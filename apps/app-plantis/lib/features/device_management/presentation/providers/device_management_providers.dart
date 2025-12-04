@@ -20,8 +20,7 @@ import '../../domain/usecases/validate_device_usecase.dart';
 part 'device_management_providers.g.dart';
 
 @riverpod
-Future<DeviceLocalDataSource> deviceLocalDataSource(
-    Ref ref) async {
+Future<DeviceLocalDataSource> deviceLocalDataSource(Ref ref) async {
   final prefs = ref.watch(sharedPreferencesProvider);
   return DeviceLocalDataSource(prefs);
 }
@@ -46,24 +45,21 @@ Future<IDeviceRepository> deviceRepository(Ref ref) async {
 }
 
 @riverpod
-Future<GetUserDevicesUseCase> getUserDevicesUseCase(
-    Ref ref) async {
+Future<GetUserDevicesUseCase> getUserDevicesUseCase(Ref ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
   final authStateNotifier = ref.watch(authStateNotifierProvider);
   return GetUserDevicesUseCase(repository, authStateNotifier);
 }
 
 @riverpod
-Future<ValidateDeviceUseCase> validateDeviceUseCase(
-    Ref ref) async {
+Future<ValidateDeviceUseCase> validateDeviceUseCase(Ref ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
   final authStateNotifier = ref.watch(authStateNotifierProvider);
   return ValidateDeviceUseCase(repository, authStateNotifier);
 }
 
 @riverpod
-Future<RevokeDeviceUseCase> revokeDeviceUseCase(
-    Ref ref) async {
+Future<RevokeDeviceUseCase> revokeDeviceUseCase(Ref ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
   final authStateNotifier = ref.watch(authStateNotifierProvider);
   return RevokeDeviceUseCase(repository, authStateNotifier);
@@ -78,8 +74,7 @@ Future<RevokeAllOtherDevicesUseCase> revokeAllOtherDevicesUseCase(
 }
 
 @riverpod
-Future<GetDeviceStatisticsUseCase> getDeviceStatisticsUseCase(
-    Ref ref) async {
+Future<GetDeviceStatisticsUseCase> getDeviceStatisticsUseCase(Ref ref) async {
   final repository = await ref.watch(deviceRepositoryProvider.future);
   final authStateNotifier = ref.watch(authStateNotifierProvider);
   return GetDeviceStatisticsUseCase(repository, authStateNotifier);

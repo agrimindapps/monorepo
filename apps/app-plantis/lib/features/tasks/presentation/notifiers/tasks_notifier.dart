@@ -84,9 +84,20 @@ class TasksNotifier extends _$TasksNotifier {
           _notificationService.checkOverdueTasks(tasks);
           _notificationService.rescheduleTaskNotifications(tasks);
 
+          // Aplica o filtro padrão (today) no carregamento inicial
+          final filteredTasks = _filterService.applyFilters(
+            tasks,
+            TasksFilterType.today,
+            '',
+            null,
+            [],
+            [],
+          );
+
           return TasksState(
             allTasks: tasks,
-            filteredTasks: tasks,
+            filteredTasks: filteredTasks,
+            currentFilter: TasksFilterType.today,
             isLoading: false,
           );
         },
@@ -231,11 +242,19 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   /// Completes a task with ownership validation
-  Future<bool> completeTask(String taskId, {String? notes}) async {
+  Future<bool> completeTask(
+    String taskId, {
+    String? notes,
+    DateTime? nextDueDate,
+  }) async {
     try {
       final task = await _getTaskWithOwnershipValidation(taskId);
       final result = await _completeTaskUseCase(
-        CompleteTaskParams(taskId: taskId, notes: notes),
+        CompleteTaskParams(
+          taskId: taskId,
+          notes: notes,
+          nextDueDate: nextDueDate,
+        ),
       );
 
       return result.fold(

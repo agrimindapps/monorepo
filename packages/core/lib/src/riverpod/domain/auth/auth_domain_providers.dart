@@ -100,7 +100,7 @@ final userLimitationsProvider = Provider<UserLimitations>((ref) {
 
   return UserLimitations(
     isPremium: isPremium,
-    maxDevices: isPremium ? 10 : 2,
+    maxDevices: isPremium ? 10 : 3, // 3 dispositivos mobile (web não conta)
     maxSyncItems: isPremium ? -1 : 100, // -1 = unlimited
     hasCloudBackup: isPremium,
     hasAdvancedFeatures: isPremium,
@@ -265,7 +265,7 @@ class UserLimitations {
 
   const UserLimitations({
     this.isPremium = false,
-    this.maxDevices = 2,
+    this.maxDevices = 3, // 3 dispositivos mobile (web não conta)
     this.maxSyncItems = 100,
     this.hasCloudBackup = false,
     this.hasAdvancedFeatures = false,

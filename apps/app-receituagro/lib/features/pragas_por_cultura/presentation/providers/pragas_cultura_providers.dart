@@ -26,6 +26,7 @@ PragasCulturaIntegrationDataSource pragasCulturaIntegrationDataSource(Ref ref) {
     ref.watch(pragasRepositoryProvider),
     ref.watch(diagnosticoRepositoryProvider),
     ref.watch(fitossanitariosRepositoryProvider),
+    ref.watch(culturasRepositoryProvider),
   );
 }
 

@@ -157,17 +157,21 @@ class DiagnosticoStateManager extends ConsumerWidget {
 
     return state.when(
       data: (data) {
+        // Show loading if still loading
+        if (data.isLoading) {
+          return const DiagnosticoLoadingWidget();
+        }
+        
         if (data.groupedDiagnosticos.isEmpty) {
           return const DiagnosticoEmptyWidget();
         }
         return builder(data.filteredDiagnosticos);
       },
       loading: () => const DiagnosticoLoadingWidget(),
-      error:
-          (error, _) => DiagnosticoErrorWidget(
-            errorMessage: error.toString(),
-            onRetry: onRetry,
-          ),
+      error: (error, _) => DiagnosticoErrorWidget(
+        errorMessage: error.toString(),
+        onRetry: onRetry,
+      ),
     );
   }
 }

@@ -243,20 +243,27 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   /// Parameters:
   /// - [taskProvider]: The task provider instance for task management
   void _initializeTasksIfNeeded(PlantTaskProvider taskProvider) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Usa um listener para reagir quando a planta for carregada
+    ref.listenManual(plantDetailsNotifierProvider, (previous, next) async {
       if (!mounted) return;
-      try {
-        final state = ref.read(plantDetailsNotifierProvider);
-        if (state.plant != null) {
+      
+      // Se a planta acabou de ser carregada
+      if (previous?.plant == null && next.plant != null) {
+        try {
+          // Primeiro carrega as tarefas do repositório
+          await taskProvider.loadTasksForPlant(widget.plantId);
+          if (!mounted) return;
+          
+          // Depois verifica se precisa gerar novas tarefas
           final tasks = taskProvider.getTasksForPlant(widget.plantId);
-          if (tasks.isEmpty) {
-            taskProvider.generateTasksForPlant(state.plant!);
+          if (tasks.isEmpty && next.plant!.config != null) {
+            await taskProvider.generateTasksForPlant(next.plant!);
           }
+        } catch (e) {
+          debugPrint('Error initializing tasks: $e');
         }
-      } catch (e) {
-        debugPrint('Error initializing tasks: $e');
       }
-    });
+    }, fireImmediately: true);
   }
 
   /// Shows the new task creation modal

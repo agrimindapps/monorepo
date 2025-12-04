@@ -55,6 +55,7 @@ class TaskCompletionDialog extends StatefulWidget {
 
 class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   late DateTime _completionDate;
+  late DateTime _nextDueDate;
   final _notesController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
@@ -62,6 +63,8 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   void initState() {
     super.initState();
     _completionDate = DateTime.now();
+    // Calcula a próxima data baseada na data atual + intervalo
+    _nextDueDate = DateTime.now().add(Duration(days: _getTaskInterval()));
   }
 
   @override
@@ -100,13 +103,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
               ),
 
               const SizedBox(height: 12),
-              _buildInfoCard(
-                theme,
-                Icons.schedule,
-                'Próximo vencimento',
-                _getNextDueDescription(),
-                Colors.green,
-              ),
+              _buildNextDueDateCard(theme),
 
               const SizedBox(height: 12),
               _buildInfoCard(
@@ -328,19 +325,155 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     );
   }
 
+  /// Card editável para a data do próximo vencimento
+  Widget _buildNextDueDateCard(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.schedule,
+                  color: Colors.orange,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  'Próximo vencimento',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              // Botão de reset para valor padrão
+              GestureDetector(
+                onTap: _resetNextDueDate,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    'Resetar',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _selectNextDueDate,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.orange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    _formatDateDescription(_nextDueDate),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.orange.shade700,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.edit_calendar,
+                    color: Colors.orange.shade700,
+                    size: 20,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Em ${_getDaysUntilNextDue()} dias (${_getIntervalDescription()})',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Calcula quantos dias até o próximo vencimento
+  int _getDaysUntilNextDue() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final nextDue = DateTime(_nextDueDate.year, _nextDueDate.month, _nextDueDate.day);
+    return nextDue.difference(today).inDays;
+  }
+
+  /// Reseta a próxima data para o valor padrão (hoje + intervalo)
+  void _resetNextDueDate() {
+    setState(() {
+      _nextDueDate = DateTime.now().add(Duration(days: _getTaskInterval()));
+    });
+  }
+
+  /// Seleciona a data do próximo vencimento
+  Future<void> _selectNextDueDate() async {
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: _nextDueDate,
+      firstDate: DateTime.now().add(const Duration(days: 1)), // Mínimo: amanhã
+      lastDate: DateTime.now().add(const Duration(days: 365)), // Máximo: 1 ano
+      helpText: 'Próximo Vencimento',
+      confirmText: 'CONFIRMAR',
+      cancelText: 'CANCELAR',
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+            colorScheme: Theme.of(
+              context,
+            ).colorScheme.copyWith(surface: Colors.white),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (selectedDate != null) {
+      setState(() {
+        _nextDueDate = selectedDate;
+      });
+    }
+  }
+
   String _formatDateDescription(DateTime date) {
     final day = date.day.toString().padLeft(2, '0');
     final month = date.month.toString().padLeft(2, '0');
     final year = date.year.toString();
-    return '$day/$month/$year';
-  }
-
-  String _getNextDueDescription() {
-    final interval = _getTaskInterval();
-    final nextDate = _completionDate.add(Duration(days: interval));
-    final day = nextDate.day.toString().padLeft(2, '0');
-    final month = nextDate.month.toString().padLeft(2, '0');
-    final year = nextDate.year.toString();
     return '$day/$month/$year';
   }
 
@@ -423,6 +556,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     final notes = _notesController.text.trim();
     final result = TaskCompletionResult(
       completionDate: _completionDate,
+      nextDueDate: _nextDueDate,
       notes: notes.isEmpty ? null : notes,
     );
 
@@ -472,23 +606,29 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
 /// Resultado da conclusão de uma tarefa
 class TaskCompletionResult {
   final DateTime completionDate;
+  final DateTime nextDueDate;
   final String? notes;
 
-  const TaskCompletionResult({required this.completionDate, this.notes});
+  const TaskCompletionResult({
+    required this.completionDate,
+    required this.nextDueDate,
+    this.notes,
+  });
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is TaskCompletionResult &&
         other.completionDate == completionDate &&
+        other.nextDueDate == nextDueDate &&
         other.notes == notes;
   }
 
   @override
-  int get hashCode => Object.hash(completionDate, notes);
+  int get hashCode => Object.hash(completionDate, nextDueDate, notes);
 
   @override
   String toString() {
-    return 'TaskCompletionResult(completionDate: $completionDate, notes: $notes)';
+    return 'TaskCompletionResult(completionDate: $completionDate, nextDueDate: $nextDueDate, notes: $notes)';
   }
 }

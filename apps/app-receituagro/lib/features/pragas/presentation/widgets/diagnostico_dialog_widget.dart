@@ -142,58 +142,87 @@ class _DiagnosticoDialogWidgetState
     final ingredienteAtivo = widget.diagnostico.ingredienteAtivo.isNotEmpty
         ? widget.diagnostico.ingredienteAtivo
         : 'Ingrediente ativo não especificado';
+    final cultura = widget.diagnostico.cultura.isNotEmpty
+        ? widget.diagnostico.cultura
+        : 'Cultura não especificada';
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              // Avatar do defensivo
-              _buildDefensivoAvatar(context),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      nomeDefensivo,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      ingredienteAtivo,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontStyle: FontStyle.italic,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+          // Avatar do defensivo
+          _buildDefensivoAvatar(context),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Linha 1: Nome do defensivo
+                Text(
+                  nomeDefensivo,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.close,
-                  size: 24,
-                  color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 4),
+                // Linha 2: Ingrediente ativo
+                Text(
+                  ingredienteAtivo,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                onPressed: () => Navigator.of(context).pop(),
-                splashRadius: 20,
-              ),
-            ],
+                const SizedBox(height: 8),
+                // Linha 3: Cultura (chip)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.eco,
+                        size: 14,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Flexible(
+                        child: Text(
+                          'Cultura: $cultura',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.primary,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-          // Card com cultura
-          _buildCulturaCard(context),
+          IconButton(
+            icon: Icon(
+              Icons.close,
+              size: 24,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+            splashRadius: 20,
+          ),
         ],
       ),
     );
@@ -232,41 +261,6 @@ class _DiagnosticoDialogWidgetState
         Icons.science_outlined,
         color: theme.colorScheme.onPrimary,
         size: 28,
-      ),
-    );
-  }
-
-  /// Card com informação da cultura
-  Widget _buildCulturaCard(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: theme.colorScheme.primary.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.eco,
-            size: 16,
-            color: theme.colorScheme.primary,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            'Cultura: ${widget.diagnostico.cultura}',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: theme.colorScheme.onSurface,
-            ),
-          ),
-        ],
       ),
     );
   }

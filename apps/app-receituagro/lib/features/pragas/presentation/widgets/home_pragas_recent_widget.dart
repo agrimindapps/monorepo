@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/core_providers.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/content_section_widget.dart';
 import '../../../../core/widgets/praga_image_widget.dart';
@@ -141,11 +140,13 @@ class HomePragasRecentWidget extends ConsumerWidget {
       String pragaName, String scientificName, PragaEntity praga) {
     state.recordPragaAccess(praga);
 
-    final navigationService = ref.read(navigationServiceProvider);
-    navigationService.navigateToDetalhePraga(
-      pragaName: pragaName,
-      pragaId: praga.idReg, // Use ID for better precision
-      pragaScientificName: scientificName,
+    Navigator.of(context).pushNamed(
+      '/praga-detail',
+      arguments: {
+        'pragaName': pragaName,
+        'pragaId': praga.idReg,
+        'pragaScientificName': scientificName,
+      },
     );
   }
 }

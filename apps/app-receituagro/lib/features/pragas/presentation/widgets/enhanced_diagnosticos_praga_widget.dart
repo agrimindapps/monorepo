@@ -656,28 +656,6 @@ class _EnhancedDiagnosticosPragaWidgetState
     );
   }
 
-  /// Constrói chip de completude
-  Widget _buildCompletudeChip(DiagnosticoCompletude completude) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: Color(completude.colorValue).withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Color(completude.colorValue).withValues(alpha: 0.3),
-        ),
-      ),
-      child: Text(
-        completude.displayName,
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-          color: Color(completude.colorValue),
-        ),
-      ),
-    );
-  }
-
   /// Mostra modal de detalhes do diagnóstico
   void _showDiagnosticoDialog(
     BuildContext context,

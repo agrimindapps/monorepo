@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'core/providers/realtime_sync_providers.dart';
 import 'core/providers/sync_completion_listener.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/plantis_theme.dart';
@@ -32,6 +33,9 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
   Widget build(BuildContext context) {
     // Inicializa o listener de sincronização
     ref.watch(syncCompletionListenerInitializerProvider);
+    
+    // Inicializa o serviço de sincronização em tempo real
+    ref.watch(realtimeSyncServiceProvider);
 
     final router = AppRouter.router(ref);
     const currentThemeMode = ThemeMode.system;

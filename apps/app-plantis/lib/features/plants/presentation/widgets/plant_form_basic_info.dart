@@ -583,7 +583,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     final formState = ref.watch(plantFormStateNotifierProvider);
     final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
     final fieldErrors = formState.fieldErrors;
-    final theme = Theme.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -602,11 +601,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             formNotifier.setName(value);
           },
           validator: (value) => _validatePlantName(value),
-          prefixIcon: Icon(
-            Icons.local_florist_outlined,
-            color: theme.colorScheme.primary,
-            size: 20,
-          ),
         ),
         const SizedBox(height: 16),
         _buildTextField(
@@ -620,11 +614,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             formNotifier.setSpecies(value);
           },
           validator: (value) => _validateSpecies(value),
-          prefixIcon: Icon(
-            Icons.spa_outlined,
-            color: theme.colorScheme.primary,
-            size: 20,
-          ),
         ),
         const SizedBox(height: 16),
         SpaceSelectorWidget(
@@ -639,11 +628,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           label: 'Data de plantio',
           value: formState.plantingDate,
           onChanged: formNotifier.setPlantingDate,
-          prefixIcon: Icon(
-            Icons.calendar_today_outlined,
-            color: theme.colorScheme.primary,
-            size: 20,
-          ),
         ),
         const SizedBox(height: 16),
         _buildTextField(
@@ -657,18 +641,6 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
             formNotifier.setNotes(value);
           },
           validator: (value) => _validateNotes(value),
-          prefixIcon: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Icon(
-                Icons.notes_outlined,
-                color: theme.colorScheme.primary,
-                size: 20,
-              ),
-            ],
-          ),
         ),
       ],
     );

@@ -352,9 +352,9 @@ class FirebaseDeviceService implements IDeviceRepository {
 
   @override
   Future<Either<Failure, int>> getDeviceLimit(String userId) async {
-    // Default limit - should be fetched from subscription status
-    // For now returning a default value
-    return const Right(5); // Default: 5 devices
+    // Limite padrão: 3 dispositivos mobile (web não conta)
+    // TODO: Integrar com subscription status para premium (10 dispositivos)
+    return const Right(3);
   }
 
   @override

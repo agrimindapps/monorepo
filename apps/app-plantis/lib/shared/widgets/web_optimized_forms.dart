@@ -319,11 +319,15 @@ class WebOptimizedDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DropdownButtonFormField<T>(
       initialValue: value,
       items: items,
       onChanged: enabled ? onChanged : null,
       validator: validator,
+      dropdownColor: theme.brightness == Brightness.dark
+          ? const Color(0xFF2D2D2D)
+          : Colors.white,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,

@@ -32,7 +32,7 @@ class DiagnosticoModel {
   });
 }
 
-/// Diagnosticos Praga state
+/// Estado dos diagnósticos da praga
 class DiagnosticosPragaState {
   final List<DiagnosticoModel> diagnosticos;
   final String searchQuery;
@@ -40,7 +40,6 @@ class DiagnosticosPragaState {
   final List<String> culturas;
   final bool isLoading;
   final bool isLoadingFilters;
-  final bool hasPartialData;
   final String? errorMessage;
 
   const DiagnosticosPragaState({
@@ -50,7 +49,6 @@ class DiagnosticosPragaState {
     required this.culturas,
     required this.isLoading,
     required this.isLoadingFilters,
-    required this.hasPartialData,
     this.errorMessage,
   });
 
@@ -59,18 +57,9 @@ class DiagnosticosPragaState {
       diagnosticos: [],
       searchQuery: '',
       selectedCultura: 'Todas',
-      culturas: [
-        'Todas',
-        'Soja',
-        'Milho',
-        'Algodão',
-        'Café',
-        'Citros',
-        'Cana-de-açúcar',
-      ],
+      culturas: ['Todas'],
       isLoading: false,
       isLoadingFilters: false,
-      hasPartialData: false,
       errorMessage: null,
     );
   }
@@ -82,7 +71,6 @@ class DiagnosticosPragaState {
     List<String>? culturas,
     bool? isLoading,
     bool? isLoadingFilters,
-    bool? hasPartialData,
     String? errorMessage,
   }) {
     return DiagnosticosPragaState(
@@ -92,136 +80,118 @@ class DiagnosticosPragaState {
       culturas: culturas ?? this.culturas,
       isLoading: isLoading ?? this.isLoading,
       isLoadingFilters: isLoadingFilters ?? this.isLoadingFilters,
-      hasPartialData: hasPartialData ?? this.hasPartialData,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
-  DiagnosticosPragaState clearError() {
-    return copyWith(errorMessage: null);
-  }
+  DiagnosticosPragaState clearError() => copyWith(errorMessage: null);
 
   bool get hasData => diagnosticos.isNotEmpty;
   bool get hasError => errorMessage != null;
 
+  /// Diagnósticos filtrados por pesquisa e cultura
   List<DiagnosticoModel> get filteredDiagnosticos {
-    return diagnosticos.where((diagnostic) {
-      bool matchesSearch =
-          searchQuery.isEmpty ||
-          diagnostic.nome.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          diagnostic.ingredienteAtivo.toLowerCase().contains(
-            searchQuery.toLowerCase(),
-          );
+    return diagnosticos.where((d) {
+      final matchesSearch = searchQuery.isEmpty ||
+          d.nome.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          d.ingredienteAtivo.toLowerCase().contains(searchQuery.toLowerCase());
 
-      bool matchesCulture =
-          selectedCultura == 'Todas' || diagnostic.cultura == selectedCultura;
+      final matchesCulture = selectedCultura == 'Todas' || d.cultura == selectedCultura;
 
       return matchesSearch && matchesCulture;
     }).toList();
   }
 
+  /// Diagnósticos agrupados por cultura
   Map<String, List<DiagnosticoModel>> get groupedDiagnosticos {
-    final filtered = filteredDiagnosticos;
     final grouped = <String, List<DiagnosticoModel>>{};
-
-    for (final diagnostic in filtered) {
-      grouped.putIfAbsent(diagnostic.cultura, () => []).add(diagnostic);
+    for (final d in filteredDiagnosticos) {
+      grouped.putIfAbsent(d.cultura, () => []).add(d);
     }
-
     return grouped;
-  }
-
-  Map<String, int> get dataStats {
-    final stats = <String, int>{};
-    stats['total'] = diagnosticos.length;
-    stats['filtered'] = filteredDiagnosticos.length;
-
-    final culturaGroups = groupedDiagnosticos;
-    stats['culturas'] = culturaGroups.keys.length;
-
-    return stats;
   }
 }
 
 /// Notifier para gerenciar diagnósticos relacionados à praga
-/// Responsabilidade única: filtros e busca de diagnósticos
-///
-/// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
-/// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
-@riverpod
+/// 
+/// Responsabilidade: carregar, filtrar e buscar diagnósticos por praga.
+/// Usa keepAlive para manter o estado entre navegações de tabs.
+@Riverpod(keepAlive: true)
 class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   @override
   Future<DiagnosticosPragaState> build() async {
     return DiagnosticosPragaState.initial();
   }
 
-  /// Carrega diagnósticos para uma praga específica por ID e nome
-  Future<void> loadDiagnosticos(String pragaId, {String? pragaName}) async {
-    debugPrint('🔍 [DIAGNOSTICOS_PRAGA] loadDiagnosticos - pragaId: $pragaId, pragaName: $pragaName');
-    
-    final currentState = state.value;
-    if (currentState == null) {
-      debugPrint('⚠️ [DIAGNOSTICOS_PRAGA] currentState is null, returning');
-      return;
+  /// Verifica se o notifier ainda está ativo
+  bool _isMounted() {
+    try {
+      // ignore: unnecessary_statements
+      state;
+      return true;
+    } catch (_) {
+      return false;
     }
+  }
 
-    state = AsyncValue.data(
-      currentState.copyWith(isLoading: true).clearError(),
-    );
+  /// Carrega diagnósticos para uma praga específica
+  Future<void> loadDiagnosticos(String pragaId, {String? pragaName}) async {
+    if (!_isMounted()) return;
+
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    // Set loading state
+    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
 
     try {
-      // Use queryByPraga instead of deprecated getByPraga
       final diagnosticosRepository = ref.read(iDiagnosticosRepositoryProvider);
-      debugPrint('🔍 [DIAGNOSTICOS_PRAGA] Chamando queryByPraga com pragaId: $pragaId');
       final result = await diagnosticosRepository.queryByPraga(pragaId);
+
+      if (!_isMounted()) return;
 
       await result.fold(
         (failure) async {
-          debugPrint('❌ [DIAGNOSTICOS_PRAGA] Erro: ${failure.toString()}');
+          if (!_isMounted()) return;
+          final freshState = state.value ?? DiagnosticosPragaState.initial();
           state = AsyncValue.data(
-            currentState.copyWith(
+            freshState.copyWith(
               isLoading: false,
-              errorMessage:
-                  'Erro ao carregar diagnósticos: ${failure.toString()}',
+              errorMessage: 'Erro ao carregar diagnósticos: ${failure.message}',
               diagnosticos: [],
             ),
           );
         },
-        (diagnosticosEntities) async {
-          debugPrint('✅ [DIAGNOSTICOS_PRAGA] ${diagnosticosEntities.length} diagnósticos encontrados');
+        (entities) async {
+          if (!_isMounted()) return;
+          
           final diagnosticosList = <DiagnosticoModel>[];
 
-          for (final entity in diagnosticosEntities) {
-            String culturaNome = 'Não especificado';
-            if (entity.idCultura.isNotEmpty) {
-              culturaNome = await _resolveCulturaNome(entity.idCultura);
-            }
-            String pragaNome = pragaName ?? '';
+          for (final entity in entities) {
+            if (!_isMounted()) return;
+            
+            // Resolve nomes das entidades relacionadas
+            final culturaNome = entity.idCultura.isNotEmpty
+                ? await _resolveCulturaNome(entity.idCultura)
+                : 'Não especificado';
+            
+            var pragaNome = pragaName ?? '';
             if (pragaNome.isEmpty && entity.idPraga.isNotEmpty) {
               pragaNome = await _resolvePragaNome(entity.idPraga);
             }
-            if (pragaNome.isEmpty) {
-              pragaNome = 'Praga não identificada';
-            }
-            String defensivoNome = '';
-            String ingredienteAtivo = 'Não especificado';
+            pragaNome = pragaNome.isEmpty ? 'Praga não identificada' : pragaNome;
+            
+            var (defensivoNome, ingredienteAtivo) = ('', 'Não especificado');
             if (entity.idDefensivo.isNotEmpty) {
-              final defensivoData = await _resolveDefensivoData(
-                entity.idDefensivo,
-              );
-              defensivoNome = defensivoData.$1; // Nome
-              ingredienteAtivo = defensivoData.$2; // Ingrediente ativo
+              (defensivoNome, ingredienteAtivo) = await _resolveDefensivoData(entity.idDefensivo);
             }
-            if (defensivoNome.isEmpty) {
-              defensivoNome = 'Defensivo não especificado';
-            }
+            defensivoNome = defensivoNome.isEmpty ? 'Defensivo não especificado' : defensivoNome;
 
             diagnosticosList.add(
               DiagnosticoModel(
                 id: entity.id,
                 nome: defensivoNome,
-                ingredienteAtivo:
-                    ingredienteAtivo, // Agora usa ingrediente ativo real
+                ingredienteAtivo: ingredienteAtivo,
                 dosagem: entity.dosagem.displayDosagem,
                 cultura: culturaNome,
                 grupo: pragaNome,
@@ -233,36 +203,36 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
             );
           }
 
-          // CORREÇÃO: Extrair culturas únicas dos diagnósticos carregados
-          // ao invés de usar lista hard-coded
-          final culturasUnicas =
-              diagnosticosList
-                  .map((d) => d.cultura)
-                  .where(
-                    (c) =>
-                        c.isNotEmpty && c != 'Não especificado' && c != 'Todas',
-                  )
-                  .toSet()
-                  .toList()
-                ..sort();
+          if (!_isMounted()) return;
 
-          // Adiciona "Todas" no início, garantindo sem duplicatas
-          final culturasComTodas = ['Todas', ...culturasUnicas];
+          // Extrai culturas únicas dos diagnósticos
+          final culturasUnicas = diagnosticosList
+              .map((d) => d.cultura)
+              .where((c) => c.isNotEmpty && c != 'Não especificado' && c != 'Todas')
+              .toSet()
+              .toList()
+            ..sort();
 
+          final freshState = state.value ?? DiagnosticosPragaState.initial();
           state = AsyncValue.data(
-            currentState
-                .copyWith(
-                  isLoading: false,
-                  diagnosticos: diagnosticosList,
-                  culturas: culturasComTodas, // Atualiza com culturas dinâmicas
-                )
-                .clearError(),
+            freshState.copyWith(
+              isLoading: false,
+              diagnosticos: diagnosticosList,
+              culturas: ['Todas', ...culturasUnicas],
+            ).clearError(),
           );
         },
       );
     } catch (e) {
+      if (e.toString().contains('disposed')) return;
+      
+      if (kDebugMode) {
+        debugPrint('❌ [DIAGNOSTICOS_PRAGA] Erro: $e');
+      }
+      
+      final freshState = state.value ?? DiagnosticosPragaState.initial();
       state = AsyncValue.data(
-        currentState.copyWith(
+        freshState.copyWith(
           isLoading: false,
           errorMessage: 'Erro ao carregar diagnósticos: $e',
           diagnosticos: [],
@@ -289,10 +259,15 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   }
 
   /// Resolve o nome da praga pelo ID usando o repository
+  /// 
+  /// NOTA: idPraga aqui é na verdade o pragaId (FK int) convertido para string
   Future<String> _resolvePragaNome(String idPraga) async {
     try {
+      final pragaIdInt = int.tryParse(idPraga);
+      if (pragaIdInt == null) return '';
+      
       final pragasRepository = ref.read(pragasRepositoryProvider);
-      final pragaData = await pragasRepository.findByIdPraga(idPraga);
+      final pragaData = await pragasRepository.findById(pragaIdInt);
       if (pragaData != null && pragaData.nome.isNotEmpty) {
         return pragaData.nome;
       }
@@ -306,10 +281,12 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Retorna (nome, ingredienteAtivo)
   Future<(String, String)> _resolveDefensivoData(String idDefensivo) async {
     try {
+      final defensivoIdInt = int.tryParse(idDefensivo);
+      if (defensivoIdInt == null) return ('', 'Não especificado');
+      
       final defensivoRepository = ref.read(fitossanitariosRepositoryProvider);
-      final defensivoData = await defensivoRepository.findByIdDefensivo(
-        idDefensivo,
-      );
+      final defensivoData = await defensivoRepository.findById(defensivoIdInt);
+      
       if (defensivoData != null) {
         final nome = defensivoData.nome;
         final ingrediente = defensivoData.ingredienteAtivo?.isNotEmpty == true
@@ -318,7 +295,7 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
         return (nome, ingrediente);
       }
     } catch (e) {
-      // Erro ao buscar defensivo, retorna valores padrão
+      // Erro silencioso
     }
     return ('', 'Não especificado');
   }

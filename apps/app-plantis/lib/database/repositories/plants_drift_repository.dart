@@ -1,8 +1,11 @@
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
+import '../../core/data/models/planta_config_model.dart';
 import '../../features/plants/data/models/plant_model.dart';
 import '../../features/plants/domain/entities/plant.dart';
 import '../plantis_database.dart' as db;
+import 'plant_configs_drift_repository.dart';
 
 /// ============================================================================
 /// PLANTS DRIFT REPOSITORY
@@ -26,8 +29,11 @@ import '../plantis_database.dart' as db;
 
 class PlantsDriftRepository {
   final db.PlantisDatabase _db;
+  late final PlantConfigsDriftRepository _configsRepo;
 
-  PlantsDriftRepository(this._db);
+  PlantsDriftRepository(this._db) {
+    _configsRepo = PlantConfigsDriftRepository(_db);
+  }
 
   // ==================== CREATE ====================
 
@@ -45,12 +51,6 @@ class PlantsDriftRepository {
       imageUrls: Value(model.imageUrls.join(',')), // CSV
       plantingDate: Value(model.plantingDate),
       notes: Value(model.notes),
-      // TODO: config field - PlantConfig is stored in separate PlantConfigs table (1:1 relationship)
-      // config: Value(
-      //   model.config != null
-      //       ? PlantConfigModel.fromEntity(model.config!).toJson().toString()
-      //       : null,
-      // ),
       createdAt: Value(model.createdAt ?? DateTime.now()),
       updatedAt: Value(model.updatedAt ?? DateTime.now()),
       lastSyncAt: Value(model.lastSyncAt),
@@ -62,7 +62,14 @@ class PlantsDriftRepository {
       isFavorited: Value(model.isFavorited),
     );
 
-    return await _db.into(_db.plants).insert(companion);
+    final id = await _db.into(_db.plants).insert(companion);
+
+    // Salvar config se existir
+    if (model.config != null) {
+      await _saveOrUpdateConfig(model.id, model.config!);
+    }
+
+    return id;
   }
 
   // ==================== READ ====================
@@ -159,6 +166,13 @@ class PlantsDriftRepository {
 
     final localSpaceId = await _resolveSpaceId(model.spaceId);
 
+    if (kDebugMode) {
+      print('🔄 PlantsDriftRepository.updatePlant() - localId: $localId');
+      print('   model.id: ${model.id}');
+      print('   model.spaceId: ${model.spaceId} -> localSpaceId: $localSpaceId');
+      print('   model.config: ${model.config}');
+    }
+
     final companion = db.PlantsCompanion(
       id: Value(localId),
       firebaseId: Value(model.id),
@@ -169,12 +183,6 @@ class PlantsDriftRepository {
       imageUrls: Value(model.imageUrls.join(',')),
       plantingDate: Value(model.plantingDate),
       notes: Value(model.notes),
-      // TODO: config field - PlantConfig stored in separate table
-      // config: Value(
-      //   model.config != null
-      //       ? PlantConfigModel.fromEntity(model.config!).toJson().toString()
-      //       : null,
-      // ),
       updatedAt: Value(DateTime.now()),
       isDirty: Value(model.isDirty),
       isDeleted: Value(model.isDeleted),
@@ -187,7 +195,52 @@ class PlantsDriftRepository {
     )..where((p) => p.id.equals(localId!)))
         .write(companion);
 
+    // Salvar/atualizar config se existir
+    if (model.config != null) {
+      await _saveOrUpdateConfig(model.id, model.config!);
+    }
+
     return updated > 0;
+  }
+
+  /// Salva ou atualiza a configuração de cuidados da planta
+  Future<void> _saveOrUpdateConfig(String plantFirebaseId, PlantConfig config) async {
+    try {
+      final plantaConfigModel = PlantaConfigModel.fromPlantConfig(
+        plantaId: plantFirebaseId,
+        plantConfig: config,
+      );
+
+      if (kDebugMode) {
+        print('🔧 PlantsDriftRepository._saveOrUpdateConfig()');
+        print('   plantFirebaseId: $plantFirebaseId');
+        print('   aguaAtiva: ${plantaConfigModel.aguaAtiva}');
+        print('   intervaloRegaDias: ${plantaConfigModel.intervaloRegaDias}');
+        print('   aduboAtivo: ${plantaConfigModel.aduboAtivo}');
+      }
+
+      // Verificar se já existe config para esta planta
+      final existingConfig = await _configsRepo.getConfigByPlantId(plantFirebaseId);
+      
+      if (existingConfig != null) {
+        // Atualizar config existente
+        final updated = await _configsRepo.updateConfig(plantaConfigModel);
+        if (kDebugMode) {
+          print('✅ PlantsDriftRepository._saveOrUpdateConfig() - Config atualizado: $updated');
+        }
+      } else {
+        // Inserir novo config
+        final id = await _configsRepo.insertConfig(plantaConfigModel);
+        if (kDebugMode) {
+          print('✅ PlantsDriftRepository._saveOrUpdateConfig() - Config inserido com id: $id');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsDriftRepository._saveOrUpdateConfig() - Erro: $e');
+      }
+      // Não propagar erro - config é secondary
+    }
   }
 
   // ==================== DELETE ====================
@@ -290,19 +343,12 @@ class PlantsDriftRepository {
 
   // ==================== CONVERTERS ====================
 
-  /// Converte Drift Plant → PlantModel
+  /// Converte Drift Plant → PlantModel (sem config - para operações rápidas)
   PlantModel _plantDriftToModel(db.Plant plant) {
     // Parse imageUrls CSV
     final imageUrls = plant.imageUrls != null && plant.imageUrls!.isNotEmpty
         ? plant.imageUrls!.split(',')
         : <String>[];
-
-    // Config is stored in separate PlantConfigs table (1:1 relationship)
-    // To get config, query PlantConfigsDriftRepository separately
-    PlantConfig? config;
-    // TODO: Query PlantConfigsDriftRepository.getConfigByPlantId(plant.firebaseId)
-    // For now, return null
-    config = null;
 
     return PlantModel(
       id: plant.firebaseId ?? plant.id.toString(),
@@ -313,7 +359,7 @@ class PlantsDriftRepository {
       imageUrls: imageUrls,
       plantingDate: plant.plantingDate,
       notes: plant.notes,
-      config: config,
+      config: null, // Config será carregado separadamente se necessário
       createdAt: plant.createdAt,
       updatedAt: plant.updatedAt,
       lastSyncAt: plant.lastSyncAt,
@@ -324,6 +370,74 @@ class PlantsDriftRepository {
       moduleName: plant.moduleName,
       isFavorited: plant.isFavorited,
     );
+  }
+
+  /// Converte Drift Plant → PlantModel COM config carregado
+  Future<PlantModel> _plantDriftToModelWithConfig(db.Plant plant) async {
+    final model = _plantDriftToModel(plant);
+    
+    // Carregar config da tabela separada
+    final plantFirebaseId = plant.firebaseId ?? plant.id.toString();
+    final configModel = await _configsRepo.getConfigByPlantId(plantFirebaseId);
+    
+    if (configModel != null) {
+      return PlantModel(
+        id: model.id,
+        name: model.name,
+        species: model.species,
+        spaceId: model.spaceId,
+        imageBase64: model.imageBase64,
+        imageUrls: model.imageUrls,
+        plantingDate: model.plantingDate,
+        notes: model.notes,
+        config: configModel.toPlantConfig(),
+        createdAt: model.createdAt,
+        updatedAt: model.updatedAt,
+        lastSyncAt: model.lastSyncAt,
+        isDirty: model.isDirty,
+        isDeleted: model.isDeleted,
+        version: model.version,
+        userId: model.userId,
+        moduleName: model.moduleName,
+        isFavorited: model.isFavorited,
+      );
+    }
+    
+    return model;
+  }
+
+  /// Retorna todas as plantas ativas COM configs carregados
+  Future<List<Plant>> getAllPlantsWithConfig() async {
+    final plants = await (_db.select(_db.plants)
+          ..where((p) => p.isDeleted.equals(false))
+          ..orderBy([
+            (p) => OrderingTerm.desc(p.createdAt),
+          ]))
+        .get();
+
+    return Future.wait(plants.map(_plantDriftToModelWithConfig));
+  }
+
+  /// Retorna planta pelo ID COM config carregado
+  Future<Plant?> getPlantByIdWithConfig(String id) async {
+    // 1. Tenta buscar pelo firebaseId (padrão)
+    var plant = await (_db.select(
+      _db.plants,
+    )..where((p) => p.firebaseId.equals(id)))
+        .getSingleOrNull();
+
+    // 2. Se não encontrou, tenta buscar pelo ID local (fallback para dados legados)
+    if (plant == null) {
+      final localId = int.tryParse(id);
+      if (localId != null) {
+        plant = await (_db.select(
+          _db.plants,
+        )..where((p) => p.id.equals(localId)))
+            .getSingleOrNull();
+      }
+    }
+
+    return plant != null ? _plantDriftToModelWithConfig(plant) : null;
   }
 
   /// Helper: Converte spaceId String (firebaseId) → INTEGER (local id)

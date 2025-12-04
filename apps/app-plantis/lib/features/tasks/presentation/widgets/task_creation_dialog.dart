@@ -283,6 +283,9 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
             child: DropdownButton<TaskType>(
               value: _selectedType,
               isExpanded: true,
+              dropdownColor: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2D2D2D)
+                  : Colors.white,
               onChanged: _onTaskTypeChanged,
               items:
                   TaskType.values.map((type) {
@@ -365,6 +368,9 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
                 value: _selectedPlantId,
                 isExpanded: true,
                 hint: const Text(AppStrings.selectPlantHint),
+                dropdownColor: theme.brightness == Brightness.dark
+                    ? const Color(0xFF2D2D2D)
+                    : Colors.white,
                 onChanged: (plantId) {
                   setState(() => _selectedPlantId = plantId);
                 },
@@ -578,6 +584,9 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
             child: DropdownButton<TaskPriority>(
               value: _selectedPriority,
               isExpanded: true,
+              dropdownColor: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2D2D2D)
+                  : Colors.white,
               onChanged: (priority) {
                 if (priority != null) {
                   setState(() => _selectedPriority = priority);

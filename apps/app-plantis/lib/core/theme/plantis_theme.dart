@@ -142,6 +142,36 @@ class PlantisTheme {
       }),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      textStyle: const TextStyle(
+        color: Colors.black87,
+        fontSize: 14,
+      ),
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.white),
+        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+        elevation: WidgetStateProperty.all(8),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    ),
+    menuTheme: MenuThemeData(
+      style: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(Colors.white),
+        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+        elevation: WidgetStateProperty.all(8),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    ),
     scaffoldBackgroundColor: const Color(0xFFF8F9FA),
   );
 
@@ -269,6 +299,36 @@ class PlantisTheme {
         return Colors.grey.withValues(alpha: 0.2);
       }),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+    ),
+    popupMenuTheme: PopupMenuThemeData(
+      color: const Color(0xFF2D2D2D),
+      surfaceTintColor: Colors.transparent,
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      textStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 14,
+      ),
+    ),
+    dropdownMenuTheme: DropdownMenuThemeData(
+      menuStyle: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(const Color(0xFF2D2D2D)),
+        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+        elevation: WidgetStateProperty.all(8),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+    ),
+    menuTheme: MenuThemeData(
+      style: MenuStyle(
+        backgroundColor: WidgetStateProperty.all(const Color(0xFF2D2D2D)),
+        surfaceTintColor: WidgetStateProperty.all(Colors.transparent),
+        elevation: WidgetStateProperty.all(8),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
     ),
     scaffoldBackgroundColor: const Color(0xFF1C1C1E),
   );

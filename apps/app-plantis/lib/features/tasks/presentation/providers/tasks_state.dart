@@ -105,7 +105,7 @@ sealed class TasksState with _$TasksState {
     @Default([]) List<task_entity.Task> filteredTasks,
     @Default(false) bool isLoading,
     String? errorMessage,
-    @Default(TasksFilterType.all) TasksFilterType currentFilter,
+    @Default(TasksFilterType.today) TasksFilterType currentFilter,
     String? selectedPlantId,
     @Default('') String searchQuery,
     @Default([]) List<task_entity.TaskType> selectedTaskTypes,

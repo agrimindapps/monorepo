@@ -107,7 +107,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
               ),
               const SizedBox(width: 8),
               Text(
-                'Adicionar observação',
+                'Adicionar comentário',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: theme.colorScheme.onSurface,
@@ -124,7 +124,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             },
             decoration: InputDecoration(
               hintText:
-                  'Escreva uma observação sobre ${widget.plant.displayName}...',
+                  'Escreva um comentário sobre ${widget.plant.displayName}...',
               hintStyle: TextStyle(
                 color: theme.colorScheme.onSurfaceVariant.withValues(
                   alpha: 0.6,
@@ -206,7 +206,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
             const SizedBox(width: 8),
             Text(
-              'Histórico de observações',
+              'Histórico de comentários',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: theme.colorScheme.onSurface,
@@ -214,7 +214,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
             const Spacer(),
             Text(
-              '${comments.length} ${comments.length == 1 ? 'observação' : 'observações'}',
+              '${comments.length} ${comments.length == 1 ? 'comentário' : 'comentários'}',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -366,7 +366,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Observação adicionada com sucesso'),
+              content: Text('Comentário adicionado com sucesso'),
               backgroundColor: Colors.green,
               duration: Duration(seconds: 2),
             ),
@@ -376,7 +376,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
         if (mounted) {
           final commentsState = ref.read(commentsNotifierProvider).value;
           final errorMsg = commentsState?.errorMessage ??
-              'Erro desconhecido ao adicionar observação';
+              'Erro desconhecido ao adicionar comentário';
 
           if (kDebugMode) {
             print('   Error Message: $errorMsg');
@@ -428,121 +428,278 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
 
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Editar observação'),
-        content: TextField(
-          controller: editController,
-          maxLines: 3,
-          decoration: const InputDecoration(
-            hintText: 'Edite sua observação...',
-            border: OutlineInputBorder(),
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              editController.dispose();
-              Navigator.of(dialogContext).pop();
-            },
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final newText = editController.text.trim();
-              if (newText.isNotEmpty && newText != comment.conteudo) {
-                final success = await ref
-                    .read(commentsNotifierProvider.notifier)
-                    .updateComment(comment.id, newText);
-
-                if (!dialogContext.mounted) {
-                  editController.dispose();
-                  return;
-                }
-                Navigator.of(dialogContext).pop();
-                editController.dispose();
-
-                if (success) {
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Observação atualizada'),
-                      backgroundColor: Colors.green,
+          child: Container(
+            width: 400,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.edit_outlined,
+                        color: theme.colorScheme.primary,
+                        size: 24,
+                      ),
                     ),
-                  );
-                } else {
-                  if (!mounted) return;
-                  final commentsState = ref.read(commentsNotifierProvider).value;
-                  final errorMsg = commentsState?.errorMessage ??
-                      'Não foi possível atualizar a observação';
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Erro: $errorMsg'),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 4),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Editar comentário',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Altere o texto do seu comentário',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  );
-                }
-              } else {
-                Navigator.of(dialogContext).pop();
-                editController.dispose();
-              }
-            },
-            child: const Text('Salvar'),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                // TextField
+                TextField(
+                  controller: editController,
+                  maxLines: 4,
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    hintText: 'Digite seu comentário...',
+                    hintStyle: TextStyle(
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    ),
+                    filled: true,
+                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(
+                        color: theme.colorScheme.primary,
+                        width: 2,
+                      ),
+                    ),
+                    contentPadding: const EdgeInsets.all(16),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                // Actions
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        editController.dispose();
+                        Navigator.of(dialogContext).pop();
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
+                      child: const Text('Cancelar'),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.icon(
+                      onPressed: () async {
+                        final newText = editController.text.trim();
+                        if (newText.isNotEmpty && newText != comment.conteudo) {
+                          final success = await ref
+                              .read(commentsNotifierProvider.notifier)
+                              .updateComment(comment.id, newText);
+
+                          if (!dialogContext.mounted) {
+                            editController.dispose();
+                            return;
+                          }
+                          Navigator.of(dialogContext).pop();
+                          editController.dispose();
+
+                          if (success) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Comentário atualizado'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            if (!mounted) return;
+                            final commentsState = ref.read(commentsNotifierProvider).value;
+                            final errorMsg = commentsState?.errorMessage ??
+                                'Não foi possível atualizar o comentário';
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erro: $errorMsg'),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
+                          }
+                        } else {
+                          Navigator.of(dialogContext).pop();
+                          editController.dispose();
+                        }
+                      },
+                      icon: const Icon(Icons.check, size: 18),
+                      label: const Text('Salvar'),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   void _confirmDeleteComment(ComentarioModel comment) {
     showDialog<void>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Excluir observação'),
-        content: const Text(
-          'Tem certeza que deseja excluir esta observação?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancelar'),
+      builder: (dialogContext) {
+        final theme = Theme.of(dialogContext);
+        
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          TextButton(
-            onPressed: () async {
-              final success = await ref
-                  .read(commentsNotifierProvider.notifier)
-                  .deleteComment(comment.id);
-
-              if (!dialogContext.mounted) return;
-              Navigator.of(dialogContext).pop();
-
-              if (success) {
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Observação excluída'),
-                    backgroundColor: Colors.green,
+          child: Container(
+            width: 360,
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.errorContainer,
+                    shape: BoxShape.circle,
                   ),
-                );
-              } else {
-                if (!mounted) return;
-                final commentsState = ref.read(commentsNotifierProvider).value;
-                final errorMsg = commentsState?.errorMessage ??
-                    'Não foi possível excluir a observação';
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Erro: $errorMsg'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 4),
+                  child: Icon(
+                    Icons.delete_outline,
+                    color: theme.colorScheme.error,
+                    size: 32,
                   ),
-                );
-              }
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Excluir'),
+                ),
+                const SizedBox(height: 20),
+                // Title
+                Text(
+                  'Excluir comentário',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Message
+                Text(
+                  'Tem certeza que deseja excluir este comentário? Esta ação não pode ser desfeita.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                // Actions
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(dialogContext).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () async {
+                          final success = await ref
+                              .read(commentsNotifierProvider.notifier)
+                              .deleteComment(comment.id);
+
+                          if (!dialogContext.mounted) return;
+                          Navigator.of(dialogContext).pop();
+
+                          if (success) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Comentário excluído'),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          } else {
+                            if (!mounted) return;
+                            final commentsState = ref.read(commentsNotifierProvider).value;
+                            final errorMsg = commentsState?.errorMessage ??
+                                'Não foi possível excluir o comentário';
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Erro: $errorMsg'),
+                                backgroundColor: Colors.red,
+                                duration: const Duration(seconds: 4),
+                              ),
+                            );
+                          }
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: theme.colorScheme.error,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Excluir'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -588,7 +745,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Nenhuma observação ainda',
+              'Nenhum comentário ainda',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
@@ -597,7 +754,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Adicione a primeira observação sobre ${widget.plant.displayName}',
+              'Adicione o primeiro comentário sobre ${widget.plant.displayName}',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),

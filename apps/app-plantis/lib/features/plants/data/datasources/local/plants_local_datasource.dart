@@ -52,8 +52,8 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
         }
       }
 
-      // Busca do Drift
-      final plants = await _driftRepo.getAllPlants();
+      // Busca do Drift COM config carregado
+      final plants = await _driftRepo.getAllPlantsWithConfig();
 
       // Atualiza cache
       _cachedPlants = plants;
@@ -71,7 +71,8 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
   @override
   Future<Plant?> getPlantById(String id) async {
     try {
-      return await _driftRepo.getPlantById(id);
+      // Buscar COM config carregado
+      return await _driftRepo.getPlantByIdWithConfig(id);
     } catch (e) {
       throw CacheFailure('Erro ao buscar planta do cache local: ${e.toString()}');
     }

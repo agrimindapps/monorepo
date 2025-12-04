@@ -26,20 +26,23 @@ class PragasNotifier extends _$PragasNotifier {
     try {
       // Carregar todas as pragas
       final pragasRepository = ref.read(pragasRepositoryProvider);
-      debugPrint('🐛 [PRAGAS_NOTIFIER] Repository obtido, chamando findAll()...');
+      debugPrint(
+          '🐛 [PRAGAS_NOTIFIER] Repository obtido, chamando findAll()...');
       var pragasDrift = await pragasRepository.findAll();
-      debugPrint('🐛 [PRAGAS_NOTIFIER] findAll() retornou ${pragasDrift.length} pragas');
+      debugPrint(
+          '🐛 [PRAGAS_NOTIFIER] findAll() retornou ${pragasDrift.length} pragas');
 
       // Se não há dados, aguardar um pouco e tentar novamente
       // (os dados podem estar sendo carregados pelo AppDataManager)
       if (pragasDrift.isEmpty) {
         debugPrint('🐛 [PRAGAS_NOTIFIER] Aguardando dados serem carregados...');
-        
+
         // Tentar até 3 vezes com delay progressivo
         for (var attempt = 1; attempt <= 3 && pragasDrift.isEmpty; attempt++) {
           await Future<void>.delayed(Duration(milliseconds: 500 * attempt));
           pragasDrift = await pragasRepository.findAll();
-          debugPrint('🐛 [PRAGAS_NOTIFIER] Tentativa $attempt: ${pragasDrift.length} pragas');
+          debugPrint(
+              '🐛 [PRAGAS_NOTIFIER] Tentativa $attempt: ${pragasDrift.length} pragas');
         }
       }
 
@@ -48,7 +51,8 @@ class PragasNotifier extends _$PragasNotifier {
 
       // Carregar histórico e sugestões iniciais
       final historyData = await _loadHistoryData(pragas);
-      debugPrint('🐛 [PRAGAS_NOTIFIER] Histórico carregado: ${historyData.recentPragas.length} recentes, ${historyData.suggestedPragas.length} sugestões');
+      debugPrint(
+          '🐛 [PRAGAS_NOTIFIER] Histórico carregado: ${historyData.recentPragas.length} recentes, ${historyData.suggestedPragas.length} sugestões');
 
       return PragasState(
         pragas: pragas,
@@ -81,36 +85,38 @@ class PragasNotifier extends _$PragasNotifier {
     try {
       final historyService = ref.read(accessHistoryServiceProvider);
       final historyItems = await historyService.getPragasHistory(limit: 7);
-      
+
       final historicPragas = <PragaEntity>[];
-      
+
       // Buscar pragas do histórico
       for (final historyItem in historyItems) {
         final itemMap = historyItem as Map<String, dynamic>;
         final id = itemMap['id'] as String?;
         if (id == null) continue;
-        
+
         final praga = allPragas.where((p) => p.idReg == id).firstOrNull;
         if (praga != null) {
           historicPragas.add(praga);
         }
       }
-      
+
       // SEMPRE retorna exatamente 7 registros
       // Se histórico < 7, completa com aleatórios excluindo os do histórico
-      final recentPragas = RandomSelectionService.fillHistoryToCount<PragaEntity>(
+      final recentPragas =
+          RandomSelectionService.fillHistoryToCount<PragaEntity>(
         historyItems: historicPragas,
         allItems: allPragas,
         targetCount: 7,
         areEqual: (a, b) => a.idReg == b.idReg,
       );
-      
+
       // Seleciona pragas sugeridas aleatoriamente
-      final suggestedPragas = ReceitaAgroRandomExtensions.selectSuggestedPragas<PragaEntity>(
+      final suggestedPragas =
+          ReceitaAgroRandomExtensions.selectSuggestedPragas<PragaEntity>(
         allPragas,
         count: 7,
       );
-      
+
       return _HistoryData(
         recentPragas: recentPragas,
         suggestedPragas: suggestedPragas,
@@ -119,12 +125,16 @@ class PragasNotifier extends _$PragasNotifier {
       debugPrint('🐛 [PRAGAS_NOTIFIER] Erro ao carregar histórico: $e');
       // Em caso de erro, usa fallback aleatório
       final recentPragas = allPragas.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectRandomPragas<PragaEntity>(allPragas, count: 7)
+          ? ReceitaAgroRandomExtensions.selectRandomPragas<PragaEntity>(
+              allPragas,
+              count: 7)
           : <PragaEntity>[];
       final suggestedPragas = allPragas.isNotEmpty
-          ? ReceitaAgroRandomExtensions.selectSuggestedPragas<PragaEntity>(allPragas, count: 7)
+          ? ReceitaAgroRandomExtensions.selectSuggestedPragas<PragaEntity>(
+              allPragas,
+              count: 7)
           : <PragaEntity>[];
-      
+
       return _HistoryData(
         recentPragas: recentPragas,
         suggestedPragas: suggestedPragas,
@@ -193,38 +203,44 @@ class PragasNotifier extends _$PragasNotifier {
       final pragasRepository = ref.read(pragasRepositoryProvider);
       final pragasDrift = await pragasRepository.findAll();
       final allPragas = PragaMapper.fromDriftToEntityList(pragasDrift);
-      
+
       // Filtrar por tipo
       List<PragaEntity> filteredPragas;
       switch (tipo) {
         case '1':
           // Insetos
           filteredPragas = allPragas.where((p) => p.isInseto).toList();
-          debugPrint('🐛 [PRAGAS_NOTIFIER] Filtrado insetos: ${filteredPragas.length} de ${allPragas.length}');
+          debugPrint(
+              '🐛 [PRAGAS_NOTIFIER] Filtrado insetos: ${filteredPragas.length} de ${allPragas.length}');
           break;
         case '2':
           // Doenças
           filteredPragas = allPragas.where((p) => p.isDoenca).toList();
-          debugPrint('🐛 [PRAGAS_NOTIFIER] Filtrado doenças: ${filteredPragas.length} de ${allPragas.length}');
+          debugPrint(
+              '🐛 [PRAGAS_NOTIFIER] Filtrado doenças: ${filteredPragas.length} de ${allPragas.length}');
           break;
         case '3':
           // Plantas Daninhas
           filteredPragas = allPragas.where((p) => p.isPlanta).toList();
-          debugPrint('🐛 [PRAGAS_NOTIFIER] Filtrado plantas: ${filteredPragas.length} de ${allPragas.length}');
+          debugPrint(
+              '🐛 [PRAGAS_NOTIFIER] Filtrado plantas: ${filteredPragas.length} de ${allPragas.length}');
           break;
         default:
           // Todas as pragas
           filteredPragas = allPragas;
-          debugPrint('🐛 [PRAGAS_NOTIFIER] Sem filtro: ${filteredPragas.length} pragas');
+          debugPrint(
+              '🐛 [PRAGAS_NOTIFIER] Sem filtro: ${filteredPragas.length} pragas');
       }
-      
+
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragas: filteredPragas,
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              pragas: filteredPragas,
+              isLoading: false,
+            )
+            .clearError(),
       );
-      
+
       // Ordenar alfabeticamente por padrão
       sortPragas(true);
     } catch (e) {
@@ -254,26 +270,29 @@ class PragasNotifier extends _$PragasNotifier {
       final pragasRepository = ref.read(pragasRepositoryProvider);
       final pragasDrift = await pragasRepository.findAll();
       final allPragas = PragaMapper.fromDriftToEntityList(pragasDrift);
-      
+
       // Filtrar pragas que contêm o termo de busca no nome comum ou científico
       final filteredPragas = allPragas.where((praga) {
         final nomeComum = praga.nomeComum.toLowerCase();
         final nomeCientifico = praga.nomeCientifico.toLowerCase();
-        return nomeComum.contains(trimmedTerm) || 
-               nomeCientifico.contains(trimmedTerm);
+        return nomeComum.contains(trimmedTerm) ||
+            nomeCientifico.contains(trimmedTerm);
       }).toList();
-      
+
       // Ordenar alfabeticamente
-      filteredPragas.sort((a, b) => 
-        a.nomeComum.toLowerCase().compareTo(b.nomeComum.toLowerCase()));
-      
-      debugPrint('🔍 [PRAGAS_NOTIFIER] Pesquisa "$trimmedTerm": ${filteredPragas.length} resultados');
-      
+      filteredPragas.sort((a, b) =>
+          a.nomeComum.toLowerCase().compareTo(b.nomeComum.toLowerCase()));
+
+      debugPrint(
+          '🔍 [PRAGAS_NOTIFIER] Pesquisa "$trimmedTerm": ${filteredPragas.length} resultados');
+
       state = AsyncValue.data(
-        currentState.copyWith(
-          pragas: filteredPragas,
-          isLoading: false,
-        ).clearError(),
+        currentState
+            .copyWith(
+              pragas: filteredPragas,
+              isLoading: false,
+            )
+            .clearError(),
       );
     } catch (e) {
       debugPrint('🔍 [PRAGAS_NOTIFIER] ❌ Erro na pesquisa: $e');
@@ -290,7 +309,7 @@ class PragasNotifier extends _$PragasNotifier {
 
     try {
       final allPragas = currentState.pragas;
-      
+
       if (allPragas.isEmpty) {
         state = AsyncValue.data(currentState.copyWith(recentPragas: []));
         return;
@@ -298,34 +317,34 @@ class PragasNotifier extends _$PragasNotifier {
 
       final historyService = ref.read(accessHistoryServiceProvider);
       final historyItems = await historyService.getPragasHistory(limit: 7);
-      
+
       final historicPragas = <PragaEntity>[];
-      
+
       // Buscar pragas do histórico
       for (final historyItem in historyItems) {
         final itemMap = historyItem as Map<String, dynamic>;
         final id = itemMap['id'] as String?;
         if (id == null) continue;
-        
-        final praga = allPragas
-            .where((p) => p.idReg == id)
-            .firstOrNull;
-        
+
+        final praga = allPragas.where((p) => p.idReg == id).firstOrNull;
+
         if (praga != null) {
           historicPragas.add(praga);
         }
       }
-      
+
       // SEMPRE retorna exatamente 7 registros
       // Se histórico < 7, completa com aleatórios excluindo os do histórico
-      final recentPragas = RandomSelectionService.fillHistoryToCount<PragaEntity>(
+      final recentPragas =
+          RandomSelectionService.fillHistoryToCount<PragaEntity>(
         historyItems: historicPragas,
         allItems: allPragas,
         targetCount: 7,
         areEqual: (a, b) => a.idReg == b.idReg,
       );
-      
-      state = AsyncValue.data(currentState.copyWith(recentPragas: recentPragas));
+
+      state =
+          AsyncValue.data(currentState.copyWith(recentPragas: recentPragas));
     } catch (e) {
       debugPrint('🐛 [PRAGAS_NOTIFIER] Erro ao carregar histórico: $e');
       // Em caso de erro, usa fallback aleatório
@@ -336,8 +355,9 @@ class PragasNotifier extends _$PragasNotifier {
               count: 7,
             )
           : <PragaEntity>[];
-      
-      state = AsyncValue.data(currentState.copyWith(recentPragas: recentPragas));
+
+      state =
+          AsyncValue.data(currentState.copyWith(recentPragas: recentPragas));
     }
   }
 
@@ -348,19 +368,21 @@ class PragasNotifier extends _$PragasNotifier {
 
     try {
       final allPragas = currentState.pragas;
-      
+
       if (allPragas.isEmpty) {
         state = AsyncValue.data(currentState.copyWith(suggestedPragas: []));
         return;
       }
-      
+
       // Seleciona pragas sugeridas aleatoriamente
-      final suggestedPragas = ReceitaAgroRandomExtensions.selectSuggestedPragas<PragaEntity>(
+      final suggestedPragas =
+          ReceitaAgroRandomExtensions.selectSuggestedPragas<PragaEntity>(
         allPragas,
         count: limit,
       );
-      
-      state = AsyncValue.data(currentState.copyWith(suggestedPragas: suggestedPragas));
+
+      state = AsyncValue.data(
+          currentState.copyWith(suggestedPragas: suggestedPragas));
     } catch (e) {
       debugPrint('🐛 [PRAGAS_NOTIFIER] Erro ao carregar sugestões: $e');
       state = AsyncValue.data(

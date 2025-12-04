@@ -28,6 +28,26 @@ service cloud.firestore {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
 
+      // ===== DISPOSITIVOS (subcoleção do usuário) =====
+      // Limite: 3 dispositivos mobile por usuário (web não conta)
+      match /devices/{deviceId} {
+        // Leitura: apenas o próprio usuário
+        allow read: if request.auth != null && request.auth.uid == userId;
+        
+        // Criação: apenas o próprio usuário, com validação de campos obrigatórios
+        allow create: if request.auth != null 
+          && request.auth.uid == userId
+          && request.resource.data.uuid is string
+          && request.resource.data.platform is string
+          && request.resource.data.isActive is bool;
+        
+        // Atualização: apenas o próprio usuário (para lastActiveAt, isActive, etc)
+        allow update: if request.auth != null && request.auth.uid == userId;
+        
+        // Deleção: apenas o próprio usuário
+        allow delete: if request.auth != null && request.auth.uid == userId;
+      }
+
       match /users/{userDocId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
@@ -36,14 +56,6 @@ service cloud.firestore {
     // ===== CONFIGURAÇÕES =====
     match /userSettings/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // ===== DISPOSITIVOS =====
-    match /devices/{deviceId} {
-      allow read, write: if request.auth != null &&
-        request.auth.uid == resource.data.user_id;
-      allow create: if request.auth != null &&
-        request.auth.uid == request.resource.data.user_id;
     }
 
     // ===== DADOS DE SINCRONIZAÇÃO =====

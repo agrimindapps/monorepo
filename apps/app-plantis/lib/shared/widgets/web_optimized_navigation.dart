@@ -76,6 +76,7 @@ class _ModernSidebarState extends State<ModernSidebar>
   late Animation<double> _widthAnimation;
 
   bool _isExpanded = true;
+  bool _showExpandedContent = true; // Controla quando mostrar conteúdo expandido
   static const double _expandedWidth = 280.0;
   static const double _collapsedWidth = 80.0;
 
@@ -104,6 +105,15 @@ class _ModernSidebarState extends State<ModernSidebar>
       ),
     );
 
+    // Listener para controlar quando mostrar conteúdo expandido
+    _widthAnimationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _showExpandedContent = _isExpanded;
+        });
+      }
+    });
+
     _fadeAnimationController.forward();
     _widthAnimationController.forward();
   }
@@ -116,6 +126,17 @@ class _ModernSidebarState extends State<ModernSidebar>
   }
 
   void _toggleSidebar() {
+    // Se está expandindo, mostra conteúdo expandido imediatamente
+    // Se está colapsando, esconde conteúdo expandido imediatamente para evitar overflow
+    if (!_isExpanded) {
+      // Vai expandir - mostra conteúdo após animação terminar (via listener)
+    } else {
+      // Vai colapsar - esconde conteúdo imediatamente
+      setState(() {
+        _showExpandedContent = false;
+      });
+    }
+
     setState(() {
       _isExpanded = !_isExpanded;
     });
@@ -165,11 +186,11 @@ class _ModernSidebarState extends State<ModernSidebar>
             ),
             child: Column(
               children: [
-                _SidebarHeader(isExpanded: _isExpanded),
-                Expanded(child: _NavigationList(isExpanded: _isExpanded)),
-                _BottomNavigationSection(isExpanded: _isExpanded),
+                _SidebarHeader(isExpanded: _showExpandedContent),
+                Expanded(child: _NavigationList(isExpanded: _showExpandedContent)),
+                _BottomNavigationSection(isExpanded: _showExpandedContent),
                 _SidebarFooter(
-                  isExpanded: _isExpanded,
+                  isExpanded: _showExpandedContent,
                   onToggle: _toggleSidebar,
                 ),
               ],
@@ -192,56 +213,82 @@ class _SidebarHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 24, 16, 24),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [PlantisColors.primary, PlantisColors.primaryLight],
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: PlantisColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+      padding: EdgeInsets.fromLTRB(
+        isExpanded ? 20 : 18,
+        24,
+        isExpanded ? 16 : 18,
+        24,
+      ),
+      child: isExpanded
+          ? Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [PlantisColors.primary, PlantisColors.primaryLight],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: PlantisColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.eco, color: Colors.white, size: 22),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Inside Garden',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
+                          fontSize: 17,
+                        ),
+                      ),
+                      Text(
+                        'Cuidado de Plantas',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
-            child: const Icon(Icons.eco, color: Colors.white, size: 22),
-          ),
-          if (isExpanded) ...[
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Inside Garden',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 17,
-                    ),
+            )
+          : Center(
+              child: Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [PlantisColors.primary, PlantisColors.primaryLight],
                   ),
-                  Text(
-                    'Cuidado de Plantas',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                      fontSize: 11,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: PlantisColors.primary.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: const Icon(Icons.eco, color: Colors.white, size: 22),
               ),
             ),
-          ],
-        ],
-      ),
     );
   }
 }
@@ -255,7 +302,7 @@ class _NavigationList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 0),
+      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -283,14 +330,12 @@ class _NavigationList extends StatelessWidget {
                     label: 'Tarefas',
                     route: '/tasks',
                     badge: pendingTasksCount > 0 ? pendingTasksCount : null,
-                    shortcut: '1',
                     isExpanded: isExpanded,
                   ),
                   _NavigationItem(
                     icon: Icons.eco_outlined,
                     label: 'Plantas',
                     route: '/plants',
-                    shortcut: '2',
                     isExpanded: isExpanded,
                   ),
                 ],
@@ -314,7 +359,7 @@ class _BottomNavigationSection extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 0),
+      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 8),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
@@ -331,7 +376,6 @@ class _BottomNavigationSection extends StatelessWidget {
             icon: Icons.settings_outlined,
             label: 'Configurações',
             route: '/settings',
-            shortcut: '3',
             isExpanded: isExpanded,
           ),
           const SizedBox(height: 8),
@@ -347,7 +391,6 @@ class _NavigationItem extends StatefulWidget {
   final String label;
   final String route;
   final int? badge;
-  final String? shortcut;
   final bool isExpanded;
 
   const _NavigationItem({
@@ -355,7 +398,6 @@ class _NavigationItem extends StatefulWidget {
     required this.label,
     required this.route,
     this.badge,
-    this.shortcut,
     required this.isExpanded,
   });
 
@@ -421,6 +463,7 @@ class _NavigationItemState extends State<_NavigationItem>
           return Transform.scale(
             scale: _scaleAnimation.value,
             child: MouseRegion(
+              cursor: SystemMouseCursors.click,
               onEnter: (_) => setState(() => _isHovering = true),
               onExit: (_) => setState(() => _isHovering = false),
               child: GestureDetector(
@@ -444,9 +487,7 @@ class _NavigationItemState extends State<_NavigationItem>
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
                     padding: EdgeInsets.symmetric(
-                      horizontal: widget.isExpanded
-                          ? 16
-                          : 0, // Sem padding horizontal quando colapsado
+                      horizontal: widget.isExpanded ? 16 : 12,
                       vertical: 12,
                     ),
                     decoration: BoxDecoration(
@@ -521,24 +562,6 @@ class _NavigationItemState extends State<_NavigationItem>
             ),
           ),
         ],
-        if (widget.shortcut != null && _isHovering) ...[
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: theme.dividerColor, width: 0.5),
-            ),
-            child: Text(
-              widget.shortcut!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontSize: 10,
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }
@@ -584,11 +607,18 @@ class _NavigationItemState extends State<_NavigationItem>
 }
 
 /// Footer da sidebar com informações do usuário
-class _SidebarFooter extends StatelessWidget {
+class _SidebarFooter extends StatefulWidget {
   final bool isExpanded;
   final VoidCallback onToggle;
 
   const _SidebarFooter({required this.isExpanded, required this.onToggle});
+
+  @override
+  State<_SidebarFooter> createState() => _SidebarFooterState();
+}
+
+class _SidebarFooterState extends State<_SidebarFooter> {
+  bool _isUserHovered = false;
 
   @override
   Widget build(BuildContext context) {
@@ -598,7 +628,7 @@ class _SidebarFooter extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.all(isExpanded ? 20 : 16),
+          padding: EdgeInsets.all(widget.isExpanded ? 20 : 16),
           decoration: BoxDecoration(
             border: Border(
               top: BorderSide(
@@ -626,14 +656,15 @@ class _SidebarFooter extends StatelessWidget {
                   'Carregando...';
 
               Widget footerContent;
-              if (!isExpanded) {
+              if (!widget.isExpanded) {
                 footerContent = Tooltip(
                   message: displayName,
                   waitDuration: const Duration(milliseconds: 500),
                   child: Center(
                     child: Stack(
                       children: [
-                        Container(
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
@@ -649,9 +680,9 @@ class _SidebarFooter extends StatelessWidget {
                             boxShadow: [
                               BoxShadow(
                                 color: PlantisColors.primary.withValues(
-                                  alpha: 0.3,
+                                  alpha: _isUserHovered ? 0.5 : 0.3,
                                 ),
-                                blurRadius: 8,
+                                blurRadius: _isUserHovered ? 12 : 8,
                                 offset: const Offset(0, 2),
                               ),
                             ],
@@ -685,76 +716,100 @@ class _SidebarFooter extends StatelessWidget {
                   ),
                 );
               } else {
-                footerContent = Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            PlantisColors.primary,
-                            PlantisColors.primaryLight,
+                footerContent = AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _isUserHovered
+                        ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              PlantisColors.primary,
+                              PlantisColors.primaryLight,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: PlantisColors.primary.withValues(
+                                alpha: _isUserHovered ? 0.5 : 0.3,
+                              ),
+                              blurRadius: _isUserHovered ? 12 : 8,
+                              offset: const Offset(0, 2),
+                            ),
                           ],
                         ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: PlantisColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                        child: const Center(
+                          child: Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 20,
                           ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Icon(
-                          Icons.person,
-                          color: Colors.white,
-                          size: 20,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            displayName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              displayName,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            statusText,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 11,
+                            Row(
+                              children: [
+                                Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(3),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  statusText,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: Colors.orange,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
+                      if (_isUserHovered)
+                        Icon(
+                          Icons.chevron_right,
+                          size: 18,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                    ],
+                  ),
                 );
               }
 
-              // Wrap with clickable interaction
+              // Wrap with clickable interaction and hover
               return MouseRegion(
                 cursor: SystemMouseCursors.click,
+                onEnter: (_) => setState(() => _isUserHovered = true),
+                onExit: (_) => setState(() => _isUserHovered = false),
                 child: GestureDetector(
                   onTap: () {
                     HapticFeedback.lightImpact();
@@ -779,7 +834,7 @@ class _SidebarFooter extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
             children: [
-              if (isExpanded) ...[
+              if (widget.isExpanded) ...[
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -807,7 +862,7 @@ class _SidebarFooter extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
               ],
-              _ToggleButton(isExpanded: isExpanded, onToggle: onToggle),
+              _ToggleButton(isExpanded: widget.isExpanded, onToggle: widget.onToggle),
             ],
           ),
         ),

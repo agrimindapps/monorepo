@@ -315,8 +315,32 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
 
+      if (kDebugMode) {
+        print('🔄 PlantsRepositoryImpl.updatePlant() - Iniciando');
+        print('   plant.id: ${plant.id}');
+        print('   plant.name: ${plant.name}');
+        print('   plant.spaceId: ${plant.spaceId}');
+        print('   plant.config: ${plant.config}');
+        if (plant.config != null) {
+          print('   config.wateringIntervalDays: ${plant.config!.wateringIntervalDays}');
+          print('   config.fertilizingIntervalDays: ${plant.config!.fertilizingIntervalDays}');
+          print('   config.pruningIntervalDays: ${plant.config!.pruningIntervalDays}');
+        }
+      }
+
       final plantModel = PlantModel.fromEntity(plant);
+      
+      if (kDebugMode) {
+        print('🔄 PlantsRepositoryImpl.updatePlant() - PlantModel criado');
+        print('   plantModel.spaceId: ${plantModel.spaceId}');
+        print('   plantModel.config: ${plantModel.config}');
+      }
+      
       await localDatasource.updatePlant(plantModel);
+      
+      if (kDebugMode) {
+        print('✅ PlantsRepositoryImpl.updatePlant() - Salvo localmente');
+      }
 
       if (await networkInfo.isConnected) {
         try {
@@ -325,9 +349,17 @@ class PlantsRepositoryImpl implements PlantsRepository {
             userId,
           );
           await localDatasource.updatePlant(remotePlant);
+          
+          if (kDebugMode) {
+            print('✅ PlantsRepositoryImpl.updatePlant() - Salvo remotamente');
+            print('   remotePlant.spaceId: ${remotePlant.spaceId}');
+          }
 
           return Right(remotePlant);
         } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ PlantsRepositoryImpl.updatePlant() - Erro remoto: $e');
+          }
           return Right(plantModel);
         }
       } else {
@@ -336,6 +368,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     } on CacheFailure catch (e) {
       return Left(e);
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ PlantsRepositoryImpl.updatePlant() - Erro: $e');
+      }
       return Left(
         UnknownFailure('Erro inesperado ao atualizar planta: ${e.toString()}'),
       );

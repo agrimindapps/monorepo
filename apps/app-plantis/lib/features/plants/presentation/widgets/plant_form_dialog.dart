@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/state/plant_form_state_notifier.dart';
@@ -55,18 +54,8 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
     final formManager = ref.read(plantFormStateNotifierProvider.notifier);
 
     if (widget.plantId != null) {
-      if (kDebugMode) {
-        print(
-          '🔧 PlantFormDialog._initializeFormManager() - Iniciando edição para plantId: ${widget.plantId}',
-        );
-      }
       formManager.loadPlant(widget.plantId!);
     } else {
-      if (kDebugMode) {
-        print(
-          '🔧 PlantFormDialog._initializeFormManager() - Iniciando adição de nova planta',
-        );
-      }
       formManager.initializeForNewPlant();
     }
   }
@@ -150,19 +139,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
       padding: const EdgeInsets.fromLTRB(24, 24, 16, 0),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: colorScheme.primaryContainer,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.local_florist,
-              color: colorScheme.onPrimaryContainer,
-              size: 24,
-            ),
-          ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,20 +439,16 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         // Atualizar lista em background (sem await para não bloquear)
         try {
           ref.read(plantsNotifierProvider.notifier).refreshPlants();
-        } catch (e) {
-          if (kDebugMode) {
-            print('Aviso: Não foi possível atualizar a lista automaticamente: $e');
-          }
+        } catch (_) {
+          // Ignora erro de atualização da lista
         }
 
         // Recarregar detalhes se editando
         if (plantId != null) {
           try {
             ref.read(plantDetailsNotifierProvider.notifier).reloadPlant(plantId);
-          } catch (e2) {
-            if (kDebugMode) {
-              print('❌ PlantFormDialog._handleSave() - Falha ao atualizar PlantDetailsProvider: $e2');
-            }
+          } catch (_) {
+            // Ignora erro de atualização dos detalhes
           }
         }
       } else {
@@ -514,9 +486,6 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             behavior: SnackBarBehavior.floating,
           ),
         );
-      }
-      if (kDebugMode) {
-        print('❌ PlantFormDialog._handleSave() - Erro: $e');
       }
     }
   }

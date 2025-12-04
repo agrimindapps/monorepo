@@ -75,7 +75,8 @@ class Auth extends _$Auth {
     _analytics = ref.watch(gasometerAnalyticsServiceProvider);
     _platformService = ref.watch(platformServiceProvider);
     _rateLimiter = ref.watch(authRateLimiterProvider);
-    _enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+    _enhancedDeletionService =
+        ref.watch(enhancedAccountDeletionServiceProvider);
 
     // Prevent double initialization
     if (_isInitialized) {
@@ -696,10 +697,12 @@ class Auth extends _$Auth {
   void _triggerPostLoginSync() {
     // Fire-and-forget: não bloqueia o login
     // BackgroundSyncManager executará sync em background
-    BackgroundSyncManager.instance.triggerSync(
+    BackgroundSyncManager.instance
+        .triggerSync(
       'gasometer',
       force: true, // Force immediate sync
-    ).then((_) {
+    )
+        .then((_) {
       if (kDebugMode) {
         debugPrint('🔄 Post-login sync triggered successfully');
       }

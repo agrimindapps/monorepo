@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/feature_flags_notifier.dart';
+import '../../../../core/widgets/standard_tab_bar_widget.dart';
 import '../providers/subscription_notifier.dart';
 
 /// Advanced Premium Features Showcase Widget
@@ -230,30 +231,25 @@ class _PremiumFeaturesShowcaseWidgetState
 
   /// Feature Categories Tabs
   Widget _buildFeatureTabs(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+    return StandardTabBarWidget(
+      tabController: _tabController,
+      tabs: const [
+        StandardTabData(
+          icon: Icons.star_outline,
+          text: 'Essenciais',
+          semanticLabel: 'Recursos essenciais',
         ),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        indicator: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(8),
+        StandardTabData(
+          icon: Icons.auto_awesome,
+          text: 'Avançados',
+          semanticLabel: 'Recursos avançados',
         ),
-        dividerColor: Colors.transparent,
-        labelColor: Colors.white,
-        unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
-        labelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        tabs: const [
-          Tab(text: 'Essenciais'),
-          Tab(text: 'Avançados'),
-          Tab(text: 'Exclusivos'),
-        ],
-      ),
+        StandardTabData(
+          icon: Icons.diamond_outlined,
+          text: 'Exclusivos',
+          semanticLabel: 'Recursos exclusivos',
+        ),
+      ],
     );
   }
 

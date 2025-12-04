@@ -18,12 +18,16 @@ class ReceitaAgroDataSetup {
       );
 
       // Carregar dados usando os data loaders individuais
+      // IMPORTANTE: Diagnósticos dependem de Pragas, Culturas e Fitossanitários
+      // Então devem ser carregados DEPOIS das tabelas base
       await Future.wait<void>([
         CulturasDataLoader.loadCulturasData(ref),
         PragasDataLoader.loadPragasData(ref),
         FitossanitariosDataLoader.loadFitossanitariosData(ref),
-        DiagnosticosDataLoader.loadDiagnosticosData(ref),
       ]);
+      
+      // Diagnósticos só podem ser carregados após as tabelas de lookup
+      await DiagnosticosDataLoader.loadDiagnosticosData(ref);
 
       await _loadTestData(ref);
 

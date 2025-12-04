@@ -582,7 +582,11 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   @override
-  Future<Either<Failure, Task>> completeTask(String id, {String? notes}) async {
+  Future<Either<Failure, Task>> completeTask(
+    String id, {
+    String? notes,
+    DateTime? nextDueDate,
+  }) async {
     try {
       final taskResult = await getTaskById(id);
 
@@ -591,12 +595,49 @@ class TasksRepositoryImpl implements TasksRepository {
           status: TaskStatus.completed,
           completedAt: DateTime.now(),
           completionNotes: notes,
+          // Se o usuário informou uma próxima data, usa ela
+          nextDueDate: nextDueDate,
         );
 
-        return await updateTask(completedTask);
+        // Atualiza a tarefa atual como concluída
+        final updateResult = await updateTask(completedTask);
+        
+        // Se é uma tarefa recorrente, cria a próxima com a data informada
+        if (task.isRecurring && nextDueDate != null) {
+          await _createNextRecurringTaskWithDate(task, nextDueDate);
+        }
+
+        return updateResult;
       });
     } on Exception catch (e) {
       return Left(ServerFailure('Erro ao completar tarefa: ${e.toString()}'));
+    }
+  }
+
+  /// Cria a próxima tarefa recorrente com a data informada pelo usuário
+  Future<void> _createNextRecurringTaskWithDate(Task completedTask, DateTime nextDueDate) async {
+    try {
+      final newTask = Task(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+        title: completedTask.title,
+        description: completedTask.description,
+        plantId: completedTask.plantId,
+        type: completedTask.type,
+        status: TaskStatus.pending,
+        priority: completedTask.priority,
+        dueDate: nextDueDate,
+        isRecurring: true,
+        recurringIntervalDays: completedTask.recurringIntervalDays,
+        nextDueDate: completedTask.recurringIntervalDays != null
+            ? nextDueDate.add(Duration(days: completedTask.recurringIntervalDays!))
+            : null,
+      );
+
+      await addTask(newTask);
+    } catch (e) {
+      debugPrint('⚠️ Erro ao criar próxima tarefa recorrente: $e');
     }
   }
 

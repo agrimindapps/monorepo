@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter/foundation.dart';
 
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -185,15 +184,7 @@ class PlantFormState {
   bool get hasError => errorMessage != null;
   bool get isEditMode => originalPlant != null;
   bool get hasChanges => _hasChanges();
-  bool get canSave {
-    final result = isFormValid && hasChanges && !isSaving;
-    if (kDebugMode) {
-      print(
-        '🔍 PlantFormState.canSave - isFormValid: $isFormValid, hasChanges: $hasChanges, isSaving: $isSaving, result: $result',
-      );
-    }
-    return result;
-  }
+  bool get canSave => isFormValid && hasChanges && !isSaving;
 
   bool _hasChanges() {
     if (originalPlant == null) return true; // Novo plant sempre tem mudanças
@@ -252,10 +243,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
   /// Carrega planta para edição (simplificado - busca por ID na lista)
   Future<void> loadPlant(String plantId) async {
-    if (kDebugMode) {
-      print('🔍 PlantFormStateNotifier.loadPlant - plantId: $plantId');
-    }
-
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
@@ -263,51 +250,20 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
       result.fold(
         (failure) {
-          if (kDebugMode) {
-            print(
-                '❌ PlantFormStateNotifier.loadPlant - Failure: ${failure.message}');
-          }
           state = state.copyWith(
             isLoading: false,
             errorMessage: failure.message,
           );
         },
         (plants) {
-          if (kDebugMode) {
-            print(
-                '🔍 PlantFormStateNotifier.loadPlant - Total plants: ${plants.length}');
-            print(
-                '🔍 Available plant IDs: ${plants.map((p) => p.id).join(", ")}');
-          }
-
           final plant = plants.where((p) => p.id == plantId).firstOrNull;
 
           if (plant == null) {
-            if (kDebugMode) {
-              print(
-                  '❌ PlantFormStateNotifier.loadPlant - Plant not found with ID: $plantId');
-            }
             state = state.copyWith(
               isLoading: false,
               errorMessage: 'Planta não encontrada',
             );
             return;
-          }
-          if (kDebugMode) {
-            print('🌱 loadPlant - Carregando planta: ${plant.name}');
-            print('   🔧 plant.config existe? ${plant.config != null}');
-            print(
-                '   💧 wateringIntervalDays: ${plant.config?.wateringIntervalDays}');
-            print(
-                '   🌿 fertilizingIntervalDays: ${plant.config?.fertilizingIntervalDays}');
-            print(
-                '   ✂️ pruningIntervalDays: ${plant.config?.pruningIntervalDays}');
-            print(
-                '   ☀️ sunlightCheckIntervalDays: ${plant.config?.sunlightCheckIntervalDays}');
-            print(
-                '   🐛 pestInspectionIntervalDays: ${plant.config?.pestInspectionIntervalDays}');
-            print(
-                '   🌱 replantingIntervalDays: ${plant.config?.replantingIntervalDays}');
           }
 
           state = state.copyWith(
@@ -371,9 +327,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
   /// Atualiza campo nome
   void setName(String name) {
-    if (kDebugMode) {
-      print('🔄 PlantFormStateNotifier.setName - name: "$name"');
-    }
     state = state.copyWith(name: name);
     _validateForm();
   }
@@ -664,22 +617,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
   /// Constrói parâmetros para adicionar planta
   AddPlantParams _buildAddParams() {
-    if (kDebugMode) {
-      print('🔧 _buildAddParams - Building config with:');
-      print(
-          '   enableWateringCare: ${state.enableWateringCare}, intervalDays: ${state.wateringIntervalDays}');
-      print(
-          '   enableFertilizerCare: ${state.enableFertilizerCare}, intervalDays: ${state.fertilizingIntervalDays}');
-      print(
-          '   enablePruning: ${state.enablePruning}, intervalDays: ${state.pruningIntervalDays}');
-      print(
-          '   enableSunlightCare: ${state.enableSunlightCare}, intervalDays: ${state.sunlightIntervalDays}');
-      print(
-          '   enablePestInspection: ${state.enablePestInspection}, intervalDays: ${state.pestInspectionIntervalDays}');
-      print(
-          '   enableReplanting: ${state.enableReplanting}, intervalDays: ${state.replantingIntervalDays}');
-    }
-
     final config = PlantConfig(
       wateringIntervalDays:
           state.enableWateringCare == true ? state.wateringIntervalDays : null,
@@ -703,18 +640,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       enableFertilizerCare: state.enableFertilizerCare,
       lastFertilizerDate: state.lastFertilizerDate,
     );
-
-    if (kDebugMode) {
-      print('🔧 _buildAddParams - PlantConfig created:');
-      print('   wateringIntervalDays: ${config.wateringIntervalDays}');
-      print('   fertilizingIntervalDays: ${config.fertilizingIntervalDays}');
-      print('   pruningIntervalDays: ${config.pruningIntervalDays}');
-      print(
-          '   sunlightCheckIntervalDays: ${config.sunlightCheckIntervalDays}');
-      print(
-          '   pestInspectionIntervalDays: ${config.pestInspectionIntervalDays}');
-      print('   replantingIntervalDays: ${config.replantingIntervalDays}');
-    }
 
     return AddPlantParams(
       name: state.name.trim(),
@@ -847,12 +772,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
   /// Valida formulário completo
   void _validateForm() {
-    if (kDebugMode) {
-      print(
-        '🔍 PlantFormStateNotifier._validateForm - name: "${state.name}", species: "${state.species}"',
-      );
-    }
-
     final validation = _validationService.validatePlantForm(
       name: state.name,
       species: state.species,
@@ -864,12 +783,6 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       fertilizingIntervalDays: state.fertilizingIntervalDays,
       waterAmount: state.waterAmount,
     );
-
-    if (kDebugMode) {
-      print(
-        '🔍 PlantFormStateNotifier._validateForm - validation.isValid: ${validation.isValid}, errors: ${validation.errors}',
-      );
-    }
 
     state = state.copyWith(
       fieldErrors: validation.errors,

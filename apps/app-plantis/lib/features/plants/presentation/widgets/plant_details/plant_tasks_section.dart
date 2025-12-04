@@ -462,6 +462,7 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
           plantTask.id,
           completionDate: result.completionDate,
           notes: result.notes,
+          nextDueDate: result.nextDueDate,
         );
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

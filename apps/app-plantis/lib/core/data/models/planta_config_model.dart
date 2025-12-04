@@ -1,3 +1,4 @@
+import '../../../features/plants/domain/entities/plant.dart';
 import 'base_sync_model.dart';
 
 /// PlantaConfig model with Firebase sync support
@@ -507,5 +508,19 @@ class PlantaConfigModel extends BaseSyncModel {
   @override
   String toString() {
     return 'PlantaConfigModel(id: $id, plantaId: $plantaId, aguaAtiva: $aguaAtiva, intervaloRegaDias: $intervaloRegaDias)';
+  }
+
+  /// Converte PlantaConfigModel → PlantConfig entity
+  PlantConfig toPlantConfig() {
+    return PlantConfig(
+      wateringIntervalDays: aguaAtiva ? intervaloRegaDias : null,
+      fertilizingIntervalDays: aduboAtivo ? intervaloAdubacaoDias : null,
+      pruningIntervalDays: podaAtiva ? intervaloPodaDias : null,
+      sunlightCheckIntervalDays: banhoSolAtivo ? intervaloBanhoSolDias : null,
+      pestInspectionIntervalDays: inspecaoPragasAtiva ? intervaloInspecaoPragasDias : null,
+      replantingIntervalDays: replantarAtivo ? intervaloReplantarDias : null,
+      enableWateringCare: aguaAtiva,
+      enableFertilizerCare: aduboAtivo,
+    );
   }
 }

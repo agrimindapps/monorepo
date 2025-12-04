@@ -4,9 +4,9 @@ import 'dart:developer' as developer;
 import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../../../domain/entities/base_sync_entity.dart';
+import '../../../../../shared/services/firebase_id_service.dart';
 import '../../../../../shared/utils/failure.dart';
 import '../../../../services/connectivity_service.dart';
 import '../interfaces/i_drift_sync_adapter.dart';
@@ -121,15 +121,15 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
 
             // Determinar o docId para Firebase:
             // - Se entity.id parece ser um UUID (36 chars com hífens), usa ele
-            // - Se entity.id é numérico (ID local do Drift), gera novo UUID
+            // - Se entity.id é numérico (ID local do Drift), gera novo ID do Firebase
             final String docId;
             
             if (_isValidUuid(entity.id)) {
               // Já tem UUID válido, usa ele
               docId = entity.id;
             } else {
-              // ID numérico do Drift, gera UUID para Firebase
-              docId = const Uuid().v4();
+              // ID numérico do Drift, gera ID do Firebase
+              docId = FirebaseIdService(firestore: firestore).generate();
               developer.log(
                 '🆔 Generating new Firebase docId: $docId for local id: ${entity.id}',
                 name: 'DriftSync.$collectionName',
@@ -580,19 +580,26 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
     }).where((item) => item != null).toList();
   }
 
-  /// Verifica se uma string é um UUID válido (formato v4)
+  /// Verifica se uma string é um UUID válido (formato v4) ou um Firebase ID
   /// 
   /// UUID v4 tem formato: xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-  /// onde x é qualquer dígito hex e y é 8, 9, a, ou b
+  /// Firebase ID tem formato: 20 caracteres alfanuméricos
   bool _isValidUuid(String id) {
     // UUID tem exatamente 36 caracteres (32 hex + 4 hífens)
-    if (id.length != 36) return false;
+    if (id.length == 36) {
+      // Regex para validar formato UUID
+      final uuidRegex = RegExp(
+        r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
+      );
+      return uuidRegex.hasMatch(id);
+    }
     
-    // Regex para validar formato UUID
-    final uuidRegex = RegExp(
-      r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$',
-    );
+    // Firebase ID tem exatamente 20 caracteres alfanuméricos
+    if (id.length == 20) {
+      final firebaseIdRegex = RegExp(r'^[A-Za-z0-9]+$');
+      return firebaseIdRegex.hasMatch(id);
+    }
     
-    return uuidRegex.hasMatch(id);
+    return false;
   }
 }

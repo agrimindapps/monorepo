@@ -52,11 +52,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-
+      // O filtro 'today' já é aplicado automaticamente no carregamento inicial
       ref.read(tasksNotifierProvider.notifier).loadTasks();
-      ref
-          .read(tasksNotifierProvider.notifier)
-          .filterTasks(TasksFilterType.today);
     });
   }
 
@@ -663,7 +660,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
     if (result != null && context.mounted) {
       try {
-        await ref.read(tasksNotifierProvider.notifier).completeTask(task.id);
+        await ref.read(tasksNotifierProvider.notifier).completeTask(
+          task.id,
+          notes: result.notes,
+          nextDueDate: result.nextDueDate,
+        );
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

@@ -81,6 +81,56 @@ class CommentsDriftRepository {
     );
   }
 
+  /// Get a comment by its Firebase ID
+  Future<ComentarioModel?> getCommentById(String firebaseId) async {
+    final comment = await (_db.select(_db.comments)
+          ..where((c) => c.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+
+    if (comment == null) return null;
+    return _commentDriftToModel(comment);
+  }
+
+  /// Soft delete a comment by its Firebase ID
+  Future<bool> softDeleteComment(String firebaseId) async {
+    final rowsAffected = await (_db.update(_db.comments)
+          ..where((c) => c.firebaseId.equals(firebaseId)))
+        .write(
+      db.CommentsCompanion(
+        isDeleted: const Value(true),
+        isDirty: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    return rowsAffected > 0;
+  }
+
+  /// Update an existing comment
+  Future<bool> updateComment(ComentarioModel model) async {
+    final rowsAffected = await (_db.update(_db.comments)
+          ..where((c) => c.firebaseId.equals(model.id)))
+        .write(
+      db.CommentsCompanion(
+        conteudo: Value(model.conteudo),
+        updatedAt: Value(model.updatedAt ?? DateTime.now()),
+        lastSyncAt: Value(model.lastSyncAt),
+        isDirty: Value(model.isDirty),
+        version: Value(model.version),
+      ),
+    );
+    return rowsAffected > 0;
+  }
+
+  /// Insert or update a comment (upsert)
+  Future<void> upsertComment(ComentarioModel model) async {
+    final existing = await getCommentById(model.id);
+    if (existing != null) {
+      await updateComment(model);
+    } else {
+      await insertComment(model);
+    }
+  }
+
   Future<int?> _resolvePlantId(String? plantFirebaseId) async {
     if (plantFirebaseId == null) return null;
     final asInt = int.tryParse(plantFirebaseId);

@@ -89,14 +89,18 @@ class PlantTaskGenerator {
   ///
   /// ✅ FIX: Calcula próxima tarefa baseado em completionDate real,
   /// não em nextScheduledDate (que pode estar no passado se tarefa atrasada)
+  /// 
+  /// Se [customNextDueDate] for informado, usa essa data em vez de calcular
   PlantTask generateNextTask(
     PlantTask completedTask, {
     DateTime? completionDate,
+    DateTime? customNextDueDate,
   }) {
-    final baseDate = completionDate ?? DateTime.now();
-    final nextScheduledDate = baseDate.add(
-      Duration(days: completedTask.intervalDays),
-    );
+    // Se o usuário informou uma data customizada, usa ela
+    final nextScheduledDate = customNextDueDate ??
+        (completionDate ?? DateTime.now()).add(
+          Duration(days: completedTask.intervalDays),
+        );
 
     return PlantTask(
       id: _generateTaskId(),

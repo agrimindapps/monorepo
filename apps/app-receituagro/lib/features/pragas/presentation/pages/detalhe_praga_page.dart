@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/modern_header_widget.dart';
@@ -65,46 +66,34 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
     super.dispose();
   }
 
-  /// Carrega dados iniciais - operações locais sem timeout necessário
+  /// Carrega dados iniciais usando o método unificado
   Future<void> _loadInitialData() async {
     try {
-      debugPrint('🔍 [DETALHE_PRAGA_PAGE] _loadInitialData iniciando...');
-      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaId: ${widget.pragaId}, pragaName: ${widget.pragaName}');
-      
       final pragaNotifier = ref.read(detalhePragaProvider.notifier);
-      final diagnosticosNotifier = ref.read(
-        diagnosticosPragaProvider.notifier,
+      final diagnosticosNotifier = ref.read(diagnosticosPragaProvider.notifier);
+
+      // Inicializa praga usando método unificado
+      await pragaNotifier.initialize(
+        pragaId: widget.pragaId,
+        pragaName: widget.pragaName,
+        pragaScientificName: widget.pragaScientificName,
       );
 
-      if (widget.pragaId != null && widget.pragaId!.isNotEmpty) {
-        debugPrint('🔍 [DETALHE_PRAGA_PAGE] Inicializando por ID: ${widget.pragaId}');
-        await pragaNotifier.initializeById(widget.pragaId!);
-      } else {
-        debugPrint('🔍 [DETALHE_PRAGA_PAGE] Inicializando por nome: ${widget.pragaName}');
-        await pragaNotifier.initializeAsync(
-          widget.pragaName,
-          widget.pragaScientificName,
-        );
-      }
-
-      final pragaState = await ref.read(detalhePragaProvider.future);
-      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaState.pragaData: ${pragaState.pragaData}');
-      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaData.id: ${pragaState.pragaData?.id}');
-      debugPrint('🔍 [DETALHE_PRAGA_PAGE] pragaData.idPraga: ${pragaState.pragaData?.idPraga}');
-
-      if (pragaState.pragaData != null &&
-          pragaState.pragaData!.idPraga.isNotEmpty) {
-        debugPrint('🔍 [DETALHE_PRAGA_PAGE] Carregando diagnósticos para idPraga: ${pragaState.pragaData!.idPraga}');
+      // Aguarda o estado da praga e carrega diagnósticos
+      final pragaState = ref.read(detalhePragaProvider).value;
+      
+      if (!mounted) return;
+      
+      if (pragaState?.pragaData != null && pragaState!.pragaData!.idPraga.isNotEmpty) {
         await diagnosticosNotifier.loadDiagnosticos(
           pragaState.pragaData!.idPraga,
-          pragaName: widget.pragaName,
+          pragaName: pragaState.pragaName,
         );
-      } else {
-        debugPrint('⚠️ [DETALHE_PRAGA_PAGE] pragaData ou idPraga vazio/null');
       }
-    } catch (e, stack) {
-      debugPrint('❌ [DETALHE_PRAGA_PAGE] Erro em _loadInitialData: $e');
-      debugPrint('❌ [DETALHE_PRAGA_PAGE] Stack: $stack');
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ [DETALHE_PRAGA_PAGE] Erro em _loadInitialData: $e');
+      }
     }
   }
 
@@ -120,19 +109,25 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1120),
-              child: pragaAsyncState.when(
-                data: (state) => Column(
-                  children: [
-                    _buildHeader(state),
-                    Expanded(
-                      child: Column(
-                        children: [
-                          StandardTabBarWidget(
-                            tabController: _tabController,
-                            tabs: StandardTabData.pragaDetailsTabs,
-                          ),
-                          Expanded(
-                            child: TabBarView(
+              child: Column(
+                children: [
+                  // Header - reativo ao estado da praga
+                  pragaAsyncState.when(
+                    data: (state) => _buildHeader(state),
+                    loading: () => _buildHeader(DetalhePragaState.initial()),
+                    error: (_, __) => _buildHeader(DetalhePragaState.initial()),
+                  ),
+                  // Tabs - estáticos, não dependem do estado
+                  Expanded(
+                    child: Column(
+                      children: [
+                        StandardTabBarWidget(
+                          tabController: _tabController,
+                          tabs: StandardTabData.pragaDetailsTabs,
+                        ),
+                        Expanded(
+                          child: pragaAsyncState.when(
+                            data: (_) => TabBarView(
                               controller: _tabController,
                               children: [
                                 PragaInfoWidget(
@@ -140,20 +135,23 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
                                   pragaScientificName:
                                       widget.pragaScientificName,
                                 ),
-                                DiagnosticosPragaWidget(
-                                  pragaName: widget.pragaName,
+                                // Wrap with AutomaticKeepAliveClientMixin to preserve state
+                                _KeepAliveWrapper(
+                                  child: DiagnosticosPragaWidget(
+                                    pragaName: widget.pragaName,
+                                  ),
                                 ),
                                 const ComentariosPragaWidget(),
                               ],
                             ),
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (error, stack) => Center(child: Text('Erro: $error')),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => Center(child: Text('Erro: $error')),
+                  ),
+                ],
               ),
             ),
           ),
@@ -201,5 +199,26 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
         );
       }
     }
+  }
+}
+
+class _KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+
+  const _KeepAliveWrapper({required this.child});
+
+  @override
+  State<_KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<_KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

@@ -185,7 +185,8 @@ class Profile extends _$Profile {
   ) async {
     try {
       if (kDebugMode) {
-        debugPrint('🔐 [Profile] Salvando dados do usuário localmente com avatar');
+        debugPrint(
+            '🔐 [Profile] Salvando dados do usuário localmente com avatar');
       }
       final coreUser = _convertToCore(user);
       await _authLocalDataSource.cacheUser(coreUser);

@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/core_providers.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../providers/home_pragas_notifier.dart';
 
@@ -357,27 +356,26 @@ class HomePragasStatsWidget extends ConsumerWidget {
     debugPrint('=== NAVEGAÇÃO HOME PRAGAS ===');
     debugPrint('Categoria: $category');
 
-    final navigationService = ref.read(navigationServiceProvider);
     switch (category) {
       case 'culturas':
         debugPrint('Navegando para: Lista de Culturas');
-        navigationService.navigateToListaCulturas();
+        Navigator.of(context).pushNamed('/culturas');
         break;
       case 'insetos':
         debugPrint('Navegando para: Lista de Pragas (Insetos)');
-        navigationService.navigateToListaPragas(categoria: '1');
+        Navigator.of(context).pushNamed('/pragas', arguments: {'categoria': '1'});
         break;
       case 'doencas':
         debugPrint('Navegando para: Lista de Pragas (Doenças)');
-        navigationService.navigateToListaPragas(categoria: '2');
+        Navigator.of(context).pushNamed('/pragas', arguments: {'categoria': '2'});
         break;
       case 'plantas':
         debugPrint('Navegando para: Lista de Pragas (Plantas)');
-        navigationService.navigateToListaPragas(categoria: '3');
+        Navigator.of(context).pushNamed('/pragas', arguments: {'categoria': '3'});
         break;
       default:
         debugPrint('Navegando para: Lista de Pragas (Default)');
-        navigationService.navigateToListaPragas();
+        Navigator.of(context).pushNamed('/pragas');
     }
   }
 }

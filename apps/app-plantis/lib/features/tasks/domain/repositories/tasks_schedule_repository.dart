@@ -13,10 +13,11 @@ import '../entities/task.dart' as task_entity;
 /// - createRecurring - Generate next recurring task
 /// - markOverdue - Mark task as overdue
 abstract class ITasksScheduleRepository {
-  /// Mark task as completed with optional notes
+  /// Mark task as completed with optional notes and custom next due date
   Future<Either<Failure, task_entity.Task>> completeTask(
     String id, {
     String? notes,
+    DateTime? nextDueDate,
   });
 
   /// Retrieve all overdue tasks

@@ -137,47 +137,6 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
     ref.read(riverpod_plants.plantsNotifierProvider.notifier).setSortBy(sort);
   }
 
-  void _showSortOptions(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => Consumer(
-        builder: (BuildContext context, WidgetRef ref, Widget? _) {
-          final sortManager = ref.watch(plantsSortManagerProvider);
-          final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
-          return plantsAsync.when(
-            data: (state) => Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Ordenar por',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  ...SortBy.values.map(
-                    (sort) => ListTile(
-                      title: Text(sortManager.getSortTitle(sort)),
-                      trailing:
-                          state.sortBy == sort ? const Icon(Icons.check) : null,
-                      onTap: () {
-                        _onSortChanged(sort);
-                        Navigator.of(context).pop();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (_, __) => const SizedBox(),
-          );
-        },
-      ),
-    );
-  }
-
   void _scrollToTop() {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
@@ -492,9 +451,57 @@ class _PlantsListPageState extends ConsumerState<PlantsListPage> {
   Widget _buildSortButton(BuildContext context) {
     return Consumer(
       builder: (BuildContext context, WidgetRef ref, Widget? child) {
-        return GestureDetector(
-          onTap: () => _showSortOptions(context),
-          child: Container(
+        final sortManager = ref.watch(plantsSortManagerProvider);
+        final plantsAsync = ref.watch(riverpod_plants.plantsNotifierProvider);
+
+        return plantsAsync.maybeWhen(
+          data: (state) => PopupMenuButton<SortBy>(
+            tooltip: 'Ordenar por',
+            offset: const Offset(0, 40),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            onSelected: _onSortChanged,
+            itemBuilder: (context) => SortBy.values.map((sort) {
+              final isSelected = state.sortBy == sort;
+              return PopupMenuItem<SortBy>(
+                value: sort,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        sortManager.getSortTitle(sort),
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                          color: isSelected 
+                              ? Theme.of(context).colorScheme.primary 
+                              : null,
+                        ),
+                      ),
+                    ),
+                    if (isSelected)
+                      Icon(
+                        Icons.check,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                  ],
+                ),
+              );
+            }).toList(),
+            child: Container(
+              width: 36,
+              height: 36,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+              ),
+              child: const Icon(Icons.sort, color: Colors.white, size: 18),
+            ),
+          ),
+          orElse: () => Container(
             width: 36,
             height: 36,
             margin: const EdgeInsets.only(right: 8),

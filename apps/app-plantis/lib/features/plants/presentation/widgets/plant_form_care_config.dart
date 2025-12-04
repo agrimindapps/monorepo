@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/state/plant_form_state_notifier.dart';
@@ -13,72 +14,41 @@ class PlantFormCareConfig extends ConsumerStatefulWidget {
 }
 
 class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
-  final List<String> _intervalOptions = [
-    '1 dia',
-    '2 dias',
-    '3 dias',
-    '1 semana',
-    '2 semanas',
-    '1 mês',
-    '2 meses',
-    '3 meses',
-    '6 meses',
-    '1 ano',
-  ];
-
-  int _getIntervalDays(String interval) {
-    switch (interval) {
-      case '1 dia':
-        return 1;
-      case '2 dias':
-        return 2;
-      case '3 dias':
-        return 3;
-      case '1 semana':
-        return 7;
-      case '2 semanas':
-        return 14;
-      case '1 mês':
-        return 30;
-      case '2 meses':
-        return 60;
-      case '3 meses':
-        return 90;
-      case '6 meses':
-        return 180;
-      case '1 ano':
-        return 365;
-      default:
-        return 7;
-    }
+  /// Converte dias em texto legível formatado
+  String _formatIntervalText(int days) {
+    if (days == 1) return '1 dia';
+    if (days < 7) return '$days dias';
+    if (days == 7) return '1 semana';
+    if (days == 14) return '2 semanas';
+    if (days == 30) return '1 mês';
+    if (days == 60) return '2 meses';
+    if (days == 90) return '3 meses';
+    if (days == 180) return '6 meses';
+    if (days == 365) return '1 ano';
+    return '$days dias';
   }
 
   String _getIntervalText(int? days) {
-    if (days == null) return _intervalOptions[3]; // Default: 1 semana
-    switch (days) {
-      case 1:
-        return '1 dia';
-      case 2:
-        return '2 dias';
-      case 3:
-        return '3 dias';
-      case 7:
-        return '1 semana';
-      case 14:
-        return '2 semanas';
-      case 30:
-        return '1 mês';
-      case 60:
-        return '2 meses';
-      case 90:
-        return '3 meses';
-      case 180:
-        return '6 meses';
-      case 365:
-        return '1 ano';
-      default:
-        return '1 semana';
+    if (days == null) return _formatIntervalText(7); // Default: 1 semana
+    return _formatIntervalText(days);
+  }
+
+  int _getIntervalDays(String interval) {
+    // Extrai o número de dias do texto formatado
+    final match = RegExp(r'(\d+)').firstMatch(interval);
+    if (match == null) return 7; // default
+
+    final num = int.tryParse(match.group(1)!) ?? 7;
+
+    // Converte unidades para dias
+    if (interval.contains('semana')) {
+      return num * 7;
+    } else if (interval.contains('mês') || interval.contains('meses')) {
+      return num * 30;
+    } else if (interval.contains('ano')) {
+      return num * 365;
     }
+    return num; // já está em dias
   }
 
   @override
@@ -489,43 +459,37 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
     String currentValue,
     ValueChanged<String> onChanged,
   ) {
-    showModalBottomSheet<void>(
-      context: context,
-      builder: (context) => Container(
-        height: 300,
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Text(
-              'Selecionar Intervalo',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _intervalOptions.length,
-                itemBuilder: (context, index) {
-                  final option = _intervalOptions[index];
-                  final isSelected = option == currentValue;
+    // Extrai o número de dias do texto atual
+    int currentDays = 7; // default
+    final match = RegExp(r'(\d+)').firstMatch(currentValue);
+    if (match != null) {
+      final num = int.tryParse(match.group(1)!);
+      if (num != null) {
+        // Converte unidades para dias
+        if (currentValue.contains('semana')) {
+          currentDays = num * 7;
+        } else if (currentValue.contains('mês') || currentValue.contains('meses')) {
+          currentDays = num * 30;
+        } else if (currentValue.contains('ano')) {
+          currentDays = num * 365;
+        } else {
+          currentDays = num;
+        }
+      }
+    }
+    currentDays = currentDays.clamp(1, 365);
 
-                  return ListTile(
-                    title: Text(option),
-                    trailing: isSelected ? const Icon(Icons.check) : null,
-                    selected: isSelected,
-                    onTap: () {
-                      onChanged(option);
-                      Navigator.of(context).pop();
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+    showDialog<int>(
+      context: context,
+      builder: (context) => _IntervalPickerDialog(
+        initialDays: currentDays,
+        formatIntervalText: _formatIntervalText,
       ),
-    );
+    ).then((selectedDays) {
+      if (selectedDays != null) {
+        onChanged(_formatIntervalText(selectedDays));
+      }
+    });
   }
 
   void _showDatePicker(
@@ -575,5 +539,155 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
     ];
 
     return '${date.day} ${months[date.month - 1]}';
+  }
+}
+
+/// Dialog central com CupertinoPicker para seleção de intervalo (estilo iOS)
+class _IntervalPickerDialog extends StatefulWidget {
+  final int initialDays;
+  final String Function(int) formatIntervalText;
+
+  const _IntervalPickerDialog({
+    required this.initialDays,
+    required this.formatIntervalText,
+  });
+
+  @override
+  State<_IntervalPickerDialog> createState() => _IntervalPickerDialogState();
+}
+
+class _IntervalPickerDialogState extends State<_IntervalPickerDialog> {
+  late int _selectedDays;
+  late FixedExtentScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDays = widget.initialDays.clamp(1, 365);
+    // O índice é days - 1 porque o array começa em 0 mas os dias começam em 1
+    _scrollController = FixedExtentScrollController(
+      initialItem: _selectedDays - 1,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 320),
+        child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Título
+            Text(
+              'Selecionar Intervalo',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Texto formatado do intervalo selecionado
+            Text(
+              widget.formatIntervalText(_selectedDays),
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: PlantisColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // CupertinoPicker
+            SizedBox(
+              height: 200,
+              child: CupertinoPicker(
+                scrollController: _scrollController,
+                itemExtent: 44,
+                diameterRatio: 1.2,
+                selectionOverlay: Container(
+                  decoration: BoxDecoration(
+                    border: Border.symmetric(
+                      horizontal: BorderSide(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                onSelectedItemChanged: (index) {
+                  setState(() {
+                    _selectedDays = index + 1; // índice 0 = 1 dia
+                  });
+                },
+                children: List.generate(365, (index) {
+                  final days = index + 1;
+                  final isSelected = days == _selectedDays;
+                  return Center(
+                    child: Text(
+                      '$days ${days == 1 ? 'dia' : 'dias'}',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        color: isSelected
+                            ? PlantisColors.primary
+                            : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Botões
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      side: BorderSide(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: const Text('Cancelar'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: () => Navigator.of(context).pop(_selectedDays),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: PlantisColors.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Confirmar'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      ),
+    );
   }
 }

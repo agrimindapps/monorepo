@@ -13,7 +13,11 @@ class CompleteTaskUseCase
   Future<Either<Failure, task_entity.Task>> call(
     CompleteTaskParams params,
   ) async {
-    return await repository.completeTask(params.taskId, notes: params.notes);
+    return await repository.completeTask(
+      params.taskId,
+      notes: params.notes,
+      nextDueDate: params.nextDueDate,
+    );
   }
 }
 
@@ -31,8 +35,13 @@ class DeleteTaskUseCase implements UseCase<void, DeleteTaskParams> {
 class CompleteTaskParams {
   final String taskId;
   final String? notes;
+  final DateTime? nextDueDate;
 
-  CompleteTaskParams({required this.taskId, this.notes});
+  CompleteTaskParams({
+    required this.taskId,
+    this.notes,
+    this.nextDueDate,
+  });
 }
 
 class DeleteTaskParams {

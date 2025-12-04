@@ -23,6 +23,9 @@ class _DeviceManagementDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final settingsState = ref.watch(settingsNotifierProvider);
+    // Usar o limite centralizado do provider
+    final maxDevices = ref.watch(maxDevicesProvider);
+    final effectiveMaxDevices = maxDevices == -1 ? 3 : maxDevices;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -70,7 +73,7 @@ class _DeviceManagementDialogState
                         const SizedBox(height: 4),
                         settingsState.when<Widget>(
                           data: (SettingsState state) => Text(
-                            '${state.activeDeviceCount} de 3 dispositivos ativos',
+                            '${state.activeDeviceCount} de $effectiveMaxDevices dispositivos ativos',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: Colors.white.withValues(alpha: 0.9),
                             ),
@@ -92,7 +95,7 @@ class _DeviceManagementDialogState
             // Body
             Flexible(
               child: settingsState.when<Widget>(
-                data: (SettingsState state) => _buildDeviceList(context, state),
+                data: (SettingsState state) => _buildDeviceList(context, state, effectiveMaxDevices),
                 loading: () => const Center(
                   child: Padding(
                     padding: EdgeInsets.all(40),
@@ -135,7 +138,7 @@ class _DeviceManagementDialogState
     );
   }
 
-  Widget _buildDeviceList(BuildContext context, SettingsState state) {
+  Widget _buildDeviceList(BuildContext context, SettingsState state, int maxDevices) {
     final currentDevice = state.currentDevice;
     final otherDevices = state.connectedDevices
         .where((DeviceEntity d) => d.uuid != currentDevice?.uuid)
@@ -215,7 +218,7 @@ class _DeviceManagementDialogState
 
           // Info Footer
           const SizedBox(height: 16),
-          _buildInfoFooter(context),
+          _buildInfoFooter(context, maxDevices),
         ],
       ),
     );
@@ -231,7 +234,7 @@ class _DeviceManagementDialogState
     );
   }
 
-  Widget _buildInfoFooter(BuildContext context) {
+  Widget _buildInfoFooter(BuildContext context, int maxDevices) {
     final theme = Theme.of(context);
 
     return Container(
@@ -251,7 +254,7 @@ class _DeviceManagementDialogState
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Você pode conectar até 3 dispositivos. Remova dispositivos antigos para liberar espaço.',
+              'Você pode conectar até $maxDevices dispositivos. Remova dispositivos antigos para liberar espaço.',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.blue.shade900,
               ),

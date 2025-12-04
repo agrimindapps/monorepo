@@ -22,6 +22,9 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         print('🔍 getCommentsForPlant - plantId: $plantId');
       }
       
+      // Try to sync from Firebase first (non-blocking if fails)
+      await _syncCommentsFromFirebase(plantId);
+      
       // Get comments from local Drift database
       final comments = await _driftRepository.getCommentsByPlant(plantId);
       
@@ -35,6 +38,71 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         print('❌ Error getting comments: $e');
       }
       return Left(CacheFailure('Failed to get comments: $e'));
+    }
+  }
+
+  /// Syncs comments from Firebase to local Drift database
+  Future<void> _syncCommentsFromFirebase(String plantId) async {
+    try {
+      if (kDebugMode) {
+        print('☁️ Syncing comments from Firebase for plant $plantId');
+      }
+      
+      // Get comments from Firebase using UnifiedSyncManager
+      final result = await UnifiedSyncManager.instance.findWhere<ComentarioModel>(
+        _appName,
+        {'plantId': plantId},
+      );
+      
+      await result.fold(
+        (Failure failure) async {
+          if (kDebugMode) {
+            print('⚠️ Firebase sync failed (using local data): ${failure.message}');
+          }
+        },
+        (List<ComentarioModel> remoteComments) async {
+          if (kDebugMode) {
+            print('☁️ Found ${remoteComments.length} comments in Firebase');
+          }
+          
+          // Merge remote comments with local ones
+          for (final remoteComment in remoteComments) {
+            // Skip deleted comments
+            if (remoteComment.isDeleted) {
+              // If exists locally, delete it
+              await _driftRepository.softDeleteComment(remoteComment.id);
+              continue;
+            }
+            
+            // Check if comment exists locally
+            final localComment = await _driftRepository.getCommentById(remoteComment.id);
+            
+            if (localComment == null) {
+              // Insert new comment from Firebase
+              await _driftRepository.insertComment(remoteComment);
+              if (kDebugMode) {
+                print('📥 Inserted comment from Firebase: ${remoteComment.id}');
+              }
+            } else {
+              // Update if remote is newer
+              final remoteUpdated = remoteComment.updatedAt ?? remoteComment.createdAt ?? DateTime.now();
+              final localUpdated = localComment.updatedAt ?? localComment.createdAt ?? DateTime.now();
+              
+              if (remoteUpdated.isAfter(localUpdated)) {
+                await _driftRepository.updateComment(remoteComment);
+                if (kDebugMode) {
+                  print('🔄 Updated comment from Firebase: ${remoteComment.id}');
+                }
+              }
+            }
+          }
+        },
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('⚠️ Error syncing from Firebase (using local data): $e');
+      }
+      // Don't throw - just use local data
     }
   }
 
@@ -139,15 +207,66 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         print('🗑️ Deleting comment: $commentId');
       }
 
-      final result = await UnifiedSyncManager.instance.delete<ComentarioModel>(
-        _appName,
-        commentId,
-      );
-      
-      return result;
+      // Get existing comment from Drift
+      final existingComment = await _driftRepository.getCommentById(commentId);
+      if (existingComment == null) {
+        if (kDebugMode) {
+          print('❌ Comment not found in local database: $commentId');
+        }
+        return Left(NotFoundFailure('Comentário não encontrado: $commentId'));
+      }
+
+      // Soft delete in local Drift database
+      final deleted = await _driftRepository.softDeleteComment(commentId);
+      if (!deleted) {
+        return const Left(CacheFailure('Falha ao deletar comentário localmente'));
+      }
+
+      if (kDebugMode) {
+        print('✅ Comment soft deleted locally: $commentId');
+      }
+
+      // Sync deletion to Firebase in background
+      _syncDeleteToFirebaseInBackground(existingComment);
+
+      return const Right(null);
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error deleting comment: $e');
+      }
       return Left(CacheFailure('Failed to delete comment: $e'));
     }
+  }
+
+  /// Syncs comment deletion to Firebase in background without blocking
+  void _syncDeleteToFirebaseInBackground(ComentarioModel comment) {
+    Future.microtask(() async {
+      try {
+        final deletedComment = comment.markAsDeleted();
+        final result = await UnifiedSyncManager.instance.update<ComentarioModel>(
+          _appName,
+          comment.id,
+          deletedComment,
+        );
+
+        result.fold(
+          (failure) {
+            if (kDebugMode) {
+              print('⚠️ Firebase delete sync failed (will retry): ${failure.message}');
+            }
+          },
+          (_) {
+            if (kDebugMode) {
+              print('☁️ Comment deletion synced to Firebase: ${comment.id}');
+            }
+          },
+        );
+      } catch (e) {
+        if (kDebugMode) {
+          print('⚠️ Firebase delete sync error (will retry): $e');
+        }
+      }
+    });
   }
 
   @override

@@ -75,14 +75,16 @@ class PragasCulturaPageViewModel extends _$PragasCulturaPageViewModel {
 
   /// Carrega pragas para uma cultura
   Future<void> loadPragasForCultura(String culturaId) async {
-    state = AsyncValue.data(state.value!.copyWith(isLoading: true, erro: null));
+    final currentState = state.value ?? const PragasCulturaPageState();
+    state = AsyncValue.data(currentState.copyWith(isLoading: true, erro: null));
 
     try {
       final pragas = await dataService.getPragasForCultura(culturaId);
       _applyFiltersAndSort(pragas);
     } catch (e) {
+      final errorState = state.value ?? const PragasCulturaPageState();
       state = AsyncValue.data(
-        state.value!.copyWith(
+        errorState.copyWith(
           isLoading: false,
           erro: errorService.getLoadPragasError(e.toString()),
         ),
@@ -94,10 +96,12 @@ class PragasCulturaPageViewModel extends _$PragasCulturaPageViewModel {
   Future<void> loadCulturas() async {
     try {
       final culturas = await dataService.getAllCulturas();
-      state = AsyncValue.data(state.value!.copyWith(culturas: culturas));
+      final currentState = state.value ?? const PragasCulturaPageState();
+      state = AsyncValue.data(currentState.copyWith(culturas: culturas));
     } catch (e) {
+      final errorState = state.value ?? const PragasCulturaPageState();
       state = AsyncValue.data(
-        state.value!.copyWith(
+        errorState.copyWith(
           erro: errorService.getLoadCulturasError(e.toString()),
         ),
       );

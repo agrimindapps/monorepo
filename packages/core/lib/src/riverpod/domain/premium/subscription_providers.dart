@@ -304,6 +304,7 @@ class FeatureLimits {
             'expenses': 30,
             'data_export': 0, // Premium only
             'advanced_analytics': 0,
+            'devices': 3, // Limite de 3 dispositivos mobile (web não conta)
           },
         );
       case 'plantis':
@@ -316,6 +317,7 @@ class FeatureLimits {
             'photo_storage': 20,
             'advanced_care_tips': 0,
             'plant_identification': 3,
+            'devices': 3, // Limite de 3 dispositivos mobile (web não conta)
           },
         );
       case 'receituagro':
@@ -327,6 +329,7 @@ class FeatureLimits {
             'offline_access': 0,
             'expert_consultation': 0,
             'detailed_reports': 0,
+            'devices': 3, // Limite de 3 dispositivos mobile (web não conta)
           },
         );
       default:

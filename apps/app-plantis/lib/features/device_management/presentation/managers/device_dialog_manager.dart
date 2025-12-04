@@ -37,44 +37,45 @@ class DeviceDialogManager {
   }
 
   /// Shows help dialog about device management
-  Future<void> showHelpDialog(BuildContext context) {
+  /// [maxDevices] - Maximum number of allowed devices (default: 3)
+  Future<void> showHelpDialog(BuildContext context, {int maxDevices = 3}) {
     return showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Ajuda - Gerenciamento de Dispositivos'),
-        content: const SingleChildScrollView(
+        content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              const Text(
                 'O que são dispositivos registrados?',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 'São os aparelhos (celular, tablet, computador) onde você fez login no Plantis. '
-                'Você pode ter até 3 dispositivos ativos simultaneamente.',
+                'Você pode ter até $maxDevices dispositivos ativos simultaneamente.',
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 'Por que revogar um dispositivo?',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-              SizedBox(height: 8),
-              Text(
+              const SizedBox(height: 8),
+              const Text(
                 '• Quando perder ou trocar de aparelho\n'
                 '• Para liberar espaço para um novo dispositivo\n'
                 '• Por questões de segurança\n'
                 '• Quando não usar mais um aparelho',
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 'O que acontece ao revogar?',
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
-              SizedBox(height: 8),
-              Text(
+              const SizedBox(height: 8),
+              const Text(
                 'O dispositivo revogado será desconectado automaticamente e precisará '
                 'fazer login novamente para usar o Plantis.',
               ),

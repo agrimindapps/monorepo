@@ -305,6 +305,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
     String taskId, {
     required DateTime completionDate,
     String? notes,
+    DateTime? nextDueDate,
   }) async {
     try {
       final tasks = List<PlantTask>.from(getTasksForPlant(plantId));
@@ -326,9 +327,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         await _repository!.updatePlantTask(completedTask);
       }
 
+      // Usa a data informada pelo usuário ou calcula baseado na data de conclusão
       final nextTask = _taskGenerationService.generateNextTask(
         completedTask,
         completionDate: completionDate,
+        customNextDueDate: nextDueDate,
       );
       tasks.add(nextTask);
 
@@ -346,6 +349,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         print(
           '✅ PlantTaskProvider: Tarefa $taskId concluída em ${completionDate.day}/${completionDate.month}/${completionDate.year}',
         );
+        if (nextDueDate != null) {
+          print(
+            '   📅 Próxima tarefa agendada para ${nextDueDate.day}/${nextDueDate.month}/${nextDueDate.year}',
+          );
+        }
       }
     } catch (e) {
       state = state.copyWith(errorMessage: 'Erro ao completar tarefa: $e');

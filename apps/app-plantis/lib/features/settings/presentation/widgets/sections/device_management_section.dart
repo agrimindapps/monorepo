@@ -14,12 +14,14 @@ class DeviceManagementSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final settingsState = ref.watch(settingsNotifierProvider);
+    // Usar o limite centralizado do provider
+    final maxDevices = ref.watch(maxDevicesProvider);
+    final effectiveMaxDevices = maxDevices == -1 ? 3 : maxDevices;
 
     return settingsState.when<Widget>(
       data: (SettingsState state) {
         final deviceCount = state.activeDeviceCount;
-        const maxDevices = 3;
-        final progress = deviceCount / maxDevices;
+        final progress = deviceCount / effectiveMaxDevices;
 
         return InkWell(
           onTap: () => _showDeviceManagementDialog(context, ref),
@@ -55,7 +57,7 @@ class DeviceManagementSection extends ConsumerWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '$deviceCount de $maxDevices dispositivos ativos',
+                        '$deviceCount de $effectiveMaxDevices dispositivos ativos',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -81,7 +83,7 @@ class DeviceManagementSection extends ConsumerWidget {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '$deviceCount/$maxDevices',
+                            '$deviceCount/$effectiveMaxDevices',
                             style: theme.textTheme.labelSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: _getProgressColor(progress),

@@ -248,7 +248,7 @@ class PlantInfoSection extends ConsumerWidget {
               Text(
                 plant.notes?.isNotEmpty == true
                     ? plant.notes!
-                    : 'Nenhuma observação registrada para esta planta.',
+                    : 'Nenhum comentário registrado para esta planta.',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color:
                       plant.notes?.isNotEmpty == true

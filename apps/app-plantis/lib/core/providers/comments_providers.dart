@@ -288,6 +288,16 @@ class CommentsNotifier extends _$CommentsNotifier {
     state = AsyncData(currentState.copyWith(clearError: true));
   }
 
+  /// Force refresh comments for current plant (used by realtime sync)
+  Future<void> refresh() async {
+    final currentState = state.value;
+    if (currentState?.currentPlantId != null) {
+      // Clear cache and reload
+      state = AsyncData(currentState!.copyWith(comments: [], isLoading: true));
+      await loadComments(currentState.currentPlantId!);
+    }
+  }
+
   /// Get comment by ID
   ComentarioModel? getCommentById(String commentId) {
     final currentState = state.value;

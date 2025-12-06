@@ -1,16 +1,16 @@
 import 'dart:async';
 
-import 'package:core/core.dart'
-    hide ValidateDeviceUseCase, DeviceValidationResult;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
-import '../../domain/usecases/validate_device_usecase.dart';
+import '../../data/models/device_model.dart';
 
 /// Interceptor para validação automática de dispositivos
 /// Monitora mudanças de autenticação e valida dispositivos automaticamente
+/// Usa DeviceManagementService do core para todas as operações
 class DeviceValidationInterceptor {
-  final ValidateDeviceUseCase _validateDeviceUseCase;
+  final DeviceManagementService _deviceService;
   final AuthStateNotifier _authStateNotifier;
 
   StreamSubscription<UserEntity?>? _userSubscription;
@@ -20,10 +20,10 @@ class DeviceValidationInterceptor {
   bool _hasValidatedThisSession = false;
 
   DeviceValidationInterceptor({
-    required ValidateDeviceUseCase validateDeviceUseCase,
+    required DeviceManagementService deviceService,
     required AuthStateNotifier authStateNotifier,
-  }) : _validateDeviceUseCase = validateDeviceUseCase,
-       _authStateNotifier = authStateNotifier {
+  })  : _deviceService = deviceService,
+        _authStateNotifier = authStateNotifier {
     _startListening();
   }
 
@@ -77,7 +77,16 @@ class DeviceValidationInterceptor {
         debugPrint('🔐 DeviceInterceptor: Auto-validating device after login');
       }
 
-      final result = await _validateDeviceUseCase();
+      final currentDevice = await DeviceModel.fromCurrentDevice();
+      if (currentDevice == null) {
+        if (kDebugMode) {
+          debugPrint('🔐 DeviceInterceptor: Platform not supported');
+        }
+        _hasValidatedThisSession = true;
+        return;
+      }
+
+      final result = await _deviceService.validateDevice(currentDevice.toEntity());
 
       result.fold(
         (Failure failure) {
@@ -90,31 +99,13 @@ class DeviceValidationInterceptor {
             _notifyDeviceLimitExceeded();
           }
         },
-        (DeviceValidationResult validationResult) {
-          if (validationResult.isValid) {
-            if (kDebugMode) {
-              debugPrint(
-                '✅ DeviceInterceptor: Device auto-validated successfully',
-              );
-            }
-            _hasValidatedThisSession = true;
-          } else {
-            if (kDebugMode) {
-              debugPrint(
-                '⚠️ DeviceInterceptor: Device validation failed - ${validationResult.message}',
-              );
-            }
-            switch (validationResult.status) {
-              case DeviceValidationStatus.exceeded:
-                _notifyDeviceLimitExceeded();
-                break;
-              case DeviceValidationStatus.invalid:
-                _notifyDeviceInvalid();
-                break;
-              default:
-                break;
-            }
+        (DeviceEntity validatedDevice) {
+          if (kDebugMode) {
+            debugPrint(
+              '✅ DeviceInterceptor: Device auto-validated successfully',
+            );
           }
+          _hasValidatedThisSession = true;
         },
       );
     } catch (e) {
@@ -169,7 +160,12 @@ class DeviceValidationInterceptor {
         debugPrint('🔐 DeviceInterceptor: Force validating device');
       }
 
-      final result = await _validateDeviceUseCase();
+      final currentDevice = await DeviceModel.fromCurrentDevice();
+      if (currentDevice == null) {
+        return DeviceValidationResult.invalid('Plataforma não suportada');
+      }
+
+      final result = await _deviceService.validateDevice(currentDevice.toEntity());
 
       return result.fold(
         (Failure failure) {
@@ -178,16 +174,14 @@ class DeviceValidationInterceptor {
               '❌ DeviceInterceptor: Force validation failed - ${failure.message}',
             );
           }
-          return null;
+          return DeviceValidationResult.invalid(failure.message);
         },
-        (DeviceValidationResult validationResult) {
-          if (validationResult.isValid) {
-            _hasValidatedThisSession = true;
-            if (kDebugMode) {
-              debugPrint('✅ DeviceInterceptor: Force validation successful');
-            }
+        (DeviceEntity validatedDevice) {
+          _hasValidatedThisSession = true;
+          if (kDebugMode) {
+            debugPrint('✅ DeviceInterceptor: Force validation successful');
           }
-          return validationResult;
+          return DeviceValidationResult.valid();
         },
       );
     } catch (e) {

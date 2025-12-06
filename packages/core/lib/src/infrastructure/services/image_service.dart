@@ -221,6 +221,8 @@ class ImageService {
     ImageSource source = ImageSource.gallery,
   }) async {
     return ResultUtils.tryExecuteAsync(() async {
+      debugPrint('📷 [ImageService] pickImage - Iniciando (source: $source)');
+      
       final XFile? xFile = await _picker.pickImage(
         source: source,
         maxWidth: config.maxWidth.toDouble(),
@@ -228,7 +230,10 @@ class ImageService {
         imageQuality: config.imageQuality,
       );
 
+      debugPrint('📷 [ImageService] pickImage - pickImage retornou: ${xFile != null ? "XFile válido" : "null"}');
+
       if (xFile == null) {
+        debugPrint('📷 [ImageService] pickImage - Nenhuma imagem selecionada/capturada');
         return Future.error(
           ValidationError(
             message: source == ImageSource.camera
@@ -238,23 +243,33 @@ class ImageService {
         );
       }
 
+      debugPrint('📷 [ImageService] pickImage - Convertendo XFile para PickedImage...');
+      debugPrint('📷 [ImageService] pickImage - XFile path: ${xFile.path}');
+      debugPrint('📷 [ImageService] pickImage - XFile name: ${xFile.name}');
+      
       final pickedImage = await PickedImage.fromXFile(xFile);
+      debugPrint('📷 [ImageService] pickImage - PickedImage criado: ${pickedImage.sizeInKB.toStringAsFixed(2)} KB');
+      
       final validationResult = validatePickedImage(pickedImage);
       if (validationResult.isError) {
+        debugPrint('📷 [ImageService] pickImage - Validação falhou: ${validationResult.error?.message}');
         return Future.error(validationResult.error!);
       }
 
+      debugPrint('📷 [ImageService] pickImage - Imagem válida, retornando');
       return pickedImage;
     });
   }
 
   /// Selecionar imagem da galeria
   Future<Result<PickedImage>> pickImageFromGallery() async {
+    debugPrint('📷 [ImageService] pickImageFromGallery - Chamando pickImage');
     return pickImage(source: ImageSource.gallery);
   }
 
   /// Capturar imagem da câmera
   Future<Result<PickedImage>> pickImageFromCamera() async {
+    debugPrint('📷 [ImageService] pickImageFromCamera - Chamando pickImage');
     return pickImage(source: ImageSource.camera);
   }
 

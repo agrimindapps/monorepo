@@ -2,19 +2,21 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide AuthState, Column, analyticsServiceProvider;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
 import '../services/device_identity_service.dart';
-import 'auth_state.dart' as local;
+import 'auth_state.dart';
 import 'core_providers.dart';
 
-/// AuthNotifier using StateNotifier pattern
+part 'auth_notifier.g.dart';
+
+/// AuthNotifier using AsyncNotifier pattern (Riverpod 3.0)
 /// Manages authentication state
-class AuthNotifier extends StateNotifier<local.AuthState> {
-  final Ref ref;
+@Riverpod(keepAlive: true)
+class AuthNotifier extends _$AuthNotifier {
   late final IAuthRepository _authRepository;
   late final DeviceIdentityService _deviceService;
   late final ReceitaAgroAnalyticsService _analytics;
@@ -22,43 +24,65 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
   StreamSubscription<UserEntity?>? _userSubscription;
 
-  AuthNotifier(this.ref) : super(const local.AuthState.initial()) {
-    _initializeAuthNotifier();
-  }
-
-  Future<void> _initializeAuthNotifier() async {
-    // Initialize dependencies from Riverpod providers
+  @override
+  Future<AuthState> build() async {
+    // Initialize dependencies
     _authRepository = ref.read(authRepositoryProvider);
     _deviceService = ref.read(deviceIdentityServiceProvider);
     _analytics = ref.read(analyticsServiceProvider);
-    _enhancedDeletionService = ref.read(
-      enhancedAccountDeletionServiceProvider,
-    );
+    _enhancedDeletionService = ref.read(enhancedAccountDeletionServiceProvider);
 
+    // Setup cleanup on dispose
+    ref.onDispose(() {
+      _userSubscription?.cancel();
+    });
+
+    // Initialize and return initial state
+    await _initializeAuthNotifier();
+    return state.value ?? const AuthState.initial();
+  }
+
+  Future<void> _initializeAuthNotifier() async {
     try {
+      state = const AsyncValue.data(AuthState.initial());
+
       _userSubscription = _authRepository.currentUser.listen(
         _handleUserStateChange,
         onError: (Object error) {
           if (kDebugMode) {
             print('❌ Auth Notifier: Error in user stream - $error');
           }
-          state = state.copyWith(errorMessage: 'Erro na autenticação: $error');
+          final currentState = state.value;
+          if (currentState != null) {
+            state = AsyncValue.data(
+              currentState.copyWith(errorMessage: 'Erro na autenticação: $error'),
+            );
+          }
         },
       );
       final isLoggedIn = await _authRepository.isLoggedIn;
-      if (isLoggedIn && state.currentUser != null) {
-        await _initializeUserSession(state.currentUser!);
+      final currentState = state.value;
+      if (isLoggedIn && currentState?.currentUser != null) {
+        await _initializeUserSession(currentState!.currentUser!);
       }
 
       if (kDebugMode) print('✅ Auth Notifier: Initialized successfully');
     } catch (e) {
       if (kDebugMode) print('❌ Auth Notifier: Initialization error - $e');
-      state = state.copyWith(errorMessage: 'Erro na inicialização: $e');
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(
+          currentState.copyWith(errorMessage: 'Erro na inicialização: $e'),
+        );
+      }
     }
   }
 
   Future<void> _handleUserStateChange(UserEntity? user) async {
-    final previousUser = state.currentUser;
+    final currentState = state.value;
+    if (currentState == null) return;
+
+    final previousUser = currentState.currentUser;
 
     if (user != null) {
       await _initializeUserSession(user);
@@ -78,8 +102,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   }
 
   Future<void> _initializeUserSession(UserEntity user) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
     try {
-      state = state.copyWith(isLoading: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true));
       final deviceId = await _deviceService.getDeviceUuid();
       final sessionData = UserSessionData(
         userId: user.id,
@@ -88,18 +115,24 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         isAnonymous: user.isAnonymous,
       );
       await _analytics.setUserId(user.id);
-      await _analytics.setUserProperties(
-        userType: _mapToAnalyticsUserType(state.userType),
-        isPremium: false,
-        deviceCount: 1,
-      );
 
-      state = state.copyWith(
-        currentUser: user,
-        sessionData: sessionData,
-        isLoading: false,
-        clearError: true,
-      );
+      final updatedState = state.value;
+      if (updatedState != null) {
+        await _analytics.setUserProperties(
+          userType: _mapToAnalyticsUserType(updatedState.userType),
+          isPremium: false,
+          deviceCount: 1,
+        );
+
+        state = AsyncValue.data(
+          updatedState.copyWith(
+            currentUser: user,
+            sessionData: sessionData,
+            isLoading: false,
+            clearError: true,
+          ),
+        );
+      }
 
       if (kDebugMode) {
         print(
@@ -107,10 +140,15 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         );
       }
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro na inicialização da sessão: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro na inicialização da sessão: $e',
+          ),
+        );
+      }
       if (kDebugMode) {
         print('❌ Auth Notifier: Session initialization error - $e');
       }
@@ -120,7 +158,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   Future<void> _clearUserSession() async {
     await _analytics.clearUser();
 
-    state = state.clearUser();
+    state = AsyncValue.data(const AuthState.initial());
 
     if (kDebugMode) print('✅ Auth Notifier: Session cleared');
   }
@@ -232,7 +270,10 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   }
 
   Future<bool> forceSyncUserData() async {
-    if (state.currentUser == null || state.currentUser!.isAnonymous) {
+    final currentState = state.value;
+    if (currentState == null) return false;
+
+    if (currentState.currentUser == null || currentState.currentUser!.isAnonymous) {
       if (kDebugMode) {
         print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
       }
@@ -243,14 +284,14 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       _analytics.trackEvent(
         'manual_sync_triggered',
         parameters: {
-          'user_id': state.currentUser!.id,
+          'user_id': currentState.currentUser!.id,
           'trigger_source': 'manual_button',
         },
       );
 
       if (kDebugMode) {
         print(
-          '🔄 Auth Notifier: Starting manual sync for user ${state.currentUser!.displayName}',
+          '🔄 Auth Notifier: Starting manual sync for user ${currentState.currentUser!.displayName}',
         );
       }
 
@@ -292,8 +333,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     required String email,
     required String password,
   }) async {
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
 
       _analytics.trackAuthFunnelStep('login_attempt');
 
@@ -304,24 +348,37 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: failure.message,
-          );
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: failure.message,
+              ),
+            );
+          }
           _analytics.trackError('auth_login', failure.message);
           return AuthResult.failure(failure.message);
         },
         (user) {
-          state = state.copyWith(isLoading: false);
+          final successState = state.value;
+          if (successState != null) {
+            state = AsyncValue.data(successState.copyWith(isLoading: false));
+          }
           _analytics.trackAuthFunnelStep('login_success');
           return AuthResult.success(user);
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro inesperado: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro inesperado: $e',
+          ),
+        );
+      }
       _analytics.trackError('auth_login', e.toString());
       return AuthResult.failure(e.toString());
     }
@@ -332,8 +389,11 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     required String password,
     required String displayName,
   }) async {
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
 
       _analytics.trackAuthFunnelStep('signup_attempt');
 
@@ -345,55 +405,84 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: failure.message,
-          );
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: failure.message,
+              ),
+            );
+          }
           _analytics.trackError('auth_signup', failure.message);
           return AuthResult.failure(failure.message);
         },
         (user) {
-          state = state.copyWith(isLoading: false);
+          final successState = state.value;
+          if (successState != null) {
+            state = AsyncValue.data(successState.copyWith(isLoading: false));
+          }
           _analytics.trackAuthFunnelStep('signup_success');
           _analytics.trackSignup('email', success: true);
           return AuthResult.success(user);
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro inesperado: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro inesperado: $e',
+          ),
+        );
+      }
       _analytics.trackError('auth_signup', e.toString());
       return AuthResult.failure(e.toString());
     }
   }
 
   Future<AuthResult> signInAnonymously() async {
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+
     try {
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
 
       final result = await _authRepository.signInAnonymously();
 
       return result.fold(
         (failure) {
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: failure.message,
-          );
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: failure.message,
+              ),
+            );
+          }
           return AuthResult.failure(failure.message);
         },
         (user) {
-          state = state.copyWith(isLoading: false);
+          final successState = state.value;
+          if (successState != null) {
+            state = AsyncValue.data(successState.copyWith(isLoading: false));
+          }
           _analytics.trackLogin('anonymous');
           return AuthResult.success(user);
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro inesperado: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro inesperado: $e',
+          ),
+        );
+      }
       return AuthResult.failure(e.toString());
     }
   }
@@ -403,10 +492,13 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
     required String password,
     required String displayName,
   }) async {
-    try {
-      state = state.copyWith(isLoading: true, clearError: true);
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado não inicializado');
 
-      if (!state.isAnonymous) {
+    try {
+      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
+
+      if (!currentState.isAnonymous) {
         return AuthResult.failure('Usuário não é anônimo');
       }
 
@@ -420,89 +512,145 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(
-            isLoading: false,
-            errorMessage: failure.message,
-          );
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: failure.message,
+              ),
+            );
+          }
           _analytics.trackError('auth_upgrade', failure.message);
           return AuthResult.failure(failure.message);
         },
         (user) {
-          state = state.copyWith(isLoading: false);
+          final successState = state.value;
+          if (successState != null) {
+            state = AsyncValue.data(successState.copyWith(isLoading: false));
+          }
           _analytics.trackAuthFunnelStep('anonymous_upgrade_success');
           return AuthResult.success(user);
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro inesperado: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro inesperado: $e',
+          ),
+        );
+      }
       _analytics.trackError('auth_upgrade', e.toString());
       return AuthResult.failure(e.toString());
     }
   }
 
   Future<void> signOut() async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
     try {
-      state = state.copyWith(isLoading: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
       final result = await _authRepository.signOut();
 
       result.fold(
-        (failure) => state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        ),
+        (failure) {
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: failure.message,
+              ),
+            );
+          }
+        },
         (_) async {
           // 🔐 SEGURANÇA: Limpar dados premium e sensíveis antes de criar novo usuário anônimo
           await _clearPremiumDataOnLogout();
 
           _analytics.trackLogout('user_action');
-          state = state.copyWith(isLoading: false);
+          final successState = state.value;
+          if (successState != null) {
+            state = AsyncValue.data(successState.copyWith(isLoading: false));
+          }
           await signInAnonymously();
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao fazer logout: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro ao fazer logout: $e',
+          ),
+        );
+      }
     }
   }
 
   Future<void> sendPasswordResetEmail({required String email}) async {
+    final currentState = state.value;
+    if (currentState == null) return;
+
     try {
-      state = state.copyWith(isLoading: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
       final result = await _authRepository.sendPasswordResetEmail(email: email);
 
       result.fold(
-        (failure) => state = state.copyWith(
-          isLoading: false,
-          errorMessage: failure.message,
-        ),
+        (failure) {
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: failure.message,
+              ),
+            );
+          }
+        },
         (_) {
-          state = state.copyWith(isLoading: false, clearError: true);
+          final successState = state.value;
+          if (successState != null) {
+            state = AsyncValue.data(
+              successState.copyWith(isLoading: false, clearError: true),
+            );
+          }
           _analytics.trackEvent('password_reset_sent');
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro ao enviar email: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro ao enviar email: $e',
+          ),
+        );
+      }
     }
   }
 
   Future<AuthResult> deleteAccount({String? password}) async {
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+
     try {
-      if (state.currentUser == null) {
-        state = state.copyWith(errorMessage: 'Nenhum usuário autenticado');
+      if (currentState.currentUser == null) {
+        state = AsyncValue.data(
+          currentState.copyWith(errorMessage: 'Nenhum usuário autenticado'),
+        );
         return AuthResult.failure('Nenhum usuário autenticado');
       }
 
-      state = state.copyWith(isLoading: true, clearError: true);
+      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
 
       if (kDebugMode) {
         debugPrint('🗑️ AuthNotifier: Iniciando exclusão de conta');
@@ -511,25 +659,30 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       _analytics.trackEvent(
         'account_deletion_attempt',
         parameters: {
-          'user_id': state.currentUser!.id,
-          'user_type': state.userType.toString(),
+          'user_id': currentState.currentUser!.id,
+          'user_type': currentState.userType.toString(),
         },
       );
 
       final result = await _enhancedDeletionService.deleteAccount(
         password: password ?? '',
-        userId: state.currentUser!.id,
-        isAnonymous: state.isAnonymous,
+        userId: currentState.currentUser!.id,
+        isAnonymous: currentState.isAnonymous,
       );
 
       return result.fold(
         (error) {
-          state = state.copyWith(isLoading: false, errorMessage: error.message);
+          final errorState = state.value;
+          if (errorState != null) {
+            state = AsyncValue.data(
+              errorState.copyWith(isLoading: false, errorMessage: error.message),
+            );
+          }
           _analytics.trackEvent(
             'account_deletion_failed',
             parameters: {
               'error': error.message,
-              'user_id': state.currentUser!.id,
+              'user_id': currentState.currentUser!.id,
             },
           );
 
@@ -545,7 +698,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
           if (deletionResult.isSuccess) {
             _analytics.trackEvent(
               'account_deletion_success',
-              parameters: {'user_id': state.currentUser!.id},
+              parameters: {'user_id': currentState.currentUser!.id},
             );
 
             if (kDebugMode) {
@@ -565,15 +718,20 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
               ),
             );
           } else {
-            state = state.copyWith(
-              isLoading: false,
-              errorMessage: deletionResult.userMessage,
-            );
+            final errorState = state.value;
+            if (errorState != null) {
+              state = AsyncValue.data(
+                errorState.copyWith(
+                  isLoading: false,
+                  errorMessage: deletionResult.userMessage,
+                ),
+              );
+            }
             _analytics.trackEvent(
               'account_deletion_failed',
               parameters: {
                 'error': deletionResult.userMessage,
-                'user_id': state.currentUser!.id,
+                'user_id': currentState.currentUser!.id,
               },
             );
 
@@ -582,10 +740,15 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         },
       );
     } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: 'Erro inesperado durante exclusão: $e',
-      );
+      final errorState = state.value;
+      if (errorState != null) {
+        state = AsyncValue.data(
+          errorState.copyWith(
+            isLoading: false,
+            errorMessage: 'Erro inesperado durante exclusão: $e',
+          ),
+        );
+      }
       _analytics.trackError('account_deletion_exception', e.toString());
 
       if (kDebugMode) {
@@ -597,7 +760,7 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   }
 
   void _performPostDeletionCleanup() {
-    state = state.clearUser();
+    state = AsyncValue.data(const AuthState.initial());
   }
 
   Future<Map<String, dynamic>?> getAccountDeletionPreview() async {
@@ -616,7 +779,12 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
 
       return result.fold(
         (failure) {
-          state = state.copyWith(errorMessage: failure.message);
+          final currentState = state.value;
+          if (currentState != null) {
+            state = AsyncValue.data(
+              currentState.copyWith(errorMessage: failure.message),
+            );
+          }
           if (kDebugMode) {
             debugPrint(
               '❌ AuthNotifier: Erro ao obter preview - ${failure.message}',
@@ -637,7 +805,12 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
         },
       );
     } catch (e) {
-      state = state.copyWith(errorMessage: 'Erro ao obter preview: $e');
+      final currentState = state.value;
+      if (currentState != null) {
+        state = AsyncValue.data(
+          currentState.copyWith(errorMessage: 'Erro ao obter preview: $e'),
+        );
+      }
       if (kDebugMode) {
         debugPrint('❌ AuthNotifier: Erro inesperado no preview - $e');
       }
@@ -646,21 +819,25 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
   }
 
   void clearError() {
-    state = state.copyWith(clearError: true);
+    final currentState = state.value;
+    if (currentState != null) {
+      state = AsyncValue.data(currentState.copyWith(clearError: true));
+    }
   }
 
   bool canAccessFeature(String feature) {
-    if (!state.isAuthenticated) return false;
+    final currentState = state.value;
+    if (currentState == null || !currentState.isAuthenticated) return false;
     return true;
   }
 
-  AnalyticsUserType _mapToAnalyticsUserType(local.UserType userType) {
+  AnalyticsUserType _mapToAnalyticsUserType(UserType userType) {
     switch (userType) {
-      case local.UserType.guest:
+      case UserType.guest:
         return AnalyticsUserType.guest;
-      case local.UserType.registered:
+      case UserType.registered:
         return AnalyticsUserType.registered;
-      case local.UserType.premium:
+      case UserType.premium:
         return AnalyticsUserType.premium;
     }
   }
@@ -787,12 +964,6 @@ class AuthNotifier extends StateNotifier<local.AuthState> {
       }
       _analytics.trackError('premium_data_cleanup_error', e.toString());
     }
-  }
-
-  @override
-  void dispose() {
-    _userSubscription?.cancel();
-    super.dispose();
   }
 }
 

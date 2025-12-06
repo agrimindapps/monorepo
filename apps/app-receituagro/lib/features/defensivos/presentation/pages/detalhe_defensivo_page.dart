@@ -6,13 +6,9 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/services/access_history_service.dart';
-import '../../../../core/services/diagnosticos_data_loader.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
-import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/diagnostico_repository.dart';
-import '../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
 import '../../domain/entities/defensivo_details_entity.dart';
 import '../providers/detalhe_defensivo_notifier.dart';
 import '../widgets/detalhe/comentarios_tab_widget.dart';
@@ -22,7 +18,7 @@ import '../widgets/detalhe/loading_error_widgets.dart';
 import '../widgets/detalhe/tecnologia_tab_widget.dart';
 
 /// Página refatorada de detalhes do defensivo
-/// REFATORAÇÃO COMPLETA: De 2.379 linhas para menos de 300
+/// REFATORAÇÃO COMPLETA: Usa provider unificado para diagnósticos
 /// Responsabilidade: coordenar widgets e providers usando Clean Architecture
 /// Migrated to Riverpod - uses ConsumerStatefulWidget
 class DetalheDefensivoPage extends ConsumerStatefulWidget {
@@ -82,214 +78,20 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
   Future<void> _loadData() async {
     try {
-      debugPrint('=== DETALHE DEFENSIVO: Iniciando carregamento ===');
-      debugPrint('Defensivo: ${widget.defensivoName}');
-      debugPrint('Fabricante: ${widget.fabricante}');
-      await _debugDiagnosticosStatus();
-
-      final startTime = DateTime.now();
-
+      // Carrega apenas os dados do defensivo
+      // Diagnósticos são carregados automaticamente pelo provider unificado
       await ref
           .read(detalheDefensivoProvider.notifier)
           .initializeData(widget.defensivoName, widget.fabricante);
+      
       final state = ref.read(detalheDefensivoProvider);
       state.whenData((data) async {
         if (data.defensivoData != null) {
-          final defensivoData = data.defensivoData!;
-          final defensivoIdReg = defensivoData.idDefensivo;
-          debugPrint('=== CARREGANDO DIAGNÓSTICOS ===');
-          debugPrint('ID Reg do defensivo encontrado: $defensivoIdReg');
-          debugPrint('Nome do defensivo: ${defensivoData.nomeComum}');
-          debugPrint('Fabricante: ${defensivoData.fabricante}');
-
-          debugPrint(
-            '🔍 [DETALHE_DEFENSIVO_PAGE] Chamando getDiagnosticosByDefensivo...',
-          );
-          debugPrint(
-            '🔍 [DETALHE_DEFENSIVO_PAGE] defensivoIdReg: $defensivoIdReg',
-          );
-          debugPrint(
-            '🔍 [DETALHE_DEFENSIVO_PAGE] nomeDefensivo: ${defensivoData.nomeComum}',
-          );
-
-          final notifier = ref.read(diagnosticosProvider.notifier);
-          debugPrint(
-            '🔍 [DETALHE_DEFENSIVO_PAGE] Notifier obtido: ${notifier.runtimeType}',
-          );
-
-          await notifier.getDiagnosticosByDefensivo(
-            defensivoIdReg,
-            nomeDefensivo: defensivoData.nomeComum,
-          );
-
-          debugPrint(
-            '✅ [DETALHE_DEFENSIVO_PAGE] getDiagnosticosByDefensivo concluído',
-          );
-
-          // Verificar estado após chamada
-          final stateAfter = ref.read(diagnosticosProvider);
-          stateAfter.whenData((stateData) {
-            debugPrint('📊 [DETALHE_DEFENSIVO_PAGE] Estado após chamada:');
-            debugPrint(
-              '   - allDiagnosticos: ${stateData.allDiagnosticos.length}',
-            );
-            debugPrint(
-              '   - filteredDiagnosticos: ${stateData.filteredDiagnosticos.length}',
-            );
-            debugPrint(
-              '   - contextoDefensivo: ${stateData.contextoDefensivo}',
-            );
-            debugPrint(
-              '   - diagnosticos (getter): ${stateData.diagnosticos.length}',
-            );
-          });
-          await _recordDefensivoAccess(defensivoData);
-
-          final endTime = DateTime.now();
-          final duration = endTime.difference(startTime);
-          debugPrint('=== CARREGAMENTO COMPLETO ===');
-          debugPrint('Tempo total: ${duration.inMilliseconds}ms');
-        } else {
-          debugPrint('⚠️ AVISO: Dados do defensivo não foram carregados!');
+          await _recordDefensivoAccess(data.defensivoData!);
         }
       });
     } catch (e) {
-      debugPrint('❌ ERRO ao carregar dados: $e');
-      debugPrint('Stack trace: ${StackTrace.current}');
-    }
-  }
-
-  /// Debug function para verificar status dos diagnósticos
-  Future<void> _debugDiagnosticosStatus() async {
-    try {
-      debugPrint('🔧 [FORCE DEBUG] Verificando status dos diagnósticos...');
-      final repository = ref.read(diagnosticoRepositoryProvider);
-      final result = await repository.getAll();
-      final allDiagnosticos = result;
-      debugPrint(
-        '📊 [FORCE DEBUG] Repository direto: ${allDiagnosticos.length} diagnósticos',
-      );
-
-      if (allDiagnosticos.isEmpty) {
-        debugPrint(
-          '⚠️ [FORCE DEBUG] Nenhum diagnóstico no repository, tentando forçar carregamento...',
-        );
-        debugPrint(
-          '🔄 [FORCE DEBUG] Chamando DiagnosticosDataLoader.loadDiagnosticosData()...',
-        );
-        await DiagnosticosDataLoader.loadDiagnosticosData(ref);
-        final newResult = await repository.getAll();
-        final newCount = newResult.length;
-        debugPrint(
-          '📊 [FORCE DEBUG] Após carregamento: $newCount diagnósticos',
-        );
-
-        if (newCount > 0) {
-          debugPrint('✅ [FORCE DEBUG] Carregamento bem-sucedido!');
-          final sampleResult = await repository.getAll();
-          final sample = sampleResult.take(3).toList();
-          for (int i = 0; i < sample.length; i++) {
-            final diag = sample[i];
-            debugPrint(
-              '[$i] SAMPLE: defensivoId="${diag.defensivoId}"',
-            );
-          }
-        } else {
-          debugPrint(
-            '❌ [FORCE DEBUG] Carregamento falhou - ainda 0 diagnósticos',
-          );
-        }
-      } else {
-        debugPrint(
-          '✅ [FORCE DEBUG] Repository já tem dados - verificando sample...',
-        );
-        final sample = allDiagnosticos.take(10).toList();
-        for (int i = 0; i < sample.length; i++) {
-          final diag = sample[i];
-          debugPrint(
-          '[$i] SAMPLE: defensivoId="${diag.defensivoId}", idReg="${diag.idReg}"',
-          );
-        }
-        debugPrint(
-          '🔍 [INVESTIGAÇÃO] Procurando diagnósticos para defensive atual...',
-        );
-      }
-      await _investigateIdPatterns(repository, allDiagnosticos);
-    } catch (e) {
-      debugPrint('❌ [FORCE DEBUG] Erro: $e');
-      debugPrint('Stack: ${StackTrace.current}');
-    }
-  }
-
-  /// Investigar padrões de ID e buscar correspondências
-  Future<void> _investigateIdPatterns(
-    DiagnosticoRepository repository,
-    List<dynamic> allDiagnosticos,
-  ) async {
-    try {
-      final state = ref.read(detalheDefensivoProvider);
-      Fitossanitario? defensivoData;
-      state.whenData((data) {
-        defensivoData = data.defensivoData;
-      });
-
-      if (defensivoData == null) return;
-
-      final defensivoId = defensivoData!.idDefensivo;
-      final defensivoNome = defensivoData!.displayName;
-
-      debugPrint('🔍 [INVESTIGAÇÃO] ===== ANÁLISE DE CORRESPONDÊNCIA =====');
-      debugPrint('Defensivo procurado:');
-      debugPrint('  - ID: "$defensivoId"');
-      debugPrint('  - Nome: "$defensivoNome"');
-      
-      // Usar idDefensivo (campo da entity) em vez de fkIdDefensivo
-      final exactMatches = allDiagnosticos
-          .where((d) => d.idDefensivo == defensivoId)
-          .toList();
-      debugPrint('Correspondências exatas por ID: ${exactMatches.length}');
-      final nameMatches = allDiagnosticos
-          .where(
-            (d) =>
-                d.nomeDefensivo != null &&
-                d.nomeDefensivo.toString().toLowerCase().contains(
-                  defensivoNome.toLowerCase(),
-                ),
-          )
-          .toList();
-      debugPrint('Correspondências por nome: ${nameMatches.length}');
-
-      if (nameMatches.isNotEmpty) {
-        debugPrint('🎯 [INVESTIGAÇÃO] ENCONTRADAS correspondências por nome:');
-        for (int i = 0; i < nameMatches.length && i < 5; i++) {
-          final match = nameMatches[i];
-          debugPrint('  [$i] idDefensivo: "${match.idDefensivo}"');
-          debugPrint('      nomeDefensivo: "${match.nomeDefensivo}"');
-          debugPrint('      nomeCultura: "${match.nomeCultura}"');
-        }
-      }
-      final allDefensivoIds = allDiagnosticos
-          .map((d) => d.idDefensivo?.toString() ?? '')
-          .where((id) => id.isNotEmpty)
-          .toSet()
-          .toList();
-
-      debugPrint('🔍 [INVESTIGAÇÃO] Padrões de idDefensivo (10 primeiros):');
-      for (int i = 0; i < allDefensivoIds.length && i < 10; i++) {
-        debugPrint(
-          '  [$i] "${allDefensivoIds[i]}" (${allDefensivoIds[i].length} chars)',
-        );
-      }
-
-      debugPrint('📊 [INVESTIGAÇÃO] Estatísticas:');
-      debugPrint('  - Total diagnósticos: ${allDiagnosticos.length}');
-      debugPrint('  - IDs únicos de defensivos: ${allDefensivoIds.length}');
-      debugPrint('  - Tamanho do ID procurado: ${defensivoId.length} chars');
-
-      debugPrint('🔍 [INVESTIGAÇÃO] ===== FIM DA ANÁLISE =====');
-    } catch (e) {
-      debugPrint('❌ [FORCE DEBUG] Erro: $e');
-      debugPrint('Stack: ${StackTrace.current}');
+      debugPrint('❌ [DETALHE_DEFENSIVO_PAGE] Erro ao carregar dados: $e');
     }
   }
 
@@ -304,10 +106,8 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
         ingrediente: defensivoData.displayIngredient,
         classe: defensivoData.displayClass,
       );
-
-      debugPrint('✅ Acesso registrado para: ${defensivoData.displayName}');
     } catch (e) {
-      debugPrint('❌ Erro ao registrar acesso: $e');
+      debugPrint('❌ [DETALHE_DEFENSIVO_PAGE] Erro ao registrar acesso: $e');
     }
   }
 

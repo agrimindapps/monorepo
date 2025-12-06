@@ -1,36 +1,71 @@
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/animal_base_entity.dart';
 import '../../domain/usecases/search_animals.dart' as search_use_case;
+import 'livestock_di_providers.dart';
+
+part 'livestock_search_provider.g.dart';
+
+/// State class for LivestockSearch
+class LivestockSearchState {
+  final bool isSearching;
+  final List<AnimalBaseEntity> searchResults;
+  final String searchQuery;
+  final String? errorMessage;
+
+  const LivestockSearchState({
+    this.isSearching = false,
+    this.searchResults = const [],
+    this.searchQuery = '',
+    this.errorMessage,
+  });
+
+  LivestockSearchState copyWith({
+    bool? isSearching,
+    List<AnimalBaseEntity>? searchResults,
+    String? searchQuery,
+    String? errorMessage,
+    bool clearError = false,
+    bool clearResults = false,
+  }) {
+    return LivestockSearchState(
+      isSearching: isSearching ?? this.isSearching,
+      searchResults: clearResults ? const [] : (searchResults ?? this.searchResults),
+      searchQuery: clearResults ? '' : (searchQuery ?? this.searchQuery),
+      errorMessage: (clearError || clearResults) ? null : (errorMessage ?? this.errorMessage),
+    );
+  }
+
+  bool get hasResults => searchResults.isNotEmpty;
+  int get totalResults => searchResults.length;
+}
 
 /// Provider especializado para busca e filtros de animais
 ///
 /// Responsabilidade única: Gerenciar busca e filtros de animais
 /// Seguindo Single Responsibility Principle
-class LivestockSearchProvider extends ChangeNotifier {
-  final search_use_case.SearchAnimalsUseCase _searchAnimals;
+@riverpod
+class LivestockSearchNotifier extends _$LivestockSearchNotifier {
+  search_use_case.SearchAnimalsUseCase get _searchAnimals => 
+      ref.read(searchAnimalsUseCaseProvider);
 
-  LivestockSearchProvider({
-    required search_use_case.SearchAnimalsUseCase searchAnimals,
-  }) : _searchAnimals = searchAnimals;
+  @override
+  LivestockSearchState build() {
+    return const LivestockSearchState();
+  }
 
-  bool _isSearching = false;
-  List<AnimalBaseEntity> _searchResults = [];
-  String _searchQuery = '';
-  String? _errorMessage;
-
-  bool get isSearching => _isSearching;
-  List<AnimalBaseEntity> get searchResults => _searchResults;
-  String get searchQuery => _searchQuery;
-  String? get errorMessage => _errorMessage;
-
-  bool get hasResults => _searchResults.isNotEmpty;
-  int get totalResults => _searchResults.length;
+  // Convenience getters for backward compatibility
+  bool get isSearching => state.isSearching;
+  List<AnimalBaseEntity> get searchResults => state.searchResults;
+  String get searchQuery => state.searchQuery;
+  String? get errorMessage => state.errorMessage;
+  bool get hasResults => state.hasResults;
+  int get totalResults => state.totalResults;
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
-    _searchQuery = query;
-    notifyListeners();
+    state = state.copyWith(searchQuery: query);
   }
 
   /// Busca unificada em todos os animais
@@ -40,53 +75,47 @@ class LivestockSearchProvider extends ChangeNotifier {
       return;
     }
 
-    _isSearching = true;
-    _errorMessage = null;
-    _searchQuery = query;
-    notifyListeners();
+    state = state.copyWith(
+      isSearching: true,
+      searchQuery: query,
+      clearError: true,
+    );
 
     final params = search_use_case.SearchAnimalsParams(query: query);
     final result = await _searchAnimals(params);
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isSearching: false,
+        );
         debugPrint(
-            'LivestockSearchProvider: Erro ao buscar animais - ${failure.message}');
+            'LivestockSearchNotifier: Erro ao buscar animais - ${failure.message}');
       },
       (results) {
-        _searchResults = results.allAnimals;
+        state = state.copyWith(
+          searchResults: results.allAnimals,
+          isSearching: false,
+        );
         debugPrint(
-            'LivestockSearchProvider: Resultados da busca - ${results.totalCount}');
+            'LivestockSearchNotifier: Resultados da busca - ${results.totalCount}');
       },
     );
-
-    _isSearching = false;
-    notifyListeners();
   }
 
   /// Limpa resultados de busca
   void clearSearchResults() {
-    _searchResults.clear();
-    _searchQuery = '';
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearResults: true);
   }
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Filtra resultados por tipo
   List<T> getResultsByType<T extends AnimalBaseEntity>() {
-    return _searchResults.whereType<T>().toList();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('LivestockSearchProvider: Disposed');
-    super.dispose();
+    return state.searchResults.whereType<T>().toList();
   }
 }

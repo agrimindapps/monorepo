@@ -1,81 +1,84 @@
-import 'package:core/core.dart'
-    hide
-        Column,
-        RevokeDeviceUseCase,
-        RevokeAllOtherDevicesUseCase,
-        GetUserDevicesUseCase,
-        ValidateDeviceUseCase;
+/// Device Management Providers for app-plantis
+/// 
+/// Este arquivo configura os providers de device management específicos do plantis,
+/// utilizando a implementação base do core package.
+/// 
+/// A lógica de negócio está toda no core. Aqui apenas:
+/// - Configuramos os overrides necessários para o plantis
+/// - Re-exportamos os providers do core para uso no app
+library;
+
+import 'package:core/core.dart' hide Column, connectivityServiceProvider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/providers/repository_providers.dart';
-import '../../../settings/data/datasources/device_local_datasource.dart';
-import '../../../settings/data/datasources/device_remote_datasource.dart';
-import '../../../settings/data/repositories/device_repository_impl.dart';
-import '../../domain/usecases/get_device_statistics_usecase.dart';
-import '../../domain/usecases/get_user_devices_usecase.dart';
-import '../../domain/usecases/revoke_device_usecase.dart';
-import '../../domain/usecases/validate_device_usecase.dart';
 
 part 'device_management_providers.g.dart';
 
+/// Provider para configuração de limites específica do plantis
+/// Override do deviceLimitConfigProvider do core
 @riverpod
-Future<DeviceLocalDataSource> deviceLocalDataSource(Ref ref) async {
-  final prefs = ref.watch(sharedPreferencesProvider);
-  return DeviceLocalDataSource(prefs);
-}
-
-@riverpod
-DeviceRemoteDataSource deviceRemoteDataSource(Ref ref) {
-  final firestore = ref.watch(firebaseFirestoreProvider);
-  return DeviceRemoteDataSource(firestore: firestore);
-}
-
-@riverpod
-Future<IDeviceRepository> deviceRepository(Ref ref) async {
-  final localDataSource = await ref.watch(deviceLocalDataSourceProvider.future);
-  final remoteDataSource = ref.watch(deviceRemoteDataSourceProvider);
-  final connectivityService = ref.watch(connectivityServiceProvider);
-
-  return DeviceRepositoryImpl(
-    localDataSource: localDataSource,
-    remoteDataSource: remoteDataSource,
-    connectivityService: connectivityService,
+DeviceLimitConfig plantisDeviceLimitConfig(Ref ref) {
+  return const DeviceLimitConfig(
+    maxMobileDevices: 3,
+    maxWebDevices: -1, // Web ilimitado
+    countWebInLimit: false, // Web não conta no limite
+    premiumMaxMobileDevices: 10,
+    allowEmulators: true,
   );
 }
 
+/// Provider para o DeviceManagementService configurado para o plantis
 @riverpod
-Future<GetUserDevicesUseCase> getUserDevicesUseCase(Ref ref) async {
-  final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(authStateNotifierProvider);
-  return GetUserDevicesUseCase(repository, authStateNotifier);
+DeviceManagementService plantisDeviceManagementService(Ref ref) {
+  final limitConfig = ref.watch(plantisDeviceLimitConfigProvider);
+  final firebaseDeviceService = FirebaseDeviceService(
+    limitConfig: limitConfig,
+  );
+  final authService = ref.watch(firebaseAuthServiceProvider);
+  final analyticsService = ref.watch(firebaseAnalyticsServiceProvider);
+  
+  // Usa FirebaseDeviceService como repository (implementa IDeviceRepository)
+  return DeviceManagementService(
+    firebaseDeviceService: firebaseDeviceService,
+    authService: authService,
+    analyticsService: analyticsService,
+    deviceRepository: firebaseDeviceService,
+  );
 }
 
+/// Provider para lista de dispositivos do usuário
 @riverpod
-Future<ValidateDeviceUseCase> validateDeviceUseCase(Ref ref) async {
-  final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(authStateNotifierProvider);
-  return ValidateDeviceUseCase(repository, authStateNotifier);
+Future<List<DeviceEntity>> plantisUserDevices(Ref ref) async {
+  final service = ref.watch(plantisDeviceManagementServiceProvider);
+  final result = await service.getUserDevices();
+  
+  return result.fold(
+    (failure) => [],
+    (devices) => devices,
+  );
 }
 
+/// Provider para verificar se pode adicionar mais dispositivos
 @riverpod
-Future<RevokeDeviceUseCase> revokeDeviceUseCase(Ref ref) async {
-  final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(authStateNotifierProvider);
-  return RevokeDeviceUseCase(repository, authStateNotifier);
+Future<bool> plantisCanAddMoreDevices(Ref ref) async {
+  final service = ref.watch(plantisDeviceManagementServiceProvider);
+  final result = await service.canAddMoreDevices();
+  
+  return result.fold(
+    (failure) => false,
+    (canAdd) => canAdd,
+  );
 }
 
+/// Provider para estatísticas de dispositivos
 @riverpod
-Future<RevokeAllOtherDevicesUseCase> revokeAllOtherDevicesUseCase(
-    Ref ref) async {
-  final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(authStateNotifierProvider);
-  return RevokeAllOtherDevicesUseCase(repository, authStateNotifier);
-}
-
-@riverpod
-Future<GetDeviceStatisticsUseCase> getDeviceStatisticsUseCase(Ref ref) async {
-  final repository = await ref.watch(deviceRepositoryProvider.future);
-  final authStateNotifier = ref.watch(authStateNotifierProvider);
-  return GetDeviceStatisticsUseCase(repository, authStateNotifier);
+Future<DeviceStatistics?> plantisDeviceStatistics(Ref ref) async {
+  final service = ref.watch(plantisDeviceManagementServiceProvider);
+  final result = await service.getDeviceStatistics();
+  
+  return result.fold(
+    (failure) => null,
+    (stats) => stats,
+  );
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../error/app_error.dart';
-import '../providers/base_provider.dart';
 
 /// Enhanced error widget with better UX and retry mechanisms
 class EnhancedErrorWidget extends StatelessWidget {
@@ -16,24 +15,6 @@ class EnhancedErrorWidget extends StatelessWidget {
     this.customMessage,
     this.isCompact = false,
   });
-
-  /// Factory constructor for provider errors
-  factory EnhancedErrorWidget.fromProvider(
-    BaseProvider provider, {
-    VoidCallback? onRetry,
-    VoidCallback? onGoBack,
-    bool showGoBackButton = false,
-    bool isCompact = false,
-  }) {
-    return EnhancedErrorWidget(
-      error: provider.error!,
-      onRetry: provider.canRetry ? (onRetry ?? provider.retry) : null,
-      onGoBack: onGoBack,
-      showRetryButton: provider.shouldShowRetry,
-      showGoBackButton: showGoBackButton,
-      isCompact: isCompact,
-    );
-  }
 
   /// Factory constructor for network errors
   factory EnhancedErrorWidget.network({
@@ -445,47 +426,5 @@ class LoadingWithErrorWidget extends StatelessWidget {
     }
 
     return child;
-  }
-}
-
-/// Provider state builder with error handling
-class ProviderStateBuilder extends StatelessWidget {
-  const ProviderStateBuilder({
-    super.key,
-    required this.provider,
-    required this.loadingBuilder,
-    required this.emptyBuilder,
-    required this.contentBuilder,
-    this.errorBuilder,
-    this.onRetry,
-  });
-  final BaseProvider provider;
-  final Widget Function(BuildContext context) loadingBuilder;
-  final Widget Function(BuildContext context) emptyBuilder;
-  final Widget Function(BuildContext context) contentBuilder;
-  final Widget Function(BuildContext context, AppError error)? errorBuilder;
-  final VoidCallback? onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    switch (provider.state) {
-      case ProviderState.loading:
-        return loadingBuilder(context);
-
-      case ProviderState.empty:
-        return emptyBuilder(context);
-
-      case ProviderState.error:
-        if (errorBuilder != null && provider.error != null) {
-          return errorBuilder!(context, provider.error!);
-        }
-        return EnhancedErrorWidget.fromProvider(provider, onRetry: onRetry);
-
-      case ProviderState.loaded:
-        return contentBuilder(context);
-
-      case ProviderState.initial:
-        return const SizedBox.shrink();
-    }
   }
 }

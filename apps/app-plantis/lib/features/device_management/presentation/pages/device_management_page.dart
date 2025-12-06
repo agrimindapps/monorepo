@@ -379,13 +379,15 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
   Future<void> _validateCurrentDevice(BuildContext context) async {
     final notifier = ref.read(deviceManagementNotifierProvider.notifier);
 
-    final result = await notifier.validateCurrentDevice();
+    final success = await notifier.validateCurrentDevice();
 
-    if (result != null && !result.isValid) {
+    if (!success) {
       if (!context.mounted) return;
+      final deviceStateAsync = ref.read(deviceManagementNotifierProvider);
+      final errorMsg = deviceStateAsync.value?.errorMessage ?? 'Falha na validação';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result.message ?? 'Falha na validação'),
+          content: Text(errorMsg),
           backgroundColor: Colors.red,
         ),
       );

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/device_management_providers.dart';
 import '../../data/models/device_model.dart';
-import '../../presentation/providers/device_management_notifier.dart';
 
 /// Builds status UI for device management
 /// Handles device status display and statistics

@@ -59,14 +59,10 @@ SearchPlantsUseCase searchPlantsUseCase(Ref ref) {
 AddPlantUseCase addPlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
-  final plantTaskGenerator = ref.watch(plantTaskGeneratorProvider);
-  final plantTasksRepository = ref.watch(plantTasksRepositoryProvider);
 
   return AddPlantUseCase(
     repository,
     generateInitialTasks,
-    plantTaskGenerator,
-    plantTasksRepository,
   );
 }
 
@@ -74,14 +70,10 @@ AddPlantUseCase addPlantUseCase(Ref ref) {
 UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
-  final plantTaskGenerator = ref.watch(plantTaskGeneratorProvider);
-  final plantTasksRepository = ref.watch(plantTasksRepositoryProvider);
 
   return UpdatePlantUseCase(
     repository,
     generateInitialTasks,
-    plantTaskGenerator,
-    plantTasksRepository,
   );
 }
 

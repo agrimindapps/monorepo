@@ -6,10 +6,6 @@ import 'package:flutter/foundation.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/device_management/data/models/device_model.dart';
-import '../../features/device_management/domain/usecases/revoke_device_usecase.dart'
-    as device_revocation;
-import '../../features/device_management/domain/usecases/validate_device_usecase.dart'
-    as device_validation;
 import '../../features/device_management/presentation/providers/device_management_providers.dart'
     as device_management_providers;
 import '../auth/auth_state_notifier.dart';
@@ -119,8 +115,7 @@ class AuthState {
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
   late final AuthStateNotifier _authStateNotifier;
-  late final device_validation.ValidateDeviceUseCase? _validateDeviceUseCase;
-  late final device_revocation.RevokeDeviceUseCase? _revokeDeviceUseCase;
+  DeviceManagementService? _deviceManagementService;
   late final ResetPasswordUseCase _resetPasswordUseCase;
   late final IAuthRepository _authRepository;
   late final ISubscriptionRepository? _subscriptionRepository;
@@ -139,8 +134,7 @@ class AuthNotifier extends _$AuthNotifier {
     _logoutUseCase = ref.watch(logoutUseCaseProvider);
     _resetPasswordUseCase = ref.watch(resetPasswordUseCaseProvider);
     _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
-    _validateDeviceUseCase = await ref.watch(device_management_providers.validateDeviceUseCaseProvider.future);
-    _revokeDeviceUseCase = await ref.watch(device_management_providers.revokeDeviceUseCaseProvider.future);
+    _deviceManagementService = ref.watch(device_management_providers.plantisDeviceManagementServiceProvider);
 
     ref.onDispose(() {
       _userSubscription?.cancel();
@@ -353,7 +347,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _validateDeviceAfterLogin() async {
-    if (_validateDeviceUseCase == null) {
+    if (_deviceManagementService == null) {
       if (kDebugMode) {
         debugPrint('⚠️ Device validation não disponível');
       }
@@ -374,7 +368,17 @@ class AuthNotifier extends _$AuthNotifier {
         debugPrint('🔐 Validando dispositivo após login...');
       }
 
-      final result = await _validateDeviceUseCase.call();
+      final currentDevice = await DeviceModel.fromCurrentDevice();
+      if (currentDevice == null) {
+        if (kDebugMode) {
+          debugPrint('⚠️ Plataforma não suportada para device validation');
+        }
+        final newState = state.value ?? const AuthState();
+        state = AsyncData(newState.copyWith(isValidatingDevice: false));
+        return;
+      }
+
+      final result = await _deviceManagementService!.validateDevice(currentDevice.toEntity());
 
       result.fold(
         (failure) {
@@ -396,32 +400,9 @@ class AuthNotifier extends _$AuthNotifier {
             _handleDeviceLimitExceeded();
           }
         },
-        (validationResult) {
-          if (validationResult.isValid) {
-            if (kDebugMode) {
-              debugPrint('✅ Dispositivo validado com sucesso');
-            }
-          } else {
-            if (kDebugMode) {
-              debugPrint(
-                '⚠️ Device validation falhou: ${validationResult.message}',
-              );
-            }
-
-            final newState = state.value ?? const AuthState();
-            state = AsyncData(
-              newState.copyWith(
-                deviceValidationError: validationResult.message,
-              ),
-            );
-
-            if (validationResult.status == DeviceValidationStatus.exceeded) {
-              final updatedState = state.value ?? const AuthState();
-              state = AsyncData(
-                updatedState.copyWith(deviceLimitExceeded: true),
-              );
-              _handleDeviceLimitExceeded();
-            }
+        (validatedDevice) {
+          if (kDebugMode) {
+            debugPrint('✅ Dispositivo validado com sucesso');
           }
 
           final finalState = state.value ?? const AuthState();
@@ -631,7 +612,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<void> _performDeviceCleanupOnLogout() async {
-    if (_revokeDeviceUseCase == null ||
+    if (_deviceManagementService == null ||
         state.value?.currentUser == null ||
         isAnonymous) {
       return;
@@ -643,12 +624,8 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      final revokeResult = await _revokeDeviceUseCase.call(
-        device_revocation.RevokeDeviceParams(
-          deviceUuid: currentDevice.uuid,
-          preventSelfRevoke: false,
-          reason: 'User logout',
-        ),
+      final revokeResult = await _deviceManagementService!.revokeDevice(
+        currentDevice.uuid,
       );
 
       revokeResult.fold(

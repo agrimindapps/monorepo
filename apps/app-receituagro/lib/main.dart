@@ -185,10 +185,14 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
     // Cria o observer uma única vez para evitar recriação a cada build
     // Usa Future.microtask para evitar modificar provider durante build
     _bottomNavObserver = BottomNavVisibilityObserver(
-      onVisibilityChanged: (visible) {
+      onStateChanged: (visible, tabIndex) {
         Future.microtask(() {
           if (mounted) {
-            ref.read(navigationStateProvider.notifier).setBottomNavVisibility(visible);
+            final notifier = ref.read(navigationStateProvider.notifier);
+            notifier.setBottomNavVisibility(visible);
+            if (tabIndex != null) {
+              notifier.selectTab(tabIndex);
+            }
           }
         });
       },

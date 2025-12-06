@@ -41,11 +41,12 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
   }
 
   Future<void> _loadEquineDetails() async {
-    final provider = ref.read(equinesProviderProvider);
-    var equine = provider.getEquineById(widget.equineId);
+    final notifier = ref.read(equinesProvider.notifier);
+    final state = ref.read(equinesProvider);
+    var equine = notifier.getEquineById(widget.equineId);
     if (equine == null) {
-      await provider.loadEquineById(widget.equineId);
-      equine = provider.selectedEquine;
+      await notifier.loadEquineById(widget.equineId);
+      equine = ref.read(equinesProvider).selectedEquine;
     }
 
     if (mounted) {

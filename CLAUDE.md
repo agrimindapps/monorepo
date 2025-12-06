@@ -3,14 +3,14 @@
 ## 🏢 Monorepo Structure
 
 ### **Apps (8 projects)**
-- **app-gasometer**: Vehicle control (Hive + Analytics) - **Migrating to Riverpod**
-- **app-plantis**: Plant care (Notifications + Scheduling) - **Gold Standard 10/10** → **Migrating to Riverpod**
-- **app_taskolist**: Task management (Clean Architecture) - **Migrating to Riverpod**
-- **app-receituagro**: Agricultural diagnostics (Static Data + Hive) - **Migrating to Riverpod**
-- **app-petiveti**: Pet care management - **Migrating to Riverpod**
-- **app_agrihurbi**: Agricultural management - **Standardizing to Riverpod**
+- **app-gasometer**: Vehicle control (Drift + Analytics) - **✅ Pure Riverpod** (~99% migrado)
+- **app-plantis**: Plant care (Notifications + Scheduling) - **✅ Pure Riverpod** (~98% migrado)
+- **app_taskolist**: Task management (Clean Architecture) - **✅ Pure Riverpod** (100% migrado)
+- **app-receituagro**: Agricultural diagnostics (Static Data + Hive) - **✅ Pure Riverpod 3.0** (100% migrado)
+- **app-petiveti**: Pet care management - **✅ Pure Riverpod** (~99% migrado)
+- **app_agrihurbi**: Agricultural management - **⚠️ Riverpod Legacy** (ChangeNotifierProvider)
 - **app_nebulalist**: Task/list management (Clean Arch + Offline-first) - **✅ Pure Riverpod** (9/10)
-- **receituagro_web**: Web platform - **Migrating to Riverpod**
+- **receituagro_web**: Web platform - **✅ Pure Riverpod** (100% migrado)
 
 ### **Packages**
 - **packages/core**: Shared services (Firebase, RevenueCat, Drift, Riverpod)
@@ -21,8 +21,8 @@
 
 ### **State Management**
 - **PADRÃO ÚNICO**: Riverpod com code generation (`@riverpod`)
-- **Status**: Migrando todos os apps para Riverpod
-- **Referência**: `.claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md`
+- **Status**: Maioria dos apps migrados para Riverpod
+- **Apps 100% Riverpod**: app-plantis, app-receituagro, app-nebulalist
 
 ### **Arquitetura**
 - **Clean Architecture** (Presentation/Domain/Data)
@@ -57,8 +57,13 @@ dart run build_runner watch --delete-conflicting-outputs
 ```
 
 ### **Documentação Gerada (Markdown)**
-- **Localização Obrigatória**: Toda análise, plano ou documentação técnica gerada em Markdown deve ser salva em `apps/[app-name]/docs/`.
-- **Ação**: Se a pasta `docs/` não existir no app alvo, crie-a antes de salvar o arquivo.
+- **Localização Obrigatória**: Toda documentação técnica deve ser salva em `apps/[app-name]/docs/`.
+- **Regra**: Arquivos `.md` NÃO devem ficar na raiz do app (exceto README.md).
+- **Organização sugerida**:
+  - `docs/` - Documentação geral
+  - `docs/features/` - Documentação por feature
+  - `docs/issues/` - Tracking de issues por módulo
+- **Ação**: Se a pasta `docs/` não existir, crie-a antes de salvar.
 
 ---
 
@@ -69,13 +74,13 @@ dart run build_runner watch --delete-conflicting-outputs
 **Métricas:**
 - ✅ 0 erros analyzer
 - ✅ 0 critical warnings
-- ✅ 13 testes unitários (100% pass rate)
+- ✅ ~98% migrado para Riverpod (314+ providers)
 - ✅ Clean Architecture rigorosa
 - ✅ SOLID Principles (Specialized Services)
 - ✅ Either<Failure, T> em toda camada de domínio
-- ✅ README profissional com documentação completa
+- ✅ ConsumerWidgets em toda UI (72+)
 
-**Próximo passo**: Migrar para Riverpod mantendo qualidade 10/10
+**Status Riverpod**: Migração concluída. Nenhum uso de GetIt/Provider restante.
 
 ### **app-nebulalist: 9/10 Quality Score** (Pure Riverpod Implementation)
 
@@ -131,22 +136,17 @@ dart run build_runner watch --delete-conflicting-outputs
 
 ## 📋 Active Context
 
-### **🔄 Migração Provider → Riverpod (Em Andamento)**
+### **✅ Migração Riverpod - Status Atual**
 
-**Status**: Fase de preparação
-- ✅ Agentes atualizados para padrão Riverpod-only
-- ✅ Guia de migração criado (`.claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md`)
-- 🔄 Iniciando migração dos apps
-
-**Ordem de Migração**:
-1. app-taskolist (2h) - Menor esforço
-2. app-petiveti (4-6h) - Consolidar padrão
-3. app-receituagro (6-8h) - Aplicar aprendizados
-4. app-gasometer (8-12h) - Médio/Grande porte
-5. app-agrihurbi (6-8h) - Remover Provider misto
-6. app-plantis (12-16h) - Gold Standard (migração cuidadosa)
-
-**Tempo Total Estimado**: 40-50 horas (1-2 semanas)
+| App | Status | Observação |
+|-----|--------|------------|
+| app-plantis | ✅ ~98% | 314+ providers, 0 erros |
+| app-gasometer | ✅ ~99% | 182+ providers, 0 erros, código morto removido |
+| app-receituagro | ✅ 100% | Pure Riverpod 3.0 |
+| app-nebulalist | ✅ 100% | Pure Riverpod |
+| app-taskolist | ✅ 100% | Pure Riverpod, 0 erros |
+| app-petiveti | ✅ ~99% | 1 ChangeNotifier (wrapper válido), 0 erros |
+| app-agrihurbi | ⚠️ ~85% | 9 providers migrados, 17 ChangeNotifierProvider restantes, 0 erros |
 
 ---
 
@@ -225,7 +225,6 @@ Para garantir consistência e qualidade, consulte estes documentos antes de gera
 - **[Tech Stack](.claude/docs/TECH_STACK.md)**: Versões e pacotes permitidos.
 
 ### **Guias Técnicos**
-- `.claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md` - Guia completo de migração Riverpod
 - `.claude/guides/DRIFT_IMPLEMENTATION_GUIDE.md` - Guia de implementação Drift (SQLite)
 - `.claude/agents/flutter-architect.md` - Padrões arquiteturais Riverpod
 - `.claude/agents/flutter-engineer.md` - Padrões de desenvolvimento Riverpod
@@ -244,7 +243,8 @@ Para garantir consistência e qualidade, consulte estes documentos antes de gera
 flutter create --org com.yourorg app-name
 
 # 2. Adicionar dependências Riverpod
-# (Ver .claude/guides/MIGRATION_PROVIDER_TO_RIVERPOD.md - Fase 1)
+flutter pub add flutter_riverpod riverpod_annotation
+flutter pub add dev:riverpod_generator dev:build_runner
 
 # 3. Seguir arquitetura app-plantis
 # lib/

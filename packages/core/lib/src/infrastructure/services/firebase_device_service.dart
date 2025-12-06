@@ -4,6 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/device_entity.dart';
+import '../../domain/entities/device_limit_config.dart';
 import '../../domain/repositories/i_device_repository.dart';
 import '../../shared/utils/failure.dart';
 
@@ -16,12 +17,17 @@ class FirebaseDeviceService implements IDeviceRepository {
   /// Instância do Firestore para operações de banco de dados
   final FirebaseFirestore _firestore;
 
+  /// Configuração de limites de dispositivos
+  final DeviceLimitConfig _limitConfig;
+
   /// Cria uma instância de FirebaseDeviceService
   FirebaseDeviceService({
     FirebaseFunctions? functions,
     FirebaseFirestore? firestore,
+    DeviceLimitConfig? limitConfig,
   }) : _functions = functions ?? FirebaseFunctions.instance,
-       _firestore = firestore ?? FirebaseFirestore.instance;
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _limitConfig = limitConfig ?? const DeviceLimitConfig();
 
   /// Valida um dispositivo via Cloud Function
   @override
@@ -329,15 +335,121 @@ class FirebaseDeviceService implements IDeviceRepository {
   @override
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
     try {
-      final countResult = await getActiveDeviceCount(userId);
-      final limitResult = await getDeviceLimit(userId);
-
-      return countResult.fold(
+      final devicesResult = await getUserDevices(userId);
+      
+      return devicesResult.fold(
         (failure) => Left(failure),
-        (deviceCount) => limitResult.fold(
-          (failure) => Left(failure),
-          (limit) => Right(deviceCount < limit),
+        (devices) {
+          // Conta dispositivos por tipo de plataforma
+          int mobileCount = 0;
+          int webCount = 0;
+          
+          for (final device in devices) {
+            if (_limitConfig.isMobilePlatform(device.platform)) {
+              mobileCount++;
+            } else if (_limitConfig.isWebOrDesktopPlatform(device.platform)) {
+              webCount++;
+            }
+          }
+          
+          // Verifica se pode adicionar mais dispositivos mobile
+          // Web não conta no limite por padrão
+          final canAdd = mobileCount < _limitConfig.maxMobileDevices;
+          
+          if (kDebugMode) {
+            debugPrint(
+              '📱 FirebaseDevice: Mobile: $mobileCount/${_limitConfig.maxMobileDevices}, '
+              'Web: $webCount (não conta no limite), canAdd: $canAdd',
+            );
+          }
+          
+          return Right(canAdd);
+        },
+      );
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          'Erro ao verificar limite de dispositivos',
+          code: 'CHECK_LIMIT_ERROR',
+          details: e,
         ),
+      );
+    }
+  }
+
+  /// Verifica limite com resultado detalhado
+  Future<Either<Failure, DeviceLimitCheckResult>> checkDeviceLimit(
+    String userId, {
+    bool isPremium = false,
+    String? newDevicePlatform,
+  }) async {
+    try {
+      final devicesResult = await getUserDevices(userId);
+      
+      return devicesResult.fold(
+        (failure) => Left(failure),
+        (devices) {
+          int mobileCount = 0;
+          int webCount = 0;
+          
+          for (final device in devices) {
+            if (_limitConfig.isMobilePlatform(device.platform)) {
+              mobileCount++;
+            } else if (_limitConfig.isWebOrDesktopPlatform(device.platform)) {
+              webCount++;
+            }
+          }
+          
+          final mobileLimit = _limitConfig.getLimit(isPremium: isPremium);
+          final webLimit = isPremium 
+              ? _limitConfig.premiumMaxWebDevices 
+              : _limitConfig.maxWebDevices;
+          
+          // Se está verificando para um novo dispositivo específico
+          if (newDevicePlatform != null) {
+            final canAdd = _limitConfig.canAddMoreDevices(
+              currentMobileCount: mobileCount,
+              currentWebCount: webCount,
+              isPremium: isPremium,
+              newDevicePlatform: newDevicePlatform,
+            );
+            
+            if (canAdd) {
+              return Right(DeviceLimitCheckResult.allowed(
+                currentMobileCount: mobileCount,
+                currentWebCount: webCount,
+                mobileLimit: mobileLimit,
+                webLimit: webLimit,
+              ));
+            } else {
+              return Right(DeviceLimitCheckResult.limitExceeded(
+                currentMobileCount: mobileCount,
+                currentWebCount: webCount,
+                mobileLimit: mobileLimit,
+                webLimit: webLimit,
+              ));
+            }
+          }
+          
+          // Verifica apenas mobile (padrão)
+          final canAdd = mobileCount < mobileLimit;
+          
+          if (canAdd) {
+            return Right(DeviceLimitCheckResult.allowed(
+              currentMobileCount: mobileCount,
+              currentWebCount: webCount,
+              mobileLimit: mobileLimit,
+              webLimit: webLimit,
+            ));
+          } else {
+            return Right(DeviceLimitCheckResult.limitExceeded(
+              currentMobileCount: mobileCount,
+              currentWebCount: webCount,
+              mobileLimit: mobileLimit,
+              webLimit: webLimit,
+            ));
+          }
+        },
       );
     } catch (e) {
       return Left(
@@ -352,9 +464,53 @@ class FirebaseDeviceService implements IDeviceRepository {
 
   @override
   Future<Either<Failure, int>> getDeviceLimit(String userId) async {
-    // Limite padrão: 3 dispositivos mobile (web não conta)
-    // TODO: Integrar com subscription status para premium (10 dispositivos)
-    return const Right(3);
+    // Retorna o limite de dispositivos mobile da configuração
+    // TODO: Integrar com subscription status para premium
+    return Right(_limitConfig.maxMobileDevices);
+  }
+
+  /// Obtém a configuração atual de limites
+  DeviceLimitConfig get limitConfig => _limitConfig;
+
+  /// Obtém contagem de dispositivos por tipo
+  Future<Either<Failure, Map<String, int>>> getDeviceCountByType(String userId) async {
+    try {
+      final devicesResult = await getUserDevices(userId);
+      
+      return devicesResult.fold(
+        (failure) => Left(failure),
+        (devices) {
+          int mobileCount = 0;
+          int webCount = 0;
+          int otherCount = 0;
+          
+          for (final device in devices) {
+            if (_limitConfig.isMobilePlatform(device.platform)) {
+              mobileCount++;
+            } else if (_limitConfig.isWebOrDesktopPlatform(device.platform)) {
+              webCount++;
+            } else {
+              otherCount++;
+            }
+          }
+          
+          return Right({
+            'mobile': mobileCount,
+            'web': webCount,
+            'other': otherCount,
+            'total': devices.length,
+          });
+        },
+      );
+    } catch (e) {
+      return Left(
+        ServerFailure(
+          'Erro ao contar dispositivos por tipo',
+          code: 'COUNT_BY_TYPE_ERROR',
+          details: e,
+        ),
+      );
+    }
   }
 
   @override
@@ -577,19 +733,31 @@ class FirebaseDeviceService implements IDeviceRepository {
   }
 
   /// Obtém contagem de dispositivos ativos
+  /// Por padrão, conta apenas dispositivos mobile (não web)
   @override
   Future<Either<Failure, int>> getActiveDeviceCount(String userId) async {
     try {
-      final querySnapshot =
-          await _firestore
-              .collection('users')
-              .doc(userId)
-              .collection('devices')
-              .where('isActive', isEqualTo: true)
-              .count()
-              .get();
-
-      return Right(querySnapshot.count ?? 0);
+      // Busca todos os dispositivos ativos
+      final devicesResult = await getUserDevices(userId);
+      
+      return devicesResult.fold(
+        (failure) => Left(failure),
+        (devices) {
+          // Conta apenas dispositivos mobile
+          final mobileCount = devices
+              .where((d) => _limitConfig.isMobilePlatform(d.platform))
+              .length;
+          
+          if (kDebugMode) {
+            debugPrint(
+              '📱 FirebaseDevice: Active mobile devices: $mobileCount '
+              '(total: ${devices.length}, web/desktop não contados)',
+            );
+          }
+          
+          return Right(mobileCount);
+        },
+      );
     } on FirebaseException catch (e) {
       return Left(
         FirebaseFailure(

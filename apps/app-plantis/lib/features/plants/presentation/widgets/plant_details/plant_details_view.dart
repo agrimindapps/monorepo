@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/localization/app_strings.dart';
@@ -10,7 +9,6 @@ import '../../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../../shared/widgets/responsive_layout.dart';
 import '../../../domain/entities/plant.dart';
 import '../../providers/plant_details_provider.dart';
-import '../../providers/plant_task_provider.dart';
 import '../../providers/plants_notifier.dart';
 import '../plant_form_dialog.dart';
 import 'plant_care_section.dart';
@@ -94,7 +92,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       final notifier = ref.read(plantDetailsNotifierProvider.notifier);
       final state = ref.read(plantDetailsNotifierProvider);
       final provider = PlantDetailsProvider(notifier, state);
-      final taskProvider = ref.read(plantTaskNotifierProvider.notifier);
 
       if (kDebugMode) {
         print('✅ PlantDetailsView._initializeController - Providers loaded');
@@ -122,7 +119,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       }
 
       _controller!.loadPlant(widget.plantId);
-      _initializeTasksIfNeeded(taskProvider);
 
       if (kDebugMode) {
         print(
@@ -225,99 +221,6 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       ),
     );
   }
-
-  /// Initializes plant tasks if none exist for the current plant
-  ///
-  /// This method checks if the plant already has tasks assigned and
-  /// generates initial tasks if none are found. It ensures that every
-  /// plant has basic care reminders set up automatically.
-  ///
-  /// The initialization process:
-  /// 1. Checks if tasks already exist for the plant
-  /// 2. If no tasks found, generates default tasks based on plant type
-  /// 3. Tasks include watering, fertilizing, and other care reminders
-  ///
-  /// This is called once during widget initialization to avoid duplicate
-  /// task creation on subsequent widget rebuilds.
-  ///
-  /// Parameters:
-  /// - [taskProvider]: The task provider instance for task management
-  void _initializeTasksIfNeeded(PlantTaskProvider taskProvider) {
-    // Usa um listener para reagir quando a planta for carregada
-    ref.listenManual(plantDetailsNotifierProvider, (previous, next) async {
-      if (!mounted) return;
-      
-      // Se a planta acabou de ser carregada
-      if (previous?.plant == null && next.plant != null) {
-        try {
-          // Primeiro carrega as tarefas do repositório
-          await taskProvider.loadTasksForPlant(widget.plantId);
-          if (!mounted) return;
-          
-          // Depois verifica se precisa gerar novas tarefas
-          final tasks = taskProvider.getTasksForPlant(widget.plantId);
-          if (tasks.isEmpty && next.plant!.config != null) {
-            await taskProvider.generateTasksForPlant(next.plant!);
-          }
-        } catch (e) {
-          debugPrint('Error initializing tasks: $e');
-        }
-      }
-    }, fireImmediately: true);
-  }
-
-  /// Shows the new task creation modal
-  ///
-  /// This method displays a comprehensive task creation interface
-  /// where users can create custom care reminders for their plants.
-  ///
-  /// The task creation modal includes:
-  /// - Task type selection (watering, fertilizing, pruning, etc.)
-  /// - Custom title and description fields
-  /// - Date picker for scheduling
-  /// - Form validation and submission
-  ///
-  /// After successful task creation, the task is added to the plant's
-  /// care schedule and the user receives confirmation.
-  ///
-  /// Parameters:
-  /// - [context]: Build context for showing the modal
-  /// - [plant]: The plant entity for which to create the task
-
-  /// Returns the default title for a new task of the given type
-  ///
-  /// This method provides sensible default task titles that users
-  /// can customize when creating new plant care tasks.
-  ///
-  /// Parameters:
-  /// - [type]: The task type enum to get the default title for
-  ///
-  /// Returns:
-  /// - A localized default title string for the task type
-  ///
-  /// Example:
-  /// ```dart
-  /// final title = _getDefaultTaskTitle(TaskType.watering); // returns "Regar planta"
-  /// ```
-
-  /// Creates and saves a new plant care task
-  ///
-  /// This method handles the actual task creation process by:
-  /// 1. Creating a new PlantTask entity with provided parameters
-  /// 2. Adding it to the task provider's list for the plant
-  /// 3. Closing the creation modal
-  /// 4. Showing success feedback to the user
-  ///
-  /// The task is immediately available in the Tasks tab and will
-  /// trigger notifications based on the scheduled date.
-  ///
-  /// Parameters:
-  /// - [context]: Build context for navigation and feedback
-  /// - [plant]: The plant entity this task belongs to
-  /// - [type]: The type of care task (watering, fertilizing, etc.)
-  /// - [title]: User-provided or default title for the task
-  /// - [description]: Optional detailed description of the task
-  /// - [scheduledDate]: When the task should be performed
 
   void _syncPlantDeletion(String plantId) {
     // Schedule the refresh for after the current frame to avoid potential

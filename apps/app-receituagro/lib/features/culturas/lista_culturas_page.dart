@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/widgets/modern_header_widget.dart';
 import '../../database/providers/database_providers.dart';

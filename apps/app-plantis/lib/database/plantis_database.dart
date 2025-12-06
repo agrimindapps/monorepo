@@ -39,6 +39,7 @@ part 'plantis_database.g.dart';
     Tasks,
     Comments,
     ConflictHistory,
+    PlantImages,
     PlantsSyncQueue,
   ],
 )
@@ -49,7 +50,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   ///
   /// Incrementar quando houver mudanças estruturais nas tabelas
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Factory constructor para ambiente de produção
   ///
@@ -95,6 +96,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   ///
   /// **onCreate:** Executado na primeira criação do banco
   /// **beforeOpen:** Executado toda vez antes de abrir o banco
+  /// **onUpgrade:** Executado quando schemaVersion aumenta
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (Migrator m) async {
@@ -105,13 +107,24 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
 
           print('✅ Plantis Database schema created successfully!');
         },
+        onUpgrade: (Migrator m, int from, int to) async {
+          print('🔄 Migrating Plantis Database from v$from to v$to...');
+
+          if (from < 2) {
+            // Migração v1 -> v2: Adiciona tabela PlantImages
+            print('📦 Adding PlantImages table...');
+            await m.createTable(plantImages);
+          }
+
+          print('✅ Migration completed successfully!');
+        },
         beforeOpen: (details) async {
           // CRÍTICO: Habilita foreign keys no SQLite
           await customStatement('PRAGMA foreign_keys = ON');
 
           if (details.wasCreated) {
             print('🎉 Plantis Database criado com sucesso!');
-            print('📊 Tabelas: Spaces, Plants, PlantConfigs, PlantTasks, Tasks, Comments, ConflictHistory, PlantsSyncQueue');
+            print('📊 Tabelas: Spaces, Plants, PlantConfigs, PlantTasks, Tasks, Comments, ConflictHistory, PlantImages, PlantsSyncQueue');
           } else {
             print('🔄 Plantis Database aberto (versão $schemaVersion)');
           }

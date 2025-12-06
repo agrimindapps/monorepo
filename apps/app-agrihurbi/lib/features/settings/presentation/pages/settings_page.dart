@@ -21,13 +21,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(settingsProviderProvider).initialize();
+      ref.read(settingsProvider.notifier).initialize();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(settingsProviderProvider);
+    final provider = ref.watch(settingsProvider.notifier);
 
     return Scaffold(
       appBar: _buildAppBar(),
@@ -92,7 +92,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSettingsContent(SettingsProvider provider) {
+  Widget _buildSettingsContent(SettingsNotifier provider) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -146,7 +146,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => ref.read(settingsProviderProvider).clearMessages(),
+            onPressed: () => ref.read(settingsProvider.notifier).clearMessages(),
           ),
         ],
       ),
@@ -171,14 +171,14 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => ref.read(settingsProviderProvider).clearMessages(),
+            onPressed: () => ref.read(settingsProvider.notifier).clearMessages(),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildThemeSection(SettingsProvider provider) {
+  Widget _buildThemeSection(SettingsNotifier provider) {
     return SettingsSection(
       title: 'Aparência',
       icon: Icons.palette,
@@ -227,7 +227,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildNotificationSection(SettingsProvider provider) {
+  Widget _buildNotificationSection(SettingsNotifier provider) {
     final notifications = provider.notifications;
 
     return SettingsSection(
@@ -288,7 +288,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildDataSection(SettingsProvider provider) {
+  Widget _buildDataSection(SettingsNotifier provider) {
     final dataSettings = provider.dataSettings;
 
     return SettingsSection(
@@ -354,7 +354,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildPrivacySection(SettingsProvider provider) {
+  Widget _buildPrivacySection(SettingsNotifier provider) {
     final privacy = provider.privacy;
 
     return SettingsSection(
@@ -409,7 +409,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildDisplaySection(SettingsProvider provider) {
+  Widget _buildDisplaySection(SettingsNotifier provider) {
     final display = provider.display;
 
     return SettingsSection(
@@ -492,7 +492,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildSecuritySection(SettingsProvider provider) {
+  Widget _buildSecuritySection(SettingsNotifier provider) {
     final security = provider.security;
 
     return SettingsSection(
@@ -546,7 +546,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  Widget _buildBackupSection(SettingsProvider provider) {
+  Widget _buildBackupSection(SettingsNotifier provider) {
     final backup = provider.backup;
 
     return SettingsSection(
@@ -677,7 +677,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ref.read(settingsProviderProvider).loadSettings();
+              ref.read(settingsProvider.notifier).loadSettings();
             },
             child: const Text('Tentar Novamente'),
           ),
@@ -687,7 +687,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _handleMenuAction(String action) {
-    final provider = ref.read(settingsProviderProvider);
+    final provider = ref.read(settingsProvider.notifier);
 
     switch (action) {
       case 'export':
@@ -702,7 +702,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
-  void _exportSettings(SettingsProvider provider) async {
+  void _exportSettings(SettingsNotifier provider) async {
     final data = await provider.exportSettings();
     if (data != null) {
       if (!context.mounted) return;
@@ -712,7 +712,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
-  void _importSettings(SettingsProvider provider) {
+  void _importSettings(SettingsNotifier provider) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Funcionalidade de importação será implementada'),
@@ -720,7 +720,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  void _showResetDialog(SettingsProvider provider) {
+  void _showResetDialog(SettingsNotifier provider) {
     showDialog<void>(
       context: context,
       builder:
@@ -751,7 +751,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  void _showQuietHoursDialog(SettingsProvider provider) {
+  void _showQuietHoursDialog(SettingsNotifier provider) {
     final notifications = provider.notifications;
     TimeOfDay startTime = TimeOfDay(
       hour: int.parse(notifications.quietHoursStart.split(':')[0]),

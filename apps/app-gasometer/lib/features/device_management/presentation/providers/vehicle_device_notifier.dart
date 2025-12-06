@@ -7,6 +7,33 @@ import '../../domain/extensions/vehicle_device_extension.dart';
 
 part 'vehicle_device_notifier.g.dart';
 
+/// Provider para DeviceManagementService do core
+@riverpod
+core.DeviceManagementService coreDeviceManagementService(Ref ref) {
+  return ref.watch(deviceManagementServiceProvider);
+}
+
+/// Provider de conectividade (stream)
+/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
+@riverpod
+Stream<bool> connectivityStream(Ref ref) {
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  return connectivityService.connectivityStream;
+}
+
+/// Provider de status online
+/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
+@riverpod
+Future<bool> isOnlineStatus(Ref ref) async {
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  final result = await connectivityService.isOnline();
+
+  return result.fold((core.Failure failure) {
+    debugPrint('Connectivity check failed: ${failure.message}');
+    return false;
+  }, (bool isOnline) => isOnline);
+}
+
 /// State para gerenciamento de dispositivos veiculares
 class VehicleDeviceState {
   const VehicleDeviceState({
@@ -100,37 +127,13 @@ class DeviceLimitInfo {
   }
 }
 
-/// Provider de dependências: DeviceManagementService (mock por enquanto)
-@riverpod
-core.DeviceManagementService? deviceManagementService(Ref ref) {
-  return null;
-}
-
-/// Provider de conectividade (stream)
-/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
-@riverpod
-Stream<bool> connectivityStream(Ref ref) {
-  final connectivityService = ref.watch(connectivityServiceProvider);
-  return connectivityService.connectivityStream;
-}
-
-/// Provider de status online
-/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
-@riverpod
-Future<bool> isOnlineStatus(Ref ref) async {
-  final connectivityService = ref.watch(connectivityServiceProvider);
-  final result = await connectivityService.isOnline();
-
-  return result.fold((core.Failure failure) {
-    debugPrint('Connectivity check failed: ${failure.message}');
-    return false;
-  }, (bool isOnline) => isOnline);
-}
-
 /// Notifier principal para gerenciamento de dispositivos veiculares
 @riverpod
 class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
   static const int _deviceLimit = 3; // Free tier
+
+  core.DeviceManagementService get _deviceService => 
+      ref.read(coreDeviceManagementServiceProvider);
 
   @override
   VehicleDeviceState build() {
@@ -149,58 +152,41 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     return VehicleDeviceState.empty;
   }
 
-  /// Carrega dispositivos do usuário (MOCK IMPLEMENTATION)
-  /// TODO: Substituir por implementação real quando DeviceManagementService estiver disponível
+  /// Carrega dispositivos do usuário do Firebase
   Future<void> loadUserDevices() async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 500));
+      final result = await _deviceService.getUserDevices();
+      
+      result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ VehicleDeviceNotifier: Failed to load devices - ${failure.message}');
+          }
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+        },
+        (devices) {
+          final statistics = VehicleDeviceStatistics.fromDevices(devices);
 
-      // Mock devices for development - replace with real device management service
-      final mockDevices = [
-        core.DeviceEntity(
-          id: 'device_1',
-          uuid: 'mock_uuid_1',
-          name: 'iPhone Principal',
-          model: 'iPhone 14 Pro',
-          platform: 'iOS',
-          systemVersion: '16.4',
-          appVersion: '2.1.0',
-          buildNumber: '45',
-          isPhysicalDevice: true,
-          manufacturer: 'Apple',
-          firstLoginAt: DateTime.now().subtract(const Duration(days: 30)),
-          lastActiveAt: DateTime.now().subtract(const Duration(minutes: 5)),
-        ),
-        core.DeviceEntity(
-          id: 'device_2',
-          uuid: 'mock_uuid_2',
-          name: 'Samsung Tablet',
-          model: 'Galaxy Tab S8',
-          platform: 'Android',
-          systemVersion: '13.0',
-          appVersion: '2.1.0',
-          buildNumber: '45',
-          isPhysicalDevice: true,
-          manufacturer: 'Samsung',
-          firstLoginAt: DateTime.now().subtract(const Duration(days: 15)),
-          lastActiveAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-      ];
+          state = state.copyWith(
+            devices: devices,
+            statistics: statistics,
+            isLoading: false,
+          );
 
-      final statistics = VehicleDeviceStatistics.fromDevices(mockDevices);
-
-      state = state.copyWith(
-        devices: mockDevices,
-        statistics: statistics,
-        isLoading: false,
-      );
-
-      debugPrint(
-        '🔄 Loaded ${mockDevices.length} mock devices (development mode)',
+          if (kDebugMode) {
+            debugPrint('✅ VehicleDeviceNotifier: Loaded ${devices.length} devices');
+          }
+        },
       );
     } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ VehicleDeviceNotifier: Unexpected error - $e');
+      }
       state = state.copyWith(
         isLoading: false,
         errorMessage: 'Erro inesperado: $e',
@@ -211,23 +197,32 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
   /// Valida se o dispositivo pode ser registrado
   Future<bool> validateDeviceRegistration(core.DeviceEntity device) async {
     try {
-      if (!canAddMoreDevices) {
-        state = state.copyWith(
-          errorMessage:
-              'Limite de dispositivos atingido. Faça upgrade para adicionar mais.',
-        );
-        return false;
-      }
-      await Future<void>.delayed(const Duration(milliseconds: 300));
+      final canAddResult = await _deviceService.canAddMoreDevices();
+      
+      return canAddResult.fold(
+        (failure) {
+          state = state.copyWith(errorMessage: failure.message);
+          return false;
+        },
+        (canAdd) {
+          if (!canAdd) {
+            state = state.copyWith(
+              errorMessage:
+                  'Limite de dispositivos atingido. Faça upgrade para adicionar mais.',
+            );
+            return false;
+          }
 
-      final isValid = device.isPhysicalDevice && device.isActive;
-      if (!isValid) {
-        state = state.copyWith(
-          errorMessage: 'Dispositivo não passou na validação de segurança.',
-        );
-      }
+          final isValid = device.isPhysicalDevice && device.isActive;
+          if (!isValid) {
+            state = state.copyWith(
+              errorMessage: 'Dispositivo não passou na validação de segurança.',
+            );
+          }
 
-      return isValid;
+          return isValid;
+        },
+      );
     } catch (e) {
       state = state.copyWith(errorMessage: 'Erro na validação: $e');
       return false;
@@ -239,29 +234,43 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-
-      final deviceExists = state.devices.any((device) => device.id == deviceId);
-      if (!deviceExists) {
-        state = state.copyWith(
-          isLoading: false,
-          errorMessage: 'Dispositivo não encontrado',
-        );
-        return false;
-      }
-
-      final updatedDevices =
-          state.devices.where((device) => device.id != deviceId).toList();
-      final statistics = VehicleDeviceStatistics.fromDevices(updatedDevices);
-
-      state = state.copyWith(
-        devices: updatedDevices,
-        statistics: statistics,
-        isLoading: false,
+      // Find device UUID from ID
+      final device = state.devices.firstWhere(
+        (d) => d.id == deviceId,
+        orElse: () => throw Exception('Dispositivo não encontrado'),
       );
+      
+      final result = await _deviceService.revokeDevice(device.uuid);
+      
+      return result.fold(
+        (failure) {
+          if (kDebugMode) {
+            debugPrint('❌ VehicleDeviceNotifier: Failed to revoke - ${failure.message}');
+          }
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return false;
+        },
+        (_) {
+          // Remove from local state
+          final updatedDevices =
+              state.devices.where((d) => d.id != deviceId).toList();
+          final statistics = VehicleDeviceStatistics.fromDevices(updatedDevices);
 
-      debugPrint('🔄 Device $deviceId revoked');
-      return true;
+          state = state.copyWith(
+            devices: updatedDevices,
+            statistics: statistics,
+            isLoading: false,
+          );
+
+          if (kDebugMode) {
+            debugPrint('✅ VehicleDeviceNotifier: Device $deviceId revoked');
+          }
+          return true;
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -278,32 +287,24 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     var revokedCount = 0;
 
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 800));
-
-      final updatedDevices = <core.DeviceEntity>[];
-      for (final device in state.devices) {
-        if (deviceIds.contains(device.id)) {
+      for (final deviceId in deviceIds) {
+        final success = await revokeDevice(deviceId);
+        if (success) {
           revokedCount++;
-        } else {
-          updatedDevices.add(device);
         }
       }
 
-      final statistics = VehicleDeviceStatistics.fromDevices(updatedDevices);
-
-      state = state.copyWith(
-        devices: updatedDevices,
-        statistics: statistics,
-        isLoading: false,
-      );
-
-      debugPrint('🔄 Revoked $revokedCount/${deviceIds.length} devices');
+      if (kDebugMode) {
+        debugPrint('🔄 Revoked $revokedCount/${deviceIds.length} devices');
+      }
 
       if (revokedCount < deviceIds.length) {
         state = state.copyWith(
           errorMessage: 'Alguns dispositivos não puderam ser revogados',
         );
       }
+      
+      state = state.copyWith(isLoading: false);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -316,8 +317,19 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
 
   /// Obtém estatísticas detalhadas dos dispositivos
   Future<void> refreshStatistics() async {
-    final statistics = VehicleDeviceStatistics.fromDevices(state.devices);
-    state = state.copyWith(statistics: statistics);
+    final result = await _deviceService.getDeviceStatistics();
+    
+    result.fold(
+      (failure) {
+        if (kDebugMode) {
+          debugPrint('⚠️ VehicleDeviceNotifier: Failed to get statistics');
+        }
+      },
+      (coreStats) {
+        final statistics = VehicleDeviceStatistics.fromDevices(state.devices);
+        state = state.copyWith(statistics: statistics);
+      },
+    );
   }
 
   /// Revoga todos os outros dispositivos exceto o atual
@@ -325,10 +337,27 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      await Future<void>.delayed(const Duration(milliseconds: 800));
-      if (state.devices.isNotEmpty) {
-        final current = state.currentDevice;
-        if (current != null) {
+      final current = state.currentDevice;
+      if (current == null) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: 'Nenhum dispositivo atual encontrado',
+        );
+        return false;
+      }
+
+      final result = await _deviceService.revokeAllOtherDevices(current.uuid);
+      
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return false;
+        },
+        (_) {
+          // Keep only current device in state
           final statistics = VehicleDeviceStatistics.fromDevices([current]);
 
           state = state.copyWith(
@@ -337,12 +366,12 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
             isLoading: false,
           );
 
+          if (kDebugMode) {
+            debugPrint('✅ VehicleDeviceNotifier: All other devices revoked');
+          }
           return true;
-        }
-      }
-
-      state = state.copyWith(isLoading: false);
-      return false;
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,

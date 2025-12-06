@@ -29,7 +29,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(newsProviderProvider).initialize();
+      ref.read(newsProvider.notifier).initialize();
     });
   }
 
@@ -148,30 +148,31 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   Widget _buildNewsTab() {
-    final provider = ref.watch(newsProviderProvider);
+    final state = ref.watch(newsProvider);
+    final notifier = ref.read(newsProvider.notifier);
 
     return Builder(
       builder: (context) {
-        if (provider.isLoadingNews && provider.articles.isEmpty) {
+        if (state.isLoadingNews && state.articles.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (provider.hasError && provider.articles.isEmpty) {
-          return _buildErrorWidget(provider.errorMessage!);
+        if (state.hasError && state.articles.isEmpty) {
+          return _buildErrorWidget(state.errorMessage!);
         }
 
-        if (provider.articles.isEmpty) {
+        if (state.articles.isEmpty) {
           return _buildEmptyWidget();
         }
 
         return RefreshIndicator(
-          onRefresh: () => provider.loadNews(refresh: true),
+          onRefresh: () => notifier.loadNews(refresh: true),
           child: ListView.builder(
             controller: _scrollController,
             padding: const EdgeInsets.all(16),
-            itemCount: provider.articles.length + (provider.isLoadingNews ? 1 : 0),
+            itemCount: state.articles.length + (state.isLoadingNews ? 1 : 0),
             itemBuilder: (context, index) {
-              if (index == provider.articles.length) {
+              if (index == state.articles.length) {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16),
@@ -180,7 +181,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
                 );
               }
 
-              final article = provider.articles[index];
+              final article = state.articles[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: NewsArticleCard(
@@ -198,25 +199,26 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   Widget _buildPremiumTab() {
-    final provider = ref.watch(newsProviderProvider);
+    final state = ref.watch(newsProvider);
+    final notifier = ref.read(newsProvider.notifier);
 
     return Builder(
       builder: (context) {
-        if (provider.isLoadingPremium && provider.premiumArticles.isEmpty) {
+        if (state.isLoadingPremium && state.premiumArticles.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        if (provider.premiumArticles.isEmpty) {
+        if (state.premiumArticles.isEmpty) {
           return _buildPremiumEmptyWidget();
         }
 
         return RefreshIndicator(
-          onRefresh: () => provider.loadPremiumNews(refresh: true),
+          onRefresh: () => notifier.loadPremiumNews(refresh: true),
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: provider.premiumArticles.length,
+            itemCount: state.premiumArticles.length,
             itemBuilder: (context, index) {
-              final article = provider.premiumArticles[index];
+              final article = state.premiumArticles[index];
               return Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: NewsArticleCard(
@@ -235,19 +237,20 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   Widget _buildCommoditiesTab() {
-    final provider = ref.watch(newsProviderProvider);
+    final state = ref.watch(newsProvider);
+    final notifier = ref.read(newsProvider.notifier);
 
     return Builder(
       builder: (context) {
         return RefreshIndicator(
-          onRefresh: () => provider.loadCommodityPrices(refresh: true),
+          onRefresh: () => notifier.loadCommodityPrices(refresh: true),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (provider.marketSummary != null)
-                  _buildMarketSummaryCard(provider.marketSummary!),
+                if (state.marketSummary != null)
+                  _buildMarketSummaryCard(state.marketSummary!),
                 const SizedBox(height: 16),
                 Text(
                   'Preços das Commodities',
@@ -255,9 +258,9 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
                 ),
                 const SizedBox(height: 16),
                 CommodityPricesWidget(
-                  prices: provider.commodityPrices,
-                  isLoading: provider.isLoadingCommodities,
-                  onRefresh: () => provider.loadCommodityPrices(refresh: true),
+                  prices: state.commodityPrices,
+                  isLoading: state.isLoadingCommodities,
+                  onRefresh: () => notifier.loadCommodityPrices(refresh: true),
                 ),
               ],
             ),
@@ -339,7 +342,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ref.read(newsProviderProvider).loadNews(refresh: true);
+              ref.read(newsProvider.notifier).loadNews(refresh: true);
             },
             child: const Text('Tentar Novamente'),
           ),
@@ -371,7 +374,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              ref.read(newsProviderProvider).refreshRSSFeeds();
+              ref.read(newsProvider.notifier).refreshRSSFeeds();
             },
             child: const Text('Atualizar Feeds'),
           ),
@@ -413,13 +416,14 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   Widget _buildRefreshFAB() {
-    final provider = ref.watch(newsProviderProvider);
+    final state = ref.watch(newsProvider);
+    final notifier = ref.read(newsProvider.notifier);
 
     return FloatingActionButton(
-      onPressed: provider.isRefreshing ? null : () {
-        provider.refreshRSSFeeds();
+      onPressed: state.isRefreshing ? null : () {
+        notifier.refreshRSSFeeds();
       },
-      child: provider.isRefreshing
+      child: state.isRefreshing
           ? const SizedBox(
               width: 20,
               height: 20,
@@ -447,7 +451,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
           onSubmitted: (query) {
             Navigator.pop(context);
             if (query.isNotEmpty) {
-              ref.read(newsProviderProvider).searchNews(query: query);
+              ref.read(newsProvider.notifier).searchNews(query: query);
               Navigator.pushNamed(context, '/news/search', arguments: query);
             }
           },
@@ -462,7 +466,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
               Navigator.pop(context);
               final query = _searchController.text.trim();
               if (query.isNotEmpty) {
-                ref.read(newsProviderProvider).searchNews(query: query);
+                ref.read(newsProvider.notifier).searchNews(query: query);
                 Navigator.pushNamed(context, '/news/search', arguments: query);
               }
             },
@@ -482,13 +486,13 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: NewsFilterWidget(
-          currentFilter: ref.read(newsProviderProvider).currentFilter,
+          currentFilter: ref.read(newsProvider).currentFilter,
           onApply: (filter) {
-            ref.read(newsProviderProvider).applyFilter(filter);
+            ref.read(newsProvider.notifier).applyFilter(filter);
             Navigator.pop(context);
           },
           onClear: () {
-            ref.read(newsProviderProvider).clearFilter();
+            ref.read(newsProvider.notifier).clearFilter();
             Navigator.pop(context);
           },
         ),
@@ -497,11 +501,11 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   void _handleMenuAction(String action) {
-    final provider = ref.read(newsProviderProvider);
+    final notifier = ref.read(newsProvider.notifier);
 
     switch (action) {
       case 'refresh_rss':
-        provider.refreshRSSFeeds();
+        notifier.refreshRSSFeeds();
         break;
       case 'manage_feeds':
         Navigator.pushNamed(context, '/news/feeds');
@@ -521,18 +525,18 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   Future<void> _toggleFavorite(String articleId) async {
-    final provider = ref.read(newsProviderProvider);
-    final isFavorite = await provider.isArticleFavorite(articleId);
+    final notifier = ref.read(newsProvider.notifier);
+    final isFavorite = await notifier.isArticleFavorite(articleId);
 
     if (isFavorite) {
-      await provider.removeFromFavorites(articleId);
+      await notifier.removeFromFavorites(articleId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Removido dos favoritos')),
         );
       }
     } else {
-      await provider.addToFavorites(articleId);
+      await notifier.addToFavorites(articleId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Adicionado aos favoritos')),

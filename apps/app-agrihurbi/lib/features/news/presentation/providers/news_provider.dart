@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/commodity_price_entity.dart';
 import '../../domain/entities/news_article_entity.dart';
@@ -8,88 +9,127 @@ import '../../domain/usecases/get_commodity_prices.dart';
 import '../../domain/usecases/get_news.dart';
 import 'news_di_providers.dart';
 
-/// Provider Riverpod para NewsProvider
-final newsProviderProvider = ChangeNotifierProvider<NewsProvider>((ref) {
-  return NewsProvider(
-    ref.watch(getNewsUseCaseProvider),
-    ref.watch(getArticleByIdUseCaseProvider),
-    ref.watch(searchArticlesUseCaseProvider),
-    ref.watch(getPremiumArticlesUseCaseProvider),
-    ref.watch(manageFavoritesUseCaseProvider),
-    ref.watch(refreshRSSFeedsUseCaseProvider),
-    ref.watch(getCommodityPricesUseCaseProvider),
-    ref.watch(newsRepositoryProvider),
-  );
-});
+part 'news_provider.g.dart';
 
+/// State class for News
+class NewsState {
+  final List<NewsArticleEntity> articles;
+  final List<NewsArticleEntity> premiumArticles;
+  final List<NewsArticleEntity> favoriteArticles;
+  final List<NewsArticleEntity> searchResults;
+  final List<CommodityPriceEntity> commodityPrices;
+  final MarketSummaryEntity? marketSummary;
+  final bool isLoadingNews;
+  final bool isLoadingPremium;
+  final bool isLoadingCommodities;
+  final bool isRefreshing;
+  final bool isSearching;
+  final String? errorMessage;
+  final NewsFilter? currentFilter;
+  final String currentSearchQuery;
+  final DateTime? lastRSSUpdate;
+  final List<String> rssSources;
 
-/// News Provider for State Management
-///
-/// Manages news articles, commodity prices, and RSS feed state
-/// using Provider pattern for reactive UI updates
-class NewsProvider with ChangeNotifier {
-  final GetNews _getNews;
-  final GetArticleById _getArticleById;
-  final SearchArticles _searchArticles;
-  final GetPremiumArticles _getPremiumArticles;
-  final ManageFavorites _manageFavorites;
-  final RefreshRSSFeeds _refreshRSSFeeds;
-  final GetCommodityPrices _getCommodityPrices;
-  final NewsRepository _repository;
+  const NewsState({
+    this.articles = const [],
+    this.premiumArticles = const [],
+    this.favoriteArticles = const [],
+    this.searchResults = const [],
+    this.commodityPrices = const [],
+    this.marketSummary,
+    this.isLoadingNews = false,
+    this.isLoadingPremium = false,
+    this.isLoadingCommodities = false,
+    this.isRefreshing = false,
+    this.isSearching = false,
+    this.errorMessage,
+    this.currentFilter,
+    this.currentSearchQuery = '',
+    this.lastRSSUpdate,
+    this.rssSources = const [],
+  });
 
-  NewsProvider(
-    this._getNews,
-    this._getArticleById,
-    this._searchArticles,
-    this._getPremiumArticles,
-    this._manageFavorites,
-    this._refreshRSSFeeds,
-    this._getCommodityPrices,
-    this._repository,
-  );
+  NewsState copyWith({
+    List<NewsArticleEntity>? articles,
+    List<NewsArticleEntity>? premiumArticles,
+    List<NewsArticleEntity>? favoriteArticles,
+    List<NewsArticleEntity>? searchResults,
+    List<CommodityPriceEntity>? commodityPrices,
+    MarketSummaryEntity? marketSummary,
+    bool? isLoadingNews,
+    bool? isLoadingPremium,
+    bool? isLoadingCommodities,
+    bool? isRefreshing,
+    bool? isSearching,
+    String? errorMessage,
+    NewsFilter? currentFilter,
+    String? currentSearchQuery,
+    DateTime? lastRSSUpdate,
+    List<String>? rssSources,
+    bool clearMarketSummary = false,
+    bool clearError = false,
+    bool clearCurrentFilter = false,
+  }) {
+    return NewsState(
+      articles: articles ?? this.articles,
+      premiumArticles: premiumArticles ?? this.premiumArticles,
+      favoriteArticles: favoriteArticles ?? this.favoriteArticles,
+      searchResults: searchResults ?? this.searchResults,
+      commodityPrices: commodityPrices ?? this.commodityPrices,
+      marketSummary: clearMarketSummary ? null : (marketSummary ?? this.marketSummary),
+      isLoadingNews: isLoadingNews ?? this.isLoadingNews,
+      isLoadingPremium: isLoadingPremium ?? this.isLoadingPremium,
+      isLoadingCommodities: isLoadingCommodities ?? this.isLoadingCommodities,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      isSearching: isSearching ?? this.isSearching,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      currentFilter: clearCurrentFilter ? null : (currentFilter ?? this.currentFilter),
+      currentSearchQuery: currentSearchQuery ?? this.currentSearchQuery,
+      lastRSSUpdate: lastRSSUpdate ?? this.lastRSSUpdate,
+      rssSources: rssSources ?? this.rssSources,
+    );
+  }
 
-  List<NewsArticleEntity> _articles = [];
-  List<NewsArticleEntity> _premiumArticles = [];
-  List<NewsArticleEntity> _favoriteArticles = [];
-  List<NewsArticleEntity> _searchResults = [];
-  List<CommodityPriceEntity> _commodityPrices = [];
-  MarketSummaryEntity? _marketSummary;
+  bool get hasError => errorMessage != null;
+  bool get hasData => articles.isNotEmpty;
+}
 
-  bool _isLoadingNews = false;
-  bool _isLoadingPremium = false;
-  bool _isLoadingCommodities = false;
-  bool _isRefreshing = false;
-  bool _isSearching = false;
+/// News Notifier using Riverpod code generation
+@riverpod
+class NewsNotifier extends _$NewsNotifier {
+  GetNews get _getNews => ref.read(getNewsUseCaseProvider);
+  GetArticleById get _getArticleById => ref.read(getArticleByIdUseCaseProvider);
+  SearchArticles get _searchArticles => ref.read(searchArticlesUseCaseProvider);
+  GetPremiumArticles get _getPremiumArticles => ref.read(getPremiumArticlesUseCaseProvider);
+  ManageFavorites get _manageFavorites => ref.read(manageFavoritesUseCaseProvider);
+  RefreshRSSFeeds get _refreshRSSFeeds => ref.read(refreshRSSFeedsUseCaseProvider);
+  GetCommodityPrices get _getCommodityPrices => ref.read(getCommodityPricesUseCaseProvider);
+  NewsRepository get _repository => ref.read(newsRepositoryProvider);
 
-  String? _errorMessage;
-  NewsFilter? _currentFilter;
-  String _currentSearchQuery = '';
+  @override
+  NewsState build() {
+    return const NewsState();
+  }
 
-  DateTime? _lastRSSUpdate;
-  List<String> _rssSources = [];
-
-  List<NewsArticleEntity> get articles => _articles;
-  List<NewsArticleEntity> get premiumArticles => _premiumArticles;
-  List<NewsArticleEntity> get favoriteArticles => _favoriteArticles;
-  List<NewsArticleEntity> get searchResults => _searchResults;
-  List<CommodityPriceEntity> get commodityPrices => _commodityPrices;
-  MarketSummaryEntity? get marketSummary => _marketSummary;
-
-  bool get isLoadingNews => _isLoadingNews;
-  bool get isLoadingPremium => _isLoadingPremium;
-  bool get isLoadingCommodities => _isLoadingCommodities;
-  bool get isRefreshing => _isRefreshing;
-  bool get isSearching => _isSearching;
-
-  String? get errorMessage => _errorMessage;
-  NewsFilter? get currentFilter => _currentFilter;
-  String get currentSearchQuery => _currentSearchQuery;
-
-  DateTime? get lastRSSUpdate => _lastRSSUpdate;
-  List<String> get rssSources => _rssSources;
-
-  bool get hasError => _errorMessage != null;
-  bool get hasData => _articles.isNotEmpty;
+  // Convenience getters for backward compatibility
+  List<NewsArticleEntity> get articles => state.articles;
+  List<NewsArticleEntity> get premiumArticles => state.premiumArticles;
+  List<NewsArticleEntity> get favoriteArticles => state.favoriteArticles;
+  List<NewsArticleEntity> get searchResults => state.searchResults;
+  List<CommodityPriceEntity> get commodityPrices => state.commodityPrices;
+  MarketSummaryEntity? get marketSummary => state.marketSummary;
+  bool get isLoadingNews => state.isLoadingNews;
+  bool get isLoadingPremium => state.isLoadingPremium;
+  bool get isLoadingCommodities => state.isLoadingCommodities;
+  bool get isRefreshing => state.isRefreshing;
+  bool get isSearching => state.isSearching;
+  String? get errorMessage => state.errorMessage;
+  NewsFilter? get currentFilter => state.currentFilter;
+  String get currentSearchQuery => state.currentSearchQuery;
+  DateTime? get lastRSSUpdate => state.lastRSSUpdate;
+  List<String> get rssSources => state.rssSources;
+  bool get hasError => state.hasError;
+  bool get hasData => state.hasData;
 
   /// Load news articles with optional filter
   Future<void> loadNews({
@@ -97,51 +137,60 @@ class NewsProvider with ChangeNotifier {
     int limit = 20,
     bool refresh = false,
   }) async {
-    if (_isLoadingNews && !refresh) return;
+    if (state.isLoadingNews && !refresh) return;
 
-    _setLoadingNews(true);
-    _clearError();
+    state = state.copyWith(isLoadingNews: true, clearError: true);
 
     try {
       final result = await _getNews(filter: filter, limit: limit);
 
       result.fold(
-        (failure) => _setError('Erro ao carregar notícias: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar notícias: ${failure.message}',
+          isLoadingNews: false,
+        ),
         (articles) {
-          _articles = articles;
-          _currentFilter = filter;
-          notifyListeners();
+          state = state.copyWith(
+            articles: articles,
+            currentFilter: filter,
+            isLoadingNews: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingNews(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingNews: false,
+      );
     }
   }
 
   /// Load premium articles
   Future<void> loadPremiumNews({int limit = 10, bool refresh = false}) async {
-    if (_isLoadingPremium && !refresh) return;
+    if (state.isLoadingPremium && !refresh) return;
 
-    _setLoadingPremium(true);
-    _clearError();
+    state = state.copyWith(isLoadingPremium: true, clearError: true);
 
     try {
       final result = await _getPremiumArticles(limit: limit);
 
       result.fold(
-        (failure) =>
-            _setError('Erro ao carregar notícias premium: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar notícias premium: ${failure.message}',
+          isLoadingPremium: false,
+        ),
         (articles) {
-          _premiumArticles = articles;
-          notifyListeners();
+          state = state.copyWith(
+            premiumArticles: articles,
+            isLoadingPremium: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingPremium(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingPremium: false,
+      );
     }
   }
 
@@ -152,14 +201,14 @@ class NewsProvider with ChangeNotifier {
     int limit = 20,
   }) async {
     if (query.isEmpty) {
-      _searchResults = [];
-      _currentSearchQuery = '';
-      notifyListeners();
+      state = state.copyWith(
+        searchResults: [],
+        currentSearchQuery: '',
+      );
       return;
     }
 
-    _setSearching(true);
-    _clearError();
+    state = state.copyWith(isSearching: true, clearError: true);
 
     try {
       final result = await _searchArticles(
@@ -168,25 +217,33 @@ class NewsProvider with ChangeNotifier {
         limit: limit,
       );
 
-      result.fold((failure) => _setError('Erro na busca: ${failure.message}'), (
-        articles,
-      ) {
-        _searchResults = articles;
-        _currentSearchQuery = query;
-        notifyListeners();
-      });
+      result.fold(
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro na busca: ${failure.message}',
+          isSearching: false,
+        ),
+        (articles) {
+          state = state.copyWith(
+            searchResults: articles,
+            currentSearchQuery: query,
+            isSearching: false,
+          );
+        },
+      );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setSearching(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isSearching: false,
+      );
     }
   }
 
   /// Clear search results
   void clearSearch() {
-    _searchResults = [];
-    _currentSearchQuery = '';
-    notifyListeners();
+    state = state.copyWith(
+      searchResults: [],
+      currentSearchQuery: '',
+    );
   }
 
   /// Get article by ID
@@ -194,11 +251,13 @@ class NewsProvider with ChangeNotifier {
     try {
       final result = await _getArticleById(id);
       return result.fold((failure) {
-        _setError('Erro ao carregar artigo: ${failure.message}');
+        state = state.copyWith(
+          errorMessage: 'Erro ao carregar artigo: ${failure.message}',
+        );
         return null;
       }, (article) => article);
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return null;
     }
   }
@@ -209,15 +268,15 @@ class NewsProvider with ChangeNotifier {
       final result = await _manageFavorites.getFavorites();
 
       result.fold(
-        (failure) =>
-            _setError('Erro ao carregar favoritos: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar favoritos: ${failure.message}',
+        ),
         (articles) {
-          _favoriteArticles = articles;
-          notifyListeners();
+          state = state.copyWith(favoriteArticles: articles);
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
     }
   }
 
@@ -228,7 +287,9 @@ class NewsProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao adicionar favorito: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao adicionar favorito: ${failure.message}',
+          );
           return false;
         },
         (_) {
@@ -237,7 +298,7 @@ class NewsProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -249,7 +310,9 @@ class NewsProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao remover favorito: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao remover favorito: ${failure.message}',
+          );
           return false;
         },
         (_) {
@@ -258,7 +321,7 @@ class NewsProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -276,25 +339,29 @@ class NewsProvider with ChangeNotifier {
 
   /// Refresh RSS feeds
   Future<void> refreshRSSFeeds() async {
-    if (_isRefreshing) return;
+    if (state.isRefreshing) return;
 
-    _setRefreshing(true);
-    _clearError();
+    state = state.copyWith(isRefreshing: true, clearError: true);
 
     try {
       final result = await _refreshRSSFeeds();
 
       result.fold(
-        (failure) => _setError('Erro ao atualizar feeds: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao atualizar feeds: ${failure.message}',
+          isRefreshing: false,
+        ),
         (_) async {
           await _updateLastRSSTime();
           await loadNews(refresh: true);
+          state = state.copyWith(isRefreshing: false);
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setRefreshing(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isRefreshing: false,
+      );
     }
   }
 
@@ -303,10 +370,10 @@ class NewsProvider with ChangeNotifier {
     try {
       final result = await _repository.getLastRSSUpdate();
       result.fold((failure) => null, (lastUpdate) {
-        _lastRSSUpdate = lastUpdate;
-        notifyListeners();
+        state = state.copyWith(lastRSSUpdate: lastUpdate);
       });
     } catch (e) {
+      // Silent error
     }
   }
 
@@ -315,15 +382,15 @@ class NewsProvider with ChangeNotifier {
     try {
       final result = await _repository.getRSSSources();
       result.fold(
-        (failure) =>
-            _setError('Erro ao carregar feeds RSS: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar feeds RSS: ${failure.message}',
+        ),
         (sources) {
-          _rssSources = sources;
-          notifyListeners();
+          state = state.copyWith(rssSources: sources);
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
     }
   }
 
@@ -334,7 +401,9 @@ class NewsProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao adicionar feed RSS: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao adicionar feed RSS: ${failure.message}',
+          );
           return false;
         },
         (_) {
@@ -343,7 +412,7 @@ class NewsProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -355,7 +424,9 @@ class NewsProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao remover feed RSS: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao remover feed RSS: ${failure.message}',
+          );
           return false;
         },
         (_) {
@@ -364,7 +435,7 @@ class NewsProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -374,25 +445,30 @@ class NewsProvider with ChangeNotifier {
     List<CommodityType>? types,
     bool refresh = false,
   }) async {
-    if (_isLoadingCommodities && !refresh) return;
+    if (state.isLoadingCommodities && !refresh) return;
 
-    _setLoadingCommodities(true);
-    _clearError();
+    state = state.copyWith(isLoadingCommodities: true, clearError: true);
 
     try {
       final result = await _getCommodityPrices(types: types);
 
       result.fold(
-        (failure) => _setError('Erro ao carregar preços: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar preços: ${failure.message}',
+          isLoadingCommodities: false,
+        ),
         (prices) {
-          _commodityPrices = prices;
-          notifyListeners();
+          state = state.copyWith(
+            commodityPrices: prices,
+            isLoadingCommodities: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingCommodities(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingCommodities: false,
+      );
     }
   }
 
@@ -402,27 +478,27 @@ class NewsProvider with ChangeNotifier {
       final result = await _repository.getMarketSummary();
 
       result.fold(
-        (failure) =>
-            _setError('Erro ao carregar resumo do mercado: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar resumo do mercado: ${failure.message}',
+        ),
         (summary) {
-          _marketSummary = summary;
-          notifyListeners();
+          state = state.copyWith(marketSummary: summary);
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
     }
   }
 
   /// Apply news filter
   void applyFilter(NewsFilter filter) {
-    _currentFilter = filter;
+    state = state.copyWith(currentFilter: filter);
     loadNews(filter: filter);
   }
 
   /// Clear current filter
   void clearFilter() {
-    _currentFilter = null;
+    state = state.copyWith(clearCurrentFilter: true);
     loadNews();
   }
 
@@ -434,7 +510,7 @@ class NewsProvider with ChangeNotifier {
 
   /// Show only premium articles
   void showOnlyPremium(bool showOnly) {
-    final filter = (_currentFilter ?? const NewsFilter()).copyWith(
+    final filter = (state.currentFilter ?? const NewsFilter()).copyWith(
       showOnlyPremium: showOnly,
     );
     applyFilter(filter);
@@ -460,37 +536,8 @@ class NewsProvider with ChangeNotifier {
     ]);
   }
 
-  void _setLoadingNews(bool loading) {
-    _isLoadingNews = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingPremium(bool loading) {
-    _isLoadingPremium = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingCommodities(bool loading) {
-    _isLoadingCommodities = loading;
-    notifyListeners();
-  }
-
-  void _setRefreshing(bool refreshing) {
-    _isRefreshing = refreshing;
-    notifyListeners();
-  }
-
-  void _setSearching(bool searching) {
-    _isSearching = searching;
-    notifyListeners();
-  }
-
-  void _setError(String message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _errorMessage = null;
+  /// Clear error
+  void clearError() {
+    state = state.copyWith(clearError: true);
   }
 }

@@ -18,7 +18,7 @@ class HomePage extends ConsumerWidget {
         actions: [
           Builder(
             builder: (context) {
-              final authProvider = ref.watch(authProviderProvider);
+              final authNotifier = ref.read(authProvider.notifier);
               return PopupMenuButton<String>(
                 onSelected: (value) async {
                   switch (value) {
@@ -29,7 +29,7 @@ class HomePage extends ConsumerWidget {
                       await context.push('/home/settings');
                       break;
                     case 'logout':
-                      final result = await authProvider.logout();
+                      final result = await authNotifier.logout();
                       result.fold(
                         (failure) {
                           if (context.mounted) {

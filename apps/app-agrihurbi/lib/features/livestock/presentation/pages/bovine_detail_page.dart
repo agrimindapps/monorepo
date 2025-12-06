@@ -41,11 +41,11 @@ class _BovineDetailPageState extends ConsumerState<BovineDetailPage> {
   }
 
   Future<void> _loadBovineDetails() async {
-    final provider = ref.read(bovinesProviderProvider);
-    var bovine = provider.getBovineById(widget.bovineId);
+    final notifier = ref.read(bovinesProvider.notifier);
+    var bovine = notifier.getBovineById(widget.bovineId);
     if (bovine == null) {
-      await provider.loadBovineById(widget.bovineId);
-      bovine = provider.selectedBovine;
+      await notifier.loadBovineById(widget.bovineId);
+      bovine = notifier.selectedBovine;
     }
 
     if (mounted) {
@@ -537,8 +537,8 @@ class _BovineDetailPageState extends ConsumerState<BovineDetailPage> {
   }
 
   void _deleteBovine() async {
-    final provider = ref.read(bovinesProviderProvider);
-    final success = await provider.deleteBovine(_bovine!.id);
+    final notifier = ref.read(bovinesProvider.notifier);
+    final success = await notifier.deleteBovine(_bovine!.id);
     
     if (!mounted) return;
     
@@ -553,7 +553,7 @@ class _BovineDetailPageState extends ConsumerState<BovineDetailPage> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao excluir bovino: ${provider.errorMessage}'),
+          content: Text('Erro ao excluir bovino: ${notifier.errorMessage}'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );

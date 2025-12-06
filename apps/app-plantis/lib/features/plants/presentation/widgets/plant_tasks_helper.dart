@@ -20,14 +20,33 @@ class PlantTasksHelper {
       if (!tasksAsync.hasValue) return 0;
 
       final tasksState = tasksAsync.value!;
+      
+      // DEBUG: Log para investigar o problema
+      debugPrint('🔍 PlantTasksHelper.getPendingTasksCount - plantId: $plantId');
+      debugPrint('🔍 Total de tarefas no state: ${tasksState.allTasks.length}');
+      
       final plantTasks = tasksState.allTasks
           .whereType<task_entity.Task>()
-          .where((task) => task.plantId == plantId)
+          .where((task) {
+            final matches = task.plantId == plantId && !task.isDeleted;
+            if (task.plantId.isNotEmpty) {
+              debugPrint('🔍 Task "${task.title}" plantId: ${task.plantId}, match: $matches, isDeleted: ${task.isDeleted}, status: ${task.status}');
+            }
+            return matches;
+          })
           .toList();
+          
+      debugPrint('🔍 Tarefas filtradas para planta: ${plantTasks.length}');
+      
       final pendingTasks = plantTasks
-          .where((task) => task.status == task_entity.TaskStatus.pending)
+          .where(
+            (task) =>
+                task.status == task_entity.TaskStatus.pending ||
+                task.status == task_entity.TaskStatus.overdue,
+          )
           .length;
 
+      debugPrint('🔍 Tarefas pendentes/atrasadas: $pendingTasks');
       return pendingTasks;
     } catch (e) {
       debugPrint('Erro ao buscar tarefas pendentes para planta $plantId: $e');
@@ -47,8 +66,8 @@ class PlantTasksHelper {
           .where(
             (task) =>
                 task.plantId == plantId &&
-                task.status == task_entity.TaskStatus.pending &&
-                task.isOverdue,
+                !task.isDeleted &&
+                task.status == task_entity.TaskStatus.overdue,
           )
           .length;
 
@@ -88,9 +107,7 @@ class PlantTasksHelper {
 
     return TaskBadgeInfo(
       count: pendingCount,
-      text: pendingCount == 1
-          ? '1 tarefa pendente'
-          : '$pendingCount tarefas pendentes',
+      text: '$pendingCount pendente${pendingCount > 1 ? 's' : ''}',
       color: const Color(0xFFFF9500), // Laranja
       backgroundColor: const Color(0xFFFF9500).withValues(alpha: 0.15),
       icon: Icons.schedule,

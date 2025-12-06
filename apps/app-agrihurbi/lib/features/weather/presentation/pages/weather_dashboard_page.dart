@@ -25,7 +25,7 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(weatherProviderProvider).initialize();
+      ref.read(weatherProvider.notifier).initialize();
     });
   }
 
@@ -37,6 +37,8 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   @override
   Widget build(BuildContext context) {
+    final state = ref.watch(weatherProvider);
+    final notifier = ref.read(weatherProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Estação Meteorológica'),
@@ -44,10 +46,9 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
         actions: [
           Builder(
             builder: (context) {
-              final provider = ref.watch(weatherProviderProvider);
               return IconButton(
-                onPressed: provider.isSyncing ? null : () => _syncWeatherData(),
-                icon: provider.isSyncing
+                onPressed: state.isSyncing ? null : () => _syncWeatherData(),
+                icon: state.isSyncing
                     ? const SizedBox(
                         width: 20,
                         height: 20,
@@ -75,8 +76,7 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
       ),
       body: Builder(
         builder: (context) {
-          final provider = ref.watch(weatherProviderProvider);
-          if (provider.isLoading && !provider.hasMeasurements) {
+          if (state.isLoading && !state.hasMeasurements) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -89,7 +89,7 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
             );
           }
 
-          if (provider.hasError && !provider.hasMeasurements) {
+          if (state.hasError && !state.hasMeasurements) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -106,13 +106,13 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    provider.errorMessage ?? 'Erro desconhecido',
+                    state.errorMessage ?? 'Erro desconhecido',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => provider.initialize(),
+                    onPressed: () => notifier.initialize(),
                     child: const Text('Tentar Novamente'),
                   ),
                 ],
@@ -123,9 +123,9 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
           return TabBarView(
             controller: _tabController,
             children: [
-              _buildCurrentWeatherTab(provider),
-              _buildHistoryTab(provider),
-              _buildRainGaugesTab(provider),
+              _buildCurrentWeatherTab(state, notifier),
+              _buildHistoryTab(state, notifier),
+              _buildRainGaugesTab(state, notifier),
             ],
           );
         },
@@ -139,9 +139,9 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
   }
 
   /// Build current weather tab
-  Widget _buildCurrentWeatherTab(WeatherProvider provider) {
+  Widget _buildCurrentWeatherTab(WeatherState state, WeatherNotifier notifier) {
     return RefreshIndicator(
-      onRefresh: () => provider.loadLatestMeasurement(),
+      onRefresh: () => notifier.loadLatestMeasurement(),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
@@ -149,14 +149,14 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             WeatherCurrentCard(
-              measurement: provider.latestMeasurement,
-              isLoading: provider.isLoading,
+              measurement: state.latestMeasurement,
+              isLoading: state.isLoading,
             ),
             
             const SizedBox(height: 16),
-            if (provider.hasStatistics) ...[
+            if (state.hasStatistics) ...[
               WeatherStatisticsCard(
-                statistics: provider.statistics.first,
+                statistics: state.statistics.first,
               ),
               const SizedBox(height: 16),
             ],
@@ -205,7 +205,7 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
   }
 
   /// Build history tab
-  Widget _buildHistoryTab(WeatherProvider provider) {
+  Widget _buildHistoryTab(WeatherState state, WeatherNotifier notifier) {
     return Column(
       children: [
         Container(
@@ -217,7 +217,7 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
                 child: ElevatedButton.icon(
                   onPressed: () => _showDateRangePicker(),
                   icon: const Icon(Icons.date_range),
-                  label: Text(_getDateRangeText(provider)),
+                  label: Text(_getDateRangeText(state)),
                 ),
               ),
               const SizedBox(width: 8),
@@ -231,11 +231,11 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
         ),
         Expanded(
           child: WeatherMeasurementsList(
-            measurements: provider.measurements,
-            isLoading: provider.isMeasurementsLoading,
-            hasMore: provider.hasMoreMeasurements,
-            onLoadMore: () => provider.loadMoreMeasurements(),
-            onRefresh: () => provider.loadMeasurements(refresh: true),
+            measurements: state.measurements,
+            isLoading: state.isMeasurementsLoading,
+            hasMore: state.hasMoreMeasurements,
+            onLoadMore: () => notifier.loadMoreMeasurements(),
+            onRefresh: () => notifier.loadMeasurements(refresh: true),
           ),
         ),
       ],
@@ -243,9 +243,9 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
   }
 
   /// Build rain gauges tab
-  Widget _buildRainGaugesTab(WeatherProvider provider) {
+  Widget _buildRainGaugesTab(WeatherState state, WeatherNotifier notifier) {
     return RefreshIndicator(
-      onRefresh: () => provider.loadRainGauges(refresh: true),
+      onRefresh: () => notifier.loadRainGauges(refresh: true),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(16),
@@ -253,8 +253,8 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             RainGaugesSummary(
-              rainGauges: provider.rainGauges,
-              isLoading: provider.isRainGaugesLoading,
+              rainGauges: state.rainGauges,
+              isLoading: state.isRainGaugesLoading,
             ),
             
             const SizedBox(height: 16),
@@ -269,9 +269,9 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
-                    _buildStatusRow('Operacionais', provider.operationalRainGauges.length, Colors.green),
-                    _buildStatusRow('Necessitam Manutenção', provider.rainGaugesNeedingMaintenance.length, Colors.orange),
-                    _buildStatusRow('Total', provider.rainGauges.length, Colors.blue),
+                    _buildStatusRow('Operacionais', state.operationalRainGauges.length, Colors.green),
+                    _buildStatusRow('Necessitam Manutenção', state.rainGaugesNeedingMaintenance.length, Colors.orange),
+                    _buildStatusRow('Total', state.rainGauges.length, Colors.blue),
                   ],
                 ),
               ),
@@ -341,21 +341,21 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
   }
 
   /// Get date range text for display
-  String _getDateRangeText(WeatherProvider provider) {
-    if (provider.startDate == null && provider.endDate == null) {
+  String _getDateRangeText(WeatherState state) {
+    if (state.startDate == null && state.endDate == null) {
       return 'Período: Todos';
     }
     
-    final start = provider.startDate?.toLocal().toString().split(' ')[0] ?? 'Início';
-    final end = provider.endDate?.toLocal().toString().split(' ')[0] ?? 'Fim';
+    final start = state.startDate?.toLocal().toString().split(' ')[0] ?? 'Início';
+    final end = state.endDate?.toLocal().toString().split(' ')[0] ?? 'Fim';
     
     return '$start - $end';
   }
 
   /// Sync weather data
   Future<void> _syncWeatherData() async {
-    final provider = ref.read(weatherProviderProvider);
-    final success = await provider.syncWeatherData();
+    final notifier = ref.read(weatherProvider.notifier);
+    final success = await notifier.syncWeatherData();
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -433,19 +433,20 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Show date range picker
   Future<void> _showDateRangePicker() async {
-    final provider = ref.read(weatherProviderProvider);
+    final state = ref.read(weatherProvider);
+    final notifier = ref.read(weatherProvider.notifier);
     
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime.now().subtract(const Duration(days: 365)),
       lastDate: DateTime.now(),
-      initialDateRange: provider.startDate != null && provider.endDate != null
-          ? DateTimeRange(start: provider.startDate!, end: provider.endDate!)
+      initialDateRange: state.startDate != null && state.endDate != null
+          ? DateTimeRange(start: state.startDate!, end: state.endDate!)
           : null,
     );
 
     if (picked != null) {
-      provider.setDateRangeFilter(picked.start, picked.end);
+      notifier.setDateRangeFilter(picked.start, picked.end);
     }
   }
 
@@ -499,18 +500,19 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
     const latitude = -23.5505;
     const longitude = -46.6333;
     
-    final provider = ref.read(weatherProviderProvider);
-    await provider.getCurrentWeatherFromAPI(latitude, longitude);
+    final notifier = ref.read(weatherProvider.notifier);
+    await notifier.getCurrentWeatherFromAPI(latitude, longitude);
     
+    final state = ref.read(weatherProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            provider.hasError 
+            state.hasError 
                 ? 'Erro ao obter dados da API'
                 : 'Dados atualizados da API!',
           ),
-          backgroundColor: provider.hasError ? Colors.red : Colors.green,
+          backgroundColor: state.hasError ? Colors.red : Colors.green,
         ),
       );
     }
@@ -521,18 +523,19 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
     const latitude = -23.5505;
     const longitude = -46.6333;
     
-    final provider = ref.read(weatherProviderProvider);
-    await provider.getWeatherForecast(latitude, longitude, days: 7);
+    final notifier = ref.read(weatherProvider.notifier);
+    await notifier.getWeatherForecast(latitude, longitude, days: 7);
     
+    final state = ref.read(weatherProvider);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            provider.hasError 
+            state.hasError 
                 ? 'Erro ao obter previsão'
                 : 'Previsão de 7 dias obtida!',
           ),
-          backgroundColor: provider.hasError ? Colors.red : Colors.green,
+          backgroundColor: state.hasError ? Colors.red : Colors.green,
         ),
       );
     }

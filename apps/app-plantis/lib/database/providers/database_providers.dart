@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../plantis_database.dart';
 import '../repositories/comments_drift_repository.dart';
 import '../repositories/plant_tasks_drift_repository.dart';
+import '../repositories/plant_images_drift_repository.dart';
 import '../repositories/plants_drift_repository.dart';
 import '../repositories/spaces_drift_repository.dart';
 import '../repositories/tasks_drift_repository.dart';
@@ -154,4 +155,9 @@ final spacesDriftRepositoryProvider = Provider<SpacesDriftRepository>((ref) {
 final commentsDriftRepositoryProvider = Provider<CommentsDriftRepository>((ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return CommentsDriftRepository(db);
+});
+
+final plantImagesDriftRepositoryProvider = Provider<PlantImagesDriftRepository>((ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return PlantImagesDriftRepository(db);
 });

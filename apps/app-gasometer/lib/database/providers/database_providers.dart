@@ -8,7 +8,9 @@ import '../../features/maintenance/domain/repositories/maintenance_repository.da
 import '../../features/odometer/data/repositories/odometer_repository_drift_impl.dart';
 import '../../features/odometer/domain/repositories/odometer_repository.dart';
 import '../gasometer_database.dart';
+import '../repositories/receipt_images_repository.dart';
 import '../repositories/repositories.dart';
+import '../repositories/vehicle_images_repository.dart';
 
 /// Provider do banco de dados principal
 ///
@@ -113,6 +115,18 @@ final expensesDomainRepositoryProvider = Provider<IExpensesRepository>((ref) {
 final auditTrailRepositoryProvider = Provider<AuditTrailRepository>((ref) {
   final db = ref.watch(gasometerDatabaseProvider);
   return AuditTrailRepository(db);
+});
+
+/// Provider do repositório de imagens de veículos
+final vehicleImagesDriftRepositoryProvider = Provider<VehicleImagesDriftRepository>((ref) {
+  final db = ref.watch(gasometerDatabaseProvider);
+  return VehicleImagesDriftRepository(db);
+});
+
+/// Provider do repositório de imagens de comprovantes
+final receiptImagesDriftRepositoryProvider = Provider<ReceiptImagesDriftRepository>((ref) {
+  final db = ref.watch(gasometerDatabaseProvider);
+  return ReceiptImagesDriftRepository(db);
 });
 
 // ========== STREAM PROVIDERS ==========

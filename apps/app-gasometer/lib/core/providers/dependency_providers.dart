@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide connectivityServiceProvider;
 
 import '../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../core/services/connectivity/connectivity_state_manager.dart';
@@ -278,5 +278,19 @@ final gasometerSyncServiceProvider = Provider<GasometerSyncService>((ref) {
   return GasometerSyncService(
     pushService: ref.watch(syncPushServiceProvider),
     pullService: ref.watch(syncPullServiceProvider),
+  );
+});
+
+// Device Management
+final firebaseDeviceServiceProvider = Provider<FirebaseDeviceService>((ref) {
+  return FirebaseDeviceService();
+});
+
+final deviceManagementServiceProvider = Provider<DeviceManagementService>((ref) {
+  return DeviceManagementService(
+    firebaseDeviceService: ref.watch(firebaseDeviceServiceProvider),
+    authService: ref.watch(firebaseAuthServiceProvider),
+    analyticsService: ref.watch(firebaseAnalyticsServiceProvider),
+    deviceRepository: ref.watch(firebaseDeviceServiceProvider),
   );
 });

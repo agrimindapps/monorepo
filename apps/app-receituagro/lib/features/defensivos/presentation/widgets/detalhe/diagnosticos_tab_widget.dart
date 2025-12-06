@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/providers/core_providers.dart';
 import '../../../../../core/theme/spacing_tokens.dart';
-import '../../../../../database/receituagro_database.dart';
-import '../../../../diagnosticos/domain/entities/diagnostico_entity.dart';
-import '../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
+import '../../../../diagnosticos/presentation/providers/diagnosticos_by_entity_provider.dart';
 import '../../providers/detalhe_defensivo_notifier.dart';
 import 'diagnosticos_defensivos_components.dart';
 
 /// Widget principal responsável por exibir diagnósticos relacionados ao defensivo
+///
+/// **VERSÃO REFATORADA** - Usa o provider unificado `diagnosticosByEntityProvider`
+/// que resolve todos os nomes no backend, eliminando FutureBuilders.
 ///
 /// Responsabilidade única: orquestrar componentes para exibir diagnósticos
 /// - Filtros de pesquisa e cultura
@@ -19,15 +19,14 @@ import 'diagnosticos_defensivos_components.dart';
 ///
 /// **Arquitetura Decomposta:**
 /// - `DiagnosticoDefensivoFilterWidget`: Filtros de pesquisa
-/// - `DiagnosticoDefensivoStateManager`: Gerenciamento de estados
 /// - `DiagnosticoDefensivoListItemWidget`: Itens da lista
 /// - `DiagnosticoDefensivoDialogWidget`: Modal de detalhes
 ///
 /// **Performance Otimizada:**
 /// - RepaintBoundary para evitar rebuilds desnecessários
-/// - Componentes reutilizáveis e modulares
-/// - Estados gerenciados de forma eficiente
-/// Migrated to Riverpod - uses ConsumerWidget
+/// - Nomes resolvidos no provider (não no widget)
+/// - Sem FutureBuilder aninhados
+/// - Estado consistente e tipado
 class DiagnosticosTabWidget extends ConsumerWidget {
   final String defensivoName;
 
@@ -35,288 +34,287 @@ class DiagnosticosTabWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final diagnosticosAsync = ref.watch(diagnosticosProvider);
-
-    return RepaintBoundary(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Passa culturas disponíveis do agrupamento para o filtro
-          diagnosticosAsync.when(
-            data: (state) {
-              return FutureBuilder<Map<String, List<dynamic>>>(
-                future: _groupDiagnosticsByCulture(
-                  ref,
-                  state.searchQuery.isNotEmpty
-                      ? state.searchResults
-                      : state.filteredDiagnosticos,
-                ),
-                builder: (context, snapshot) {
-                  final culturas = snapshot.data?.keys.toList() ?? [];
-                  return DiagnosticoDefensivoFilterWidget(
-                    availableCulturas: culturas,
-                  );
-                },
-              );
-            },
-            loading: () => const DiagnosticoDefensivoFilterWidget(),
-            error: (_, __) => const DiagnosticoDefensivoFilterWidget(),
-          ),
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(
-                top: SpacingTokens.xs,
-                bottom: SpacingTokens.bottomNavSpace, // Espaço para bottom nav
-              ),
-              child: DiagnosticoDefensivoStateManager(
-                defensivoName: defensivoName,
-                builder: (diagnosticos) => _buildDiagnosticsList(context, ref, diagnosticos),
-                onRetry: () => _retryLoadDiagnostics(ref),
-              ),
-            ),
-          ),
-        ],
+    // Obtém o ID do defensivo do provider de detalhes
+    final detalheState = ref.watch(detalheDefensivoProvider);
+    
+    return detalheState.when(
+      data: (data) {
+        final defensivoId = data.defensivoData?.idDefensivo;
+        
+        if (defensivoId == null || defensivoId.isEmpty) {
+          return _buildEmptyState(
+            context,
+            hasFilters: false,
+            message: 'Carregando dados do defensivo...',
+          );
+        }
+        
+        return _DiagnosticosContent(
+          defensivoId: defensivoId,
+          defensivoName: defensivoName,
+        );
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => _buildErrorState(
+        context,
+        error.toString(),
+        () => ref.invalidate(detalheDefensivoProvider),
       ),
     );
   }
 
-  /// Callback para retry quando houver erro
-  void _retryLoadDiagnostics(WidgetRef ref) {
-    final defensivoState = ref.read(detalheDefensivoProvider);
-    defensivoState.whenData((data) {
-      final idReg = data.defensivoData?.idDefensivo;
-      final nomeDefensivo = data.defensivoData?.nomeComum;
-      if (idReg != null) {
-        ref
-            .read(diagnosticosProvider.notifier)
-            .getDiagnosticosByDefensivo(idReg, nomeDefensivo: nomeDefensivo);
-      }
-    });
-  }
-
-  /// Constrói lista de diagnósticos agrupados por cultura
-  Widget _buildDiagnosticsList(BuildContext context, WidgetRef ref, List<dynamic> diagnosticos) {
-    return FutureBuilder<Map<String, List<dynamic>>>(
-      future: _groupDiagnosticsByCulture(ref, diagnosticos),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Erro: ${snapshot.error}'));
-        }
-
-        final groupedDiagnostics = snapshot.data ?? {};
-
-        // Usa FutureBuilder aninhado para ordenação assíncrona
-        return FutureBuilder<Widget>(
-          future: _buildGroupedWidgets(ref, groupedDiagnostics),
-          builder: (context, widgetSnapshot) {
-            if (widgetSnapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (widgetSnapshot.hasError) {
-              return Center(
-                child: Text('Erro ao ordenar: ${widgetSnapshot.error}'),
-              );
-            }
-
-            return widgetSnapshot.data ?? const SizedBox.shrink();
-          },
-        );
-      },
+  Widget _buildEmptyState(BuildContext context, {required bool hasFilters, String? message}) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              hasFilters ? Icons.search_off : Icons.science_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message ?? (hasFilters
+                  ? 'Nenhum diagnóstico encontrado'
+                  : 'Nenhum diagnóstico disponível'),
+              style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  /// Agrupa diagnósticos por cultura usando dados reais do repositório
-  Future<Map<String, List<dynamic>>> _groupDiagnosticsByCulture(
-    WidgetRef ref,
-    List<dynamic> diagnosticos,
-  ) async {
-    final grouped = <String, List<dynamic>>{};
-    final culturaRepository = ref.read(culturasRepositoryProvider);
+  Widget _buildErrorState(BuildContext context, String message, VoidCallback onRetry) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar diagnósticos',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.red.shade600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('Tentar Novamente'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-    for (final diagnostic in diagnosticos) {
-      String culturaNome = 'Não especificado';
+/// Widget interno que gerencia o estado dos diagnósticos
+class _DiagnosticosContent extends ConsumerWidget {
+  final String defensivoId;
+  final String defensivoName;
 
-      try {
-        final idCulturaStr = _getPropertyFromDiagnostic(
-          diagnostic,
-          'idCultura',
-        );
-        if (idCulturaStr != null) {
-          final idCultura = int.tryParse(idCulturaStr);
-          if (idCultura != null) {
-            final culturaData = await culturaRepository.findById(idCultura);
-            if (culturaData != null) {
-              culturaNome = culturaData.nome;
-            }
+  const _DiagnosticosContent({
+    required this.defensivoId,
+    required this.defensivoName,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final params = DiagnosticosByEntityParams(
+      entityType: DiagnosticoEntityType.defensivo,
+      entityId: defensivoId,
+      entityName: defensivoName,
+    );
+
+    final stateAsync = ref.watch(diagnosticosByEntityProvider(params));
+
+    return RepaintBoundary(
+      child: stateAsync.when(
+        data: (state) {
+          if (state.isLoading) {
+            return const Center(child: CircularProgressIndicator());
           }
-        }
-        if (culturaNome == 'Não especificado') {
-          final nomeCultura = _getPropertyFromDiagnostic(
-            diagnostic,
-            'nomeCultura',
+
+          if (state.hasError) {
+            return _buildErrorWidget(
+              context,
+              state.errorMessage ?? 'Erro desconhecido',
+              () => ref
+                  .read(diagnosticosByEntityProvider(params).notifier)
+                  .loadDiagnosticos(),
+            );
+          }
+
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Filtros
+              DiagnosticoDefensivoFilterWidget(
+                params: params,
+                availableCulturas: state.culturas
+                    .where((c) => c != 'Todas')
+                    .toList(),
+              ),
+
+              // Lista
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(
+                    top: SpacingTokens.xs,
+                    bottom: SpacingTokens.bottomNavSpace,
+                  ),
+                  child: state.filteredItems.isEmpty
+                      ? _buildEmptyWidget(
+                          context,
+                          hasFilters: state.searchQuery.isNotEmpty ||
+                              state.selectedCultura != 'Todas',
+                          onClearFilters: () => ref
+                              .read(diagnosticosByEntityProvider(params).notifier)
+                              .clearFilters(),
+                        )
+                      : _DiagnosticosList(
+                          ref: ref,
+                          params: params,
+                          groupedItems: state.groupedItems,
+                          defensivoName: defensivoName,
+                        ),
+                ),
+              ),
+            ],
           );
-          final culturaProp = _getPropertyFromDiagnostic(diagnostic, 'cultura');
-          culturaNome = nomeCultura ?? culturaProp ?? 'Não especificado';
-        }
-      } catch (e) {
-        culturaNome = 'Não especificado';
-      }
-
-      grouped.putIfAbsent(culturaNome, () => []).add(diagnostic);
-    }
-
-    return grouped;
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => _buildErrorWidget(
+          context,
+          error.toString(),
+          () => ref
+              .read(diagnosticosByEntityProvider(params).notifier)
+              .loadDiagnosticos(),
+        ),
+      ),
+    );
   }
 
-  /// Helper para extrair propriedades de um diagnóstico
-  String? _getPropertyFromDiagnostic(dynamic diagnostic, String property) {
-    try {
-      if (diagnostic is Map<String, dynamic>) {
-        return diagnostic[property]?.toString();
-      } else {
-        switch (property) {
-          case 'idCultura':
-            return diagnostic.idCultura?.toString();
-          case 'nomeCultura':
-            return diagnostic.nomeCultura?.toString();
-          case 'cultura':
-            return diagnostic.cultura?.toString();
-          default:
-            return null;
-        }
-      }
-    } catch (e) {
-      return null;
-    }
+  Widget _buildErrorWidget(BuildContext context, String message, VoidCallback onRetry) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
+            const SizedBox(height: 16),
+            Text(
+              'Erro ao carregar diagnósticos',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.red.shade600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              child: const Text('Tentar Novamente'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  /// Constrói widgets agrupados por cultura usando ListView.separated
-  Future<Widget> _buildGroupedWidgets(
-    WidgetRef ref,
-    Map<String, List<dynamic>> groupedDiagnostics,
-  ) async {
-    // Ordena culturas alfabeticamente
-    final culturasOrdenadas = groupedDiagnostics.keys.toList()..sort();
+  Widget _buildEmptyWidget(
+    BuildContext context, {
+    required bool hasFilters,
+    VoidCallback? onClearFilters,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              hasFilters ? Icons.search_off : Icons.science_outlined,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              hasFilters
+                  ? 'Nenhum diagnóstico encontrado'
+                  : 'Nenhum diagnóstico disponível',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              hasFilters
+                  ? 'Tente ajustar os filtros de pesquisa'
+                  : 'Este defensivo ainda não possui diagnósticos cadastrados',
+              style: Theme.of(context).textTheme.bodyMedium,
+              textAlign: TextAlign.center,
+            ),
+            if (hasFilters && onClearFilters != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(
+                onPressed: onClearFilters,
+                child: const Text('Limpar Filtros'),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-    // Cria lista flat com headers e itens para ListView.separated
-    final List<_DiagnosticoListItem> flatList = [];
+/// Lista de diagnósticos agrupados por cultura
+class _DiagnosticosList extends StatelessWidget {
+  final WidgetRef ref;
+  final DiagnosticosByEntityParams params;
+  final Map<String, List<DiagnosticoDisplayItem>> groupedItems;
+  final String defensivoName;
+
+  const _DiagnosticosList({
+    required this.ref,
+    required this.params,
+    required this.groupedItems,
+    required this.defensivoName,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Cria lista flat com headers e itens
+    final flatList = <_ListItem>[];
+    final culturasOrdenadas = groupedItems.keys.toList()..sort();
 
     for (final cultura in culturasOrdenadas) {
-      final diagnostics = groupedDiagnostics[cultura]!;
+      final diagnosticos = List<DiagnosticoDisplayItem>.from(groupedItems[cultura]!);
 
-      // Ordena diagnósticos por nome comum da praga usando ordenação assíncrona
-      // Precisamos buscar os nomes das pragas do repositório para ordenar corretamente
-      final diagnosticsComNomes = <MapEntry<dynamic, String>>[];
-      final pragaRepository = ref.read(pragasRepositoryProvider);
+      // Ordena por nome da praga
+      diagnosticos.sort((a, b) =>
+          a.nomePraga.toLowerCase().compareTo(b.nomePraga.toLowerCase()));
 
-      for (final diagnostic in diagnostics) {
-        String nomePraga = '';
+      // Header da cultura
+      flatList.add(_ListItem.header(cultura, diagnosticos.length, diagnosticos));
 
-        if (diagnostic is Map<String, dynamic>) {
-          nomePraga = (diagnostic['nomePraga'] ?? diagnostic['grupo'] ?? '')
-              .toString();
-        } else if (diagnostic is DiagnosticoEntity) {
-          nomePraga = diagnostic.nomePraga ?? '';
-        } else {
-          try {
-            nomePraga =
-                diagnostic.nomePraga?.toString() ??
-                diagnostic.grupo?.toString() ??
-                '';
-          } catch (e) {
-            nomePraga = '';
-          }
-        }
-
-        // Se nomePraga estiver vazio ou for "Não especificado", busca do repositório
-        if (nomePraga.isEmpty || nomePraga == 'Não especificado') {
-          Praga? pragaData;
-          
-          // Para Diagnostico do Drift, usar pragaId (int)
-          if (diagnostic is Diagnostico) {
-            pragaData = await pragaRepository.findById(diagnostic.pragaId);
-          } else if (diagnostic is DiagnosticoEntity) {
-            // Para DiagnosticoEntity, idPraga é string
-            final intId = int.tryParse(diagnostic.idPraga);
-            if (intId != null) {
-              pragaData = await pragaRepository.findById(intId);
-            }
-            if (pragaData == null) {
-              pragaData = await pragaRepository.getById(diagnostic.idPraga);
-            }
-          } else {
-            // Para Map ou outros tipos
-            String? fkIdPraga;
-            if (diagnostic is Map<String, dynamic>) {
-              fkIdPraga = diagnostic['fkIdPraga']?.toString() ?? 
-                         diagnostic['pragaId']?.toString();
-            } else {
-              try {
-                fkIdPraga = diagnostic.fkIdPraga?.toString() ??
-                           diagnostic.pragaId?.toString();
-              } catch (e) {
-                // ignore
-              }
-            }
-
-            if (fkIdPraga != null && fkIdPraga.isNotEmpty) {
-              // Tenta primeiro como int (ID do banco)
-              final intId = int.tryParse(fkIdPraga);
-              if (intId != null) {
-                pragaData = await pragaRepository.findById(intId);
-              }
-              // Se não encontrou, tenta como string (idPraga original)
-              if (pragaData == null) {
-                pragaData = await pragaRepository.getById(fkIdPraga);
-              }
-            }
-          }
-          
-          if (pragaData != null) {
-            final nomeComum = pragaData.nome;
-            // Extrai primeiro nome se houver vírgula ou ponto-e-vírgula
-            if (nomeComum.contains(',')) {
-              nomePraga = nomeComum.split(',').first.trim();
-            } else if (nomeComum.contains(';')) {
-              nomePraga = nomeComum.split(';').first.trim();
-            } else {
-              nomePraga = nomeComum;
-            }
-          }
-        }
-
-        diagnosticsComNomes.add(MapEntry(diagnostic, nomePraga));
-      }
-
-      // Ordena por nome
-      diagnosticsComNomes.sort(
-        (a, b) => a.value.toLowerCase().trim().compareTo(
-          b.value.toLowerCase().trim(),
-        ),
-      );
-
-      // Extrai apenas os diagnósticos ordenados
-      final diagnosticsOrdenados = diagnosticsComNomes
-          .map((e) => e.key)
-          .toList();
-
-      // Adiciona header da cultura
-      flatList.add(
-        _DiagnosticoListItem.header(
-          cultura,
-          diagnosticsOrdenados.length,
-          diagnosticsOrdenados,
-        ),
-      );
-
-      // Adiciona todos os diagnósticos dessa cultura (já ordenados)
-      for (final diagnostic in diagnosticsOrdenados) {
-        flatList.add(_DiagnosticoListItem.diagnostic(diagnostic));
+      // Itens da cultura
+      for (final item in diagnosticos) {
+        flatList.add(_ListItem.item(item));
       }
     }
 
@@ -325,83 +323,96 @@ class DiagnosticosTabWidget extends ConsumerWidget {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: flatList.length,
       separatorBuilder: (context, index) {
-        final currentItem = flatList[index];
-        final nextItem = index + 1 < flatList.length
-            ? flatList[index + 1]
-            : null;
+        final current = flatList[index];
+        final next = index + 1 < flatList.length ? flatList[index + 1] : null;
 
-        // Espaçamento após header
-        if (currentItem.isHeader) {
+        if (current.isHeader) {
           return const SizedBox(height: 2);
         }
-
-        // Espaçamento maior antes do próximo header
-        if (nextItem != null && nextItem.isHeader) {
+        if (next != null && next.isHeader) {
           return const SizedBox(height: 2);
         }
-
-        // Divider entre cards
         return const Divider(height: 1, thickness: 1);
       },
       itemBuilder: (context, index) {
-        final item = flatList[index];
+        final listItem = flatList[index];
 
-        if (item.isHeader) {
+        if (listItem.isHeader) {
           return DiagnosticoDefensivoCultureSectionWidget(
-            cultura: item.cultura!,
-            diagnosticCount: item.count!,
-            diagnosticos: item.diagnosticos,
+            cultura: listItem.headerTitle!,
+            diagnosticCount: listItem.headerCount!,
+            diagnosticos: listItem.diagnosticos!
+                .map((d) => _toDefensivoMap(d))
+                .toList(),
           );
         }
 
-        return Builder(
-          builder: (context) => DiagnosticoDefensivoListItemWidget(
-            diagnostico: item.diagnostic,
-            onTap: () => _showDiagnosticoDialog(context, ref, item.diagnostic),
-            isDense: true,
-            hasElevation: false,
-          ),
+        final item = listItem.diagnostico!;
+        return DiagnosticoDefensivoListItemWidget(
+          diagnostico: _toDefensivoMap(item),
+          onTap: () => _showDiagnosticoDialog(context, item),
+          isDense: true,
+          hasElevation: false,
         );
       },
     );
   }
 
-  /// Mostra modal de detalhes do diagnóstico
-  void _showDiagnosticoDialog(BuildContext context, WidgetRef ref, dynamic diagnostico) {
-    DiagnosticoDefensivoDialogWidget.show(context, ref, diagnostico, defensivoName);
+  /// Converte DiagnosticoDisplayItem para Map usado pelos widgets existentes
+  Map<String, dynamic> _toDefensivoMap(DiagnosticoDisplayItem item) {
+    return {
+      'id': item.id,
+      'nomePraga': item.nomePraga,
+      'nomeCultura': item.nomeCultura,
+      'nomeDefensivo': item.nomeDefensivo,
+      'ingredienteAtivo': item.ingredienteAtivo,
+      'dosagem': item.dosagem,
+      'aplicacaoTerrestre': item.aplicacaoTerrestre,
+      'aplicacaoAerea': item.aplicacaoAerea,
+      'intervaloSeguranca': item.intervaloSeguranca,
+    };
+  }
+
+  void _showDiagnosticoDialog(BuildContext context, DiagnosticoDisplayItem item) {
+    DiagnosticoDefensivoDialogWidget.show(
+      context,
+      ref,
+      _toDefensivoMap(item),
+      defensivoName,
+    );
   }
 }
 
-/// Helper class para representar items na lista flat (headers ou diagnósticos)
-class _DiagnosticoListItem {
+/// Item da lista (header ou diagnóstico)
+class _ListItem {
   final bool isHeader;
-  final String? cultura;
-  final int? count;
-  final List<dynamic>? diagnosticos;
-  final dynamic diagnostic;
+  final String? headerTitle;
+  final int? headerCount;
+  final List<DiagnosticoDisplayItem>? diagnosticos;
+  final DiagnosticoDisplayItem? diagnostico;
 
-  _DiagnosticoListItem._({
+  _ListItem._({
     required this.isHeader,
-    this.cultura,
-    this.count,
+    this.headerTitle,
+    this.headerCount,
     this.diagnosticos,
-    this.diagnostic,
+    this.diagnostico,
   });
 
-  factory _DiagnosticoListItem.header(
-    String cultura,
+  factory _ListItem.header(
+    String title,
     int count,
-    List<dynamic> diagnosticos,
+    List<DiagnosticoDisplayItem> diagnosticos,
   ) {
-    return _DiagnosticoListItem._(
+    return _ListItem._(
       isHeader: true,
-      cultura: cultura,
-      count: count,
+      headerTitle: title,
+      headerCount: count,
       diagnosticos: diagnosticos,
     );
   }
 
-  factory _DiagnosticoListItem.diagnostic(dynamic diagnostic) {
-    return _DiagnosticoListItem._(isHeader: false, diagnostic: diagnostic);
+  factory _ListItem.item(DiagnosticoDisplayItem diagnostico) {
+    return _ListItem._(isHeader: false, diagnostico: diagnostico);
   }
 }

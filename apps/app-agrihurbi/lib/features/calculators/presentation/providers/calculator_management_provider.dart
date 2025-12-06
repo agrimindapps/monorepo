@@ -1,136 +1,153 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/get_calculators.dart';
+import 'calculators_di_providers.dart';
+
+part 'calculator_management_provider.g.dart';
+
+/// State class for CalculatorManagement
+class CalculatorManagementState {
+  final List<CalculatorEntity> calculators;
+  final CalculatorEntity? selectedCalculator;
+  final bool isLoading;
+  final String? errorMessage;
+
+  const CalculatorManagementState({
+    this.calculators = const [],
+    this.selectedCalculator,
+    this.isLoading = false,
+    this.errorMessage,
+  });
+
+  CalculatorManagementState copyWith({
+    List<CalculatorEntity>? calculators,
+    CalculatorEntity? selectedCalculator,
+    bool? isLoading,
+    String? errorMessage,
+    bool clearSelectedCalculator = false,
+    bool clearError = false,
+  }) {
+    return CalculatorManagementState(
+      calculators: calculators ?? this.calculators,
+      selectedCalculator: clearSelectedCalculator ? null : (selectedCalculator ?? this.selectedCalculator),
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
+  }
+
+  int get totalCalculators => calculators.length;
+  bool get hasSelectedCalculator => selectedCalculator != null;
+
+  List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
+    return calculators.where((calc) => calc.category == category).toList();
+  }
+
+  Set<CalculatorCategory> get availableCategories {
+    return calculators.map((calc) => calc.category).toSet();
+  }
+}
 
 /// Provider especializado para gerenciamento de calculadoras
 /// 
 /// Responsabilidade única: CRUD e gerenciamento de estado de calculadoras
 /// Seguindo Single Responsibility Principle
-class CalculatorManagementProvider extends ChangeNotifier {
-  final GetCalculators _getCalculators;
-  final GetCalculatorsByCategory _getCalculatorsByCategory;
-  final GetCalculatorById _getCalculatorById;
+@riverpod
+class CalculatorManagementNotifier extends _$CalculatorManagementNotifier {
+  GetCalculators get _getCalculators => ref.read(getCalculatorsUseCaseProvider);
+  GetCalculatorById get _getCalculatorById => ref.read(getCalculatorByIdUseCaseProvider);
 
-  CalculatorManagementProvider({
-    required GetCalculators getCalculators,
-    required GetCalculatorsByCategory getCalculatorsByCategory,
-    required GetCalculatorById getCalculatorById,
-  })  : _getCalculators = getCalculators,
-        _getCalculatorsByCategory = getCalculatorsByCategory,
-        _getCalculatorById = getCalculatorById;
+  @override
+  CalculatorManagementState build() {
+    return const CalculatorManagementState();
+  }
 
-  List<CalculatorEntity> _calculators = [];
-  CalculatorEntity? _selectedCalculator;
-  bool _isLoading = false;
-  String? _errorMessage;
+  // Convenience getters for backward compatibility
+  List<CalculatorEntity> get calculators => state.calculators;
+  CalculatorEntity? get selectedCalculator => state.selectedCalculator;
+  bool get isLoading => state.isLoading;
+  String? get errorMessage => state.errorMessage;
+  int get totalCalculators => state.totalCalculators;
+  bool get hasSelectedCalculator => state.hasSelectedCalculator;
 
-  List<CalculatorEntity> get calculators => _calculators;
-  CalculatorEntity? get selectedCalculator => _selectedCalculator;
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-  
-  int get totalCalculators => _calculators.length;
-  bool get hasSelectedCalculator => _selectedCalculator != null;
-  
   /// Calculadoras por categoria
   List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) {
-    return _calculators.where((calc) => calc.category == category).toList();
+    return state.getCalculatorsByCategory(category);
   }
 
   /// Carrega todas as calculadoras
   Future<void> loadCalculators() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _getCalculators();
     
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorManagementProvider: Erro ao carregar calculadoras - ${failure.message}');
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+        );
+        debugPrint('CalculatorManagementNotifier: Erro ao carregar calculadoras - ${failure.message}');
       },
-      (calculators) {
-        _calculators = calculators;
-        debugPrint('CalculatorManagementProvider: Calculadoras carregadas - ${calculators.length} itens');
-      },
-    );
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  /// Carrega calculadoras por categoria
-  Future<void> loadCalculatorsByCategory(CalculatorCategory category) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
-
-    final result = await _getCalculatorsByCategory(category);
-    
-    result.fold(
-      (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorManagementProvider: Erro ao carregar calculadoras por categoria - ${failure.message}');
-      },
-      (calculators) {
-        for (final calculator in calculators) {
-          if (!_calculators.any((c) => c.id == calculator.id)) {
-            _calculators.add(calculator);
-          }
-        }
-        debugPrint('CalculatorManagementProvider: Calculadoras da categoria ${category.name} carregadas - ${calculators.length} itens');
+      (loadedCalculators) {
+        state = state.copyWith(
+          calculators: loadedCalculators,
+          isLoading: false,
+        );
+        debugPrint('CalculatorManagementNotifier: Calculadoras carregadas - ${loadedCalculators.length} itens');
       },
     );
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   /// Carrega calculadora por ID
   Future<bool> loadCalculatorById(String calculatorId) async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _getCalculatorById(calculatorId);
     
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorManagementProvider: Erro ao carregar calculadora - ${failure.message}');
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+        );
+        debugPrint('CalculatorManagementNotifier: Erro ao carregar calculadora - ${failure.message}');
       },
       (calculator) {
-        _selectedCalculator = calculator;
-        if (!_calculators.any((c) => c.id == calculator.id)) {
-          _calculators.add(calculator);
+        final updatedCalculators = List<CalculatorEntity>.from(state.calculators);
+        if (!updatedCalculators.any((c) => c.id == calculator.id)) {
+          updatedCalculators.add(calculator);
         }
         
+        state = state.copyWith(
+          calculators: updatedCalculators,
+          selectedCalculator: calculator,
+          isLoading: false,
+        );
         success = true;
-        debugPrint('CalculatorManagementProvider: Calculadora carregada - ${calculator.id}');
+        debugPrint('CalculatorManagementNotifier: Calculadora carregada - ${calculator.id}');
       },
     );
 
-    _isLoading = false;
-    notifyListeners();
     return success;
   }
 
   /// Seleciona uma calculadora
   void selectCalculator(CalculatorEntity? calculator) {
-    _selectedCalculator = calculator;
-    notifyListeners();
-    debugPrint('CalculatorManagementProvider: Calculadora selecionada - ${calculator?.id ?? 'nenhuma'}');
+    state = state.copyWith(
+      selectedCalculator: calculator,
+      clearSelectedCalculator: calculator == null,
+    );
+    debugPrint('CalculatorManagementNotifier: Calculadora selecionada - ${calculator?.id ?? 'nenhuma'}');
   }
 
   /// Encontra calculadora por ID
   CalculatorEntity? findCalculatorById(String id) {
     try {
-      return _calculators.firstWhere((calculator) => calculator.id == id);
+      return state.calculators.firstWhere((calculator) => calculator.id == id);
     } catch (e) {
       return null;
     }
@@ -143,12 +160,12 @@ class CalculatorManagementProvider extends ChangeNotifier {
 
   /// Obtém calculadoras de uma categoria específica
   List<CalculatorEntity> getCategoryCalculators(CalculatorCategory category) {
-    return _calculators.where((calc) => calc.category == category).toList();
+    return state.calculators.where((calc) => calc.category == category).toList();
   }
 
   /// Obtém todas as categorias disponíveis
   Set<CalculatorCategory> getAvailableCategories() {
-    return _calculators.map((calc) => calc.category).toSet();
+    return state.availableCategories;
   }
 
   /// Refresh completo das calculadoras
@@ -158,27 +175,16 @@ class CalculatorManagementProvider extends ChangeNotifier {
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Limpa seleção atual
   void clearSelection() {
-    _selectedCalculator = null;
-    notifyListeners();
+    state = state.copyWith(clearSelectedCalculator: true);
   }
 
   /// Reset completo do estado
   void resetState() {
-    _calculators.clear();
-    _selectedCalculator = null;
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('CalculatorManagementProvider: Disposed');
-    super.dispose();
+    state = const CalculatorManagementState();
   }
 }

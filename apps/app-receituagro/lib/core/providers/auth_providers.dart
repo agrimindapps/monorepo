@@ -1,46 +1,39 @@
 import 'package:core/core.dart' hide AuthState, Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:flutter_riverpod/legacy.dart';
 
 import 'auth_notifier.dart';
 import 'auth_state.dart' as local;
 
-/// **AUTH PROVIDERS - Riverpod StateNotifierProvider**
+// Re-export authProvider from auth_notifier (generated in auth_notifier.g.dart)
+export 'auth_notifier.dart' show authProvider, AuthNotifier, AuthResult;
+export 'auth_state.dart' show AuthState, UserType;
+
+/// **AUTH PROVIDERS - Riverpod AsyncNotifier (3.0)**
 ///
-/// Uses traditional StateNotifierProvider pattern (not @riverpod code generation)
-/// because StateNotifier's .state property is protected and can't be accessed
-/// in generated providers.
+/// Uses @riverpod code generation with AsyncNotifier pattern.
 ///
 /// ## Architecture:
 /// ```
-/// UI Layer → StateNotifierProvider → AuthNotifier (StateNotifier) → AuthRepository
+/// UI Layer → AsyncNotifierProvider → AuthNotifier (AsyncNotifier) → AuthRepository
 /// ```
 ///
 /// ## Usage:
 /// ```dart
-/// // Watch auth state
-/// final authState = ref.watch(authProvider);
+/// // Watch auth state (returns AsyncValue<AuthState>)
+/// final authAsync = ref.watch(authProvider);
+/// authAsync.when(
+///   data: (state) => /* use state */,
+///   loading: () => /* loading UI */,
+///   error: (e, s) => /* error UI */,
+/// );
 ///
-/// // Access current user
-/// final user = ref.watch(currentUserProvider);
+/// // Access notifier methods
+/// ref.read(authProvider.notifier).signOut();
 ///
-/// // Check authentication
-/// final isAuth = ref.watch(isAuthenticatedProvider);
+/// // For synchronous access (when state is guaranteed)
+/// final state = ref.watch(authProvider).value;
 /// ```
-
-// ============================================================================
-// Auth Notifier Provider (StateNotifierProvider)
-// ============================================================================
-
-/// Authentication notifier provider
-/// Exposes both the AuthNotifier and its AuthState to consumers
 ///
-/// This uses the traditional StateNotifierProvider pattern which automatically
-/// exposes the state without needing to access the protected .state property.
-final authProvider =
-    StateNotifierProvider<AuthNotifier, local.AuthState>((ref) {
-  return AuthNotifier(ref);
-});
+/// Note: authProvider is generated in auth_notifier.g.dart
 
 // ============================================================================
 // Derived Providers (computed from auth state)
@@ -48,20 +41,20 @@ final authProvider =
 
 /// Computed provider: Current authenticated user
 final currentUserProvider = Provider<UserEntity?>((ref) {
-  return ref.watch(authProvider).currentUser;
+  return ref.watch(authProvider).value?.currentUser;
 });
 
 /// Computed provider: Authentication status
 final isAuthenticatedProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).isAuthenticated;
+  return ref.watch(authProvider).value?.isAuthenticated ?? false;
 });
 
 /// Computed provider: Loading state
 final isLoadingProvider = Provider<bool>((ref) {
-  return ref.watch(authProvider).isLoading;
+  return ref.watch(authProvider).value?.isLoading ?? false;
 });
 
 /// Computed provider: Error message
 final errorMessageProvider = Provider<String?>((ref) {
-  return ref.watch(authProvider).errorMessage;
+  return ref.watch(authProvider).value?.errorMessage;
 });

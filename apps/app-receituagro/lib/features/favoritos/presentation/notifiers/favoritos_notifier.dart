@@ -179,30 +179,6 @@ class FavoritosNotifier extends _$FavoritosNotifier {
     });
   }
 
-  /// Carrega defensivos favoritos
-  /// @Deprecated Use loadAllFavoritos() + state.defensivos getter em vez disso
-  Future<void> loadDefensivos() async {
-    await loadAllFavoritos();
-  }
-
-  /// Carrega pragas favoritas
-  /// @Deprecated Use loadAllFavoritos() + state.pragas getter em vez disso
-  Future<void> loadPragas() async {
-    await loadAllFavoritos();
-  }
-
-  /// Carrega diagnósticos favoritos
-  /// @Deprecated Use loadAllFavoritos() + state.diagnosticos getter em vez disso
-  Future<void> loadDiagnosticos() async {
-    await loadAllFavoritos();
-  }
-
-  /// Carrega culturas favoritas
-  /// @Deprecated Use loadAllFavoritos() + state.culturas getter em vez disso
-  Future<void> loadCulturas() async {
-    await loadAllFavoritos();
-  }
-
   /// Verifica se um item é favorito
   Future<bool> isFavorito(String tipo, String id) async {
     try {
@@ -238,49 +214,6 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       return result;
     } catch (e) {
       _setError(_errorMessageService.getToggleErrorMessage(tipo));
-      return false;
-    } finally {
-      _setLoading(false);
-    }
-  }
-
-  /// Adiciona favorito
-  /// @Deprecated Use addFavoritoUseCase(FavoritoEntity) em vez disso
-  Future<bool> addFavorito(String tipo, String id) async {
-    try {
-      _setLoading(true);
-
-      // Usa os métodos específicos ainda disponíveis
-      // These methods return Either<Failure, bool>, so we need to unwrap them
-      bool result;
-      switch (tipo) {
-        case TipoFavorito.defensivo:
-          final r = await _repository.addDefensivo(id);
-          result = r.fold((failure) => false, (success) => success);
-          break;
-        case TipoFavorito.praga:
-          final r = await _repository.addPraga(id);
-          result = r.fold((failure) => false, (success) => success);
-          break;
-        case TipoFavorito.diagnostico:
-          final r = await _repository.addDiagnostico(id);
-          result = r.fold((failure) => false, (success) => success);
-          break;
-        case TipoFavorito.cultura:
-          final r = await _repository.addCultura(id);
-          result = r.fold((failure) => false, (success) => success);
-          break;
-        default:
-          result = false;
-      }
-
-      if (result) {
-        await loadAllFavoritos(); // Recarrega após adicionar
-      }
-
-      return result;
-    } catch (e) {
-      _setError(_errorMessageService.getAddErrorMessage(tipo));
       return false;
     } finally {
       _setLoading(false);
@@ -358,7 +291,7 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       _setLoading(true);
 
       await _repository.clearFavorites(tipo);
-      await _reloadAfterToggle(tipo);
+      await loadAllFavoritos();
     } catch (e) {
       _setError(_errorMessageService.getClearErrorMessage(tipo));
     } finally {
@@ -404,13 +337,6 @@ class FavoritosNotifier extends _$FavoritosNotifier {
   /// Limpa erro
   void clearError() {
     state = state.copyWith(errorMessage: null);
-  }
-
-  /// @Deprecated Método removido - use loadAllFavoritos() em vez disso
-  @Deprecated('Não é mais necessário - todos os favoritos já estão em memória')
-  Future<void> _reloadAfterToggle(String tipo) async {
-    // Apenas recarrega tudo (consolidado)
-    await loadAllFavoritos();
   }
 
   Future<void> _executeOperation(Future<void> Function() operation) async {

@@ -49,11 +49,11 @@ class _MarketDetailPageState extends ConsumerState<MarketDetailPage>
     setState(() => _isLoading = true);
 
     try {
-      final provider = ref.read(marketProviderProvider);
-      final market = await provider.getMarketById(widget.marketId);
+      final notifier = ref.read(marketProvider.notifier);
+      final market = await notifier.getMarketById(widget.marketId);
 
       if (market != null) {
-        final isFavorite = await provider.isMarketFavorite(widget.marketId);
+        final isFavorite = await notifier.isMarketFavorite(widget.marketId);
 
         setState(() {
           _market = market;
@@ -77,8 +77,8 @@ class _MarketDetailPageState extends ConsumerState<MarketDetailPage>
   Future<void> _toggleFavorite() async {
     if (_market == null) return;
 
-    final provider = ref.read(marketProviderProvider);
-    final newStatus = await provider.toggleFavorite(_market!.id);
+    final notifier = ref.read(marketProvider.notifier);
+    final newStatus = await notifier.toggleFavorite(_market!.id);
 
     setState(() {
       _isFavorite = newStatus;

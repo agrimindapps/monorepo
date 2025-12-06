@@ -344,6 +344,117 @@ class OdometerReadings extends Table {
   TextColumn get notes => text().nullable()();
 }
 
+/// Tabela de Imagens de Veículos
+///
+/// Armazena fotos de veículos como BLOB para funcionamento offline-first.
+/// Sincroniza com Firebase Storage em background.
+class VehicleImages extends Table {
+  // ========== CAMPOS BASE ==========
+
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get firebaseId => text().nullable()();
+  TextColumn get userId => text()();
+  TextColumn get moduleName =>
+      text().withDefault(const Constant('gasometer'))();
+
+  // ========== TIMESTAMPS ==========
+
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get lastSyncAt => dateTime().nullable()();
+
+  // ========== CONTROLE DE SINCRONIZAÇÃO ==========
+
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
+
+  // ========== RELACIONAMENTO ==========
+
+  /// ID do veículo (foreign key)
+  IntColumn get vehicleId =>
+      integer().references(Vehicles, #id, onDelete: KeyAction.cascade)();
+
+  // ========== DADOS DA IMAGEM ==========
+
+  /// Bytes da imagem (BLOB - armazenamento eficiente)
+  BlobColumn get imageData => blob()();
+
+  /// Nome original do arquivo
+  TextColumn get fileName => text().nullable()();
+
+  /// MIME type da imagem (image/jpeg, image/png, etc.)
+  TextColumn get mimeType => text().withDefault(const Constant('image/jpeg'))();
+
+  /// Tamanho em bytes
+  IntColumn get sizeBytes => integer().nullable()();
+
+  /// URL no Firebase Storage (após upload)
+  TextColumn get storageUrl => text().nullable()();
+
+  /// Indica se é a imagem principal do veículo
+  BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
+
+  /// Status do upload (pending, uploading, completed, failed)
+  TextColumn get uploadStatus =>
+      text().withDefault(const Constant('pending'))();
+}
+
+/// Tabela de Imagens de Comprovantes
+///
+/// Armazena fotos de recibos/comprovantes como BLOB para funcionamento offline-first.
+/// Pode ser associada a abastecimentos, manutenções ou despesas.
+class ReceiptImages extends Table {
+  // ========== CAMPOS BASE ==========
+
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get firebaseId => text().nullable()();
+  TextColumn get userId => text()();
+  TextColumn get moduleName =>
+      text().withDefault(const Constant('gasometer'))();
+
+  // ========== TIMESTAMPS ==========
+
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get lastSyncAt => dateTime().nullable()();
+
+  // ========== CONTROLE DE SINCRONIZAÇÃO ==========
+
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
+
+  // ========== RELACIONAMENTOS (um de cada vez) ==========
+
+  /// Tipo da entidade pai (fuel_supply, maintenance, expense)
+  TextColumn get entityType => text()();
+
+  /// ID da entidade pai (abastecimento, manutenção ou despesa)
+  IntColumn get entityId => integer()();
+
+  // ========== DADOS DA IMAGEM ==========
+
+  /// Bytes da imagem (BLOB - armazenamento eficiente)
+  BlobColumn get imageData => blob()();
+
+  /// Nome original do arquivo
+  TextColumn get fileName => text().nullable()();
+
+  /// MIME type da imagem (image/jpeg, image/png, etc.)
+  TextColumn get mimeType => text().withDefault(const Constant('image/jpeg'))();
+
+  /// Tamanho em bytes
+  IntColumn get sizeBytes => integer().nullable()();
+
+  /// URL no Firebase Storage (após upload)
+  TextColumn get storageUrl => text().nullable()();
+
+  /// Status do upload (pending, uploading, completed, failed)
+  TextColumn get uploadStatus =>
+      text().withDefault(const Constant('pending'))();
+}
+
 /// Tabela de Auditoria Financeira
 ///
 /// Registra todas as operações financeiras para compliance e auditoria

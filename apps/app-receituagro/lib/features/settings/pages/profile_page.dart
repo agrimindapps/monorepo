@@ -45,49 +45,45 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final authState = ref.watch(authProvider);
+    final authAsync = ref.watch(authProvider);
     final settingsState = ref.watch(settingsProvider);
 
-    if (authState.isLoading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    // Handle AsyncValue states
+    return authAsync.when(
+      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (error, stack) => Scaffold(body: Center(child: Text('Erro: $error'))),
+      data: (authState) {
+        final authData = authState;
+        final isAuthenticated = authData.isAuthenticated && !authData.isAnonymous;
+        final user = authData.currentUser;
+        if (!_settingsInitialized && isAuthenticated && user?.id != null) {
+          _settingsInitialized = true;
+          final userId = user?.id;
+          if (userId != null) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              ref.read(settingsProvider.notifier).initialize(userId);
+            });
+          }
+        }
+        debugPrint(
+          '🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}',
+        );
 
-    if (authState.errorMessage != null) {
-      return Scaffold(body: Center(child: Text('Erro: ${authState.errorMessage}')));
-    }
-
-    final authData = authState;
-    final isAuthenticated =
-        authData.isAuthenticated && !authData.isAnonymous;
-    final user = authData.currentUser;
-    if (!_settingsInitialized && isAuthenticated && user?.id != null) {
-      _settingsInitialized = true;
-      final userId = user?.id;
-      if (userId != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(settingsProvider.notifier).initialize(userId);
-        });
-      }
-    }
-    debugPrint(
-      '🔍 ProfilePage: Auth state - isAuthenticated: $isAuthenticated, user: ${user?.email}',
-    );
-
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: ResponsiveContentWrapper(
-            child: Column(
-              children: [
-                ModernHeaderWidget(
-                  title: isAuthenticated
-                      ? _getUserDisplayTitle(user)
-                      : 'Perfil do Visitante',
-                  subtitle: isAuthenticated
-                      ? 'Gerencie sua conta e configurações'
-                      : 'Entre em sua conta para recursos completos',
-                  leftIcon: Icons.person,
+        return Scaffold(
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: ResponsiveContentWrapper(
+                child: Column(
+                  children: [
+                    ModernHeaderWidget(
+                      title: isAuthenticated
+                          ? _getUserDisplayTitle(user)
+                          : 'Perfil do Visitante',
+                      subtitle: isAuthenticated
+                          ? 'Gerencie sua conta e configurações'
+                          : 'Entre em sua conta para recursos completos',
+                      leftIcon: Icons.person,
                   showBackButton: true,
                   isDark: isDark,
                 ),
@@ -136,6 +132,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
       ),
+    );
+      },
     );
   }
 
@@ -335,8 +333,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final shouldClear = await ClearDataDialog.show(context);
 
     if (shouldClear == true && context.mounted) {
-      final authState = ref.read(authProvider);
-      final userId = authState.currentUser?.id ?? 'unknown';
+      final authState = ref.read(authProvider).value;
+      final userId = authState?.currentUser?.id ?? 'unknown';
 
       try {
         // Obter o serviço de analytics

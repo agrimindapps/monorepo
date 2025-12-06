@@ -87,11 +87,16 @@ class DefensivosStatsService implements IDefensivosStatsService {
   }
 
   /// Get count of distinct modo de ação values
+  /// Handles comma-separated values (e.g., "Sistêmico, Seletivo")
   int _getDistinctModosAcaoCount(List<DefensivoEntity> defensivos) {
-    return defensivos
-        .map((d) => d.modoAcao)
-        .where((m) => m != null && m.isNotEmpty)
-        .toSet()
-        .length;
+    final modosSet = <String>{};
+    for (final d in defensivos) {
+      if (d.modoAcao != null && d.modoAcao!.isNotEmpty) {
+        // Split by comma and trim each value
+        final modos = d.modoAcao!.split(',').map((m) => m.trim()).where((m) => m.isNotEmpty);
+        modosSet.addAll(modos);
+      }
+    }
+    return modosSet.length;
   }
 }

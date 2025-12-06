@@ -1,37 +1,23 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart'
-    hide
-        GetUserDevicesUseCase,
-        ValidateDeviceUseCase,
-        RevokeDeviceUseCase,
-        RevokeAllOtherDevicesUseCase,
-        DeviceValidationResult,
-        ValidateDeviceParams,
-        GetUserDevicesParams,
-        RevokeDeviceParams,
-        RevokeAllOtherDevicesParams;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/providers/core_di_providers.dart';
 import '../../data/models/device_model.dart';
-import '../../domain/usecases/get_device_statistics_usecase.dart';
-import '../../domain/usecases/get_user_devices_usecase.dart';
-import '../../domain/usecases/revoke_device_usecase.dart';
-import '../../domain/usecases/validate_device_usecase.dart';
 import 'device_management_providers.dart';
 
 part 'device_management_provider.freezed.dart';
 part 'device_management_provider.g.dart';
 
-/// State for Device Management
+/// State for Device Management - Specific to Plantis app
 @freezed
-sealed class DeviceManagementState with _$DeviceManagementState {
-  const factory DeviceManagementState({
+sealed class PlantisDeviceManagementState with _$PlantisDeviceManagementState {
+  const factory PlantisDeviceManagementState({
     @Default([]) List<DeviceModel> devices,
     DeviceModel? currentDevice,
     DeviceStatisticsModel? statistics,
@@ -42,11 +28,11 @@ sealed class DeviceManagementState with _$DeviceManagementState {
     @Default(false) bool isValidating,
     @Default(false) bool isRevoking,
     String? revokingDeviceUuid,
-  }) = _DeviceManagementState;
+  }) = _PlantisDeviceManagementState;
 }
 
-/// Extension providing computed properties for DeviceManagementState
-extension DeviceManagementStateX on DeviceManagementState {
+/// Extension providing computed properties for PlantisDeviceManagementState
+extension PlantisDeviceManagementStateX on PlantisDeviceManagementState {
   List<DeviceModel> get activeDevices =>
       devices.where((d) => d.isActive).toList();
 
@@ -102,13 +88,10 @@ extension DeviceManagementStateX on DeviceManagementState {
 }
 
 /// Provider para gerenciar estado de dispositivos no app-plantis
+/// Usa o DeviceManagementService do core para todas as operações
 @riverpod
 class DeviceManagementNotifier extends _$DeviceManagementNotifier {
-  late final GetUserDevicesUseCase _getUserDevicesUseCase;
-  late final ValidateDeviceUseCase _validateDeviceUseCase;
-  late final RevokeDeviceUseCase _revokeDeviceUseCase;
-  late final RevokeAllOtherDevicesUseCase _revokeAllOtherDevicesUseCase;
-  late final GetDeviceStatisticsUseCase _getDeviceStatisticsUseCase;
+  DeviceManagementService? _deviceService;
 
   AuthStateNotifier get _authStateNotifier =>
       ref.read(authStateNotifierProvider);
@@ -116,7 +99,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   StreamSubscription<UserEntity?>? _userSubscription;
 
   @override
-  DeviceManagementState build() {
+  PlantisDeviceManagementState build() {
     ref.onDispose(() {
       if (kDebugMode) {
         debugPrint('♻️ DeviceProvider: Disposing');
@@ -126,7 +109,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
     _initializeProvider();
 
-    return const DeviceManagementState();
+    return const PlantisDeviceManagementState();
   }
 
   /// Inicializa o provider
@@ -136,15 +119,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     }
 
     try {
-      _getUserDevicesUseCase =
-          await ref.read(getUserDevicesUseCaseProvider.future);
-      _validateDeviceUseCase =
-          await ref.read(validateDeviceUseCaseProvider.future);
-      _revokeDeviceUseCase = await ref.read(revokeDeviceUseCaseProvider.future);
-      _revokeAllOtherDevicesUseCase =
-          await ref.read(revokeAllOtherDevicesUseCaseProvider.future);
-      _getDeviceStatisticsUseCase =
-          await ref.read(getDeviceStatisticsUseCaseProvider.future);
+      _deviceService = ref.read(plantisDeviceManagementServiceProvider);
 
       _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
 
@@ -242,9 +217,12 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
         return;
       }
 
-      const params = GetUserDevicesParams(activeOnly: false);
+      if (_deviceService == null) {
+        _setError('Serviço de dispositivos não inicializado');
+        return;
+      }
 
-      final result = await _getUserDevicesUseCase(params);
+      final result = await _deviceService!.getUserDevices();
 
       result.fold(
         (failure) {
@@ -269,8 +247,8 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   }
 
   /// Valida dispositivo atual
-  Future<DeviceValidationResult?> validateCurrentDevice() async {
-    if (state.isValidating) return null;
+  Future<bool> validateCurrentDevice() async {
+    if (state.isValidating) return false;
 
     state = state.copyWith(isValidating: true);
     _clearMessages();
@@ -282,40 +260,38 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
 
       if (state.currentDevice == null) {
         _setError('Nenhum dispositivo atual identificado');
-        return null;
+        return false;
       }
 
       final currentUser = _authStateNotifier.currentUser;
       if (currentUser == null) {
         _setError('Usuário não autenticado');
-        return null;
+        return false;
       }
 
-      final params = ValidateDeviceParams(device: state.currentDevice);
+      if (_deviceService == null) {
+        _setError('Serviço de dispositivos não inicializado');
+        return false;
+      }
 
-      final result = await _validateDeviceUseCase(params);
+      final result = await _deviceService!.validateDevice(
+        state.currentDevice!.toEntity(),
+      );
 
       return result.fold(
         (failure) {
           _setError('Erro ao validar dispositivo: ${failure.message}');
-          return null;
+          return false;
         },
-        (validationResult) {
-          if (validationResult.isValid) {
-            _setSuccess('Dispositivo validado com sucesso');
-            _loadDevices(showLoading: false);
-          } else {
-            _setError(
-              validationResult.message ?? 'Falha na validação do dispositivo',
-            );
-          }
-
-          return validationResult;
+        (validatedDevice) {
+          _setSuccess('Dispositivo validado com sucesso');
+          _loadDevices(showLoading: false);
+          return true;
         },
       );
     } catch (e) {
       _setError('Erro inesperado na validação: $e');
-      return null;
+      return false;
     } finally {
       state = state.copyWith(isValidating: false);
     }
@@ -343,9 +319,12 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
         return false;
       }
 
-      final params = RevokeDeviceParams(deviceUuid: deviceUuid);
+      if (_deviceService == null) {
+        _setError('Serviço de dispositivos não inicializado');
+        return false;
+      }
 
-      final result = await _revokeDeviceUseCase(params);
+      final result = await _deviceService!.revokeDevice(deviceUuid);
 
       return result.fold(
         (failure) {
@@ -397,11 +376,14 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
         return false;
       }
 
-      final params = RevokeAllOtherDevicesParams(
-        currentDeviceUuid: state.currentDevice!.uuid,
-      );
+      if (_deviceService == null) {
+        _setError('Serviço de dispositivos não inicializado');
+        return false;
+      }
 
-      final result = await _revokeAllOtherDevicesUseCase(params);
+      final result = await _deviceService!.revokeAllOtherDevices(
+        state.currentDevice!.uuid,
+      );
 
       return result.fold(
         (failure) {
@@ -463,12 +445,12 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
         debugPrint('🔄 DeviceProvider: Loading statistics (refresh: $refresh)');
       }
 
-      final result = await _getDeviceStatisticsUseCase(
-        GetDeviceStatisticsParams(
-          includeExtendedInfo: true,
-          refreshCache: refresh,
-        ),
-      );
+      if (_deviceService == null) {
+        _setError('Serviço de dispositivos não inicializado');
+        return;
+      }
+
+      final result = await _deviceService!.getDeviceStatistics();
 
       result.fold(
         (failure) {
@@ -483,7 +465,9 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           if (kDebugMode) {
             debugPrint('✅ DeviceProvider: Statistics loaded successfully');
           }
-          state = state.copyWith(statistics: statistics);
+          state = state.copyWith(
+            statistics: DeviceStatisticsModel.fromEntity(statistics),
+          );
         },
       );
     } catch (e) {
@@ -504,7 +488,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       debugPrint('🔄 DeviceProvider: Resetting state');
     }
 
-    state = const DeviceManagementState();
+    state = const PlantisDeviceManagementState();
   }
 
   void _setLoading(bool loading) {
@@ -531,3 +515,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     state = state.copyWith(errorMessage: null, successMessage: null);
   }
 }
+
+/// Alias for backwards compatibility
+/// Usado em código legado - prefira usar deviceManagementProvider
+const deviceManagementNotifierProvider = deviceManagementProvider;

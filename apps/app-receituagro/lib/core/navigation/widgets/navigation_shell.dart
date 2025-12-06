@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../extensions/route_settings_extension.dart';
 import '../providers/navigation_state_provider.dart';
 
-/// Shell que envolve o MaterialApp e provê BottomNavigationBar persistente
-class NavigationShell extends ConsumerWidget {
+/// Shell que envolve páginas e provê BottomNavigationBar persistente
+/// 
+/// **REFACTORED**: Não adiciona Scaffold extra - apenas BottomNavigationBar
+/// As páginas filhas já têm seu próprio Scaffold
+class NavigationShell extends ConsumerStatefulWidget {
   final Widget? child;
 
   const NavigationShell({
@@ -14,18 +17,26 @@ class NavigationShell extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NavigationShell> createState() => _NavigationShellState();
+}
+
+class _NavigationShellState extends ConsumerState<NavigationShell> {
+  @override
+  Widget build(BuildContext context) {
     final navigationState = ref.watch(navigationStateProvider);
 
-    // Se não deve mostrar bottom nav, retorna apenas o child sem Scaffold extra
-    // Isso evita Scaffolds aninhados em páginas de detalhe
+    // Se não deve mostrar bottom nav, retorna apenas o child
     if (!navigationState.showBottomNav) {
-      return child ?? const SizedBox.shrink();
+      return widget.child ?? const SizedBox.shrink();
     }
 
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: _buildBottomNavigationBar(context, ref, navigationState),
+    // Usa Column para adicionar BottomNav sem Scaffold extra
+    // As páginas filhas já têm Scaffold com SafeArea
+    return Column(
+      children: [
+        Expanded(child: widget.child ?? const SizedBox.shrink()),
+        _buildBottomNavigationBar(context, ref, navigationState),
+      ],
     );
   }
 
@@ -37,7 +48,7 @@ class NavigationShell extends ConsumerWidget {
   ) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      currentIndex: state.selectedTabIndex,
+      currentIndex: state.selectedTabIndex.clamp(0, 4),
       onTap: (index) => _onBottomNavTap(context, ref, index),
       elevation: 8,
       items: const [
@@ -77,8 +88,8 @@ class NavigationShell extends ConsumerWidget {
     // Evita navegação desnecessária
     if (currentIndex == index) return;
 
-    // Navega para página principal correspondente
-    // O estado do provider será atualizado pelo BottomNavVisibilityObserver
+    // Atualiza estado e navega
+    ref.read(navigationStateProvider.notifier).selectTab(index);
     _navigateToMainPage(context, index);
   }
 
@@ -106,21 +117,21 @@ class NavigationShell extends ConsumerWidget {
 
 /// NavigatorObserver para sincronizar estado do BottomNav com rotas
 class BottomNavVisibilityObserver extends NavigatorObserver {
-  final void Function(bool) onVisibilityChanged;
+  final void Function(bool visible, int? tabIndex) onStateChanged;
 
-  BottomNavVisibilityObserver({required this.onVisibilityChanged});
+  BottomNavVisibilityObserver({required this.onStateChanged});
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
-    _updateVisibility(route);
+    _updateState(route);
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPop(route, previousRoute);
     if (previousRoute != null) {
-      _updateVisibility(previousRoute);
+      _updateState(previousRoute);
     }
   }
 
@@ -128,12 +139,12 @@ class BottomNavVisibilityObserver extends NavigatorObserver {
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     if (newRoute != null) {
-      _updateVisibility(newRoute);
+      _updateState(newRoute);
     }
   }
 
-  void _updateVisibility(Route<dynamic> route) {
+  void _updateState(Route<dynamic> route) {
     final settings = route.settings;
-    onVisibilityChanged(settings.showBottomNav);
+    onStateChanged(settings.showBottomNav, settings.tabIndex);
   }
 }

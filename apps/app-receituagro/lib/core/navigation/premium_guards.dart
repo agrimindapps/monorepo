@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/adapters/subscription_adapter.dart';

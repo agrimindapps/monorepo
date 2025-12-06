@@ -9,13 +9,13 @@ import 'package:core/core.dart' show Either, Right, Left;
 
 class SettingsRepositoryImpl implements SettingsRepository {
   final SettingsLocalDataSource _localDataSource;
-  final AuthProvider _authProvider;
+  final AuthNotifier _authNotifier;
 
-  const SettingsRepositoryImpl(this._localDataSource, this._authProvider);
+  const SettingsRepositoryImpl(this._localDataSource, this._authNotifier);
 
   /// Get current user ID from auth provider
   String _getCurrentUserId() {
-    return _authProvider.currentUser?.id ?? 'anonymous_user';
+    return _authNotifier.currentUser?.id ?? 'anonymous_user';
   }
 
   @override

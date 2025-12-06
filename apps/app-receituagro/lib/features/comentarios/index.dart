@@ -1,13 +1,8 @@
 export 'comentarios_page.dart';
 export 'constants/comentarios_design_tokens.dart';
-export 'data/comentario_edit_state.dart';
 export 'data/comentario_model.dart';
-export 'data/comentarios_state.dart';
-// export 'di/comentarios_bindings.dart'; // TODO: Criar se necessário
 export 'domain/comentarios_service.dart';
-export 'views/widgets/add_comentario_dialog.dart';
-export 'views/widgets/comentario_card.dart';
-export 'views/widgets/comments_list_widget.dart';
-export 'views/widgets/empty_comments_state.dart';
-export 'views/widgets/premium_upgrade_widget.dart';
-export 'views/widgets/search_comments_widget.dart';
+// Legacy exports removidos - arquivos não existem mais:
+// - data/comentario_edit_state.dart
+// - data/comentarios_state.dart
+// - views/widgets/*.dart

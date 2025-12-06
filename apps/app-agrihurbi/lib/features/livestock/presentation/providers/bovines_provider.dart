@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/usecases/create_bovine.dart';
@@ -9,84 +10,78 @@ import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/update_bovine.dart';
 import 'livestock_di_providers.dart';
 
-/// Provider Riverpod para BovinesProvider
-final bovinesProviderProvider = ChangeNotifierProvider<BovinesProvider>((ref) {
-  return BovinesProvider(
-    getAllBovines: ref.watch(getAllBovinesUseCaseProvider),
-    getBovineById: ref.watch(getBovineByIdUseCaseProvider),
-    createBovine: ref.watch(createBovineUseCaseProvider),
-    updateBovine: ref.watch(updateBovineUseCaseProvider),
-    deleteBovine: ref.watch(deleteBovineUseCaseProvider),
-  );
-});
+part 'bovines_provider.g.dart';
 
-/// Provider especializado para operações de bovinos
-///
-/// Separado do provider principal para otimização e modularização
-/// Integrado completamente com todos os use cases bovinos
-class BovinesProvider extends ChangeNotifier {
-  final GetAllBovinesUseCase _getAllBovines;
-  final GetBovineByIdUseCase _getBovineById;
-  final CreateBovineUseCase _createBovine;
-  final UpdateBovineUseCase _updateBovine;
-  final DeleteBovineUseCase _deleteBovine;
+/// State class for Bovines
+class BovinesState {
+  final List<BovineEntity> bovines;
+  final BovineEntity? selectedBovine;
+  final bool isLoading;
+  final bool isLoadingBovine;
+  final bool isCreating;
+  final bool isUpdating;
+  final bool isDeleting;
+  final String? errorMessage;
+  final String searchQuery;
 
-  BovinesProvider({
-    required GetAllBovinesUseCase getAllBovines,
-    required GetBovineByIdUseCase getBovineById,
-    required CreateBovineUseCase createBovine,
-    required UpdateBovineUseCase updateBovine,
-    required DeleteBovineUseCase deleteBovine,
-  })  : _getAllBovines = getAllBovines,
-        _getBovineById = getBovineById,
-        _createBovine = createBovine,
-        _updateBovine = updateBovine,
-        _deleteBovine = deleteBovine;
+  const BovinesState({
+    this.bovines = const [],
+    this.selectedBovine,
+    this.isLoading = false,
+    this.isLoadingBovine = false,
+    this.isCreating = false,
+    this.isUpdating = false,
+    this.isDeleting = false,
+    this.errorMessage,
+    this.searchQuery = '',
+  });
 
-  List<BovineEntity> _bovines = [];
-  BovineEntity? _selectedBovine;
-
-  bool _isLoading = false;
-  bool _isLoadingBovine = false;
-  bool _isCreating = false;
-  bool _isUpdating = false;
-  bool _isDeleting = false;
-
-  String? _errorMessage;
-  String _searchQuery = '';
-
-  List<BovineEntity> get bovines => _bovines;
-  BovineEntity? get selectedBovine => _selectedBovine;
-
-  bool get isLoading => _isLoading;
-  bool get isLoadingBovine => _isLoadingBovine;
-  bool get isCreating => _isCreating;
-  bool get isUpdating => _isUpdating;
-  bool get isDeleting => _isDeleting;
-
-  String? get errorMessage => _errorMessage;
-  String get searchQuery => _searchQuery;
+  BovinesState copyWith({
+    List<BovineEntity>? bovines,
+    BovineEntity? selectedBovine,
+    bool? isLoading,
+    bool? isLoadingBovine,
+    bool? isCreating,
+    bool? isUpdating,
+    bool? isDeleting,
+    String? errorMessage,
+    String? searchQuery,
+    bool clearSelectedBovine = false,
+    bool clearError = false,
+  }) {
+    return BovinesState(
+      bovines: bovines ?? this.bovines,
+      selectedBovine: clearSelectedBovine ? null : (selectedBovine ?? this.selectedBovine),
+      isLoading: isLoading ?? this.isLoading,
+      isLoadingBovine: isLoadingBovine ?? this.isLoadingBovine,
+      isCreating: isCreating ?? this.isCreating,
+      isUpdating: isUpdating ?? this.isUpdating,
+      isDeleting: isDeleting ?? this.isDeleting,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      searchQuery: searchQuery ?? this.searchQuery,
+    );
+  }
 
   /// Bovinos ativos (não deletados)
   List<BovineEntity> get activeBovines =>
-      _bovines.where((bovine) => bovine.isActive).toList();
+      bovines.where((bovine) => bovine.isActive).toList();
 
   /// Bovinos filtrados por busca
   List<BovineEntity> get filteredBovines {
     var filtered = activeBovines;
 
-    if (_searchQuery.isNotEmpty) {
+    if (searchQuery.isNotEmpty) {
       filtered = filtered
           .where(
             (bovine) =>
                 bovine.commonName.toLowerCase().contains(
-                      _searchQuery.toLowerCase(),
+                      searchQuery.toLowerCase(),
                     ) ||
                 bovine.breed.toLowerCase().contains(
-                      _searchQuery.toLowerCase(),
+                      searchQuery.toLowerCase(),
                     ) ||
                 bovine.registrationId.toLowerCase().contains(
-                      _searchQuery.toLowerCase(),
+                      searchQuery.toLowerCase(),
                     ),
           )
           .toList();
@@ -96,7 +91,7 @@ class BovinesProvider extends ChangeNotifier {
   }
 
   /// Estatísticas dos bovinos
-  int get totalBovines => _bovines.length;
+  int get totalBovines => bovines.length;
   int get activeBovinesCount => activeBovines.length;
   int get filteredBovinesCount => filteredBovines.length;
 
@@ -105,116 +100,159 @@ class BovinesProvider extends ChangeNotifier {
     final breeds = activeBovines.map((bovine) => bovine.breed).toSet();
     return breeds.toList()..sort();
   }
+}
+
+/// Bovines Notifier using Riverpod code generation
+///
+/// Provider especializado para operações de bovinos
+/// Separado do provider principal para otimização e modularização
+@riverpod
+class BovinesNotifier extends _$BovinesNotifier {
+  GetAllBovinesUseCase get _getAllBovines => ref.read(getAllBovinesUseCaseProvider);
+  GetBovineByIdUseCase get _getBovineById => ref.read(getBovineByIdUseCaseProvider);
+  CreateBovineUseCase get _createBovine => ref.read(createBovineUseCaseProvider);
+  UpdateBovineUseCase get _updateBovine => ref.read(updateBovineUseCaseProvider);
+  DeleteBovineUseCase get _deleteBovine => ref.read(deleteBovineUseCaseProvider);
+
+  @override
+  BovinesState build() {
+    return const BovinesState();
+  }
+
+  // Convenience getters for backward compatibility
+  List<BovineEntity> get bovines => state.bovines;
+  BovineEntity? get selectedBovine => state.selectedBovine;
+  bool get isLoading => state.isLoading;
+  bool get isLoadingBovine => state.isLoadingBovine;
+  bool get isCreating => state.isCreating;
+  bool get isUpdating => state.isUpdating;
+  bool get isDeleting => state.isDeleting;
+  String? get errorMessage => state.errorMessage;
+  String get searchQuery => state.searchQuery;
+  List<BovineEntity> get activeBovines => state.activeBovines;
+  List<BovineEntity> get filteredBovines => state.filteredBovines;
+  int get totalBovines => state.totalBovines;
+  int get activeBovinesCount => state.activeBovinesCount;
+  int get filteredBovinesCount => state.filteredBovinesCount;
+  List<String> get uniqueBreeds => state.uniqueBreeds;
 
   /// Carrega todos os bovinos
   Future<void> loadBovines() async {
-    _isLoading = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _getAllBovines();
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoading: false,
+        );
         debugPrint(
-          'BovinesProvider: Erro ao carregar bovinos - ${failure.message}',
+          'BovinesNotifier: Erro ao carregar bovinos - ${failure.message}',
         );
       },
-      (bovines) {
-        _bovines = bovines;
+      (loadedBovines) {
+        state = state.copyWith(
+          bovines: loadedBovines,
+          isLoading: false,
+        );
         debugPrint(
-          'BovinesProvider: Bovinos carregados - ${bovines.length} itens',
+          'BovinesNotifier: Bovinos carregados - ${loadedBovines.length} itens',
         );
       },
     );
-
-    _isLoading = false;
-    notifyListeners();
   }
 
   /// Seleciona um bovino específico
   void selectBovine(BovineEntity? bovine) {
-    _selectedBovine = bovine;
-    notifyListeners();
+    state = state.copyWith(
+      selectedBovine: bovine,
+      clearSelectedBovine: bovine == null,
+    );
     debugPrint(
-      'BovinesProvider: Bovino selecionado - ${bovine?.id ?? 'nenhum'}',
+      'BovinesNotifier: Bovino selecionado - ${bovine?.id ?? 'nenhum'}',
     );
   }
 
   /// Cria um novo bovino
   Future<bool> createBovine(BovineEntity bovine) async {
-    _isCreating = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isCreating: true, clearError: true);
 
     final result = await _createBovine(CreateBovineParams(bovine: bovine));
 
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isCreating: false,
+        );
         debugPrint(
-          'BovinesProvider: Erro ao criar bovino - ${failure.message}',
+          'BovinesNotifier: Erro ao criar bovino - ${failure.message}',
         );
       },
       (createdBovine) {
-        _bovines.add(createdBovine);
-        _selectedBovine = createdBovine; // Seleciona o bovino criado
+        final updatedBovines = [...state.bovines, createdBovine];
+        state = state.copyWith(
+          bovines: updatedBovines,
+          selectedBovine: createdBovine,
+          isCreating: false,
+        );
         success = true;
         debugPrint(
-          'BovinesProvider: Bovino criado com sucesso - ${createdBovine.id}',
+          'BovinesNotifier: Bovino criado com sucesso - ${createdBovine.id}',
         );
       },
     );
 
-    _isCreating = false;
-    notifyListeners();
     return success;
   }
 
   /// Atualiza um bovino existente
   Future<bool> updateBovine(BovineEntity bovine) async {
-    _isUpdating = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isUpdating: true, clearError: true);
 
     final result = await _updateBovine(UpdateBovineParams(bovine: bovine));
 
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isUpdating: false,
+        );
         debugPrint(
-          'BovinesProvider: Erro ao atualizar bovino - ${failure.message}',
+          'BovinesNotifier: Erro ao atualizar bovino - ${failure.message}',
         );
       },
       (updatedBovine) {
-        final index = _bovines.indexWhere((b) => b.id == updatedBovine.id);
+        final index = state.bovines.indexWhere((b) => b.id == updatedBovine.id);
         if (index != -1) {
-          _bovines[index] = updatedBovine;
-          if (_selectedBovine?.id == updatedBovine.id) {
-            _selectedBovine = updatedBovine;
-          }
-
+          final updatedBovines = List<BovineEntity>.from(state.bovines);
+          updatedBovines[index] = updatedBovine;
+          
+          state = state.copyWith(
+            bovines: updatedBovines,
+            selectedBovine: state.selectedBovine?.id == updatedBovine.id 
+                ? updatedBovine 
+                : state.selectedBovine,
+            isUpdating: false,
+          );
           success = true;
           debugPrint(
-            'BovinesProvider: Bovino atualizado com sucesso - ${updatedBovine.id}',
+            'BovinesNotifier: Bovino atualizado com sucesso - ${updatedBovine.id}',
           );
         }
       },
     );
 
-    _isUpdating = false;
-    notifyListeners();
     return success;
   }
 
   /// Remove um bovino (soft delete)
   Future<bool> deleteBovine(String bovineId, {bool confirmed = false}) async {
-    _isDeleting = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isDeleting: true, clearError: true);
 
     final result = await _deleteBovine(
       DeleteBovineParams(
@@ -227,126 +265,132 @@ class BovinesProvider extends ChangeNotifier {
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isDeleting: false,
+        );
         debugPrint(
-          'BovinesProvider: Erro ao deletar bovino - ${failure.message}',
+          'BovinesNotifier: Erro ao deletar bovino - ${failure.message}',
         );
       },
       (_) {
-        final index = _bovines.indexWhere((b) => b.id == bovineId);
+        final index = state.bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
-          _bovines[index] = _bovines[index].copyWith(isActive: false);
-          if (_selectedBovine?.id == bovineId) {
-            _selectedBovine = null;
-          }
-
+          final updatedBovines = List<BovineEntity>.from(state.bovines);
+          updatedBovines[index] = updatedBovines[index].copyWith(isActive: false);
+          
+          state = state.copyWith(
+            bovines: updatedBovines,
+            selectedBovine: state.selectedBovine?.id == bovineId 
+                ? null 
+                : state.selectedBovine,
+            clearSelectedBovine: state.selectedBovine?.id == bovineId,
+            isDeleting: false,
+          );
           success = true;
           debugPrint(
-            'BovinesProvider: Bovino deletado com sucesso - $bovineId',
+            'BovinesNotifier: Bovino deletado com sucesso - $bovineId',
           );
         }
       },
     );
 
-    _isDeleting = false;
-    notifyListeners();
     return success;
   }
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
-    _searchQuery = query;
-    notifyListeners();
-    debugPrint('BovinesProvider: Query de busca atualizada - "$query"');
+    state = state.copyWith(searchQuery: query);
+    debugPrint('BovinesNotifier: Query de busca atualizada - "$query"');
   }
 
   /// Limpa busca
   void clearSearch() {
-    _searchQuery = '';
-    notifyListeners();
-    debugPrint('BovinesProvider: Busca limpa');
+    state = state.copyWith(searchQuery: '');
+    debugPrint('BovinesNotifier: Busca limpa');
   }
 
   /// Busca bovino por ID
   BovineEntity? getBovineById(String id) {
     try {
-      return _bovines.firstWhere((bovine) => bovine.id == id);
+      return state.bovines.firstWhere((bovine) => bovine.id == id);
     } catch (e) {
-      debugPrint('BovinesProvider: Bovino não encontrado - $id');
+      debugPrint('BovinesNotifier: Bovino não encontrado - $id');
       return null;
     }
   }
 
   /// Carrega um bovino específico por ID usando use case dedicado
-  ///
-  /// Esta implementação:
-  /// 1. Busca localmente primeiro no cache em memória
-  /// 2. Se não encontrar, usa o use case que implementa local-first strategy
-  /// 3. O repository busca no cache local e depois remotamente se necessário
-  /// 4. Define automaticamente o bovino como selecionado se encontrado
   Future<bool> loadBovineById(String id) async {
-    _isLoadingBovine = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoadingBovine: true, clearError: true);
 
     try {
       final localBovine = getBovineById(id);
       if (localBovine != null) {
-        _selectedBovine = localBovine;
-        _isLoadingBovine = false;
-        notifyListeners();
-        debugPrint('BovinesProvider: Bovino encontrado no cache - $id');
+        state = state.copyWith(
+          selectedBovine: localBovine,
+          isLoadingBovine: false,
+        );
+        debugPrint('BovinesNotifier: Bovino encontrado no cache - $id');
         return true;
       }
+
       final result = await _getBovineById(GetBovineByIdParams(bovineId: id));
 
       bool success = false;
       result.fold(
         (failure) {
-          _errorMessage = failure.message;
+          state = state.copyWith(
+            errorMessage: failure.message,
+            isLoadingBovine: false,
+          );
           debugPrint(
-            'BovinesProvider: Erro ao carregar bovino por ID - ${failure.message}',
+            'BovinesNotifier: Erro ao carregar bovino por ID - ${failure.message}',
           );
         },
         (bovine) {
-          final existingIndex = _bovines.indexWhere((b) => b.id == bovine.id);
+          final existingIndex = state.bovines.indexWhere((b) => b.id == bovine.id);
+          final updatedBovines = List<BovineEntity>.from(state.bovines);
+          
           if (existingIndex == -1) {
-            _bovines.add(bovine);
+            updatedBovines.add(bovine);
           } else {
-            _bovines[existingIndex] = bovine;
+            updatedBovines[existingIndex] = bovine;
           }
 
-          _selectedBovine = bovine;
+          state = state.copyWith(
+            bovines: updatedBovines,
+            selectedBovine: bovine,
+            isLoadingBovine: false,
+          );
           success = true;
           debugPrint(
-            'BovinesProvider: Bovino carregado individualmente - ${bovine.id}',
+            'BovinesNotifier: Bovino carregado individualmente - ${bovine.id}',
           );
         },
       );
 
-      _isLoadingBovine = false;
-      notifyListeners();
       return success;
     } catch (e) {
-      _errorMessage = 'Erro inesperado ao carregar bovino: $e';
-      _isLoadingBovine = false;
-      notifyListeners();
-      debugPrint('BovinesProvider: Exceção ao carregar bovino - $e');
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado ao carregar bovino: $e',
+        isLoadingBovine: false,
+      );
+      debugPrint('BovinesNotifier: Exceção ao carregar bovino - $e');
       return false;
     }
   }
 
   /// Busca bovinos por raça
   List<BovineEntity> getBovinesByBreed(String breed) {
-    return activeBovines
+    return state.activeBovines
         .where((bovine) => bovine.breed.toLowerCase() == breed.toLowerCase())
         .toList();
   }
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Refresh completo dos dados
@@ -356,18 +400,11 @@ class BovinesProvider extends ChangeNotifier {
 
   /// Limpa seleção
   void clearSelection() {
-    _selectedBovine = null;
-    notifyListeners();
+    state = state.copyWith(clearSelectedBovine: true);
   }
 
   /// Verifica se bovino está selecionado
   bool isBovineSelected(String bovineId) {
-    return _selectedBovine?.id == bovineId;
-  }
-
-  @override
-  void dispose() {
-    debugPrint('BovinesProvider: Disposed');
-    super.dispose();
+    return state.selectedBovine?.id == bovineId;
   }
 }

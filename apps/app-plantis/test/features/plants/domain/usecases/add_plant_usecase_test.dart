@@ -10,8 +10,6 @@ import '../../../../helpers/test_fixtures.dart';
 void main() {
   late MockPlantsRepository mockPlantsRepository;
   late MockGenerateInitialTasksUseCase mockGenerateInitialTasksUseCase;
-  late MockPlantTaskGenerator mockPlantTaskGenerator;
-  late MockPlantTasksRepository mockPlantTasksRepository;
   late AddPlantUseCase addPlantUseCase;
 
   setUpAll(() {
@@ -32,14 +30,10 @@ void main() {
   setUp(() {
     mockPlantsRepository = MockPlantsRepository();
     mockGenerateInitialTasksUseCase = MockGenerateInitialTasksUseCase();
-    mockPlantTaskGenerator = MockPlantTaskGenerator();
-    mockPlantTasksRepository = MockPlantTasksRepository();
 
     addPlantUseCase = AddPlantUseCase(
       mockPlantsRepository,
       mockGenerateInitialTasksUseCase,
-      mockPlantTaskGenerator,
-      mockPlantTasksRepository,
     );
   });
 
@@ -161,10 +155,6 @@ void main() {
           () => mockPlantsRepository.addPlant(any()),
         ).thenAnswer((_) async => Right(testPlant));
 
-        when(
-          () => mockPlantTaskGenerator.generateTasksForPlant(any()),
-        ).thenReturn([]);
-
         const params = AddPlantParams(
           name: 'Monstera',
           species: 'Monstera Deliciosa',
@@ -212,10 +202,6 @@ void main() {
       when(
         () => mockPlantsRepository.addPlant(any()),
       ).thenAnswer((_) async => Right(testPlant));
-
-      when(
-        () => mockPlantTaskGenerator.generateTasksForPlant(any()),
-      ).thenReturn([]);
 
       const params = AddPlantParams(name: '  Test Plant  ');
 

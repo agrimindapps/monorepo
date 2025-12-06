@@ -4,7 +4,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/theme/spacing_tokens.dart';
-import '../../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
+import '../../../../../diagnosticos/presentation/providers/diagnosticos_by_entity_provider.dart';
 
 /// Widget responsável pelos filtros de diagnósticos
 ///
@@ -12,10 +12,17 @@ import '../../../../../diagnosticos/presentation/providers/diagnosticos_notifier
 /// - Campo de busca por texto
 /// - Dropdown de seleção de cultura
 /// - Layout responsivo e design consistente
+///
+/// **MIGRADO** - Agora usa `diagnosticosByEntityProvider` ao invés do deprecated
 class DiagnosticoDefensivoFilterWidget extends ConsumerStatefulWidget {
   final List<String>? availableCulturas;
+  final DiagnosticosByEntityParams? params;
 
-  const DiagnosticoDefensivoFilterWidget({super.key, this.availableCulturas});
+  const DiagnosticoDefensivoFilterWidget({
+    super.key,
+    this.availableCulturas,
+    this.params,
+  });
 
   @override
   ConsumerState<DiagnosticoDefensivoFilterWidget> createState() =>
@@ -48,92 +55,106 @@ class _DiagnosticoDefensivoFilterWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final diagnosticosAsync = ref.watch(diagnosticosProvider);
+    // Se não tiver params, usa culturas passadas diretamente (modo standalone)
+    if (widget.params == null) {
+      return _buildStaticFilters(context);
+    }
+
+    final stateAsync = ref.watch(diagnosticosByEntityProvider(widget.params!));
 
     return RepaintBoundary(
-      child: diagnosticosAsync.when(
-        data: (diagnosticosState) {
-          // Usa culturas passadas ou extrai dos diagnósticos como fallback
+      child: stateAsync.when(
+        data: (state) {
+          // Usa culturas passadas ou do estado
           final List<String> availableCulturas;
           if (widget.availableCulturas != null &&
               widget.availableCulturas!.isNotEmpty) {
             availableCulturas = ['Todas', ...widget.availableCulturas!];
           } else {
-            // IMPORTANTE: Sempre usar allDiagnosticos para extrair culturas disponíveis
-            // Usar filteredDiagnosticos causaria loop infinito (ao filtrar, remove a cultura da lista)
-            final diagnosticosParaCulturas = diagnosticosState.allDiagnosticos;
-
-            final culturasFromDiagnosticos =
-                diagnosticosParaCulturas
-                    .map((d) => d.nomeCultura)
-                    .where((cultura) => cultura != null && cultura.isNotEmpty)
-                    .cast<String>()
-                    .toSet()
-                    .toList()
-                  ..sort();
-
-            availableCulturas =
-                culturasFromDiagnosticos.isEmpty
-                    ? ['Todas']
-                    : ['Todas', ...culturasFromDiagnosticos];
+            availableCulturas = state.culturas;
           }
 
-          // Garante que o valor selecionado existe na lista
-          final rawSelectedCultura = diagnosticosState.contextoCultura ?? 'Todas';
-          final selectedCultura = availableCulturas.contains(rawSelectedCultura) 
-              ? rawSelectedCultura 
-              : 'Todas';
-
-          return Container(
-            padding: const EdgeInsets.all(SpacingTokens.sm),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: _isSearchFocused ? 2 : 1,
-                  child: SearchField(
-                    focusNode: _searchFocusNode,
-                    onChanged: (query) {
-                      ref
-                          .read(diagnosticosProvider.notifier)
-                          .searchByPattern(query);
-                    },
-                  ),
-                ),
-                if (!_isSearchFocused) ...[
-                  const SizedBox(width: SpacingTokens.md),
-                  Expanded(
-                    flex: 1,
-                    child: CultureDropdown(
-                      value: selectedCultura,
-                      cultures: availableCulturas,
-                      onChanged: (cultura) {
-                        if (cultura == 'Todas') {
-                          ref
-                              .read(diagnosticosProvider.notifier)
-                              .filterByCultura(null);
-                        } else {
-                          ref
-                              .read(diagnosticosProvider.notifier)
-                              .filterByCultura(cultura);
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ],
-            ),
+          return _buildFilterRow(
+            context,
+            availableCulturas: availableCulturas,
+            selectedCultura: state.selectedCultura,
+            onSearchChanged: (query) {
+              ref
+                  .read(diagnosticosByEntityProvider(widget.params!).notifier)
+                  .updateSearchQuery(query);
+            },
+            onCulturaChanged: (cultura) {
+              ref
+                  .read(diagnosticosByEntityProvider(widget.params!).notifier)
+                  .updateSelectedCultura(cultura);
+            },
           );
         },
-        loading:
-            () => Container(
-              padding: const EdgeInsets.all(SpacingTokens.sm),
-              child: const Center(child: CircularProgressIndicator()),
+        loading: () => Container(
+          padding: const EdgeInsets.all(SpacingTokens.sm),
+          child: const Center(child: CircularProgressIndicator()),
+        ),
+        error: (error, _) => Container(
+          padding: const EdgeInsets.all(SpacingTokens.sm),
+          child: const SearchField(focusNode: null, onChanged: null),
+        ),
+      ),
+    );
+  }
+
+  /// Filtros estáticos quando não há params (modo standalone)
+  Widget _buildStaticFilters(BuildContext context) {
+    final availableCulturas = widget.availableCulturas != null &&
+            widget.availableCulturas!.isNotEmpty
+        ? ['Todas', ...widget.availableCulturas!]
+        : ['Todas'];
+
+    return _buildFilterRow(
+      context,
+      availableCulturas: availableCulturas,
+      selectedCultura: 'Todas',
+      onSearchChanged: null,
+      onCulturaChanged: null,
+    );
+  }
+
+  Widget _buildFilterRow(
+    BuildContext context, {
+    required List<String> availableCulturas,
+    required String selectedCultura,
+    required ValueChanged<String>? onSearchChanged,
+    required ValueChanged<String>? onCulturaChanged,
+  }) {
+    // Garante valor válido
+    final safeSelectedCultura = availableCulturas.contains(selectedCultura)
+        ? selectedCultura
+        : 'Todas';
+
+    return Container(
+      padding: const EdgeInsets.all(SpacingTokens.sm),
+      child: Row(
+        children: [
+          Expanded(
+            flex: _isSearchFocused ? 2 : 1,
+            child: SearchField(
+              focusNode: _searchFocusNode,
+              onChanged: onSearchChanged,
             ),
-        error:
-            (error, _) => Container(
-              padding: const EdgeInsets.all(SpacingTokens.sm),
-              child: const SearchField(focusNode: null, onChanged: null),
+          ),
+          if (!_isSearchFocused) ...[
+            const SizedBox(width: SpacingTokens.md),
+            Expanded(
+              flex: 1,
+              child: CultureDropdown(
+                value: safeSelectedCultura,
+                cultures: availableCulturas,
+                onChanged: onCulturaChanged != null
+                    ? (cultura) => onCulturaChanged(cultura)
+                    : (_) {},
+              ),
             ),
+          ],
+        ],
       ),
     );
   }

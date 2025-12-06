@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/market_entity.dart';
 import '../../domain/entities/market_filter_entity.dart';
@@ -9,88 +10,132 @@ import '../../domain/usecases/get_markets.dart';
 import '../../domain/usecases/manage_market_favorites.dart';
 import 'markets_di_providers.dart';
 
-/// Provider Riverpod para MarketProvider
-final marketProviderProvider = ChangeNotifierProvider<MarketProvider>((ref) {
-  return MarketProvider(
-    ref.watch(getMarketsUseCaseProvider),
-    ref.watch(getMarketSummaryUseCaseProvider),
-    ref.watch(getTopGainersUseCaseProvider),
-    ref.watch(getTopLosersUseCaseProvider),
-    ref.watch(getMostActiveUseCaseProvider),
-    ref.watch(manageMarketFavoritesUseCaseProvider),
-    ref.watch(marketRepositoryProvider),
-  );
-});
+part 'market_provider.g.dart';
 
+/// State class for Market
+class MarketState {
+  final List<MarketEntity> markets;
+  final List<MarketEntity> favoriteMarkets;
+  final List<MarketEntity> searchResults;
+  final List<MarketEntity> topGainers;
+  final List<MarketEntity> topLosers;
+  final List<MarketEntity> mostActive;
+  final MarketSummary? marketSummary;
+  final bool isLoadingMarkets;
+  final bool isLoadingSummary;
+  final bool isLoadingFavorites;
+  final bool isLoadingSearch;
+  final bool isRefreshing;
+  final String? errorMessage;
+  final MarketFilter currentFilter;
+  final String currentSearchQuery;
+  final DateTime? lastUpdate;
+  final List<String> searchHistory;
 
-/// Market Provider for State Management
-///
-/// Manages market data, filtering, favorites, and search state
-/// using Provider pattern for reactive UI updates
-class MarketProvider with ChangeNotifier {
-  final GetMarkets _getMarkets;
-  final GetMarketSummary _getMarketSummary;
-  final GetTopGainers _getTopGainers;
-  final GetTopLosers _getTopLosers;
-  final GetMostActive _getMostActive;
-  final ManageMarketFavorites _manageFavorites;
-  final MarketRepository _repository;
+  const MarketState({
+    this.markets = const [],
+    this.favoriteMarkets = const [],
+    this.searchResults = const [],
+    this.topGainers = const [],
+    this.topLosers = const [],
+    this.mostActive = const [],
+    this.marketSummary,
+    this.isLoadingMarkets = false,
+    this.isLoadingSummary = false,
+    this.isLoadingFavorites = false,
+    this.isLoadingSearch = false,
+    this.isRefreshing = false,
+    this.errorMessage,
+    this.currentFilter = const MarketFilter(),
+    this.currentSearchQuery = '',
+    this.lastUpdate,
+    this.searchHistory = const [],
+  });
 
-  MarketProvider(
-    this._getMarkets,
-    this._getMarketSummary,
-    this._getTopGainers,
-    this._getTopLosers,
-    this._getMostActive,
-    this._manageFavorites,
-    this._repository,
-  );
+  MarketState copyWith({
+    List<MarketEntity>? markets,
+    List<MarketEntity>? favoriteMarkets,
+    List<MarketEntity>? searchResults,
+    List<MarketEntity>? topGainers,
+    List<MarketEntity>? topLosers,
+    List<MarketEntity>? mostActive,
+    MarketSummary? marketSummary,
+    bool? isLoadingMarkets,
+    bool? isLoadingSummary,
+    bool? isLoadingFavorites,
+    bool? isLoadingSearch,
+    bool? isRefreshing,
+    String? errorMessage,
+    MarketFilter? currentFilter,
+    String? currentSearchQuery,
+    DateTime? lastUpdate,
+    List<String>? searchHistory,
+    bool clearMarketSummary = false,
+    bool clearError = false,
+  }) {
+    return MarketState(
+      markets: markets ?? this.markets,
+      favoriteMarkets: favoriteMarkets ?? this.favoriteMarkets,
+      searchResults: searchResults ?? this.searchResults,
+      topGainers: topGainers ?? this.topGainers,
+      topLosers: topLosers ?? this.topLosers,
+      mostActive: mostActive ?? this.mostActive,
+      marketSummary: clearMarketSummary ? null : (marketSummary ?? this.marketSummary),
+      isLoadingMarkets: isLoadingMarkets ?? this.isLoadingMarkets,
+      isLoadingSummary: isLoadingSummary ?? this.isLoadingSummary,
+      isLoadingFavorites: isLoadingFavorites ?? this.isLoadingFavorites,
+      isLoadingSearch: isLoadingSearch ?? this.isLoadingSearch,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      currentFilter: currentFilter ?? this.currentFilter,
+      currentSearchQuery: currentSearchQuery ?? this.currentSearchQuery,
+      lastUpdate: lastUpdate ?? this.lastUpdate,
+      searchHistory: searchHistory ?? this.searchHistory,
+    );
+  }
 
-  List<MarketEntity> _markets = [];
-  List<MarketEntity> _favoriteMarkets = [];
-  List<MarketEntity> _searchResults = [];
-  List<MarketEntity> _topGainers = [];
-  List<MarketEntity> _topLosers = [];
-  List<MarketEntity> _mostActive = [];
-  MarketSummary? _marketSummary;
+  bool get hasError => errorMessage != null;
+  bool get hasData => markets.isNotEmpty;
+  bool get hasSearchResults => searchResults.isNotEmpty;
+}
 
-  bool _isLoadingMarkets = false;
-  bool _isLoadingSummary = false;
-  bool _isLoadingFavorites = false;
-  bool _isLoadingSearch = false;
-  bool _isRefreshing = false;
+/// Market Notifier using Riverpod code generation
+@riverpod
+class MarketNotifier extends _$MarketNotifier {
+  GetMarkets get _getMarkets => ref.read(getMarketsUseCaseProvider);
+  GetMarketSummary get _getMarketSummary => ref.read(getMarketSummaryUseCaseProvider);
+  GetTopGainers get _getTopGainers => ref.read(getTopGainersUseCaseProvider);
+  GetTopLosers get _getTopLosers => ref.read(getTopLosersUseCaseProvider);
+  GetMostActive get _getMostActive => ref.read(getMostActiveUseCaseProvider);
+  ManageMarketFavorites get _manageFavorites => ref.read(manageMarketFavoritesUseCaseProvider);
+  MarketRepository get _repository => ref.read(marketRepositoryProvider);
 
-  String? _errorMessage;
-  MarketFilter _currentFilter = const MarketFilter();
-  String _currentSearchQuery = '';
+  @override
+  MarketState build() {
+    return const MarketState();
+  }
 
-  DateTime? _lastUpdate;
-  List<String> _searchHistory = [];
-
-  List<MarketEntity> get markets => _markets;
-  List<MarketEntity> get favoriteMarkets => _favoriteMarkets;
-  List<MarketEntity> get searchResults => _searchResults;
-  List<MarketEntity> get topGainers => _topGainers;
-  List<MarketEntity> get topLosers => _topLosers;
-  List<MarketEntity> get mostActive => _mostActive;
-  MarketSummary? get marketSummary => _marketSummary;
-
-  bool get isLoadingMarkets => _isLoadingMarkets;
-  bool get isLoadingSummary => _isLoadingSummary;
-  bool get isLoadingFavorites => _isLoadingFavorites;
-  bool get isLoadingSearch => _isLoadingSearch;
-  bool get isRefreshing => _isRefreshing;
-
-  String? get errorMessage => _errorMessage;
-  MarketFilter get currentFilter => _currentFilter;
-  String get currentSearchQuery => _currentSearchQuery;
-
-  DateTime? get lastUpdate => _lastUpdate;
-  List<String> get searchHistory => _searchHistory;
-
-  bool get hasError => _errorMessage != null;
-  bool get hasData => _markets.isNotEmpty;
-  bool get hasSearchResults => _searchResults.isNotEmpty;
+  // Convenience getters for backward compatibility
+  List<MarketEntity> get markets => state.markets;
+  List<MarketEntity> get favoriteMarkets => state.favoriteMarkets;
+  List<MarketEntity> get searchResults => state.searchResults;
+  List<MarketEntity> get topGainers => state.topGainers;
+  List<MarketEntity> get topLosers => state.topLosers;
+  List<MarketEntity> get mostActive => state.mostActive;
+  MarketSummary? get marketSummary => state.marketSummary;
+  bool get isLoadingMarkets => state.isLoadingMarkets;
+  bool get isLoadingSummary => state.isLoadingSummary;
+  bool get isLoadingFavorites => state.isLoadingFavorites;
+  bool get isLoadingSearch => state.isLoadingSearch;
+  bool get isRefreshing => state.isRefreshing;
+  String? get errorMessage => state.errorMessage;
+  MarketFilter get currentFilter => state.currentFilter;
+  String get currentSearchQuery => state.currentSearchQuery;
+  DateTime? get lastUpdate => state.lastUpdate;
+  List<String> get searchHistory => state.searchHistory;
+  bool get hasError => state.hasError;
+  bool get hasData => state.hasData;
+  bool get hasSearchResults => state.hasSearchResults;
 
   /// Load markets with optional filter
   Future<void> loadMarkets({
@@ -99,10 +144,9 @@ class MarketProvider with ChangeNotifier {
     int offset = 0,
     bool refresh = false,
   }) async {
-    if (_isLoadingMarkets && !refresh) return;
+    if (state.isLoadingMarkets && !refresh) return;
 
-    _setLoadingMarkets(true);
-    _clearError();
+    state = state.copyWith(isLoadingMarkets: true, clearError: true);
 
     try {
       final result = await _getMarkets(
@@ -112,42 +156,53 @@ class MarketProvider with ChangeNotifier {
       );
 
       result.fold(
-        (failure) => _setError('Erro ao carregar mercados: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar mercados: ${failure.message}',
+          isLoadingMarkets: false,
+        ),
         (markets) {
-          _markets = markets;
-          _currentFilter = filter ?? const MarketFilter();
-          _lastUpdate = DateTime.now();
-          notifyListeners();
+          state = state.copyWith(
+            markets: markets,
+            currentFilter: filter ?? const MarketFilter(),
+            lastUpdate: DateTime.now(),
+            isLoadingMarkets: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingMarkets(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingMarkets: false,
+      );
     }
   }
 
   /// Load market summary with top performers
   Future<void> loadMarketSummary({bool refresh = false}) async {
-    if (_isLoadingSummary && !refresh) return;
+    if (state.isLoadingSummary && !refresh) return;
 
-    _setLoadingSummary(true);
-    _clearError();
+    state = state.copyWith(isLoadingSummary: true, clearError: true);
 
     try {
       final result = await _getMarketSummary();
 
       result.fold(
-        (failure) => _setError('Erro ao carregar resumo: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar resumo: ${failure.message}',
+          isLoadingSummary: false,
+        ),
         (summary) {
-          _marketSummary = summary;
-          notifyListeners();
+          state = state.copyWith(
+            marketSummary: summary,
+            isLoadingSummary: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingSummary(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingSummary: false,
+      );
     }
   }
 
@@ -164,27 +219,38 @@ class MarketProvider with ChangeNotifier {
         _getMostActive(limit: limit, type: type),
       ]);
 
+      List<MarketEntity> gainers = state.topGainers;
+      List<MarketEntity> losers = state.topLosers;
+      List<MarketEntity> active = state.mostActive;
+
       results[0].fold(
-        (failure) =>
-            _setError('Erro ao carregar maiores altas: ${failure.message}'),
-        (gainers) => _topGainers = gainers,
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar maiores altas: ${failure.message}',
+        ),
+        (data) => gainers = data,
       );
 
       results[1].fold(
-        (failure) =>
-            _setError('Erro ao carregar maiores quedas: ${failure.message}'),
-        (losers) => _topLosers = losers,
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar maiores quedas: ${failure.message}',
+        ),
+        (data) => losers = data,
       );
 
       results[2].fold(
-        (failure) =>
-            _setError('Erro ao carregar mais negociados: ${failure.message}'),
-        (active) => _mostActive = active,
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar mais negociados: ${failure.message}',
+        ),
+        (data) => active = data,
       );
 
-      notifyListeners();
+      state = state.copyWith(
+        topGainers: gainers,
+        topLosers: losers,
+        mostActive: active,
+      );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
     }
   }
 
@@ -195,14 +261,14 @@ class MarketProvider with ChangeNotifier {
     int limit = 20,
   }) async {
     if (query.isEmpty) {
-      _searchResults = [];
-      _currentSearchQuery = '';
-      notifyListeners();
+      state = state.copyWith(
+        searchResults: [],
+        currentSearchQuery: '',
+      );
       return;
     }
 
-    _setSearching(true);
-    _clearError();
+    state = state.copyWith(isLoadingSearch: true, clearError: true);
 
     try {
       final result = await _repository.searchMarkets(
@@ -211,25 +277,33 @@ class MarketProvider with ChangeNotifier {
         limit: limit,
       );
 
-      result.fold((failure) => _setError('Erro na busca: ${failure.message}'), (
-        results,
-      ) {
-        _searchResults = results;
-        _currentSearchQuery = query;
-        notifyListeners();
-      });
+      result.fold(
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro na busca: ${failure.message}',
+          isLoadingSearch: false,
+        ),
+        (results) {
+          state = state.copyWith(
+            searchResults: results,
+            currentSearchQuery: query,
+            isLoadingSearch: false,
+          );
+        },
+      );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setSearching(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingSearch: false,
+      );
     }
   }
 
   /// Clear search results
   void clearSearch() {
-    _searchResults = [];
-    _currentSearchQuery = '';
-    notifyListeners();
+    state = state.copyWith(
+      searchResults: [],
+      currentSearchQuery: '',
+    );
   }
 
   /// Get market by ID
@@ -237,11 +311,13 @@ class MarketProvider with ChangeNotifier {
     try {
       final result = await _repository.getMarketById(id);
       return result.fold((failure) {
-        _setError('Erro ao carregar mercado: ${failure.message}');
+        state = state.copyWith(
+          errorMessage: 'Erro ao carregar mercado: ${failure.message}',
+        );
         return null;
       }, (market) => market);
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return null;
     }
   }
@@ -251,8 +327,7 @@ class MarketProvider with ChangeNotifier {
     required MarketType type,
     int limit = 20,
   }) async {
-    _setLoadingMarkets(true);
-    _clearError();
+    state = state.copyWith(isLoadingMarkets: true, clearError: true);
 
     try {
       final result = await _repository.getMarketsByType(
@@ -261,40 +336,50 @@ class MarketProvider with ChangeNotifier {
       );
 
       result.fold(
-        (failure) => _setError('Erro ao carregar mercados: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar mercados: ${failure.message}',
+          isLoadingMarkets: false,
+        ),
         (markets) {
-          _markets = markets;
-          _currentFilter = MarketFilter(types: [type]);
-          notifyListeners();
+          state = state.copyWith(
+            markets: markets,
+            currentFilter: MarketFilter(types: [type]),
+            isLoadingMarkets: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingMarkets(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingMarkets: false,
+      );
     }
   }
 
   /// Load favorite markets
   Future<void> loadFavorites() async {
-    _setLoadingFavorites(true);
-    _clearError();
+    state = state.copyWith(isLoadingFavorites: true, clearError: true);
 
     try {
       final result = await _manageFavorites.getFavorites();
 
       result.fold(
-        (failure) =>
-            _setError('Erro ao carregar favoritos: ${failure.message}'),
+        (failure) => state = state.copyWith(
+          errorMessage: 'Erro ao carregar favoritos: ${failure.message}',
+          isLoadingFavorites: false,
+        ),
         (favorites) {
-          _favoriteMarkets = favorites;
-          notifyListeners();
+          state = state.copyWith(
+            favoriteMarkets: favorites,
+            isLoadingFavorites: false,
+          );
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
-    } finally {
-      _setLoadingFavorites(false);
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoadingFavorites: false,
+      );
     }
   }
 
@@ -305,7 +390,9 @@ class MarketProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao adicionar favorito: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao adicionar favorito: ${failure.message}',
+          );
           return false;
         },
         (_) {
@@ -314,7 +401,7 @@ class MarketProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -326,7 +413,9 @@ class MarketProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao remover favorito: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao remover favorito: ${failure.message}',
+          );
           return false;
         },
         (_) {
@@ -335,7 +424,7 @@ class MarketProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -347,7 +436,9 @@ class MarketProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError('Erro ao alterar favorito: ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Erro ao alterar favorito: ${failure.message}',
+          );
           return false;
         },
         (isFavorite) {
@@ -356,7 +447,7 @@ class MarketProvider with ChangeNotifier {
         },
       );
     } catch (e) {
-      _setError('Erro inesperado: $e');
+      state = state.copyWith(errorMessage: 'Erro inesperado: $e');
       return false;
     }
   }
@@ -374,31 +465,31 @@ class MarketProvider with ChangeNotifier {
 
   /// Apply filter
   void applyFilter(MarketFilter filter) {
-    _currentFilter = filter;
+    state = state.copyWith(currentFilter: filter);
     loadMarkets(filter: filter);
   }
 
   /// Clear current filter
   void clearFilter() {
-    _currentFilter = const MarketFilter();
+    state = state.copyWith(currentFilter: const MarketFilter());
     loadMarkets();
   }
 
   /// Filter by type
   void filterByType(MarketType type) {
-    final filter = _currentFilter.copyWith(types: [type]);
+    final filter = state.currentFilter.copyWith(types: [type]);
     applyFilter(filter);
   }
 
   /// Filter by exchange
   void filterByExchange(String exchange) {
-    final filter = _currentFilter.copyWith(exchanges: [exchange]);
+    final filter = state.currentFilter.copyWith(exchanges: [exchange]);
     applyFilter(filter);
   }
 
   /// Show only favorites
   void showOnlyFavorites(bool showOnly) {
-    final filter = _currentFilter.copyWith(onlyFavorites: showOnly);
+    final filter = state.currentFilter.copyWith(onlyFavorites: showOnly);
     applyFilter(filter);
   }
 
@@ -415,57 +506,29 @@ class MarketProvider with ChangeNotifier {
 
   /// Refresh all data
   Future<void> refreshAll() async {
-    _setRefreshing(true);
+    state = state.copyWith(isRefreshing: true);
 
     try {
       await _repository.refreshMarketData();
       await initialize();
     } catch (e) {
-      _setError('Erro ao atualizar dados: $e');
+      state = state.copyWith(errorMessage: 'Erro ao atualizar dados: $e');
     } finally {
-      _setRefreshing(false);
+      state = state.copyWith(isRefreshing: false);
     }
   }
 
   /// Load search history
   Future<void> _loadSearchHistory() async {
     try {
-      _searchHistory = [];
+      state = state.copyWith(searchHistory: []);
     } catch (e) {
+      // Silent error
     }
   }
 
-  void _setLoadingMarkets(bool loading) {
-    _isLoadingMarkets = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingSummary(bool loading) {
-    _isLoadingSummary = loading;
-    notifyListeners();
-  }
-
-  void _setLoadingFavorites(bool loading) {
-    _isLoadingFavorites = loading;
-    notifyListeners();
-  }
-
-  void _setSearching(bool searching) {
-    _isLoadingSearch = searching;
-    notifyListeners();
-  }
-
-  void _setRefreshing(bool refreshing) {
-    _isRefreshing = refreshing;
-    notifyListeners();
-  }
-
-  void _setError(String message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  void _clearError() {
-    _errorMessage = null;
+  /// Clear error
+  void clearError() {
+    state = state.copyWith(clearError: true);
   }
 }

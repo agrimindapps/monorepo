@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column, AuthState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart';
-import '../../../../core/providers/auth_state.dart';
 import '../../presentation/providers/settings_notifier.dart';
 
 /// User Profile Dialog
@@ -32,8 +31,8 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     _displayNameController = TextEditingController();
     _emailController = TextEditingController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authState = ref.read(authProvider);
-      if (mounted) {
+      final authState = ref.read(authProvider).value;
+      if (mounted && authState != null) {
         setState(() {
           _displayNameController.text = _getUserDisplayName(authState);
           _emailController.text = _getUserEmail(authState);
@@ -75,9 +74,13 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final authState = ref.watch(authProvider);
+    final authAsync = ref.watch(authProvider);
 
-    return _buildDialogContent(context, theme, authState);
+    return authAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, s) => Center(child: Text('Erro: $e')),
+      data: (authState) => _buildDialogContent(context, theme, authState),
+    );
   }
 
   Widget _buildDialogContent(

@@ -1,6 +1,7 @@
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/rain_gauge_entity.dart';
 import '../../domain/entities/weather_measurement_entity.dart';
@@ -13,117 +14,181 @@ import '../../domain/usecases/get_rain_gauges.dart';
 import '../../domain/usecases/get_weather_measurements.dart';
 import 'weather_di_providers.dart';
 
-/// Provider Riverpod para WeatherProvider
-final weatherProviderProvider = ChangeNotifierProvider<WeatherProvider>((ref) {
-  final getWeatherMeasurements = ref.watch(getWeatherMeasurementsProvider);
-  final createWeatherMeasurement = ref.watch(createWeatherMeasurementProvider);
-  final getRainGauges = ref.watch(getRainGaugesProvider);
-  final calculateWeatherStatistics = ref.watch(calculateWeatherStatisticsProvider);
-  final weatherRepository = ref.watch(weatherRepositoryProvider);
+part 'weather_provider.g.dart';
 
-  return WeatherProvider(
-    getWeatherMeasurements: getWeatherMeasurements,
-    createWeatherMeasurement: createWeatherMeasurement,
-    getRainGauges: getRainGauges,
-    calculateWeatherStatistics: calculateWeatherStatistics,
-    weatherRepository: weatherRepository,
-  );
-});
+/// State class for Weather
+class WeatherState {
+  final bool isLoading;
+  final bool isMeasurementsLoading;
+  final bool isRainGaugesLoading;
+  final bool isStatisticsLoading;
+  final bool isSyncing;
+  final List<WeatherMeasurementEntity> measurements;
+  final List<RainGaugeEntity> rainGauges;
+  final List<WeatherStatisticsEntity> statistics;
+  final WeatherMeasurementEntity? currentWeather;
+  final WeatherMeasurementEntity? latestMeasurement;
+  final String? selectedLocationId;
+  final String selectedPeriod;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final int measurementsLimit;
+  final WeatherFailure? lastError;
+  final String? errorMessage;
+  final bool hasMoreMeasurements;
+  final int currentPage;
 
-/// Weather provider using ChangeNotifier for state management
-/// Follows Provider pattern similar to existing app architecture
-class WeatherProvider with ChangeNotifier {
-  final GetWeatherMeasurements _getWeatherMeasurements;
-  final CreateWeatherMeasurement _createWeatherMeasurement;
-  final GetRainGauges _getRainGauges;
-  final CalculateWeatherStatistics _calculateWeatherStatistics;
-  final WeatherRepository _weatherRepository;
+  const WeatherState({
+    this.isLoading = false,
+    this.isMeasurementsLoading = false,
+    this.isRainGaugesLoading = false,
+    this.isStatisticsLoading = false,
+    this.isSyncing = false,
+    this.measurements = const [],
+    this.rainGauges = const [],
+    this.statistics = const [],
+    this.currentWeather,
+    this.latestMeasurement,
+    this.selectedLocationId,
+    this.selectedPeriod = 'daily',
+    this.startDate,
+    this.endDate,
+    this.measurementsLimit = 50,
+    this.lastError,
+    this.errorMessage,
+    this.hasMoreMeasurements = true,
+    this.currentPage = 0,
+  });
 
-  WeatherProvider({
-    required GetWeatherMeasurements getWeatherMeasurements,
-    required CreateWeatherMeasurement createWeatherMeasurement,
-    required GetRainGauges getRainGauges,
-    required CalculateWeatherStatistics calculateWeatherStatistics,
-    required WeatherRepository weatherRepository,
-  }) : _getWeatherMeasurements = getWeatherMeasurements,
-       _createWeatherMeasurement = createWeatherMeasurement,
-       _getRainGauges = getRainGauges,
-       _calculateWeatherStatistics = calculateWeatherStatistics,
-       _weatherRepository = weatherRepository;
-  bool _isLoading = false;
-  bool _isMeasurementsLoading = false;
-  bool _isRainGaugesLoading = false;
-  bool _isStatisticsLoading = false;
-  bool _isSyncing = false;
-  List<WeatherMeasurementEntity> _measurements = [];
-  List<RainGaugeEntity> _rainGauges = [];
-  final List<WeatherStatisticsEntity> _statistics = [];
-  WeatherMeasurementEntity? _currentWeather;
-  WeatherMeasurementEntity? _latestMeasurement;
-  String? _selectedLocationId;
-  String _selectedPeriod = 'daily';
-  DateTime? _startDate;
-  DateTime? _endDate;
-  int _measurementsLimit = 50;
-  WeatherFailure? _lastError;
-  String? _errorMessage;
-  bool _hasMoreMeasurements = true;
-  int _currentPage = 0;
-  bool get isLoading => _isLoading;
-  bool get isMeasurementsLoading => _isMeasurementsLoading;
-  bool get isRainGaugesLoading => _isRainGaugesLoading;
-  bool get isStatisticsLoading => _isStatisticsLoading;
-  bool get isSyncing => _isSyncing;
-  List<WeatherMeasurementEntity> get measurements =>
-      List.unmodifiable(_measurements);
-  List<RainGaugeEntity> get rainGauges => List.unmodifiable(_rainGauges);
-  List<WeatherStatisticsEntity> get statistics =>
-      List.unmodifiable(_statistics);
-  WeatherMeasurementEntity? get currentWeather => _currentWeather;
-  WeatherMeasurementEntity? get latestMeasurement => _latestMeasurement;
-  String? get selectedLocationId => _selectedLocationId;
-  String get selectedPeriod => _selectedPeriod;
-  DateTime? get startDate => _startDate;
-  DateTime? get endDate => _endDate;
-  int get measurementsLimit => _measurementsLimit;
-  WeatherFailure? get lastError => _lastError;
-  String? get errorMessage => _errorMessage;
-  bool get hasError => _lastError != null;
-  bool get hasMeasurements => _measurements.isNotEmpty;
-  bool get hasRainGauges => _rainGauges.isNotEmpty;
-  bool get hasStatistics => _statistics.isNotEmpty;
-  bool get hasMoreMeasurements => _hasMoreMeasurements;
-  int get currentPage => _currentPage;
+  WeatherState copyWith({
+    bool? isLoading,
+    bool? isMeasurementsLoading,
+    bool? isRainGaugesLoading,
+    bool? isStatisticsLoading,
+    bool? isSyncing,
+    List<WeatherMeasurementEntity>? measurements,
+    List<RainGaugeEntity>? rainGauges,
+    List<WeatherStatisticsEntity>? statistics,
+    WeatherMeasurementEntity? currentWeather,
+    WeatherMeasurementEntity? latestMeasurement,
+    String? selectedLocationId,
+    String? selectedPeriod,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? measurementsLimit,
+    WeatherFailure? lastError,
+    String? errorMessage,
+    bool? hasMoreMeasurements,
+    int? currentPage,
+    bool clearCurrentWeather = false,
+    bool clearLatestMeasurement = false,
+    bool clearSelectedLocationId = false,
+    bool clearStartDate = false,
+    bool clearEndDate = false,
+    bool clearError = false,
+  }) {
+    return WeatherState(
+      isLoading: isLoading ?? this.isLoading,
+      isMeasurementsLoading: isMeasurementsLoading ?? this.isMeasurementsLoading,
+      isRainGaugesLoading: isRainGaugesLoading ?? this.isRainGaugesLoading,
+      isStatisticsLoading: isStatisticsLoading ?? this.isStatisticsLoading,
+      isSyncing: isSyncing ?? this.isSyncing,
+      measurements: measurements ?? this.measurements,
+      rainGauges: rainGauges ?? this.rainGauges,
+      statistics: statistics ?? this.statistics,
+      currentWeather: clearCurrentWeather ? null : (currentWeather ?? this.currentWeather),
+      latestMeasurement: clearLatestMeasurement ? null : (latestMeasurement ?? this.latestMeasurement),
+      selectedLocationId: clearSelectedLocationId ? null : (selectedLocationId ?? this.selectedLocationId),
+      selectedPeriod: selectedPeriod ?? this.selectedPeriod,
+      startDate: clearStartDate ? null : (startDate ?? this.startDate),
+      endDate: clearEndDate ? null : (endDate ?? this.endDate),
+      measurementsLimit: measurementsLimit ?? this.measurementsLimit,
+      lastError: clearError ? null : (lastError ?? this.lastError),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      hasMoreMeasurements: hasMoreMeasurements ?? this.hasMoreMeasurements,
+      currentPage: currentPage ?? this.currentPage,
+    );
+  }
+
+  bool get hasError => lastError != null;
+  bool get hasMeasurements => measurements.isNotEmpty;
+  bool get hasRainGauges => rainGauges.isNotEmpty;
+  bool get hasStatistics => statistics.isNotEmpty;
+
   List<RainGaugeEntity> get activeRainGauges =>
-      _rainGauges.where((gauge) => gauge.isActive).toList();
+      rainGauges.where((gauge) => gauge.isActive).toList();
 
   List<RainGaugeEntity> get operationalRainGauges =>
-      _rainGauges.where((gauge) => gauge.isOperational).toList();
+      rainGauges.where((gauge) => gauge.isOperational).toList();
 
   List<RainGaugeEntity> get rainGaugesNeedingMaintenance =>
-      _rainGauges.where((gauge) => gauge.needsMaintenance).toList();
+      rainGauges.where((gauge) => gauge.needsMaintenance).toList();
+
   Map<String, dynamic> get weatherSummary {
-    if (_latestMeasurement == null) return {};
+    if (latestMeasurement == null) return {};
 
     return {
-      'temperature': _latestMeasurement!.temperature,
-      'humidity': _latestMeasurement!.humidity,
-      'pressure': _latestMeasurement!.pressure,
-      'condition': _latestMeasurement!.weatherCondition,
-      'description': _latestMeasurement!.description,
-      'timestamp': _latestMeasurement!.timestamp,
-      'location': _latestMeasurement!.locationName,
+      'temperature': latestMeasurement!.temperature,
+      'humidity': latestMeasurement!.humidity,
+      'pressure': latestMeasurement!.pressure,
+      'condition': latestMeasurement!.weatherCondition,
+      'description': latestMeasurement!.description,
+      'timestamp': latestMeasurement!.timestamp,
+      'location': latestMeasurement!.locationName,
     };
   }
+}
+
+/// Weather Notifier using Riverpod code generation
+@riverpod
+class WeatherNotifier extends _$WeatherNotifier {
+  GetWeatherMeasurements get _getWeatherMeasurements => ref.read(getWeatherMeasurementsProvider);
+  CreateWeatherMeasurement get _createWeatherMeasurement => ref.read(createWeatherMeasurementProvider);
+  GetRainGauges get _getRainGauges => ref.read(getRainGaugesProvider);
+  CalculateWeatherStatistics get _calculateWeatherStatistics => ref.read(calculateWeatherStatisticsProvider);
+  WeatherRepository get _weatherRepository => ref.read(weatherRepositoryProvider);
+
+  @override
+  WeatherState build() {
+    return const WeatherState();
+  }
+
+  // Convenience getters for backward compatibility
+  bool get isLoading => state.isLoading;
+  bool get isMeasurementsLoading => state.isMeasurementsLoading;
+  bool get isRainGaugesLoading => state.isRainGaugesLoading;
+  bool get isStatisticsLoading => state.isStatisticsLoading;
+  bool get isSyncing => state.isSyncing;
+  List<WeatherMeasurementEntity> get measurements => state.measurements;
+  List<RainGaugeEntity> get rainGauges => state.rainGauges;
+  List<WeatherStatisticsEntity> get statistics => state.statistics;
+  WeatherMeasurementEntity? get currentWeather => state.currentWeather;
+  WeatherMeasurementEntity? get latestMeasurement => state.latestMeasurement;
+  String? get selectedLocationId => state.selectedLocationId;
+  String get selectedPeriod => state.selectedPeriod;
+  DateTime? get startDate => state.startDate;
+  DateTime? get endDate => state.endDate;
+  int get measurementsLimit => state.measurementsLimit;
+  WeatherFailure? get lastError => state.lastError;
+  String? get errorMessage => state.errorMessage;
+  bool get hasError => state.hasError;
+  bool get hasMeasurements => state.hasMeasurements;
+  bool get hasRainGauges => state.hasRainGauges;
+  bool get hasStatistics => state.hasStatistics;
+  bool get hasMoreMeasurements => state.hasMoreMeasurements;
+  int get currentPage => state.currentPage;
+  List<RainGaugeEntity> get activeRainGauges => state.activeRainGauges;
+  List<RainGaugeEntity> get operationalRainGauges => state.operationalRainGauges;
+  List<RainGaugeEntity> get rainGaugesNeedingMaintenance => state.rainGaugesNeedingMaintenance;
+  Map<String, dynamic> get weatherSummary => state.weatherSummary;
 
   /// Initialize weather provider with default data
   Future<void> initialize({String? locationId}) async {
-    _setLoading(true);
-    _clearError();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       if (locationId != null) {
-        _selectedLocationId = locationId;
+        state = state.copyWith(selectedLocationId: locationId);
       }
       await Future.wait([
         loadMeasurements(),
@@ -131,73 +196,89 @@ class WeatherProvider with ChangeNotifier {
         loadLatestMeasurement(),
       ]);
 
-      if (_measurements.isNotEmpty) {
+      if (state.measurements.isNotEmpty) {
         await loadStatistics();
       }
     } catch (e) {
-      _setError(
-        WeatherDataFailure('Failed to initialize weather provider: $e'),
+      state = state.copyWith(
+        lastError: WeatherDataFailure('Failed to initialize weather provider: $e'),
+        errorMessage: 'Failed to initialize weather provider: $e',
       );
     } finally {
-      _setLoading(false);
+      state = state.copyWith(isLoading: false);
     }
   }
 
   /// Load weather measurements with current filters
   Future<void> loadMeasurements({bool refresh = false}) async {
     if (refresh) {
-      _measurements.clear();
-      _currentPage = 0;
-      _hasMoreMeasurements = true;
+      state = state.copyWith(
+        measurements: [],
+        currentPage: 0,
+        hasMoreMeasurements: true,
+      );
     }
 
-    _setMeasurementsLoading(true);
-    _clearError();
+    state = state.copyWith(isMeasurementsLoading: true, clearError: true);
 
     try {
       final result = await _getWeatherMeasurements(
-        locationId: _selectedLocationId,
-        startDate: _startDate,
-        endDate: _endDate,
-        limit: _measurementsLimit,
+        locationId: state.selectedLocationId,
+        startDate: state.startDate,
+        endDate: state.endDate,
+        limit: state.measurementsLimit,
       );
 
-      result.fold((failure) => _setError(failure), (newMeasurements) {
-        if (refresh) {
-          _measurements = newMeasurements;
-        } else {
-          _measurements.addAll(newMeasurements);
-        }
-
-        _hasMoreMeasurements = newMeasurements.length == _measurementsLimit;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (newMeasurements) {
+        final updatedMeasurements = refresh 
+            ? newMeasurements 
+            : [...state.measurements, ...newMeasurements];
+        state = state.copyWith(
+          measurements: updatedMeasurements,
+          hasMoreMeasurements: newMeasurements.length == state.measurementsLimit,
+        );
       });
     } catch (e) {
-      _setError(WeatherMeasurementFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     } finally {
-      _setMeasurementsLoading(false);
+      state = state.copyWith(isMeasurementsLoading: false);
     }
   }
 
   /// Load more measurements (pagination)
   Future<void> loadMoreMeasurements() async {
-    if (!_hasMoreMeasurements || _isMeasurementsLoading) return;
+    if (!state.hasMoreMeasurements || state.isMeasurementsLoading) return;
 
-    _currentPage++;
+    state = state.copyWith(currentPage: state.currentPage + 1);
     await loadMeasurements();
   }
 
   /// Get latest weather measurement
   Future<void> loadLatestMeasurement() async {
     try {
-      final result = await _getWeatherMeasurements.latest(_selectedLocationId);
+      final result = await _getWeatherMeasurements.latest(state.selectedLocationId);
 
-      result.fold((failure) => _setError(failure), (measurement) {
-        _latestMeasurement = measurement;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (measurement) {
+        state = state.copyWith(latestMeasurement: measurement);
       });
     } catch (e) {
-      _setError(WeatherMeasurementFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     }
   }
 
@@ -212,8 +293,7 @@ class WeatherProvider with ChangeNotifier {
     double? minRainfall,
     double? maxRainfall,
   }) async {
-    _setMeasurementsLoading(true);
-    _clearError();
+    state = state.copyWith(isMeasurementsLoading: true, clearError: true);
 
     try {
       final result = await _getWeatherMeasurements.search(
@@ -225,45 +305,59 @@ class WeatherProvider with ChangeNotifier {
         weatherCondition: weatherCondition,
         minRainfall: minRainfall,
         maxRainfall: maxRainfall,
-        limit: _measurementsLimit,
+        limit: state.measurementsLimit,
       );
 
-      result.fold((failure) => _setError(failure), (measurements) {
-        _measurements = measurements;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (measurements) {
+        state = state.copyWith(measurements: measurements);
       });
     } catch (e) {
-      _setError(WeatherMeasurementFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     } finally {
-      _setMeasurementsLoading(false);
+      state = state.copyWith(isMeasurementsLoading: false);
     }
   }
 
   /// Create new weather measurement
   Future<bool> createMeasurement(WeatherMeasurementEntity measurement) async {
-    _setLoading(true);
-    _clearError();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final result = await _createWeatherMeasurement(measurement);
 
       return result.fold(
         (failure) {
-          _setError(failure);
+          state = state.copyWith(
+            lastError: failure,
+            errorMessage: failure.toString(),
+            isLoading: false,
+          );
           return false;
         },
         (createdMeasurement) {
-          _measurements.insert(0, createdMeasurement);
-          _latestMeasurement = createdMeasurement;
-          notifyListeners();
+          state = state.copyWith(
+            measurements: [createdMeasurement, ...state.measurements],
+            latestMeasurement: createdMeasurement,
+            isLoading: false,
+          );
           return true;
         },
       );
     } catch (e) {
-      _setError(WeatherMeasurementSaveFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementSaveFailure(e.toString()),
+        errorMessage: e.toString(),
+        isLoading: false,
+      );
       return false;
-    } finally {
-      _setLoading(false);
     }
   }
 
@@ -284,8 +378,7 @@ class WeatherProvider with ChangeNotifier {
     String weatherCondition = 'unknown',
     String? notes,
   }) async {
-    _setLoading(true);
-    _clearError();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final result = await _createWeatherMeasurement.fromManualInput(
@@ -308,21 +401,29 @@ class WeatherProvider with ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _setError(failure);
+          state = state.copyWith(
+            lastError: failure,
+            errorMessage: failure.toString(),
+            isLoading: false,
+          );
           return false;
         },
         (measurement) {
-          _measurements.insert(0, measurement);
-          _latestMeasurement = measurement;
-          notifyListeners();
+          state = state.copyWith(
+            measurements: [measurement, ...state.measurements],
+            latestMeasurement: measurement,
+            isLoading: false,
+          );
           return true;
         },
       );
     } catch (e) {
-      _setError(WeatherMeasurementSaveFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementSaveFailure(e.toString()),
+        errorMessage: e.toString(),
+        isLoading: false,
+      );
       return false;
-    } finally {
-      _setLoading(false);
     }
   }
 
@@ -331,8 +432,7 @@ class WeatherProvider with ChangeNotifier {
     double latitude,
     double longitude,
   ) async {
-    _setLoading(true);
-    _clearError();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final result = await _weatherRepository.getCurrentWeatherFromAPI(
@@ -340,22 +440,33 @@ class WeatherProvider with ChangeNotifier {
         longitude,
       );
 
-      result.fold((failure) => _setError(failure), (measurement) {
-        _currentWeather = measurement;
-        _latestMeasurement = measurement;
-        final existingIndex = _measurements.indexWhere(
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (measurement) {
+        final existingIndex = state.measurements.indexWhere(
           (m) => m.id == measurement.id,
         );
+        final updatedMeasurements = List<WeatherMeasurementEntity>.from(state.measurements);
         if (existingIndex == -1) {
-          _measurements.insert(0, measurement);
+          updatedMeasurements.insert(0, measurement);
         }
 
-        notifyListeners();
+        state = state.copyWith(
+          currentWeather: measurement,
+          latestMeasurement: measurement,
+          measurements: updatedMeasurements,
+        );
       });
     } catch (e) {
-      _setError(WeatherApiFailure('external_api', 500, e.toString()));
+      state = state.copyWith(
+        lastError: WeatherApiFailure('external_api', 500, e.toString()),
+        errorMessage: e.toString(),
+      );
     } finally {
-      _setLoading(false);
+      state = state.copyWith(isLoading: false);
     }
   }
 
@@ -365,8 +476,7 @@ class WeatherProvider with ChangeNotifier {
     double longitude, {
     int days = 7,
   }) async {
-    _setLoading(true);
-    _clearError();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
       final result = await _weatherRepository.getWeatherForecast(
@@ -375,60 +485,81 @@ class WeatherProvider with ChangeNotifier {
         days: days,
       );
 
-      result.fold((failure) => _setError(failure), (forecastMeasurements) {
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (forecastMeasurements) {
+        final updatedMeasurements = List<WeatherMeasurementEntity>.from(state.measurements);
         for (final measurement in forecastMeasurements) {
-          final existingIndex = _measurements.indexWhere(
+          final existingIndex = updatedMeasurements.indexWhere(
             (m) => m.id == measurement.id,
           );
           if (existingIndex == -1) {
-            _measurements.add(measurement);
+            updatedMeasurements.add(measurement);
           }
         }
-        _measurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-        notifyListeners();
+        updatedMeasurements.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        state = state.copyWith(measurements: updatedMeasurements);
       });
     } catch (e) {
-      _setError(WeatherApiFailure('external_api', 500, e.toString()));
+      state = state.copyWith(
+        lastError: WeatherApiFailure('external_api', 500, e.toString()),
+        errorMessage: e.toString(),
+      );
     } finally {
-      _setLoading(false);
+      state = state.copyWith(isLoading: false);
     }
   }
 
   /// Load rain gauges
   Future<void> loadRainGauges({bool refresh = false}) async {
-    _setRainGaugesLoading(true);
-    _clearError();
+    state = state.copyWith(isRainGaugesLoading: true, clearError: true);
 
     try {
       final result = await _getRainGauges();
 
-      result.fold((failure) => _setError(failure), (rainGauges) {
-        _rainGauges = rainGauges;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (rainGauges) {
+        state = state.copyWith(rainGauges: rainGauges);
       });
     } catch (e) {
-      _setError(RainGaugeFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: RainGaugeFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     } finally {
-      _setRainGaugesLoading(false);
+      state = state.copyWith(isRainGaugesLoading: false);
     }
   }
 
   /// Get rain gauges by location
   Future<void> loadRainGaugesByLocation(String locationId) async {
-    _setRainGaugesLoading(true);
-    _clearError();
+    state = state.copyWith(isRainGaugesLoading: true, clearError: true);
 
     try {
       final result = await _getRainGauges.byLocation(locationId);
 
-      result.fold((failure) => _setError(failure), (rainGauges) {
-        _rainGauges = rainGauges;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (rainGauges) {
+        state = state.copyWith(rainGauges: rainGauges);
       });
     } catch (e) {
-      _setError(RainGaugeFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: RainGaugeFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     } finally {
-      _setRainGaugesLoading(false);
+      state = state.copyWith(isRainGaugesLoading: false);
     }
   }
 
@@ -438,11 +569,17 @@ class WeatherProvider with ChangeNotifier {
       final result = await _getRainGauges.getHealthReport();
 
       return result.fold((failure) {
-        _setError(failure);
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
         return null;
       }, (report) => report);
     } catch (e) {
-      _setError(RainGaugeFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: RainGaugeFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
       return null;
     }
   }
@@ -454,40 +591,46 @@ class WeatherProvider with ChangeNotifier {
     DateTime? startDate,
     DateTime? endDate,
   }) async {
-    _setStatisticsLoading(true);
-    _clearError();
+    state = state.copyWith(isStatisticsLoading: true, clearError: true);
 
     try {
       final result = await _calculateWeatherStatistics(
-        locationId: locationId ?? _selectedLocationId ?? 'default',
-        period: period ?? _selectedPeriod,
+        locationId: locationId ?? state.selectedLocationId ?? 'default',
+        period: period ?? state.selectedPeriod,
         startDate:
             startDate ??
-            _startDate ??
+            state.startDate ??
             DateTime.now().subtract(const Duration(days: 30)),
-        endDate: endDate ?? _endDate ?? DateTime.now(),
+        endDate: endDate ?? state.endDate ?? DateTime.now(),
       );
 
-      result.fold((failure) => _setError(failure), (statistics) {
-        final existingIndex = _statistics.indexWhere(
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (statistics) {
+        final updatedStatistics = List<WeatherStatisticsEntity>.from(state.statistics);
+        final existingIndex = updatedStatistics.indexWhere(
           (s) => s.id == statistics.id,
         );
         if (existingIndex != -1) {
-          _statistics[existingIndex] = statistics;
+          updatedStatistics[existingIndex] = statistics;
         } else {
-          _statistics.add(statistics);
+          updatedStatistics.add(statistics);
         }
-        notifyListeners();
+        state = state.copyWith(statistics: updatedStatistics);
       });
     } catch (e) {
-      _setError(
-        WeatherStatisticsCalculationFailure(
+      state = state.copyWith(
+        lastError: WeatherStatisticsCalculationFailure(
           e.toString(),
-          period ?? _selectedPeriod,
+          period ?? state.selectedPeriod,
         ),
+        errorMessage: e.toString(),
       );
     } finally {
-      _setStatisticsLoading(false);
+      state = state.copyWith(isStatisticsLoading: false);
     }
   }
 
@@ -504,11 +647,19 @@ class WeatherProvider with ChangeNotifier {
         date: targetDate,
       );
 
-      result.fold((failure) => _setError(failure), (statistics) {
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (statistics) {
         _updateStatistics(statistics);
       });
     } catch (e) {
-      _setError(WeatherStatisticsCalculationFailure(e.toString(), 'daily'));
+      state = state.copyWith(
+        lastError: WeatherStatisticsCalculationFailure(e.toString(), 'daily'),
+        errorMessage: e.toString(),
+      );
     }
   }
 
@@ -525,25 +676,36 @@ class WeatherProvider with ChangeNotifier {
         monthDate: targetDate,
       );
 
-      result.fold((failure) => _setError(failure), (statistics) {
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (statistics) {
         _updateStatistics(statistics);
       });
     } catch (e) {
-      _setError(WeatherStatisticsCalculationFailure(e.toString(), 'monthly'));
+      state = state.copyWith(
+        lastError: WeatherStatisticsCalculationFailure(e.toString(), 'monthly'),
+        errorMessage: e.toString(),
+      );
     }
   }
 
   /// Sync weather data
   Future<bool> syncWeatherData() async {
-    _setSyncing(true);
-    _clearError();
+    state = state.copyWith(isSyncing: true, clearError: true);
 
     try {
       final result = await _weatherRepository.syncWeatherData();
 
       return result.fold(
         (failure) {
-          _setError(failure);
+          state = state.copyWith(
+            lastError: failure,
+            errorMessage: failure.toString(),
+            isSyncing: false,
+          );
           return false;
         },
         (syncedCount) {
@@ -551,23 +713,27 @@ class WeatherProvider with ChangeNotifier {
             loadMeasurements(refresh: true),
             loadRainGauges(refresh: true),
           ]);
-
+          state = state.copyWith(isSyncing: false);
           return true;
         },
       );
     } catch (e) {
-      _setError(WeatherSyncFailure('Sync failed: $e'));
+      state = state.copyWith(
+        lastError: WeatherSyncFailure('Sync failed: $e'),
+        errorMessage: 'Sync failed: $e',
+        isSyncing: false,
+      );
       return false;
-    } finally {
-      _setSyncing(false);
     }
   }
 
   /// Set location filter
   void setLocationFilter(String? locationId) {
-    if (_selectedLocationId != locationId) {
-      _selectedLocationId = locationId;
-      notifyListeners();
+    if (state.selectedLocationId != locationId) {
+      state = state.copyWith(
+        selectedLocationId: locationId,
+        clearSelectedLocationId: locationId == null,
+      );
       loadMeasurements(refresh: true);
       if (locationId != null) {
         loadRainGaugesByLocation(locationId);
@@ -579,39 +745,41 @@ class WeatherProvider with ChangeNotifier {
 
   /// Set date range filter
   void setDateRangeFilter(DateTime? startDate, DateTime? endDate) {
-    if (_startDate != startDate || _endDate != endDate) {
-      _startDate = startDate;
-      _endDate = endDate;
-      notifyListeners();
+    if (state.startDate != startDate || state.endDate != endDate) {
+      state = state.copyWith(
+        startDate: startDate,
+        endDate: endDate,
+        clearStartDate: startDate == null,
+        clearEndDate: endDate == null,
+      );
       loadMeasurements(refresh: true);
     }
   }
 
   /// Set period filter
   void setPeriodFilter(String period) {
-    if (_selectedPeriod != period) {
-      _selectedPeriod = period;
-      notifyListeners();
+    if (state.selectedPeriod != period) {
+      state = state.copyWith(selectedPeriod: period);
       loadStatistics();
     }
   }
 
   /// Set measurements limit
   void setMeasurementsLimit(int limit) {
-    if (_measurementsLimit != limit) {
-      _measurementsLimit = limit;
-      notifyListeners();
+    if (state.measurementsLimit != limit) {
+      state = state.copyWith(measurementsLimit: limit);
     }
   }
 
   /// Clear all filters
   void clearFilters() {
-    _selectedLocationId = null;
-    _startDate = null;
-    _endDate = null;
-    _selectedPeriod = 'daily';
-    _measurementsLimit = 50;
-    notifyListeners();
+    state = state.copyWith(
+      clearSelectedLocationId: true,
+      clearStartDate: true,
+      clearEndDate: true,
+      selectedPeriod: 'daily',
+      measurementsLimit: 50,
+    );
     loadMeasurements(refresh: true);
     loadRainGauges(refresh: true);
   }
@@ -619,14 +787,21 @@ class WeatherProvider with ChangeNotifier {
   /// Get measurements for today
   Future<void> loadTodayMeasurements() async {
     try {
-      final result = await _getWeatherMeasurements.today(_selectedLocationId);
+      final result = await _getWeatherMeasurements.today(state.selectedLocationId);
 
-      result.fold((failure) => _setError(failure), (measurements) {
-        _measurements = measurements;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (measurements) {
+        state = state.copyWith(measurements: measurements);
       });
     } catch (e) {
-      _setError(WeatherMeasurementFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     }
   }
 
@@ -634,92 +809,51 @@ class WeatherProvider with ChangeNotifier {
   Future<void> loadFavorableMeasurements() async {
     try {
       final result = await _getWeatherMeasurements.favorableForAgriculture(
-        locationId: _selectedLocationId,
-        startDate: _startDate,
-        endDate: _endDate,
-        limit: _measurementsLimit,
+        locationId: state.selectedLocationId,
+        startDate: state.startDate,
+        endDate: state.endDate,
+        limit: state.measurementsLimit,
       );
 
-      result.fold((failure) => _setError(failure), (measurements) {
-        _measurements = measurements;
-        notifyListeners();
+      result.fold((failure) {
+        state = state.copyWith(
+          lastError: failure,
+          errorMessage: failure.toString(),
+        );
+      }, (measurements) {
+        state = state.copyWith(measurements: measurements);
       });
     } catch (e) {
-      _setError(WeatherMeasurementFetchFailure(e.toString()));
+      state = state.copyWith(
+        lastError: WeatherMeasurementFetchFailure(e.toString()),
+        errorMessage: e.toString(),
+      );
     }
   }
 
   /// Get measurements by weather condition
   List<WeatherMeasurementEntity> getMeasurementsByCondition(String condition) {
-    return _measurements.where((m) => m.weatherCondition == condition).toList();
+    return state.measurements.where((m) => m.weatherCondition == condition).toList();
   }
 
   /// Get average temperature for loaded measurements
   double get averageTemperature {
-    if (_measurements.isEmpty) return 0.0;
-    final total = _measurements
+    if (state.measurements.isEmpty) return 0.0;
+    final total = state.measurements
         .map((m) => m.temperature)
         .reduce((a, b) => a + b);
-    return total / _measurements.length;
+    return total / state.measurements.length;
   }
 
   /// Get total rainfall for loaded measurements
   double get totalRainfall {
-    if (_measurements.isEmpty) return 0.0;
-    return _measurements.map((m) => m.rainfall).reduce((a, b) => a + b);
-  }
-
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _setMeasurementsLoading(bool loading) {
-    if (_isMeasurementsLoading != loading) {
-      _isMeasurementsLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _setRainGaugesLoading(bool loading) {
-    if (_isRainGaugesLoading != loading) {
-      _isRainGaugesLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _setStatisticsLoading(bool loading) {
-    if (_isStatisticsLoading != loading) {
-      _isStatisticsLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  void _setSyncing(bool syncing) {
-    if (_isSyncing != syncing) {
-      _isSyncing = syncing;
-      notifyListeners();
-    }
-  }
-
-  void _setError(WeatherFailure? error) {
-    _lastError = error;
-    _errorMessage = error?.toString();
-    notifyListeners();
-  }
-
-  void _clearError() {
-    if (_lastError != null) {
-      _lastError = null;
-      _errorMessage = null;
-      notifyListeners();
-    }
+    if (state.measurements.isEmpty) return 0.0;
+    return state.measurements.map((m) => m.rainfall).reduce((a, b) => a + b);
   }
 
   void _updateStatistics(WeatherStatisticsEntity statistics) {
-    final existingIndex = _statistics.indexWhere(
+    final updatedStatistics = List<WeatherStatisticsEntity>.from(state.statistics);
+    final existingIndex = updatedStatistics.indexWhere(
       (s) =>
           s.locationId == statistics.locationId &&
           s.period == statistics.period &&
@@ -727,17 +861,16 @@ class WeatherProvider with ChangeNotifier {
     );
 
     if (existingIndex != -1) {
-      _statistics[existingIndex] = statistics;
+      updatedStatistics[existingIndex] = statistics;
     } else {
-      _statistics.add(statistics);
+      updatedStatistics.add(statistics);
     }
 
-    notifyListeners();
+    state = state.copyWith(statistics: updatedStatistics);
   }
 
-  /// Dispose method for cleanup
-  @override
-  void dispose() {
-    super.dispose();
+  /// Clear error
+  void clearError() {
+    state = state.copyWith(clearError: true);
   }
 }

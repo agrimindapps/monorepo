@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../domain/entities/user_settings_entity.dart';

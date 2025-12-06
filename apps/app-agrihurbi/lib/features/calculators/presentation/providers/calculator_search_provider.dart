@@ -1,47 +1,96 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/get_calculators.dart';
+import 'calculators_di_providers.dart';
+
+part 'calculator_search_provider.g.dart';
+
+/// State class for CalculatorSearch
+class CalculatorSearchState {
+  final bool isSearching;
+  final String searchQuery;
+  final CalculatorCategory? selectedCategory;
+  final List<CalculatorEntity> filteredCalculators;
+  final String? errorMessage;
+  final List<String> searchHistory;
+
+  const CalculatorSearchState({
+    this.isSearching = false,
+    this.searchQuery = '',
+    this.selectedCategory,
+    this.filteredCalculators = const [],
+    this.errorMessage,
+    this.searchHistory = const [],
+  });
+
+  CalculatorSearchState copyWith({
+    bool? isSearching,
+    String? searchQuery,
+    CalculatorCategory? selectedCategory,
+    List<CalculatorEntity>? filteredCalculators,
+    String? errorMessage,
+    List<String>? searchHistory,
+    bool clearCategory = false,
+    bool clearResults = false,
+    bool clearError = false,
+  }) {
+    return CalculatorSearchState(
+      isSearching: isSearching ?? this.isSearching,
+      searchQuery: clearResults ? '' : (searchQuery ?? this.searchQuery),
+      selectedCategory: clearCategory ? null : (selectedCategory ?? this.selectedCategory),
+      filteredCalculators: clearResults ? const [] : (filteredCalculators ?? this.filteredCalculators),
+      errorMessage: (clearError || clearResults) ? null : (errorMessage ?? this.errorMessage),
+      searchHistory: searchHistory ?? this.searchHistory,
+    );
+  }
+
+  bool get hasResults => filteredCalculators.isNotEmpty;
+  bool get hasActiveFilters => searchQuery.isNotEmpty || selectedCategory != null;
+  int get totalResults => filteredCalculators.length;
+}
 
 /// Provider especializado para busca e filtros de calculadoras
 /// 
 /// Responsabilidade única: Gerenciar busca e filtros de calculadoras
 /// Seguindo Single Responsibility Principle
-class CalculatorSearchProvider extends ChangeNotifier {
-  final SearchCalculators _searchCalculators;
+@riverpod
+class CalculatorSearchNotifier extends _$CalculatorSearchNotifier {
+  SearchCalculators get _searchCalculators {
+    // Fallback implementation if provider not available
+    final repository = ref.read(calculatorRepositoryProvider);
+    return SearchCalculators(repository);
+  }
 
-  CalculatorSearchProvider({
-    required SearchCalculators searchCalculators,
-  }) : _searchCalculators = searchCalculators;
+  @override
+  CalculatorSearchState build() {
+    return const CalculatorSearchState();
+  }
 
-  bool _isSearching = false;
-  String _searchQuery = '';
-  CalculatorCategory? _selectedCategory;
-  List<CalculatorEntity> _filteredCalculators = [];
-  String? _errorMessage;
-
-  bool get isSearching => _isSearching;
-  String get searchQuery => _searchQuery;
-  CalculatorCategory? get selectedCategory => _selectedCategory;
-  List<CalculatorEntity> get filteredCalculators => _filteredCalculators;
-  String? get errorMessage => _errorMessage;
-  
-  bool get hasResults => _filteredCalculators.isNotEmpty;
-  bool get hasActiveFilters => _searchQuery.isNotEmpty || _selectedCategory != null;
-  int get totalResults => _filteredCalculators.length;
+  // Convenience getters for backward compatibility
+  bool get isSearching => state.isSearching;
+  String get searchQuery => state.searchQuery;
+  CalculatorCategory? get selectedCategory => state.selectedCategory;
+  List<CalculatorEntity> get filteredCalculators => state.filteredCalculators;
+  String? get errorMessage => state.errorMessage;
+  bool get hasResults => state.hasResults;
+  bool get hasActiveFilters => state.hasActiveFilters;
+  int get totalResults => state.totalResults;
+  List<String> get searchHistory => state.searchHistory;
 
   /// Atualiza query de busca
   void updateSearchQuery(String query) {
-    _searchQuery = query;
-    notifyListeners();
+    state = state.copyWith(searchQuery: query);
   }
 
   /// Atualiza filtro de categoria
   void updateCategoryFilter(CalculatorCategory? category) {
-    _selectedCategory = category;
-    notifyListeners();
+    state = state.copyWith(
+      selectedCategory: category,
+      clearCategory: category == null,
+    );
   }
 
   /// Busca calculadoras por termo
@@ -51,56 +100,60 @@ class CalculatorSearchProvider extends ChangeNotifier {
       return;
     }
 
-    _isSearching = true;
-    _errorMessage = null;
-    _searchQuery = query;
-    notifyListeners();
+    state = state.copyWith(
+      isSearching: true,
+      searchQuery: query,
+      clearError: true,
+    );
 
     final result = await _searchCalculators.call(query);
     
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorSearchProvider: Erro ao buscar calculadoras - ${failure.message}');
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isSearching: false,
+        );
+        debugPrint('CalculatorSearchNotifier: Erro ao buscar calculadoras - ${failure.message}');
       },
       (calculators) {
-        _filteredCalculators = calculators;
-        debugPrint('CalculatorSearchProvider: Busca concluída - ${calculators.length} resultados');
+        state = state.copyWith(
+          filteredCalculators: calculators,
+          isSearching: false,
+        );
+        debugPrint('CalculatorSearchNotifier: Busca concluída - ${calculators.length} resultados');
       },
     );
-
-    _isSearching = false;
-    notifyListeners();
   }
 
   /// Aplica filtros a uma lista de calculadoras
   List<CalculatorEntity> applyFilters(List<CalculatorEntity> calculators) {
     var filtered = List<CalculatorEntity>.from(calculators);
-    if (_selectedCategory != null) {
-      filtered = filtered.where((calc) => calc.category == _selectedCategory).toList();
+    
+    if (state.selectedCategory != null) {
+      filtered = filtered.where((calc) => calc.category == state.selectedCategory).toList();
     }
-    if (_searchQuery.isNotEmpty) {
-      final query = _searchQuery.toLowerCase();
+    
+    if (state.searchQuery.isNotEmpty) {
+      final query = state.searchQuery.toLowerCase();
       filtered = filtered.where((calc) =>
         calc.name.toLowerCase().contains(query) ||
         calc.description.toLowerCase().contains(query)
       ).toList();
     }
 
-    _filteredCalculators = filtered;
+    state = state.copyWith(filteredCalculators: filtered);
     return filtered;
   }
 
   /// Busca e aplica filtros
   Future<void> searchAndFilter(List<CalculatorEntity> allCalculators) async {
-    _isSearching = true;
-    notifyListeners();
+    state = state.copyWith(isSearching: true);
     await Future<void>.delayed(const Duration(milliseconds: 100));
 
     applyFilters(allCalculators);
 
-    _isSearching = false;
-    notifyListeners();
+    state = state.copyWith(isSearching: false);
   }
 
   /// Busca avançada com múltiplos critérios
@@ -112,25 +165,26 @@ class CalculatorSearchProvider extends ChangeNotifier {
     List<String>? tags,
   }) {
     var filtered = List<CalculatorEntity>.from(calculators);
+    
     if (nameQuery != null && nameQuery.isNotEmpty) {
       final query = nameQuery.toLowerCase();
       filtered = filtered.where((calc) =>
         calc.name.toLowerCase().contains(query)
       ).toList();
     }
+    
     if (descriptionQuery != null && descriptionQuery.isNotEmpty) {
       final query = descriptionQuery.toLowerCase();
       filtered = filtered.where((calc) =>
         calc.description.toLowerCase().contains(query)
       ).toList();
     }
+    
     if (category != null) {
       filtered = filtered.where((calc) => calc.category == category).toList();
     }
 
-    _filteredCalculators = filtered;
-    notifyListeners();
-    
+    state = state.copyWith(filteredCalculators: filtered);
     return filtered;
   }
 
@@ -147,7 +201,6 @@ class CalculatorSearchProvider extends ChangeNotifier {
     List<CalculatorEntity> calculators,
     {int daysBack = 30}
   ) {
-
     return calculators.where((calc) {
       return true; // Por enquanto, retorna todos
     }).toList();
@@ -155,33 +208,29 @@ class CalculatorSearchProvider extends ChangeNotifier {
 
   /// Limpa todos os filtros
   void clearAllFilters() {
-    _searchQuery = '';
-    _selectedCategory = null;
-    _filteredCalculators.clear();
-    notifyListeners();
-    debugPrint('CalculatorSearchProvider: Todos os filtros limpos');
+    state = state.copyWith(
+      searchQuery: '',
+      clearCategory: true,
+      clearResults: true,
+    );
+    debugPrint('CalculatorSearchNotifier: Todos os filtros limpos');
   }
 
   /// Limpa apenas a busca de texto
   void clearTextSearch() {
-    _searchQuery = '';
-    notifyListeners();
-    debugPrint('CalculatorSearchProvider: Busca de texto limpa');
+    state = state.copyWith(searchQuery: '');
+    debugPrint('CalculatorSearchNotifier: Busca de texto limpa');
   }
 
   /// Limpa apenas o filtro de categoria
   void clearCategoryFilter() {
-    _selectedCategory = null;
-    notifyListeners();
-    debugPrint('CalculatorSearchProvider: Filtro de categoria limpo');
+    state = state.copyWith(clearCategory: true);
+    debugPrint('CalculatorSearchNotifier: Filtro de categoria limpo');
   }
 
   /// Limpa resultados de busca
   void clearSearchResults() {
-    _filteredCalculators.clear();
-    _searchQuery = '';
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearResults: true);
   }
 
   /// Obtém sugestões de busca baseadas em calculadoras existentes
@@ -214,47 +263,34 @@ class CalculatorSearchProvider extends ChangeNotifier {
         .toList();
   }
 
-  final List<String> _searchHistory = [];
-  
-  List<String> get searchHistory => _searchHistory.toList();
-  
   /// Adiciona termo ao histórico de busca
   void addToSearchHistory(String query) {
     if (query.trim().isEmpty) return;
-    _searchHistory.remove(query);
-    _searchHistory.insert(0, query);
-    if (_searchHistory.length > 10) {
-      _searchHistory.removeRange(10, _searchHistory.length);
+    
+    final updatedHistory = List<String>.from(state.searchHistory);
+    updatedHistory.remove(query);
+    updatedHistory.insert(0, query);
+    if (updatedHistory.length > 10) {
+      updatedHistory.removeRange(10, updatedHistory.length);
     }
     
-    debugPrint('CalculatorSearchProvider: Termo adicionado ao histórico - $query');
+    state = state.copyWith(searchHistory: updatedHistory);
+    debugPrint('CalculatorSearchNotifier: Termo adicionado ao histórico - $query');
   }
 
   /// Limpa histórico de busca
   void clearSearchHistory() {
-    _searchHistory.clear();
-    notifyListeners();
-    debugPrint('CalculatorSearchProvider: Histórico de busca limpo');
+    state = state.copyWith(searchHistory: []);
+    debugPrint('CalculatorSearchNotifier: Histórico de busca limpo');
   }
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Reset completo do estado
   void resetState() {
-    _searchQuery = '';
-    _selectedCategory = null;
-    _filteredCalculators.clear();
-    _errorMessage = null;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('CalculatorSearchProvider: Disposed');
-    super.dispose();
+    state = const CalculatorSearchState();
   }
 }

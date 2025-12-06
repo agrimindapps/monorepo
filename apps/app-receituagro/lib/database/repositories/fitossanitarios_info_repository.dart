@@ -116,6 +116,40 @@ class FitossanitariosInfoRepository {
       ..where((tbl) => tbl.defensivoId.equals(defensivoId));
     return query.watchSingleOrNull();
   }
+
+  /// Conta todos os modos de ação únicos (separando por vírgula)
+  Future<int> countDistinctModosAcao() async {
+    final infos = await findAll();
+    final modosSet = <String>{};
+    
+    for (final info in infos) {
+      if (info.modoAcao != null && info.modoAcao!.isNotEmpty) {
+        // Split by comma and trim each value
+        final modos = info.modoAcao!.split(',').map((m) => m.trim()).where((m) => m.isNotEmpty);
+        modosSet.addAll(modos);
+      }
+    }
+    
+    return modosSet.length;
+  }
+
+  /// Retorna lista de todos os modos de ação únicos (separando por vírgula)
+  Future<List<String>> getDistinctModosAcao() async {
+    final infos = await findAll();
+    final modosSet = <String>{};
+    
+    for (final info in infos) {
+      if (info.modoAcao != null && info.modoAcao!.isNotEmpty) {
+        // Split by comma and trim each value
+        final modos = info.modoAcao!.split(',').map((m) => m.trim()).where((m) => m.isNotEmpty);
+        modosSet.addAll(modos);
+      }
+    }
+    
+    final modosList = modosSet.toList();
+    modosList.sort();
+    return modosList;
+  }
 }
 
 /// Classe auxiliar para join de FitossanitariosInfo com Fitossanitario

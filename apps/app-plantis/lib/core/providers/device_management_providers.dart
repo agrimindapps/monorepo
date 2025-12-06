@@ -1,26 +1,23 @@
-import 'package:core/core.dart'
-    hide
-        GetUserDevicesUseCase,
-        RevokeDeviceUseCase,
-        ValidateDeviceUseCase,
-        RevokeAllOtherDevicesUseCase,
-        GetUserDevicesParams,
-        RevokeDeviceParams,
-        RevokeAllOtherDevicesParams,
-        ValidateDeviceParams,
-        DeviceValidationResult;
+import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/device_management/data/models/device_model.dart';
-import '../../features/device_management/domain/usecases/get_device_statistics_usecase.dart';
-import '../../features/device_management/domain/usecases/get_user_devices_usecase.dart';
-import '../../features/device_management/domain/usecases/revoke_device_usecase.dart';
-import '../../features/device_management/domain/usecases/validate_device_usecase.dart';
-import '../auth/auth_state_notifier.dart';
+import '../../features/device_management/presentation/providers/device_management_providers.dart'
+    as feature_providers;
 
 part 'device_management_providers.g.dart';
+
+/// Configuração de limite de dispositivos para o Plantis
+/// Web não conta no limite, apenas dispositivos mobile (iOS/Android)
+const plantisDeviceLimitConfig = DeviceLimitConfig(
+  maxMobileDevices: 3,
+  maxWebDevices: -1, // Web ilimitado
+  countWebInLimit: false, // Web não conta no limite
+  premiumMaxMobileDevices: 10,
+  allowEmulators: true,
+);
 
 /// Immutable state for Device Management
 @immutable
@@ -81,50 +78,62 @@ class DeviceManagementState {
       devices.where((d) => d.isActive).toList();
   List<DeviceModel> get inactiveDevices =>
       devices.where((d) => !d.isActive).toList();
+  
+  /// Conta apenas dispositivos mobile ativos (iOS/Android)
+  int get activeMobileDeviceCount => activeDevices
+      .where((d) => plantisDeviceLimitConfig.isMobilePlatform(d.platform))
+      .length;
+  
+  /// Conta dispositivos web ativos
+  int get activeWebDeviceCount => activeDevices
+      .where((d) => plantisDeviceLimitConfig.isWebOrDesktopPlatform(d.platform))
+      .length;
+  
   int get activeDeviceCount => activeDevices.length;
   int get totalDeviceCount => devices.length;
   bool get hasDevices => devices.isNotEmpty;
-  bool get canAddMoreDevices => activeDeviceCount < 3;
+  
+  /// Verifica se pode adicionar mais dispositivos mobile
+  /// Web não conta no limite
+  bool get canAddMoreDevices => activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices;
   bool get isCurrentDeviceIdentified => currentDevice != null;
 
   String get deviceSummary {
     if (!hasDevices) return 'Nenhum dispositivo registrado';
-    if (activeDeviceCount == 1) return '1 dispositivo ativo';
-    return '$activeDeviceCount dispositivos ativos';
+    if (activeMobileDeviceCount == 1) return '1 dispositivo móvel ativo';
+    return '$activeMobileDeviceCount dispositivos móveis ativos';
   }
 
   String get statusText {
     if (!hasDevices) return 'Nenhum dispositivo registrado';
 
-    final active = activeDeviceCount;
-    final total = totalDeviceCount;
+    final mobile = activeMobileDeviceCount;
+    final web = activeWebDeviceCount;
 
-    if (active == total) {
-      return active == 1
-          ? '1 dispositivo ativo'
-          : '$active dispositivos ativos';
-    } else {
-      return '$active de $total dispositivos ativos';
+    if (web > 0) {
+      return '$mobile móvel(is) + $web web';
     }
+    return mobile == 1 ? '1 dispositivo ativo' : '$mobile dispositivos ativos';
   }
 
   Color get statusColor {
     if (!hasDevices) return Colors.grey;
-    if (activeDeviceCount == totalDeviceCount) return Colors.green;
+    if (activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices) return Colors.green;
     return Colors.orange;
   }
 
   IconData get statusIcon {
     if (!hasDevices) return Icons.devices_other;
-    if (activeDeviceCount == totalDeviceCount) return Icons.verified;
+    if (activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices) return Icons.verified;
     return Icons.warning;
   }
 
-  String get deviceLimitText => '$activeDeviceCount/3 dispositivos';
+  /// Mostra apenas dispositivos mobile no limite (web não conta)
+  String get deviceLimitText => '$activeMobileDeviceCount/${plantisDeviceLimitConfig.maxMobileDevices} dispositivos móveis';
 
-  bool get isNearDeviceLimit => activeDeviceCount >= 2;
+  bool get isNearDeviceLimit => activeMobileDeviceCount >= (plantisDeviceLimitConfig.maxMobileDevices - 1);
 
-  bool get hasReachedDeviceLimit => activeDeviceCount >= 3;
+  bool get hasReachedDeviceLimit => activeMobileDeviceCount >= plantisDeviceLimitConfig.maxMobileDevices;
 
   @override
   bool operator ==(Object other) {
@@ -155,29 +164,14 @@ class DeviceManagementState {
 }
 
 /// Riverpod AsyncNotifier for Device Management
+/// Utiliza DeviceManagementService do core para operações
 @riverpod
 class DeviceManagementNotifier extends _$DeviceManagementNotifier {
-  late final GetUserDevicesUseCase _getUserDevicesUseCase;
-  late final ValidateDeviceUseCase _validateDeviceUseCase;
-  late final RevokeDeviceUseCase _revokeDeviceUseCase;
-  late final RevokeAllOtherDevicesUseCase _revokeAllOtherDevicesUseCase;
-  late final GetDeviceStatisticsUseCase _getDeviceStatisticsUseCase;
+  late DeviceManagementService _deviceManagementService;
 
   @override
   Future<DeviceManagementState> build() async {
-    final deviceRepository = FirebaseDeviceService();
-    final authStateNotifier = AuthStateNotifier.instance;
-
-    _getUserDevicesUseCase =
-        GetUserDevicesUseCase(deviceRepository, authStateNotifier);
-    _validateDeviceUseCase =
-        ValidateDeviceUseCase(deviceRepository, authStateNotifier);
-    _revokeDeviceUseCase =
-        RevokeDeviceUseCase(deviceRepository, authStateNotifier);
-    _revokeAllOtherDevicesUseCase =
-        RevokeAllOtherDevicesUseCase(deviceRepository, authStateNotifier);
-    _getDeviceStatisticsUseCase =
-        GetDeviceStatisticsUseCase(deviceRepository, authStateNotifier);
+    _deviceManagementService = ref.watch(feature_providers.plantisDeviceManagementServiceProvider);
 
     ref.onDispose(() {
       if (kDebugMode) {
@@ -192,12 +186,11 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   Future<DeviceManagementState> _initializeDeviceManagement() async {
     try {
       final currentDevice = await _identifyCurrentDevice();
-      final devicesResult =
-          await _getUserDevicesUseCase.call(const GetUserDevicesParams());
+      final devicesResult = await _deviceManagementService.getUserDevices();
 
       final List<DeviceModel> devices = devicesResult.fold(
         (failure) => <DeviceModel>[],
-        (List<DeviceModel> devicesList) => devicesList,
+        (devicesList) => devicesList.map((e) => DeviceModel.fromEntity(e)).toList(),
       );
 
       return DeviceManagementState(
@@ -250,15 +243,14 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     state = await AsyncValue.guard(() async {
       final currentState = state.value ?? DeviceManagementState.initial();
 
-      final result =
-          await _getUserDevicesUseCase.call(const GetUserDevicesParams());
+      final result = await _deviceManagementService.getUserDevices();
 
       return result.fold(
         (Failure failure) => currentState.copyWith(
           errorMessage: 'Erro ao carregar dispositivos: ${failure.message}',
         ),
-        (List<DeviceModel> devices) => currentState.copyWith(
-          devices: devices,
+        (devicesList) => currentState.copyWith(
+          devices: devicesList.map((e) => DeviceModel.fromEntity(e)).toList(),
           clearError: true,
         ),
       );
@@ -276,9 +268,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       clearSuccess: true,
     ));
 
-    final result = await _revokeDeviceUseCase.call(
-      RevokeDeviceParams(deviceUuid: deviceUuid, reason: reason),
-    );
+    final result = await _deviceManagementService.revokeDevice(deviceUuid);
 
     final success = result.fold(
       (Failure failure) {
@@ -313,6 +303,14 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
   /// Revoke all other devices
   Future<bool> revokeAllOtherDevices({String? reason}) async {
     final currentState = state.value ?? DeviceManagementState.initial();
+    final currentDeviceUuid = currentState.currentDevice?.uuid;
+
+    if (currentDeviceUuid == null) {
+      state = AsyncValue.data(currentState.copyWith(
+        errorMessage: 'Dispositivo atual não identificado',
+      ));
+      return false;
+    }
 
     state = AsyncValue.data(currentState.copyWith(
       isRevoking: true,
@@ -320,45 +318,38 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       clearSuccess: true,
     ));
 
-    final result = await _revokeAllOtherDevicesUseCase.call(
-      RevokeAllOtherDevicesParams(reason: reason),
-    );
+    final result = await _deviceManagementService.revokeAllOtherDevices(currentDeviceUuid);
 
-    final resultData = result.fold(
-      (Failure failure) =>
-          {'success': false, 'message': failure.message, 'count': 0},
-      (RevokeAllResult revokeResult) => {
-        'success': true,
-        'message': revokeResult.message,
-        'count': revokeResult.revokedCount
+    final success = result.fold(
+      (Failure failure) {
+        final updatedState = (state.value ?? currentState).copyWith(
+          isRevoking: false,
+          errorMessage: failure.message,
+        );
+        state = AsyncValue.data(updatedState);
+        return false;
       },
+      (void _) => true,
     );
 
-    if (resultData['success'] as bool) {
+    if (success) {
       await loadDevices();
 
       final updatedState = (state.value ?? currentState).copyWith(
         isRevoking: false,
-        successMessage:
-            '${resultData['count']} dispositivos revogados com sucesso',
+        successMessage: 'Outros dispositivos revogados com sucesso',
         clearError: true,
-      );
-      state = AsyncValue.data(updatedState);
-    } else {
-      final updatedState = (state.value ?? currentState).copyWith(
-        isRevoking: false,
-        errorMessage: resultData['message'] as String,
       );
       state = AsyncValue.data(updatedState);
     }
 
-    return resultData['success'] as bool;
+    return success;
   }
 
   /// Validate current device
-  Future<DeviceValidationResult?> validateCurrentDevice() async {
+  Future<bool> validateCurrentDevice() async {
     final currentState = state.value ?? DeviceManagementState.initial();
-    if (currentState.isValidating) return null;
+    if (currentState.isValidating) return false;
 
     state = AsyncValue.data(currentState.copyWith(
       isValidating: true,
@@ -378,12 +369,10 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           errorMessage: 'Nenhum dispositivo atual identificado',
         );
         state = AsyncValue.data(updatedState);
-        return null;
+        return false;
       }
 
-      final result = await _validateDeviceUseCase.call(
-        ValidateDeviceParams(device: currentDevice),
-      );
+      final result = await _deviceManagementService.validateDevice(currentDevice.toEntity());
 
       return result.fold(
         (Failure failure) {
@@ -392,28 +381,18 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
             errorMessage: 'Erro ao validar dispositivo: ${failure.message}',
           );
           state = AsyncValue.data(updatedState);
-          return null;
+          return false;
         },
-        (DeviceValidationResult validationResult) async {
-          if (validationResult.isValid) {
-            await loadDevices();
+        (DeviceEntity validatedDevice) {
+          loadDevices();
 
-            final updatedState = (state.value ?? currentState).copyWith(
-              isValidating: false,
-              successMessage: 'Dispositivo validado com sucesso',
-              clearError: true,
-            );
-            state = AsyncValue.data(updatedState);
-          } else {
-            final updatedState = (state.value ?? currentState).copyWith(
-              isValidating: false,
-              errorMessage: validationResult.message ??
-                  'Falha na validação do dispositivo',
-            );
-            state = AsyncValue.data(updatedState);
-          }
-
-          return validationResult;
+          final updatedState = (state.value ?? currentState).copyWith(
+            isValidating: false,
+            successMessage: 'Dispositivo validado com sucesso',
+            clearError: true,
+          );
+          state = AsyncValue.data(updatedState);
+          return true;
         },
       );
     } catch (e) {
@@ -425,7 +404,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
         errorMessage: 'Erro inesperado na validação',
       );
       state = AsyncValue.data(updatedState);
-      return null;
+      return false;
     }
   }
 
@@ -439,8 +418,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
     final currentState = state.value ?? DeviceManagementState.initial();
 
     try {
-      final result = await _getDeviceStatisticsUseCase
-          .call(const GetDeviceStatisticsParams());
+      final result = await _deviceManagementService.getDeviceStatistics();
 
       final statistics = result.fold(
         (failure) {
@@ -449,7 +427,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           }
           return null;
         },
-        (stats) => stats,
+        (stats) => DeviceStatisticsModel.fromEntity(stats),
       );
 
       state = AsyncValue.data(currentState.copyWith(

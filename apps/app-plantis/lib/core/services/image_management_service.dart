@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 
 /// Interface para abstração do ImageService
 abstract class IImageService {
@@ -30,12 +31,25 @@ class ImageServiceAdapter implements IImageService {
   @override
   Future<Either<Failure, String>> pickFromGallery() async {
     try {
+      debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Iniciando');
       final result = await _imageService.pickImageFromGallery();
+      debugPrint('📷 [ImageServiceAdapter] pickFromGallery - pickImageFromGallery concluído: ${result.isSuccess ? "Sucesso" : "Erro"}');
+      
       return result.fold(
-        (error) => Left(CacheFailure(error.message)),
-        (image) => Right(image.toBase64DataUri()),
+        (error) {
+          debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Erro: ${error.message}');
+          return Left(CacheFailure(error.message));
+        },
+        (image) {
+          debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Imagem recebida: ${image.name}, ${image.sizeInKB.toStringAsFixed(2)} KB');
+          final base64 = image.toBase64DataUri();
+          debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Convertido para Base64, tamanho: ${base64.length} chars');
+          return Right(base64);
+        },
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('📷 [ImageServiceAdapter] pickFromGallery - EXCEÇÃO: $e');
+      debugPrint('📷 [ImageServiceAdapter] pickFromGallery - StackTrace: $stackTrace');
       return Left(CacheFailure('Erro ao selecionar imagem: $e'));
     }
   }
@@ -111,19 +125,29 @@ class ImageManagementService {
   /// Seleciona imagem da galeria
   Future<Either<Failure, String>> selectFromGallery() async {
     try {
+      debugPrint('📷 [ImageManagementService] selectFromGallery - Iniciando');
       final result = await _imageService.pickFromGallery();
+      debugPrint('📷 [ImageManagementService] selectFromGallery - pickFromGallery concluído: ${result.isRight() ? "Sucesso" : "Falha"}');
       
       return result.fold(
-        (failure) => Left(_mapImageFailure(failure, 'Erro ao selecionar imagem da galeria')),
+        (failure) {
+          debugPrint('📷 [ImageManagementService] selectFromGallery - Falha: ${failure.message}');
+          return Left(_mapImageFailure(failure, 'Erro ao selecionar imagem da galeria'));
+        },
         (base64Image) {
+          debugPrint('📷 [ImageManagementService] selectFromGallery - Base64 recebido, tamanho: ${base64Image.length}');
           if (_isValidBase64Image(base64Image)) {
+            debugPrint('📷 [ImageManagementService] selectFromGallery - Imagem válida');
             return Right(base64Image);
           } else {
+            debugPrint('📷 [ImageManagementService] selectFromGallery - Imagem inválida');
             return const Left(ValidationFailure('Imagem selecionada inválida'));
           }
         },
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('📷 [ImageManagementService] selectFromGallery - EXCEÇÃO: $e');
+      debugPrint('📷 [ImageManagementService] selectFromGallery - StackTrace: $stackTrace');
       return Left(CacheFailure('Erro inesperado ao selecionar imagem: $e'));
     }
   }

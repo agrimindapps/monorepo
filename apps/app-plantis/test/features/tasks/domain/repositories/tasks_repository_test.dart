@@ -71,7 +71,11 @@ class _TestTasksRepository implements TasksRepository {
   }
 
   @override
-  Future<Either<Failure, Task>> completeTask(String id, {String? notes}) async {
+  Future<Either<Failure, Task>> completeTask(
+    String id, {
+    String? notes,
+    DateTime? nextDueDate,
+  }) async {
     final index = _tasks.indexWhere((t) => t.id == id);
     if (index == -1) {
       return const Left(NotFoundFailure('Task not found'));

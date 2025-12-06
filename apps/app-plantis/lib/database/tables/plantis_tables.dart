@@ -500,7 +500,74 @@ class ConflictHistory extends Table {
 }
 
 // ============================================================================
-// 8. PLANTS SYNC QUEUE TABLE
+// 8. PLANT IMAGES TABLE
+// ============================================================================
+
+/// Tabela de Imagens de Plantas
+///
+/// Armazena imagens como BLOB para funcionamento offline-first.
+/// Sincroniza com Firebase Storage em background.
+class PlantImages extends Table {
+  // ========== CAMPOS BASE ==========
+
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get firebaseId => text().nullable()();
+  TextColumn get userId => text().nullable()();
+  TextColumn get moduleName =>
+      text().withDefault(const Constant('plantis'))();
+
+  // ========== TIMESTAMPS ==========
+
+  DateTimeColumn get createdAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get lastSyncAt => dateTime().nullable()();
+
+  // ========== CONTROLE DE SINCRONIZAÇÃO ==========
+
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
+
+  // ========== RELACIONAMENTO ==========
+
+  /// ID da planta (foreign key)
+  IntColumn get plantId =>
+      integer().references(Plants, #id, onDelete: KeyAction.cascade)();
+
+  // ========== DADOS DA IMAGEM ==========
+
+  /// Bytes da imagem (BLOB - armazenamento eficiente)
+  BlobColumn get imageData => blob()();
+
+  /// Nome original do arquivo
+  TextColumn get fileName => text().nullable()();
+
+  /// MIME type da imagem (image/jpeg, image/png, etc.)
+  TextColumn get mimeType => text().withDefault(const Constant('image/jpeg'))();
+
+  /// Tamanho em bytes
+  IntColumn get sizeBytes => integer().nullable()();
+
+  /// URL no Firebase Storage (após upload)
+  TextColumn get storageUrl => text().nullable()();
+
+  /// Indica se é a imagem principal da planta
+  BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
+
+  /// Status do upload (pending, uploading, completed, failed)
+  TextColumn get uploadStatus =>
+      text().withDefault(const Constant('pending'))();
+
+  // ========== ÍNDICES ==========
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {firebaseId},
+      ];
+}
+
+// ============================================================================
+// 9. PLANTS SYNC QUEUE TABLE
 // ============================================================================
 
 /// Tabela de Fila de Sincronização (Plantis)

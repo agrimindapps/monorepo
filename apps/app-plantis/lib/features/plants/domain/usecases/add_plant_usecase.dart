@@ -5,9 +5,7 @@ import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/data/models/planta_config_model.dart';
 import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../entities/plant.dart';
-import '../repositories/plant_tasks_repository.dart';
 import '../repositories/plants_repository.dart';
-import '../services/plant_task_generator.dart';
 
 /// Resultado detalhado da geração de tarefas para logging e feedback
 class TaskGenerationResult {
@@ -77,14 +75,10 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
   AddPlantUseCase(
     this.repository,
     this.generateInitialTasksUseCase,
-    this.plantTaskGenerator,
-    this.plantTasksRepository,
   );
 
   final PlantsRepository repository;
   final GenerateInitialTasksUseCase generateInitialTasksUseCase;
-  final PlantTaskGenerator plantTaskGenerator;
-  final PlantTasksRepository plantTasksRepository;
 
   @override
   Future<Either<Failure, Plant>> call(AddPlantParams params) async {
@@ -162,29 +156,17 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
               '🌱 AddPlantUseCase.call() - Config ativa para: ${PlantaConfigModel.fromPlantConfig(plantaId: savedPlant.id, plantConfig: savedPlant.config).activeCareTypes}',
             );
           }
-          final plantTasksResult = await _generatePlantTasksWithErrorHandling(
-            savedPlant,
-          );
+          // Only generate unified Task system tasks (not PlantTask)
           final taskGenerationResult =
               await _generateInitialTasksWithErrorHandling(savedPlant);
 
           if (taskGenerationResult.isFailure && kDebugMode) {
             print(
-              '⚠️ AddPlantUseCase.call() - Tasks tradicionais não foram geradas, mas planta foi salva com sucesso',
+              '⚠️ AddPlantUseCase.call() - Tasks não foram geradas, mas planta foi salva com sucesso',
             );
           } else if (taskGenerationResult.isSuccess && kDebugMode) {
             print(
-              '✅ AddPlantUseCase.call() - ${taskGenerationResult.taskCount} tasks tradicionais geradas com sucesso',
-            );
-          }
-
-          if (plantTasksResult.isFailure && kDebugMode) {
-            print(
-              '⚠️ AddPlantUseCase.call() - PlantTasks não foram geradas, mas planta foi salva com sucesso',
-            );
-          } else if (plantTasksResult.isSuccess && kDebugMode) {
-            print(
-              '✅ AddPlantUseCase.call() - ${plantTasksResult.taskCount} PlantTasks geradas com sucesso',
+              '✅ AddPlantUseCase.call() - ${taskGenerationResult.taskCount} tasks geradas com sucesso',
             );
           }
         }
@@ -225,95 +207,6 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     }
 
     return null;
-  }
-
-  /// Gera PlantTasks automáticas com tratamento robusto de erros
-  /// Retorna resultado detalhado para logging e feedback
-  Future<TaskGenerationResult> _generatePlantTasksWithErrorHandling(
-    Plant plant,
-  ) async {
-    try {
-      if (plant.config == null) {
-        if (kDebugMode) {
-          print(
-            '⚠️ _generatePlantTasksWithErrorHandling - Skipping: sem configuração',
-          );
-        }
-        return TaskGenerationResult.skipped(
-          'Planta sem configuração de cuidados',
-        );
-      }
-
-      if (kDebugMode) {
-        print(
-          '🌱 _generatePlantTasksWithErrorHandling - Iniciando geração de PlantTasks',
-        );
-      }
-      final plantTasks = plantTaskGenerator.generateTasksForPlant(plant);
-
-      if (plantTasks.isEmpty) {
-        if (kDebugMode) {
-          print(
-            '⚠️ _generatePlantTasksWithErrorHandling - Nenhuma PlantTask gerada',
-          );
-        }
-        return TaskGenerationResult.skipped(
-          'Nenhuma configuração de cuidado ativa',
-        );
-      }
-
-      if (kDebugMode) {
-        print(
-          '✅ _generatePlantTasksWithErrorHandling - SUCESSO: ${plantTasks.length} PlantTasks geradas',
-        );
-        for (int i = 0; i < plantTasks.length; i++) {
-          print(
-            '   - PlantTask ${i + 1}: ${plantTasks[i].title} (${plantTasks[i].type.name})',
-          );
-        }
-      }
-      if (kDebugMode) {
-        print(
-          '💾 _generatePlantTasksWithErrorHandling - Persistindo ${plantTasks.length} PlantTasks',
-        );
-      }
-
-      final saveResult = await plantTasksRepository.addPlantTasks(
-        plantTasks,
-      );
-      return saveResult.fold(
-        (failure) {
-          if (kDebugMode) {
-            print(
-              '❌ _generatePlantTasksWithErrorHandling - Erro ao persistir PlantTasks: ${failure.message}',
-            );
-          }
-          return TaskGenerationResult.failure(
-            'Erro ao persistir PlantTasks: ${failure.message}',
-            failure,
-          );
-        },
-        (savedTasks) {
-          if (kDebugMode) {
-            print(
-              '✅ _generatePlantTasksWithErrorHandling - ${savedTasks.length} PlantTasks persistidas com sucesso',
-            );
-          }
-          return TaskGenerationResult.success(savedTasks.length, savedTasks);
-        },
-      );
-    } catch (e, stackTrace) {
-      if (kDebugMode) {
-        print('❌ _generatePlantTasksWithErrorHandling - EXCEPTION: $e');
-        print('   - Stack trace: $stackTrace');
-      }
-      return TaskGenerationResult.failure(
-        'Erro inesperado ao gerar PlantTasks: ${e.toString()}',
-        null,
-        e,
-        stackTrace,
-      );
-    }
   }
 
   /// Gera tarefas iniciais com tratamento robusto de erros

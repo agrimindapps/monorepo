@@ -188,7 +188,6 @@ class _ModernSidebarState extends State<ModernSidebar>
               children: [
                 _SidebarHeader(isExpanded: _showExpandedContent),
                 Expanded(child: _NavigationList(isExpanded: _showExpandedContent)),
-                _BottomNavigationSection(isExpanded: _showExpandedContent),
                 _SidebarFooter(
                   isExpanded: _showExpandedContent,
                   onToggle: _toggleSidebar,
@@ -348,38 +347,81 @@ class _NavigationList extends StatelessWidget {
   }
 }
 
-/// Seção de navegação bottom (Configurações)
-class _BottomNavigationSection extends StatelessWidget {
-  final bool isExpanded;
+/// Botão de Configurações como ícone
+class _SettingsIconButton extends StatefulWidget {
+  const _SettingsIconButton();
 
-  const _BottomNavigationSection({required this.isExpanded});
+  @override
+  State<_SettingsIconButton> createState() => _SettingsIconButtonState();
+}
+
+class _SettingsIconButtonState extends State<_SettingsIconButton> {
+  bool _isHovered = false;
+
+  bool get _isActive {
+    final currentRoute = GoRouter.of(
+      context,
+    ).routerDelegate.currentConfiguration.uri.path;
+    return currentRoute.startsWith('/settings');
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isActive = _isActive;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: isExpanded ? 16 : 8),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: theme.dividerColor.withValues(alpha: 0.1),
-            width: 1,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: () {
+          HapticFeedback.lightImpact();
+          context.go('/settings');
+        },
+        child: Tooltip(
+          message: 'Configurações',
+          waitDuration: const Duration(milliseconds: 500),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? PlantisColors.primary
+                  : _isHovered
+                      ? PlantisColors.primary.withValues(alpha: 0.2)
+                      : PlantisColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isActive
+                    ? PlantisColors.primary
+                    : _isHovered
+                        ? PlantisColors.primary.withValues(alpha: 0.5)
+                        : PlantisColors.primary.withValues(alpha: 0.3),
+                width: _isHovered || isActive ? 1.5 : 1,
+              ),
+              boxShadow: _isHovered || isActive
+                  ? [
+                      BoxShadow(
+                        color: PlantisColors.primary.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Icon(
+              isActive ? Icons.settings : Icons.settings_outlined,
+              size: 18,
+              color: isActive
+                  ? Colors.white
+                  : _isHovered
+                      ? PlantisColors.primary
+                      : theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 12),
-          _NavigationItem(
-            icon: Icons.settings_outlined,
-            label: 'Configurações',
-            route: '/settings',
-            isExpanded: isExpanded,
-          ),
-          const SizedBox(height: 8),
-        ],
       ),
     );
   }
@@ -628,15 +670,7 @@ class _SidebarFooterState extends State<_SidebarFooter> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.all(widget.isExpanded ? 20 : 16),
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(
-                color: theme.dividerColor.withValues(alpha: 0.1),
-                width: 1,
-              ),
-            ),
-          ),
+          padding: EdgeInsets.symmetric(horizontal: widget.isExpanded ? 20 : 16),
           child: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
               final authState = ref.watch(authProvider);
@@ -825,46 +859,50 @@ class _SidebarFooterState extends State<_SidebarFooter> {
             },
           ),
         ),
-        Divider(
-          height: 1,
-          thickness: 1,
-          color: theme.dividerColor.withValues(alpha: 0.15),
-        ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              if (widget.isExpanded) ...[
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Inside Garden',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 10,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'v1.0.0',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.7,
+          child: widget.isExpanded
+              ? Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Inside Garden',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 10,
+                            ),
                           ),
-                          fontSize: 9,
-                        ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'v1.0.0',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.7,
+                              ),
+                              fontSize: 9,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 8),
+                    const _SettingsIconButton(),
+                    const SizedBox(width: 8),
+                    _ToggleButton(isExpanded: widget.isExpanded, onToggle: widget.onToggle),
+                  ],
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _SettingsIconButton(),
+                    const SizedBox(height: 8),
+                    _ToggleButton(isExpanded: widget.isExpanded, onToggle: widget.onToggle),
+                  ],
                 ),
-                const SizedBox(width: 8),
-              ],
-              _ToggleButton(isExpanded: widget.isExpanded, onToggle: widget.onToggle),
-            ],
-          ),
         ),
       ],
     );

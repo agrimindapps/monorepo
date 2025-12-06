@@ -39,6 +39,8 @@ part 'gasometer_database.g.dart';
     Maintenances,
     Expenses,
     OdometerReadings,
+    VehicleImages,
+    ReceiptImages,
     AuditTrail,
   ],
 )
@@ -91,7 +93,7 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   }
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Estratégia de migração do banco de dados
   ///
@@ -123,6 +125,59 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
         );
 
         print('✅ Migration v1→v2: firebaseId adicionado a todas as tabelas');
+      }
+
+      // ========== MIGRAÇÃO v2 → v3: Adicionar tabelas de imagens ==========
+      if (from < 3) {
+        // Criar tabela vehicle_images
+        await customStatement('''
+          CREATE TABLE IF NOT EXISTS vehicle_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            firebase_id TEXT,
+            user_id TEXT NOT NULL,
+            module_name TEXT NOT NULL DEFAULT 'gasometer',
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER,
+            last_sync_at INTEGER,
+            is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            version INTEGER NOT NULL DEFAULT 1,
+            vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+            image_data BLOB NOT NULL,
+            file_name TEXT,
+            mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+            size_bytes INTEGER,
+            storage_url TEXT,
+            is_primary INTEGER NOT NULL DEFAULT 0,
+            upload_status TEXT NOT NULL DEFAULT 'pending'
+          );
+        ''');
+
+        // Criar tabela receipt_images
+        await customStatement('''
+          CREATE TABLE IF NOT EXISTS receipt_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            firebase_id TEXT,
+            user_id TEXT NOT NULL,
+            module_name TEXT NOT NULL DEFAULT 'gasometer',
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER,
+            last_sync_at INTEGER,
+            is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            version INTEGER NOT NULL DEFAULT 1,
+            entity_type TEXT NOT NULL,
+            entity_id INTEGER NOT NULL,
+            image_data BLOB NOT NULL,
+            file_name TEXT,
+            mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+            size_bytes INTEGER,
+            storage_url TEXT,
+            upload_status TEXT NOT NULL DEFAULT 'pending'
+          );
+        ''');
+
+        print('✅ Migration v2→v3: Tabelas de imagens criadas');
       }
 
       // Migrações futuras virão aqui

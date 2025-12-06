@@ -172,6 +172,39 @@ cd apps/app-plantis && flutter test
 
 ## 📚 Documentação
 
+### Sistema de Gestão por Feature
+Cada app possui documentação organizada por feature em `apps/{app}/docs/`:
+
+| App | Features | Status |
+|-----|----------|--------|
+| [app-receituagro](apps/app-receituagro/docs/) | 19 | ✅ Completo |
+| [app-plantis](apps/app-plantis/docs/) | 12 | ✅ Estrutura criada |
+| [app-gasometer](apps/app-gasometer/docs/) | 21 | ✅ Estrutura criada |
+| [app-nebulalist](apps/app-nebulalist/docs/) | 6 | ✅ Estrutura criada |
+| [app-taskolist](apps/app-taskolist/docs/) | 6 | ✅ Estrutura criada |
+| [app-petiveti](apps/app-petiveti/docs/) | 22 | ✅ Estrutura criada |
+| [app-agrihurbi](apps/app-agrihurbi/docs/) | 11 | ✅ Estrutura criada |
+| [app-calculei](apps/app-calculei/docs/) | 10 | ✅ Estrutura criada |
+| [app-minigames](apps/app-minigames/docs/) | 28 | ✅ Estrutura criada |
+| [web_receituagro](apps/web_receituagro/docs/) | 6 | ✅ Estrutura criada |
+
+**Total: 141 features documentadas**
+
+### Estrutura de Docs por App
+```
+apps/{app}/docs/
+├── README.md          # Índice principal
+├── STATUS.md          # Dashboard e métricas
+├── features/          # Documentação por feature
+│   ├── {feature}/
+│   │   ├── README.md  # Regras de negócio
+│   │   └── TASKS.md   # Backlog e histórico
+├── backlog/           # Tarefas globais
+└── guides/            # Guias de desenvolvimento
+```
+
+### Documentação Adicional
+- [CLAUDE.md](CLAUDE.md) - Padrões e configurações do monorepo
 - [Documento Original](flutter_monorepo_doc.md) - Análise arquitetural inicial
 - [Documento de Desenvolvimento](flutter_monorepo_desenvolvimento.md) - Plano detalhado
 
@@ -225,6 +258,6 @@ Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICE
 
 ---
 
-**Última Atualização:** Agosto 2025  
-**Status:** 🔄 Em Desenvolvimento - Fase 1 Concluída  
-**Próximo Milestone:** Implementação do Core Package
+**Última Atualização:** Dezembro 2025  
+**Status:** 🔄 Em Desenvolvimento - Migração Riverpod  
+**Apps Documentados:** 10 apps, 141 features

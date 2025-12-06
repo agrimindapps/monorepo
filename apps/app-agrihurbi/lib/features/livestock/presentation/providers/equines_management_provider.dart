@@ -1,89 +1,141 @@
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/equine_entity.dart';
 import '../../domain/usecases/get_equines.dart';
+import 'livestock_di_providers.dart';
+
+part 'equines_management_provider.g.dart';
+
+/// State class for EquinesManagement
+class EquinesManagementState {
+  final List<EquineEntity> equines;
+  final EquineEntity? selectedEquine;
+  final bool isLoadingEquines;
+  final bool isCreating;
+  final bool isUpdating;
+  final bool isDeleting;
+  final String? errorMessage;
+
+  const EquinesManagementState({
+    this.equines = const [],
+    this.selectedEquine,
+    this.isLoadingEquines = false,
+    this.isCreating = false,
+    this.isUpdating = false,
+    this.isDeleting = false,
+    this.errorMessage,
+  });
+
+  EquinesManagementState copyWith({
+    List<EquineEntity>? equines,
+    EquineEntity? selectedEquine,
+    bool? isLoadingEquines,
+    bool? isCreating,
+    bool? isUpdating,
+    bool? isDeleting,
+    String? errorMessage,
+    bool clearSelectedEquine = false,
+    bool clearError = false,
+  }) {
+    return EquinesManagementState(
+      equines: equines ?? this.equines,
+      selectedEquine: clearSelectedEquine ? null : (selectedEquine ?? this.selectedEquine),
+      isLoadingEquines: isLoadingEquines ?? this.isLoadingEquines,
+      isCreating: isCreating ?? this.isCreating,
+      isUpdating: isUpdating ?? this.isUpdating,
+      isDeleting: isDeleting ?? this.isDeleting,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
+  }
+
+  bool get isAnyOperationInProgress =>
+      isLoadingEquines || isCreating || isUpdating || isDeleting;
+
+  List<EquineEntity> get activeEquines =>
+      equines.where((equine) => equine.isActive).toList();
+
+  int get totalEquines => equines.length;
+  int get totalActiveEquines => activeEquines.length;
+  bool get hasSelectedEquine => selectedEquine != null;
+
+  List<String> get uniqueOriginCountries {
+    final countries = <String>{};
+    for (final equine in equines) {
+      countries.add(equine.originCountry);
+    }
+    return countries.toList()..sort();
+  }
+}
 
 /// Provider especializado para gerenciamento de equinos
 ///
 /// Responsabilidade única: CRUD e gerenciamento de estado de equinos
 /// Seguindo Single Responsibility Principle
-class EquinesManagementProvider extends ChangeNotifier {
-  final GetEquinesUseCase _getEquines;
+@riverpod
+class EquinesManagementNotifier extends _$EquinesManagementNotifier {
+  GetEquinesUseCase get _getEquines => ref.read(getEquinesUseCaseProvider);
 
-  EquinesManagementProvider({
-    required GetEquinesUseCase getEquines,
-  }) : _getEquines = getEquines;
+  @override
+  EquinesManagementState build() {
+    return const EquinesManagementState();
+  }
 
-  List<EquineEntity> _equines = [];
-  EquineEntity? _selectedEquine;
-
-  /// Estados de loading específicos para cada operação
-  bool _isLoadingEquines = false;
-  final bool _isCreating = false;
-  final bool _isUpdating = false;
-  final bool _isDeleting = false;
-
-  String? _errorMessage;
-
-  List<EquineEntity> get equines => _equines;
-  EquineEntity? get selectedEquine => _selectedEquine;
-
-  bool get isLoadingEquines => _isLoadingEquines;
-  bool get isCreating => _isCreating;
-  bool get isUpdating => _isUpdating;
-  bool get isDeleting => _isDeleting;
-  bool get isAnyOperationInProgress =>
-      _isLoadingEquines || _isCreating || _isUpdating || _isDeleting;
-
-  String? get errorMessage => _errorMessage;
-
-  /// Equinos ativos (não deletados)
-  List<EquineEntity> get activeEquines =>
-      _equines.where((equine) => equine.isActive).toList();
-
-  int get totalEquines => _equines.length;
-  int get totalActiveEquines => activeEquines.length;
-
-  /// Verifica se tem equino selecionado
-  bool get hasSelectedEquine => _selectedEquine != null;
+  // Convenience getters for backward compatibility
+  List<EquineEntity> get equines => state.equines;
+  EquineEntity? get selectedEquine => state.selectedEquine;
+  bool get isLoadingEquines => state.isLoadingEquines;
+  bool get isCreating => state.isCreating;
+  bool get isUpdating => state.isUpdating;
+  bool get isDeleting => state.isDeleting;
+  bool get isAnyOperationInProgress => state.isAnyOperationInProgress;
+  String? get errorMessage => state.errorMessage;
+  List<EquineEntity> get activeEquines => state.activeEquines;
+  int get totalEquines => state.totalEquines;
+  int get totalActiveEquines => state.totalActiveEquines;
+  bool get hasSelectedEquine => state.hasSelectedEquine;
+  List<String> get uniqueOriginCountries => state.uniqueOriginCountries;
 
   /// Carrega todos os equinos
   Future<void> loadEquines() async {
-    _isLoadingEquines = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoadingEquines: true, clearError: true);
 
     final result = await _getEquines(const GetEquinesParams());
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoadingEquines: false,
+        );
         debugPrint(
-            'EquinesManagementProvider: Erro ao carregar equinos - ${failure.message}');
+            'EquinesManagementNotifier: Erro ao carregar equinos - ${failure.message}');
       },
-      (equines) {
-        _equines = equines;
+      (loadedEquines) {
+        state = state.copyWith(
+          equines: loadedEquines,
+          isLoadingEquines: false,
+        );
         debugPrint(
-            'EquinesManagementProvider: Equinos carregados - ${equines.length}');
+            'EquinesManagementNotifier: Equinos carregados - ${loadedEquines.length}');
       },
     );
-
-    _isLoadingEquines = false;
-    notifyListeners();
   }
 
   /// Seleciona um equino específico
   void selectEquine(EquineEntity? equine) {
-    _selectedEquine = equine;
-    notifyListeners();
+    state = state.copyWith(
+      selectedEquine: equine,
+      clearSelectedEquine: equine == null,
+    );
     debugPrint(
-        'EquinesManagementProvider: Equino selecionado - ${equine?.id ?? "nenhum"}');
+        'EquinesManagementNotifier: Equino selecionado - ${equine?.id ?? "nenhum"}');
   }
 
   /// Encontra equino por ID
   EquineEntity? findEquineById(String id) {
     try {
-      return _equines.firstWhere((equine) => equine.id == id);
+      return state.equines.firstWhere((equine) => equine.id == id);
     } catch (e) {
       return null;
     }
@@ -94,17 +146,6 @@ class EquinesManagementProvider extends ChangeNotifier {
     return findEquineById(id) != null;
   }
 
-  /// Obtém lista de países de origem únicos
-  List<String> get uniqueOriginCountries {
-    final countries = <String>{};
-
-    for (final equine in _equines) {
-      countries.add(equine.originCountry);
-    }
-
-    return countries.toList()..sort();
-  }
-
   /// Refresh completo dos equinos
   Future<void> refreshEquines() async {
     await loadEquines();
@@ -112,45 +153,34 @@ class EquinesManagementProvider extends ChangeNotifier {
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Limpa seleção atual
   void clearSelection() {
-    _selectedEquine = null;
-    notifyListeners();
+    state = state.copyWith(clearSelectedEquine: true);
   }
 
   /// Reset completo do estado
   void resetState() {
-    _equines.clear();
-    _selectedEquine = null;
-    _errorMessage = null;
-    notifyListeners();
+    state = const EquinesManagementState();
   }
 
   Future<bool> createEquine(EquineEntity equine) async {
     debugPrint(
-        'EquinesManagementProvider: createEquine não implementado ainda');
+        'EquinesManagementNotifier: createEquine não implementado ainda');
     return false;
   }
 
   Future<bool> updateEquine(EquineEntity equine) async {
     debugPrint(
-        'EquinesManagementProvider: updateEquine não implementado ainda');
+        'EquinesManagementNotifier: updateEquine não implementado ainda');
     return false;
   }
 
   Future<bool> deleteEquine(String equineId) async {
     debugPrint(
-        'EquinesManagementProvider: deleteEquine não implementado ainda');
+        'EquinesManagementNotifier: deleteEquine não implementado ainda');
     return false;
-  }
-
-  @override
-  void dispose() {
-    debugPrint('EquinesManagementProvider: Disposed');
-    super.dispose();
   }
 }

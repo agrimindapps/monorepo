@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/auth_providers.dart';
-import '../../../../core/providers/auth_state.dart';
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../constants/settings_design_tokens.dart';
 import '../../pages/profile_page.dart';
@@ -14,17 +13,18 @@ class AuthSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
+    final authAsync = ref.watch(authProvider);
 
-    if (authState.isLoading) {
-      return _buildLoadingSection(context);
-    }
-
-    if (!authState.isAuthenticated || authState.isAnonymous) {
-      return _buildGuestSummary(context);
-    }
-
-    return _buildUserSummary(context, authState);
+    return authAsync.when(
+      loading: () => _buildLoadingSection(context),
+      error: (e, s) => _buildGuestSummary(context),
+      data: (authState) {
+        if (!authState.isAuthenticated || authState.isAnonymous) {
+          return _buildGuestSummary(context);
+        }
+        return _buildUserSummary(context, authState);
+      },
+    );
   }
 
   Widget _buildLoadingSection(BuildContext context) {

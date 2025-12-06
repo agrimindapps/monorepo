@@ -3,7 +3,9 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../core/services/fitossanitarios_data_loader.dart';
+import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
+import '../../../../database/repositories/fitossanitarios_info_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 
 part 'defensivos_statistics_notifier.g.dart';
@@ -36,12 +38,11 @@ class DefensivosStatistics {
 /// Performance optimization: Prevents UI thread blocking during heavy statistical calculations
 DefensivosStatistics _calculateDefensivosStatistics(
   List<Fitossanitario> defensivos,
+  int totalModoAcao,
 ) {
   final totalDefensivos = defensivos.length;
   final totalFabricantes =
       defensivos.map((d) => d.displayFabricante).toSet().length;
-  final totalModoAcao =
-      defensivos.length; // Simplificado - usar contagem total por enquanto
   final totalIngredienteAtivo = defensivos
       .map((d) => d.displayIngredient)
       .where((i) => i.isNotEmpty)
@@ -123,10 +124,12 @@ class DefensivosStatisticsState {
 @riverpod
 class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
   late final FitossanitariosRepository _repository;
+  late final FitossanitariosInfoRepository _infoRepository;
 
   @override
   Future<DefensivosStatisticsState> build() async {
     _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
+    _infoRepository = ref.watch(fitossanitariosInfoRepositoryProvider);
     return await _loadStatistics();
   }
 
@@ -148,7 +151,10 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
           }
         }
       }
-      final statistics = _calculateDefensivosStatistics(defensivos);
+      
+      // Get distinct modos de ação from info repository
+      final totalModoAcao = await _infoRepository.countDistinctModosAcao();
+      final statistics = _calculateDefensivosStatistics(defensivos, totalModoAcao);
 
       return DefensivosStatisticsState(
         statistics: statistics,
@@ -182,7 +188,8 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
 
     try {
       var defensivos = await _repository.findElegiveis();
-      final statistics = _calculateDefensivosStatistics(defensivos);
+      final totalModoAcao = await _infoRepository.countDistinctModosAcao();
+      final statistics = _calculateDefensivosStatistics(defensivos, totalModoAcao);
 
       state = AsyncValue.data(
         currentState.copyWith(statistics: statistics).clearError(),

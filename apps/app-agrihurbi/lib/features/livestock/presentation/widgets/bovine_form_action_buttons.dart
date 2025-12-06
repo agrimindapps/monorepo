@@ -9,7 +9,7 @@ import '../providers/livestock_provider.dart';
 /// Responsabilidades:
 /// - Botões de cancelar e salvar
 /// - Estados de loading diferenciados
-/// - Integração com LivestockProvider
+/// - Integração com LivestockNotifier
 /// - Confirmação de ações destrutivas
 /// - Feedback visual consistente
 class BovineFormActionButtons extends ConsumerWidget {
@@ -32,7 +32,7 @@ class BovineFormActionButtons extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final provider = ref.watch(livestockProviderProvider);
+    final provider = ref.watch(livestockProvider.notifier);
     final isLoading = provider.isCreating ||
                      provider.isUpdating ||
                      provider.isDeleting;
@@ -123,7 +123,7 @@ class BovineFormActionButtons extends ConsumerWidget {
     );
   }
 
-  Widget _buildSaveButton(BuildContext context, LivestockProvider provider, bool isLoading) {
+  Widget _buildSaveButton(BuildContext context, LivestockNotifier provider, bool isLoading) {
     String buttonText = isEditing ? 'Salvar' : 'Criar';
     IconData buttonIcon = isEditing ? Icons.save : Icons.add;
     
@@ -143,7 +143,7 @@ class BovineFormActionButtons extends ConsumerWidget {
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context, LivestockProvider provider, bool isLoading) {
+  Widget _buildDeleteButton(BuildContext context, LivestockNotifier provider, bool isLoading) {
     return SizedBox(
       width: double.infinity,
       height: 48,

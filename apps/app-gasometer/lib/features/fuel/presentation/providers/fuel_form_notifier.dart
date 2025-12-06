@@ -1,6 +1,6 @@
 import 'package:core/core.dart' as core;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart' hide FormState;
+import 'package:core/core.dart' hide FormState, connectivityServiceProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

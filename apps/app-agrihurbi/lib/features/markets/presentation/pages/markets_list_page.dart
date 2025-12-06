@@ -32,7 +32,7 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(marketProviderProvider).initialize();
+      ref.read(marketProvider.notifier).initialize();
     });
     _scrollController.addListener(_onScroll);
   }
@@ -53,7 +53,7 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
 
   @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(marketProviderProvider);
+    final provider = ref.watch(marketProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mercados Agrícolas'),
@@ -70,7 +70,7 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
           ),
           IconButton(
             icon:
-                ref.watch(marketProviderProvider).isRefreshing
+                ref.watch(marketProvider).isRefreshing
                     ? SizedBox(
                       width: 20,
                       height: 20,
@@ -83,9 +83,9 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
                     )
                     : const Icon(Icons.refresh),
             onPressed:
-                ref.watch(marketProviderProvider).isRefreshing
+                ref.watch(marketProvider).isRefreshing
                     ? null
-                    : () => ref.read(marketProviderProvider).refreshAll(),
+                    : () => ref.read(marketProvider.notifier).refreshAll(),
           ),
         ],
         bottom: TabBar(
@@ -106,16 +106,16 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
               : TabBarView(
                 controller: _tabController,
                 children: [
-                  _buildSummaryTab(provider),
-                  _buildMarketsTab(provider),
-                  _buildFavoritesTab(provider),
+                  _buildSummaryTab(ref.read(marketProvider.notifier)),
+                  _buildMarketsTab(ref.read(marketProvider.notifier)),
+                  _buildFavoritesTab(ref.read(marketProvider.notifier)),
                 ],
               ),
     );
   }
 
   /// Build summary tab with market overview
-  Widget _buildSummaryTab(MarketProvider provider) {
+  Widget _buildSummaryTab(MarketNotifier provider) {
     return RefreshIndicator(
       onRefresh: () => provider.loadMarketSummary(refresh: true),
       child: SingleChildScrollView(
@@ -163,7 +163,7 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
   }
 
   /// Build markets tab with full list
-  Widget _buildMarketsTab(MarketProvider provider) {
+  Widget _buildMarketsTab(MarketNotifier provider) {
     return RefreshIndicator(
       onRefresh: () => provider.loadMarkets(refresh: true),
       child: Column(
@@ -220,7 +220,7 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
   }
 
   /// Build favorites tab
-  Widget _buildFavoritesTab(MarketProvider provider) {
+  Widget _buildFavoritesTab(MarketNotifier provider) {
     return RefreshIndicator(
       onRefresh: () => provider.loadFavorites(),
       child:
@@ -289,8 +289,8 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
   /// Perform search operation
   void _performSearch(String query) {
     if (query.trim().isNotEmpty) {
-      final provider = ref.read(marketProviderProvider);
-      provider.searchMarkets(query: query.trim());
+      final notifier = ref.read(marketProvider.notifier);
+      notifier.searchMarkets(query: query.trim());
       _tabController.animateTo(1);
     }
   }
@@ -302,9 +302,9 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
       isScrollControlled: true,
       builder:
           (context) => MarketFilterSheet(
-            currentFilter: ref.read(marketProviderProvider).currentFilter,
+            currentFilter: ref.read(marketProvider).currentFilter,
             onFilterApplied: (filter) {
-              ref.read(marketProviderProvider).applyFilter(filter);
+              ref.read(marketProvider.notifier).applyFilter(filter);
               _tabController.animateTo(1); // Switch to markets tab
             },
           ),
@@ -340,7 +340,7 @@ class _MarketsListPageState extends ConsumerState<MarketsListPage>
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => ref.read(marketProviderProvider).initialize(),
+              onPressed: () => ref.read(marketProvider.notifier).initialize(),
               icon: const Icon(Icons.refresh),
               label: const Text('Tentar Novamente'),
             ),

@@ -58,18 +58,4 @@ class FavoritosSyncService {
       return null;
     }
   }
-
-  /// @Deprecated("Deprecated - use alternative") Use prepareDataForLocalSave e salve no repositório Drift
-  Future<void> syncOperation(
-    String operation,
-    String tipo,
-    String id,
-    Map<String, dynamic>? data,
-  ) async {
-    developer.log(
-      'DEPRECATED: syncOperation chamado. O sistema agora usa Offline-First via Drift.',
-      name: 'FavoritosSync',
-    );
-    // No-op: A sincronização real acontece via DriftSyncAdapter
-  }
 }

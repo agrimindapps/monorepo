@@ -262,22 +262,19 @@ class DeviceActionsWidget extends ConsumerWidget {
     WidgetRef ref,
   ) async {
     final notifier = ref.read(deviceManagementNotifierProvider.notifier);
-    final result = await notifier.validateCurrentDevice();
+    final success = await notifier.validateCurrentDevice();
 
-    if (result != null && !result.isValid && context.mounted) {
-      String message = result.message ?? 'Falha na validação';
-
-      if (result.status.name == 'exceeded') {
-        message =
-            'Limite de dispositivos atingido. Revogue um dispositivo inativo primeiro.';
-      }
+    if (!success && context.mounted) {
+      final state = ref.read(deviceManagementNotifierProvider).value;
+      final message = state?.errorMessage ?? 'Falha na validação';
+      final isLimitExceeded = message.toLowerCase().contains('limite');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
           action:
-              result.status.name == 'exceeded'
+              isLimitExceeded
                   ? SnackBarAction(
                     label: 'Ver Dispositivos',
                     textColor: Colors.white,

@@ -65,13 +65,17 @@ class DefensivosQueryService implements IDefensivosQueryService {
 
   @override
   List<String> getModosAcao(List<DefensivoEntity> defensivos) {
-    final modosAcao = defensivos
-        .map((defensivo) => defensivo.modoAcao)
-        .where((modo) => modo != null && modo.isNotEmpty)
-        .cast<String>()
-        .toSet()
-        .toList();
+    final modosSet = <String>{};
+    for (final defensivo in defensivos) {
+      final modoAcao = defensivo.modoAcao;
+      if (modoAcao != null && modoAcao.isNotEmpty) {
+        // Split by comma and trim each value
+        final modos = modoAcao.split(',').map((m) => m.trim()).where((m) => m.isNotEmpty);
+        modosSet.addAll(modos);
+      }
+    }
 
+    final modosAcao = modosSet.toList();
     modosAcao.sort();
     return modosAcao;
   }

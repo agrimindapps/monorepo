@@ -1,5 +1,15 @@
 import 'package:core/core.dart' hide Column;
 
+/// Configuração de limite de dispositivos para o Receituagro
+/// Web não conta no limite, apenas dispositivos mobile (iOS/Android)
+const _deviceLimitConfig = DeviceLimitConfig(
+  maxMobileDevices: 3,
+  maxWebDevices: -1, // Web ilimitado
+  countWebInLimit: false, // Web não conta no limite
+  premiumMaxMobileDevices: 10,
+  allowEmulators: true,
+);
+
 /// Remote data source para operações de dispositivos via Firebase
 abstract class DeviceRemoteDataSource {
   Future<Either<Failure, List<DeviceEntity>>> getUserDevices(String userId);
@@ -122,17 +132,23 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
   @override
   Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
     if (!_isServiceAvailable) {
-      return const Right(true);
+      return const Right(true); // Web sempre pode adicionar (não conta no limite)
     }
     
     try {
-      final countResult = await _firebaseDeviceService!.getActiveDeviceCount(userId);
+      // Busca dispositivos para contar apenas mobile
+      final devicesResult = await _firebaseDeviceService!.getDevicesFromFirestore(userId);
       
-      return countResult.fold(
+      return devicesResult.fold(
         (failure) => Left(failure),
-        (activeCount) {
-          const int deviceLimit = 3;
-          return Right(activeCount < deviceLimit);
+        (devices) {
+          // Conta apenas dispositivos mobile (iOS/Android)
+          final mobileCount = devices
+              .where((d) => d.isActive && _deviceLimitConfig.isMobilePlatform(d.platform))
+              .length;
+          
+          final canAdd = mobileCount < _deviceLimitConfig.maxMobileDevices;
+          return Right(canAdd);
         },
       );
     } catch (e) {
@@ -155,8 +171,20 @@ class DeviceRemoteDataSourceImpl implements DeviceRemoteDataSource {
         (devices) {
           final activeDevices = devices.where((d) => d.isActive).toList();
           
-          final platformStats = <String, int>{};
+          // Conta por tipo de dispositivo
+          final mobileCount = activeDevices
+              .where((d) => _deviceLimitConfig.isMobilePlatform(d.platform))
+              .length;
+          final webCount = activeDevices
+              .where((d) => _deviceLimitConfig.isWebOrDesktopPlatform(d.platform))
+              .length;
           
+          final platformStats = <String, int>{
+            'mobile': mobileCount,
+            'web': webCount,
+          };
+          
+          // Também agrupa por plataforma específica
           for (final device in devices) {
             final platform = device.platform;
             platformStats[platform] = (platformStats[platform] ?? 0) + 1;

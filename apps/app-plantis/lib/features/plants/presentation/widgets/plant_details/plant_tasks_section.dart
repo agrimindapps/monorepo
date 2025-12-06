@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/theme/plantis_colors.dart';
+import '../../../../tasks/domain/entities/task.dart';
+import '../../../../tasks/presentation/notifiers/tasks_notifier.dart';
 import '../../../../tasks/presentation/widgets/task_completion_dialog.dart';
 import '../../../domain/entities/plant.dart';
-import '../../../domain/entities/plant_task.dart';
-import '../../providers/plant_task_provider.dart';
-import 'plant_task_adapter.dart';
+import '../../providers/plant_tasks_unified_provider.dart';
 
 /// Widget responsável por exibir e gerenciar as tarefas da planta
+/// usando o sistema unificado de Task (features/tasks/)
 class PlantTasksSection extends ConsumerStatefulWidget {
   final Plant plant;
 
@@ -18,26 +19,18 @@ class PlantTasksSection extends ConsumerStatefulWidget {
   ConsumerState<PlantTasksSection> createState() => _PlantTasksSectionState();
 }
 
-class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
-    with PlantTaskAdapter {
+class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
   bool _showAllCompletedTasks = false;
 
   @override
   Widget build(BuildContext context) {
-    final taskState = ref.watch(plantTaskNotifierProvider);
-    final taskProvider = ref.read(plantTaskNotifierProvider.notifier);
-
-    if (taskState.isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final tasks = taskProvider.getTasksForPlant(widget.plant.id);
+    final tasks = ref.watch(plantTasksUnifiedProvider(widget.plant.id));
 
     if (tasks.isEmpty) {
       return _buildEmptyTasksState(context);
     }
 
-    return _buildTasksList(context, tasks, taskProvider);
+    return _buildTasksList(context, tasks);
   }
 
   Widget _buildEmptyTasksState(BuildContext context) {
@@ -84,31 +77,36 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     );
   }
 
-  Widget _buildTasksList(
-    BuildContext context,
-    List<PlantTask> tasks,
-    PlantTaskProvider taskProvider,
-  ) {
+  Widget _buildTasksList(BuildContext context, List<Task> tasks) {
     final overdueTasks = tasks.where((task) => task.isOverdue).toList();
     final upcomingTasks =
-        tasks.where((task) => task.isDueToday || task.isDueSoon).toList();
+        tasks
+            .where(
+              (task) =>
+                  task.status == TaskStatus.pending &&
+                  !task.isOverdue &&
+                  (task.isDueToday || task.isDueTomorrow),
+            )
+            .toList();
     final pendingTasks =
         tasks
             .where(
               (task) =>
-                  !task.isCompleted &&
+                  task.status == TaskStatus.pending &&
                   !task.isOverdue &&
                   !task.isDueToday &&
-                  !task.isDueSoon,
+                  !task.isDueTomorrow,
             )
             .toList();
-    final completedTasks = tasks.where((task) => task.isCompleted).toList();
+    final completedTasks =
+        tasks.where((task) => task.status == TaskStatus.completed).toList();
+
     overdueTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     upcomingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     pendingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     completedTasks.sort(
-      (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
-        a.completedDate ?? DateTime(1970),
+      (a, b) => (b.completedAt ?? DateTime(1970)).compareTo(
+        a.completedAt ?? DateTime(1970),
       ),
     );
 
@@ -121,7 +119,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
             title: 'Tarefas em atraso',
             tasks: overdueTasks,
             color: Colors.red,
-            taskProvider: taskProvider,
           ),
           const SizedBox(height: 24),
         ],
@@ -131,7 +128,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
             title: 'Tarefas próximas',
             tasks: upcomingTasks,
             color: Colors.orange,
-            taskProvider: taskProvider,
           ),
           const SizedBox(height: 24),
         ],
@@ -141,16 +137,11 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
             title: 'Tarefas pendentes',
             tasks: pendingTasks,
             color: PlantisColors.primary,
-            taskProvider: taskProvider,
           ),
           const SizedBox(height: 24),
         ],
         if (completedTasks.isNotEmpty) ...[
-          _buildCompletedTasksExpandableSection(
-            context,
-            completedTasks,
-            taskProvider,
-          ),
+          _buildCompletedTasksExpandableSection(context, completedTasks),
         ],
       ],
     );
@@ -159,9 +150,8 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
   Widget _buildTaskSection(
     BuildContext context, {
     required String title,
-    required List<PlantTask> tasks,
+    required List<Task> tasks,
     required Color color,
-    required PlantTaskProvider taskProvider,
     bool isCompleted = false,
   }) {
     final theme = Theme.of(context);
@@ -197,31 +187,28 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
         ...tasks.map(
           (task) => Padding(
             padding: const EdgeInsets.only(bottom: 8),
-            child: _buildTaskCard(context, task, taskProvider),
+            child: _buildTaskCard(context, task),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTaskCard(
-    BuildContext context,
-    PlantTask task,
-    PlantTaskProvider taskProvider,
-  ) {
+  Widget _buildTaskCard(BuildContext context, Task task) {
     final theme = Theme.of(context);
     final color = _getTaskColor(task);
+    final isCompleted = task.status == TaskStatus.completed;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color:
             theme.brightness == Brightness.dark
                 ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+                : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color:
-              task.isCompleted
+              isCompleted
                   ? Colors.green.withValues(alpha: 0.3)
                   : color.withValues(alpha: 0.2),
         ),
@@ -235,9 +222,9 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
       ),
       child: InkWell(
         onTap:
-            task.isCompleted
+            isCompleted
                 ? null
-                : () => _showTaskCompletionDialog(context, task, taskProvider),
+                : () => _showTaskCompletionDialog(context, task),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -251,7 +238,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
                 ),
                 child: Icon(_getTaskIcon(task.type), color: color, size: 20),
               ),
-
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
@@ -262,13 +248,11 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
                         color:
-                            task.isCompleted
+                            isCompleted
                                 ? theme.colorScheme.onSurfaceVariant
                                 : theme.colorScheme.onSurface,
                         decoration:
-                            task.isCompleted
-                                ? TextDecoration.lineThrough
-                                : null,
+                            isCompleted ? TextDecoration.lineThrough : null,
                       ),
                     ),
                     if (task.description?.isNotEmpty == true) ...[
@@ -308,11 +292,11 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     );
   }
 
-  Color _getTaskColor(PlantTask task) {
-    if (task.isCompleted) return Colors.green;
+  Color _getTaskColor(Task task) {
+    if (task.status == TaskStatus.completed) return Colors.green;
     if (task.isOverdue) return Colors.red;
-    if (task.isDueToday) return Colors.amber; // Amarelo para hoje
-    if (task.isDueSoon) return Colors.orange;
+    if (task.isDueToday) return Colors.amber;
+    if (task.isDueTomorrow) return Colors.orange;
     return PlantisColors.primary;
   }
 
@@ -324,12 +308,20 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
         return Icons.grass;
       case TaskType.pruning:
         return Icons.content_cut;
-      case TaskType.sunlightCheck:
+      case TaskType.sunlight:
         return Icons.wb_sunny;
+      case TaskType.shade:
+        return Icons.cloud;
       case TaskType.pestInspection:
         return Icons.bug_report;
-      case TaskType.replanting:
+      case TaskType.repotting:
         return Icons.change_circle;
+      case TaskType.cleaning:
+        return Icons.cleaning_services;
+      case TaskType.spraying:
+        return Icons.shower;
+      case TaskType.custom:
+        return Icons.task_alt;
     }
   }
 
@@ -343,8 +335,7 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
   /// Seção expansível de tarefas concluídas
   Widget _buildCompletedTasksExpandableSection(
     BuildContext context,
-    List<PlantTask> completedTasks,
-    PlantTaskProvider taskProvider,
+    List<Task> completedTasks,
   ) {
     final theme = Theme.of(context);
 
@@ -432,7 +423,6 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
                         title: 'Tarefas concluídas',
                         tasks: completedTasks,
                         color: Colors.green,
-                        taskProvider: taskProvider,
                         isCompleted: true,
                       ),
                     ],
@@ -443,31 +433,30 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection>
     );
   }
 
-  /// Exibe dialog de conclusão de tarefa (igual ao comportamento da página principal)
+  /// Exibe dialog de conclusão de tarefa
   Future<void> _showTaskCompletionDialog(
     BuildContext context,
-    PlantTask plantTask,
-    PlantTaskProvider taskProvider,
+    Task task,
   ) async {
     try {
-      final taskEntity = PlantTaskAdapter.plantTaskToTask(plantTask);
       final result = await TaskCompletionDialog.show(
         context: context,
-        task: taskEntity,
+        task: task,
         plantName: widget.plant.name,
       );
+
       if (result != null && context.mounted) {
-        await taskProvider.completeTaskWithDate(
-          widget.plant.id,
-          plantTask.id,
-          completionDate: result.completionDate,
+        final tasksNotifier = ref.read(tasksNotifierProvider.notifier);
+        final success = await tasksNotifier.completeTask(
+          task.id,
           notes: result.notes,
           nextDueDate: result.nextDueDate,
         );
-        if (context.mounted) {
+
+        if (success && context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Tarefa "${plantTask.title}" concluída!'),
+              content: Text('Tarefa "${task.title}" concluída!'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
             ),

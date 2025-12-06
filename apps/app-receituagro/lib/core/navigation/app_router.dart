@@ -20,18 +20,20 @@ abstract final class AppRouter {
   /// Private constructor para prevenir instanciação
   const AppRouter._();
 
-  /// Helper para criar rotas com metadata (showBottomNav)
+  /// Helper para criar rotas com metadata (showBottomNav, tabIndex)
   /// ⚠️ IMPORTANTE: Envolve páginas com NavigationShell para bottom nav persistente
   static Route<T> _buildRoute<T>({
     required Widget page,
     required RouteSettings settings,
     bool showBottomNav = true,
+    int? tabIndex,
   }) {
     // Combina argumentos existentes com metadata
     final Map<String, dynamic> combinedArgs = {
       if (settings.arguments is Map<String, dynamic>)
         ...(settings.arguments as Map<String, dynamic>),
       'showBottomNav': showBottomNav,
+      if (tabIndex != null) 'tabIndex': tabIndex,
     };
 
     return MaterialPageRoute<T>(
@@ -57,6 +59,7 @@ abstract final class AppRouter {
           page: const HomeDefensivosPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 0,
         );
 
       case '/home-pragas':
@@ -64,6 +67,7 @@ abstract final class AppRouter {
           page: const HomePragasPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 1,
         );
 
       case '/favoritos':
@@ -71,6 +75,7 @@ abstract final class AppRouter {
           page: const FavoritosPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 2,
         );
 
       case '/comentarios':
@@ -78,6 +83,7 @@ abstract final class AppRouter {
           page: const ComentariosPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 3,
         );
 
       case '/settings':
@@ -85,6 +91,7 @@ abstract final class AppRouter {
           page: const SettingsPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 4,
         );
 
       // ========== PÁGINAS DE LISTAGEM ==========
@@ -100,6 +107,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 0,
         );
 
       case '/defensivos-unificado':
@@ -113,6 +121,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 0,
         );
 
       case '/defensivos-agrupados':
@@ -126,6 +135,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 0,
         );
 
       case '/pragas':
@@ -136,6 +146,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 1,
         );
 
       case '/culturas':
@@ -143,6 +154,7 @@ abstract final class AppRouter {
           page: const ListaCulturasPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 1,
         );
 
       // ========== PÁGINAS DE DETALHES (sem bottom nav) ==========
@@ -156,6 +168,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: false,
+          tabIndex: 0, // Mantém referência à tab de Defensivos
         );
 
       case '/detalhe-diagnostico':
@@ -169,6 +182,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: false,
+          tabIndex: detDiagArgs?['tabIndex'] as int? ?? 0, // Preserva tab de origem
         );
 
       case '/praga-detail':
@@ -182,6 +196,7 @@ abstract final class AppRouter {
           ),
           settings: settings,
           showBottomNav: false,
+          tabIndex: 1, // Mantém referência à tab de Pragas
         );
 
       // ========== OUTRAS PÁGINAS ==========
@@ -191,6 +206,7 @@ abstract final class AppRouter {
           page: const SubscriptionPage(),
           settings: settings,
           showBottomNav: true,
+          tabIndex: 4, // Config tab
         );
 
       default:

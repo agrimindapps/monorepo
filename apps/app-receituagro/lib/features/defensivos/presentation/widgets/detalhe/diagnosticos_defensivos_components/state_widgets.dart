@@ -2,42 +2,43 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/theme/spacing_tokens.dart';
-import '../../../../../diagnosticos/presentation/providers/diagnosticos_notifier.dart';
+import '../../../../../diagnosticos/presentation/providers/diagnosticos_by_entity_provider.dart';
 
 /// Widget para gerenciamento de estados da lista de diagnósticos
+///
+/// **MIGRADO** - Agora usa `diagnosticosByEntityProvider` ao invés do deprecated
 class DiagnosticoDefensivoStateManager extends ConsumerWidget {
   final String defensivoName;
-  final Widget Function(List<dynamic>) builder;
+  final Widget Function(List<DiagnosticoDisplayItem>) builder;
   final VoidCallback? onRetry;
+  final DiagnosticosByEntityParams params;
 
   const DiagnosticoDefensivoStateManager({
     super.key,
     required this.defensivoName,
     required this.builder,
+    required this.params,
     this.onRetry,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final diagnosticosAsync = ref.watch(diagnosticosProvider);
+    final stateAsync = ref.watch(diagnosticosByEntityProvider(params));
 
-    return diagnosticosAsync.when(
-      data: (diagnosticosState) {
-        if (diagnosticosState.isLoading) {
+    return stateAsync.when(
+      data: (state) {
+        if (state.isLoading) {
           return const DiagnosticoDefensivoLoadingWidget();
         }
 
-        if (diagnosticosState.hasError) {
+        if (state.hasError) {
           return DiagnosticoDefensivoErrorWidget(
-            errorMessage: diagnosticosState.errorMessage ?? 'Erro desconhecido',
+            errorMessage: state.errorMessage ?? 'Erro desconhecido',
             onRetry: onRetry,
           );
         }
 
-        final diagnosticosParaExibir =
-            diagnosticosState.searchQuery.isNotEmpty
-                ? diagnosticosState.searchResults
-                : diagnosticosState.filteredDiagnosticos;
+        final diagnosticosParaExibir = state.filteredItems;
 
         if (diagnosticosParaExibir.isEmpty) {
           return DiagnosticoDefensivoEmptyWidget(defensivoName: defensivoName);
@@ -46,11 +47,10 @@ class DiagnosticoDefensivoStateManager extends ConsumerWidget {
         return builder(diagnosticosParaExibir);
       },
       loading: () => const DiagnosticoDefensivoLoadingWidget(),
-      error:
-          (error, _) => DiagnosticoDefensivoErrorWidget(
-            errorMessage: error.toString(),
-            onRetry: onRetry,
-          ),
+      error: (error, _) => DiagnosticoDefensivoErrorWidget(
+        errorMessage: error.toString(),
+        onRetry: onRetry,
+      ),
     );
   }
 }

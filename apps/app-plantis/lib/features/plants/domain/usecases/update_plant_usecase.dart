@@ -4,22 +4,16 @@ import 'package:flutter/foundation.dart';
 import '../../../../core/data/models/planta_config_model.dart';
 import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../entities/plant.dart';
-import '../repositories/plant_tasks_repository.dart';
 import '../repositories/plants_repository.dart';
-import '../services/plant_task_generator.dart';
 
 class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
   UpdatePlantUseCase(
     this.repository,
     this.generateInitialTasksUseCase,
-    this.plantTaskGenerator,
-    this.plantTasksRepository,
   );
 
   final PlantsRepository repository;
   final GenerateInitialTasksUseCase generateInitialTasksUseCase;
-  final PlantTaskGenerator plantTaskGenerator;
-  final PlantTasksRepository plantTasksRepository;
 
   @override
   Future<Either<Failure, Plant>> call(UpdatePlantParams params) async {
@@ -103,7 +97,7 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
     return (oldValue == null || oldValue <= 0) && (newValue != null && newValue > 0);
   }
 
-  /// Gera tarefas apenas para os novos tipos de cuidado
+  /// Gera tarefas apenas para os novos tipos de cuidado (usando Task system unificado)
   Future<void> _generateTasksForNewCareTypes(Plant plant, List<String> careTypes) async {
     try {
       if (kDebugMode) {
@@ -145,22 +139,7 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
         return;
       }
       
-      // Gerar PlantTasks usando o generator existente
-      final plantTasksToGenerate = plantTaskGenerator.generateTasksForPlant(
-        plant.copyWith(config: _plantConfigFromFiltered(filteredConfig, plant.config!)),
-      );
-      
-      if (plantTasksToGenerate.isNotEmpty) {
-        if (kDebugMode) {
-          print('✅ _generateTasksForNewCareTypes - ${plantTasksToGenerate.length} PlantTasks geradas');
-        }
-        
-        for (final task in plantTasksToGenerate) {
-          await plantTasksRepository.addPlantTask(task);
-        }
-      }
-      
-      // Gerar Tasks (sistema tradicional)
+      // Gerar Tasks usando o sistema unificado
       final tasksResult = await generateInitialTasksUseCase.call(
         GenerateInitialTasksParams(
           plantaId: plant.id,
@@ -187,21 +166,6 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
         print('Stack: $stack');
       }
     }
-  }
-  
-  /// Cria um PlantConfig filtrado a partir do PlantaConfigModel
-  PlantConfig _plantConfigFromFiltered(PlantaConfigModel filtered, PlantConfig original) {
-    return PlantConfig(
-      wateringIntervalDays: filtered.aguaAtiva ? filtered.intervaloRegaDias : null,
-      fertilizingIntervalDays: filtered.aduboAtivo ? filtered.intervaloAdubacaoDias : null,
-      pruningIntervalDays: filtered.podaAtiva ? filtered.intervaloPodaDias : null,
-      sunlightCheckIntervalDays: filtered.banhoSolAtivo ? filtered.intervaloBanhoSolDias : null,
-      pestInspectionIntervalDays: filtered.inspecaoPragasAtiva ? filtered.intervaloInspecaoPragasDias : null,
-      replantingIntervalDays: filtered.replantarAtivo ? filtered.intervaloReplantarDias : null,
-      waterAmount: original.waterAmount,
-      enableWateringCare: filtered.aguaAtiva,
-      enableFertilizerCare: filtered.aduboAtivo,
-    );
   }
 
   ValidationFailure? _validatePlant(UpdatePlantParams params) {

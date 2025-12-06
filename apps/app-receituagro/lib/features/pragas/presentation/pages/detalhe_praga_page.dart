@@ -2,14 +2,15 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/services/access_history_service.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/standard_tab_bar_widget.dart';
+import '../../../../database/receituagro_database.dart';
 import '../../../../features/navigation/navigation_providers.dart';
 import '../../../favoritos/favoritos_page.dart';
 import '../providers/detalhe_praga_notifier.dart';
-import '../providers/diagnosticos_praga_notifier.dart';
 import '../widgets/comentarios_praga_widget.dart';
-import '../widgets/diagnosticos_praga_widget.dart';
+import '../widgets/diagnosticos_praga_unified_widget.dart';
 import '../widgets/praga_info_widget.dart';
 
 /// Página refatorada seguindo Clean Architecture
@@ -70,7 +71,6 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
   Future<void> _loadInitialData() async {
     try {
       final pragaNotifier = ref.read(detalhePragaProvider.notifier);
-      final diagnosticosNotifier = ref.read(diagnosticosPragaProvider.notifier);
 
       // Inicializa praga usando método unificado
       await pragaNotifier.initialize(
@@ -79,21 +79,35 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
         pragaScientificName: widget.pragaScientificName,
       );
 
-      // Aguarda o estado da praga e carrega diagnósticos
-      final pragaState = ref.read(detalhePragaProvider).value;
-      
-      if (!mounted) return;
-      
-      if (pragaState?.pragaData != null && pragaState!.pragaData!.idPraga.isNotEmpty) {
-        await diagnosticosNotifier.loadDiagnosticos(
-          pragaState.pragaData!.idPraga,
-          pragaName: pragaState.pragaName,
-        );
-      }
+      // Registra acesso após carregar dados da praga
+      final state = ref.read(detalhePragaProvider);
+      state.whenData((data) async {
+        if (data.pragaData != null) {
+          await _recordPragaAccess(data.pragaData!);
+        }
+      });
+
+      // Diagnósticos agora são carregados automaticamente pelo provider unificado
+      // quando o DiagnosticosPragaUnifiedWidget é montado
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ [DETALHE_PRAGA_PAGE] Erro em _loadInitialData: $e');
       }
+    }
+  }
+
+  /// Registra acesso à praga para histórico
+  Future<void> _recordPragaAccess(Praga pragaData) async {
+    try {
+      final accessHistoryService = AccessHistoryService();
+      await accessHistoryService.recordPragaAccess(
+        id: pragaData.idPraga,
+        nomeComum: pragaData.nome,
+        nomeCientifico: pragaData.nomeLatino ?? '',
+        tipoPraga: pragaData.tipo,
+      );
+    } catch (e) {
+      debugPrint('❌ [DETALHE_PRAGA_PAGE] Erro ao registrar acesso: $e');
     }
   }
 
@@ -127,7 +141,7 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
                         ),
                         Expanded(
                           child: pragaAsyncState.when(
-                            data: (_) => TabBarView(
+                            data: (state) => TabBarView(
                               controller: _tabController,
                               children: [
                                 PragaInfoWidget(
@@ -135,9 +149,10 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
                                   pragaScientificName:
                                       widget.pragaScientificName,
                                 ),
-                                // Wrap with AutomaticKeepAliveClientMixin to preserve state
+                                // Novo widget unificado - carrega diagnósticos automaticamente
                                 _KeepAliveWrapper(
-                                  child: DiagnosticosPragaWidget(
+                                  child: DiagnosticosPragaUnifiedWidget(
+                                    pragaId: state.pragaData?.idPraga ?? widget.pragaId ?? '',
                                     pragaName: widget.pragaName,
                                   ),
                                 ),

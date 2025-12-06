@@ -28,7 +28,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(livestockProviderProvider).loadBovines();
+      ref.read(livestockProvider.notifier).loadBovines();
     });
   }
 
@@ -41,7 +41,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = ref.watch(livestockProviderProvider);
+    final provider = ref.watch(livestockProvider.notifier);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Bovinos'),
@@ -128,7 +128,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
     );
   }
 
-  Widget _buildBovinesList(BuildContext context, LivestockProvider provider) {
+  Widget _buildBovinesList(BuildContext context, LivestockNotifier provider) {
     if (provider.isLoadingBovines) {
       return const Center(
         child: Column(
@@ -237,7 +237,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
     );
   }
 
-  bool _hasActiveFilters(LivestockProvider provider) {
+  bool _hasActiveFilters(LivestockNotifier provider) {
     return provider.selectedBreed != null ||
         provider.selectedOriginCountry != null ||
         provider.selectedAptitude != null ||
@@ -260,7 +260,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   }
 
   void _performSync() async {
-    final provider = ref.read(livestockProviderProvider);
+    final provider = ref.read(livestockProvider.notifier);
 
     ScaffoldMessenger.of(
       context,
@@ -288,7 +288,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   }
 
   void _showStatistics() {
-    final provider = ref.read(livestockProviderProvider);
+    final provider = ref.read(livestockProvider.notifier);
 
     showDialog<void>(
       context: context,
@@ -376,7 +376,7 @@ class _BovinesListPageState extends ConsumerState<BovinesListPage> {
   }
 
   void _deleteBovine(BovineEntity bovine) async {
-    final provider = ref.read(livestockProviderProvider);
+    final provider = ref.read(livestockProvider.notifier);
     final success = await provider.deleteBovine(bovine.id);
 
     if (!mounted) return;

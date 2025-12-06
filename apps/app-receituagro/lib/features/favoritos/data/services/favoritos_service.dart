@@ -120,14 +120,7 @@ class FavoritosService {
 
       if (result) {
         await _cache.clearForTipo(tipo);
-        try {
-          await _syncService.syncOperation('create', tipo, id, itemData);
-        } catch (e) {
-          developer.log(
-            '🔖 [FAVORITOS] ⚠️ Erro na sincronização (local OK): $e',
-            name: 'FavoritosService',
-          );
-        }
+        // Sync agora é feito via DriftSyncAdapter (offline-first)
       }
 
       return result;
@@ -166,16 +159,7 @@ class FavoritosService {
 
       if (result) {
         await _cache.clearForTipo(tipo);
-        try {
-          await _syncService.syncOperation('delete', tipo, id, null);
-        } catch (e) {
-          if (kDebugMode) {
-            developer.log(
-              'Erro na sincronização de remoção (local OK): $e',
-              name: 'FavoritosService',
-            );
-          }
-        }
+        // Sync agora é feito via DriftSyncAdapter (offline-first)
       }
 
       return result;

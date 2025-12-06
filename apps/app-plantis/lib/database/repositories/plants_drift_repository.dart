@@ -76,36 +76,59 @@ class PlantsDriftRepository {
 
   /// Retorna todas as plantas ativas
   Future<List<Plant>> getAllPlants() async {
-    final plants = await (_db.select(_db.plants)
-          ..where((p) => p.isDeleted.equals(false))
-          ..orderBy([
-            (p) => OrderingTerm.desc(p.createdAt),
-          ]))
-        .get();
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(_db.plants.isDeleted.equals(false))
+      ..orderBy([OrderingTerm.desc(_db.plants.createdAt)]);
 
-    return plants.map(_plantDriftToModel).toList();
+    final results = await query.get();
+
+    return results.map((row) {
+      final plant = row.readTable(_db.plants);
+      final space = row.readTableOrNull(_db.spaces);
+      return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+    }).toList();
   }
 
   /// Retorna planta pelo firebaseId ou ID local
   Future<Plant?> getPlantById(String id) async {
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ]);
+
     // 1. Tenta buscar pelo firebaseId (padrão)
-    var plant = await (_db.select(
-      _db.plants,
-    )..where((p) => p.firebaseId.equals(id)))
-        .getSingleOrNull();
+    query.where(_db.plants.firebaseId.equals(id));
+    var result = await query.getSingleOrNull();
 
     // 2. Se não encontrou, tenta buscar pelo ID local (fallback para dados legados)
-    if (plant == null) {
+    if (result == null) {
       final localId = int.tryParse(id);
       if (localId != null) {
-        plant = await (_db.select(
-          _db.plants,
-        )..where((p) => p.id.equals(localId)))
-            .getSingleOrNull();
+        final queryById = _db.select(_db.plants).join([
+          leftOuterJoin(
+            _db.spaces,
+            _db.spaces.id.equalsExp(_db.plants.spaceId),
+          ),
+        ])
+          ..where(_db.plants.id.equals(localId));
+        result = await queryById.getSingleOrNull();
       }
     }
 
-    return plant != null ? _plantDriftToModel(plant) : null;
+    if (result == null) return null;
+
+    final plant = result.readTable(_db.plants);
+    final space = result.readTableOrNull(_db.spaces);
+    return _plantDriftToModelWithSpace(plant, space?.firebaseId);
   }
 
   /// Retorna plantas de um espaço específico
@@ -113,32 +136,54 @@ class PlantsDriftRepository {
     final localSpaceId = await _resolveSpaceId(spaceFirebaseId);
     if (localSpaceId == null) return [];
 
-    final plants = await (_db.select(_db.plants)
-          ..where(
-            (p) => p.spaceId.equals(localSpaceId) & p.isDeleted.equals(false),
-          )
-          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
-        .get();
+    // Query com JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(
+        _db.plants.spaceId.equals(localSpaceId) &
+            _db.plants.isDeleted.equals(false),
+      )
+      ..orderBy([OrderingTerm.asc(_db.plants.name)]);
 
-    return plants.map(_plantDriftToModel).toList();
+    final results = await query.get();
+
+    return results.map((row) {
+      final plant = row.readTable(_db.plants);
+      final space = row.readTableOrNull(_db.spaces);
+      return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+    }).toList();
   }
 
   /// Busca plantas por query (nome, espécie, notas)
   Future<List<Plant>> searchPlants(String query) async {
     final searchTerm = '%${query.toLowerCase()}%';
 
-    final plants = await (_db.select(_db.plants)
-          ..where(
-            (p) =>
-                p.isDeleted.equals(false) &
-                (p.name.lower().like(searchTerm) |
-                    p.species.lower().like(searchTerm) |
-                    p.notes.lower().like(searchTerm)),
-          )
-          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
-        .get();
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final joinQuery = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(
+        _db.plants.isDeleted.equals(false) &
+            (_db.plants.name.lower().like(searchTerm) |
+                _db.plants.species.lower().like(searchTerm) |
+                _db.plants.notes.lower().like(searchTerm)),
+      )
+      ..orderBy([OrderingTerm.asc(_db.plants.name)]);
 
-    return plants.map(_plantDriftToModel).toList();
+    final results = await joinQuery.get();
+
+    return results.map((row) {
+      final plant = row.readTable(_db.plants);
+      final space = row.readTableOrNull(_db.spaces);
+      return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+    }).toList();
   }
 
   // ==================== UPDATE ====================
@@ -280,21 +325,41 @@ class PlantsDriftRepository {
 
   /// Watch todas as plantas ativas
   Stream<List<Plant>> watchPlants() {
-    return (_db.select(_db.plants)
-          ..where((p) => p.isDeleted.equals(false))
-          ..orderBy([
-            (p) => OrderingTerm.desc(p.createdAt),
-          ]))
-        .watch()
-        .map((plants) => plants.map(_plantDriftToModel).toList());
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(_db.plants.isDeleted.equals(false))
+      ..orderBy([OrderingTerm.desc(_db.plants.createdAt)]);
+
+    return query.watch().map((results) {
+      return results.map((row) {
+        final plant = row.readTable(_db.plants);
+        final space = row.readTableOrNull(_db.spaces);
+        return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+      }).toList();
+    });
   }
 
   /// Watch planta específica
   Stream<Plant?> watchPlantById(String firebaseId) {
-    return (_db.select(_db.plants)
-          ..where((p) => p.firebaseId.equals(firebaseId)))
-        .watchSingleOrNull()
-        .map((plant) => plant != null ? _plantDriftToModel(plant) : null);
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(_db.plants.firebaseId.equals(firebaseId));
+
+    return query.watchSingleOrNull().map((result) {
+      if (result == null) return null;
+      final plant = result.readTable(_db.plants);
+      final space = result.readTableOrNull(_db.spaces);
+      return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+    });
   }
 
   /// Watch plantas de um espaço
@@ -306,13 +371,25 @@ class PlantsDriftRepository {
         return Stream.value(<Plant>[]);
       }
 
-      return (_db.select(_db.plants)
-            ..where(
-              (p) => p.spaceId.equals(localSpaceId) & p.isDeleted.equals(false),
-            )
-            ..orderBy([(p) => OrderingTerm.asc(p.name)]))
-          .watch()
-          .map((plants) => plants.map(_plantDriftToModel).toList());
+      final query = _db.select(_db.plants).join([
+        leftOuterJoin(
+          _db.spaces,
+          _db.spaces.id.equalsExp(_db.plants.spaceId),
+        ),
+      ])
+        ..where(
+          _db.plants.spaceId.equals(localSpaceId) &
+              _db.plants.isDeleted.equals(false),
+        )
+        ..orderBy([OrderingTerm.asc(_db.plants.name)]);
+
+      return query.watch().map((results) {
+        return results.map((row) {
+          final plant = row.readTable(_db.plants);
+          final space = row.readTableOrNull(_db.spaces);
+          return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+        }).toList();
+      });
     });
   }
 
@@ -320,12 +397,22 @@ class PlantsDriftRepository {
 
   /// Retorna plantas dirty
   Future<List<Plant>> getDirtyPlants() async {
-    final plants = await (_db.select(
-      _db.plants,
-    )..where((p) => p.isDirty.equals(true)))
-        .get();
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(_db.plants.isDirty.equals(true));
 
-    return plants.map(_plantDriftToModel).toList();
+    final results = await query.get();
+
+    return results.map((row) {
+      final plant = row.readTable(_db.plants);
+      final space = row.readTableOrNull(_db.spaces);
+      return _plantDriftToModelWithSpace(plant, space?.firebaseId);
+    }).toList();
   }
 
   /// Marca como sincronizada
@@ -343,8 +430,8 @@ class PlantsDriftRepository {
 
   // ==================== CONVERTERS ====================
 
-  /// Converte Drift Plant → PlantModel (sem config - para operações rápidas)
-  PlantModel _plantDriftToModel(db.Plant plant) {
+  /// Converte Drift Plant → PlantModel com spaceId já resolvido
+  PlantModel _plantDriftToModelWithSpace(db.Plant plant, String? spaceFirebaseId) {
     // Parse imageUrls CSV
     final imageUrls = plant.imageUrls != null && plant.imageUrls!.isNotEmpty
         ? plant.imageUrls!.split(',')
@@ -354,7 +441,7 @@ class PlantsDriftRepository {
       id: plant.firebaseId ?? plant.id.toString(),
       name: plant.name,
       species: plant.species,
-      spaceId: plant.spaceId?.toString(), // Converter de volta para String
+      spaceId: spaceFirebaseId, // Usar firebaseId do espaço
       imageBase64: plant.imageBase64,
       imageUrls: imageUrls,
       plantingDate: plant.plantingDate,
@@ -372,14 +459,17 @@ class PlantsDriftRepository {
     );
   }
 
-  /// Converte Drift Plant → PlantModel COM config carregado
-  Future<PlantModel> _plantDriftToModelWithConfig(db.Plant plant) async {
-    final model = _plantDriftToModel(plant);
-    
+  /// Converte Drift Plant → PlantModel COM config carregado e spaceId resolvido
+  Future<PlantModel> _plantDriftToModelWithConfigAndSpace(
+    db.Plant plant,
+    String? spaceFirebaseId,
+  ) async {
+    final model = _plantDriftToModelWithSpace(plant, spaceFirebaseId);
+
     // Carregar config da tabela separada
     final plantFirebaseId = plant.firebaseId ?? plant.id.toString();
     final configModel = await _configsRepo.getConfigByPlantId(plantFirebaseId);
-    
+
     if (configModel != null) {
       return PlantModel(
         id: model.id,
@@ -402,42 +492,65 @@ class PlantsDriftRepository {
         isFavorited: model.isFavorited,
       );
     }
-    
+
     return model;
   }
 
   /// Retorna todas as plantas ativas COM configs carregados
   Future<List<Plant>> getAllPlantsWithConfig() async {
-    final plants = await (_db.select(_db.plants)
-          ..where((p) => p.isDeleted.equals(false))
-          ..orderBy([
-            (p) => OrderingTerm.desc(p.createdAt),
-          ]))
-        .get();
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ])
+      ..where(_db.plants.isDeleted.equals(false))
+      ..orderBy([OrderingTerm.desc(_db.plants.createdAt)]);
 
-    return Future.wait(plants.map(_plantDriftToModelWithConfig));
+    final results = await query.get();
+
+    return Future.wait(results.map((row) {
+      final plant = row.readTable(_db.plants);
+      final space = row.readTableOrNull(_db.spaces);
+      return _plantDriftToModelWithConfigAndSpace(plant, space?.firebaseId);
+    }));
   }
 
   /// Retorna planta pelo ID COM config carregado
   Future<Plant?> getPlantByIdWithConfig(String id) async {
+    // Query com LEFT JOIN para obter o firebaseId do espaço
+    final query = _db.select(_db.plants).join([
+      leftOuterJoin(
+        _db.spaces,
+        _db.spaces.id.equalsExp(_db.plants.spaceId),
+      ),
+    ]);
+
     // 1. Tenta buscar pelo firebaseId (padrão)
-    var plant = await (_db.select(
-      _db.plants,
-    )..where((p) => p.firebaseId.equals(id)))
-        .getSingleOrNull();
+    query.where(_db.plants.firebaseId.equals(id));
+    var result = await query.getSingleOrNull();
 
     // 2. Se não encontrou, tenta buscar pelo ID local (fallback para dados legados)
-    if (plant == null) {
+    if (result == null) {
       final localId = int.tryParse(id);
       if (localId != null) {
-        plant = await (_db.select(
-          _db.plants,
-        )..where((p) => p.id.equals(localId)))
-            .getSingleOrNull();
+        final queryById = _db.select(_db.plants).join([
+          leftOuterJoin(
+            _db.spaces,
+            _db.spaces.id.equalsExp(_db.plants.spaceId),
+          ),
+        ])
+          ..where(_db.plants.id.equals(localId));
+        result = await queryById.getSingleOrNull();
       }
     }
 
-    return plant != null ? _plantDriftToModelWithConfig(plant) : null;
+    if (result == null) return null;
+
+    final plant = result.readTable(_db.plants);
+    final space = result.readTableOrNull(_db.spaces);
+    return _plantDriftToModelWithConfigAndSpace(plant, space?.firebaseId);
   }
 
   /// Helper: Converte spaceId String (firebaseId) → INTEGER (local id)
@@ -475,14 +588,22 @@ class PlantsDriftRepository {
     return null;
   }
 
-  /// Helper: Obter ID local da planta
-  Future<int?> _getLocalIdByFirebaseId(String firebaseId) async {
+  /// Obtém o ID local de uma planta pelo firebaseId
+  /// 
+  /// Útil para operações que precisam do ID local do Drift,
+  /// como salvar imagens na tabela PlantImages
+  Future<int?> getLocalIdByFirebaseId(String firebaseId) async {
     final plant = await (_db.select(
       _db.plants,
     )..where((p) => p.firebaseId.equals(firebaseId)))
         .getSingleOrNull();
 
     return plant?.id;
+  }
+
+  /// Helper: Obter ID local da planta (privado)
+  Future<int?> _getLocalIdByFirebaseId(String firebaseId) async {
+    return getLocalIdByFirebaseId(firebaseId);
   }
 
   // ==================== STATISTICS ====================

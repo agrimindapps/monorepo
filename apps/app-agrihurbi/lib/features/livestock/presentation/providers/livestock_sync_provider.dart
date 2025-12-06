@@ -1,40 +1,64 @@
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/repositories/livestock_repository.dart';
+import 'livestock_di_providers.dart';
 
-/// Provider especializado para sincronização de dados de livestock
-///
-/// Responsabilidade única: Gerenciar sincronização de dados remotos
-/// Seguindo Single Responsibility Principle
-class LivestockSyncProvider extends ChangeNotifier {
-  final LivestockRepository _repository;
+part 'livestock_sync_provider.g.dart';
 
-  LivestockSyncProvider({
-    required LivestockRepository repository,
-  }) : _repository = repository;
+/// Status da sincronização
+enum SyncStatus {
+  idle,
+  syncing,
+  success,
+  error,
+  cancelled,
+}
 
-  bool _isSyncing = false;
-  DateTime? _lastSyncTime;
-  String? _errorMessage;
-  SyncStatus _syncStatus = SyncStatus.idle;
-  double _syncProgress = 0.0;
+/// State class for LivestockSync
+class LivestockSyncState {
+  final bool isSyncing;
+  final DateTime? lastSyncTime;
+  final String? errorMessage;
+  final SyncStatus syncStatus;
+  final double syncProgress;
 
-  bool get isSyncing => _isSyncing;
-  DateTime? get lastSyncTime => _lastSyncTime;
-  String? get errorMessage => _errorMessage;
-  SyncStatus get syncStatus => _syncStatus;
-  double get syncProgress => _syncProgress;
+  const LivestockSyncState({
+    this.isSyncing = false,
+    this.lastSyncTime,
+    this.errorMessage,
+    this.syncStatus = SyncStatus.idle,
+    this.syncProgress = 0.0,
+  });
 
-  bool get hasSync => _lastSyncTime != null;
+  LivestockSyncState copyWith({
+    bool? isSyncing,
+    DateTime? lastSyncTime,
+    String? errorMessage,
+    SyncStatus? syncStatus,
+    double? syncProgress,
+    bool clearError = false,
+    bool resetState = false,
+  }) {
+    return LivestockSyncState(
+      isSyncing: isSyncing ?? this.isSyncing,
+      lastSyncTime: resetState ? null : (lastSyncTime ?? this.lastSyncTime),
+      errorMessage: (clearError || resetState) ? null : (errorMessage ?? this.errorMessage),
+      syncStatus: resetState ? SyncStatus.idle : (syncStatus ?? this.syncStatus),
+      syncProgress: resetState ? 0.0 : (syncProgress ?? this.syncProgress),
+    );
+  }
+
+  bool get hasSync => lastSyncTime != null;
   bool get needsSync =>
-      _lastSyncTime == null ||
-      DateTime.now().difference(_lastSyncTime!).inHours > 1;
+      lastSyncTime == null ||
+      DateTime.now().difference(lastSyncTime!).inHours > 1;
 
   String get lastSyncFormatted {
-    if (_lastSyncTime == null) return 'Nunca sincronizado';
+    if (lastSyncTime == null) return 'Nunca sincronizado';
 
     final now = DateTime.now();
-    final difference = now.difference(_lastSyncTime!);
+    final difference = now.difference(lastSyncTime!);
 
     if (difference.inMinutes < 60) {
       return '${difference.inMinutes} min atrás';
@@ -44,22 +68,47 @@ class LivestockSyncProvider extends ChangeNotifier {
       return '${difference.inDays} dias atrás';
     }
   }
+}
+
+/// Provider especializado para sincronização de dados de livestock
+///
+/// Responsabilidade única: Gerenciar sincronização de dados remotos
+/// Seguindo Single Responsibility Principle
+@riverpod
+class LivestockSyncNotifier extends _$LivestockSyncNotifier {
+  LivestockRepository get _repository => ref.read(livestockRepositoryProvider);
+
+  @override
+  LivestockSyncState build() {
+    return const LivestockSyncState();
+  }
+
+  // Convenience getters for backward compatibility
+  bool get isSyncing => state.isSyncing;
+  DateTime? get lastSyncTime => state.lastSyncTime;
+  String? get errorMessage => state.errorMessage;
+  SyncStatus get syncStatus => state.syncStatus;
+  double get syncProgress => state.syncProgress;
+  bool get hasSync => state.hasSync;
+  bool get needsSync => state.needsSync;
+  String get lastSyncFormatted => state.lastSyncFormatted;
 
   /// Força sincronização manual
   Future<bool> forceSyncNow({
     void Function(double)? onProgress,
     bool showProgress = true,
   }) async {
-    if (_isSyncing) {
-      debugPrint('LivestockSyncProvider: Sincronização já em andamento');
+    if (state.isSyncing) {
+      debugPrint('LivestockSyncNotifier: Sincronização já em andamento');
       return false;
     }
 
-    _isSyncing = true;
-    _errorMessage = null;
-    _syncStatus = SyncStatus.syncing;
-    _syncProgress = 0.0;
-    notifyListeners();
+    state = state.copyWith(
+      isSyncing: true,
+      syncStatus: SyncStatus.syncing,
+      syncProgress: 0.0,
+      clearError: true,
+    );
 
     try {
       if (showProgress && onProgress != null) {
@@ -71,97 +120,84 @@ class LivestockSyncProvider extends ChangeNotifier {
 
       return result.fold(
         (failure) {
-          _errorMessage = failure.message;
-          _syncStatus = SyncStatus.error;
+          state = state.copyWith(
+            errorMessage: failure.message,
+            syncStatus: SyncStatus.error,
+            isSyncing: false,
+          );
           debugPrint(
-              'LivestockSyncProvider: Erro na sincronização - ${failure.message}');
+              'LivestockSyncNotifier: Erro na sincronização - ${failure.message}');
+          _resetStatusAfterDelay();
           return false;
         },
         (_) {
-          _lastSyncTime = DateTime.now();
-          _syncStatus = SyncStatus.success;
-          _syncProgress = 1.0;
+          state = state.copyWith(
+            lastSyncTime: DateTime.now(),
+            syncStatus: SyncStatus.success,
+            syncProgress: 1.0,
+            isSyncing: false,
+          );
           debugPrint(
-              'LivestockSyncProvider: Sincronização realizada com sucesso');
+              'LivestockSyncNotifier: Sincronização realizada com sucesso');
 
           if (showProgress && onProgress != null) {
             onProgress(1.0);
           }
-
+          _resetStatusAfterDelay();
           return true;
         },
       );
     } catch (e, stackTrace) {
-      _errorMessage = 'Erro inesperado na sincronização: $e';
-      _syncStatus = SyncStatus.error;
-      debugPrint('LivestockSyncProvider: Erro inesperado - $e');
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado na sincronização: $e',
+        syncStatus: SyncStatus.error,
+        isSyncing: false,
+      );
+      debugPrint('LivestockSyncNotifier: Erro inesperado - $e');
       debugPrint('StackTrace: $stackTrace');
+      _resetStatusAfterDelay();
       return false;
-    } finally {
-      _isSyncing = false;
-      notifyListeners();
-      Future.delayed(const Duration(seconds: 3), () {
-        if (_syncStatus != SyncStatus.idle) {
-          _syncStatus = SyncStatus.idle;
-          notifyListeners();
-        }
-      });
     }
+  }
+
+  void _resetStatusAfterDelay() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (state.syncStatus != SyncStatus.idle) {
+        state = state.copyWith(syncStatus: SyncStatus.idle);
+      }
+    });
+  }
+
+  void _updateProgress(double progress, void Function(double) onProgress) {
+    state = state.copyWith(syncProgress: progress);
+    onProgress(progress);
   }
 
   /// Sincronização silenciosa em background
   Future<bool> backgroundSync() async {
-    if (_isSyncing || !needsSync) {
+    if (state.isSyncing || !state.needsSync) {
       return false;
     }
 
-    debugPrint('LivestockSyncProvider: Iniciando sincronização em background');
+    debugPrint('LivestockSyncNotifier: Iniciando sincronização em background');
     return await forceSyncNow(showProgress: false);
   }
 
   /// Cancela sincronização se possível
   void cancelSync() {
-    if (_isSyncing) {
-      _syncStatus = SyncStatus.cancelled;
-      debugPrint('LivestockSyncProvider: Sincronização cancelada pelo usuário');
-      notifyListeners();
+    if (state.isSyncing) {
+      state = state.copyWith(syncStatus: SyncStatus.cancelled);
+      debugPrint('LivestockSyncNotifier: Sincronização cancelada pelo usuário');
     }
   }
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    _syncStatus = SyncStatus.idle;
-    notifyListeners();
+    state = state.copyWith(clearError: true, syncStatus: SyncStatus.idle);
   }
 
   /// Reset completo do estado de sincronização
   void resetSyncState() {
-    _lastSyncTime = null;
-    _errorMessage = null;
-    _syncStatus = SyncStatus.idle;
-    _syncProgress = 0.0;
-    notifyListeners();
+    state = state.copyWith(resetState: true);
   }
-
-  void _updateProgress(double progress, void Function(double) onProgress) {
-    _syncProgress = progress;
-    onProgress(progress);
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    debugPrint('LivestockSyncProvider: Disposed');
-    super.dispose();
-  }
-}
-
-/// Status da sincronização
-enum SyncStatus {
-  idle,
-  syncing,
-  success,
-  error,
-  cancelled,
 }

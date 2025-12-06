@@ -66,6 +66,7 @@ export 'src/domain/entities/data_migration/data_conflict_result.dart';
 export 'src/domain/entities/data_migration/data_resolution_choice.dart';
 export 'src/domain/entities/database_record.dart';
 export 'src/domain/entities/device_entity.dart';
+export 'src/domain/entities/device_limit_config.dart';
 export 'src/domain/entities/file_entity.dart';
 export 'src/domain/entities/log_entry.dart';
 export 'src/domain/entities/module_auth_config.dart';
@@ -115,6 +116,9 @@ export 'src/infrastructure/services/auth/auth_sign_in_service.dart';
 export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/data_migration_service.dart';
 export 'src/infrastructure/services/device_management_service.dart';
+// Device Management - Unified Implementation
+export 'src/infrastructure/repositories/datasources/device_local_datasource.dart';
+export 'src/infrastructure/repositories/device_repository_impl.dart';
 export 'src/infrastructure/services/enhanced_account_deletion_service.dart';
 export 'src/infrastructure/services/enhanced_analytics_service.dart';
 export 'src/infrastructure/services/enhanced_connectivity_service.dart';

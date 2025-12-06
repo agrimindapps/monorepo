@@ -215,14 +215,10 @@ DeletePlantUseCase deletePlantUseCase(Ref ref) {
 UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
-  final plantTaskGenerator = ref.watch(plantTaskGeneratorProvider);
-  final plantTasksRepository = ref.watch(plantTasksRepositoryProvider);
 
   return UpdatePlantUseCase(
     repository,
     generateInitialTasks,
-    plantTaskGenerator,
-    plantTasksRepository,
   );
 }
 

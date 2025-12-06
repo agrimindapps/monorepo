@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import '../architecture/i_form_state_manager.dart';
-import '../architecture/i_form_validator.dart';
+import '../architecture/i_form_validator.dart' show FormValidationResult;
 import 'form_state.dart';
 
 /// Concrete implementation of form state manager
 /// 
-/// This class manages form state using Provider pattern and follows
+/// This class manages form state and follows
 /// Single Responsibility Principle by focusing solely on state management.
 /// It provides reactive state updates and validation integration.
 class FormStateManager<T> implements IFormStateManager<T> {
@@ -276,81 +276,6 @@ class FormStateManager<T> implements IFormStateManager<T> {
   }
 }
 
-/// Provider-compatible form state manager
-/// 
-/// This class wraps FormStateManager to provide ChangeNotifier compatibility
-/// for use with Flutter Provider package.
-class ProviderFormStateManager<T> extends ChangeNotifier {
-  
-  ProviderFormStateManager({
-    T? initialData,
-    Duration validationDebounce = const Duration(milliseconds: 300),
-    bool autoSaveEnabled = false,
-    Duration autoSaveInterval = const Duration(seconds: 30),
-    Future<void> Function(T data)? onAutoSave,
-  }) {
-    _manager = FormStateManager<T>(
-      initialData: initialData,
-      validationDebounce: validationDebounce,
-      autoSaveEnabled: autoSaveEnabled,
-      autoSaveInterval: autoSaveInterval,
-      onAutoSave: onAutoSave,
-    );
-    _manager.addListener((state) => notifyListeners());
-  }
-  
-  /// Create a provider-compatible state manager with validation
-  factory ProviderFormStateManager.withValidator({
-    T? initialData,
-    IFormValidator<T>? validator,
-    Duration validationDebounce = const Duration(milliseconds: 300),
-    bool autoSaveEnabled = false,
-    Duration autoSaveInterval = const Duration(seconds: 30),
-    Future<void> Function(T data)? onAutoSave,
-  }) {
-    final manager = ProviderFormStateManager<T>(
-      initialData: initialData,
-      validationDebounce: validationDebounce,
-      autoSaveEnabled: autoSaveEnabled,
-      autoSaveInterval: autoSaveInterval,
-      onAutoSave: onAutoSave,
-    );
-    if (validator != null) {
-      manager._manager.addListener((state) {
-        if (state.data != null) {
-          validator.validateForm(state.data as T).then((result) {
-            manager.setValidationResult(result);
-          });
-        }
-      });
-    }
-    
-    return manager;
-  }
-  late final FormStateManager<T> _manager;
-  FormState<T> get currentState => _manager.currentState;
-  Stream<FormState<T>> get stateStream => _manager.stateStream;
-  bool get canSubmit => _manager.canSubmit;
-  bool get hasUnsavedChanges => _manager.hasUnsavedChanges;
-  Future<void> updateField(String fieldName, dynamic value) => _manager.updateField(fieldName, value);
-  Future<void> updateFields(Map<String, dynamic> fieldUpdates) => _manager.updateFields(fieldUpdates);
-  Future<void> setFormData(T data) => _manager.setFormData(data);
-  Future<void> reset() => _manager.reset();
-  Future<void> markDirty() => _manager.markDirty();
-  Future<void> markClean() => _manager.markClean();
-  Future<void> setLoading(bool isLoading) => _manager.setLoading(isLoading);
-  Future<void> setError(String? error) => _manager.setError(error);
-  Future<void> setValidationResult(FormValidationResult result) => _manager.setValidationResult(result);
-  void saveSnapshot(String key) => _manager.saveSnapshot(key);
-  Future<void> restoreSnapshot(String key) => _manager.restoreSnapshot(key);
-  
-  @override
-  void dispose() {
-    _manager.dispose();
-    super.dispose();
-  }
-}
-
 /// Form state manager builder for easy configuration
 class FormStateManagerBuilder<T> {
   T? _initialData;
@@ -358,7 +283,6 @@ class FormStateManagerBuilder<T> {
   bool _autoSaveEnabled = false;
   Duration _autoSaveInterval = const Duration(seconds: 30);
   Future<void> Function(T data)? _onAutoSave;
-  IFormValidator<T>? _validator;
   
   /// Set initial data
   FormStateManagerBuilder<T> withInitialData(T data) {
@@ -383,28 +307,10 @@ class FormStateManagerBuilder<T> {
     return this;
   }
   
-  /// Set validator
-  FormStateManagerBuilder<T> withValidator(IFormValidator<T> validator) {
-    _validator = validator;
-    return this;
-  }
-  
   /// Build form state manager
   FormStateManager<T> build() {
     return FormStateManager<T>(
       initialData: _initialData,
-      validationDebounce: _validationDebounce,
-      autoSaveEnabled: _autoSaveEnabled,
-      autoSaveInterval: _autoSaveInterval,
-      onAutoSave: _onAutoSave,
-    );
-  }
-  
-  /// Build provider-compatible form state manager
-  ProviderFormStateManager<T> buildProvider() {
-    return ProviderFormStateManager.withValidator(
-      initialData: _initialData,
-      validator: _validator,
       validationDebounce: _validationDebounce,
       autoSaveEnabled: _autoSaveEnabled,
       autoSaveInterval: _autoSaveInterval,

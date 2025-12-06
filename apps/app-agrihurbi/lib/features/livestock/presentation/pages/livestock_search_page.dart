@@ -62,7 +62,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   }
 
   Future<void> _performInitialSearch() async {
-    final provider = ref.read(livestockProviderProvider);
+    final provider = ref.read(livestockProvider.notifier);
     await provider.loadBovines();
     await provider.loadEquines();
     _performSearch();
@@ -73,7 +73,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
       _isSearching = true;
     });
 
-    final provider = ref.read(livestockProviderProvider);
+    final provider = ref.read(livestockProvider.notifier);
     List<AnimalBaseEntity> results = [];
     if (_selectedAnimalTypes.contains('bovine')) {
       final bovines = provider.filteredBovines
@@ -605,7 +605,7 @@ class _LivestockSearchPageState extends ConsumerState<LivestockSearchPage> {
   }
 
   void _deleteAnimal(AnimalBaseEntity animal) async {
-    final provider = ref.read(livestockProviderProvider);
+    final provider = ref.read(livestockProvider.notifier);
     bool success = false;
 
     if (animal is BovineEntity) {

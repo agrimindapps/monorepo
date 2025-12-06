@@ -1,6 +1,8 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../database/providers/database_providers.dart';
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
 import '../../../features/plants/domain/usecases/get_plants_usecase.dart';
@@ -8,6 +10,7 @@ import '../../../features/plants/domain/usecases/update_plant_usecase.dart';
 import '../../../features/plants/presentation/providers/plants_providers.dart';
 import '../../services/form_validation_service.dart';
 import '../../services/image_management_service.dart';
+import '../../services/local_image_storage_service.dart';
 import '../image_providers.dart';
 
 part 'plant_form_state_notifier.g.dart';
@@ -226,6 +229,7 @@ class PlantFormState {
 class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   late final FormValidationService _validationService;
   late final ImageManagementService _imageService;
+  late final LocalImageStorageService _localImageService;
   late final GetPlantsUseCase _getPlantsUseCase;
   late final AddPlantUseCase _addPlantUseCase;
   late final UpdatePlantUseCase _updatePlantUseCase;
@@ -234,6 +238,7 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   PlantFormState build() {
     _validationService = ref.read(formValidationServiceProvider);
     _imageService = ref.read(imageManagementServiceProvider);
+    _localImageService = ref.read(localImageStorageServiceProvider);
     _getPlantsUseCase = ref.read(getPlantsUseCaseProvider);
     _addPlantUseCase = ref.read(addPlantUseCaseProvider);
     _updatePlantUseCase = ref.read(updatePlantUseCaseProvider);
@@ -441,29 +446,40 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
   /// Seleciona imagem da galeria
   Future<void> selectImageFromGallery() async {
+    debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Iniciando seleção');
     state = state.copyWith(isUploadingImages: true, clearError: true);
 
     try {
+      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Chamando _imageService.selectFromGallery()');
       final result = await _imageService.selectFromGallery();
+      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Resultado recebido: ${result.isRight() ? "Sucesso" : "Falha"}');
 
       result.fold(
         (failure) {
+          debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - FALHA: ${failure.message}');
           state = state.copyWith(
             isUploadingImages: false,
             errorMessage: failure.message,
           );
         },
         (base64Image) {
+          debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Imagem recebida, tamanho: ${base64Image.length} chars');
+          debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Prefixo: ${base64Image.substring(0, base64Image.length > 50 ? 50 : base64Image.length)}...');
+          
           final imageResult =
               _imageService.addImageToList(state.imageUrls, base64Image);
 
           if (imageResult.isSuccess) {
+            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Imagem adicionada à lista com sucesso');
+            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - updatedImages.length: ${imageResult.updatedImages.length}');
             state = state.copyWith(
               isUploadingImages: false,
               imageUrls: imageResult.updatedImages,
               clearError: true,
             );
+            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Novo state.imageUrls.length: ${state.imageUrls.length}');
           } else {
+            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Erro ao adicionar imagem: ${imageResult.message}');
             state = state.copyWith(
               isUploadingImages: false,
               errorMessage: imageResult.message,
@@ -471,7 +487,9 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
           }
         },
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - EXCEÇÃO: $e');
+      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - StackTrace: $stackTrace');
       state = state.copyWith(
         isUploadingImages: false,
         errorMessage: 'Erro inesperado: $e',
@@ -494,63 +512,19 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   }
 
   /// Salva planta
+  /// 
+  /// Fluxo offline-first:
+  /// 1. Salva a planta com imagens base64 no estado (para display imediato)
+  /// 2. Após salvar, armazena as imagens como BLOB no Drift local
+  /// 3. Upload para Firebase Storage acontece em background (sync service)
   Future<bool> savePlant() async {
     if (!state.canSave) return false;
 
     state = state.copyWith(isSaving: true, clearError: true);
 
     try {
-      // Se tem imagens Base64 para upload
-      if (state.imageUrls.any((url) => url.startsWith('data:image/'))) {
-        final base64Images = state.imageUrls
-            .where((url) => url.startsWith('data:image/'))
-            .toList();
-
-        state = state.copyWith(
-          isUploadingImages: true,
-          totalImagesToUpload: base64Images.length,
-        );
-
-        final uploadResult = await _imageService.uploadImages(
-          base64Images,
-          onProgress: (index, progress) {
-            state = state.copyWith(
-              uploadProgress: progress,
-              uploadingImageIndex: index,
-            );
-          },
-        );
-
-        final uploadSuccess = uploadResult.fold(
-          (failure) {
-            state = state.copyWith(
-              isSaving: false,
-              isUploadingImages: false,
-              errorMessage: failure.message,
-              clearUploadProgress: true,
-            );
-            return false;
-          },
-          (downloadUrls) {
-            // Substitui Base64 por URLs permanentes
-            final updatedImageUrls = state.imageUrls
-                .where((url) => !url.startsWith('data:image/'))
-                .toList()
-              ..addAll(downloadUrls);
-
-            state = state.copyWith(
-              imageUrls: updatedImageUrls,
-              isUploadingImages: false,
-              clearUploadProgress: true,
-            );
-            return true;
-          },
-        );
-
-        if (!uploadSuccess) return false;
-      }
-
-      // Continua salvando planta
+      // Salvar planta (com base64 nas imageUrls para display)
+      // O upload para Firebase acontecerá em background via sync service
       if (state.isEditMode) {
         return await _updatePlant();
       } else {
@@ -580,7 +554,10 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
         );
         return false;
       },
-      (plant) {
+      (plant) async {
+        // Salvar imagens localmente como BLOB (offline-first)
+        await _saveImagesToLocalStorage(plant.id);
+        
         state = state.copyWith(
           isSaving: false,
           originalPlant: plant,
@@ -604,7 +581,10 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
         );
         return false;
       },
-      (plant) {
+      (plant) async {
+        // Salvar imagens localmente como BLOB (offline-first)
+        await _saveImagesToLocalStorage(plant.id);
+        
         state = state.copyWith(
           isSaving: false,
           originalPlant: plant,
@@ -613,6 +593,44 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
         return true;
       },
     );
+  }
+  
+  /// Salva imagens base64 no armazenamento local como BLOB
+  Future<void> _saveImagesToLocalStorage(String plantFirebaseId) async {
+    final base64Images = state.imageUrls
+        .where((url) => url.startsWith('data:image/'))
+        .toList();
+    
+    if (base64Images.isEmpty) return;
+    
+    debugPrint('📷 [PlantFormStateNotifier] Salvando ${base64Images.length} imagens localmente para planta $plantFirebaseId');
+    
+    try {
+      // Obter o ID local do Drift pelo firebaseId
+      final plantsRepo = ref.read(plantsDriftRepositoryProvider);
+      final localPlantId = await plantsRepo.getLocalIdByFirebaseId(plantFirebaseId);
+      
+      if (localPlantId == null) {
+        debugPrint('📷 [PlantFormStateNotifier] Erro: não encontrou ID local para firebaseId: $plantFirebaseId');
+        return;
+      }
+      
+      debugPrint('📷 [PlantFormStateNotifier] ID local encontrado: $localPlantId');
+      
+      for (int i = 0; i < base64Images.length; i++) {
+        final isPrimary = i == 0; // Primeira imagem é a principal
+        await _localImageService.saveBase64Image(
+          plantId: localPlantId,
+          base64Image: base64Images[i],
+          isPrimary: isPrimary,
+        );
+      }
+      
+      debugPrint('📷 [PlantFormStateNotifier] Imagens salvas localmente com sucesso');
+    } catch (e) {
+      debugPrint('📷 [PlantFormStateNotifier] Erro ao salvar imagens localmente: $e');
+      // Não falhar a operação de salvar - as imagens estão no state.imageUrls
+    }
   }
 
   /// Constrói parâmetros para adicionar planta

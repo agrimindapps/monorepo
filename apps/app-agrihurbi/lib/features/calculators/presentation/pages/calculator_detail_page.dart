@@ -469,9 +469,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     if (!mounted || provider.selectedCalculator == null) return;
 
     try {
-      CalculatorFeaturesProvider? featuresProvider;
+      CalculatorFeaturesNotifier? featuresProvider;
       try {
-        featuresProvider = ref.read(calculatorFeaturesProvider);
+        featuresProvider = ref.read(calculatorFeaturesProvider.notifier);
       } catch (e) {
         if (_templateService == null) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -552,9 +552,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     if (calculator == null) return;
 
     try {
-      CalculatorFeaturesProvider? featuresProvider;
+      CalculatorFeaturesNotifier? featuresProvider;
       try {
-        featuresProvider = ref.read(calculatorFeaturesProvider);
+        featuresProvider = ref.read(calculatorFeaturesProvider.notifier);
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -805,9 +805,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           userId: 'current_user',
           isPublic: false,
         );
-        CalculatorFeaturesProvider? featuresProvider;
+        CalculatorFeaturesNotifier? featuresProvider;
         try {
-          featuresProvider = ref.read(calculatorFeaturesProvider);
+          featuresProvider = ref.read(calculatorFeaturesProvider.notifier);
         } catch (e) {
           if (_templateService == null) {
             ScaffoldMessenger.of(context).showSnackBar(

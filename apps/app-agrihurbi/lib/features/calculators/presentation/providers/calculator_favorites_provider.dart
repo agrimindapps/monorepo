@@ -1,133 +1,196 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/manage_favorites.dart';
+import 'calculators_di_providers.dart';
+
+part 'calculator_favorites_provider.g.dart';
+
+/// FavoritesStatistics class
+class FavoritesStatistics {
+  final int totalFavorites;
+  final List<String> favoriteIds;
+
+  const FavoritesStatistics({
+    required this.totalFavorites,
+    required this.favoriteIds,
+  });
+
+  bool get hasFavorites => totalFavorites > 0;
+}
+
+/// State class for CalculatorFavorites
+class CalculatorFavoritesState {
+  final List<String> favoriteCalculatorIds;
+  final bool isLoadingFavorites;
+  final bool isUpdatingFavorite;
+  final String? errorMessage;
+
+  const CalculatorFavoritesState({
+    this.favoriteCalculatorIds = const [],
+    this.isLoadingFavorites = false,
+    this.isUpdatingFavorite = false,
+    this.errorMessage,
+  });
+
+  CalculatorFavoritesState copyWith({
+    List<String>? favoriteCalculatorIds,
+    bool? isLoadingFavorites,
+    bool? isUpdatingFavorite,
+    String? errorMessage,
+    bool clearError = false,
+  }) {
+    return CalculatorFavoritesState(
+      favoriteCalculatorIds: favoriteCalculatorIds ?? this.favoriteCalculatorIds,
+      isLoadingFavorites: isLoadingFavorites ?? this.isLoadingFavorites,
+      isUpdatingFavorite: isUpdatingFavorite ?? this.isUpdatingFavorite,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
+  }
+
+  int get totalFavorites => favoriteCalculatorIds.length;
+  bool get hasFavorites => favoriteCalculatorIds.isNotEmpty;
+
+  bool isCalculatorFavorite(String calculatorId) {
+    return favoriteCalculatorIds.contains(calculatorId);
+  }
+
+  List<CalculatorEntity> getFavoriteCalculators(List<CalculatorEntity> allCalculators) {
+    return allCalculators
+        .where((calc) => favoriteCalculatorIds.contains(calc.id))
+        .toList();
+  }
+}
 
 /// Provider especializado para favoritos de calculadoras
 /// 
 /// Responsabilidade única: Gerenciar favoritos de calculadoras
 /// Seguindo Single Responsibility Principle
-class CalculatorFavoritesProvider extends ChangeNotifier {
-  final ManageFavorites _manageFavorites;
+@riverpod
+class CalculatorFavoritesNotifier extends _$CalculatorFavoritesNotifier {
+  ManageFavorites get _manageFavorites => ref.read(manageFavoritesUseCaseProvider);
 
-  CalculatorFavoritesProvider({
-    required ManageFavorites manageFavorites,
-  }) : _manageFavorites = manageFavorites;
+  @override
+  CalculatorFavoritesState build() {
+    return const CalculatorFavoritesState();
+  }
 
-  List<String> _favoriteCalculatorIds = [];
-  bool _isLoadingFavorites = false;
-  bool _isUpdatingFavorite = false;
-  String? _errorMessage;
+  // Convenience getters for backward compatibility
+  List<String> get favoriteCalculatorIds => state.favoriteCalculatorIds;
+  bool get isLoadingFavorites => state.isLoadingFavorites;
+  bool get isUpdatingFavorite => state.isUpdatingFavorite;
+  String? get errorMessage => state.errorMessage;
+  int get totalFavorites => state.totalFavorites;
+  bool get hasFavorites => state.hasFavorites;
 
-  List<String> get favoriteCalculatorIds => _favoriteCalculatorIds;
-  bool get isLoadingFavorites => _isLoadingFavorites;
-  bool get isUpdatingFavorite => _isUpdatingFavorite;
-  String? get errorMessage => _errorMessage;
-  
-  int get totalFavorites => _favoriteCalculatorIds.length;
-  bool get hasFavorites => _favoriteCalculatorIds.isNotEmpty;
-  
   /// Verifica se uma calculadora é favorita
   bool isCalculatorFavorite(String calculatorId) {
-    return _favoriteCalculatorIds.contains(calculatorId);
+    return state.isCalculatorFavorite(calculatorId);
   }
 
   /// Filtra calculadoras favoritas de uma lista
   List<CalculatorEntity> getFavoriteCalculators(List<CalculatorEntity> allCalculators) {
-    return allCalculators
-        .where((calc) => _favoriteCalculatorIds.contains(calc.id))
-        .toList();
+    return state.getFavoriteCalculators(allCalculators);
   }
 
   /// Carrega favoritos
   Future<void> loadFavorites() async {
-    _isLoadingFavorites = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoadingFavorites: true, clearError: true);
 
     final result = await _manageFavorites.call(const GetFavoritesParams());
     
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorFavoritesProvider: Erro ao carregar favoritos - ${failure.message}');
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoadingFavorites: false,
+        );
+        debugPrint('CalculatorFavoritesNotifier: Erro ao carregar favoritos - ${failure.message}');
       },
       (favorites) {
-        _favoriteCalculatorIds = favorites is List ? List<String>.from(favorites) : <String>[];
-        debugPrint('CalculatorFavoritesProvider: Favoritos carregados - ${favorites.length} itens');
+        state = state.copyWith(
+          favoriteCalculatorIds: favorites is List ? List<String>.from(favorites) : <String>[],
+          isLoadingFavorites: false,
+        );
+        debugPrint('CalculatorFavoritesNotifier: Favoritos carregados - ${favorites.length} itens');
       },
     );
-
-    _isLoadingFavorites = false;
-    notifyListeners();
   }
 
   /// Adiciona calculadora aos favoritos
   Future<bool> addToFavorites(String calculatorId) async {
-    if (_favoriteCalculatorIds.contains(calculatorId)) {
-      debugPrint('CalculatorFavoritesProvider: Calculadora já está nos favoritos - $calculatorId');
+    if (state.favoriteCalculatorIds.contains(calculatorId)) {
+      debugPrint('CalculatorFavoritesNotifier: Calculadora já está nos favoritos - $calculatorId');
       return true;
     }
 
-    _isUpdatingFavorite = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isUpdatingFavorite: true, clearError: true);
 
     final result = await _manageFavorites.call(AddFavoriteParams(calculatorId));
 
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorFavoritesProvider: Erro ao adicionar favorito - ${failure.message}');
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isUpdatingFavorite: false,
+        );
+        debugPrint('CalculatorFavoritesNotifier: Erro ao adicionar favorito - ${failure.message}');
       },
       (_) {
-        _favoriteCalculatorIds.add(calculatorId);
+        final updatedFavorites = [...state.favoriteCalculatorIds, calculatorId];
+        state = state.copyWith(
+          favoriteCalculatorIds: updatedFavorites,
+          isUpdatingFavorite: false,
+        );
         success = true;
-        debugPrint('CalculatorFavoritesProvider: Favorito adicionado - $calculatorId');
+        debugPrint('CalculatorFavoritesNotifier: Favorito adicionado - $calculatorId');
       },
     );
 
-    _isUpdatingFavorite = false;
-    notifyListeners();
     return success;
   }
 
   /// Remove calculadora dos favoritos
   Future<bool> removeFromFavorites(String calculatorId) async {
-    if (!_favoriteCalculatorIds.contains(calculatorId)) {
-      debugPrint('CalculatorFavoritesProvider: Calculadora não está nos favoritos - $calculatorId');
+    if (!state.favoriteCalculatorIds.contains(calculatorId)) {
+      debugPrint('CalculatorFavoritesNotifier: Calculadora não está nos favoritos - $calculatorId');
       return true;
     }
 
-    _isUpdatingFavorite = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isUpdatingFavorite: true, clearError: true);
 
     final result = await _manageFavorites.call(RemoveFavoriteParams(calculatorId));
 
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
-        debugPrint('CalculatorFavoritesProvider: Erro ao remover favorito - ${failure.message}');
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isUpdatingFavorite: false,
+        );
+        debugPrint('CalculatorFavoritesNotifier: Erro ao remover favorito - ${failure.message}');
       },
       (_) {
-        _favoriteCalculatorIds.remove(calculatorId);
+        final updatedFavorites = state.favoriteCalculatorIds
+            .where((id) => id != calculatorId)
+            .toList();
+        state = state.copyWith(
+          favoriteCalculatorIds: updatedFavorites,
+          isUpdatingFavorite: false,
+        );
         success = true;
-        debugPrint('CalculatorFavoritesProvider: Favorito removido - $calculatorId');
+        debugPrint('CalculatorFavoritesNotifier: Favorito removido - $calculatorId');
       },
     );
 
-    _isUpdatingFavorite = false;
-    notifyListeners();
     return success;
   }
 
   /// Alterna estado de favorito (adiciona/remove)
   Future<bool> toggleFavorite(String calculatorId) async {
-    final isFavorite = _favoriteCalculatorIds.contains(calculatorId);
+    final isFavorite = state.favoriteCalculatorIds.contains(calculatorId);
     
     if (isFavorite) {
       return await removeFromFavorites(calculatorId);
@@ -164,11 +227,11 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
 
   /// Limpa todos os favoritos
   Future<bool> clearAllFavorites() async {
-    if (_favoriteCalculatorIds.isEmpty) {
+    if (state.favoriteCalculatorIds.isEmpty) {
       return true;
     }
 
-    final calculatorIds = List<String>.from(_favoriteCalculatorIds);
+    final calculatorIds = List<String>.from(state.favoriteCalculatorIds);
     return await removeMultipleFromFavorites(calculatorIds);
   }
 
@@ -180,8 +243,8 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
   /// Obtém estatísticas dos favoritos
   FavoritesStatistics getFavoritesStatistics() {
     return FavoritesStatistics(
-      totalFavorites: _favoriteCalculatorIds.length,
-      favoriteIds: List<String>.from(_favoriteCalculatorIds),
+      totalFavorites: state.favoriteCalculatorIds.length,
+      favoriteIds: List<String>.from(state.favoriteCalculatorIds),
     );
   }
 
@@ -218,32 +281,11 @@ class CalculatorFavoritesProvider extends ChangeNotifier {
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Reset completo do estado
   void resetState() {
-    _favoriteCalculatorIds.clear();
-    _errorMessage = null;
-    notifyListeners();
+    state = const CalculatorFavoritesState();
   }
-
-  @override
-  void dispose() {
-    debugPrint('CalculatorFavoritesProvider: Disposed');
-    super.dispose();
-  }
-}
-
-class FavoritesStatistics {
-  final int totalFavorites;
-  final List<String> favoriteIds;
-
-  const FavoritesStatistics({
-    required this.totalFavorites,
-    required this.favoriteIds,
-  });
-
-  bool get hasFavorites => totalFavorites > 0;
 }

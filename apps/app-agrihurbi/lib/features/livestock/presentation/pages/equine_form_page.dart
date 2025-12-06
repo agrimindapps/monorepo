@@ -60,12 +60,12 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
 
   Future<void> _loadEquineData() async {
     if (widget.isEditing) {
-      final provider = ref.read(equinesProviderProvider);
-      var equine = provider.getEquineById(widget.equineId!);
+      final notifier = ref.read(equinesProvider.notifier);
+      var equine = notifier.getEquineById(widget.equineId!);
       if (equine == null) {
-        final success = await provider.loadEquineById(widget.equineId!);
+        final success = await notifier.loadEquineById(widget.equineId!);
         if (success) {
-          equine = provider.selectedEquine;
+          equine = ref.read(equinesProvider).selectedEquine;
         }
       }
 

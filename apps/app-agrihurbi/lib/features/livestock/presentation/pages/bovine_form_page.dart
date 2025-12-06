@@ -14,8 +14,8 @@ import '../widgets/bovine_characteristics_section.dart';
 import '../widgets/bovine_form_action_buttons.dart';
 import '../widgets/bovine_status_section.dart';
 
-final bovineFormProvider = ChangeNotifierProvider<BovineFormProvider>((ref) {
-  // Temporary mock service for migration
+/// Local form provider using legacy pattern (will be migrated separately)
+final bovineFormLocalProvider = ChangeNotifierProvider<BovineFormProvider>((ref) {
   final validationService = LivestockValidationService();
   final formService = BovineFormService(validationService);
   return BovineFormProvider(formService);
@@ -61,8 +61,8 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
 
   @override
   Widget build(BuildContext context) {
-    final formProvider = ref.watch(bovineFormProvider);
-    final bovinesProviderState = ref.watch(bovinesProviderProvider);
+    final formProvider = ref.watch(bovineFormLocalProvider);
+    final bovinesState = ref.watch(bovinesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -71,7 +71,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       ),
       body: _isLoading
           ? _buildLoadingState()
-          : _buildFormContent(formProvider, bovinesProviderState),
+          : _buildFormContent(formProvider, bovinesState),
     );
   }
 
@@ -90,17 +90,17 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
 
   Widget _buildFormContent(
     BovineFormProvider formProvider,
-    BovinesProvider bovinesProvider,
+    BovinesState bovinesState,
   ) {
-    if (bovinesProvider.errorMessage != null && widget.isEditing) {
-      return _buildErrorState(bovinesProvider);
+    if (bovinesState.errorMessage != null && widget.isEditing) {
+      return _buildErrorState(bovinesState);
     }
 
     return Form(
       key: _formKey,
       child: Column(
         children: [
-          Expanded(child: _buildScrollableForm(formProvider, bovinesProvider)),
+          Expanded(child: _buildScrollableForm(formProvider, bovinesState)),
           _buildActionButtons(formProvider),
         ],
       ),
@@ -109,10 +109,10 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
 
   Widget _buildScrollableForm(
     BovineFormProvider formProvider,
-    BovinesProvider bovinesProvider,
+    BovinesState bovinesState,
   ) {
     final isOperating =
-        bovinesProvider.isCreating || bovinesProvider.isUpdating;
+        bovinesState.isCreating || bovinesState.isUpdating;
 
     return SingleChildScrollView(
       controller: _scrollController,
@@ -125,13 +125,13 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             registrationIdController: formProvider.registrationIdController,
             breedController: formProvider.breedController,
             originCountryController: formProvider.originCountryController,
-            formService: ref.read(bovineFormProvider).formService,
+            formService: ref.read(bovineFormLocalProvider).formService,
             enabled: !isOperating,
           ),
           const SizedBox(height: 24),
           BovineCharacteristicsSection(
             purposeController: formProvider.purposeController,
-            formService: ref.read(bovineFormProvider).formService,
+            formService: ref.read(bovineFormLocalProvider).formService,
             selectedAptitude: formProvider.selectedAptitude,
             selectedBreedingSystem: formProvider.selectedBreedingSystem,
             onAptitudeChanged: formProvider.updateAptitude,
@@ -144,7 +144,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
             animalTypeController: formProvider.animalTypeController,
             originController: formProvider.originController,
             characteristicsController: formProvider.characteristicsController,
-            formService: ref.read(bovineFormProvider).formService,
+            formService: ref.read(bovineFormLocalProvider).formService,
             onTagsChanged: formProvider.updateTags,
             selectedTags: formProvider.selectedTags,
             enabled: !isOperating,
@@ -171,7 +171,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
     );
   }
 
-  Widget _buildErrorState(BovinesProvider provider) {
+  Widget _buildErrorState(BovinesState state) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -188,7 +188,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            provider.errorMessage!,
+            state.errorMessage!,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -205,7 +205,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
               const SizedBox(width: 16),
               ElevatedButton(
                 onPressed: () {
-                  provider.clearError();
+                  ref.read(bovinesProvider.notifier).clearError();
                   _loadBovineData();
                 },
                 child: const Text('Tentar Novamente'),
@@ -224,7 +224,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       if (widget.isEditing) {
         await _loadBovineForEditing();
       } else {
-        ref.read(bovineFormProvider).initializeForCreation();
+        ref.read(bovineFormLocalProvider).initializeForCreation();
       }
     } catch (e) {
       if (mounted) {
@@ -239,19 +239,19 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
   }
 
   Future<void> _loadBovineForEditing() async {
-    final provider = ref.read(bovinesProviderProvider);
-    var bovine = provider.getBovineById(widget.bovineId!);
+    final notifier = ref.read(bovinesProvider.notifier);
+    var bovine = notifier.getBovineById(widget.bovineId!);
     if (bovine == null) {
-      final success = await provider.loadBovineById(widget.bovineId!);
-      if (success) bovine = provider.selectedBovine;
+      final success = await notifier.loadBovineById(widget.bovineId!);
+      if (success) bovine = notifier.selectedBovine;
     }
 
     if (!mounted) return;
 
     if (bovine != null) {
-      ref.read(bovineFormProvider).initializeForEditing(bovine);
+      ref.read(bovineFormLocalProvider).initializeForEditing(bovine);
     } else {
-      final errorMsg = provider.errorMessage ?? 'Bovino não encontrado';
+      final errorMsg = notifier.errorMessage ?? 'Bovino não encontrado';
       _showErrorAndGoBack(errorMsg);
     }
   }
@@ -262,32 +262,32 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       return;
     }
 
-    final provider = ref.read(bovinesProviderProvider);
-    final bovine = ref.read(bovineFormProvider).prepareBovineForSaving(
+    final notifier = ref.read(bovinesProvider.notifier);
+    final bovine = ref.read(bovineFormLocalProvider).prepareBovineForSaving(
           isEditing: widget.isEditing,
           existingId: widget.bovineId,
-          existingImageUrls: provider.selectedBovine?.imageUrls,
-          existingCreatedAt: provider.selectedBovine?.createdAt,
+          existingImageUrls: notifier.selectedBovine?.imageUrls,
+          existingCreatedAt: notifier.selectedBovine?.createdAt,
         );
 
     final success = widget.isEditing
-        ? await provider.updateBovine(bovine)
-        : await provider.createBovine(bovine);
+        ? await notifier.updateBovine(bovine)
+        : await notifier.createBovine(bovine);
 
     if (!mounted) return;
 
     if (success) {
-      ref.read(bovineFormProvider).markAsSaved();
+      ref.read(bovineFormLocalProvider).markAsSaved();
       _showSuccessMessage(widget.isEditing ? 'atualizado' : 'criado');
       context.pop();
     } else {
-      _showErrorMessage(provider.errorMessage ?? 'Operação falhou');
+      _showErrorMessage(notifier.errorMessage ?? 'Operação falhou');
     }
   }
 
   void _deleteBovine() async {
-    final provider = ref.read(bovinesProviderProvider);
-    final success = await provider.deleteBovine(
+    final notifier = ref.read(bovinesProvider.notifier);
+    final success = await notifier.deleteBovine(
       widget.bovineId!,
       confirmed: true,
     );
@@ -298,7 +298,7 @@ class _BovineFormPageState extends ConsumerState<BovineFormPage> {
       _showSuccessMessage('excluído');
       context.pop();
     } else {
-      _showErrorMessage('Erro ao excluir: ${provider.errorMessage}');
+      _showErrorMessage('Erro ao excluir: ${notifier.errorMessage}');
     }
   }
 

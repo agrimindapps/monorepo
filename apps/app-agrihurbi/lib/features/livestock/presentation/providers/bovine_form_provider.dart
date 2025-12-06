@@ -1,25 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/bovine_entity.dart';
 import '../../domain/services/bovine_form_service.dart';
+import '../../domain/services/livestock_validation_service.dart';
+
+part 'bovine_form_provider.g.dart';
+
+/// State class for BovineForm
+class BovineFormState {
+  final BovineAptitude? selectedAptitude;
+  final BreedingSystem? selectedBreedingSystem;
+  final List<String> selectedTags;
+  final bool isActive;
+  final bool isInitialized;
+  final bool hasUnsavedChanges;
+  final BovineFormData? originalData;
+
+  const BovineFormState({
+    this.selectedAptitude,
+    this.selectedBreedingSystem,
+    this.selectedTags = const [],
+    this.isActive = true,
+    this.isInitialized = false,
+    this.hasUnsavedChanges = false,
+    this.originalData,
+  });
+
+  BovineFormState copyWith({
+    BovineAptitude? selectedAptitude,
+    BreedingSystem? selectedBreedingSystem,
+    List<String>? selectedTags,
+    bool? isActive,
+    bool? isInitialized,
+    bool? hasUnsavedChanges,
+    BovineFormData? originalData,
+    bool clearOriginalData = false,
+  }) {
+    return BovineFormState(
+      selectedAptitude: selectedAptitude ?? this.selectedAptitude,
+      selectedBreedingSystem: selectedBreedingSystem ?? this.selectedBreedingSystem,
+      selectedTags: selectedTags ?? this.selectedTags,
+      isActive: isActive ?? this.isActive,
+      isInitialized: isInitialized ?? this.isInitialized,
+      hasUnsavedChanges: hasUnsavedChanges ?? this.hasUnsavedChanges,
+      originalData: clearOriginalData ? null : (originalData ?? this.originalData),
+    );
+  }
+}
 
 /// Provider especializado para gerenciar o estado do formulário de bovino
-///
-/// Responsabilidades:
-/// - Gerenciar controllers de forma otimizada
-/// - Controlar estado dos campos do formulário
-/// - Detectar mudanças não salvas
-/// - Validação em tempo real
-/// - Memory management dos controllers
-class BovineFormProvider extends ChangeNotifier {
-  final BovineFormService _formService;
-
-  BovineFormProvider(this._formService);
-
-  /// Expõe o formService para uso externo
-  BovineFormService get formService => _formService;
-
+@riverpod
+class BovineFormNotifier extends _$BovineFormNotifier {
+  late final BovineFormService _formService;
+  
   static final Map<String, TextEditingController> _controllerPool = {};
+  
+  late TextEditingController _commonNameController;
+  late TextEditingController _registrationIdController;
+  late TextEditingController _breedController;
+  late TextEditingController _originCountryController;
+  late TextEditingController _animalTypeController;
+  late TextEditingController _originController;
+  late TextEditingController _characteristicsController;
+  late TextEditingController _purposeController;
+  late TextEditingController _tagsController;
+
+  @override
+  BovineFormState build() {
+    final validationService = LivestockValidationService();
+    _formService = BovineFormService(validationService);
+    _initializeControllers();
+    return const BovineFormState();
+  }
+
+  void _initializeControllers() {
+    _commonNameController = _getController('commonName');
+    _registrationIdController = _getController('registrationId');
+    _breedController = _getController('breed');
+    _originCountryController = _getController('originCountry');
+    _animalTypeController = _getController('animalType');
+    _originController = _getController('origin');
+    _characteristicsController = _getController('characteristics');
+    _purposeController = _getController('purpose');
+    _tagsController = _getController('tags');
+  }
 
   TextEditingController _getController(String key) {
     return _controllerPool.putIfAbsent(key, () => TextEditingController());
@@ -30,74 +95,49 @@ class BovineFormProvider extends ChangeNotifier {
     controller?.clear();
   }
 
-  late final TextEditingController _commonNameController = _getController(
-    'commonName',
-  );
-  late final TextEditingController _registrationIdController = _getController(
-    'registrationId',
-  );
-  late final TextEditingController _breedController = _getController('breed');
-  late final TextEditingController _originCountryController = _getController(
-    'originCountry',
-  );
-  late final TextEditingController _animalTypeController = _getController(
-    'animalType',
-  );
-  late final TextEditingController _originController = _getController('origin');
-  late final TextEditingController _characteristicsController = _getController(
-    'characteristics',
-  );
-  late final TextEditingController _purposeController = _getController(
-    'purpose',
-  );
-  late final TextEditingController _tagsController = _getController('tags');
+  // Public getters for controllers
+  BovineFormService get formService => _formService;
   TextEditingController get commonNameController => _commonNameController;
-  TextEditingController get registrationIdController =>
-      _registrationIdController;
+  TextEditingController get registrationIdController => _registrationIdController;
   TextEditingController get breedController => _breedController;
   TextEditingController get originCountryController => _originCountryController;
   TextEditingController get animalTypeController => _animalTypeController;
   TextEditingController get originController => _originController;
-  TextEditingController get characteristicsController =>
-      _characteristicsController;
+  TextEditingController get characteristicsController => _characteristicsController;
   TextEditingController get purposeController => _purposeController;
   TextEditingController get tagsController => _tagsController;
 
-  BovineAptitude? _selectedAptitude;
-  BreedingSystem? _selectedBreedingSystem;
-  List<String> _selectedTags = [];
-  bool _isActive = true;
-  bool _isInitialized = false;
-  bool _hasUnsavedChanges = false;
-  BovineFormData? _originalData;
-  BovineAptitude? get selectedAptitude => _selectedAptitude;
-  BreedingSystem? get selectedBreedingSystem => _selectedBreedingSystem;
-  List<String> get selectedTags => List.unmodifiable(_selectedTags);
-  bool get isActive => _isActive;
-  bool get isInitialized => _isInitialized;
-  bool get hasUnsavedChanges => _hasUnsavedChanges;
+  // Convenience getters
+  BovineAptitude? get selectedAptitude => state.selectedAptitude;
+  BreedingSystem? get selectedBreedingSystem => state.selectedBreedingSystem;
+  List<String> get selectedTags => List.unmodifiable(state.selectedTags);
+  bool get isActive => state.isActive;
+  bool get isInitialized => state.isInitialized;
+  bool get hasUnsavedChanges => state.hasUnsavedChanges;
 
   /// Inicializa o formulário para criação
   void initializeForCreation() {
     _clearForm();
-    _isActive = true;
-    _selectedAptitude = BovineAptitude.beef;
-    _selectedBreedingSystem = BreedingSystem.extensive;
-    _isInitialized = true;
-    _hasUnsavedChanges = false;
-    _originalData = _getCurrentFormData();
+    state = state.copyWith(
+      isActive: true,
+      selectedAptitude: BovineAptitude.beef,
+      selectedBreedingSystem: BreedingSystem.extensive,
+      isInitialized: true,
+      hasUnsavedChanges: false,
+      originalData: _getCurrentFormData(),
+    );
     _setupListeners();
-    notifyListeners();
   }
 
   /// Inicializa o formulário para edição
   void initializeForEditing(BovineEntity bovine) {
     _populateForm(bovine);
-    _isInitialized = true;
-    _hasUnsavedChanges = false;
-    _originalData = _getCurrentFormData();
+    state = state.copyWith(
+      isInitialized: true,
+      hasUnsavedChanges: false,
+      originalData: _getCurrentFormData(),
+    );
     _setupListeners();
-    notifyListeners();
   }
 
   void _clearForm() {
@@ -111,10 +151,12 @@ class BovineFormProvider extends ChangeNotifier {
     _purposeController.clear();
     _tagsController.clear();
 
-    _selectedAptitude = null;
-    _selectedBreedingSystem = null;
-    _selectedTags = [];
-    _isActive = true;
+    state = state.copyWith(
+      selectedAptitude: null,
+      selectedBreedingSystem: null,
+      selectedTags: [],
+      isActive: true,
+    );
   }
 
   void _populateForm(BovineEntity bovine) {
@@ -128,10 +170,12 @@ class BovineFormProvider extends ChangeNotifier {
     _purposeController.text = bovine.purpose;
     _tagsController.text = _formService.tagsToString(bovine.tags);
 
-    _selectedAptitude = bovine.aptitude;
-    _selectedBreedingSystem = bovine.breedingSystem;
-    _selectedTags = List.from(bovine.tags);
-    _isActive = bovine.isActive;
+    state = state.copyWith(
+      selectedAptitude: bovine.aptitude,
+      selectedBreedingSystem: bovine.breedingSystem,
+      selectedTags: List.from(bovine.tags),
+      isActive: bovine.isActive,
+    );
   }
 
   void _setupListeners() {
@@ -161,45 +205,40 @@ class BovineFormProvider extends ChangeNotifier {
 
   void _onFormChanged() {
     final currentData = _getCurrentFormData();
-    final hasChanges = _originalData != null &&
-        _formService.hasFormChanged(currentData, _originalData!);
+    final hasChanges = state.originalData != null &&
+        _formService.hasFormChanged(currentData, state.originalData!);
 
-    if (hasChanges != _hasUnsavedChanges) {
-      _hasUnsavedChanges = hasChanges;
-      notifyListeners();
+    if (hasChanges != state.hasUnsavedChanges) {
+      state = state.copyWith(hasUnsavedChanges: hasChanges);
     }
   }
 
   void updateAptitude(BovineAptitude? aptitude) {
-    if (_selectedAptitude != aptitude) {
-      _selectedAptitude = aptitude;
+    if (state.selectedAptitude != aptitude) {
+      state = state.copyWith(selectedAptitude: aptitude);
       _onFormChanged();
-      notifyListeners();
     }
   }
 
   void updateBreedingSystem(BreedingSystem? system) {
-    if (_selectedBreedingSystem != system) {
-      _selectedBreedingSystem = system;
+    if (state.selectedBreedingSystem != system) {
+      state = state.copyWith(selectedBreedingSystem: system);
       _onFormChanged();
-      notifyListeners();
     }
   }
 
   void updateTags(List<String> tags) {
-    if (_selectedTags.length != tags.length ||
-        !_selectedTags.every(tags.contains)) {
-      _selectedTags = List.from(tags);
+    if (state.selectedTags.length != tags.length ||
+        !state.selectedTags.every(tags.contains)) {
+      state = state.copyWith(selectedTags: List.from(tags));
       _onFormChanged();
-      notifyListeners();
     }
   }
 
   void updateActiveStatus(bool isActive) {
-    if (_isActive != isActive) {
-      _isActive = isActive;
+    if (state.isActive != isActive) {
+      state = state.copyWith(isActive: isActive);
       _onFormChanged();
-      notifyListeners();
     }
   }
 
@@ -242,9 +281,9 @@ class BovineFormProvider extends ChangeNotifier {
       characteristics: _characteristicsController.text,
       purpose: _purposeController.text,
       tagsString: _tagsController.text,
-      aptitude: _selectedAptitude,
-      breedingSystem: _selectedBreedingSystem,
-      isActive: _isActive,
+      aptitude: state.selectedAptitude,
+      breedingSystem: state.selectedBreedingSystem,
+      isActive: state.isActive,
     );
   }
 
@@ -265,10 +304,9 @@ class BovineFormProvider extends ChangeNotifier {
   }
 
   void resetToOriginal() {
-    if (_originalData != null) {
-      _populateFormFromData(_originalData!);
-      _hasUnsavedChanges = false;
-      notifyListeners();
+    if (state.originalData != null) {
+      _populateFormFromData(state.originalData!);
+      state = state.copyWith(hasUnsavedChanges: false);
     }
   }
 
@@ -283,16 +321,19 @@ class BovineFormProvider extends ChangeNotifier {
     _purposeController.text = data.purpose ?? '';
     _tagsController.text = data.tagsString ?? '';
 
-    _selectedAptitude = data.aptitude;
-    _selectedBreedingSystem = data.breedingSystem;
-    _selectedTags = _formService.processTags(data.tagsString ?? '');
-    _isActive = data.isActive ?? true;
+    state = state.copyWith(
+      selectedAptitude: data.aptitude,
+      selectedBreedingSystem: data.breedingSystem,
+      selectedTags: _formService.processTags(data.tagsString ?? ''),
+      isActive: data.isActive ?? true,
+    );
   }
 
   void markAsSaved() {
-    _originalData = _getCurrentFormData();
-    _hasUnsavedChanges = false;
-    notifyListeners();
+    state = state.copyWith(
+      originalData: _getCurrentFormData(),
+      hasUnsavedChanges: false,
+    );
   }
 
   int getCharacterCount(String fieldName) {
@@ -335,15 +376,11 @@ class BovineFormProvider extends ChangeNotifier {
     _returnController('purpose');
     _returnController('tags');
 
-    _isInitialized = false;
-    _hasUnsavedChanges = false;
-    _originalData = null;
-  }
-
-  @override
-  void dispose() {
-    cleanup();
-    super.dispose();
+    state = state.copyWith(
+      isInitialized: false,
+      hasUnsavedChanges: false,
+      clearOriginalData: true,
+    );
   }
 
   /// Limpa a pool de controllers para liberar memória

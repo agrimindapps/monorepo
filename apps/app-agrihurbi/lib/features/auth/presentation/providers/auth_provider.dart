@@ -1,7 +1,8 @@
 import 'package:core/core.dart' show EnhancedAccountDeletionService;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
@@ -12,98 +13,120 @@ import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
 import 'auth_di_providers.dart';
 
-/// Provider Riverpod para AuthProvider
-final authProviderProvider = ChangeNotifierProvider<AuthProvider>((ref) {
-  final loginUseCase = ref.watch(loginUseCaseProvider);
-  final registerUseCase = ref.watch(registerUseCaseProvider);
-  final logoutUseCase = ref.watch(logoutUseCaseProvider);
-  final getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
-  final refreshUserUseCase = ref.watch(refreshUserUseCaseProvider);
-  // final enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+part 'auth_provider.g.dart';
 
-  return AuthProvider(
-    loginUseCase: loginUseCase,
-    registerUseCase: registerUseCase,
-    logoutUseCase: logoutUseCase,
-    getCurrentUserUseCase: getCurrentUserUseCase,
-    refreshUserUseCase: refreshUserUseCase,
-    enhancedAccountDeletionService: null, // enhancedDeletionService,
-  );
-});
+/// State class for Auth
+class AuthState {
+  final UserEntity? currentUser;
+  final bool isLoading;
+  final bool isLoggedIn;
+  final bool isInitializing;
+  final bool isLoggingIn;
+  final bool isRegistering;
+  final bool isLoggingOut;
+  final bool isRefreshing;
+  final String? errorMessage;
 
-/// Provider para operações de autenticação usando Clean Architecture
-///
-/// Gerencia estado de autenticação seguindo padrões Provider
-/// Utiliza use cases para todas as operações de domínio
-class AuthProvider extends ChangeNotifier {
-  final local_login.LoginUseCase _loginUseCase;
-  final RegisterUseCase _registerUseCase;
-  final local_logout.LogoutUseCase _logoutUseCase;
-  final GetCurrentUserUseCase _getCurrentUserUseCase;
-  final RefreshUserUseCase _refreshUserUseCase;
-  final EnhancedAccountDeletionService? _enhancedDeletionService;
+  const AuthState({
+    this.currentUser,
+    this.isLoading = false,
+    this.isLoggedIn = false,
+    this.isInitializing = true,
+    this.isLoggingIn = false,
+    this.isRegistering = false,
+    this.isLoggingOut = false,
+    this.isRefreshing = false,
+    this.errorMessage,
+  });
 
-  AuthProvider({
-    required local_login.LoginUseCase loginUseCase,
-    required RegisterUseCase registerUseCase,
-    required local_logout.LogoutUseCase logoutUseCase,
-    required GetCurrentUserUseCase getCurrentUserUseCase,
-    required RefreshUserUseCase refreshUserUseCase,
-    EnhancedAccountDeletionService? enhancedAccountDeletionService,
-  }) : _loginUseCase = loginUseCase,
-       _registerUseCase = registerUseCase,
-       _logoutUseCase = logoutUseCase,
-       _getCurrentUserUseCase = getCurrentUserUseCase,
-       _refreshUserUseCase = refreshUserUseCase,
-       _enhancedDeletionService = enhancedAccountDeletionService {
-    _initializeAuthState();
+  AuthState copyWith({
+    UserEntity? currentUser,
+    bool? isLoading,
+    bool? isLoggedIn,
+    bool? isInitializing,
+    bool? isLoggingIn,
+    bool? isRegistering,
+    bool? isLoggingOut,
+    bool? isRefreshing,
+    String? errorMessage,
+    bool clearUser = false,
+    bool clearError = false,
+  }) {
+    return AuthState(
+      currentUser: clearUser ? null : (currentUser ?? this.currentUser),
+      isLoading: isLoading ?? this.isLoading,
+      isLoggedIn: isLoggedIn ?? this.isLoggedIn,
+      isInitializing: isInitializing ?? this.isInitializing,
+      isLoggingIn: isLoggingIn ?? this.isLoggingIn,
+      isRegistering: isRegistering ?? this.isRegistering,
+      isLoggingOut: isLoggingOut ?? this.isLoggingOut,
+      isRefreshing: isRefreshing ?? this.isRefreshing,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
   }
-
-  UserEntity? _currentUser;
-  bool _isLoading = false;
-  bool _isLoggedIn = false;
-  bool _isInitializing = true;
-  bool _isLoggingIn = false;
-  bool _isRegistering = false;
-  bool _isLoggingOut = false;
-  bool _isRefreshing = false;
-
-  String? _errorMessage;
-
-  UserEntity? get currentUser => _currentUser;
-  bool get isLoading => _isLoading;
-  bool get isLoggedIn => _isLoggedIn;
-  bool get isInitializing => _isInitializing;
-
-  bool get isLoggingIn => _isLoggingIn;
-  bool get isRegistering => _isRegistering;
-  bool get isLoggingOut => _isLoggingOut;
-  bool get isRefreshing => _isRefreshing;
-
-  String? get errorMessage => _errorMessage;
 
   /// Estado geral indicando se alguma operação está em andamento
   bool get isAnyOperationInProgress =>
-      _isLoading ||
-      _isLoggingIn ||
-      _isRegistering ||
-      _isLoggingOut ||
-      _isRefreshing;
+      isLoading || isLoggingIn || isRegistering || isLoggingOut || isRefreshing;
 
   /// Informações do usuário para exibição
-  String get userDisplayName => _currentUser?.displayName ?? 'Usuário';
-  String get userEmail => _currentUser?.email ?? '';
-  String? get userProfileImage => _currentUser?.photoUrl;
-  bool get hasProfileImage => _currentUser?.photoUrl?.isNotEmpty == true;
+  String get userDisplayName => currentUser?.displayName ?? 'Usuário';
+  String get userEmail => currentUser?.email ?? '';
+  String? get userProfileImage => currentUser?.photoUrl;
+  bool get hasProfileImage => currentUser?.photoUrl?.isNotEmpty == true;
+
+  /// Verifica se o usuário atual é válido
+  bool get hasValidUser => currentUser != null && currentUser!.id.isNotEmpty;
+}
+
+/// Auth Notifier using Riverpod code generation
+///
+/// Gerencia estado de autenticação seguindo padrões Riverpod
+/// Utiliza use cases para todas as operações de domínio
+@riverpod
+class AuthNotifier extends _$AuthNotifier {
+  local_login.LoginUseCase get _loginUseCase => ref.read(loginUseCaseProvider);
+  RegisterUseCase get _registerUseCase => ref.read(registerUseCaseProvider);
+  local_logout.LogoutUseCase get _logoutUseCase => ref.read(logoutUseCaseProvider);
+  GetCurrentUserUseCase get _getCurrentUserUseCase => ref.read(getCurrentUserUseCaseProvider);
+  RefreshUserUseCase get _refreshUserUseCase => ref.read(refreshUserUseCaseProvider);
+  EnhancedAccountDeletionService? get _enhancedDeletionService {
+    try {
+      return ref.read(enhancedAccountDeletionServiceProvider);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  AuthState build() {
+    _initializeAuthState();
+    return const AuthState();
+  }
+
+  // Convenience getters for backward compatibility
+  UserEntity? get currentUser => state.currentUser;
+  bool get isLoading => state.isLoading;
+  bool get isLoggedIn => state.isLoggedIn;
+  bool get isInitializing => state.isInitializing;
+  bool get isLoggingIn => state.isLoggingIn;
+  bool get isRegistering => state.isRegistering;
+  bool get isLoggingOut => state.isLoggingOut;
+  bool get isRefreshing => state.isRefreshing;
+  String? get errorMessage => state.errorMessage;
+  bool get isAnyOperationInProgress => state.isAnyOperationInProgress;
+  String get userDisplayName => state.userDisplayName;
+  String get userEmail => state.userEmail;
+  String? get userProfileImage => state.userProfileImage;
+  bool get hasProfileImage => state.hasProfileImage;
+  bool get hasValidUser => state.hasValidUser;
 
   /// Inicializa o estado de autenticação verificando usuário logado
   Future<void> _initializeAuthState() async {
     try {
-      debugPrint('AuthProvider: Inicializando estado de autenticação');
+      debugPrint('AuthNotifier: Inicializando estado de autenticação');
 
-      _isInitializing = true;
-      _clearError();
-      notifyListeners();
+      state = state.copyWith(isInitializing: true, clearError: true);
 
       final result = await _getCurrentUserUseCase.call(
         const GetCurrentUserParams(),
@@ -112,28 +135,40 @@ class AuthProvider extends ChangeNotifier {
       result.fold(
         (failure) {
           debugPrint(
-            'AuthProvider: Falha ao obter usuário atual - ${failure.message}',
+            'AuthNotifier: Falha ao obter usuário atual - ${failure.message}',
           );
-          _clearUserState();
+          state = state.copyWith(
+            isInitializing: false,
+            isLoggedIn: false,
+            clearUser: true,
+          );
         },
         (user) {
           if (user != null) {
-            debugPrint('AuthProvider: Usuário encontrado - ${user.id}');
-            _setUserState(user);
+            debugPrint('AuthNotifier: Usuário encontrado - ${user.id}');
+            state = state.copyWith(
+              currentUser: user,
+              isLoggedIn: true,
+              isInitializing: false,
+            );
           } else {
-            debugPrint('AuthProvider: Nenhum usuário logado');
-            _clearUserState();
+            debugPrint('AuthNotifier: Nenhum usuário logado');
+            state = state.copyWith(
+              isInitializing: false,
+              isLoggedIn: false,
+              clearUser: true,
+            );
           }
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('AuthProvider: Erro na inicialização - $e');
+      debugPrint('AuthNotifier: Erro na inicialização - $e');
       debugPrint('StackTrace: $stackTrace');
-      _clearUserState();
-    } finally {
-      _isInitializing = false;
-      notifyListeners();
-      debugPrint('AuthProvider: Inicialização concluída');
+      state = state.copyWith(
+        isInitializing: false,
+        isLoggedIn: false,
+        clearUser: true,
+      );
     }
   }
 
@@ -144,12 +179,13 @@ class AuthProvider extends ChangeNotifier {
     bool rememberMe = false,
   }) async {
     try {
-      debugPrint('AuthProvider: Iniciando login para $email');
+      debugPrint('AuthNotifier: Iniciando login para $email');
 
-      _isLoggingIn = true;
-      _setLoading(true);
-      _clearError();
-      notifyListeners();
+      state = state.copyWith(
+        isLoggingIn: true,
+        isLoading: true,
+        clearError: true,
+      );
 
       final result = await _loginUseCase.call(
         local_login.LoginParams(
@@ -161,26 +197,36 @@ class AuthProvider extends ChangeNotifier {
 
       return result.fold(
         (Failure failure) {
-          debugPrint('AuthProvider: Falha no login - ${failure.message}');
-          _setError(failure.message);
+          debugPrint('AuthNotifier: Falha no login - ${failure.message}');
+          state = state.copyWith(
+            errorMessage: failure.message,
+            isLoggingIn: false,
+            isLoading: false,
+          );
           return Left<Failure, UserEntity>(failure);
         },
         (UserEntity user) {
-          debugPrint('AuthProvider: Login bem-sucedido - ${user.id}');
-          _setUserState(user);
+          debugPrint('AuthNotifier: Login bem-sucedido - ${user.id}');
+          state = state.copyWith(
+            currentUser: user,
+            isLoggedIn: true,
+            isLoggingIn: false,
+            isLoading: false,
+            clearError: true,
+          );
           return Right<Failure, UserEntity>(user);
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('AuthProvider: Erro inesperado no login - $e');
+      debugPrint('AuthNotifier: Erro inesperado no login - $e');
       debugPrint('StackTrace: $stackTrace');
       final error = 'Erro inesperado no login: ${e.toString()}';
-      _setError(error);
+      state = state.copyWith(
+        errorMessage: error,
+        isLoggingIn: false,
+        isLoading: false,
+      );
       return Left(UnknownFailure(message: error));
-    } finally {
-      _isLoggingIn = false;
-      _setLoading(false);
-      notifyListeners();
     }
   }
 
@@ -193,12 +239,13 @@ class AuthProvider extends ChangeNotifier {
     bool acceptTerms = false,
   }) async {
     try {
-      debugPrint('AuthProvider: Iniciando registro para $email');
+      debugPrint('AuthNotifier: Iniciando registro para $email');
 
-      _isRegistering = true;
-      _setLoading(true);
-      _clearError();
-      notifyListeners();
+      state = state.copyWith(
+        isRegistering: true,
+        isLoading: true,
+        clearError: true,
+      );
 
       final result = await _registerUseCase.call(
         RegisterParams(
@@ -212,26 +259,36 @@ class AuthProvider extends ChangeNotifier {
 
       return result.fold(
         (failure) {
-          debugPrint('AuthProvider: Falha no registro - ${failure.message}');
-          _setError(failure.message);
+          debugPrint('AuthNotifier: Falha no registro - ${failure.message}');
+          state = state.copyWith(
+            errorMessage: failure.message,
+            isRegistering: false,
+            isLoading: false,
+          );
           return Left(failure);
         },
         (user) {
-          debugPrint('AuthProvider: Registro bem-sucedido - ${user.id}');
-          _setUserState(user);
+          debugPrint('AuthNotifier: Registro bem-sucedido - ${user.id}');
+          state = state.copyWith(
+            currentUser: user,
+            isLoggedIn: true,
+            isRegistering: false,
+            isLoading: false,
+            clearError: true,
+          );
           return Right(user);
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('AuthProvider: Erro inesperado no registro - $e');
+      debugPrint('AuthNotifier: Erro inesperado no registro - $e');
       debugPrint('StackTrace: $stackTrace');
       final error = 'Erro inesperado no registro: ${e.toString()}';
-      _setError(error);
+      state = state.copyWith(
+        errorMessage: error,
+        isRegistering: false,
+        isLoading: false,
+      );
       return Left(UnknownFailure(message: error));
-    } finally {
-      _isRegistering = false;
-      _setLoading(false);
-      notifyListeners();
     }
   }
 
@@ -241,12 +298,13 @@ class AuthProvider extends ChangeNotifier {
     bool logAnalytics = true,
   }) async {
     try {
-      debugPrint('AuthProvider: Iniciando logout');
+      debugPrint('AuthNotifier: Iniciando logout');
 
-      _isLoggingOut = true;
-      _setLoading(true);
-      _clearError();
-      notifyListeners();
+      state = state.copyWith(
+        isLoggingOut: true,
+        isLoading: true,
+        clearError: true,
+      );
 
       final result = await _logoutUseCase.call(
         local_logout.LogoutParams(
@@ -257,28 +315,40 @@ class AuthProvider extends ChangeNotifier {
 
       return result.fold(
         (Failure failure) {
-          debugPrint('AuthProvider: Falha no logout - ${failure.message}');
-          _clearUserState();
-          _setError('Falha no logout, mas sessão local foi encerrada');
+          debugPrint('AuthNotifier: Falha no logout - ${failure.message}');
+          state = state.copyWith(
+            errorMessage: 'Falha no logout, mas sessão local foi encerrada',
+            isLoggedIn: false,
+            isLoggingOut: false,
+            isLoading: false,
+            clearUser: true,
+          );
           return Left<Failure, void>(failure);
         },
         (_) {
-          debugPrint('AuthProvider: Logout bem-sucedido');
-          _clearUserState();
+          debugPrint('AuthNotifier: Logout bem-sucedido');
+          state = state.copyWith(
+            isLoggedIn: false,
+            isLoggingOut: false,
+            isLoading: false,
+            clearUser: true,
+            clearError: true,
+          );
           return const Right<Failure, void>(null);
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('AuthProvider: Erro inesperado no logout - $e');
+      debugPrint('AuthNotifier: Erro inesperado no logout - $e');
       debugPrint('StackTrace: $stackTrace');
-      _clearUserState();
       final error = 'Erro no logout: ${e.toString()}';
-      _setError(error);
+      state = state.copyWith(
+        errorMessage: error,
+        isLoggedIn: false,
+        isLoggingOut: false,
+        isLoading: false,
+        clearUser: true,
+      );
       return Left(UnknownFailure(message: error));
-    } finally {
-      _isLoggingOut = false;
-      _setLoading(false);
-      notifyListeners();
     }
   }
 
@@ -289,19 +359,17 @@ class AuthProvider extends ChangeNotifier {
     bool fallbackToCurrent = true,
   }) async {
     try {
-      if (_currentUser == null) {
+      if (state.currentUser == null) {
         const error = 'Nenhum usuário logado para atualizar';
-        _setError(error);
+        state = state.copyWith(errorMessage: error);
         return const Left(ValidationFailure(message: error));
       }
 
       debugPrint(
-        'AuthProvider: Atualizando dados do usuário ${_currentUser!.id}',
+        'AuthNotifier: Atualizando dados do usuário ${state.currentUser!.id}',
       );
 
-      _isRefreshing = true;
-      _clearError();
-      notifyListeners();
+      state = state.copyWith(isRefreshing: true, clearError: true);
 
       final result = await _refreshUserUseCase.call(
         RefreshUserParams(
@@ -313,160 +381,114 @@ class AuthProvider extends ChangeNotifier {
 
       return result.fold(
         (failure) {
-          debugPrint('AuthProvider: Falha na atualização - ${failure.message}');
-          _setError(failure.message);
+          debugPrint('AuthNotifier: Falha na atualização - ${failure.message}');
+          state = state.copyWith(
+            errorMessage: failure.message,
+            isRefreshing: false,
+          );
           return Left(failure);
         },
         (updatedUser) {
-          debugPrint('AuthProvider: Dados atualizados - ${updatedUser.id}');
-          _setUserState(updatedUser);
+          debugPrint('AuthNotifier: Dados atualizados - ${updatedUser.id}');
+          state = state.copyWith(
+            currentUser: updatedUser,
+            isRefreshing: false,
+            clearError: true,
+          );
           return Right(updatedUser);
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('AuthProvider: Erro na atualização - $e');
+      debugPrint('AuthNotifier: Erro na atualização - $e');
       debugPrint('StackTrace: $stackTrace');
       final error = 'Erro na atualização: ${e.toString()}';
-      _setError(error);
+      state = state.copyWith(
+        errorMessage: error,
+        isRefreshing: false,
+      );
       return Left(UnknownFailure(message: error));
-    } finally {
-      _isRefreshing = false;
-      notifyListeners();
     }
   }
 
   /// Limpa mensagem de erro
   void clearError() {
-    _clearError();
+    state = state.copyWith(clearError: true);
   }
-
-  /// Verifica se o usuário atual é válido
-  bool get hasValidUser => _currentUser != null && _currentUser!.id.isNotEmpty;
 
   /// Força verificação do estado de autenticação
   Future<void> checkAuthenticationStatus() async {
     await _initializeAuthState();
   }
 
-  /// Define estado de carregamento
-  void _setLoading(bool loading) {
-    if (_isLoading != loading) {
-      _isLoading = loading;
-      notifyListeners();
-    }
-  }
-
-  /// Define mensagem de erro
-  void _setError(String error) {
-    _errorMessage = error;
-    notifyListeners();
-    debugPrint('AuthProvider: Erro definido - $error');
-  }
-
-  /// Limpa mensagem de erro
-  void _clearError() {
-    if (_errorMessage != null) {
-      _errorMessage = null;
-      notifyListeners();
-    }
-  }
-
-  /// Define estado do usuário logado
-  void _setUserState(UserEntity user) {
-    _currentUser = user;
-    _isLoggedIn = true;
-    _errorMessage = null;
-    notifyListeners();
-    debugPrint('AuthProvider: Estado do usuário definido - ${user.id}');
-  }
-
-  /// Limpa estado do usuário
-  void _clearUserState() {
-    _currentUser = null;
-    _isLoggedIn = false;
-    _errorMessage = null;
-    notifyListeners();
-    debugPrint('AuthProvider: Estado do usuário limpo');
-  }
-
   /// Deleta a conta do usuário
-
   Future<bool> deleteAccount({String? password}) async {
-    if (_currentUser == null) {
-      _setError('Nenhum usuário autenticado');
+    if (state.currentUser == null) {
+      state = state.copyWith(errorMessage: 'Nenhum usuário autenticado');
       return false;
     }
 
-    _isLoading = true;
-    _clearError();
-    notifyListeners();
+    state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      debugPrint('AuthProvider: Iniciando exclusão de conta');
+      debugPrint('AuthNotifier: Iniciando exclusão de conta');
 
       if (_enhancedDeletionService != null) {
-        final result = await _enhancedDeletionService.deleteAccount(
+        final result = await _enhancedDeletionService!.deleteAccount(
           password: password ?? '',
-          userId: _currentUser!.id,
-          isAnonymous: false, // agrihurbi doesn't support anonymous
+          userId: state.currentUser!.id,
+          isAnonymous: false,
         );
 
         return result.fold(
           (error) {
             debugPrint(
-              'AuthProvider: Erro ao deletar conta - ${error.message}',
+              'AuthNotifier: Erro ao deletar conta - ${error.message}',
             );
-            _setError(error.message);
-            _isLoading = false;
-            notifyListeners();
+            state = state.copyWith(
+              errorMessage: error.message,
+              isLoading: false,
+            );
             return false;
           },
           (deletionResult) {
             if (deletionResult.isSuccess) {
-              debugPrint('AuthProvider: Conta deletada com sucesso');
-              _performPostDeletionCleanup();
+              debugPrint('AuthNotifier: Conta deletada com sucesso');
+              state = state.copyWith(
+                isLoading: false,
+                isLoggedIn: false,
+                clearUser: true,
+                clearError: true,
+              );
               return true;
             } else {
               debugPrint(
-                'AuthProvider: Falha na exclusão - ${deletionResult.userMessage}',
+                'AuthNotifier: Falha na exclusão - ${deletionResult.userMessage}',
               );
-              _setError(deletionResult.userMessage);
-              _isLoading = false;
-              notifyListeners();
+              state = state.copyWith(
+                errorMessage: deletionResult.userMessage,
+                isLoading: false,
+              );
               return false;
             }
           },
         );
       } else {
         debugPrint(
-          'AuthProvider: EnhancedAccountDeletionService not available',
+          'AuthNotifier: EnhancedAccountDeletionService not available',
         );
-        _setError('Funcionalidade de exclusão de conta não está disponível');
-        _isLoading = false;
-        notifyListeners();
+        state = state.copyWith(
+          errorMessage: 'Funcionalidade de exclusão de conta não está disponível',
+          isLoading: false,
+        );
         return false;
       }
     } catch (e) {
-      debugPrint('AuthProvider: Erro inesperado ao deletar conta - $e');
-      _setError('Erro inesperado: $e');
-      _isLoading = false;
-      notifyListeners();
+      debugPrint('AuthNotifier: Erro inesperado ao deletar conta - $e');
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado: $e',
+        isLoading: false,
+      );
       return false;
     }
-  }
-
-  void _performPostDeletionCleanup() {
-    _currentUser = null;
-    _isLoggedIn = false;
-    _isLoading = false;
-    _errorMessage = null;
-    notifyListeners();
-    debugPrint('AuthProvider: Limpeza pós-exclusão concluída');
-  }
-
-  @override
-  void dispose() {
-    debugPrint('AuthProvider: Disposing');
-    super.dispose();
   }
 }

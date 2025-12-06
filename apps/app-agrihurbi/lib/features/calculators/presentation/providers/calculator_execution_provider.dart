@@ -1,142 +1,210 @@
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/usecases/execute_calculation.dart';
+import 'calculators_di_providers.dart';
+
+part 'calculator_execution_provider.g.dart';
+
+/// ValidationResult class for inputs
+class ValidationResult {
+  final bool isValid;
+  final List<String> errors;
+  final List<String> missingInputs;
+
+  const ValidationResult({
+    required this.isValid,
+    required this.errors,
+    required this.missingInputs,
+  });
+
+  bool get hasErrors => errors.isNotEmpty;
+  bool get hasMissingInputs => missingInputs.isNotEmpty;
+}
+
+/// State class for CalculatorExecution
+class CalculatorExecutionState {
+  final bool isCalculating;
+  final CalculationResult? currentResult;
+  final Map<String, dynamic> currentInputs;
+  final String? errorMessage;
+  final CalculatorEntity? activeCalculator;
+
+  const CalculatorExecutionState({
+    this.isCalculating = false,
+    this.currentResult,
+    this.currentInputs = const {},
+    this.errorMessage,
+    this.activeCalculator,
+  });
+
+  CalculatorExecutionState copyWith({
+    bool? isCalculating,
+    CalculationResult? currentResult,
+    Map<String, dynamic>? currentInputs,
+    String? errorMessage,
+    CalculatorEntity? activeCalculator,
+    bool clearResult = false,
+    bool clearInputs = false,
+    bool clearError = false,
+    bool clearActiveCalculator = false,
+  }) {
+    return CalculatorExecutionState(
+      isCalculating: isCalculating ?? this.isCalculating,
+      currentResult: clearResult ? null : (currentResult ?? this.currentResult),
+      currentInputs: clearInputs ? const {} : (currentInputs ?? this.currentInputs),
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      activeCalculator: clearActiveCalculator ? null : (activeCalculator ?? this.activeCalculator),
+    );
+  }
+
+  bool get hasResult => currentResult != null;
+  bool get hasInputs => currentInputs.isNotEmpty;
+  bool get canExecute => activeCalculator != null && currentInputs.isNotEmpty;
+}
 
 /// Provider especializado para execução de cálculos
 ///
 /// Responsabilidade única: Gerenciar execução de cálculos e inputs
 /// Seguindo Single Responsibility Principle
-class CalculatorExecutionProvider extends ChangeNotifier {
-  final ExecuteCalculation _executeCalculation;
+@riverpod
+class CalculatorExecutionNotifier extends _$CalculatorExecutionNotifier {
+  ExecuteCalculation get _executeCalculation => ref.read(executeCalculationUseCaseProvider);
 
-  CalculatorExecutionProvider({
-    required ExecuteCalculation executeCalculation,
-  }) : _executeCalculation = executeCalculation;
+  @override
+  CalculatorExecutionState build() {
+    return const CalculatorExecutionState();
+  }
 
-  bool _isCalculating = false;
-  CalculationResult? _currentResult;
-  Map<String, dynamic> _currentInputs = {};
-  String? _errorMessage;
-  CalculatorEntity? _activeCalculator;
-
-  bool get isCalculating => _isCalculating;
-  CalculationResult? get currentResult => _currentResult;
-  Map<String, dynamic> get currentInputs => _currentInputs;
-  String? get errorMessage => _errorMessage;
-  CalculatorEntity? get activeCalculator => _activeCalculator;
-
-  bool get hasResult => _currentResult != null;
-  bool get hasInputs => _currentInputs.isNotEmpty;
-  bool get canExecute => _activeCalculator != null && _currentInputs.isNotEmpty;
+  // Convenience getters for backward compatibility
+  bool get isCalculating => state.isCalculating;
+  CalculationResult? get currentResult => state.currentResult;
+  Map<String, dynamic> get currentInputs => state.currentInputs;
+  String? get errorMessage => state.errorMessage;
+  CalculatorEntity? get activeCalculator => state.activeCalculator;
+  bool get hasResult => state.hasResult;
+  bool get hasInputs => state.hasInputs;
+  bool get canExecute => state.canExecute;
 
   /// Verifica se um input específico foi definido
-  bool hasInput(String parameterId) => _currentInputs.containsKey(parameterId);
+  bool hasInput(String parameterId) => state.currentInputs.containsKey(parameterId);
 
   /// Obtém valor de um input específico
-  T? getInput<T>(String parameterId) => _currentInputs[parameterId] as T?;
+  T? getInput<T>(String parameterId) => state.currentInputs[parameterId] as T?;
 
   /// Define calculadora ativa
   void setActiveCalculator(CalculatorEntity? calculator) {
-    _activeCalculator = calculator;
-    if (calculator == null || _activeCalculator?.id != calculator.id) {
-      _currentInputs.clear();
-      _currentResult = null;
+    if (calculator == null || state.activeCalculator?.id != calculator.id) {
+      state = state.copyWith(
+        activeCalculator: calculator,
+        clearActiveCalculator: calculator == null,
+        clearInputs: true,
+        clearResult: true,
+      );
+    } else {
+      state = state.copyWith(activeCalculator: calculator);
     }
-
-    notifyListeners();
     debugPrint(
-        'CalculatorExecutionProvider: Calculadora ativa definida - ${calculator?.id ?? 'nenhuma'}');
+        'CalculatorExecutionNotifier: Calculadora ativa definida - ${calculator?.id ?? 'nenhuma'}');
   }
 
   /// Atualiza input de cálculo
   void updateInput(String parameterId, dynamic value) {
-    _currentInputs[parameterId] = value;
-    _currentResult = null;
-
-    notifyListeners();
+    final updatedInputs = Map<String, dynamic>.from(state.currentInputs);
+    updatedInputs[parameterId] = value;
+    state = state.copyWith(
+      currentInputs: updatedInputs,
+      clearResult: true,
+    );
     debugPrint(
-        'CalculatorExecutionProvider: Input atualizado - $parameterId: $value');
+        'CalculatorExecutionNotifier: Input atualizado - $parameterId: $value');
   }
 
   /// Atualiza múltiplos inputs
   void updateInputs(Map<String, dynamic> inputs) {
-    _currentInputs.addAll(inputs);
-    _currentResult = null;
-
-    notifyListeners();
+    final updatedInputs = Map<String, dynamic>.from(state.currentInputs);
+    updatedInputs.addAll(inputs);
+    state = state.copyWith(
+      currentInputs: updatedInputs,
+      clearResult: true,
+    );
     debugPrint(
-        'CalculatorExecutionProvider: Múltiplos inputs atualizados - ${inputs.keys.toList()}');
+        'CalculatorExecutionNotifier: Múltiplos inputs atualizados - ${inputs.keys.toList()}');
   }
 
   /// Remove um input específico
   void removeInput(String parameterId) {
-    if (_currentInputs.remove(parameterId) != null) {
-      _currentResult = null;
-      notifyListeners();
-      debugPrint('CalculatorExecutionProvider: Input removido - $parameterId');
+    final updatedInputs = Map<String, dynamic>.from(state.currentInputs);
+    if (updatedInputs.remove(parameterId) != null) {
+      state = state.copyWith(
+        currentInputs: updatedInputs,
+        clearResult: true,
+      );
+      debugPrint('CalculatorExecutionNotifier: Input removido - $parameterId');
     }
   }
 
   /// Limpa todos os inputs
   void clearInputs() {
-    _currentInputs.clear();
-    _currentResult = null;
-    notifyListeners();
-    debugPrint('CalculatorExecutionProvider: Todos os inputs limpos');
+    state = state.copyWith(clearInputs: true, clearResult: true);
+    debugPrint('CalculatorExecutionNotifier: Todos os inputs limpos');
   }
 
   /// Limpa resultado atual
   void clearResult() {
-    _currentResult = null;
-    notifyListeners();
-    debugPrint('CalculatorExecutionProvider: Resultado limpo');
+    state = state.copyWith(clearResult: true);
+    debugPrint('CalculatorExecutionNotifier: Resultado limpo');
   }
 
   /// Executa cálculo com a calculadora ativa
   Future<bool> executeCalculation() async {
-    if (_activeCalculator == null) {
-      _errorMessage = 'Nenhuma calculadora ativa definida';
-      notifyListeners();
+    if (state.activeCalculator == null) {
+      state = state.copyWith(errorMessage: 'Nenhuma calculadora ativa definida');
       return false;
     }
 
-    return await executeCalculationWithCalculator(_activeCalculator!);
+    return await executeCalculationWithCalculator(state.activeCalculator!);
   }
 
   /// Executa cálculo com calculadora específica
   Future<bool> executeCalculationWithCalculator(
       CalculatorEntity calculator) async {
-    _isCalculating = true;
-    _errorMessage = null;
-    _activeCalculator = calculator;
-    notifyListeners();
+    state = state.copyWith(
+      isCalculating: true,
+      activeCalculator: calculator,
+      clearError: true,
+    );
 
     final result = await _executeCalculation.execute(
       ExecuteCalculationParams(
         calculatorId: calculator.id,
-        inputs: _currentInputs,
+        inputs: state.currentInputs,
       ),
     );
 
     bool success = false;
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isCalculating: false,
+        );
         debugPrint(
-            'CalculatorExecutionProvider: Erro no cálculo - ${failure.message}');
+            'CalculatorExecutionNotifier: Erro no cálculo - ${failure.message}');
       },
       (calculationResult) {
-        _currentResult = calculationResult;
+        state = state.copyWith(
+          currentResult: calculationResult,
+          isCalculating: false,
+        );
         success = true;
         debugPrint(
-            'CalculatorExecutionProvider: Cálculo executado com sucesso - ${calculator.id}');
+            'CalculatorExecutionNotifier: Cálculo executado com sucesso - ${calculator.id}');
       },
     );
 
-    _isCalculating = false;
-    notifyListeners();
     return success;
   }
 
@@ -155,12 +223,12 @@ class CalculatorExecutionProvider extends ChangeNotifier {
     return result.fold(
       (failure) {
         debugPrint(
-            'CalculatorExecutionProvider: Erro no cálculo rápido - ${failure.message}');
+            'CalculatorExecutionNotifier: Erro no cálculo rápido - ${failure.message}');
         return null;
       },
       (calculationResult) {
         debugPrint(
-            'CalculatorExecutionProvider: Cálculo rápido executado - ${calculator.id}');
+            'CalculatorExecutionNotifier: Cálculo rápido executado - ${calculator.id}');
         return calculationResult;
       },
     );
@@ -168,7 +236,7 @@ class CalculatorExecutionProvider extends ChangeNotifier {
 
   /// Valida inputs obrigatórios
   ValidationResult validateRequiredInputs() {
-    if (_activeCalculator == null) {
+    if (state.activeCalculator == null) {
       return const ValidationResult(
         isValid: false,
         errors: ['Nenhuma calculadora ativa'],
@@ -178,7 +246,7 @@ class CalculatorExecutionProvider extends ChangeNotifier {
 
     final errors = <String>[];
     final missingInputs = <String>[];
-    if (_currentInputs.isEmpty) {
+    if (state.currentInputs.isEmpty) {
       errors.add('Nenhum parâmetro informado');
     }
 
@@ -200,51 +268,26 @@ class CalculatorExecutionProvider extends ChangeNotifier {
 
   /// Aplica resultado de cálculo anterior
   void applyPreviousResult(CalculationResult result) {
-    _currentResult = result;
-    _currentInputs = Map<String, dynamic>.from(result.inputs);
-    notifyListeners();
-    debugPrint('CalculatorExecutionProvider: Resultado anterior aplicado');
+    state = state.copyWith(
+      currentResult: result,
+      currentInputs: Map<String, dynamic>.from(result.inputs),
+    );
+    debugPrint('CalculatorExecutionNotifier: Resultado anterior aplicado');
   }
 
   /// Obtém resumo do resultado atual
   String? getResultSummary() {
-    if (_currentResult == null) return null;
-    return 'Cálculo realizado com ${_currentInputs.length} parâmetros';
+    if (state.currentResult == null) return null;
+    return 'Cálculo realizado com ${state.currentInputs.length} parâmetros';
   }
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Reset completo do estado
   void resetState() {
-    _currentInputs.clear();
-    _currentResult = null;
-    _activeCalculator = null;
-    _errorMessage = null;
-    notifyListeners();
+    state = const CalculatorExecutionState();
   }
-
-  @override
-  void dispose() {
-    debugPrint('CalculatorExecutionProvider: Disposed');
-    super.dispose();
-  }
-}
-
-class ValidationResult {
-  final bool isValid;
-  final List<String> errors;
-  final List<String> missingInputs;
-
-  const ValidationResult({
-    required this.isValid,
-    required this.errors,
-    required this.missingInputs,
-  });
-
-  bool get hasErrors => errors.isNotEmpty;
-  bool get hasMissingInputs => missingInputs.isNotEmpty;
 }

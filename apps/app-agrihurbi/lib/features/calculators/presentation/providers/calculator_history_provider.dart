@@ -1,85 +1,145 @@
 import 'package:flutter/foundation.dart';
-
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculation_history.dart';
 import '../../domain/entities/calculation_result.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/save_calculation_to_history.dart';
+import 'calculators_di_providers.dart';
 
-/// Provider especializado para histórico de cálculos
-///
-/// Responsabilidade única: Gerenciar histórico de cálculos
-/// Seguindo Single Responsibility Principle
-class CalculatorHistoryProvider extends ChangeNotifier {
-  final GetCalculationHistory _getCalculationHistory;
-  final SaveCalculationToHistory _saveCalculationToHistory;
+part 'calculator_history_provider.g.dart';
 
-  CalculatorHistoryProvider({
-    required GetCalculationHistory getCalculationHistory,
-    required SaveCalculationToHistory saveCalculationToHistory,
-  }) : _getCalculationHistory = getCalculationHistory,
-       _saveCalculationToHistory = saveCalculationToHistory;
+/// HistoryStatistics class
+class HistoryStatistics {
+  final int totalCalculations;
+  final int uniqueCalculators;
+  final String? mostUsedCalculator;
+  final int mostUsedCalculatorCount;
+  final DateTime? oldestCalculation;
+  final DateTime? newestCalculation;
 
-  List<CalculationHistory> _calculationHistory = [];
-  bool _isLoadingHistory = false;
-  bool _isSavingToHistory = false;
-  String? _errorMessage;
+  const HistoryStatistics({
+    required this.totalCalculations,
+    required this.uniqueCalculators,
+    required this.mostUsedCalculator,
+    required this.mostUsedCalculatorCount,
+    required this.oldestCalculation,
+    required this.newestCalculation,
+  });
+}
 
-  List<CalculationHistory> get calculationHistory => _calculationHistory;
-  bool get isLoadingHistory => _isLoadingHistory;
-  bool get isSavingToHistory => _isSavingToHistory;
-  String? get errorMessage => _errorMessage;
+/// State class for CalculatorHistory
+class CalculatorHistoryState {
+  final List<CalculationHistory> calculationHistory;
+  final bool isLoadingHistory;
+  final bool isSavingToHistory;
+  final String? errorMessage;
 
-  int get totalHistoryItems => _calculationHistory.length;
-  bool get hasHistory => _calculationHistory.isNotEmpty;
+  const CalculatorHistoryState({
+    this.calculationHistory = const [],
+    this.isLoadingHistory = false,
+    this.isSavingToHistory = false,
+    this.errorMessage,
+  });
 
-  /// Obtém os últimos N itens do histórico
-  List<CalculationHistory> getRecentHistory(int count) {
-    return _calculationHistory.take(count).toList();
+  CalculatorHistoryState copyWith({
+    List<CalculationHistory>? calculationHistory,
+    bool? isLoadingHistory,
+    bool? isSavingToHistory,
+    String? errorMessage,
+    bool clearError = false,
+  }) {
+    return CalculatorHistoryState(
+      calculationHistory: calculationHistory ?? this.calculationHistory,
+      isLoadingHistory: isLoadingHistory ?? this.isLoadingHistory,
+      isSavingToHistory: isSavingToHistory ?? this.isSavingToHistory,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+    );
   }
 
-  /// Obtém histórico por calculadora
+  int get totalHistoryItems => calculationHistory.length;
+  bool get hasHistory => calculationHistory.isNotEmpty;
+
+  List<CalculationHistory> getRecentHistory(int count) {
+    return calculationHistory.take(count).toList();
+  }
+
   List<CalculationHistory> getHistoryByCalculator(String calculatorId) {
-    return _calculationHistory
+    return calculationHistory
         .where((item) => item.calculatorId == calculatorId)
         .toList();
   }
 
-  /// Obtém histórico por data
   List<CalculationHistory> getHistoryByDateRange(DateTime start, DateTime end) {
-    return _calculationHistory
+    return calculationHistory
         .where(
           (item) =>
               item.createdAt.isAfter(start) && item.createdAt.isBefore(end),
         )
         .toList();
   }
+}
+
+/// Provider especializado para histórico de cálculos
+///
+/// Responsabilidade única: Gerenciar histórico de cálculos
+/// Seguindo Single Responsibility Principle
+@riverpod
+class CalculatorHistoryNotifier extends _$CalculatorHistoryNotifier {
+  GetCalculationHistory get _getCalculationHistory => ref.read(getCalculationHistoryUseCaseProvider);
+  SaveCalculationToHistory get _saveCalculationToHistory => ref.read(saveCalculationToHistoryUseCaseProvider);
+
+  @override
+  CalculatorHistoryState build() {
+    return const CalculatorHistoryState();
+  }
+
+  // Convenience getters for backward compatibility
+  List<CalculationHistory> get calculationHistory => state.calculationHistory;
+  bool get isLoadingHistory => state.isLoadingHistory;
+  bool get isSavingToHistory => state.isSavingToHistory;
+  String? get errorMessage => state.errorMessage;
+  int get totalHistoryItems => state.totalHistoryItems;
+  bool get hasHistory => state.hasHistory;
+
+  List<CalculationHistory> getRecentHistory(int count) {
+    return state.getRecentHistory(count);
+  }
+
+  List<CalculationHistory> getHistoryByCalculator(String calculatorId) {
+    return state.getHistoryByCalculator(calculatorId);
+  }
+
+  List<CalculationHistory> getHistoryByDateRange(DateTime start, DateTime end) {
+    return state.getHistoryByDateRange(start, end);
+  }
 
   /// Carrega histórico de cálculos
   Future<void> loadCalculationHistory() async {
-    _isLoadingHistory = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isLoadingHistory: true, clearError: true);
 
     final result = await _getCalculationHistory.call();
 
     result.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoadingHistory: false,
+        );
         debugPrint(
-          'CalculatorHistoryProvider: Erro ao carregar histórico - ${failure.message}',
+          'CalculatorHistoryNotifier: Erro ao carregar histórico - ${failure.message}',
         );
       },
       (history) {
-        _calculationHistory = history;
+        state = state.copyWith(
+          calculationHistory: history,
+          isLoadingHistory: false,
+        );
         debugPrint(
-          'CalculatorHistoryProvider: Histórico carregado - ${history.length} itens',
+          'CalculatorHistoryNotifier: Histórico carregado - ${history.length} itens',
         );
       },
     );
-
-    _isLoadingHistory = false;
-    notifyListeners();
   }
 
   /// Salva resultado no histórico
@@ -90,9 +150,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     String? userId,
     String? notes,
   }) async {
-    _isSavingToHistory = true;
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(isSavingToHistory: true, clearError: true);
 
     final historyItem = CalculationHistory(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -109,35 +167,41 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     bool success = false;
     saveResult.fold(
       (failure) {
-        _errorMessage = failure.message;
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isSavingToHistory: false,
+        );
         debugPrint(
-          'CalculatorHistoryProvider: Erro ao salvar no histórico - ${failure.message}',
+          'CalculatorHistoryNotifier: Erro ao salvar no histórico - ${failure.message}',
         );
       },
       (_) {
-        _calculationHistory.insert(0, historyItem);
+        final updatedHistory = [historyItem, ...state.calculationHistory];
+        state = state.copyWith(
+          calculationHistory: updatedHistory,
+          isSavingToHistory: false,
+        );
         success = true;
         debugPrint(
-          'CalculatorHistoryProvider: Resultado salvo no histórico - ${historyItem.id}',
+          'CalculatorHistoryNotifier: Resultado salvo no histórico - ${historyItem.id}',
         );
       },
     );
 
-    _isSavingToHistory = false;
-    notifyListeners();
     return success;
   }
 
   /// Remove item do histórico por ID
   Future<bool> removeFromHistory(String historyId) async {
-    final initialCount = _calculationHistory.length;
-    _calculationHistory.removeWhere((item) => item.id == historyId);
-    final removed = initialCount - _calculationHistory.length;
+    final updatedHistory = state.calculationHistory
+        .where((item) => item.id != historyId)
+        .toList();
+    final removed = state.calculationHistory.length - updatedHistory.length;
 
     if (removed > 0) {
-      notifyListeners();
+      state = state.copyWith(calculationHistory: updatedHistory);
       debugPrint(
-        'CalculatorHistoryProvider: Item removido do histórico - $historyId',
+        'CalculatorHistoryNotifier: Item removido do histórico - $historyId',
       );
       return true;
     }
@@ -147,14 +211,15 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
   /// Remove múltiplos itens do histórico
   Future<bool> removeMultipleFromHistory(List<String> historyIds) async {
-    final initialCount = _calculationHistory.length;
-    _calculationHistory.removeWhere((item) => historyIds.contains(item.id));
+    final updatedHistory = state.calculationHistory
+        .where((item) => !historyIds.contains(item.id))
+        .toList();
+    final removedCount = state.calculationHistory.length - updatedHistory.length;
 
-    final removedCount = initialCount - _calculationHistory.length;
     if (removedCount > 0) {
-      notifyListeners();
+      state = state.copyWith(calculationHistory: updatedHistory);
       debugPrint(
-        'CalculatorHistoryProvider: $removedCount itens removidos do histórico',
+        'CalculatorHistoryNotifier: $removedCount itens removidos do histórico',
       );
       return true;
     }
@@ -163,24 +228,22 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   }
 
   Future<bool> clearAllHistory() async {
-    _calculationHistory.clear();
-    notifyListeners();
-    debugPrint('CalculatorHistoryProvider: Todo histórico limpo');
+    state = state.copyWith(calculationHistory: []);
+    debugPrint('CalculatorHistoryNotifier: Todo histórico limpo');
     return true;
   }
 
   /// Limpa histórico de uma calculadora específica
   Future<bool> clearCalculatorHistory(String calculatorId) async {
-    final initialCount = _calculationHistory.length;
-    _calculationHistory.removeWhere(
-      (item) => item.calculatorId == calculatorId,
-    );
+    final updatedHistory = state.calculationHistory
+        .where((item) => item.calculatorId != calculatorId)
+        .toList();
+    final removedCount = state.calculationHistory.length - updatedHistory.length;
 
-    final removedCount = initialCount - _calculationHistory.length;
     if (removedCount > 0) {
-      notifyListeners();
+      state = state.copyWith(calculationHistory: updatedHistory);
       debugPrint(
-        'CalculatorHistoryProvider: Histórico da calculadora $calculatorId limpo - $removedCount itens removidos',
+        'CalculatorHistoryNotifier: Histórico da calculadora $calculatorId limpo - $removedCount itens removidos',
       );
       return true;
     }
@@ -190,10 +253,10 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
   /// Busca no histórico por termo
   List<CalculationHistory> searchHistory(String searchTerm) {
-    if (searchTerm.trim().isEmpty) return _calculationHistory;
+    if (searchTerm.trim().isEmpty) return state.calculationHistory;
 
     final term = searchTerm.toLowerCase();
-    return _calculationHistory
+    return state.calculationHistory
         .where(
           (item) =>
               item.calculatorName.toLowerCase().contains(term) ||
@@ -204,14 +267,14 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
   /// Filtra histórico por calculadora
   List<CalculationHistory> filterByCalculator(String calculatorId) {
-    return _calculationHistory
+    return state.calculationHistory
         .where((item) => item.calculatorId == calculatorId)
         .toList();
   }
 
   /// Filtra histórico por período
   List<CalculationHistory> filterByPeriod(DateTime start, DateTime end) {
-    return _calculationHistory
+    return state.calculationHistory
         .where(
           (item) =>
               item.createdAt.isAfter(start) && item.createdAt.isBefore(end),
@@ -221,7 +284,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
   /// Obtém estatísticas do histórico
   HistoryStatistics getHistoryStatistics() {
-    if (_calculationHistory.isEmpty) {
+    if (state.calculationHistory.isEmpty) {
       return const HistoryStatistics(
         totalCalculations: 0,
         uniqueCalculators: 0,
@@ -236,7 +299,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     DateTime? oldest;
     DateTime? newest;
 
-    for (final item in _calculationHistory) {
+    for (final item in state.calculationHistory) {
       calculatorCounts[item.calculatorId] =
           (calculatorCounts[item.calculatorId] ?? 0) + 1;
       if (oldest == null || item.createdAt.isBefore(oldest)) {
@@ -256,7 +319,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
     });
 
     return HistoryStatistics(
-      totalCalculations: _calculationHistory.length,
+      totalCalculations: state.calculationHistory.length,
       uniqueCalculators: calculatorCounts.keys.length,
       mostUsedCalculator: mostUsedCalculator,
       mostUsedCalculatorCount: mostUsedCount,
@@ -269,7 +332,7 @@ class CalculatorHistoryProvider extends ChangeNotifier {
   Map<String, List<CalculationHistory>> getHistoryGroupedByDate() {
     final grouped = <String, List<CalculationHistory>>{};
 
-    for (final item in _calculationHistory) {
+    for (final item in state.calculationHistory) {
       final dateKey =
           '${item.createdAt.year}-${item.createdAt.month.toString().padLeft(2, '0')}-${item.createdAt.day.toString().padLeft(2, '0')}';
       grouped[dateKey] ??= [];
@@ -286,38 +349,11 @@ class CalculatorHistoryProvider extends ChangeNotifier {
 
   /// Limpa mensagens de erro
   void clearError() {
-    _errorMessage = null;
-    notifyListeners();
+    state = state.copyWith(clearError: true);
   }
 
   /// Reset completo do estado
   void resetState() {
-    _calculationHistory.clear();
-    _errorMessage = null;
-    notifyListeners();
+    state = const CalculatorHistoryState();
   }
-
-  @override
-  void dispose() {
-    debugPrint('CalculatorHistoryProvider: Disposed');
-    super.dispose();
-  }
-}
-
-class HistoryStatistics {
-  final int totalCalculations;
-  final int uniqueCalculators;
-  final String? mostUsedCalculator;
-  final int mostUsedCalculatorCount;
-  final DateTime? oldestCalculation;
-  final DateTime? newestCalculation;
-
-  const HistoryStatistics({
-    required this.totalCalculations,
-    required this.uniqueCalculators,
-    required this.mostUsedCalculator,
-    required this.mostUsedCalculatorCount,
-    required this.oldestCalculation,
-    required this.newestCalculation,
-  });
 }

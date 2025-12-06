@@ -427,14 +427,8 @@ class StaticDataLoader {
   }
 
   /// Carrega informações de fitossanitários dos JSONs
+  /// NOTA: Não limpa dados existentes para preservar modoAcao carregado de TBFITOSSANITARIOS
   Future<void> loadFitossanitariosInfo() async {
-    // LIMPAR DADOS EXISTENTES antes de inserir novos
-    developer.log(
-      '🗑️ Clearing existing fitossanitarios info data...',
-      name: 'StaticDataLoader',
-    );
-    await db.delete(db.fitossanitariosInfo).go();
-
     int fileIndex = 0;
     int totalLoaded = 0;
 
@@ -463,21 +457,56 @@ class StaticDataLoader {
             continue;
           }
 
-          // Inserir ou atualizar info (upsert)
-          await db.into(db.fitossanitariosInfo).insert(
-                FitossanitariosInfoCompanion.insert(
-                  idReg: idReg,
-                  defensivoId: defensivo.id,
-                  modoAcao: Value(data['modoAcao'] as String?),
-                  formulacao: Value(data['formulacao'] as String?),
-                  toxicidade: Value(data['toxicidade'] as String?),
-                  carencia: Value(data['carencia'] as String?),
-                  informacoesAdicionais: Value(
-                    data['informacoesAdicionais'] as String?,
-                  ),
+          // Verificar se já existe info com modoAcao
+          final existingInfo = await (db.select(db.fitossanitariosInfo)
+                ..where((t) => t.idReg.equals(idReg)))
+              .getSingleOrNull();
+
+          if (existingInfo != null) {
+            // Atualizar apenas campos que não sobrescrevem modoAcao existente
+            final newModoAcao = data['modoAcao'] as String?;
+            await (db.update(db.fitossanitariosInfo)
+                  ..where((t) => t.idReg.equals(idReg)))
+                .write(
+              FitossanitariosInfoCompanion(
+                // Preservar modoAcao se já existir e novo for nulo
+                modoAcao: Value(
+                  (newModoAcao != null && newModoAcao.isNotEmpty)
+                      ? newModoAcao
+                      : existingInfo.modoAcao,
                 ),
-                mode: InsertMode.insertOrReplace,
-              );
+                formulacao: Value(
+                  data['formulacao'] as String? ?? existingInfo.formulacao,
+                ),
+                toxicidade: Value(
+                  data['toxicidade'] as String? ?? existingInfo.toxicidade,
+                ),
+                carencia: Value(
+                  data['carencia'] as String? ?? existingInfo.carencia,
+                ),
+                informacoesAdicionais: Value(
+                  data['informacoesAdicionais'] as String? ??
+                      existingInfo.informacoesAdicionais,
+                ),
+              ),
+            );
+          } else {
+            // Inserir novo registro
+            await db.into(db.fitossanitariosInfo).insert(
+                  FitossanitariosInfoCompanion.insert(
+                    idReg: idReg,
+                    defensivoId: defensivo.id,
+                    modoAcao: Value(data['modoAcao'] as String?),
+                    formulacao: Value(data['formulacao'] as String?),
+                    toxicidade: Value(data['toxicidade'] as String?),
+                    carencia: Value(data['carencia'] as String?),
+                    informacoesAdicionais: Value(
+                      data['informacoesAdicionais'] as String?,
+                    ),
+                  ),
+                  mode: InsertMode.insertOrIgnore,
+                );
+          }
           loaded++;
         }
 

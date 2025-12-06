@@ -5,10 +5,6 @@ import '../../core/sync/sync_queue_drift_service.dart';
 import '../../database/providers/database_providers.dart';
 import '../../database/repositories/sync_queue_drift_repository.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
-import '../../features/device_management/data/datasources/device_local_datasource.dart';
-import '../../features/device_management/data/datasources/device_remote_datasource.dart';
-import '../../features/device_management/data/repositories/device_repository_impl.dart';
-import '../../features/device_management/domain/repositories/device_repository.dart';
 import '../../features/plants/data/datasources/local/plant_tasks_local_datasource.dart';
 import '../../features/plants/data/datasources/local/plants_local_datasource.dart';
 import '../../features/plants/data/datasources/local/spaces_local_datasource.dart';
@@ -92,8 +88,26 @@ ILocalStorageRepository localStorageRepository(Ref ref) {
 @riverpod
 FirebaseDeviceService firebaseDeviceService(Ref ref) {
   return FirebaseDeviceService(
-    firestore: ref.watch(firebaseFirestoreProvider),
+    limitConfig: const DeviceLimitConfig(
+      maxMobileDevices: 3,
+      maxWebDevices: -1,
+      countWebInLimit: false,
+      premiumMaxMobileDevices: 10,
+      allowEmulators: true,
+    ),
   );
+}
+
+/// Firebase Auth Service provider
+@riverpod
+FirebaseAuthService firebaseAuthService(Ref ref) {
+  return FirebaseAuthService();
+}
+
+/// Firebase Analytics Service provider
+@riverpod
+FirebaseAnalyticsService firebaseAnalyticsService(Ref ref) {
+  return FirebaseAnalyticsService();
 }
 
 /// === DATASOURCES ===
@@ -142,20 +156,6 @@ PlantTasksRemoteDatasource plantTasksRemoteDatasource(
     Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   return PlantTasksRemoteDatasourceImpl(firestore);
-}
-
-@riverpod
-DeviceLocalDataSource deviceLocalDataSource(Ref ref) {
-  return DeviceLocalDataSourceImpl(
-    storageService: ref.watch(localStorageRepositoryProvider),
-  );
-}
-
-@riverpod
-DeviceRemoteDataSource deviceRemoteDataSource(Ref ref) {
-  return DeviceRemoteDataSourceImpl(
-    firebaseDeviceService: ref.watch(firebaseDeviceServiceProvider),
-  );
 }
 
 /// === SERVICES ===
@@ -218,14 +218,6 @@ PlantsRepository plantsRepository(Ref ref) {
     commentsRepository: ref.watch(plantCommentsRepositoryProvider),
     connectivityService: ref.watch(plantsConnectivityServiceProvider),
     syncService: ref.watch(plantSyncServiceProvider),
-  );
-}
-
-@riverpod
-DeviceRepository deviceRepository(Ref ref) {
-  return DeviceRepositoryImpl(
-    localDataSource: ref.watch(deviceLocalDataSourceProvider),
-    remoteDataSource: ref.watch(deviceRemoteDataSourceProvider),
   );
 }
 

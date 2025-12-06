@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../core/providers/spaces_providers.dart';
 import '../../domain/entities/plant.dart';
 import 'plant_tasks_helper.dart';
 
@@ -12,10 +13,28 @@ class PlantListTile extends ConsumerWidget {
 
   const PlantListTile({super.key, required this.plant, this.onTap});
 
+  String _getSpaceName(WidgetRef ref) {
+    if (plant.spaceId == null || plant.spaceId!.isEmpty) {
+      return '';
+    }
+
+    final spacesState = ref.watch(spacesNotifierProvider);
+    return spacesState.when(
+      data: (state) {
+        final space =
+            state.spaces.where((s) => s.id == plant.spaceId).firstOrNull;
+        return space?.name ?? '';
+      },
+      loading: () => '',
+      error: (_, __) => '',
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final spaceName = _getSpaceName(ref);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
@@ -68,41 +87,49 @@ class PlantListTile extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Text(
-                            plant.displaySpecies,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.7)
-                                  : theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.7,
-                                    ),
-                              fontSize: 14,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.location_on,
-                            size: 14,
-                            color: isDark
-                                ? Colors.white.withValues(alpha: 0.5)
-                                : theme.colorScheme.onSurface.withValues(
-                                    alpha: 0.5,
-                                  ),
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            'Sala de Estar',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: isDark
-                                  ? Colors.white.withValues(alpha: 0.7)
-                                  : theme.colorScheme.onSurface.withValues(
-                                      alpha: 0.7,
-                                    ),
-                              fontSize: 14,
+                          Flexible(
+                            child: Text(
+                              plant.displaySpecies,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.7)
+                                    : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                          if (spaceName.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.location_on,
+                              size: 14,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.5)
+                                  : theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.5,
+                                    ),
+                            ),
+                            const SizedBox(width: 2),
+                            Flexible(
+                              child: Text(
+                                spaceName,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : theme.colorScheme.onSurface.withValues(
+                                          alpha: 0.7,
+                                        ),
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 12),

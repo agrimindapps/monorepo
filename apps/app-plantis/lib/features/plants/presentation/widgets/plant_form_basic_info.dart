@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
@@ -97,6 +99,17 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
   Widget _buildImageSection(BuildContext context) {
     final formState = ref.watch(plantFormStateNotifierProvider);
     final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
+
+    debugPrint('📷 [PlantFormBasicInfo] _buildImageSection rebuild');
+    debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - isUploadingImages: ${formState.isUploadingImages}');
+    debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - imageUrls.length: ${formState.imageUrls.length}');
+    
+    if (formState.imageUrls.isNotEmpty) {
+      final firstImage = formState.imageUrls.first;
+      debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - Primeira imagem length: ${firstImage.length}');
+      debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - Primeira imagem prefixo: ${firstImage.substring(0, firstImage.length > 50 ? 50 : firstImage.length)}');
+      debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - Renderizando _buildSingleImage');
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1033,6 +1046,88 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     required double width,
     required double height,
   }) {
+    debugPrint('📷 [_buildNetworkImageWithFallback] imageUrl length: ${imageUrl.length}');
+    debugPrint('📷 [_buildNetworkImageWithFallback] imageUrl starts with: ${imageUrl.substring(0, imageUrl.length > 50 ? 50 : imageUrl.length)}...');
+    
+    // Suportar imagens base64 (data:image/...)
+    if (imageUrl.startsWith('data:image/')) {
+      try {
+        // Extrair a parte base64 da string
+        final parts = imageUrl.split(',');
+        if (parts.length < 2) {
+          debugPrint('📷 [_buildNetworkImageWithFallback] ERRO: Formato base64 inválido - não contém virgula');
+          throw Exception('Formato base64 inválido');
+        }
+        final base64String = parts.last;
+        debugPrint('📷 [_buildNetworkImageWithFallback] Base64 string length: ${base64String.length}');
+        
+        // Verificar se é base64 válido
+        if (base64String.isEmpty) {
+          debugPrint('📷 [_buildNetworkImageWithFallback] ERRO: Base64 string vazia');
+          throw Exception('Base64 string vazia');
+        }
+        
+        final bytes = base64Decode(base64String);
+        debugPrint('📷 [_buildNetworkImageWithFallback] ✅ Decoded bytes length: ${bytes.length}');
+        
+        return Image.memory(
+          bytes,
+          width: width,
+          height: height,
+          fit: BoxFit.cover,
+          gaplessPlayback: true, // Evita flash durante rebuild
+          errorBuilder: (context, error, stackTrace) {
+            debugPrint('📷 [_buildNetworkImageWithFallback] Image.memory errorBuilder: $error');
+            debugPrint('📷 [_buildNetworkImageWithFallback] StackTrace: $stackTrace');
+            return Container(
+              width: width,
+              height: height,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.broken_image,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    size: 32,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Erro ao carregar',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      } catch (e, stackTrace) {
+        debugPrint('📷 Erro ao decodificar imagem base64: $e');
+        debugPrint('📷 StackTrace: $stackTrace');
+        return Container(
+          width: width,
+          height: height,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.broken_image,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                size: 32,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Formato inválido',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    // Suportar URLs de rede (http/https)
     if (imageUrl.startsWith('http')) {
       return Image.network(
         imageUrl,
@@ -1071,6 +1166,8 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         },
       );
     }
+
+    // Fallback para formato não suportado
     return Container(
       width: width,
       height: height,

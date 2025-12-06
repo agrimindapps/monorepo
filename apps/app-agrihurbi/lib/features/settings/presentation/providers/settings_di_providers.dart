@@ -23,8 +23,8 @@ final settingsLocalDataSourceProvider = Provider<SettingsLocalDataSource>((ref) 
 // Repository
 final settingsRepositoryProvider = Provider<SettingsRepository>((ref) {
   final localDataSource = ref.watch(settingsLocalDataSourceProvider);
-  final authProvider = ref.watch(authProviderProvider);
-  return SettingsRepositoryImpl(localDataSource, authProvider);
+  final authNotifier = ref.watch(authProvider.notifier);
+  return SettingsRepositoryImpl(localDataSource, authNotifier);
 });
 
 // Use Cases

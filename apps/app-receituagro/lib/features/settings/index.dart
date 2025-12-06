@@ -13,7 +13,6 @@ export 'widgets/section_title_widget.dart';
 export 'widgets/sections/about_section.dart';
 export 'widgets/sections/app_info_section.dart';
 export 'widgets/sections/development_section.dart';
-export 'widgets/sections/premium_section.dart';
 export 'widgets/sections/support_section.dart';
 export 'widgets/shared/section_header.dart';
 export 'widgets/shared/settings_card.dart';

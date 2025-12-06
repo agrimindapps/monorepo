@@ -1,10 +1,145 @@
-import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../domain/entities/device_entity.dart';
+import '../../../domain/entities/device_limit_config.dart';
+import '../../../domain/repositories/i_device_repository.dart';
+import '../../../infrastructure/repositories/datasources/device_local_datasource.dart';
+import '../../../infrastructure/repositories/device_repository_impl.dart';
+import '../../../infrastructure/services/connectivity_service.dart';
+import '../../../infrastructure/services/firebase_device_service.dart';
+import '../../../shared/utils/failure.dart';
+import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
+import '../premium/subscription_providers.dart' show currentAppIdProvider, featureLimitsProvider, FeatureLimits;
 
 /// Providers unificados para gerenciamento de dispositivos
 /// Consolida lógica de device management entre todos os apps do monorepo
 /// Migrado para Riverpod 3.0 - sem legacy imports
+
+/// Provider para configuração de limites de dispositivos
+/// Pode ser overridden por cada app para customizar os limites
+final deviceLimitConfigProvider = Provider<DeviceLimitConfig>((ref) {
+  return const DeviceLimitConfig(
+    maxMobileDevices: 3,
+    maxWebDevices: -1, // Web ilimitado
+    countWebInLimit: false, // Web não conta no limite
+    premiumMaxMobileDevices: 10,
+    allowEmulators: true,
+  );
+});
+
+/// Provider para o ConnectivityService
+final connectivityServiceProvider = Provider<ConnectivityService>((ref) {
+  return ConnectivityService.instance;
+});
+
+/// Provider para o DeviceLocalDataSource
+/// Requer ILocalStorageRepository como dependência - deve ser overridden no app
+final deviceLocalDataSourceProvider = Provider<DeviceLocalDataSource>((ref) {
+  throw UnimplementedError(
+    'deviceLocalDataSourceProvider must be overridden at app startup with ILocalStorageRepository',
+  );
+});
+
+/// Provider para o FirebaseDeviceService
+final firebaseDeviceServiceProvider = Provider<FirebaseDeviceService>((ref) {
+  final limitConfig = ref.watch(deviceLimitConfigProvider);
+  return FirebaseDeviceService(limitConfig: limitConfig);
+});
+
+/// Provider para o DeviceRepository unificado
+/// Coordena operações entre local cache e Firebase
+final deviceRepositoryProvider = Provider<IDeviceRepository>((ref) {
+  final localDataSource = ref.watch(deviceLocalDataSourceProvider);
+  final remoteDataSource = ref.watch(firebaseDeviceServiceProvider);
+  final connectivityService = ref.watch(connectivityServiceProvider);
+  
+  return DeviceRepositoryImpl(
+    localDataSource: localDataSource,
+    remoteDataSource: remoteDataSource,
+    connectivityService: connectivityService,
+  );
+});
+
+/// Provider para lista de dispositivos do usuário usando o repository unificado
+final userDevicesFromRepositoryProvider = FutureProvider<List<DeviceEntity>>((ref) async {
+  final userId = ref.watch(domainCurrentUserProvider)?.id;
+  if (userId == null) return [];
+  
+  final repository = ref.watch(deviceRepositoryProvider);
+  final result = await repository.getUserDevices(userId);
+  
+  return result.fold(
+    (failure) {
+      if (kDebugMode) {
+        debugPrint('❌ userDevicesFromRepositoryProvider: ${failure.message}');
+      }
+      return [];
+    },
+    (devices) => devices,
+  );
+});
+
+/// Provider para verificar se pode adicionar mais dispositivos
+final canAddMoreDevicesProvider = FutureProvider<bool>((ref) async {
+  final userId = ref.watch(domainCurrentUserProvider)?.id;
+  if (userId == null) return false;
+  
+  final repository = ref.watch(deviceRepositoryProvider);
+  final result = await repository.canAddMoreDevices(userId);
+  
+  return result.fold(
+    (failure) => false,
+    (canAdd) => canAdd,
+  );
+});
+
+/// Provider para verificação detalhada de limite de dispositivos
+final deviceLimitCheckProvider = FutureProvider<DeviceLimitCheckResult?>((ref) async {
+  final userId = ref.watch(domainCurrentUserProvider)?.id;
+  if (userId == null) return null;
+  
+  final firebaseService = ref.watch(firebaseDeviceServiceProvider);
+  final result = await firebaseService.checkDeviceLimit(userId);
+  
+  return result.fold(
+    (failure) {
+      if (kDebugMode) {
+        debugPrint('❌ deviceLimitCheckProvider: ${failure.message}');
+      }
+      return null;
+    },
+    (checkResult) => checkResult,
+  );
+});
+
+/// Provider para contagem de dispositivos por tipo (mobile/web)
+final deviceCountByTypeProvider = FutureProvider<Map<String, int>>((ref) async {
+  final userId = ref.watch(domainCurrentUserProvider)?.id;
+  if (userId == null) return {'mobile': 0, 'web': 0, 'total': 0};
+  
+  final firebaseService = ref.watch(firebaseDeviceServiceProvider);
+  final result = await firebaseService.getDeviceCountByType(userId);
+  
+  return result.fold(
+    (failure) => {'mobile': 0, 'web': 0, 'total': 0},
+    (counts) => counts,
+  );
+});
+
+/// Provider para estatísticas de dispositivos
+final deviceStatisticsProvider = FutureProvider<DeviceStatistics?>((ref) async {
+  final userId = ref.watch(domainCurrentUserProvider)?.id;
+  if (userId == null) return null;
+  
+  final repository = ref.watch(deviceRepositoryProvider);
+  final result = await repository.getDeviceStatistics(userId);
+  
+  return result.fold(
+    (failure) => null,
+    (stats) => stats,
+  );
+});
 
 /// Provider principal para informações do dispositivo atual
 final currentDeviceProvider = FutureProvider<DeviceEntity>((ref) async {

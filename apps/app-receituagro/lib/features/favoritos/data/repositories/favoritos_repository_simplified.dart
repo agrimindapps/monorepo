@@ -333,48 +333,4 @@ class FavoritosRepositorySimplified implements IFavoritosRepository {
   Future<Either<Failure, bool>> isCulturaFavorito(String id) async {
     return isFavorito(TipoFavorito.cultura, id);
   }
-
-  /// Adiciona defensivo aos favoritos
-  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<Either<Failure, bool>> addDefensivo(String id) async {
-    return _addFavoritoSimples(TipoFavorito.defensivo, id);
-  }
-
-  /// Adiciona praga aos favoritos
-  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<Either<Failure, bool>> addPraga(String id) async {
-    return _addFavoritoSimples(TipoFavorito.praga, id);
-  }
-
-  /// Adiciona diagnóstico aos favoritos
-  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<Either<Failure, bool>> addDiagnostico(String id) async {
-    return _addFavoritoSimples(TipoFavorito.diagnostico, id);
-  }
-
-  /// Adiciona cultura aos favoritos
-  /// @Deprecated Use `addFavorito(FavoritoEntity)` em vez disso
-  Future<Either<Failure, bool>> addCultura(String id) async {
-    return _addFavoritoSimples(TipoFavorito.cultura, id);
-  }
-
-  /// Remove defensivo dos favoritos
-  Future<Either<Failure, bool>> removeDefensivo(String id) async {
-    return removeFavorito(TipoFavorito.defensivo, id);
-  }
-
-  /// Remove praga dos favoritos
-  Future<Either<Failure, bool>> removePraga(String id) async {
-    return removeFavorito(TipoFavorito.praga, id);
-  }
-
-  /// Remove diagnóstico dos favoritos
-  Future<Either<Failure, bool>> removeDiagnostico(String id) async {
-    return removeFavorito(TipoFavorito.diagnostico, id);
-  }
-
-  /// Remove cultura dos favoritos
-  Future<Either<Failure, bool>> removeCultura(String id) async {
-    return removeFavorito(TipoFavorito.cultura, id);
-  }
 }

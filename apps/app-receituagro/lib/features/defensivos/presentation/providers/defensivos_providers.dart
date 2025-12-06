@@ -93,41 +93,6 @@ GetDefensivosUseCase getDefensivosUseCase(Ref ref) {
 }
 
 @riverpod
-GetDefensivosByClasseUseCase getDefensivosByClasseUseCase(
-    Ref ref) {
-  return GetDefensivosByClasseUseCase(ref.watch(defensivosRepositoryProvider));
-}
-
-@riverpod
-SearchDefensivosUseCase searchDefensivosUseCase(
-    Ref ref) {
-  return SearchDefensivosUseCase(ref.watch(defensivosRepositoryProvider));
-}
-
-@riverpod
-GetDefensivosRecentesUseCase getDefensivosRecentesUseCase(
-    Ref ref) {
-  return GetDefensivosRecentesUseCase(ref.watch(defensivosRepositoryProvider));
-}
-
-@riverpod
-GetDefensivosStatsUseCase getDefensivosStatsUseCase(
-    Ref ref) {
-  return GetDefensivosStatsUseCase(ref.watch(defensivosRepositoryProvider));
-}
-
-@riverpod
-GetClassesAgronomicasUseCase getClassesAgronomicasUseCase(
-    Ref ref) {
-  return GetClassesAgronomicasUseCase(ref.watch(defensivosRepositoryProvider));
-}
-
-@riverpod
-GetFabricantesUseCase getFabricantesUseCase(Ref ref) {
-  return GetFabricantesUseCase(ref.watch(defensivosRepositoryProvider));
-}
-
-@riverpod
 GetDefensivosAgrupadosUseCase getDefensivosAgrupadosUseCase(
     Ref ref) {
   return GetDefensivosAgrupadosUseCase(ref.watch(defensivosRepositoryProvider));

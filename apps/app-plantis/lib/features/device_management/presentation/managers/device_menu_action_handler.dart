@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/device_management_notifier.dart';
+import '../../../../core/providers/device_management_providers.dart';
 import 'device_dialog_manager.dart';
 
 /// Handles device management menu actions

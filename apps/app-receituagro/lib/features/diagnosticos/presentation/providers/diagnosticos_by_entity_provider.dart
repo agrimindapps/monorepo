@@ -1,5 +1,4 @@
 import 'package:core/core.dart' show Either, Failure;
-import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -180,8 +179,17 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
   Future<void> loadDiagnosticos() async {
     if (!_isMounted()) return;
 
-    final currentState = state.value;
-    if (currentState == null) return;
+    // Aguarda o estado inicial se ainda não estiver disponível
+    DiagnosticosByEntityState currentState;
+    if (state.value != null) {
+      currentState = state.value!;
+    } else {
+      try {
+        currentState = await future;
+      } catch (e) {
+        currentState = DiagnosticosByEntityState.initial();
+      }
+    }
 
     state = AsyncValue.data(currentState.copyWith(isLoading: true, errorMessage: null));
 
@@ -234,10 +242,6 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
     } catch (e) {
       if (e.toString().contains('disposed')) return;
       
-      if (kDebugMode) {
-        debugPrint('❌ [DiagnosticosByEntity] Erro: $e');
-      }
-      
       state = AsyncValue.data(
         (state.value ?? DiagnosticosByEntityState.initial()).copyWith(
           isLoading: false,
@@ -275,8 +279,19 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
 
       // Resolve nomes das entidades relacionadas
       final nomeCultura = await _resolveCulturaNome(entity.idCultura);
-      final nomePraga = params.entityName ?? await _resolvePragaNome(entity.idPraga);
-      final (nomeDefensivo, ingredienteAtivo) = await _resolveDefensivoData(entity.idDefensivo);
+      
+      // nomePraga: só usa entityName se o entityType for praga
+      // Para defensivo/cultura, sempre resolve pelo idPraga
+      final nomePraga = params.entityType == DiagnosticoEntityType.praga
+          ? (params.entityName ?? await _resolvePragaNome(entity.idPraga))
+          : await _resolvePragaNome(entity.idPraga);
+      
+      // nomeDefensivo: só usa entityName se o entityType for defensivo
+      // Para praga/cultura, sempre resolve pelo idDefensivo
+      final (nomeDefensivoResolvido, ingredienteAtivo) = await _resolveDefensivoData(entity.idDefensivo);
+      final nomeDefensivo = params.entityType == DiagnosticoEntityType.defensivo
+          ? (params.entityName ?? nomeDefensivoResolvido)
+          : nomeDefensivoResolvido;
 
       items.add(DiagnosticoDisplayItem(
         entity: entity,

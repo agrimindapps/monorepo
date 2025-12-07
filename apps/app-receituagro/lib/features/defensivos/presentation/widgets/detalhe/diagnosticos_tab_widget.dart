@@ -54,12 +54,16 @@ class DiagnosticosTabWidget extends ConsumerWidget {
           defensivoName: defensivoName,
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => _buildErrorState(
-        context,
-        error.toString(),
-        () => ref.invalidate(detalheDefensivoProvider),
-      ),
+      loading: () {
+        return const Center(child: CircularProgressIndicator());
+      },
+      error: (error, _) {
+        return _buildErrorState(
+          context,
+          error.toString(),
+          () => ref.invalidate(detalheDefensivoProvider),
+        );
+      },
     );
   }
 
@@ -185,7 +189,6 @@ class _DiagnosticosContent extends ConsumerWidget {
                               .clearFilters(),
                         )
                       : _DiagnosticosList(
-                          ref: ref,
                           params: params,
                           groupedItems: state.groupedItems,
                           defensivoName: defensivoName,
@@ -283,21 +286,19 @@ class _DiagnosticosContent extends ConsumerWidget {
 }
 
 /// Lista de diagnósticos agrupados por cultura
-class _DiagnosticosList extends StatelessWidget {
-  final WidgetRef ref;
+class _DiagnosticosList extends ConsumerWidget {
   final DiagnosticosByEntityParams params;
   final Map<String, List<DiagnosticoDisplayItem>> groupedItems;
   final String defensivoName;
 
   const _DiagnosticosList({
-    required this.ref,
     required this.params,
     required this.groupedItems,
     required this.defensivoName,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Cria lista flat com headers e itens
     final flatList = <_ListItem>[];
     final culturasOrdenadas = groupedItems.keys.toList()..sort();
@@ -350,7 +351,7 @@ class _DiagnosticosList extends StatelessWidget {
         final item = listItem.diagnostico!;
         return DiagnosticoDefensivoListItemWidget(
           diagnostico: _toDefensivoMap(item),
-          onTap: () => _showDiagnosticoDialog(context, item),
+          onTap: () => _showDiagnosticoDialog(context, ref, item),
           isDense: true,
           hasElevation: false,
         );
@@ -362,6 +363,9 @@ class _DiagnosticosList extends StatelessWidget {
   Map<String, dynamic> _toDefensivoMap(DiagnosticoDisplayItem item) {
     return {
       'id': item.id,
+      'idPraga': item.entity.idPraga,
+      'idCultura': item.entity.idCultura,
+      'idDefensivo': item.entity.idDefensivo,
       'nomePraga': item.nomePraga,
       'nomeCultura': item.nomeCultura,
       'nomeDefensivo': item.nomeDefensivo,
@@ -373,7 +377,7 @@ class _DiagnosticosList extends StatelessWidget {
     };
   }
 
-  void _showDiagnosticoDialog(BuildContext context, DiagnosticoDisplayItem item) {
+  void _showDiagnosticoDialog(BuildContext context, WidgetRef ref, DiagnosticoDisplayItem item) {
     DiagnosticoDefensivoDialogWidget.show(
       context,
       ref,

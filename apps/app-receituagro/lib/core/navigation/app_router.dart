@@ -161,10 +161,13 @@ abstract final class AppRouter {
 
       case '/detalhe-defensivo':
         final detDefArgs = arguments as Map<String, dynamic>?;
+        final defensivoName = detDefArgs?['defensivoName'] as String? ?? '';
+        final fabricante = detDefArgs?['fabricante'] as String? ?? '';
         return _buildRoute(
           page: DetalheDefensivoPage(
-            defensivoName: detDefArgs?['defensivoName'] as String? ?? '',
-            fabricante: detDefArgs?['fabricante'] as String? ?? '',
+            key: ValueKey('detalhe-defensivo-$defensivoName-$fabricante'),
+            defensivoName: defensivoName,
+            fabricante: fabricante,
           ),
           settings: settings,
           showBottomNav: false,

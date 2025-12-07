@@ -303,7 +303,7 @@ class _CultureHeader extends StatelessWidget {
   }
 }
 
-/// Item de diagnóstico
+/// Item de diagnóstico com visual moderno
 class _DiagnosticoItem extends StatelessWidget {
   final DiagnosticoDisplayItem item;
   final String pragaName;
@@ -312,37 +312,82 @@ class _DiagnosticoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      dense: true,
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: SpacingTokens.md,
-        vertical: SpacingTokens.xs,
-      ),
-      title: Text(
-        item.nomeDefensivo,
-        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-      ),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 2),
-          Text(
-            item.ingredienteAtivo,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Dosagem: ${item.dosagem}',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-      trailing: const Icon(Icons.chevron_right),
+    final theme = Theme.of(context);
+    
+    return InkWell(
       onTap: () => _showDiagnosticoDialog(context, item),
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SpacingTokens.md,
+          vertical: SpacingTokens.sm,
+        ),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: theme.colorScheme.outline.withValues(alpha: 0.1),
+            ),
+          ),
+        ),
+        child: Row(
+          children: [
+            // Ícone de defensivo
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                Icons.sanitizer_outlined,
+                color: theme.colorScheme.primary,
+                size: 26,
+              ),
+            ),
+            const SizedBox(width: SpacingTokens.md),
+            // Conteúdo
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.nomeDefensivo,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.ingredienteAtivo,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.dosagem,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Seta
+            Icon(
+              Icons.chevron_right,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
     );
   }
 

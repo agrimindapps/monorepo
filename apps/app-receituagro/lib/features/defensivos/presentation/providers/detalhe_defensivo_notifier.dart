@@ -80,7 +80,7 @@ class DetalheDefensivoState {
 ///
 /// IMPORTANTE: keepAlive mantém o state mesmo quando não há listeners
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
-@riverpod
+@Riverpod(keepAlive: true)
 class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   late final FitossanitariosRepository _fitossanitarioRepository;
   late final ComentariosService _comentariosService;
@@ -99,8 +99,19 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
   /// Initialize data with optimized loading
   Future<void> initializeData(String defensivoName, String fabricante) async {
-    final currentState = state.value;
-    if (currentState == null) return;
+    // Aguarda o estado inicial se ainda não estiver disponível
+    DetalheDefensivoState currentState;
+    if (state.value != null) {
+      currentState = state.value!;
+    } else {
+      // Se o estado ainda não está disponível, aguarda o build() completar
+      try {
+        currentState = await future;
+      } catch (e) {
+        // Cria um estado inicial padrão
+        currentState = DetalheDefensivoState.initial();
+      }
+    }
 
     // Set loading without resetting other data
     // Mantém isFavorited para evitar flicker visual
@@ -109,6 +120,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
         isLoading: true,
         defensivoData: null, // Reset apenas dados do defensivo anterior
         comentarios: [], // Reset comentários do defensivo anterior
+        errorMessage: null, // Limpa erros anteriores
       ),
     );
 
@@ -126,9 +138,11 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
           finalState.copyWith(isLoading: false).clearError(),
         );
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('❌ [DETALHE_NOTIFIER] Erro: $e\n$stackTrace');
+      final errorState = state.value ?? currentState;
       state = AsyncValue.data(
-        currentState.copyWith(
+        errorState.copyWith(
           isLoading: false,
           errorMessage: 'Erro ao carregar dados: $e',
         ),
@@ -140,15 +154,17 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
   Future<void> _loadDefensivoData(String defensivoName) async {
     final currentState = state.value;
     if (currentState == null) return;
+    
     final defensivos = await _fitossanitarioRepository.findElegiveis();
+    
     final defensivoData = defensivos
         .where((d) => d.nomeComum == defensivoName || d.nome == defensivoName)
         .firstOrNull;
 
     if (defensivoData == null) {
-      throw Exception('Defensivo não encontrado');
+      throw Exception('Defensivo "$defensivoName" não encontrado na base de dados');
     }
-
+    
     state = AsyncValue.data(
       currentState.copyWith(defensivoData: defensivoData),
     );
@@ -162,11 +178,6 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
 
     // idDefensivo vem do defensivoData que foi carregado por _loadDefensivoData
     final itemId = currentState.defensivoData?.idDefensivo ?? defensivoName;
-
-    debugPrint(
-        '🔖 [FAVORITO] _loadFavoritoState: itemId=$itemId, defensivoName=$defensivoName');
-    debugPrint(
-        '🔖 [FAVORITO] defensivoData?.idDefensivo=${currentState.defensivoData?.idDefensivo}');
 
     try {
       final result = await _favoritosRepository.isFavorito(

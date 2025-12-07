@@ -187,8 +187,13 @@ class _DetalhePragaPageState extends ConsumerState<DetalhePragaPage>
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: () =>
-          ref.read(receitaAgroNavigationServiceProvider).goBack<void>(),
+      onBackPressed: () {
+        if (Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        } else {
+          ref.read(receitaAgroNavigationServiceProvider).goBack<void>();
+        }
+      },
       onRightIconPressed: () => _toggleFavorito(),
     );
   }

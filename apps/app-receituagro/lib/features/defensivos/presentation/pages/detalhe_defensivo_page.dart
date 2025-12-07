@@ -69,7 +69,8 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
   }
 
   void _handleTabChange() {
-    if (_tabController.indexIsChanging) {
+    // Atualiza sempre que o index mudar, não apenas durante a animação
+    if (_tabController.index != _currentTabIndex) {
       setState(() {
         _currentTabIndex = _tabController.index;
       });
@@ -283,7 +284,7 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
 
     final state = ref.watch(detalheDefensivoProvider);
 
-    return state.when(
+    return state.maybeWhen(
       data: (data) {
         if (data.defensivoData == null) {
           return LoadingErrorWidgets.buildEmptyState(
@@ -302,12 +303,9 @@ class _DetalheDefensivoPageState extends ConsumerState<DetalheDefensivoPage>
           ),
         );
       },
-      loading: () => LoadingErrorWidgets.buildLoadingState(context),
-      error: (_, __) => LoadingErrorWidgets.buildEmptyState(
-        context,
-        title: 'Erro ao carregar',
-        description: 'Não foi possível carregar os dados do defensivo',
-      ),
+      orElse: () {
+        return LoadingErrorWidgets.buildLoadingState(context);
+      },
     );
   }
 

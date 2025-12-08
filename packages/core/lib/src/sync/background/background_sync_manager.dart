@@ -86,6 +86,9 @@ class BackgroundSyncManager {
 
   /// Queue para gerenciar sync requests
   late final SyncQueue _queue;
+  
+  /// Subscription para eventos da queue
+  StreamSubscription<SyncQueueEvent>? _queueSubscription;
 
   /// Logger
   final SyncLogger _logger = SyncLogger(appName: 'background_sync');
@@ -123,7 +126,7 @@ class BackgroundSyncManager {
         debounceDuration: const Duration(seconds: 2),
       );
       _queue = SyncQueue(maxQueueSize: maxQueueSize);
-      _queue.events.listen(_handleQueueEvent);
+      _queueSubscription = _queue.events.listen(_handleQueueEvent);
 
       _isInitialized = true;
 
@@ -412,6 +415,10 @@ class BackgroundSyncManager {
   /// Dispose resources
   Future<void> dispose() async {
     _logger.logInfo(message: 'Disposing Background Sync Manager');
+    
+    await _queueSubscription?.cancel();
+    _queueSubscription = null;
+    
     for (final timer in _timers.values) {
       timer.cancel();
     }

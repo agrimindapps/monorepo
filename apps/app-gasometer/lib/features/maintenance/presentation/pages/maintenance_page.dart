@@ -2,9 +2,11 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -256,11 +258,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             ? 'Nenhum registro encontrado com os filtros aplicados.'
             : 'Adicione sua primeira manutenção para começar a acompanhar o histórico de manutenções.',
         icon: Icons.build_outlined,
-        actionLabel: state.hasActiveFilters ? 'Limpar filtros' : null,
-        onAction: state.hasActiveFilters
-            ? () =>
-                ref.read(maintenancesProvider.notifier).clearFilters()
-            : null,
       );
     }
 
@@ -281,7 +278,21 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         itemCount: records.length,
         itemBuilder: (context, index) {
           final record = records[index];
-          return _buildMaintenanceCard(record);
+          return SwipeToDeleteWrapper(
+            itemKey: 'maintenance_${record.id}',
+            deletedMessage: 'Manutenção excluída',
+            onDelete: () async {
+              await ref
+                  .read(maintenancesProvider.notifier)
+                  .deleteOptimistic(record.id);
+            },
+            onRestore: () async {
+              await ref
+                  .read(maintenancesProvider.notifier)
+                  .restoreDeleted(record.id);
+            },
+            child: _buildMaintenanceCard(record),
+          );
         },
       ),
     );
@@ -295,102 +306,124 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    record.title,
+      child: InkWell(
+        onTap: () => _openMaintenanceDetail(record),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      record.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    'R\$ ${record.cost.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w600,
                         ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  'R\$ ${record.cost.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    formattedDate,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(width: 16),
+                  Icon(
+                    Icons.speed,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${record.odometer.toStringAsFixed(0)} km',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Color(record.type.colorValue).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      record.type.displayName,
+                      style: TextStyle(
+                        color: Color(record.type.colorValue),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
                       ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  formattedDate,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.speed,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${record.odometer.toStringAsFixed(0)} km',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Color(record.type.colorValue).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    record.type.displayName,
-                    style: TextStyle(
-                      color: Color(record.type.colorValue),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color:
-                        Color(record.status.colorValue).withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    record.status.displayName,
-                    style: TextStyle(
-                      color: Color(record.status.colorValue),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  const SizedBox(width: 8),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color:
+                          Color(record.status.colorValue).withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      record.status.displayName,
+                      style: TextStyle(
+                        color: Color(record.status.colorValue),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  /// Abre o detalhe da manutenção em modo visualização
+  void _openMaintenanceDetail(MaintenanceEntity record) {
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AddMaintenancePage(
+        maintenanceId: record.id,
+        vehicleId: record.vehicleId,
+        initialMode: CrudDialogMode.view,
+      ),
+    ).then((result) {
+      if (result == true && _selectedVehicleId != null) {
+        ref
+            .read(maintenancesProvider.notifier)
+            .loadMaintenancesByVehicle(_selectedVehicleId!);
+      }
+    });
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {

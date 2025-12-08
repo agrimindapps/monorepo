@@ -2,14 +2,16 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../providers/fuel_riverpod_notifier.dart';
-import 'add_fuel_page.dart';
+import 'fuel_form_page.dart';
 
 class FuelPage extends ConsumerStatefulWidget {
   const FuelPage({super.key});
@@ -356,7 +358,21 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         itemCount: records.length,
         itemBuilder: (context, index) {
           final record = records[index];
-          return _buildFuelRecordCard(record);
+          return SwipeToDeleteWrapper(
+            itemKey: 'fuel_${record.id}',
+            deletedMessage: 'Abastecimento excluído',
+            onDelete: () async {
+              await ref
+                  .read(fuelRiverpodProvider.notifier)
+                  .deleteOptimistic(record.id);
+            },
+            onRestore: () async {
+              await ref
+                  .read(fuelRiverpodProvider.notifier)
+                  .restoreDeleted(record.id);
+            },
+            child: _buildFuelRecordCard(record),
+          );
         },
       ),
     );
@@ -370,72 +386,92 @@ class _FuelPageState extends ConsumerState<FuelPage> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  formattedDate,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                Text(
-                  'R\$ ${record.totalPrice.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.local_gas_station,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${record.liters.toStringAsFixed(1)} L',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.attach_money,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                if (record.fullTank) ...[
-                  const SizedBox(width: 16),
+      child: InkWell(
+        onTap: () => _openFuelDetail(record),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    formattedDate,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  Text(
+                    'R\$ ${record.totalPrice.toStringAsFixed(2)}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
                   Icon(
-                    Icons.check_circle,
+                    Icons.local_gas_station,
                     size: 16,
-                    color: Theme.of(context).primaryColor,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
                   const SizedBox(width: 4),
                   Text(
-                    'Tanque cheio',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    '${record.liters.toStringAsFixed(1)} L',
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
+                  const SizedBox(width: 16),
+                  Icon(
+                    Icons.attach_money,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  if (record.fullTank) ...[
+                    const SizedBox(width: 16),
+                    Icon(
+                      Icons.check_circle,
+                      size: 16,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Tanque cheio',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ],
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  /// Abre o detalhe do registro de abastecimento em modo visualização
+  void _openFuelDetail(FuelRecordEntity record) {
+    showDialog<bool>(
+      context: context,
+      builder: (context) => FuelFormPage(
+        fuelRecordId: record.id,
+        vehicleId: record.vehicleId,
+        initialMode: CrudDialogMode.view,
+      ),
+    ).then((result) {
+      if (result == true) {
+        ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
+      }
+    });
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
@@ -456,7 +492,10 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         }
         showDialog<bool>(
           context: context,
-          builder: (context) => AddFuelPage(vehicleId: _selectedVehicleId),
+          builder: (context) => FuelFormPage(
+            vehicleId: _selectedVehicleId,
+            initialMode: CrudDialogMode.create,
+          ),
         ).then((result) {
           if (result == true) {
             ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();

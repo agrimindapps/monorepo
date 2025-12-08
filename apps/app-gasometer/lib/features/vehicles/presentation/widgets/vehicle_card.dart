@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
+import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../domain/entities/vehicle_entity.dart';
 import 'vehicle_card_actions.dart';
 import 'vehicle_card_content.dart';
@@ -17,20 +18,24 @@ class VehicleCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onTap,
+    this.onRestore,
     this.showActions = true,
+    this.enableSwipeToDelete = true,
   });
 
   final VehicleEntity vehicle;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onTap;
+  final VoidCallback? onRestore;
   final bool showActions;
+  final bool enableSwipeToDelete;
 
   @override
   Widget build(BuildContext context) {
     final semanticLabel = 'Veículo ${vehicle.brand} ${vehicle.model} ${vehicle.year}, placa ${vehicle.licensePlate}, ${vehicle.currentOdometer.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')} km';
     
-    return SemanticCard(
+    final card = SemanticCard(
       semanticLabel: semanticLabel,
       semanticHint: 'Card com informações do veículo. ${showActions ? 'Contém botões para editar ou excluir' : ''}',
       onTap: onTap,
@@ -51,5 +56,18 @@ class VehicleCard extends StatelessWidget {
         ],
       ),
     );
+
+    // Se swipe to delete está habilitado e temos os callbacks necessários
+    if (enableSwipeToDelete && onDelete != null && onRestore != null) {
+      return SwipeToDeleteWrapper(
+        itemKey: 'vehicle_${vehicle.id}',
+        deletedMessage: 'Veículo "${vehicle.name}" excluído',
+        onDelete: () async => onDelete?.call(),
+        onRestore: () async => onRestore?.call(),
+        child: card,
+      );
+    }
+
+    return card;
   }
 }

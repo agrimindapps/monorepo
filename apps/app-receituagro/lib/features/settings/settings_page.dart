@@ -1,9 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../core/providers/auth_providers.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
-import 'presentation/providers/settings_notifier.dart';
+import 'presentation/providers/user_settings_notifier.dart';
 import 'presentation/providers/settings_providers.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
@@ -34,7 +35,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final settingsState = ref.watch(settingsProvider);
+    final settingsState = ref.watch(userSettingsProvider);
     if (!_initialized) {
       _initialized = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -81,7 +82,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           const SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: () => ref
-                                .read(settingsProvider.notifier)
+                                .read(userSettingsProvider.notifier)
                                 .refresh(),
                             child: const Text('Tentar Novamente'),
                           ),
@@ -135,14 +136,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _initializeSettings() async {
     try {
-      final deviceService = ref.read(deviceIdentityServiceProvider);
-      final deviceId = await deviceService.getDeviceUuid();
-      await ref.read(settingsProvider.notifier).initialize(deviceId);
+      // Get user ID from auth provider
+      final authState = ref.read(authProvider).value;
+      if (authState?.currentUser?.id != null) {
+        await ref.read(userSettingsProvider.notifier).initialize(authState!.currentUser!.id);
+      } else {
+        // Initialize with anonymous ID if not authenticated
+        debugPrint('User not authenticated for settings initialization');
+      }
     } catch (e) {
       debugPrint('Error initializing settings: $e');
-      await ref
-          .read(settingsProvider.notifier)
-          .initialize('anonymous-${DateTime.now().millisecondsSinceEpoch}');
     }
   }
 }

@@ -144,6 +144,10 @@ enum AgriculturalPageType {
       listaCulturas,
       favoritos,
       settings,
+      detalheDefensivo,
+      detalhePraga,
+      detalheCultura,
+      detalheDiagnostico,
     ].contains(this);
   }
 

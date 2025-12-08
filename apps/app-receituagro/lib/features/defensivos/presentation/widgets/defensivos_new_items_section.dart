@@ -57,7 +57,7 @@ class DefensivosNewItemsSection extends ConsumerWidget {
                   ),
                   child: const Center(
                     child: FaIcon(
-                      FontAwesomeIcons.seedling,
+                      FontAwesomeIcons.leaf,
                       color: Color(0xFF4CAF50),
                       size: 20,
                     ),

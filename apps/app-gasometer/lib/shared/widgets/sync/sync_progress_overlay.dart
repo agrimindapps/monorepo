@@ -274,6 +274,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
   
   Timer? _autoHideTimer;
   bool _isVisible = true;
+  StreamSubscription<SyncProgressState>? _stateSubscription;
 
   @override
   void initState() {
@@ -314,7 +315,8 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
   }
 
   void _setupAutoHide() {
-    widget.controller.stateStream.listen((state) {
+    _stateSubscription = widget.controller.stateStream.listen((state) {
+      if (!mounted) return;
       if (state == SyncProgressState.completed && _isVisible) {
         _autoHideTimer?.cancel();
         _autoHideTimer = Timer(widget.autoHideDuration, _hideOverlay);
@@ -323,7 +325,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
   }
 
   void _hideOverlay() async {
-    if (!_isVisible) return;
+    if (!_isVisible || !mounted) return;
     
     setState(() => _isVisible = false);
     
@@ -342,6 +344,7 @@ class _SyncProgressOverlayState extends State<SyncProgressOverlay>
 
   @override
   void dispose() {
+    _stateSubscription?.cancel();
     _autoHideTimer?.cancel();
     _slideController.dispose();
     _fadeController.dispose();

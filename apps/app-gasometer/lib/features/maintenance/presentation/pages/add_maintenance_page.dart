@@ -6,9 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/theme/design_tokens.dart';
+import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/datetime_field.dart';
-import '../../../../core/widgets/error_header.dart';
-import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/money_form_field.dart';
 import '../../../../core/widgets/notes_form_field.dart';
@@ -19,32 +18,48 @@ import '../../../../core/widgets/validated_form_field.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../notifiers/maintenance_form_notifier.dart';
+import '../notifiers/maintenances_notifier.dart';
 
 class AddMaintenancePage extends ConsumerStatefulWidget {
-  const AddMaintenancePage({super.key, this.maintenanceToEdit, this.vehicleId});
+  const AddMaintenancePage({
+    super.key,
+    this.maintenanceToEdit,
+    this.maintenanceId,
+    this.vehicleId,
+    this.initialMode = CrudDialogMode.create,
+  });
   final MaintenanceEntity? maintenanceToEdit;
+  final String? maintenanceId;
   final String? vehicleId;
+  final CrudDialogMode initialMode;
 
   @override
   ConsumerState<AddMaintenancePage> createState() => _AddMaintenancePageState();
 }
 
-class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
-    with FormErrorHandlerMixin {
+class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   final Map<String, ValidationResult> _validationResults = {};
   final Map<String, FocusNode> _focusNodes = {};
+  late CrudDialogMode _mode;
   bool _isInitialized = false;
   bool _isSubmitting = false;
+  String? _formErrorMessage;
   Timer? _debounceTimer;
   Timer? _timeoutTimer;
   static const Duration _debounceDuration = Duration(milliseconds: 500);
   static const Duration _submitTimeout = Duration(seconds: 30);
 
-  bool get isEditMode => widget.maintenanceToEdit != null;
+  bool get isEditMode =>
+      widget.maintenanceToEdit != null || widget.maintenanceId != null;
+
+  void _setFormError(String? message) {
+    setState(() => _formErrorMessage = message);
+  }
 
   @override
   void initState() {
     super.initState();
+    _mode = widget.initialMode;
     _focusNodes['title'] = FocusNode();
     _focusNodes['description'] = FocusNode();
     _focusNodes['cost'] = FocusNode();
@@ -69,14 +84,35 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final authState = ref.read(authProvider);
 
-    await notifier.initialize(
-      vehicleId: widget.vehicleId ?? '',
-      userId: authState.userId,
-    );
-
-    if (widget.maintenanceToEdit != null) {
+    // Se é view/edit via maintenanceId, carregar pelo ID
+    if (widget.maintenanceId != null && widget.maintenanceId!.isNotEmpty) {
+      final maintenance = ref.read(maintenancesProvider.notifier)
+          .getMaintenanceById(widget.maintenanceId!);
+      
+      if (maintenance != null) {
+        await notifier.initialize(
+          vehicleId: maintenance.vehicleId,
+          userId: authState.userId,
+        );
+        await notifier.initializeWithMaintenance(maintenance);
+      }
+    }
+    // Se tem maintenanceToEdit (compatibilidade)
+    else if (widget.maintenanceToEdit != null) {
+      await notifier.initialize(
+        vehicleId: widget.maintenanceToEdit!.vehicleId,
+        userId: authState.userId,
+      );
       await notifier.initializeWithMaintenance(widget.maintenanceToEdit!);
     }
+    // Se é create
+    else {
+      await notifier.initialize(
+        vehicleId: widget.vehicleId ?? '',
+        userId: authState.userId,
+      );
+    }
+    
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
@@ -97,6 +133,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(maintenanceFormProvider);
+    final isReadOnly = _mode == CrudDialogMode.view;
+    
     String subtitle = 'Registre a manutenção do seu veículo';
     if (formState.isInitialized && formState.vehicle != null) {
       final vehicle = formState.vehicle!;
@@ -105,22 +143,29 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
           '${vehicle.brand} ${vehicle.model} • ${_formatOdometer(odometer)} km';
     }
 
-    return FormDialog(
+    return CrudFormDialog(
+      mode: _mode,
       title: 'Manutenção',
       subtitle: subtitle,
       headerIcon: Icons.build,
-      isLoading: formState.isLoading || _isSubmitting,
-      confirmButtonText: 'Salvar',
+      isLoading: formState.isLoading,
+      isSaving: _isSubmitting,
+      canSave: formState.isInitialized && !formState.isLoading,
+      errorMessage: _formErrorMessage,
+      showDeleteButton: _mode != CrudDialogMode.create,
+      onModeChange: (newMode) {
+        setState(() => _mode = newMode);
+      },
+      onSave: _submitFormWithRateLimit,
       onCancel: () {
         final formNotifier = ref.read(maintenanceFormProvider.notifier);
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },
-      onConfirm: _submitFormWithRateLimit,
-      errorMessage: formErrorMessage,
+      onDelete: _mode != CrudDialogMode.create ? _handleDelete : null,
       content: !formState.isInitialized
           ? const Center(child: CircularProgressIndicator())
-          : _buildFormContent(),
+          : _buildFormContent(isReadOnly),
     );
   }
 
@@ -131,25 +176,25 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     );
   }
 
-  Widget _buildFormContent() {
+  Widget _buildFormContent(bool isReadOnly) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildServiceInfoSection(),
+        _buildServiceInfoSection(isReadOnly),
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildServiceDetailsSection(),
+        _buildServiceDetailsSection(isReadOnly),
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildFinancialInfoSection(),
+        _buildFinancialInfoSection(isReadOnly),
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildReceiptImageSection(),
+        _buildReceiptImageSection(isReadOnly),
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildNextServiceDate(),
+        _buildNextServiceDate(isReadOnly),
       ],
     );
   }
 
-  Widget _buildServiceInfoSection() {
+  Widget _buildServiceInfoSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final formState = ref.watch(maintenanceFormProvider);
     final theme = Theme.of(context);
@@ -228,7 +273,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     );
   }
 
-  Widget _buildServiceDetailsSection() {
+  Widget _buildServiceDetailsSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     return FormSectionHeader(
       title: 'Detalhes do Serviço',
@@ -260,7 +305,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     );
   }
 
-  Widget _buildFinancialInfoSection() {
+  Widget _buildFinancialInfoSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final formState = ref.watch(maintenanceFormProvider);
     return FormSectionHeader(
@@ -290,7 +335,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     );
   }
 
-  Widget _buildReceiptImageSection() {
+  Widget _buildReceiptImageSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final formState = ref.watch(maintenanceFormProvider);
     return OptionalReceiptSection(
@@ -298,15 +343,15 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
       hasImage: formState.hasReceiptImage,
       isUploading: formState.isUploadingImage,
       uploadError: formState.imageUploadError,
-      onCameraSelected: () => notifier.captureReceiptImage(),
-      onGallerySelected: () => notifier.selectReceiptImageFromGallery(),
-      onImageRemoved: () => notifier.removeReceiptImage(),
+      onCameraSelected: isReadOnly ? null : () => notifier.captureReceiptImage(),
+      onGallerySelected: isReadOnly ? null : () => notifier.selectReceiptImageFromGallery(),
+      onImageRemoved: isReadOnly ? null : () => notifier.removeReceiptImage(),
       title: 'Comprovante',
       description: 'Anexe uma foto do comprovante da manutenção (opcional)',
     );
   }
 
-  Widget _buildNextServiceDate() {
+  Widget _buildNextServiceDate(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final formState = ref.watch(maintenanceFormProvider);
     final theme = Theme.of(context);
@@ -386,7 +431,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     );
 
     final notifier = ref.read(maintenanceFormProvider.notifier);
-    clearFormError();
+    _setFormError(null);
 
     if (!notifier.validateForm()) {
       debugPrint(
@@ -397,9 +442,9 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
       if (formState.fieldErrors.isNotEmpty) {
         final firstErrorField = formState.fieldErrors.keys.first;
         _focusNodes[firstErrorField]?.requestFocus();
-        setFormError(formState.fieldErrors.values.first);
+        _setFormError(formState.fieldErrors.values.first);
       } else {
-        setFormError('Por favor, corrija os campos destacados');
+        _setFormError('Por favor, corrija os campos destacados');
       }
       return;
     }
@@ -422,7 +467,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
           setState(() {
             _isSubmitting = false;
           });
-          setFormError(
+          _setFormError(
             'A operação demorou muito para ser concluída. Tente novamente.',
           );
         }
@@ -435,7 +480,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         result.fold(
           (failure) {
             debugPrint('[MAINTENANCE DEBUG] FAILURE - ${failure.message}');
-            setFormError(failure.message);
+            _setFormError(failure.message);
           },
           (success) {
             debugPrint('[MAINTENANCE DEBUG] SUCCESS - Closing dialog');
@@ -451,7 +496,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
     } catch (e) {
       debugPrint('Error submitting form: $e');
       if (mounted) {
-        setFormError('Erro inesperado: $e');
+        _setFormError('Erro inesperado: $e');
       }
     } finally {
       _timeoutTimer?.cancel();
@@ -461,5 +506,16 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage>
         });
       }
     }
+  }
+
+  Future<void> _handleDelete() async {
+    final maintenanceId = widget.maintenanceId ?? widget.maintenanceToEdit?.id;
+    if (maintenanceId == null || maintenanceId.isEmpty) return;
+
+    // Fecha o dialog e retorna
+    Navigator.of(context).pop();
+
+    // Executa o delete via notifier da lista (com undo)
+    await ref.read(maintenancesProvider.notifier).deleteOptimistic(maintenanceId);
   }
 }

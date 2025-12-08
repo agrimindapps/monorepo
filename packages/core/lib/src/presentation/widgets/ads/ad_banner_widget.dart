@@ -38,6 +38,8 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
     // Check if should show ads (premium status)
     final shouldShow = await ref.read(shouldShowAdsProvider('banner').future);
 
+    if (!mounted) return;
+    
     if (!shouldShow) {
       setState(() {
         _hasError = true;
@@ -53,9 +55,11 @@ class _AdBannerWidgetState extends ConsumerState<AdBannerWidget> {
 
     result.fold(
       (failure) {
-        setState(() {
-          _hasError = true;
-        });
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+          });
+        }
         widget.onAdFailedToLoad?.call(
           _bannerAd ??
               BannerAd(
@@ -134,6 +138,8 @@ class _AdaptiveBannerWidgetState extends ConsumerState<AdaptiveBannerWidget> {
     // Check if should show ads
     final shouldShow = await ref.read(shouldShowAdsProvider('banner').future);
 
+    if (!mounted) return;
+
     if (!shouldShow) {
       setState(() {
         _hasError = true;
@@ -148,6 +154,8 @@ class _AdaptiveBannerWidgetState extends ConsumerState<AdaptiveBannerWidget> {
     final size = await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(
       width,
     );
+
+    if (!mounted) return;
 
     if (size == null) {
       setState(() {
@@ -164,9 +172,11 @@ class _AdaptiveBannerWidgetState extends ConsumerState<AdaptiveBannerWidget> {
 
     result.fold(
       (failure) {
-        setState(() {
-          _hasError = true;
-        });
+        if (mounted) {
+          setState(() {
+            _hasError = true;
+          });
+        }
       },
       (ad) {
         if (mounted) {

@@ -37,13 +37,11 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     _syncPendingImages();
 
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
-    /*
     if (kDebugMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _performTestAutoLogin();
       });
     }
-    */
   }
 
   @override
@@ -144,55 +142,46 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
   /// 🧪 AUTO-LOGIN PARA TESTES
   /// Remove this method in production!
-  /*
   void _performTestAutoLogin() async {
     // 🔒 Verificação de segurança: apenas executa se o widget ainda está montado
     if (!mounted) return;
 
     try {
-      SecureLogger.info('🧪 [TEST] Attempting auto-login...');
+      SecureLogger.info('🧪 [GASOMETER-TEST] Attempting auto-login...');
 
-      // Test credentials
+      final auth = FirebaseAuth.instance;
+
+      // Se já está logado, não faz nada
+      if (auth.currentUser != null) {
+        SecureLogger.info(
+          '🧪 [GASOMETER-TEST] Already logged in as: ${auth.currentUser!.email}',
+        );
+        return;
+      }
+
       const testEmail = 'lucineiy@hotmail.com';
       const testPassword = 'QWEqwe@123';
 
-      // TODO: Use Riverpod provider for AuthRepository
-      // final authRepository = ref.read(authRepositoryProvider);
-      
-      /*
-      final result = await authRepository.signInWithEmail(
+      final result = await auth.signInWithEmailAndPassword(
         email: testEmail,
         password: testPassword,
       );
 
       if (!mounted) return; // Verifica novamente após operação async
 
-      result.fold(
-        (failure) {
-          if (mounted) {
-            SecureLogger.error(
-              '🧪 [TEST] Auto-login failed: ${failure.message}',
-            );
-          }
-        },
-        (user) {
-          if (mounted) {
-            SecureLogger.info(
-              '🧪 [TEST] Auto-login successful! User: ${user.email}',
-            );
-          }
-        },
-      );
-      */
+      if (result.user != null) {
+        SecureLogger.info(
+          '🧪 [GASOMETER-TEST] Auto-login successful! User: ${result.user!.email}',
+        );
+      }
     } catch (e, stackTrace) {
       if (mounted) {
         SecureLogger.error(
-          '🧪 [TEST] Auto-login error',
+          '🧪 [GASOMETER-TEST] Auto-login error',
           error: e,
           stackTrace: stackTrace,
         );
       }
     }
   }
-  */
 }

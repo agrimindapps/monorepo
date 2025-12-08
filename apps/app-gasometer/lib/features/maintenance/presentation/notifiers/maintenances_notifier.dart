@@ -27,6 +27,9 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
   late final MaintenanceFormatterService _formatter;
   late final GetVehicleById _getVehicleById;
 
+  /// Cache para itens deletados (para suportar undo)
+  final Map<String, MaintenanceEntity> _deletedCache = {};
+
   @override
   MaintenancesState build() {
     _repository = ref.watch(maintenanceRepositoryProvider);
@@ -222,6 +225,69 @@ class MaintenancesNotifier extends _$MaintenancesNotifier {
       );
       return false;
     }
+  }
+
+  /// Delete otimístico com suporte a undo
+  /// Remove o item da UI imediatamente e executa a deleção em background
+  Future<void> deleteOptimistic(String maintenanceId) async {
+    // Encontra o item a ser removido
+    final itemToDelete = state.maintenances.firstWhere(
+      (m) => m.id == maintenanceId,
+      orElse: () => throw Exception('Item não encontrado'),
+    );
+
+    // Guarda no cache para possível restauração
+    _deletedCache[maintenanceId] = itemToDelete;
+
+    // Remove otimisticamente da UI
+    final updatedList = List<MaintenanceEntity>.from(state.maintenances);
+    updatedList.removeWhere((m) => m.id == maintenanceId);
+    state = state.copyWith(maintenances: updatedList);
+    _applyFiltersAndStats();
+
+    // Executa delete no backend
+    final result = await _repository.deleteMaintenanceRecord(maintenanceId);
+
+    result.fold(
+      (failure) {
+        // Se falhou, restaura o item na UI
+        _restoreFromCache(maintenanceId);
+      },
+      (_) {
+        // Sucesso - remove do cache após um delay (tempo para undo)
+        Future.delayed(const Duration(seconds: 10), () {
+          _deletedCache.remove(maintenanceId);
+        });
+      },
+    );
+  }
+
+  /// Restaura um item deletado (undo)
+  Future<void> restoreDeleted(String maintenanceId) async {
+    final cachedItem = _deletedCache[maintenanceId];
+    if (cachedItem == null) return;
+
+    // Restaura na UI primeiro
+    _restoreFromCache(maintenanceId);
+
+    // Re-adiciona no backend
+    await _repository.addMaintenanceRecord(cachedItem);
+
+    // Remove do cache
+    _deletedCache.remove(maintenanceId);
+  }
+
+  void _restoreFromCache(String maintenanceId) {
+    final cachedItem = _deletedCache[maintenanceId];
+    if (cachedItem == null) return;
+
+    final updatedList = List<MaintenanceEntity>.from(state.maintenances);
+    updatedList.add(cachedItem);
+    // Ordena por data (mais recente primeiro)
+    updatedList.sort((a, b) => b.serviceDate.compareTo(a.serviceDate));
+
+    state = state.copyWith(maintenances: updatedList);
+    _applyFiltersAndStats();
   }
 
   /// Busca manutenção por ID

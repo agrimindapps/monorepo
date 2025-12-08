@@ -45,6 +45,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     debugLogDiagnostics: true,
     refreshListenable: authStateNotifier,
     redirect: (context, state) {
+      // Rotas de autenticação (login/promo)
+      const authRoutes = ['/login', '/promo'];
+      
       // Rotas públicas que não precisam de autenticação
       const publicRoutes = [
         '/login',
@@ -54,8 +57,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         '/account-deletion-policy',
       ];
 
+      final isAuthenticated = authStateNotifier.isAuthenticated;
+      final currentLocation = state.matchedLocation;
+
+      // Se está autenticado e está em rota de auth (login/promo), redireciona para home
+      if (isAuthenticated && authRoutes.contains(currentLocation)) {
+        return '/vehicles';
+      }
+
       // Se estiver em uma rota pública, permite
-      if (publicRoutes.contains(state.matchedLocation)) {
+      if (publicRoutes.contains(currentLocation)) {
         return null;
       }
 
@@ -63,9 +74,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (!kIsWeb) {
         return null;
       }
-
-      // Verifica se está autenticado
-      final isAuthenticated = authStateNotifier.isAuthenticated;
 
       // Se não está autenticado e está tentando acessar rota protegida, redireciona para login
       if (!isAuthenticated) {

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/services/device_identity_service.dart';
-import '../../presentation/providers/settings_notifier.dart';
 import '../items/device_list_item.dart';
 
 /// Device Management Dialog
@@ -23,12 +21,10 @@ class DeviceManagementDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final devices = (settingsData?.connectedDevicesInfo is List<DeviceInfo>)
-        ? (settingsData.connectedDevicesInfo as List<DeviceInfo>)
-        : <DeviceInfo>[];
-    final currentDevice = (settingsData?.currentDeviceInfo is DeviceInfo)
-        ? (settingsData.currentDeviceInfo as DeviceInfo?)
-        : null;
+    final devices = (settingsData?.connectedDevicesInfo is List)
+        ? (settingsData.connectedDevicesInfo as List<dynamic>)
+        : <dynamic>[];
+    final currentDevice = settingsData?.currentDeviceInfo;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -76,13 +72,13 @@ class DeviceManagementDialog extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...devices.where((device) => device.uuid != currentDevice?.uuid).map((device) {
+                      ...devices.where((device) => (device?.uuid as String?) != (currentDevice?.uuid as String?)).map((device) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: DeviceListItem(
-                            device: device,
+                            device: device as dynamic,
                             isPrimary: false,
-                            onRevoke: () => _revokeDevice(context, ref, device),
+                            onRevoke: () => _revokeDevice(context, ref, device as dynamic),
                           ),
                         );
                       }),
@@ -237,54 +233,23 @@ class DeviceManagementDialog extends ConsumerWidget {
   }
 
   /// Revoke device with confirmation
-  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, DeviceInfo device) async {
-    final confirmed = await showDialog<bool>(
+  /// NOTE: Device management is currently disabled - feature in development
+  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, dynamic device) async {
+    await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Revogar Dispositivo'),
-        content: Text(
-          'Tem certeza que deseja revogar o acesso do dispositivo "${device.displayName}"?\n\n'
-          'O usuário precisará fazer login novamente neste dispositivo.',
+        title: const Text('Recurso em Desenvolvimento'),
+        content: const Text(
+          'O gerenciamento de dispositivos está sendo desenvolvido.\n\n'
+          'Esta funcionalidade estará disponível em breve.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text('Revogar'),
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
           ),
         ],
       ),
     );
-
-    if (confirmed == true) {
-      try {
-        await ref.read(settingsProvider.notifier).revokeDevice(device.uuid);
-
-        if (context.mounted) {
-          Navigator.of(context).pop();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Dispositivo "${device.displayName}" revogado com sucesso'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erro ao revogar dispositivo: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
   }
 }

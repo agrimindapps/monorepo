@@ -1,4 +1,5 @@
 import 'package:core/core.dart' show Either, Failure;
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart';
@@ -336,20 +337,38 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
   /// Resolve dados do defensivo (nome e ingrediente ativo)
   Future<(String, String)> _resolveDefensivoData(String idDefensivo) async {
     try {
-      final id = int.tryParse(idDefensivo);
-      if (id == null) return ('', 'Não especificado');
+      debugPrint('🔍 [DiagByEntity] _resolveDefensivoData: idDefensivo="$idDefensivo"');
       
+      // Tenta primeiro como int (ID numérico do banco)
+      final id = int.tryParse(idDefensivo);
+      if (id != null) {
+        final defensivoRepo = ref.read(fitossanitariosRepositoryProvider);
+        final data = await defensivoRepo.findById(id);
+        if (data != null) {
+          debugPrint('✅ [DiagByEntity] Defensivo encontrado por ID int: ${data.nome}');
+          final nome = data.nome;
+          final ingrediente = data.ingredienteAtivo?.isNotEmpty == true
+              ? data.ingredienteAtivo!
+              : 'Não especificado';
+          return (nome, ingrediente);
+        }
+      }
+      
+      // Tenta como string (idDefensivo original)
       final defensivoRepo = ref.read(fitossanitariosRepositoryProvider);
-      final data = await defensivoRepo.findById(id);
+      final data = await defensivoRepo.getById(idDefensivo);
       if (data != null) {
+        debugPrint('✅ [DiagByEntity] Defensivo encontrado por idDefensivo string: ${data.nome}');
         final nome = data.nome;
         final ingrediente = data.ingredienteAtivo?.isNotEmpty == true
             ? data.ingredienteAtivo!
             : 'Não especificado';
         return (nome, ingrediente);
       }
-    } catch (_) {
-      // Erro silencioso
+      
+      debugPrint('❌ [DiagByEntity] Defensivo NÃO encontrado: idDefensivo="$idDefensivo"');
+    } catch (e) {
+      debugPrint('❌ [DiagByEntity] Erro ao resolver defensivo: $e');
     }
     return ('', 'Não especificado');
   }

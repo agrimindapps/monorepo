@@ -20,9 +20,15 @@ import '../../domain/services/fuel_formatter_service.dart';
 import '../providers/fuel_form_notifier.dart';
 
 class FuelFormView extends ConsumerWidget {
-  const FuelFormView({super.key, required this.vehicleId, this.onSubmit});
+  const FuelFormView({
+    super.key,
+    required this.vehicleId,
+    this.onSubmit,
+    this.isReadOnly = false,
+  });
   final String vehicleId;
   final VoidCallback? onSubmit;
+  final bool isReadOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -8,7 +8,7 @@ import '../providers/home_pragas_notifier.dart';
 import '../widgets/home_pragas_error_widget.dart';
 import '../widgets/home_pragas_recent_widget.dart';
 import '../widgets/home_pragas_stats_widget.dart';
-import '../widgets/home_pragas_suggestions_widget.dart';
+import '../widgets/home_pragas_suggestions_native_widget.dart';
 
 /// Página clean da Home de Pragas seguindo Clean Architecture
 ///
@@ -97,7 +97,7 @@ class HomePragasPage extends ConsumerWidget {
               HomePragasStatsWidget(state: state),
 
               const SizedBox(height: ReceitaAgroSpacing.lg),
-              HomePragasSuggestionsWidget(state: state),
+              HomePragasSuggestionsNativeWidget(state: state),
 
               const SizedBox(height: ReceitaAgroSpacing.lg),
               HomePragasRecentWidget(state: state),

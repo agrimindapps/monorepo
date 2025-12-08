@@ -2,6 +2,7 @@ import 'package:core/core.dart' ;
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+import '../../../../core/enums/dialog_mode.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
@@ -185,11 +186,11 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
       onRefresh: () async {
         await ref.read(vehiclesProvider.notifier).refresh();
       },
-      child: _buildStaggeredGrid(vehicles),
+      child: _buildStaggeredGrid(context, ref, vehicles),
     );
   }
 
-  Widget _buildStaggeredGrid(List<VehicleEntity> vehicles) {
+  Widget _buildStaggeredGrid(BuildContext context, WidgetRef ref, List<VehicleEntity> vehicles) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
@@ -205,7 +206,11 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
                 mainAxisCellCount: 1,
                 child: VehicleCard(
                   vehicle: vehicle,
-                  onTap: () => _navigateToVehicleDetails(vehicle),
+                  onTap: () => _openVehicleDialog(context, ref, vehicle, DialogMode.view),
+                  onEdit: () => _openVehicleDialog(context, ref, vehicle, DialogMode.edit),
+                  onDelete: () => ref.read(vehiclesProvider.notifier).removeOptimistic(vehicle),
+                  onRestore: () => ref.read(vehiclesProvider.notifier).restoreVehicle(vehicle.id),
+                  enableSwipeToDelete: true,
                 ),
               );
             }).toList(),
@@ -226,5 +231,17 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
     return 4;
   }
 
-  void _navigateToVehicleDetails(VehicleEntity vehicle) {}
+  void _openVehicleDialog(BuildContext context, WidgetRef ref, VehicleEntity vehicle, DialogMode mode) {
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AddVehiclePage(
+        vehicle: vehicle,
+        initialMode: mode,
+      ),
+    ).then((result) {
+      if (result == true) {
+        ref.read(vehiclesProvider.notifier).refresh();
+      }
+    });
+  }
 }

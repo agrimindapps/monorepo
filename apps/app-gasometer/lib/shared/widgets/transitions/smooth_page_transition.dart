@@ -343,6 +343,7 @@ class _SmoothPageSequenceState extends State<SmoothPageSequence> {
   }
 
   void _nextPage() {
+    if (!mounted) return;
     if (_currentIndex < widget.pages.length - 1) {
       setState(() {
         _currentIndex++;
@@ -389,6 +390,7 @@ class _SmoothPageSequenceState extends State<SmoothPageSequence> {
   /// Controle manual
   void nextPage() => _nextPage();
   void previousPage() {
+    if (!mounted) return;
     if (_currentIndex > 0) {
       setState(() {
         _currentIndex--;

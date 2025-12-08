@@ -117,6 +117,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
   }
 
   void _advanceToNextStep() {
+    if (!mounted) return;
     if (currentStepIndex < widget.steps.length - 1) {
       setState(() {
         currentStepIndex++;
@@ -132,7 +133,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
   }
 
   void _completeLoading() {
-    if (_completed) return;
+    if (_completed || !mounted) return;
 
     setState(() {
       _completed = true;
@@ -280,6 +281,7 @@ class _IntelligentLoadingState extends State<IntelligentLoading>
   }
 
   void jumpToStep(int stepIndex) {
+    if (!mounted) return;
     if (stepIndex >= 0 &&
         stepIndex < widget.steps.length &&
         !widget.autoAdvance) {

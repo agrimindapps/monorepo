@@ -26,6 +26,15 @@ class VehiclesNotifier extends _$VehiclesNotifier {
   StreamSubscription<Either<dynamic, List<VehicleEntity>>>?
   _vehicleSubscription;
 
+  /// Cache de veículos removidos para possível restauração (exclusão otimista)
+  final Map<String, _DeletedVehicle> _deletedVehicles = {};
+
+  /// Timers para exclusão permanente
+  final Map<String, Timer> _deleteTimers = {};
+
+  /// Duração antes da exclusão permanente
+  static const _undoDuration = Duration(seconds: 5);
+
   String get notifierName => 'VehiclesNotifier';
 
   ErrorMapper? _errorMapper;
@@ -212,6 +221,84 @@ class VehiclesNotifier extends _$VehiclesNotifier {
       );
     }, operationName: 'deleteVehicle');
   }
+
+  /// Remove veículo otimisticamente (da UI imediatamente)
+  /// 
+  /// O veículo é removido da lista imediatamente, mas a exclusão permanente
+  /// só ocorre após [_undoDuration]. Isso permite que o usuário desfaça a ação.
+  Future<void> removeOptimistic(VehicleEntity vehicle) async {
+    final id = vehicle.id;
+    _logInfo('Removing vehicle optimistically: $id');
+
+    // Cancela timer anterior se existir
+    _deleteTimers[id]?.cancel();
+
+    // Armazena o veículo para possível restauração
+    _deletedVehicles[id] = _DeletedVehicle(
+      vehicle: vehicle,
+      deletedAt: DateTime.now(),
+    );
+
+    // Remove da lista imediatamente (otimista)
+    final currentList = state.when(
+      data: (data) => data,
+      loading: () => <VehicleEntity>[],
+      error: (_, __) => <VehicleEntity>[],
+    );
+    final updatedList = currentList.where((v) => v.id != id).toList();
+    state = AsyncValue.data(updatedList);
+
+    // Agenda exclusão permanente
+    _deleteTimers[id] = Timer(_undoDuration, () {
+      _confirmDelete(id);
+    });
+  }
+
+  /// Restaura um veículo que foi removido otimisticamente
+  Future<void> restoreVehicle(String vehicleId) async {
+    _logInfo('Restoring vehicle: $vehicleId');
+
+    // Cancela o timer de exclusão permanente
+    _deleteTimers[vehicleId]?.cancel();
+    _deleteTimers.remove(vehicleId);
+
+    // Recupera o veículo do cache
+    final deletedVehicle = _deletedVehicles.remove(vehicleId);
+    if (deletedVehicle != null) {
+      // Adiciona de volta à lista
+      final currentList = state.when(
+        data: (data) => data,
+        loading: () => <VehicleEntity>[],
+        error: (_, __) => <VehicleEntity>[],
+      );
+      state = AsyncValue.data([...currentList, deletedVehicle.vehicle]);
+      _logInfo('Vehicle restored: $vehicleId');
+    }
+  }
+
+  /// Confirma a exclusão permanente
+  Future<void> _confirmDelete(String vehicleId) async {
+    _deleteTimers.remove(vehicleId);
+    _deletedVehicles.remove(vehicleId);
+
+    try {
+      _logInfo('Confirming permanent delete: $vehicleId');
+      final deleteVehicleUseCase = ref.read(deps.deleteVehicleProvider);
+      final result = await deleteVehicleUseCase(
+        DeleteVehicleParams(vehicleId: vehicleId),
+      );
+
+      result.fold(
+        (failure) => _logWarning('Failed to permanently delete vehicle: $failure'),
+        (_) => _logInfo('Vehicle permanently deleted: $vehicleId'),
+      );
+    } catch (e) {
+      _logWarning('Error confirming delete: $e');
+    }
+  }
+
+  /// Verifica se um veículo está pendente de exclusão
+  bool isPendingDelete(String vehicleId) => _deletedVehicles.containsKey(vehicleId);
 
   /// Busca veículo por ID
   Future<VehicleEntity?> getVehicleById(String vehicleId) async {
@@ -425,4 +512,15 @@ int activeVehicleCount(Ref ref) {
 bool hasVehicles(Ref ref) {
   final count = ref.watch(vehicleCountProvider);
   return count > 0;
+}
+
+/// Representa um veículo que foi removido mas ainda pode ser restaurado
+class _DeletedVehicle {
+  _DeletedVehicle({
+    required this.vehicle,
+    required this.deletedAt,
+  });
+
+  final VehicleEntity vehicle;
+  final DateTime deletedAt;
 }

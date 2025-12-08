@@ -7,30 +7,27 @@ import '../pages/detalhe_praga_page.dart';
 import '../providers/home_pragas_notifier.dart';
 import '../providers/pragas_providers.dart';
 
-/// Widget para exibir seção de sugestões com carrossel na home de pragas
+/// Widget para exibir seção de sugestões com CarouselView NATIVO do Flutter
 ///
-/// Responsabilidades:
-/// - Exibir carrossel de pragas sugeridas
-/// - Controlar indicadores de página (dots)
-/// - Navegação para detalhes da praga
-/// - Estados vazio e loading
-class HomePragasSuggestionsWidget extends ConsumerStatefulWidget {
+/// Usa o novo CarouselView introduzido no Flutter 3.16+
+/// Esta é uma versão experimental para comparação com o PageView.builder
+class HomePragasSuggestionsNativeWidget extends ConsumerStatefulWidget {
   final HomePragasState state;
 
-  const HomePragasSuggestionsWidget({super.key, required this.state});
+  const HomePragasSuggestionsNativeWidget({super.key, required this.state});
 
   @override
-  ConsumerState<HomePragasSuggestionsWidget> createState() =>
-      _HomePragasSuggestionsWidgetState();
+  ConsumerState<HomePragasSuggestionsNativeWidget> createState() =>
+      _HomePragasSuggestionsNativeWidgetState();
 }
 
-class _HomePragasSuggestionsWidgetState
-    extends ConsumerState<HomePragasSuggestionsWidget> {
-  final PageController _pageController = PageController(viewportFraction: 0.6);
+class _HomePragasSuggestionsNativeWidgetState
+    extends ConsumerState<HomePragasSuggestionsNativeWidget> {
+  final CarouselController _carouselController = CarouselController();
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _carouselController.dispose();
     super.dispose();
   }
 
@@ -41,47 +38,50 @@ class _HomePragasSuggestionsWidgetState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: ReceitaAgroSpacing.horizontalPadding,
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 4,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  'Sugestões',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.lightbulb_outline,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
+        _buildHeader(theme),
         const SizedBox(height: 12),
         _buildCarousel(context),
-
         const SizedBox(height: 12),
         _buildDotIndicators(context),
       ],
+    );
+  }
+
+  Widget _buildHeader(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: ReceitaAgroSpacing.horizontalPadding,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 24,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Sugestões',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.lightbulb_outline,
+              color: theme.colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -93,19 +93,31 @@ class _HomePragasSuggestionsWidgetState
       return _buildEmptyCarousel(context);
     }
 
-    return Container(
-      height: 280,
-      padding: const EdgeInsets.only(left: 0),
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: suggestions.length,
-        onPageChanged: (index) {
-          widget.state.updateCarouselIndex(index);
-        },
-        itemBuilder: (context, index) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxHeight: 280),
+      child: CarouselView(
+        controller: _carouselController,
+        itemExtent: MediaQuery.of(context).size.width * 0.65,
+        shrinkExtent: MediaQuery.of(context).size.width * 0.55,
+        itemSnapping: true,
+        padding: const EdgeInsets.symmetric(
+          horizontal: ReceitaAgroSpacing.horizontalPadding,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        onTap: (index) {
           final suggestion = suggestions[index];
-          return _buildCarouselItem(context, suggestion, index);
+          _navigateToPragaDetails(
+            context,
+            suggestion['name'] as String,
+            suggestion['scientific'] as String,
+            suggestion['id'] as String,
+          );
         },
+        children: suggestions.asMap().entries.map((entry) {
+          return _buildCarouselItem(context, entry.value, entry.key);
+        }).toList(),
       ),
     );
   }
@@ -115,21 +127,12 @@ class _HomePragasSuggestionsWidgetState
     Map<String, dynamic> suggestion,
     int index,
   ) {
-    return Container(
-      margin: EdgeInsets.only(
-        left: index == 0 ? 0 : ReceitaAgroSpacing.horizontalPadding,
-        right: ReceitaAgroSpacing.xs + 1,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Stack(
-          children: [
-            _buildItemBackground(context, suggestion),
-            _buildGradientOverlay(context, suggestion),
-            _buildTouchLayer(context, suggestion),
-          ],
-        ),
-      ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        _buildItemBackground(context, suggestion),
+        _buildGradientOverlay(context, suggestion),
+      ],
     );
   }
 
@@ -139,38 +142,34 @@ class _HomePragasSuggestionsWidgetState
   ) {
     final theme = Theme.of(context);
 
-    return SizedBox(
+    return PragaImageWidget(
+      nomeCientifico: suggestion['scientific'] as String,
       width: double.infinity,
       height: double.infinity,
-      child: PragaImageWidget(
-        nomeCientifico: suggestion['scientific'] as String,
+      fit: BoxFit.cover,
+      borderRadius: BorderRadius.circular(12),
+      errorWidget: Container(
         width: double.infinity,
         height: double.infinity,
-        fit: BoxFit.cover,
-        borderRadius: BorderRadius.circular(12),
-        errorWidget: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-            color: _getColorForType(
-              suggestion['type'] as String,
-              context,
-            ).withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(40),
-              ),
-              child: Center(
-                child: Text(
-                  suggestion['emoji'] as String,
-                  style: const TextStyle(fontSize: 48),
-                ),
+        decoration: BoxDecoration(
+          color: _getColorForType(
+            suggestion['type'] as String,
+            context,
+          ).withValues(alpha: 0.8),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(40),
+            ),
+            child: Center(
+              child: Text(
+                suggestion['emoji'] as String,
+                style: const TextStyle(fontSize: 48),
               ),
             ),
           ),
@@ -259,15 +258,13 @@ class _HomePragasSuggestionsWidgetState
       case 'Inseto':
         icon = Icons.bug_report;
         backgroundColor = Colors.red.withValues(alpha: 0.9);
-        break;
       case 'Doença':
         icon = Icons.coronavirus;
         backgroundColor = Colors.orange.withValues(alpha: 0.9);
-        break;
+      case 'Planta Daninha':
       case 'Planta':
         icon = Icons.grass;
         backgroundColor = Colors.green.withValues(alpha: 0.9);
-        break;
       default:
         icon = Icons.help;
         backgroundColor = Colors.grey.withValues(alpha: 0.9);
@@ -308,29 +305,6 @@ class _HomePragasSuggestionsWidgetState
     );
   }
 
-  Widget _buildTouchLayer(
-    BuildContext context,
-    Map<String, dynamic> suggestion,
-  ) {
-    return Positioned.fill(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => _navigateToPragaDetails(
-            context,
-            suggestion['name'] as String,
-            suggestion['scientific'] as String,
-            suggestion['id'] as String, // Pass ID for better precision
-          ),
-          splashColor: Theme.of(
-            context,
-          ).colorScheme.surface.withValues(alpha: 0.1),
-          highlightColor: Colors.transparent,
-        ),
-      ),
-    );
-  }
-
   Widget _buildDotIndicators(BuildContext context) {
     final typeService = ref.read(pragasTypeServiceProvider);
     final suggestions = widget.state.getSuggestionsList(typeService);
@@ -339,11 +313,13 @@ class _HomePragasSuggestionsWidgetState
       mainAxisAlignment: MainAxisAlignment.center,
       children: suggestions.asMap().entries.map((entry) {
         return GestureDetector(
-          onTap: () => _pageController.animateToPage(
-            entry.key,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          ),
+          onTap: () {
+            _carouselController.animateTo(
+              entry.key.toDouble() * MediaQuery.of(context).size.width * 0.65,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          },
           child: Container(
             width: 8.0,
             height: 8.0,
@@ -400,31 +376,30 @@ class _HomePragasSuggestionsWidgetState
   }
 
   Color _getColorForType(String type, BuildContext context) {
-    final theme = Theme.of(context);
-    switch (type.toLowerCase()) {
-      case 'inseto':
-        return theme.colorScheme.primary;
-      case 'doença':
-        return theme.colorScheme.tertiary;
-      case 'planta':
-        return theme.colorScheme.secondary;
+    switch (type) {
+      case 'Inseto':
+        return Colors.red;
+      case 'Doença':
+        return Colors.orange;
+      case 'Planta Daninha':
+      case 'Planta':
+        return Colors.green;
       default:
-        return theme.colorScheme.primary;
+        return Theme.of(context).colorScheme.primary;
     }
   }
 
   void _navigateToPragaDetails(
     BuildContext context,
-    String pragaName,
+    String name,
     String scientificName,
-    String pragaId,
+    String id,
   ) {
-    Navigator.push(
-      context,
+    Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) => DetalhePragaPage(
-          pragaName: pragaName,
-          pragaId: pragaId, // Use ID for better precision
+          pragaName: name,
+          pragaId: id,
           pragaScientificName: scientificName,
         ),
       ),

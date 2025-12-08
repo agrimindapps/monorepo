@@ -10,7 +10,7 @@ import '../../auth/presentation/pages/login_page.dart';
 import '../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../subscription/presentation/widgets/subscription_progress_widget.dart';
 import '../constants/settings_design_tokens.dart';
-import '../presentation/providers/settings_notifier.dart';
+import '../presentation/providers/user_settings_notifier.dart';
 import '../widgets/dialogs/clear_data_dialog.dart';
 import '../widgets/dialogs/delete_account_dialog.dart';
 import '../widgets/dialogs/device_management_dialog.dart';
@@ -46,7 +46,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authAsync = ref.watch(authProvider);
-    final settingsState = ref.watch(settingsProvider);
+    final settingsState = ref.watch(userSettingsProvider);
 
     // Handle AsyncValue states
     return authAsync.when(
@@ -61,7 +61,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           final userId = user?.id;
           if (userId != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              ref.read(settingsProvider.notifier).initialize(userId);
+              ref.read(userSettingsProvider.notifier).initialize(userId);
             });
           }
         }

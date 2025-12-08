@@ -2,15 +2,17 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_notifier.dart';
 import '../providers/odometer_state.dart';
-import 'add_odometer_page.dart';
+import 'odometer_form_page.dart';
 
 class OdometerPage extends ConsumerStatefulWidget {
   const OdometerPage({super.key});
@@ -274,36 +276,61 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
           final formatter = NumberFormat('#,##0.0', 'pt_BR');
           final dateFormatter = DateFormat('dd/MM/yyyy HH:mm');
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Theme.of(context).primaryColor,
-                child: const Icon(Icons.speed, color: Colors.white),
-              ),
-              title: Text(
-                '${formatter.format(reading.value)} km',
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
+          return SwipeToDeleteWrapper(
+            itemKey: 'odometer_${reading.id}',
+            deletedMessage: 'Leitura de odômetro excluída',
+            onDelete: () async {
+              await ref
+                  .read(odometerProvider.notifier)
+                  .deleteOptimistic(reading.id);
+            },
+            onRestore: () async {
+              await ref
+                  .read(odometerProvider.notifier)
+                  .restoreDeleted(reading.id);
+            },
+            child: Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                onTap: () => _openOdometerDetail(reading),
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: const Icon(Icons.speed, color: Colors.white),
                 ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(dateFormatter.format(reading.registrationDate)),
-                  if (reading.description.isNotEmpty)
+                title: Text(
+                  '${formatter.format(reading.value)} km',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(dateFormatter.format(reading.registrationDate)),
+                    if (reading.description.isNotEmpty)
+                      Text(
+                        reading.description,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                  ],
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Text(
-                      reading.description,
-                      style: const TextStyle(fontSize: 12),
+                      reading.type.displayName,
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                ],
-              ),
-              trailing: Text(
-                reading.type.displayName,
-                style: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontWeight: FontWeight.w500,
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).hintColor,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -311,6 +338,22 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         },
       ),
     );
+  }
+
+  /// Abre o detalhe do registro de odômetro em modo visualização
+  void _openOdometerDetail(OdometerEntity reading) {
+    showDialog<bool>(
+      context: context,
+      builder: (context) => OdometerFormPage(
+        odometerId: reading.id,
+        vehicleId: reading.vehicleId,
+        initialMode: CrudDialogMode.view,
+      ),
+    ).then((result) {
+      if (result == true && _selectedVehicleId != null) {
+        ref.read(odometerProvider.notifier).loadByVehicle(_selectedVehicleId!);
+      }
+    });
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
@@ -331,7 +374,10 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         }
         showDialog<bool>(
           context: context,
-          builder: (context) => AddOdometerPage(vehicleId: _selectedVehicleId),
+          builder: (context) => OdometerFormPage(
+            vehicleId: _selectedVehicleId,
+            initialMode: CrudDialogMode.create,
+          ),
         ).then((result) {
           if (result == true && _selectedVehicleId != null) {
             // Reload odometer list after adding

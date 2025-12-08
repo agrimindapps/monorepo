@@ -2,7 +2,6 @@ import 'package:core/core.dart' hide Column, AuthState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart';
-import '../../presentation/providers/settings_notifier.dart';
 
 /// User Profile Dialog
 ///
@@ -53,17 +52,7 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
     if (user != null && user.displayName.isNotEmpty) {
       return user.displayName;
     }
-    final settingsState = ref.read(settingsProvider).value;
-    final device = settingsState?.currentDeviceInfo;
-    if (device?.name.isNotEmpty == true) {
-      final name = device!.name;
-      if (name.contains('iPhone')) return 'Usuário iPhone';
-      if (name.contains('iPad')) return 'Usuário iPad';
-      if (name.contains('Samsung')) return 'Usuário Samsung';
-      if (name.contains('Pixel')) return 'Usuário Pixel';
-      return name.length > 30 ? '${name.substring(0, 30)}...' : name;
-    }
-    return 'Usuário ReceitaAgro';
+    return user?.email ?? 'Usuário ReceitaAgro';
   }
 
   String _getUserEmail(AuthState authState) {
@@ -173,10 +162,6 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
 
   /// Build profile form
   Widget _buildProfileForm(ThemeData theme, AuthState authState) {
-    final settingsState = ref.read(settingsProvider).value;
-    final currentDevice = settingsState?.currentDeviceInfo;
-    final connectedDevices = settingsState?.connectedDevicesInfo ?? [];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -247,14 +232,8 @@ class _UserProfileDialogState extends ConsumerState<UserProfileDialog> {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildInfoRow(
-                'Dispositivo Atual',
-                currentDevice?.displayName ?? 'Desconhecido',
-              ),
-              _buildInfoRow(
-                'Dispositivos Conectados',
-                '${connectedDevices.length} de 3',
-              ),
+              _buildInfoRow('Tipo de Conta', 'Gratuita'),
+              _buildInfoRow('Membro desde', 'Vários meses'),
               _buildInfoRow('Sincronização', 'Ativa'),
             ],
           ),

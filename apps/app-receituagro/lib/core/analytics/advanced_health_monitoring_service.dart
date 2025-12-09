@@ -261,7 +261,7 @@ class AdvancedHealthMonitoringService {
     try {
       final startTime = DateTime.now();
       final result = await InternetAddress.lookup('firebase.google.com');
-      
+
       final duration = DateTime.now().difference(startTime);
       final responseTime = duration.inMilliseconds;
 
@@ -491,7 +491,9 @@ class AdvancedHealthMonitoringService {
       if (pendingSyncs < 50 && failedSyncs < 5 && syncSuccessRate > 95) {
         status = HealthStatus.healthy;
         message = 'Sync system healthy';
-      } else if (pendingSyncs < 100 && failedSyncs < 10 && syncSuccessRate > 90) {
+      } else if (pendingSyncs < 100 &&
+          failedSyncs < 10 &&
+          syncSuccessRate > 90) {
         status = HealthStatus.warning;
         message = 'Sync system degraded';
       } else {
@@ -627,12 +629,12 @@ class AdvancedHealthMonitoringService {
   }
 
   /// Trigger alert
-  Future<void> _triggerAlert(AlertConfig config, SystemHealthReport report) async {
+  Future<void> _triggerAlert(
+      AlertConfig config, SystemHealthReport report) async {
     final now = DateTime.now();
     final alertKey = config.name;
     final lastAlert = _lastAlertTimes[alertKey];
-    if (lastAlert != null &&
-        now.difference(lastAlert) < config.threshold) {
+    if (lastAlert != null && now.difference(lastAlert) < config.threshold) {
       return; // Too soon to trigger again
     }
     final count = _alertCounts[alertKey] ?? 0;

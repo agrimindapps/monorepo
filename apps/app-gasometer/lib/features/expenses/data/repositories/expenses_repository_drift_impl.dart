@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 
 import '../../../../core/interfaces/i_expenses_repository.dart';
 import '../../../../database/repositories/expense_repository.dart';
+import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../datasources/expenses_local_datasource.dart';
 import '../sync/expense_drift_sync_adapter.dart';
@@ -18,11 +19,13 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
     this._dataSource,
     this._connectivityService,
     this._syncAdapter,
+    this._vehicleRepository,
   );
 
   final ExpensesLocalDataSource _dataSource;
   final ConnectivityService _connectivityService;
   final ExpenseDriftSyncAdapter _syncAdapter;
+  final VehicleRepository _vehicleRepository;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -97,7 +100,15 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
         name: 'ExpensesRepository',
       );
 
-      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      // 2. Atualizar odômetro do veículo se for maior que o atual
+      if (expense.odometer > 0) {
+        await _vehicleRepository.updateVehicleOdometer(
+          expense.vehicleId,
+          expense.odometer.toInt(),
+        );
+      }
+
+      // 3. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
       final isOnlineResult = await _connectivityService.isOnline();
       final isOnline = isOnlineResult.fold((_) => false, (online) => online);
 

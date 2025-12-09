@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -91,9 +92,7 @@ class ProfileUserSection extends ConsumerWidget {
                     const SizedBox(height: 4),
                     Text(
                       isAuthenticated
-                          ? ((user?.email is String)
-                                ? (user?.email as String)
-                                : 'email@usuario.com')
+                          ? _getUserEmail(user)
                           : 'Faça login para acessar recursos completos',
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
@@ -135,7 +134,8 @@ class ProfileUserSection extends ConsumerWidget {
   /// Obter iniciais do nome
   String _getInitials(String name) {
     if (name.isEmpty) return '?';
-    final words = name.split(' ');
+    final words = name.split(' ').where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return '?';
     if (words.length == 1) return words[0].substring(0, 1).toUpperCase();
     return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'
         .toUpperCase();
@@ -143,14 +143,49 @@ class ProfileUserSection extends ConsumerWidget {
 
   /// Obter título para exibição do usuário
   String _getUserDisplayTitle(dynamic user) {
+    if (user == null) return 'Usuário';
+    
+    // Se user é UserEntity, usa extension
+    if (user is UserEntity) {
+      return user.safeDisplayName;
+    }
+    
+    // Fallback para acesso dinâmico
     final displayName = user?.displayName;
     if (displayName != null &&
         displayName is String &&
-        displayName.isNotEmpty) {
-      return displayName;
+        displayName.trim().isNotEmpty) {
+      return displayName.trim();
     }
+    
+    // Fallback para parte do email (antes do @)
     final email = user?.email;
-    return (email is String ? email : null) ?? 'Usuário';
+    if (email is String && email.trim().isNotEmpty) {
+      final emailParts = email.split('@');
+      if (emailParts.isNotEmpty && emailParts.first.isNotEmpty) {
+        return emailParts.first;
+      }
+    }
+    
+    return 'Usuário';
+  }
+
+  /// Obter email do usuário
+  String _getUserEmail(dynamic user) {
+    if (user == null) return 'email@usuario.com';
+    
+    // Se user é UserEntity, usa extension
+    if (user is UserEntity) {
+      return user.safeEmail;
+    }
+    
+    // Fallback para acesso dinâmico
+    final email = user?.email;
+    if (email is String && email.trim().isNotEmpty) {
+      return email.trim();
+    }
+    
+    return 'email@usuario.com';
   }
 
   /// Helper: Obter tempo de membro

@@ -52,32 +52,60 @@ class OdometerEntity extends BaseSyncEntity {
 
   /// Creates an entity from Firebase map
   factory OdometerEntity.fromFirebaseMap(Map<String, dynamic> map) {
+    // Parse value/reading defensivamente
+    double parsedValue = 0.0;
+    final rawValue = map['value'] ?? map['reading'];
+    if (rawValue is num) {
+      parsedValue = rawValue.toDouble();
+    } else if (rawValue is String) {
+      parsedValue = double.tryParse(rawValue) ?? 0.0;
+    }
+
+    // Parse metadata defensivamente
+    Map<String, dynamic> parsedMetadata = {};
+    if (map['metadata'] is Map) {
+      parsedMetadata = Map<String, dynamic>.from(map['metadata'] as Map);
+    }
+
     return OdometerEntity(
       id: map['id']?.toString() ?? '',
-      vehicleId: map['vehicleId']?.toString() ?? '',
-      value: (map['value'] as num?)?.toDouble() ?? 0.0,
-      registrationDate: DateTime.fromMillisecondsSinceEpoch(
-        (map['registrationDate'] as int?) ??
-            DateTime.now().millisecondsSinceEpoch,
+      // Firebase pode salvar como vehicle_id (snake_case)
+      vehicleId: (map['vehicleId'] ?? map['vehicle_id'])?.toString() ?? '',
+      value: parsedValue,
+      // Firebase pode salvar como date (timestamp) ou registrationDate
+      registrationDate: _parseDateFromFirebase(
+        map['registrationDate'] ?? map['date'],
       ),
-      description: map['description']?.toString() ?? '',
+      description: (map['description'] ?? map['notes'])?.toString() ?? '',
       type: OdometerType.fromString(map['type']?.toString() ?? 'other'),
-      metadata: map['metadata'] as Map<String, dynamic>? ?? {},
-      createdAt: map['created_at'] != null
-          ? DateTime.parse(map['created_at'] as String)
-          : null,
-      updatedAt: map['updated_at'] != null
-          ? DateTime.parse(map['updated_at'] as String)
-          : null,
-      lastSyncAt: map['last_sync_at'] != null
-          ? DateTime.parse(map['last_sync_at'] as String)
-          : null,
+      metadata: parsedMetadata,
+      createdAt: _parseDateTimeFromFirebase(map['created_at']),
+      updatedAt: _parseDateTimeFromFirebase(map['updated_at']),
+      lastSyncAt: _parseDateTimeFromFirebase(map['last_sync_at']),
       isDirty: map['is_dirty'] as bool? ?? false,
       isDeleted: map['is_deleted'] as bool? ?? false,
-      version: map['version'] as int? ?? 1,
+      version: (map['version'] as num?)?.toInt() ?? 1,
       userId: map['user_id']?.toString(),
       moduleName: map['module_name']?.toString(),
     );
+  }
+
+  /// Helper para parsear DateTime de campos Firebase (pode ser int ou String)
+  static DateTime? _parseDateTimeFromFirebase(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    if (value is String) return DateTime.tryParse(value);
+    return null;
+  }
+
+  /// Helper para parsear data de registro (obrigatório, retorna agora se null)
+  static DateTime _parseDateFromFirebase(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    if (value is String) {
+      return DateTime.tryParse(value) ?? DateTime.now();
+    }
+    return DateTime.now();
   }
 
   final String vehicleId;

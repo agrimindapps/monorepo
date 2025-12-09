@@ -366,14 +366,15 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
               if (resolution.isRight()) {
                 final resolvedEntity =
                     (resolution as Right<Failure, TEntity>).value;
-                // Atualizar localmente
-                await db
-                    .into(table)
-                    .insert(
-                      entityToCompanion(resolvedEntity),
-                      mode: InsertMode.insertOrReplace,
-                    );
-                pulledCount++;
+                // Usar saveToLocal que pode ser sobrescrito para resolver FKs
+                final saveResult = await saveToLocal(resolvedEntity);
+                if (saveResult.isLeft()) {
+                  failedCount++;
+                  final failure = (saveResult as Left<Failure, void>).value;
+                  errors.add('Failed to save ${resolvedEntity.id}: ${failure.message}');
+                } else {
+                  pulledCount++;
+                }
               } else {
                 failedCount++;
                 errors.add(
@@ -386,13 +387,19 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
                 '➕ Inserting new record from Firebase: ${doc.id}',
                 name: 'DriftSync.$collectionName',
               );
-              await db
-                  .into(table)
-                  .insert(
-                    entityToCompanion(remoteEntity),
-                    mode: InsertMode.insertOrReplace,
-                  );
-              pulledCount++;
+              // Usar saveToLocal que pode ser sobrescrito para resolver FKs
+              final saveResult = await saveToLocal(remoteEntity);
+              if (saveResult.isLeft()) {
+                failedCount++;
+                final failure = (saveResult as Left<Failure, void>).value;
+                errors.add('Failed to save ${doc.id}: ${failure.message}');
+                developer.log(
+                  '❌ Failed to save ${doc.id}: ${failure.message}',
+                  name: 'DriftSync.$collectionName',
+                );
+              } else {
+                pulledCount++;
+              }
             }
           } catch (e) {
             failedCount++;
@@ -422,6 +429,33 @@ abstract class DriftSyncAdapterBase<TEntity extends BaseSyncEntity, TDriftRow>
         stackTrace: stack,
       );
       return Left(ServerFailure('Erro fatal no pull: $e'));
+    }
+  }
+
+  // ==========================================================================
+  // LOCAL STORAGE (pode ser sobrescrito para resolver FKs)
+  // ==========================================================================
+
+  /// Salva uma entidade no banco local durante o pull.
+  /// 
+  /// Este método pode ser sobrescrito por adapters que precisam resolver
+  /// foreign keys antes de salvar (ex: FuelSupply precisa resolver vehicleId).
+  /// 
+  /// A implementação default insere diretamente usando entityToCompanion.
+  Future<Either<Failure, void>> saveToLocal(TEntity entity) async {
+    try {
+      await db.into(table).insert(
+        entityToCompanion(entity),
+        mode: InsertMode.insertOrReplace,
+      );
+      return const Right(null);
+    } catch (e) {
+      developer.log(
+        '❌ Failed to save entity to local: $e',
+        name: 'DriftSync.$collectionName',
+        error: e,
+      );
+      return Left(CacheFailure('Failed to save to local: $e'));
     }
   }
 

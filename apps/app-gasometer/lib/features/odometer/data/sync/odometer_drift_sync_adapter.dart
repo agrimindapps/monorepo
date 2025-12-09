@@ -594,4 +594,48 @@ class OdometerDriftSyncAdapter
 
     return entity.copyWith(vehicleId: vehicleRow.id.toString());
   }
+
+  /// Sobrescreve saveToLocal para resolver FK do vehicleId antes de salvar.
+  ///
+  /// Durante o pull do Firebase, o vehicleId vem como UUID string (firebaseId),
+  /// mas o Drift precisa do id local (int) para satisfazer a FK constraint.
+  @override
+  Future<Either<Failure, void>> saveToLocal(OdometerEntity entity) async {
+    try {
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        developer.log(
+          '⏸️ Skipping odometer ${entity.id}: vehicle ${entity.vehicleId} not found locally',
+          name: 'OdometerDriftSyncAdapter',
+        );
+        return Left(
+          CacheFailure(
+            'Vehicle ${entity.vehicleId} not found locally - sync vehicles first',
+          ),
+        );
+      }
+
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.odometerReadings).insert(
+        companion,
+        mode: InsertMode.insertOrReplace,
+      );
+
+      developer.log(
+        '✅ Saved odometer reading: ${entity.id}',
+        name: 'OdometerDriftSyncAdapter',
+      );
+
+      return const Right(null);
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ Failed to save odometer reading to local',
+        name: 'OdometerDriftSyncAdapter',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Left(CacheFailure('Failed to save odometer reading: $e'));
+    }
+  }
 }

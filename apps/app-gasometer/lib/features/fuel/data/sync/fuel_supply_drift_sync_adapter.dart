@@ -536,6 +536,50 @@ class FuelSupplyDriftSyncAdapter
     }
   }
 
+  /// Sobrescreve saveToLocal para resolver FK do vehicleId antes de salvar.
+  /// 
+  /// Durante o pull do Firebase, o vehicleId vem como UUID string (firebaseId),
+  /// mas o Drift precisa do id local (int) para satisfazer a FK constraint.
+  @override
+  Future<Either<Failure, void>> saveToLocal(FuelRecordEntity entity) async {
+    try {
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        developer.log(
+          '⏸️ Skipping fuel supply ${entity.id}: vehicle ${entity.vehicleId} not found locally',
+          name: 'FuelSupplyDriftSyncAdapter',
+        );
+        return Left(
+          CacheFailure(
+            'Vehicle ${entity.vehicleId} not found locally - sync vehicles first',
+          ),
+        );
+      }
+
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.fuelSupplies).insert(
+        companion,
+        mode: InsertMode.insertOrReplace,
+      );
+
+      developer.log(
+        '✅ Saved fuel supply: ${entity.id}',
+        name: 'FuelSupplyDriftSyncAdapter',
+      );
+
+      return const Right(null);
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ Failed to save fuel supply to local',
+        name: 'FuelSupplyDriftSyncAdapter',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Left(CacheFailure('Failed to save fuel supply: $e'));
+    }
+  }
+
   Future<Either<Failure, void>> insertLocal(FuelRecordEntity entity) async {
     try {
       final resolvedEntity = await _ensureLocalVehicleReference(entity);

@@ -11,4 +11,5 @@ abstract class VehicleRepository {
   Future<Either<Failure, Unit>> syncVehicles();
   Future<Either<Failure, List<VehicleEntity>>> searchVehicles(String query);
   Stream<Either<Failure, List<VehicleEntity>>> watchVehicles();
+  Future<Either<Failure, Unit>> updateVehicleOdometer(String vehicleId, int newOdometer);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/services/device_identity_service.dart';
 import '../items/device_list_item.dart';
 
 /// Device Management Dialog
@@ -23,8 +24,10 @@ class DeviceManagementDialog extends ConsumerWidget {
     final theme = Theme.of(context);
     final devices = (settingsData?.connectedDevicesInfo is List)
         ? (settingsData.connectedDevicesInfo as List<dynamic>)
-        : <dynamic>[];
-    final currentDevice = settingsData?.currentDeviceInfo;
+            .whereType<DeviceInfo>()
+            .toList()
+        : <DeviceInfo>[];
+    final currentDevice = settingsData?.currentDeviceInfo as DeviceInfo?;
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -72,13 +75,13 @@ class DeviceManagementDialog extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      ...devices.where((device) => (device?.uuid as String?) != (currentDevice?.uuid as String?)).map((device) {
+                      ...devices.where((device) => device.uuid != currentDevice?.uuid).map((device) {
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: DeviceListItem(
-                            device: device as dynamic,
+                            device: device,
                             isPrimary: false,
-                            onRevoke: () => _revokeDevice(context, ref, device as dynamic),
+                            onRevoke: () => _revokeDevice(context, ref, device),
                           ),
                         );
                       }),
@@ -234,7 +237,7 @@ class DeviceManagementDialog extends ConsumerWidget {
 
   /// Revoke device with confirmation
   /// NOTE: Device management is currently disabled - feature in development
-  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, dynamic device) async {
+  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, DeviceInfo device) async {
     await showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(

@@ -336,6 +336,83 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
     }
   }
 
+  /// Atualiza o odômetro atual do veículo se o novo valor for maior
+  /// 
+  /// Deve ser chamado sempre que um novo registro com odômetro for criado/atualizado
+  /// (abastecimento, despesa, manutenção, leitura de odômetro)
+  @override
+  Future<Either<Failure, Unit>> updateVehicleOdometer(String vehicleId, int newOdometer) async {
+    try {
+      developer.log(
+        '🔵 VehicleRepository.updateVehicleOdometer() - vehicleId=$vehicleId, newOdometer=$newOdometer',
+        name: 'VehicleRepository',
+      );
+
+      final vehicleIdInt = int.tryParse(vehicleId);
+      if (vehicleIdInt == null) {
+        return Left(CacheFailure('Invalid vehicle ID: $vehicleId'));
+      }
+
+      final vehicle = await _datasource.findById(vehicleIdInt);
+      if (vehicle == null) {
+        developer.log(
+          '⚠️ VehicleRepository.updateVehicleOdometer() - Vehicle not found',
+          name: 'VehicleRepository',
+        );
+        return const Left(NotFoundFailure('Vehicle not found'));
+      }
+
+      // Só atualiza se o novo odômetro for maior que o atual
+      if (newOdometer <= vehicle.odometroAtual) {
+        developer.log(
+          '⏭️ VehicleRepository.updateVehicleOdometer() - Skipping (current=${vehicle.odometroAtual} >= new=$newOdometer)',
+          name: 'VehicleRepository',
+        );
+        return const Right(unit);
+      }
+
+      // Atualiza o odômetro
+      final updates = VehiclesCompanion(
+        odometroAtual: drift.Value(newOdometer.toDouble()),
+        updatedAt: drift.Value(DateTime.now()),
+        isDirty: const drift.Value(true),
+      );
+
+      final success = await _datasource.updateVehicle(vehicleIdInt, updates);
+      if (!success) {
+        return const Left(CacheFailure('Failed to update vehicle odometer'));
+      }
+
+      developer.log(
+        '✅ VehicleRepository.updateVehicleOdometer() - Updated from ${vehicle.odometroAtual} to $newOdometer',
+        name: 'VehicleRepository',
+      );
+
+      // Sync-on-Write: Se online, sincronizar imediatamente
+      final isOnlineResult = await _connectivityService.isOnline();
+      final isOnline = isOnlineResult.fold((_) => false, (online) => online);
+
+      if (isOnline) {
+        try {
+          await _syncAdapter.pushDirtyRecords(_userId);
+        } catch (e) {
+          developer.log(
+            '⚠️ VehicleRepository.updateVehicleOdometer() - Sync error: $e',
+            name: 'VehicleRepository',
+          );
+        }
+      }
+
+      return const Right(unit);
+    } catch (e) {
+      developer.log(
+        '❌ VehicleRepository.updateVehicleOdometer() - Error: $e',
+        name: 'VehicleRepository',
+      );
+      return Left(CacheFailure('Failed to update vehicle odometer: $e'));
+    }
+  }
+
   @override
   Future<Either<Failure, Unit>> syncVehicles() async {
     // TODO: Implement sync with remote server when available

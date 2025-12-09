@@ -17,8 +17,13 @@ import 'expense_type_selector.dart';
 
 /// Widget principal do formulário de despesas
 class ExpenseFormView extends ConsumerWidget {
-  const ExpenseFormView({super.key, required this.focusNodes});
+  const ExpenseFormView({
+    super.key, 
+    required this.focusNodes,
+    this.isReadOnly = false,
+  });
   final Map<String, FocusNode> focusNodes;
+  final bool isReadOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

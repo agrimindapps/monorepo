@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
 import '../../../../database/repositories/odometer_reading_repository.dart';
+import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../../domain/repositories/odometer_repository.dart';
 import '../datasources/odometer_reading_local_datasource.dart';
@@ -18,11 +19,13 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
     this._dataSource,
     this._connectivityService,
     this._syncAdapter,
+    this._vehicleRepository,
   );
 
   final OdometerReadingLocalDataSource _dataSource;
   final ConnectivityService _connectivityService;
   final OdometerDriftSyncAdapter _syncAdapter;
+  final VehicleRepository _vehicleRepository;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -109,7 +112,13 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
         name: 'OdometerRepository',
       );
 
-      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      // 2. Atualizar odômetro do veículo se for maior que o atual
+      await _vehicleRepository.updateVehicleOdometer(
+        reading.vehicleId,
+        reading.value.toInt(),
+      );
+
+      // 3. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
       final isOnlineResult = await _connectivityService.isOnline();
       final isOnline = isOnlineResult.fold((_) => false, (online) => online);
 

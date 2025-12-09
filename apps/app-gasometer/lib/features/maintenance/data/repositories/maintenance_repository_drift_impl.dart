@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 
 import '../../../../database/repositories/maintenance_repository.dart' as db;
+import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import '../datasources/maintenance_local_datasource.dart';
@@ -18,11 +19,13 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
     this._dataSource,
     this._connectivityService,
     this._syncAdapter,
+    this._vehicleRepository,
   );
 
   final MaintenanceLocalDataSource _dataSource;
   final ConnectivityService _connectivityService;
   final MaintenanceDriftSyncAdapter _syncAdapter;
+  final VehicleRepository _vehicleRepository;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -151,7 +154,13 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
         name: 'MaintenanceRepository',
       );
 
-      // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
+      // 2. Atualizar odômetro do veículo se for maior que o atual
+      await _vehicleRepository.updateVehicleOdometer(
+        maintenance.vehicleId,
+        maintenance.odometer.toInt(),
+      );
+
+      // 3. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
       final isOnlineResult = await _connectivityService.isOnline();
       final isOnline = isOnlineResult.fold((_) => false, (online) => online);
 

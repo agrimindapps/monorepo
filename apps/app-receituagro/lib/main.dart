@@ -89,7 +89,33 @@ void main() async {
   }
 
   final auth = FirebaseAuth.instance;
-  if (auth.currentUser == null) {
+  
+  // 🧪 AUTO-LOGIN para testes (apenas em desenvolvimento)
+  if (kDebugMode && auth.currentUser == null) {
+    try {
+      debugPrint('🧪 [RECEITUAGRO-TEST] Attempting auto-login...');
+      final userCredential = await auth.signInWithEmailAndPassword(
+        email: 'lucineiy@hotmail.com',
+        password: 'QWEqwe@123',
+      );
+      debugPrint('🧪 [RECEITUAGRO-TEST] Auto-login successful! User: ${userCredential.user?.email}');
+    } catch (e) {
+      debugPrint('⚠️ [RECEITUAGRO-TEST] Auto-login failed: $e');
+      // Fallback para anonymous
+      try {
+        await auth.signInAnonymously();
+      } catch (e2) {
+        if (EnvironmentConfig.enableAnalytics) {
+          await _crashlyticsRepository.recordError(
+            exception: e2,
+            stackTrace: StackTrace.current,
+            reason: 'Failed to sign in anonymously',
+            fatal: false,
+          );
+        }
+      }
+    }
+  } else if (auth.currentUser == null) {
     try {
       await auth.signInAnonymously();
     } catch (e) {

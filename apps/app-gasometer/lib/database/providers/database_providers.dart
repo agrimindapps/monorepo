@@ -7,6 +7,8 @@ import '../../features/maintenance/data/repositories/maintenance_repository_drif
 import '../../features/maintenance/domain/repositories/maintenance_repository.dart' as domain_maintenance;
 import '../../features/odometer/data/repositories/odometer_repository_drift_impl.dart';
 import '../../features/odometer/domain/repositories/odometer_repository.dart';
+import '../../features/vehicles/data/repositories/vehicle_repository_drift_impl.dart';
+import '../../features/vehicles/domain/repositories/vehicle_repository.dart' as domain_vehicle;
 import '../gasometer_database.dart';
 import '../repositories/receipt_images_repository.dart';
 import '../repositories/repositories.dart';
@@ -84,13 +86,23 @@ final odometerReadingRepositoryProvider = Provider<OdometerReadingRepository>((
   return OdometerReadingRepository(db);
 });
 
+/// Provider do repositório de veículos (interface do domain)
+/// Usa VehicleRepositoryDriftImpl como implementação com Sync-on-Write
+final vehicleDomainRepositoryProvider = Provider<domain_vehicle.VehicleRepository>((ref) {
+  final dataSource = ref.watch(deps.vehicleLocalDataSourceProvider);
+  final connectivityService = ref.watch(deps.connectivityServiceProvider);
+  final syncAdapter = ref.watch(deps.vehicleDriftSyncAdapterProvider);
+  return VehicleRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
+});
+
 /// Provider do repositório de odômetro (interface do domain)
 /// Usa OdometerRepositoryDriftImpl como implementação com Sync-on-Write
 final odometerRepositoryProvider = Provider<OdometerRepository>((ref) {
   final dataSource = ref.watch(deps.odometerReadingLocalDataSourceProvider);
   final connectivityService = ref.watch(deps.connectivityServiceProvider);
   final syncAdapter = ref.watch(deps.odometerDriftSyncAdapterProvider);
-  return OdometerRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
+  final vehicleRepository = ref.watch(vehicleDomainRepositoryProvider);
+  return OdometerRepositoryDriftImpl(dataSource, connectivityService, syncAdapter, vehicleRepository);
 });
 
 /// Provider do repositório de manutenção (interface do domain)
@@ -99,7 +111,8 @@ final maintenanceDomainRepositoryProvider = Provider<domain_maintenance.Maintena
   final dataSource = ref.watch(deps.maintenanceLocalDataSourceProvider);
   final connectivityService = ref.watch(deps.connectivityServiceProvider);
   final syncAdapter = ref.watch(deps.maintenanceDriftSyncAdapterProvider);
-  return MaintenanceRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
+  final vehicleRepository = ref.watch(vehicleDomainRepositoryProvider);
+  return MaintenanceRepositoryDriftImpl(dataSource, connectivityService, syncAdapter, vehicleRepository);
 });
 
 /// Provider do repositório de despesas (interface do domain)
@@ -108,7 +121,8 @@ final expensesDomainRepositoryProvider = Provider<IExpensesRepository>((ref) {
   final dataSource = ref.watch(deps.expensesLocalDataSourceProvider);
   final connectivityService = ref.watch(deps.connectivityServiceProvider);
   final syncAdapter = ref.watch(deps.expenseDriftSyncAdapterProvider);
-  return ExpensesRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
+  final vehicleRepository = ref.watch(vehicleDomainRepositoryProvider);
+  return ExpensesRepositoryDriftImpl(dataSource, connectivityService, syncAdapter, vehicleRepository);
 });
 
 /// Provider do repositório de auditoria

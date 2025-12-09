@@ -2,15 +2,17 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
+import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../notifiers/expenses_notifier.dart';
 import '../state/expenses_state.dart';
-import 'add_expense_page.dart';
+import 'expense_form_page.dart';
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -279,7 +281,21 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         itemCount: records.length,
         itemBuilder: (context, index) {
           final record = records[index];
-          return _buildExpenseCard(record);
+          return SwipeToDeleteWrapper(
+            itemKey: 'expense_${record.id}',
+            deletedMessage: 'Despesa "${record.title}" excluída',
+            onDelete: () async {
+              await ref
+                  .read(expensesProvider.notifier)
+                  .deleteOptimistic(record.id);
+            },
+            onRestore: () async {
+              await ref
+                  .read(expensesProvider.notifier)
+                  .restoreDeleted(record.id);
+            },
+            child: _buildExpenseCard(record),
+          );
         },
       ),
     );
@@ -293,95 +309,117 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    record.title,
+      child: InkWell(
+        onTap: () => _openExpenseDetail(record),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      record.title,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  Text(
+                    'R\$ ${record.amount.toStringAsFixed(2)}',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: Theme.of(context).primaryColor,
                           fontWeight: FontWeight.w600,
                         ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  'R\$ ${record.amount.toStringAsFixed(2)}',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(
-                  Icons.calendar_today,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  formattedDate,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                const SizedBox(width: 16),
-                Icon(
-                  Icons.speed,
-                  size: 16,
-                  color: Theme.of(context).textTheme.bodySmall?.color,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  '${record.odometer.toStringAsFixed(0)} km',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: record.type.color.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(4),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Icon(
+                    Icons.calendar_today,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        record.type.icon,
-                        size: 12,
-                        color: record.type.color,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        record.type.displayName,
-                        style: TextStyle(
+                  const SizedBox(width: 4),
+                  Text(
+                    formattedDate,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(width: 16),
+                  Icon(
+                    Icons.speed,
+                    size: 16,
+                    color: Theme.of(context).textTheme.bodySmall?.color,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${record.odometer.toStringAsFixed(0)} km',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: record.type.color.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          record.type.icon,
+                          size: 12,
                           color: record.type.color,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Text(
+                          record.type.displayName,
+                          style: TextStyle(
+                            color: record.type.color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  /// Abre o detalhe do registro de despesa em modo visualização
+  void _openExpenseDetail(ExpenseEntity record) {
+    showDialog<bool>(
+      context: context,
+      builder: (context) => ExpenseFormPage(
+        expenseId: record.id,
+        vehicleId: record.vehicleId,
+        initialMode: CrudDialogMode.view,
+      ),
+    ).then((result) {
+      if (result == true && _selectedVehicleId != null) {
+        ref
+            .read(expensesProvider.notifier)
+            .loadExpensesByVehicle(_selectedVehicleId!);
+      }
+    });
   }
 
   Widget _buildFloatingActionButton(BuildContext context) {
@@ -402,7 +440,10 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         }
         showDialog<bool>(
           context: context,
-          builder: (context) => AddExpensePage(vehicleId: _selectedVehicleId),
+          builder: (context) => ExpenseFormPage(
+            vehicleId: _selectedVehicleId,
+            initialMode: CrudDialogMode.create,
+          ),
         ).then((result) {
           if (result == true && _selectedVehicleId != null) {
             ref

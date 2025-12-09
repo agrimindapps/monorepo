@@ -794,4 +794,48 @@ class ExpenseDriftSyncAdapter
 
     return entity.copyWith(vehicleId: vehicleRow.id.toString());
   }
+
+  /// Sobrescreve saveToLocal para resolver FK do vehicleId antes de salvar.
+  ///
+  /// Durante o pull do Firebase, o vehicleId vem como UUID string (firebaseId),
+  /// mas o Drift precisa do id local (int) para satisfazer a FK constraint.
+  @override
+  Future<Either<Failure, void>> saveToLocal(ExpenseEntity entity) async {
+    try {
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        developer.log(
+          '⏸️ Skipping expense ${entity.id}: vehicle ${entity.vehicleId} not found locally',
+          name: 'ExpenseDriftSyncAdapter',
+        );
+        return Left(
+          CacheFailure(
+            'Vehicle ${entity.vehicleId} not found locally - sync vehicles first',
+          ),
+        );
+      }
+
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.expenses).insert(
+        companion,
+        mode: InsertMode.insertOrReplace,
+      );
+
+      developer.log(
+        '✅ Saved expense: ${entity.id}',
+        name: 'ExpenseDriftSyncAdapter',
+      );
+
+      return const Right(null);
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ Failed to save expense to local',
+        name: 'ExpenseDriftSyncAdapter',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Left(CacheFailure('Failed to save expense: $e'));
+    }
+  }
 }

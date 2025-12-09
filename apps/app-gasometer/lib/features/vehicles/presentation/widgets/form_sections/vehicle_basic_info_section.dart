@@ -20,7 +20,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
     required this.modelFocusNode,
     required this.yearFocusNode,
     required this.colorFocusNode,
-    required this.onYearChanged,
+    this.onYearChanged,
     super.key,
   });
 
@@ -36,7 +36,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
   final FocusNode modelFocusNode;
   final FocusNode yearFocusNode;
   final FocusNode colorFocusNode;
-  final ValueChanged<int?> onYearChanged;
+  final ValueChanged<int?>? onYearChanged;
 
   @override
   Widget build(BuildContext context) {

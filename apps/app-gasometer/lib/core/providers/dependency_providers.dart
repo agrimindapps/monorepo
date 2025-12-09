@@ -139,7 +139,8 @@ final fuelRepositoryProvider = Provider<FuelRepository>((ref) {
   final dataSource = ref.watch(fuelSupplyLocalDataSourceProvider);
   final connectivityService = ref.watch(connectivityServiceProvider);
   final syncAdapter = ref.watch(fuelSupplyDriftSyncAdapterProvider);
-  return FuelRepositoryDriftImpl(dataSource, connectivityService, syncAdapter);
+  final vehicleRepository = ref.watch(vehicleRepositoryProvider);
+  return FuelRepositoryDriftImpl(dataSource, connectivityService, syncAdapter, vehicleRepository);
 });
 
 // Use Cases - Vehicles

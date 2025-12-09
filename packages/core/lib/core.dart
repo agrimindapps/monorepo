@@ -77,6 +77,8 @@ export 'src/domain/entities/security_entity.dart';
 export 'src/domain/entities/shared_preferences_record.dart';
 export 'src/domain/entities/subscription_entity.dart';
 export 'src/domain/entities/user_entity.dart';
+// Auth Extensions
+export 'features/auth/domain/extensions/user_entity_display_extension.dart';
 export 'src/domain/repositories/i_analytics_repository.dart';
 export 'src/domain/repositories/i_app_rating_repository.dart';
 export 'src/domain/repositories/i_auth_repository.dart';

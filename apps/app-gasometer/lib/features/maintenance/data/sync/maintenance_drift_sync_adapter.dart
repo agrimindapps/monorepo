@@ -790,4 +790,48 @@ class MaintenanceDriftSyncAdapter
 
     return entity.copyWith(vehicleId: vehicleRow.id.toString());
   }
+
+  /// Sobrescreve saveToLocal para resolver FK do vehicleId antes de salvar.
+  ///
+  /// Durante o pull do Firebase, o vehicleId vem como UUID string (firebaseId),
+  /// mas o Drift precisa do id local (int) para satisfazer a FK constraint.
+  @override
+  Future<Either<Failure, void>> saveToLocal(MaintenanceEntity entity) async {
+    try {
+      final resolvedEntity = await _ensureLocalVehicleReference(entity);
+      if (resolvedEntity == null) {
+        developer.log(
+          '⏸️ Skipping maintenance ${entity.id}: vehicle ${entity.vehicleId} not found locally',
+          name: 'MaintenanceDriftSyncAdapter',
+        );
+        return Left(
+          CacheFailure(
+            'Vehicle ${entity.vehicleId} not found locally - sync vehicles first',
+          ),
+        );
+      }
+
+      final companion = entityToCompanion(resolvedEntity);
+      await _db.into(_db.maintenances).insert(
+        companion,
+        mode: InsertMode.insertOrReplace,
+      );
+
+      developer.log(
+        '✅ Saved maintenance: ${entity.id}',
+        name: 'MaintenanceDriftSyncAdapter',
+      );
+
+      return const Right(null);
+    } catch (e, stackTrace) {
+      developer.log(
+        '❌ Failed to save maintenance to local',
+        name: 'MaintenanceDriftSyncAdapter',
+        error: e,
+        stackTrace: stackTrace,
+      );
+
+      return Left(CacheFailure('Failed to save maintenance: $e'));
+    }
+  }
 }

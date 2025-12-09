@@ -436,6 +436,54 @@ class ExpensesNotifier extends _$ExpensesNotifier {
     state = state.copyWith(clearError: true);
   }
 
+  // Cache para restauração de itens excluídos
+  final Map<String, ExpenseEntity> _deletedCache = {};
+
+  /// Remove despesa de forma otimista (para SwipeToDelete)
+  /// O item é removido imediatamente da UI e pode ser restaurado
+  Future<void> deleteOptimistic(String expenseId) async {
+    final expense = getExpenseById(expenseId);
+    if (expense == null) return;
+
+    // Guarda no cache para possível restauração
+    _deletedCache[expenseId] = expense;
+
+    // Remove otimisticamente da lista
+    final updatedExpenses = state.expenses.where((e) => e.id != expenseId).toList();
+    _updateStateWithExpenses(updatedExpenses);
+
+    // Executa a deleção real em background
+    final result = await _deleteExpenseUseCase(expenseId);
+    result.fold(
+      (failure) {
+        // Se falhar, restaura o item
+        debugPrint('[ExpensesNotifier] Delete failed, restoring: ${failure.message}');
+        _restoreFromCache(expenseId);
+      },
+      (success) {
+        // Sucesso - remove do cache após um tempo
+        Future.delayed(const Duration(seconds: 10), () {
+          _deletedCache.remove(expenseId);
+        });
+      },
+    );
+  }
+
+  /// Restaura despesa excluída (para undo do SwipeToDelete)
+  Future<void> restoreDeleted(String expenseId) async {
+    _restoreFromCache(expenseId);
+  }
+
+  void _restoreFromCache(String expenseId) {
+    final expense = _deletedCache[expenseId];
+    if (expense == null) return;
+
+    // Restaura na lista
+    final updatedExpenses = List<ExpenseEntity>.from(state.expenses)..add(expense);
+    _updateStateWithExpenses(updatedExpenses);
+    _deletedCache.remove(expenseId);
+  }
+
   /// Atualiza estado com nova lista de despesas
   void _updateStateWithExpenses(
     List<ExpenseEntity> expenses, {

@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 
 import '../../../../database/repositories/fuel_supply_repository.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
+import '../../../vehicles/domain/repositories/vehicle_repository.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/repositories/fuel_repository.dart';
 import '../datasources/fuel_supply_local_datasource.dart';
@@ -19,11 +20,13 @@ class FuelRepositoryDriftImpl implements FuelRepository {
     this._dataSource,
     this._connectivityService,
     this._syncAdapter,
+    this._vehicleRepository,
   );
 
   final FuelSupplyLocalDataSource _dataSource;
   final ConnectivityService _connectivityService;
   final FuelSupplyDriftSyncAdapter _syncAdapter;
+  final VehicleRepository _vehicleRepository;
 
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
@@ -134,6 +137,12 @@ class FuelRepositoryDriftImpl implements FuelRepository {
         name: 'FuelRepository',
       );
 
+      // Atualizar odômetro do veículo
+      await _vehicleRepository.updateVehicleOdometer(
+        fuelRecord.vehicleId,
+        fuelRecord.odometer.toInt(),
+      );
+
       // 2. Sync-on-Write: Se online, sincronizar imediatamente com Firebase
       final isOnlineResult = await _connectivityService.isOnline();
       final isOnline = isOnlineResult.fold((_) => false, (online) => online);
@@ -230,6 +239,12 @@ class FuelRepositoryDriftImpl implements FuelRepository {
       developer.log(
         '✅ FuelRepository.updateFuelRecord() - Updated locally',
         name: 'FuelRepository',
+      );
+
+      // Atualizar odômetro do veículo
+      await _vehicleRepository.updateVehicleOdometer(
+        fuelRecord.vehicleId,
+        fuelRecord.odometer.toInt(),
       );
 
       // 2. Sync-on-Write: Se online, sincronizar imediatamente

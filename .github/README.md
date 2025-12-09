@@ -2,23 +2,31 @@
 
 Este diretório contém configurações avançadas do GitHub Copilot para maximizar produtividade no desenvolvimento do monorepo.
 
+> **🗺️ Perdido?** Veja o [RESOURCES_MAP.md](RESOURCES_MAP.md) - seu guia visual para navegar nos recursos!
+
 ## 📁 Estrutura
 
 ```
 .github/
-├── agents/              # Agentes especializados (@agent-name)
-├── chatmodes/           # Modos de contexto especializados
-├── prompts/             # Prompts reutilizáveis estruturados
-├── workflows/           # GitHub Actions automatizados
-├── COPILOT_GUIDE.md    # Guia completo de uso
-└── README.md           # Este arquivo
+├── agents/                  # Agentes especializados (@agent-name)
+├── chatmodes/               # Modos de contexto especializados
+├── prompts/                 # Prompts reutilizáveis estruturados
+├── workflows/               # GitHub Actions automatizados
+├── COPILOT_GUIDE.md        # Guia completo de uso (30-45min)
+├── QUICK_START_COPILOT.md  # Referência rápida (10min)
+├── COPILOT_EXAMPLES.md     # Exemplos práticos com código
+├── RESOURCES_MAP.md        # Mapa de navegação visual
+└── README.md               # Este arquivo
 ```
 
 ## 🚀 Quick Start
 
-> **📖 Novo Usuário?** Comece com o [QUICK_START_COPILOT.md](QUICK_START_COPILOT.md) para referência rápida!
->
-> **📚 Guia Completo:** Veja [COPILOT_GUIDE.md](COPILOT_GUIDE.md) para documentação detalhada com exemplos.
+> **🎯 Escolha seu caminho:**
+> 
+> - 🗺️ **Perdido?** → [RESOURCES_MAP.md](RESOURCES_MAP.md) - Mapa visual de navegação
+> - ⚡ **Referência rápida?** → [QUICK_START_COPILOT.md](QUICK_START_COPILOT.md) - Tabelas e comandos
+> - 📚 **Aprender tudo?** → [COPILOT_GUIDE.md](COPILOT_GUIDE.md) - Guia completo detalhado
+> - 💡 **Ver exemplos?** → [COPILOT_EXAMPLES.md](COPILOT_EXAMPLES.md) - 10 exemplos com código
 
 ### 1. **Chat Modes** - Contextos Especializados
 

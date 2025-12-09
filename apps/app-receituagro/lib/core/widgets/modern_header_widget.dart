@@ -165,17 +165,29 @@ class ModernHeaderWidget extends ConsumerWidget {
     _intelligentNavigationBack(context, ref);
   }
 
-  /// Sistema de navegação usando o novo ReceitaAgroNavigationService
+  /// Sistema de navegação com fallback inteligente
+  /// Prioriza Navigator.pop quando possível, pois é mais confiável para páginas
+  /// navegadas via MaterialPageRoute
   void _intelligentNavigationBack(BuildContext context, WidgetRef ref) {
+    // Primeiro tenta o Navigator padrão (funciona com MaterialPageRoute)
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+    
+    // Tenta GoRouter se disponível
     try {
       final navigationService = ref.read(receitaAgroNavigationServiceProvider);
-      navigationService.goBack<void>();
-    } catch (e) {
-      if (Navigator.canPop(context)) {
-        Navigator.pop(context);
+      // Se não consegue voltar, vai para a home
+      if (!navigationService.canGoBack()) {
+        navigationService.navigateTo('/');
       } else {
-        debugPrint('⚠️ ModernHeaderWidget: Não foi possível navegar de volta - $e');
+        navigationService.goBack<void>();
       }
+    } catch (e) {
+      // Último fallback: volta para home
+      debugPrint('⚠️ ModernHeaderWidget: Navegando para home como fallback - $e');
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
     }
   }
 }

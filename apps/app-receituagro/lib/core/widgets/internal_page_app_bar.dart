@@ -39,15 +39,33 @@ class InternalPageAppBar extends ConsumerWidget implements PreferredSizeWidget {
       leading: automaticallyImplyLeading && showBackButton
           ? IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => _handleBackPress(ref),
+              onPressed: () => _handleBackPress(context, ref),
             )
           : null,
     );
   }
 
-  void _handleBackPress(WidgetRef ref) {
-    final navigationService = ref.read(navigationServiceProvider);
-    navigationService.goBack<void>();
+  void _handleBackPress(BuildContext context, WidgetRef ref) {
+    // Primeiro tenta o Navigator padrão (funciona com MaterialPageRoute)
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+      return;
+    }
+    
+    // Tenta GoRouter se disponível
+    try {
+      final navigationService = ref.read(navigationServiceProvider);
+      // Se não consegue voltar, vai para a home
+      if (!navigationService.canGoBack()) {
+        navigationService.navigateTo('/');
+      } else {
+        navigationService.goBack<void>();
+      }
+    } catch (e) {
+      // Último fallback: volta para home
+      debugPrint('⚠️ InternalPageAppBar: Navegando para home como fallback - $e');
+      Navigator.of(context).pushNamedAndRemoveUntil('/', (route) => false);
+    }
   }
 
   @override

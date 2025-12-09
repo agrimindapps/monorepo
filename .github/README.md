@@ -2,19 +2,31 @@
 
 Este diretório contém configurações avançadas do GitHub Copilot para maximizar produtividade no desenvolvimento do monorepo.
 
+> **🗺️ Perdido?** Veja o [RESOURCES_MAP.md](RESOURCES_MAP.md) - seu guia visual para navegar nos recursos!
+
 ## 📁 Estrutura
 
 ```
 .github/
-├── agents/              # Agentes especializados (@agent-name)
-├── chatmodes/           # Modos de contexto especializados
-├── prompts/             # Prompts reutilizáveis estruturados
-├── workflows/           # GitHub Actions automatizados
-├── COPILOT_GUIDE.md    # Guia completo de uso
-└── README.md           # Este arquivo
+├── agents/                  # Agentes especializados (@agent-name)
+├── chatmodes/               # Modos de contexto especializados
+├── prompts/                 # Prompts reutilizáveis estruturados
+├── workflows/               # GitHub Actions automatizados
+├── COPILOT_GUIDE.md        # Guia completo de uso (30-45min)
+├── QUICK_START_COPILOT.md  # Referência rápida (10min)
+├── COPILOT_EXAMPLES.md     # Exemplos práticos com código
+├── RESOURCES_MAP.md        # Mapa de navegação visual
+└── README.md               # Este arquivo
 ```
 
 ## 🚀 Quick Start
+
+> **🎯 Escolha seu caminho:**
+> 
+> - 🗺️ **Perdido?** → [RESOURCES_MAP.md](RESOURCES_MAP.md) - Mapa visual de navegação
+> - ⚡ **Referência rápida?** → [QUICK_START_COPILOT.md](QUICK_START_COPILOT.md) - Tabelas e comandos
+> - 📚 **Aprender tudo?** → [COPILOT_GUIDE.md](COPILOT_GUIDE.md) - Guia completo detalhado
+> - 💡 **Ver exemplos?** → [COPILOT_EXAMPLES.md](COPILOT_EXAMPLES.md) - 10 exemplos com código
 
 ### 1. **Chat Modes** - Contextos Especializados
 
@@ -30,7 +42,7 @@ Ative um chat mode para otimizar respostas do Copilot:
 - 🔄 **Riverpod Migration**: Migrar Provider→Riverpod
 
 **Como usar:**
-1. Abra Copilot Chat
+1. Abra Copilot Chat (`Cmd/Ctrl + Shift + I`)
 2. Clique no ícone de modo (📋)
 3. Selecione o chat mode
 4. Faça suas perguntas nesse contexto
@@ -41,18 +53,14 @@ Ative um chat mode para otimizar respostas do Copilot:
 
 Invoque agentes específicos via `@agent-name`:
 
-- `@analyzer-fixer`: Corrigir analyzer warnings
-- `@quick-fix-agent`: Fixes pontuais rápidos
-- `@code-intelligence`: Análise de código (profunda/rápida)
-- `@flutter-architect`: Decisões arquiteturais
-- `@flutter-engineer`: Desenvolvimento completo
-- `@feature-planner`: Planejamento ágil
-- `@specialized-auditor`: Auditorias especializadas
-- `@project-orchestrator`: Coordenação de workflows
+- `@flutter-architect`: Decisões arquiteturais e planejamento
+- `@flutter-code-fixer`: Corrigir analyzer warnings e code quality
+- `@flutter-ux-designer`: Melhorias de UX/UI
+- `@monorepo-orchestrator`: Coordenação cross-app
 
 **Como usar:**
 ```
-@feature-planner Planejar feature de notificações push cross-app
+@flutter-architect Estruturar sistema de pagamentos cross-app para 5 apps
 ```
 
 ---
@@ -176,16 +184,31 @@ Todas as configurações seguem os padrões estabelecidos:
 
 ## 📚 Documentação Completa
 
-Para guia detalhado, veja:
+### Guias Disponíveis
 
-**[📖 COPILOT_GUIDE.md](COPILOT_GUIDE.md)**
+| Guia | Descrição | Público |
+|------|-----------|---------|
+| **[🚀 QUICK_START_COPILOT.md](QUICK_START_COPILOT.md)** | Referência rápida para uso diário | Todos |
+| **[📖 COPILOT_GUIDE.md](COPILOT_GUIDE.md)** | Documentação completa e detalhada | Intermediário/Avançado |
+| **[📋 README.md](README.md)** | Visão geral e índice (este arquivo) | Todos |
 
-Contém:
+### O que cada guia contém:
+
+#### QUICK_START_COPILOT.md ⚡
+- Tabelas de referência rápida
+- Comandos essenciais
+- Workflows curtos
+- Checklist diário
+- **Ideal para:** Consulta rápida durante desenvolvimento
+
+#### COPILOT_GUIDE.md 📖
 - Explicação detalhada de cada recurso
-- Exemplos práticos
-- Workflows recomendados
-- Best practices
-- Troubleshooting
+- Exemplos práticos completos
+- Workflows recomendados step-by-step
+- Casos de uso do mundo real
+- Best practices e dicas avançadas
+- Troubleshooting completo
+- **Ideal para:** Aprender em profundidade e referência completa
 
 ---
 

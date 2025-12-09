@@ -1,3 +1,6 @@
+import 'dart:developer' as developer;
+
+import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
@@ -130,14 +133,14 @@ class ComentariosDriftSyncAdapter
       ferramenta: data['ferramenta'] as String? ?? 'receituagro',
       pkIdentificador: data['pkIdentificador'] as String? ?? '',
       status: data['status'] as bool? ?? true,
-      createdAt: (data['createdAt'] is Timestamp)
-          ? (data['createdAt'] as Timestamp).toDate()
+      createdAt: (data['createdAt'] is fs.Timestamp)
+          ? (data['createdAt'] as fs.Timestamp).toDate()
           : null,
-      updatedAt: (data['updatedAt'] is Timestamp)
-          ? (data['updatedAt'] as Timestamp).toDate()
+      updatedAt: (data['updatedAt'] is fs.Timestamp)
+          ? (data['updatedAt'] as fs.Timestamp).toDate()
           : null,
-      lastSyncAt: (data['lastSyncAt'] is Timestamp)
-          ? (data['lastSyncAt'] as Timestamp).toDate()
+      lastSyncAt: (data['lastSyncAt'] is fs.Timestamp)
+          ? (data['lastSyncAt'] as fs.Timestamp).toDate()
           : null,
       isDirty: false,
       isDeleted: data['isDeleted'] as bool? ?? false,
@@ -170,6 +173,93 @@ class ComentariosDriftSyncAdapter
       return Left(
         CacheFailure('Erro ao buscar comentário local por firebaseId: $e'),
       );
+    }
+  }
+
+  /// Stream de mudanças em tempo real do Firestore
+  /// Escuta a coleção de comentários do usuário e atualiza o Drift quando detecta mudanças
+  Stream<void> watchRemoteChanges(String userId) {
+    return firestore
+        .collection('users')
+        .doc(userId)
+        .collection(collectionName)
+        .snapshots()
+        .asyncMap((snapshot) async {
+      for (final change in snapshot.docChanges) {
+        final data = change.doc.data();
+        if (data == null) continue;
+
+        final docId = change.doc.id;
+        data['id'] = docId;
+
+        switch (change.type) {
+          case fs.DocumentChangeType.added:
+          case fs.DocumentChangeType.modified:
+            await _handleRemoteChange(data);
+            break;
+          case fs.DocumentChangeType.removed:
+            await _handleRemoteDelete(docId);
+            break;
+        }
+      }
+    });
+  }
+
+  /// Processa uma mudança remota (add/modify)
+  Future<void> _handleRemoteChange(Map<String, dynamic> data) async {
+    try {
+      final entity = fromFirestoreDoc(data);
+      final companion = entityToCompanion(entity);
+
+      // Verifica se já existe localmente
+      final existingResult = await getLocalByFirebaseId(entity.id);
+      
+      // Extrai o valor do Either para processar corretamente
+      final existing = existingResult.fold<ComentarioSyncEntity?>(
+        (failure) => null,
+        (entity) => entity,
+      );
+      
+      if (existing != null) {
+        // Atualiza se o remoto é mais recente
+        final remoteUpdatedAt = entity.updatedAt ?? entity.createdAt;
+        final localUpdatedAt = existing.updatedAt ?? existing.createdAt;
+
+        if (remoteUpdatedAt != null &&
+            localUpdatedAt != null &&
+            remoteUpdatedAt.isAfter(localUpdatedAt)) {
+          await (localDb.update(localDb.comentarios)
+                ..where((tbl) => tbl.firebaseId.equals(entity.id)))
+              .write(companion);
+          developer.log(
+            '✅ [REALTIME_SYNC] Comentário atualizado: ${entity.id}',
+            name: 'ComentariosDriftSyncAdapter',
+          );
+        }
+      } else {
+        // Insere novo
+        await localDb.into(localDb.comentarios).insert(companion);
+        developer.log(
+          '✅ [REALTIME_SYNC] Novo comentário inserido: ${entity.id}',
+          name: 'ComentariosDriftSyncAdapter',
+        );
+      }
+    } catch (e) {
+      developer.log(
+        '❌ [REALTIME_SYNC] Erro ao processar mudança remota: $e',
+        name: 'ComentariosDriftSyncAdapter',
+      );
+    }
+  }
+
+  /// Processa uma deleção remota
+  Future<void> _handleRemoteDelete(String firebaseId) async {
+    try {
+      await (localDb.update(localDb.comentarios)
+            ..where((tbl) => tbl.firebaseId.equals(firebaseId)))
+          .write(const ComentariosCompanion(isDeleted: Value(true)));
+    } catch (e) {
+      // Silently ignore
     }
   }
 }

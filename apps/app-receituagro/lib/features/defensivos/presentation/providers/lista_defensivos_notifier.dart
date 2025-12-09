@@ -117,14 +117,14 @@ class ListaDefensivosState {
 /// Optimizes performance by consolidating state updates
 @riverpod
 class ListaDefensivosNotifier extends _$ListaDefensivosNotifier {
-  late final FitossanitariosRepository _repository;
+  FitossanitariosRepository get _repository =>
+      ref.read(core_providers.fitossanitariosRepositoryProvider);
   Timer? _debounceTimer;
 
   static const int _itemsPerPage = 50;
 
   @override
   Future<ListaDefensivosState> build() async {
-    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
     ref.onDispose(() {
       _debounceTimer?.cancel();
     });

@@ -135,13 +135,27 @@ enum FavoritosViewState { initial, loading, loaded, error, empty }
 /// - Usa FavoritosErrorMessageService para mensagens de erro centralizadas
 @riverpod
 class FavoritosNotifier extends _$FavoritosNotifier {
-  late final FavoritosRepositorySimplified _repository;
-  late final FavoritosErrorMessageService _errorMessageService;
+  FavoritosRepositorySimplified get _repository =>
+      ref.read(favoritosRepositorySimplifiedProvider);
+  FavoritosErrorMessageService get _errorMessageService =>
+      ref.read(favoritosErrorMessageServiceProvider);
 
   @override
   FavoritosState build() {
-    _repository = ref.watch(favoritosRepositorySimplifiedProvider);
-    _errorMessageService = ref.watch(favoritosErrorMessageServiceProvider);
+
+    // Escuta o stream de favoritos do Drift para sincronização em tempo real
+    // Quando o Firebase atualiza via sync, o Drift emite e este listener recarrega
+    ref.listen(favoritosStreamProvider, (previous, next) {
+      next.whenData((data) {
+        // Recarrega favoritos quando o stream do Drift emite novos dados
+        // Isso garante sincronização em tempo real entre dispositivos
+        final previousData = previous?.value;
+        if (data.isNotEmpty || (previousData != null && previousData.isNotEmpty)) {
+          loadAllFavoritos();
+        }
+      });
+    });
+
     return const FavoritosState();
   }
 

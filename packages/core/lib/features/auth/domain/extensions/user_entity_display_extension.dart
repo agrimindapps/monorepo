@@ -1,4 +1,4 @@
-import '../entities/user_entity.dart';
+import 'package:core/src/domain/entities/user_entity.dart';
 
 /// Extension para garantir valores seguros de exibição do UserEntity
 extension UserEntityDisplayExtension on UserEntity {

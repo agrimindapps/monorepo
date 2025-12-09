@@ -82,16 +82,15 @@ class DetalheDefensivoState {
 /// Isso previne perda de dados ao navegar entre tabs ou fazer rebuilds temporários
 @Riverpod(keepAlive: true)
 class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
-  late final FitossanitariosRepository _fitossanitarioRepository;
-  late final ComentariosService _comentariosService;
-  late final FavoritosRepositorySimplified _favoritosRepository;
+  FitossanitariosRepository get _fitossanitarioRepository =>
+      ref.read(core_providers.fitossanitariosRepositoryProvider);
+  ComentariosService get _comentariosService =>
+      ref.read(comentariosServiceProvider);
+  FavoritosRepositorySimplified get _favoritosRepository =>
+      ref.read(favoritosRepositorySimplifiedProvider);
 
   @override
   Future<DetalheDefensivoState> build() async {
-    _favoritosRepository = ref.watch(favoritosRepositorySimplifiedProvider);
-    _fitossanitarioRepository =
-        ref.watch(core_providers.fitossanitariosRepositoryProvider);
-    _comentariosService = ref.watch(comentariosServiceProvider);
     _setupPremiumStatusListener();
 
     return DetalheDefensivoState.initial();

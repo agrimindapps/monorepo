@@ -18,12 +18,17 @@ part 'comentarios_notifier.g.dart';
 /// Princípios: Single Responsibility + Dependency Inversion
 @riverpod
 class ComentariosNotifier extends _$ComentariosNotifier {
-  late final GetComentariosUseCase _getComentariosUseCase;
-  late final AddComentarioUseCase _addComentarioUseCase;
-  late final DeleteComentarioUseCase _deleteComentarioUseCase;
-  late final ErrorHandlerService _errorHandler;
-  late final ComentariosFilterService _filterService;
-  late final ComentariosValidationService _validationService;
+  GetComentariosUseCase get _getComentariosUseCase =>
+      ref.read(getComentariosUseCaseProvider);
+  AddComentarioUseCase get _addComentarioUseCase =>
+      ref.read(addComentarioUseCaseProvider);
+  DeleteComentarioUseCase get _deleteComentarioUseCase =>
+      ref.read(deleteComentarioUseCaseProvider);
+  ErrorHandlerService get _errorHandler => ErrorHandlerService();
+  ComentariosFilterService get _filterService =>
+      ref.read(comentariosFilterServiceProvider);
+  ComentariosValidationService get _validationService =>
+      ref.read(comentariosValidationServiceProvider);
 
   Timer? _filterDebounceTimer;
   List<ComentarioEntity>? _cachedFilteredResults;
@@ -31,13 +36,6 @@ class ComentariosNotifier extends _$ComentariosNotifier {
 
   @override
   Future<ComentariosState> build() async {
-    _getComentariosUseCase = ref.watch(getComentariosUseCaseProvider);
-    _addComentarioUseCase = ref.watch(addComentarioUseCaseProvider);
-    _deleteComentarioUseCase = ref.watch(deleteComentarioUseCaseProvider);
-    _errorHandler = ErrorHandlerService();
-    _filterService = ref.watch(comentariosFilterServiceProvider);
-    _validationService = ref.watch(comentariosValidationServiceProvider);
-
     // ✅ CORREÇÃO: Carregar comentários automaticamente no build
     // Isso garante que a página sempre tenha dados na inicialização
     final comentarios = await _getComentariosUseCase();

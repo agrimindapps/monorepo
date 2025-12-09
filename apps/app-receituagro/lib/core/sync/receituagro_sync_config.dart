@@ -39,6 +39,10 @@ UserEntity _userEntityFromFirebaseMap(Map<String, dynamic> map) {
   return UserEntityReceitaAgroExtension.fromReceitaAgroFirebaseMap(map);
 }
 
+Map<String, dynamic> _userEntityToFirebaseMap(BaseSyncEntity entity) {
+  return (entity as UserEntity).toReceitaAgroFirebaseMap();
+}
+
 /// Configuração de sincronização específica do ReceitaAgro
 /// Diagnóstico agrícola com favoritos, comentários e dados do usuário
 abstract final class ReceitaAgroSyncConfig {
@@ -56,23 +60,45 @@ abstract final class ReceitaAgroSyncConfig {
         enableOrchestration: false,
       ),
       entities: [
-        EntitySyncRegistration<FavoritoSyncEntity>.simple(
+        // Favoritos com realtime sync habilitado
+        EntitySyncRegistration<FavoritoSyncEntity>(
           entityType: FavoritoSyncEntity,
           collectionName: 'favoritos',
           fromMap: _favoritoFromFirebaseMap,
           toMap: _favoritoToFirebaseMap,
+          conflictStrategy: ConflictStrategy.timestamp,
+          enableRealtime: true, // Sincronização em tempo real
+          syncInterval: const Duration(minutes: 2),
         ),
-        EntitySyncRegistration<ComentarioSyncEntity>.simple(
+        // Comentários com realtime sync habilitado
+        EntitySyncRegistration<ComentarioSyncEntity>(
           entityType: ComentarioSyncEntity,
           collectionName: 'comentarios',
           fromMap: _comentarioFromFirebaseMap,
           toMap: _comentarioToFirebaseMap,
+          conflictStrategy: ConflictStrategy.timestamp,
+          enableRealtime: true, // Sincronização em tempo real
+          syncInterval: const Duration(minutes: 2),
         ),
-        EntitySyncRegistration<UserSettingsSyncEntity>.simple(
+        // User settings com realtime sync habilitado
+        EntitySyncRegistration<UserSettingsSyncEntity>(
           entityType: UserSettingsSyncEntity,
           collectionName: 'user_settings',
           fromMap: _userSettingsFromFirebaseMap,
           toMap: _userSettingsToFirebaseMap,
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para settings
+          enableRealtime: true, // Sincronização em tempo real
+          syncInterval: const Duration(minutes: 5),
+        ),
+        // User entity para sincronização de perfil do usuário
+        EntitySyncRegistration<UserEntity>(
+          entityType: UserEntity,
+          collectionName: 'users',
+          fromMap: _userEntityFromFirebaseMap,
+          toMap: _userEntityToFirebaseMap,
+          conflictStrategy: ConflictStrategy.remoteWins, // Remote vence para dados do usuário
+          enableRealtime: false, // Não precisa de realtime para perfil
+          syncInterval: const Duration(minutes: 10),
         ),
       ],
     );

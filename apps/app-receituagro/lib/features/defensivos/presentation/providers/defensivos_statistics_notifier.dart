@@ -123,13 +123,13 @@ class DefensivosStatisticsState {
 /// Separated from HomeDefensivosProvider to improve maintainability and testability
 @riverpod
 class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
-  late final FitossanitariosRepository _repository;
-  late final FitossanitariosInfoRepository _infoRepository;
+  FitossanitariosRepository get _repository =>
+      ref.read(core_providers.fitossanitariosRepositoryProvider);
+  FitossanitariosInfoRepository get _infoRepository =>
+      ref.read(fitossanitariosInfoRepositoryProvider);
 
   @override
   Future<DefensivosStatisticsState> build() async {
-    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
-    _infoRepository = ref.watch(fitossanitariosInfoRepositoryProvider);
     return await _loadStatistics();
   }
 

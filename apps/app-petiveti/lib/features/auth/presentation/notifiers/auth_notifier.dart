@@ -1,12 +1,15 @@
+import 'dart:async';
+
 import 'package:core/core.dart' hide User;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;
+import '../../../../core/providers/realtime_sync_notifier.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/services/rate_limit_service.dart';
 import '../../domain/usecases/auth_usecases.dart' as auth_usecases;
 import '../providers/auth_providers.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_notifier.g.dart';
 
@@ -112,6 +115,11 @@ class AuthNotifier extends _$AuthNotifier {
           user: user,
           isAnonymous: isAnonymous,
         );
+
+        // Iniciar realtime sync se autenticado
+        if (user != null) {
+          unawaited(ref.read(realtimeSyncProvider.notifier).startListening(user.id));
+        }
       },
     );
   }
@@ -147,6 +155,10 @@ class AuthNotifier extends _$AuthNotifier {
           status: AuthStatus.authenticated,
           user: user,
         );
+
+        // Iniciar realtime sync
+        ref.read(realtimeSyncProvider.notifier).startListening(user.id);
+
         return true;
       },
     );
@@ -187,6 +199,10 @@ class AuthNotifier extends _$AuthNotifier {
             status: AuthStatus.authenticated,
             user: user,
           );
+
+          // Iniciar realtime sync
+          unawaited(ref.read(realtimeSyncProvider.notifier).startListening(user.id));
+
           loginSuccess = true;
         },
       );
@@ -238,6 +254,10 @@ class AuthNotifier extends _$AuthNotifier {
           status: AuthStatus.authenticated,
           user: user,
         );
+
+        // Iniciar realtime sync
+        ref.read(realtimeSyncProvider.notifier).startListening(user.id);
+
         return true;
       },
     );
@@ -261,6 +281,10 @@ class AuthNotifier extends _$AuthNotifier {
           status: AuthStatus.authenticated,
           user: user,
         );
+
+        // Iniciar realtime sync
+        ref.read(realtimeSyncProvider.notifier).startListening(user.id);
+
         return true;
       },
     );
@@ -284,6 +308,10 @@ class AuthNotifier extends _$AuthNotifier {
           status: AuthStatus.authenticated,
           user: user,
         );
+
+        // Iniciar realtime sync
+        ref.read(realtimeSyncProvider.notifier).startListening(user.id);
+
         return true;
       },
     );
@@ -307,6 +335,10 @@ class AuthNotifier extends _$AuthNotifier {
           status: AuthStatus.authenticated,
           user: user,
         );
+
+        // Iniciar realtime sync
+        ref.read(realtimeSyncProvider.notifier).startListening(user.id);
+
         return true;
       },
     );
@@ -333,6 +365,9 @@ class AuthNotifier extends _$AuthNotifier {
         );
         _saveAnonymousPreference();
 
+        // Iniciar realtime sync
+        ref.read(realtimeSyncProvider.notifier).startListening(user.id);
+
         return true;
       },
     );
@@ -348,10 +383,15 @@ class AuthNotifier extends _$AuthNotifier {
         status: AuthStatus.error,
         error: failure.message,
       ),
-      (_) => state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        user: null,
-      ),
+      (_) {
+        // Parar realtime sync
+        ref.read(realtimeSyncProvider.notifier).stopListening();
+
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          user: null,
+        );
+      },
     );
   }
 

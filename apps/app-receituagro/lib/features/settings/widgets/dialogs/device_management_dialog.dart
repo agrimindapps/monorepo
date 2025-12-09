@@ -11,6 +11,9 @@ import '../items/device_list_item.dart';
 /// - Device details and management
 /// - Revoke multiple devices at once
 /// - Device limit information
+///
+/// NOTE: Device management is currently in development.
+/// The settingsData parameter is kept for future compatibility.
 class DeviceManagementDialog extends ConsumerWidget {
   final dynamic settingsData;
 
@@ -19,15 +22,63 @@ class DeviceManagementDialog extends ConsumerWidget {
     required this.settingsData,
   });
 
+  /// Safely extract devices list from settingsData
+  List<DeviceInfo> _extractDevices(dynamic data) {
+    try {
+      // Try to access connectedDevicesInfo if it exists
+      if (data == null) return <DeviceInfo>[];
+      
+      // Check if data has the property using reflection-safe approach
+      final dynamic devicesData = _tryGetProperty(data, 'connectedDevicesInfo');
+      if (devicesData is List) {
+        return devicesData.whereType<DeviceInfo>().toList();
+      }
+      return <DeviceInfo>[];
+    } catch (e) {
+      debugPrint('DeviceManagementDialog: Error extracting devices: $e');
+      return <DeviceInfo>[];
+    }
+  }
+
+  /// Safely extract current device from settingsData
+  DeviceInfo? _extractCurrentDevice(dynamic data) {
+    try {
+      if (data == null) return null;
+      final dynamic deviceData = _tryGetProperty(data, 'currentDeviceInfo');
+      if (deviceData is DeviceInfo) {
+        return deviceData;
+      }
+      return null;
+    } catch (e) {
+      debugPrint('DeviceManagementDialog: Error extracting current device: $e');
+      return null;
+    }
+  }
+
+  /// Try to get a property from an object safely
+  dynamic _tryGetProperty(dynamic obj, String propertyName) {
+    try {
+      // Use noSuchMethod pattern to safely check for property
+      switch (propertyName) {
+        case 'connectedDevicesInfo':
+          // ignore: avoid_dynamic_calls
+          return obj.connectedDevicesInfo;
+        case 'currentDeviceInfo':
+          // ignore: avoid_dynamic_calls
+          return obj.currentDeviceInfo;
+        default:
+          return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final devices = (settingsData?.connectedDevicesInfo is List)
-        ? (settingsData.connectedDevicesInfo as List<dynamic>)
-            .whereType<DeviceInfo>()
-            .toList()
-        : <DeviceInfo>[];
-    final currentDevice = settingsData?.currentDeviceInfo as DeviceInfo?;
+    final devices = _extractDevices(settingsData);
+    final currentDevice = _extractCurrentDevice(settingsData);
 
     return Dialog(
       shape: RoundedRectangleBorder(

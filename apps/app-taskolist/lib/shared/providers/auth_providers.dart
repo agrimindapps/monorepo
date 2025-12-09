@@ -5,6 +5,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../core/providers/core_providers.dart';
+import '../../core/providers/realtime_sync_notifier.dart';
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/sync_service.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -149,17 +150,40 @@ class AuthNotifier extends _$AuthNotifier {
     // Cleanup subscription ao descartar notifier
     ref.onDispose(() {
       _subscription?.cancel();
+      // Para o realtime sync ao fazer logout
+      ref.read(realtimeSyncProvider.notifier).stopListening();
     });
 
     // Inicializar subscription para manter estado sincronizado
     _subscription = _authService.currentUser.listen(
-      (user) => state = AsyncValue.data(user),
+      (user) {
+        state = AsyncValue.data(user);
+        // Gerencia realtime sync baseado no estado do usuário
+        if (user != null && !isAnonymous(user)) {
+          _startRealtimeSync(user.id);
+        } else {
+          ref.read(realtimeSyncProvider.notifier).stopListening();
+        }
+      },
       onError: (Object error, StackTrace stackTrace) {
         state = AsyncValue.error(error, stackTrace);
       },
     );
 
-    return _authService.currentUser.first;
+    final currentUser = await _authService.currentUser.first;
+    
+    // Inicia realtime sync se já estiver logado
+    if (currentUser != null && !isAnonymous(currentUser)) {
+      _startRealtimeSync(currentUser.id);
+    }
+
+    return currentUser;
+  }
+
+  /// Inicia o realtime sync para o usuário
+  void _startRealtimeSync(String userId) {
+    debugPrint('[AuthNotifier] Starting realtime sync for user: $userId');
+    ref.read(realtimeSyncProvider.notifier).startListening(userId);
   }
 
   Future<void> signInWithEmailAndPassword(String email, String password) async {
@@ -173,7 +197,13 @@ class AuthNotifier extends _$AuthNotifier {
     state = await AsyncValue.guard(() async {
       return result.fold(
         (failure) => throw Exception(failure.message),
-        (user) => user,
+        (user) {
+          // Inicia realtime sync após login
+          if (!isAnonymous(user)) {
+            _startRealtimeSync(user.id);
+          }
+          return user;
+        },
       );
     });
   }
@@ -194,13 +224,22 @@ class AuthNotifier extends _$AuthNotifier {
     state = await AsyncValue.guard(() async {
       return result.fold(
         (failure) => throw Exception(failure.message),
-        (user) => user,
+        (user) {
+          // Inicia realtime sync após registro
+          if (!isAnonymous(user)) {
+            _startRealtimeSync(user.id);
+          }
+          return user;
+        },
       );
     });
   }
 
   Future<void> signOut() async {
     state = const AsyncValue.loading();
+
+    // Para o realtime sync antes de fazer logout
+    await ref.read(realtimeSyncProvider.notifier).stopListening();
 
     final result = await _authService.signOut();
     result.fold(
@@ -223,6 +262,7 @@ class AuthNotifier extends _$AuthNotifier {
       (user) {
         debugPrint('✅ AuthNotifier: Login anônimo bem-sucedido: ${user.id}');
         state = AsyncValue.data(user);
+        // Não inicia realtime sync para usuários anônimos
       },
     );
   }
@@ -235,7 +275,13 @@ class AuthNotifier extends _$AuthNotifier {
     state = await AsyncValue.guard(() async {
       return result.fold(
         (failure) => throw Exception(failure.message),
-        (user) => user,
+        (user) {
+          // Inicia realtime sync após login com Google
+          if (!isAnonymous(user)) {
+            _startRealtimeSync(user.id);
+          }
+          return user;
+        },
       );
     });
   }

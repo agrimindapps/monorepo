@@ -71,20 +71,19 @@ class PremiumState {
 /// Premium notifier for subscription management
 @riverpod
 class PremiumNotifier extends _$PremiumNotifier {
-  late final ReceitaAgroAnalyticsService _analytics;
-  late final ReceitaAgroCloudFunctionsService _cloudFunctions;
-  late final ReceitaAgroRemoteConfigService _remoteConfig;
-  late final ISubscriptionRepository _subscriptionRepository;
+  ReceitaAgroAnalyticsService get _analytics =>
+      ref.read(local_providers.analyticsServiceProvider);
+  ReceitaAgroCloudFunctionsService get _cloudFunctions =>
+      ReceitaAgroCloudFunctionsService.instance;
+  ReceitaAgroRemoteConfigService get _remoteConfig =>
+      ReceitaAgroRemoteConfigService.instance;
+  ISubscriptionRepository get _subscriptionRepository =>
+      ref.read(local_providers.subscriptionRepositoryProvider);
 
   StreamSubscription<SubscriptionEntity?>? _subscriptionStreamSubscription;
 
   @override
   Future<PremiumState> build() async {
-    _analytics = ref.watch(local_providers.analyticsServiceProvider);
-    // _cloudFunctions = ref.watch(receitaAgroCloudFunctionsServiceProvider);
-    _cloudFunctions = ReceitaAgroCloudFunctionsService.instance;
-    _remoteConfig = ReceitaAgroRemoteConfigService.instance;
-    _subscriptionRepository = ref.watch(local_providers.subscriptionRepositoryProvider);
     ref.onDispose(() {
       _subscriptionStreamSubscription?.cancel();
       if (EnvironmentConfig.enableLogging) {

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
@@ -49,7 +49,7 @@ class ProductionMonitoringService {
         'monitoring_service_initialized',
         parameters: {
           'timestamp': DateTime.now().toIso8601String(),
-          'platform': Platform.operatingSystem,
+          'platform': kIsWeb ? 'web' : Platform.operatingSystem,
           'app_version': '1.0.0',
         },
       );

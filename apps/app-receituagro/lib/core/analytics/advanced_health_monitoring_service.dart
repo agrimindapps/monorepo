@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' show InternetAddress, Platform;
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
@@ -540,8 +540,8 @@ class AdvancedHealthMonitoringService {
   Future<Map<String, dynamic>> _collectSystemMetrics() async {
     return {
       'app_version': '1.0.0',
-      'platform': Platform.operatingSystem,
-      'dart_version': Platform.version,
+      'platform': kIsWeb ? 'web' : Platform.operatingSystem,
+      'dart_version': kIsWeb ? 'web' : Platform.version,
       'uptime_seconds': DateTime.now().millisecondsSinceEpoch ~/ 1000,
       'total_health_checks': _healthHistory.length,
       'alerts_triggered_today': _getAlertsTriggeredToday(),

@@ -305,7 +305,9 @@ class _DefensivosUnificadoPageState
       isDark: isDark,
       showBackButton: true,
       showActions: true,
-      onBackPressed: widget.isAgrupados && canGoBack ? _onDrillDownBack : null,
+      onBackPressed: widget.isAgrupados && canGoBack 
+          ? _onDrillDownBack 
+          : () => Navigator.of(context).pop(),
       onRightIconPressed: _toggleSort,
     );
   }

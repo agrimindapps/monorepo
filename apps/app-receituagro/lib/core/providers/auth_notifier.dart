@@ -17,21 +17,18 @@ part 'auth_notifier.g.dart';
 /// Manages authentication state
 @Riverpod(keepAlive: true)
 class AuthNotifier extends _$AuthNotifier {
-  late final IAuthRepository _authRepository;
-  late final DeviceIdentityService _deviceService;
-  late final ReceitaAgroAnalyticsService _analytics;
-  late final EnhancedAccountDeletionService _enhancedDeletionService;
+  IAuthRepository get _authRepository => ref.read(authRepositoryProvider);
+  DeviceIdentityService get _deviceService =>
+      ref.read(deviceIdentityServiceProvider);
+  ReceitaAgroAnalyticsService get _analytics =>
+      ref.read(analyticsServiceProvider);
+  EnhancedAccountDeletionService get _enhancedDeletionService =>
+      ref.read(enhancedAccountDeletionServiceProvider);
 
   StreamSubscription<UserEntity?>? _userSubscription;
 
   @override
   Future<AuthState> build() async {
-    // Initialize dependencies
-    _authRepository = ref.read(authRepositoryProvider);
-    _deviceService = ref.read(deviceIdentityServiceProvider);
-    _analytics = ref.read(analyticsServiceProvider);
-    _enhancedDeletionService = ref.read(enhancedAccountDeletionServiceProvider);
-
     // Setup cleanup on dispose
     ref.onDispose(() {
       _userSubscription?.cancel();

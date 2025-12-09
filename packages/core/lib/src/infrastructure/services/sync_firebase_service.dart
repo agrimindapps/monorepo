@@ -726,7 +726,21 @@ class SyncFirebaseService<T extends BaseSyncEntity>
   }
 
   void _setupFirestoreListener() {
-    if (_currentUserId == null || !config.enableRealtimeSync) return;
+    if (_currentUserId == null) {
+      developer.log(
+        '[$collectionName] Realtime listener não configurado: usuário não autenticado',
+        name: 'SyncService',
+      );
+      return;
+    }
+    
+    if (!config.enableRealtimeSync) {
+      developer.log(
+        '[$collectionName] Realtime listener não configurado: enableRealtimeSync=false',
+        name: 'SyncService',
+      );
+      return;
+    }
 
     try {
       final collection = _firestore
@@ -734,20 +748,34 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           .doc(_currentUserId)
           .collection(collectionName);
 
+      developer.log(
+        '[$collectionName] 🔴 Configurando listener realtime para: users/$_currentUserId/$collectionName',
+        name: 'SyncService',
+      );
+
       _firestoreSubscription = collection.snapshots().listen(
         (snapshot) {
+          developer.log(
+            '[$collectionName] 🔔 Snapshot recebido: ${snapshot.docChanges.length} mudanças',
+            name: 'SyncService',
+          );
           _handleFirestoreSnapshot(snapshot);
         },
         onError: (Object? error) {
           developer.log(
-            'Erro no listener do Firestore: $error',
+            '[$collectionName] ❌ Erro no listener do Firestore: $error',
             name: 'SyncService',
           );
         },
       );
+      
+      developer.log(
+        '[$collectionName] ✅ Listener realtime configurado com sucesso',
+        name: 'SyncService',
+      );
     } catch (e) {
       developer.log(
-        'Erro ao configurar listener do Firestore: $e',
+        '[$collectionName] ❌ Erro ao configurar listener do Firestore: $e',
         name: 'SyncService',
       );
     }
@@ -762,12 +790,28 @@ class SyncFirebaseService<T extends BaseSyncEntity>
     try {
       bool hasChanges = false;
 
+      developer.log(
+        '[$collectionName] 🔄 Processando snapshot com ${snapshot.docChanges.length} mudanças',
+        name: 'SyncService',
+      );
+
       for (final change in snapshot.docChanges) {
         final rawData = change.doc.data();
-        if (rawData == null || rawData is! Map) continue;
+        if (rawData == null || rawData is! Map) {
+          developer.log(
+            '[$collectionName] ⚠️ Documento sem dados: ${change.doc.id}',
+            name: 'SyncService',
+          );
+          continue;
+        }
 
         // Firebase returns LinkedMap<dynamic, dynamic>, ensure proper casting
         final data = Map<String, dynamic>.from(rawData);
+
+        developer.log(
+          '[$collectionName] 📝 Processando ${change.type.name}: ${change.doc.id}',
+          name: 'SyncService',
+        );
 
         switch (change.type) {
           case DocumentChangeType.added:
@@ -776,9 +820,13 @@ class SyncFirebaseService<T extends BaseSyncEntity>
               final remoteItem = fromMap(data);
               await _mergeRemoteItem(remoteItem);
               hasChanges = true;
+              developer.log(
+                '[$collectionName] ✅ Item ${change.type.name} processado: ${change.doc.id}',
+                name: 'SyncService',
+              );
             } catch (e) {
               developer.log(
-                'Erro ao processar item remoto: $e',
+                '[$collectionName] ❌ Erro ao processar item remoto: $e',
                 name: 'SyncService',
               );
             }
@@ -786,16 +834,24 @@ class SyncFirebaseService<T extends BaseSyncEntity>
           case DocumentChangeType.removed:
             await _handleRemoteDelete(change.doc.id);
             hasChanges = true;
+            developer.log(
+              '[$collectionName] 🗑️ Item removido: ${change.doc.id}',
+              name: 'SyncService',
+            );
             break;
         }
       }
 
       if (hasChanges) {
+        developer.log(
+          '[$collectionName] 🔄 Atualizando dados locais após mudanças remotas',
+          name: 'SyncService',
+        );
         await _refreshLocalData();
       }
     } catch (e) {
       developer.log(
-        'Erro ao processar snapshot do Firestore: $e',
+        '[$collectionName] ❌ Erro ao processar snapshot do Firestore: $e',
         name: 'SyncService',
       );
     }

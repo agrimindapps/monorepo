@@ -134,15 +134,14 @@ class _HistoryData {
 /// Princípios: Single Responsibility + Dependency Inversion
 @riverpod
 class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
-  late final FitossanitariosRepository _repository;
-  late final FitossanitariosInfoRepository _infoRepository;
-  late final AccessHistoryService _historyService;
+  FitossanitariosRepository get _repository =>
+      ref.read(core_providers.fitossanitariosRepositoryProvider);
+  FitossanitariosInfoRepository get _infoRepository =>
+      ref.read(fitossanitariosInfoRepositoryProvider);
+  AccessHistoryService get _historyService => AccessHistoryService();
 
   @override
   Future<HomeDefensivosState> build() async {
-    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
-    _infoRepository = ref.watch(fitossanitariosInfoRepositoryProvider);
-    _historyService = AccessHistoryService();
     return _loadInitialData();
   }
 

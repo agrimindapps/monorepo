@@ -1,3 +1,6 @@
+import 'dart:developer' as developer;
+
+import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
@@ -131,21 +134,42 @@ class FavoritosDriftSyncAdapter
 
   @override
   FavoritoSyncEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    // Parse adicionadoEm com tratamento seguro
+    DateTime? adicionadoEm;
+    final adicionadoEmRaw = data['adicionadoEm'];
+    if (adicionadoEmRaw is fs.Timestamp) {
+      adicionadoEm = adicionadoEmRaw.toDate();
+    } else if (adicionadoEmRaw is String && adicionadoEmRaw.isNotEmpty) {
+      adicionadoEm = DateTime.tryParse(adicionadoEmRaw);
+    }
+    
+    // Parse createdAt com tratamento seguro
+    DateTime? createdAt;
+    final createdAtRaw = data['createdAt'];
+    if (createdAtRaw is fs.Timestamp) {
+      createdAt = createdAtRaw.toDate();
+    } else if (createdAtRaw is String && createdAtRaw.isNotEmpty) {
+      createdAt = DateTime.tryParse(createdAtRaw);
+    }
+    
+    // Parse updatedAt com tratamento seguro
+    DateTime? updatedAt;
+    final updatedAtRaw = data['updatedAt'];
+    if (updatedAtRaw is fs.Timestamp) {
+      updatedAt = updatedAtRaw.toDate();
+    } else if (updatedAtRaw is String && updatedAtRaw.isNotEmpty) {
+      updatedAt = DateTime.tryParse(updatedAtRaw);
+    }
+    
     return FavoritoSyncEntity(
       id: data['id'] as String? ?? '',
-      tipo: data['tipo'] as String,
-      itemId: data['itemId'] as String,
+      tipo: data['tipo'] as String? ?? 'unknown',
+      itemId: data['itemId'] as String? ?? '',
       itemData: data['itemData'] as Map<String, dynamic>? ?? {},
-      adicionadoEm: (data['adicionadoEm'] is Timestamp)
-          ? (data['adicionadoEm'] as Timestamp).toDate()
-          : DateTime.parse(data['adicionadoEm'] as String),
-      createdAt: (data['createdAt'] is Timestamp)
-          ? (data['createdAt'] as Timestamp).toDate()
-          : null,
-      updatedAt: (data['updatedAt'] is Timestamp)
-          ? (data['updatedAt'] as Timestamp).toDate()
-          : null,
-      userId: data['userId'] as String,
+      adicionadoEm: adicionadoEm ?? DateTime.now(),
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      userId: data['userId'] as String? ?? '',
       isDeleted: data['isDeleted'] as bool? ?? false,
     );
   }
@@ -173,6 +197,93 @@ class FavoritosDriftSyncAdapter
       return Left(
         CacheFailure('Erro ao buscar favorito local por firebaseId: $e'),
       );
+    }
+  }
+
+  /// Stream de mudanças em tempo real do Firestore
+  /// Escuta a coleção de favoritos do usuário e atualiza o Drift quando detecta mudanças
+  Stream<void> watchRemoteChanges(String userId) {
+    return firestore
+        .collection('users')
+        .doc(userId)
+        .collection(collectionName)
+        .snapshots()
+        .asyncMap((snapshot) async {
+      for (final change in snapshot.docChanges) {
+        final data = change.doc.data();
+        if (data == null) continue;
+
+        final docId = change.doc.id;
+        data['id'] = docId;
+
+        switch (change.type) {
+          case fs.DocumentChangeType.added:
+          case fs.DocumentChangeType.modified:
+            await _handleRemoteChange(data);
+            break;
+          case fs.DocumentChangeType.removed:
+            await _handleRemoteDelete(docId);
+            break;
+        }
+      }
+    });
+  }
+
+  /// Processa uma mudança remota (add/modify)
+  Future<void> _handleRemoteChange(Map<String, dynamic> data) async {
+    try {
+      final entity = fromFirestoreDoc(data);
+      final companion = entityToCompanion(entity);
+
+      // Verifica se já existe localmente
+      final existingResult = await getLocalByFirebaseId(entity.id);
+      
+      // Extrai o valor do Either para processar corretamente
+      final existing = existingResult.fold<FavoritoSyncEntity?>(
+        (failure) => null,
+        (entity) => entity,
+      );
+      
+      if (existing != null) {
+        // Atualiza se o remoto é mais recente
+        final remoteUpdatedAt = entity.updatedAt ?? entity.createdAt;
+        final localUpdatedAt = existing.updatedAt ?? existing.createdAt;
+
+        if (remoteUpdatedAt != null &&
+            localUpdatedAt != null &&
+            remoteUpdatedAt.isAfter(localUpdatedAt)) {
+          await (localDb.update(localDb.favoritos)
+                ..where((tbl) => tbl.firebaseId.equals(entity.id)))
+              .write(companion);
+          developer.log(
+            '✅ [REALTIME_SYNC] Favorito atualizado: ${entity.itemId}',
+            name: 'FavoritosDriftSyncAdapter',
+          );
+        }
+      } else {
+        // Insere novo
+        await localDb.into(localDb.favoritos).insert(companion);
+        developer.log(
+          '✅ [REALTIME_SYNC] Novo favorito inserido: ${entity.itemId}',
+          name: 'FavoritosDriftSyncAdapter',
+        );
+      }
+    } catch (e) {
+      developer.log(
+        '❌ [REALTIME_SYNC] Erro ao processar mudança remota: $e',
+        name: 'FavoritosDriftSyncAdapter',
+      );
+    }
+  }
+
+  /// Processa uma deleção remota
+  Future<void> _handleRemoteDelete(String firebaseId) async {
+    try {
+      await (localDb.update(localDb.favoritos)
+            ..where((tbl) => tbl.firebaseId.equals(firebaseId)))
+          .write(const FavoritosCompanion(isDeleted: Value(true)));
+    } catch (e) {
+      // Silently ignore
     }
   }
 }

@@ -54,13 +54,11 @@ class PreferencesState {
 /// Notifier para gerenciar estado das preferências de usuário
 @riverpod
 class PreferencesNotifier extends _$PreferencesNotifier {
-  late final IUserPreferencesRepository _preferencesRepository;
+  IUserPreferencesRepository get _preferencesRepository =>
+      ref.read(userPreferencesRepositoryProvider);
 
   @override
   Future<PreferencesState> build() async {
-    // O repositório será injetado via Riverpod
-    _preferencesRepository = ref.watch(userPreferencesRepositoryProvider);
-
     final userPreferences = await _preferencesRepository.getUserPreferences();
 
     return PreferencesState.fromUserPreferences(userPreferences);

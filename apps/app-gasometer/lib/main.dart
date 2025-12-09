@@ -6,7 +6,9 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app.dart';
 import 'core/gasometer_sync_config.dart';
 import 'core/providers/dependency_providers.dart';
+import 'core/providers/realtime_sync_notifier.dart';
 import 'core/services/connectivity/connectivity_sync_integration.dart';
+import 'core/services/gasometer_realtime_service.dart';
 import 'features/sync/domain/services/auto_sync_service.dart';
 import 'firebase_options.dart';
 
@@ -14,6 +16,7 @@ late ICrashlyticsRepository _crashlyticsRepository;
 late ConnectivitySyncIntegration _connectivityIntegration;
 late AutoSyncService _autoSyncService;
 late SharedPreferences _sharedPreferences;
+late GasometerRealtimeService _realtimeService;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -117,6 +120,7 @@ Future<void> main() async {
 
     await _initializeConnectivityMonitoring(container);
     await _initializeAutoSync(container);
+    await _initializeRealtimeSync(container);
 
     runApp(UncontrolledProviderScope(
       container: container,
@@ -263,3 +267,33 @@ Future<void> _initializeAutoSync(ProviderContainer container) async {
 
 /// Get auto-sync service instance for lifecycle management
 AutoSyncService get autoSyncService => _autoSyncService;
+
+/// Get realtime service instance for lifecycle management
+GasometerRealtimeService get realtimeService => _realtimeService;
+
+/// Initialize realtime sync service for cross-device synchronization
+Future<void> _initializeRealtimeSync(ProviderContainer container) async {
+  try {
+    if (kDebugMode) {
+      SecureLogger.info('Initializing realtime sync service');
+    }
+
+    _realtimeService = container.read(gasometerRealtimeServiceProvider);
+    await _realtimeService.initialize();
+
+    if (kDebugMode) {
+      SecureLogger.info('Realtime sync service initialized successfully');
+    }
+  } catch (e, stackTrace) {
+    SecureLogger.error('Error initializing realtime sync service', error: e);
+    try {
+      await _crashlyticsRepository.recordError(
+        exception: e,
+        stackTrace: stackTrace,
+        reason: 'Realtime sync service initialization failed',
+      );
+    } catch (_) {
+      // Fail silently - app can still work without realtime sync
+    }
+  }
+}

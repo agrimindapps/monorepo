@@ -1,8 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Platform;
 
 import 'package:crypto/crypto.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -88,6 +89,26 @@ class DeviceIdentityService {
     final uuid = await getDeviceUuid();
     final packageInfo = await PackageInfo.fromPlatform();
 
+    // Web platform
+    if (kIsWeb) {
+      final webInfo = await _deviceInfo.webBrowserInfo;
+      return DeviceInfo(
+        uuid: uuid,
+        name: '${webInfo.browserName} on ${webInfo.platform ?? 'Web'}',
+        model: webInfo.browserName.toString(),
+        platform: 'Web',
+        systemVersion: webInfo.appVersion ?? 'unknown',
+        appVersion: packageInfo.version,
+        buildNumber: packageInfo.buildNumber,
+        identifier: webInfo.userAgent ?? uuid,
+        isPhysicalDevice: false,
+        manufacturer: 'Web Browser',
+        firstLoginAt: DateTime.now(),
+        lastActiveAt: DateTime.now(),
+        isActive: true,
+      );
+    }
+
     if (Platform.isIOS) {
       final iosInfo = await _deviceInfo.iosInfo;
       return DeviceInfo(
@@ -124,8 +145,21 @@ class DeviceIdentityService {
       );
     }
 
-    throw UnsupportedError(
-      'Platform not supported: ${Platform.operatingSystem}',
+    // Fallback for other platforms
+    return DeviceInfo(
+      uuid: uuid,
+      name: 'Unknown Device',
+      model: 'Unknown',
+      platform: 'Unknown',
+      systemVersion: 'Unknown',
+      appVersion: packageInfo.version,
+      buildNumber: packageInfo.buildNumber,
+      identifier: uuid,
+      isPhysicalDevice: false,
+      manufacturer: 'Unknown',
+      firstLoginAt: DateTime.now(),
+      lastActiveAt: DateTime.now(),
+      isActive: true,
     );
   }
 
@@ -152,7 +186,13 @@ class DeviceIdentityService {
     final identifiers = <String, String>{};
 
     try {
-      if (Platform.isIOS) {
+      if (kIsWeb) {
+        final webInfo = await _deviceInfo.webBrowserInfo;
+        identifiers['platform'] = 'web';
+        identifiers['browser'] = webInfo.browserName.toString();
+        identifiers['userAgent'] = webInfo.userAgent ?? 'unknown';
+        identifiers['vendor'] = webInfo.vendor ?? 'unknown';
+      } else if (Platform.isIOS) {
         final iosInfo = await _deviceInfo.iosInfo;
         identifiers['platform'] = 'ios';
         identifiers['model'] = iosInfo.model;
@@ -174,7 +214,7 @@ class DeviceIdentityService {
       final packageInfo = await PackageInfo.fromPlatform();
       identifiers['packageName'] = packageInfo.packageName;
     } catch (e) {
-      identifiers['platform'] = Platform.operatingSystem;
+      identifiers['platform'] = kIsWeb ? 'web' : 'unknown';
       identifiers['timestamp'] =
           DateTime.now().millisecondsSinceEpoch.toString();
     }
@@ -202,7 +242,7 @@ class DeviceIdentityService {
   String _generateFallbackUuid() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final random = (timestamp % 10000).toString().padLeft(4, '0');
-    final platform = Platform.operatingSystem.substring(0, 3);
+    final platform = kIsWeb ? 'web' : 'unk';
 
     return 'fallback-$platform-$timestamp-$random';
   }

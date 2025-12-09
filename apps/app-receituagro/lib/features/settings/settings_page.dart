@@ -107,9 +107,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         AuthSection(),
         SizedBox(height: 16),
         // New refactored sections using new notifiers
-        NewNotificationSection(),
-        SizedBox(height: 16),
         NewPremiumSection(),
+        SizedBox(height: 16),
+        NewNotificationSection(),
         SizedBox(height: 16),
         // Legacy sections (to be removed after migration)
         // PremiumSection(),

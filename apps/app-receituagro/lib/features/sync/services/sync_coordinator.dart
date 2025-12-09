@@ -15,6 +15,7 @@ import '../../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
 /// - Monitora conectividade
 /// - Dispara sincronização periódica
 /// - Gerencia ciclo de vida dos adapters
+/// - Escuta mudanças em tempo real do Firestore
 
 class SyncCoordinator {
   final ConnectivityService _connectivityService;
@@ -23,6 +24,8 @@ class SyncCoordinator {
 
   Timer? _syncTimer;
   bool _isSyncing = false;
+  StreamSubscription<void>? _favoritosRealtimeSubscription;
+  StreamSubscription<void>? _comentariosRealtimeSubscription;
 
   SyncCoordinator(
     this._connectivityService,
@@ -42,6 +45,9 @@ class SyncCoordinator {
           name: 'SyncCoordinator',
         );
         syncAll();
+        _startRealtimeListeners();
+      } else {
+        _stopRealtimeListeners();
       }
     });
 
@@ -52,6 +58,72 @@ class SyncCoordinator {
 
     // Sync inicial
     syncAll();
+    
+    // Inicia listeners em tempo real
+    _startRealtimeListeners();
+  }
+
+  /// Inicia os listeners em tempo real do Firestore
+  void _startRealtimeListeners() {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null) {
+      developer.log(
+        'Usuário não logado. Realtime listeners não iniciados.',
+        name: 'SyncCoordinator',
+      );
+      return;
+    }
+
+    developer.log(
+      'Iniciando listeners em tempo real para userId: $userId',
+      name: 'SyncCoordinator',
+    );
+
+    // Listener de Favoritos
+    _favoritosRealtimeSubscription?.cancel();
+    _favoritosRealtimeSubscription = _favoritosAdapter.watchRemoteChanges(userId).listen(
+      (_) {
+        developer.log(
+          '✅ [REALTIME] Favoritos atualizados via listener',
+          name: 'SyncCoordinator',
+        );
+      },
+      onError: (Object? error) {
+        developer.log(
+          '❌ [REALTIME] Erro no listener de favoritos: $error',
+          name: 'SyncCoordinator',
+        );
+      },
+    );
+
+    // Listener de Comentários
+    _comentariosRealtimeSubscription?.cancel();
+    _comentariosRealtimeSubscription = _comentariosAdapter.watchRemoteChanges(userId).listen(
+      (_) {
+        developer.log(
+          '✅ [REALTIME] Comentários atualizados via listener',
+          name: 'SyncCoordinator',
+        );
+      },
+      onError: (Object? error) {
+        developer.log(
+          '❌ [REALTIME] Erro no listener de comentários: $error',
+          name: 'SyncCoordinator',
+        );
+      },
+    );
+  }
+
+  /// Para os listeners em tempo real
+  void _stopRealtimeListeners() {
+    developer.log(
+      'Parando listeners em tempo real',
+      name: 'SyncCoordinator',
+    );
+    _favoritosRealtimeSubscription?.cancel();
+    _favoritosRealtimeSubscription = null;
+    _comentariosRealtimeSubscription?.cancel();
+    _comentariosRealtimeSubscription = null;
   }
 
   /// Executa sincronização de todas as entidades
@@ -146,5 +218,6 @@ class SyncCoordinator {
 
   void dispose() {
     _syncTimer?.cancel();
+    _stopRealtimeListeners();
   }
 }

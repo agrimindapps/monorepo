@@ -57,13 +57,12 @@ class DefensivosHistoryState {
 /// Separated from HomeDefensivosProvider to improve maintainability and testability
 @riverpod
 class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
-  late final FitossanitariosRepository _repository;
-  late final AccessHistoryService _historyService;
+  FitossanitariosRepository get _repository =>
+      ref.read(core_providers.fitossanitariosRepositoryProvider);
+  AccessHistoryService get _historyService => AccessHistoryService();
 
   @override
   Future<DefensivosHistoryState> build() async {
-    _repository = ref.watch(core_providers.fitossanitariosRepositoryProvider);
-    _historyService = AccessHistoryService();
     return await _loadHistory();
   }
 

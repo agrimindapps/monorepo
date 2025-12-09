@@ -179,6 +179,7 @@ export 'src/riverpod/domain/analytics/analytics_providers.dart';
 export 'src/riverpod/domain/auth/auth_domain_providers.dart';
 export 'src/riverpod/domain/device/device_management_providers.dart';
 export 'src/riverpod/domain/premium/subscription_providers.dart';
+export 'src/riverpod/domain/premium/subscription_sync_providers.dart';
 export 'src/riverpod/domain/sync/sync_providers.dart' hide OfflineData;
 export 'src/riverpod/riverpod_utils.dart';
 export 'src/services/cache/cache_service.dart';

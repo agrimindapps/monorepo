@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../providers/core_providers.dart' as core_providers;
+import '../providers/realtime_sync_notifier.dart';
 import '../services/receituagro_realtime_service.dart';
 import '../sync/receituagro_sync_config.dart';
 import '../utils/diagnostico_logger.dart';
@@ -18,7 +19,8 @@ class AppInitialization {
       debugPrint(
         '🌾 [MAIN] Initializing EnhancedConnectivityService for rural environments...',
       );
-      final enhancedConnectivity = container.read(core_providers.enhancedConnectivityServiceProvider);
+      final enhancedConnectivity =
+          container.read(core_providers.enhancedConnectivityServiceProvider);
       final enhancedResult = await enhancedConnectivity.initialize(
         customPingHost: '1.1.1.1',
         enableQualityMonitoring: true,
@@ -52,7 +54,8 @@ class AppInitialization {
   static void initializeSyncCoordinator(ProviderContainer container) {
     try {
       debugPrint('🔄 [MAIN] Initializing SyncCoordinator...');
-      final syncCoordinator = container.read(core_providers.syncCoordinatorProvider);
+      final syncCoordinator =
+          container.read(core_providers.syncCoordinatorProvider);
       syncCoordinator.initialize();
       debugPrint('✅ [MAIN] SyncCoordinator initialized');
     } catch (e) {
@@ -61,12 +64,15 @@ class AppInitialization {
   }
 
   /// Initialize push notifications
-  static Future<void> initializePushNotifications(ProviderContainer container) async {
+  static Future<void> initializePushNotifications(
+      ProviderContainer container) async {
     try {
-      final messagingService = container.read(core_providers.firebaseMessagingServiceProvider);
+      final messagingService =
+          container.read(core_providers.firebaseMessagingServiceProvider);
       await messagingService.initialize();
 
-      final promotionalManager = container.read(core_providers.promotionalNotificationManagerProvider);
+      final promotionalManager =
+          container.read(core_providers.promotionalNotificationManagerProvider);
       await promotionalManager.initialize();
 
       debugPrint('✅ [MAIN] Push notifications inicializados com sucesso');
@@ -76,15 +82,18 @@ class AppInitialization {
   }
 
   /// Initialize remote config
-  static Future<void> initializeRemoteConfig(ProviderContainer container) async {
-    final remoteConfigService = container.read(core_providers.remoteConfigServiceProvider);
+  static Future<void> initializeRemoteConfig(
+      ProviderContainer container) async {
+    final remoteConfigService =
+        container.read(core_providers.remoteConfigServiceProvider);
     await remoteConfigService.initialize();
   }
 
   /// Initialize analytics
   static Future<void> initializeAnalytics(ProviderContainer container) async {
     try {
-      final analyticsService = container.read(core_providers.analyticsServiceProvider);
+      final analyticsService =
+          container.read(core_providers.analyticsServiceProvider);
       await analyticsService.initialize();
     } catch (e) {
       DiagnosticoLogger.debug('ReceitaAgroAnalyticsService not registered', e);
@@ -93,13 +102,16 @@ class AppInitialization {
 
   /// Initialize premium service
   static Future<void> initializePremium(ProviderContainer container) async {
-    final premiumService = container.read(core_providers.premiumServiceProvider);
+    final premiumService =
+        container.read(core_providers.premiumServiceProvider);
     await premiumService.initialize();
   }
 
   /// Initialize notification service
-  static Future<void> initializeNotifications(ProviderContainer container) async {
-    final notificationService = container.read(core_providers.notificationServiceProvider);
+  static Future<void> initializeNotifications(
+      ProviderContainer container) async {
+    final notificationService =
+        container.read(core_providers.notificationServiceProvider);
     await notificationService.initialize();
   }
 
@@ -136,13 +148,23 @@ class AppInitialization {
       await ReceitaAgroRealtimeService.instance.initialize();
 
       DiagnosticoLogger.debug('Realtime sync service initialized successfully');
+
+      // Initialize RealtimeSyncNotifier to enable cross-device sync
+      // This provider watches Firebase changes and invalidates local providers
+      container.read(realtimeSyncProvider);
+      DiagnosticoLogger.debug(
+          'RealtimeSyncNotifier initialized for cross-device sync');
+
+      // Realtime sync is handled automatically by ReceitaAgroRealtimeService
+      DiagnosticoLogger.debug(
+          'Realtime sync service will manage updates automatically');
     } catch (e) {
       DiagnosticoLogger.debug('Sync initialization failed', e);
     }
   }
 
   /// Load priority data
-  /// 
+  ///
   /// NOTA: Este método agora é um no-op pois o carregamento de dados
   /// é gerenciado pelo StaticDataLoaderService através do AppDataManager.initialize()
   /// que verifica controle de versão e evita recarregamentos desnecessários.
@@ -156,7 +178,7 @@ class AppInitialization {
   }
 
   /// Load background data (non-blocking)
-  /// 
+  ///
   /// NOTA: Este método agora é um no-op pois os diagnósticos são carregados
   /// junto com os outros dados estáticos no StaticDataLoaderService.
   static void loadBackgroundData(ProviderContainer container) {

@@ -49,16 +49,17 @@ class _PremiumSubscriptionPageState
     final premiumAsyncState = ref.watch(premiumNotifierProvider);
 
     return Scaffold(
-      backgroundColor: PlantisColors.primary,
-      body: DecoratedBox(
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
+      body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              PlantisColors.primary, // Verde Plantis principal
-              PlantisColors.primaryDark, // Verde escuro
-              PlantisColors.leaf, // Verde folha
+              Color(0xFF052E16), // Very dark green (Premium)
+              Color(0xFF0A7548), // Dark green
+              Color(0xFF0D945A), // Plantis Primary
             ],
           ),
         ),
@@ -101,18 +102,23 @@ class _PremiumSubscriptionPageState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
           const Text(
             'Premium Plantis',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: const Icon(Icons.close, color: Colors.white),
-          ),
+          const SizedBox(width: 48),
         ],
       ),
     );

@@ -6,8 +6,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/tasks/data/task_model.dart';
 import '../../features/tasks/domain/task_entity.dart';
-import '../../features/tasks/providers/task_providers.dart';
 import '../../features/tasks/presentation/providers/task_notifier.dart';
+import '../../features/tasks/providers/task_providers.dart';
 
 part 'realtime_sync_notifier.g.dart';
 
@@ -30,6 +30,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
       return;
     }
 
+    // Ensure we stop any existing listeners before starting new ones
     await stopListening();
     _currentUserId = userId;
 
@@ -56,7 +57,13 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   }
 
   void _disposeAll() {
-    stopListening();
+    // Cancel all subscriptions synchronously
+    for (final sub in _subscriptions.values) {
+      sub.cancel();
+    }
+    _subscriptions.clear();
+    _currentUserId = null;
+    debugPrint('[RealtimeSync] All subscriptions disposed');
   }
 
   /// Escuta uma coleção específica do Firebase
@@ -67,10 +74,13 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   }) {
     try {
       final firestore = FirebaseFirestore.instance;
-      final collectionRef =
-          firestore.collection('users').doc(userId).collection(collection);
+      final collectionRef = firestore
+          .collection('users')
+          .doc(userId)
+          .collection(collection);
 
-      final subscription = collectionRef.snapshots().listen(
+      late final StreamSubscription<QuerySnapshot> subscription;
+      subscription = collectionRef.snapshots().listen(
         (snapshot) async {
           if (snapshot.docChanges.isNotEmpty) {
             debugPrint(
@@ -79,8 +89,11 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
             await onData(snapshot);
           }
         },
-        onError: (error) {
+        onError: (Object error) {
           debugPrint('[RealtimeSync] Error listening to $collection: $error');
+          // Cancel the subscription on error
+          subscription.cancel();
+          _subscriptions.remove(collection);
         },
       );
 
@@ -126,7 +139,8 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
               }
             } catch (e) {
               debugPrint(
-                  '[RealtimeSync] Error processing task $firebaseId: $e');
+                '[RealtimeSync] Error processing task $firebaseId: $e',
+              );
             }
             break;
 

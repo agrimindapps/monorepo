@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../database/repositories/subscription_local_repository.dart';
 import '../../domain/entities/premium_status.dart';
 import '../datasources/premium_firebase_data_source.dart';
 import '../datasources/premium_remote_data_source.dart';
@@ -21,14 +22,16 @@ class PremiumSyncService {
     this._remoteDataSource,
     this._firebaseDataSource,
     this._webhookDataSource,
-    this._authService,
-  ) {
+    this._authService, {
+    SubscriptionLocalRepository? localRepository,
+  }) : _localRepository = localRepository {
     _initializeStreams();
   }
   final PremiumRemoteDataSource _remoteDataSource;
   final PremiumFirebaseDataSource _firebaseDataSource;
   final PremiumWebhookDataSource _webhookDataSource;
   final core.IAuthRepository _authService;
+  final SubscriptionLocalRepository? _localRepository;
   final BehaviorSubject<PremiumStatus> _masterStatusController =
       BehaviorSubject<PremiumStatus>.seeded(PremiumStatus.free);
 
@@ -83,6 +86,12 @@ class PremiumSyncService {
     debugPrint(
       '[PremiumSyncService] RevenueCat atualizado: ${subscription?.isActive}',
     );
+
+    if (subscription != null && _localRepository != null) {
+      _localRepository!.saveSubscription(subscription).catchError((e) {
+        debugPrint('[PremiumSyncService] Erro ao salvar localmente: $e');
+      });
+    }
 
     _debounceStatusUpdate(() async {
       final status = await _buildPremiumStatusFromSubscription(subscription);
@@ -239,6 +248,20 @@ class PremiumSyncService {
   /// Sincronização inicial quando usuário faz login
   Future<void> _performInitialSync(String userId) async {
     try {
+      // 1. Try local repository first
+      if (_localRepository != null) {
+        try {
+          final localSub = await _localRepository!.getActiveSubscription(userId);
+          if (localSub != null) {
+             final status = await _buildPremiumStatusFromSubscription(localSub);
+             _masterStatusController.add(status);
+             debugPrint('[PremiumSyncService] Status carregado do banco local');
+          }
+        } catch (e) {
+          debugPrint('[PremiumSyncService] Erro ao carregar do banco local: $e');
+        }
+      }
+
       final cacheResult = await _firebaseDataSource.getCachedPremiumStatus(
         userId: userId,
       );

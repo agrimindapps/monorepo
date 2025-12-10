@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculation_result.dart';
@@ -17,13 +16,9 @@ part 'calculator_coordinator_provider.g.dart';
 class CalculatorCoordinatorState {
   final bool isInitialized;
 
-  const CalculatorCoordinatorState({
-    this.isInitialized = false,
-  });
+  const CalculatorCoordinatorState({this.isInitialized = false});
 
-  CalculatorCoordinatorState copyWith({
-    bool? isInitialized,
-  }) {
+  CalculatorCoordinatorState copyWith({bool? isInitialized}) {
     return CalculatorCoordinatorState(
       isInitialized: isInitialized ?? this.isInitialized,
     );
@@ -31,7 +26,7 @@ class CalculatorCoordinatorState {
 }
 
 /// Provider coordenador que compõe funcionalidades de calculadoras
-/// 
+///
 /// Responsabilidade única: Coordenar providers especializados seguindo SRP
 /// Substitui o CalculatorProvider monolítico original de 450 linhas
 @riverpod
@@ -42,43 +37,42 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
   }
 
   // Provider accessors
-  CalculatorManagementNotifier get managementNotifier => 
-      ref.read(calculatorManagementNotifierProvider.notifier);
+  CalculatorManagementNotifier get managementNotifier =>
+      ref.read(calculatorManagementProvider.notifier);
   CalculatorExecutionNotifier get executionNotifier =>
-      ref.read(calculatorExecutionNotifierProvider.notifier);
+      ref.read(calculatorExecutionProvider.notifier);
   CalculatorHistoryNotifier get historyNotifier =>
-      ref.read(calculatorHistoryNotifierProvider.notifier);
+      ref.read(calculatorHistoryProvider.notifier);
   CalculatorFavoritesNotifier get favoritesNotifier =>
-      ref.read(calculatorFavoritesNotifierProvider.notifier);
+      ref.read(calculatorFavoritesProvider.notifier);
   CalculatorSearchNotifier get searchNotifier =>
-      ref.read(calculatorSearchNotifierProvider.notifier);
+      ref.read(calculatorSearchProvider.notifier);
 
   // State accessors
-  CalculatorManagementState get managementState => 
-      ref.read(calculatorManagementNotifierProvider);
+  CalculatorManagementState get managementState =>
+      ref.read(calculatorManagementProvider);
   CalculatorExecutionState get executionState =>
-      ref.read(calculatorExecutionNotifierProvider);
+      ref.read(calculatorExecutionProvider);
   CalculatorHistoryState get historyState =>
-      ref.read(calculatorHistoryNotifierProvider);
+      ref.read(calculatorHistoryProvider);
   CalculatorFavoritesState get favoritesState =>
-      ref.read(calculatorFavoritesNotifierProvider);
-  CalculatorSearchState get searchState =>
-      ref.read(calculatorSearchNotifierProvider);
+      ref.read(calculatorFavoritesProvider);
+  CalculatorSearchState get searchState => ref.read(calculatorSearchProvider);
 
   /// Verifica se alguma operação está em andamento
   bool get isAnyOperationInProgress =>
-    managementState.isLoading ||
-    executionState.isCalculating ||
-    historyState.isLoadingHistory ||
-    historyState.isSavingToHistory ||
-    favoritesState.isLoadingFavorites ||
-    favoritesState.isUpdatingFavorite ||
-    searchState.isSearching;
+      managementState.isLoading ||
+      executionState.isCalculating ||
+      historyState.isLoadingHistory ||
+      historyState.isSavingToHistory ||
+      favoritesState.isLoadingFavorites ||
+      favoritesState.isUpdatingFavorite ||
+      searchState.isSearching;
 
   /// Obtém mensagem de erro consolidada
   String? get consolidatedErrorMessage {
     final errors = <String>[];
-    
+
     if (managementState.errorMessage != null) {
       errors.add('Gerenciamento: ${managementState.errorMessage}');
     }
@@ -94,7 +88,7 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
     if (searchState.errorMessage != null) {
       errors.add('Busca: ${searchState.errorMessage}');
     }
-    
+
     return errors.isEmpty ? null : errors.join('\n');
   }
 
@@ -105,20 +99,25 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
 
   /// Lista de calculadoras favoritas
   List<CalculatorEntity> get favoriteCalculators {
-    return favoritesNotifier.getFavoriteCalculators(managementState.calculators);
+    return favoritesNotifier.getFavoriteCalculators(
+      managementState.calculators,
+    );
   }
 
   /// Calculadora atualmente selecionada/ativa
-  CalculatorEntity? get selectedCalculator => 
-    managementState.selectedCalculator ?? executionState.activeCalculator;
+  CalculatorEntity? get selectedCalculator =>
+      managementState.selectedCalculator ?? executionState.activeCalculator;
 
   /// Resultado do último cálculo
-  CalculationResult? get currentCalculationResult => executionState.currentResult;
+  CalculationResult? get currentCalculationResult =>
+      executionState.currentResult;
 
   /// Inicialização completa do sistema de calculadoras
   Future<void> initializeSystem() async {
-    debugPrint('CalculatorCoordinatorNotifier: Inicializando sistema de calculadoras');
-    
+    debugPrint(
+      'CalculatorCoordinatorNotifier: Inicializando sistema de calculadoras',
+    );
+
     await Future.wait([
       managementNotifier.loadCalculators(),
       historyNotifier.loadCalculationHistory(),
@@ -126,21 +125,29 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
     ]);
 
     state = state.copyWith(isInitialized: true);
-    debugPrint('CalculatorCoordinatorNotifier: Sistema de calculadoras inicializado');
+    debugPrint(
+      'CalculatorCoordinatorNotifier: Sistema de calculadoras inicializado',
+    );
   }
 
   /// Seleciona e prepara calculadora para uso
   Future<bool> selectAndPrepareCalculator(String calculatorId) async {
-    debugPrint('CalculatorCoordinatorNotifier: Selecionando calculadora - $calculatorId');
-    final loadSuccess = await managementNotifier.loadCalculatorById(calculatorId);
+    debugPrint(
+      'CalculatorCoordinatorNotifier: Selecionando calculadora - $calculatorId',
+    );
+    final loadSuccess = await managementNotifier.loadCalculatorById(
+      calculatorId,
+    );
     if (!loadSuccess) return false;
-    
+
     final calculator = managementState.selectedCalculator;
     if (calculator == null) return false;
-    
+
     executionNotifier.setActiveCalculator(calculator);
-    
-    debugPrint('CalculatorCoordinatorNotifier: Calculadora selecionada e preparada - $calculatorId');
+
+    debugPrint(
+      'CalculatorCoordinatorNotifier: Calculadora selecionada e preparada - $calculatorId',
+    );
     return true;
   }
 
@@ -150,16 +157,18 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
     bool saveToHistory = true,
   }) async {
     debugPrint('CalculatorCoordinatorNotifier: Executando cálculo completo');
-    
+
     final calculator = selectedCalculator;
     if (calculator == null) {
-      debugPrint('CalculatorCoordinatorNotifier: Nenhuma calculadora selecionada');
+      debugPrint(
+        'CalculatorCoordinatorNotifier: Nenhuma calculadora selecionada',
+      );
       return false;
     }
-    
+
     final executionSuccess = await executionNotifier.executeCalculation();
     if (!executionSuccess) return false;
-    
+
     if (saveToHistory && executionState.currentResult != null) {
       await historyNotifier.saveToHistory(
         calculatorId: calculator.id,
@@ -168,8 +177,10 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
         notes: notes,
       );
     }
-    
-    debugPrint('CalculatorCoordinatorNotifier: Cálculo completo executado com sucesso');
+
+    debugPrint(
+      'CalculatorCoordinatorNotifier: Cálculo completo executado com sucesso',
+    );
     return true;
   }
 
@@ -178,15 +189,17 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
     final historyItem = historyState.calculationHistory
         .where((item) => item.id == historyId)
         .firstOrNull;
-    
+
     if (historyItem == null) return;
-    
+
     managementNotifier.selectCalculator(
-      managementNotifier.findCalculatorById(historyItem.calculatorId)
+      managementNotifier.findCalculatorById(historyItem.calculatorId),
     );
     executionNotifier.applyPreviousResult(historyItem.result);
-    
-    debugPrint('CalculatorCoordinatorNotifier: Resultado do histórico aplicado - $historyId');
+
+    debugPrint(
+      'CalculatorCoordinatorNotifier: Resultado do histórico aplicado - $historyId',
+    );
   }
 
   /// Busca calculadoras com filtros
@@ -215,13 +228,13 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
   /// Refresh completo de todos os dados
   Future<void> refreshAllData() async {
     debugPrint('CalculatorCoordinatorNotifier: Atualizando todos os dados');
-    
+
     await Future.wait([
       managementNotifier.refreshCalculators(),
       historyNotifier.refreshHistory(),
       favoritesNotifier.refreshFavorites(),
     ]);
-    
+
     debugPrint('CalculatorCoordinatorNotifier: Todos os dados atualizados');
   }
 
@@ -232,7 +245,7 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
     historyNotifier.clearError();
     favoritesNotifier.clearError();
     searchNotifier.clearError();
-    
+
     debugPrint('CalculatorCoordinatorNotifier: Todos os erros limpos');
   }
 
@@ -250,27 +263,28 @@ class CalculatorCoordinatorNotifier extends _$CalculatorCoordinatorNotifier {
 
   /// Verifica se calculadora é favorita
   bool isCalculatorFavorite(String calculatorId) =>
-    favoritesNotifier.isCalculatorFavorite(calculatorId);
+      favoritesNotifier.isCalculatorFavorite(calculatorId);
 
   /// Obtém calculadoras por categoria
-  List<CalculatorEntity> getCalculatorsByCategory(CalculatorCategory category) =>
-    managementNotifier.getCalculatorsByCategory(category);
+  List<CalculatorEntity> getCalculatorsByCategory(
+    CalculatorCategory category,
+  ) => managementNotifier.getCalculatorsByCategory(category);
 
   /// Obtém estatísticas do histórico
   HistoryStatistics get historyStatistics =>
-    historyNotifier.getHistoryStatistics();
+      historyNotifier.getHistoryStatistics();
 
   /// Obtém estatísticas dos favoritos
   FavoritesStatistics get favoritesStatistics =>
-    favoritesNotifier.getFavoritesStatistics();
+      favoritesNotifier.getFavoritesStatistics();
 
   /// Atalho para executar cálculo rápido
   Future<bool> quickCalculate() => executeCalculationAndSave();
-  
+
   /// Atalho para buscar por termo
   Future<void> search(String query) => searchCalculators(query: query);
-  
+
   /// Atalho para filtrar por categoria
-  Future<void> filterByCategory(CalculatorCategory category) => 
-    searchCalculators(category: category);
+  Future<void> filterByCategory(CalculatorCategory category) =>
+      searchCalculators(category: category);
 }

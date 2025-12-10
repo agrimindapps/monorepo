@@ -32,6 +32,8 @@ IAppSubscriptionRepository appSubscriptionRepository(
     ref.watch(subscriptionRepositoryProvider),
     ref.watch(localStorageRepositoryProvider),
     ref.watch(subscriptionErrorMessageServiceProvider),
+    ref.watch(subscriptionLocalRepositoryProvider),
+    ref.watch(authRepositoryProvider),
   );
 }
 

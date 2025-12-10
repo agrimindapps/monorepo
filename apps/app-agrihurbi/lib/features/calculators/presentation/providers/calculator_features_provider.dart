@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calculation_template.dart';
@@ -83,15 +82,12 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Carrega lista de favoritos
   Future<void> loadFavorites() async {
     if (_favoritesService == null) return;
-    
+
     state = state.copyWith(isLoadingFavorites: true, clearError: true);
 
     try {
       final favorites = await _favoritesService!.getFavoriteIds();
-      state = state.copyWith(
-        favoriteIds: favorites,
-        isLoadingFavorites: false,
-      );
+      state = state.copyWith(favoriteIds: favorites, isLoadingFavorites: false);
       debugPrint(
         'CalculatorFeaturesNotifier: Favoritos carregados - ${favorites.length} itens',
       );
@@ -112,7 +108,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Alterna status de favorito
   Future<bool> toggleFavorite(String calculatorId) async {
     if (_favoritesService == null) return false;
-    
+
     try {
       final success = await _favoritesService!.toggleFavorite(calculatorId);
       if (success) {
@@ -135,7 +131,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Adiciona calculadora aos favoritos
   Future<bool> addToFavorites(String calculatorId) async {
     if (_favoritesService == null) return false;
-    
+
     try {
       final success = await _favoritesService!.addToFavorites(calculatorId);
       if (success) {
@@ -158,9 +154,11 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Remove calculadora dos favoritos
   Future<bool> removeFromFavorites(String calculatorId) async {
     if (_favoritesService == null) return false;
-    
+
     try {
-      final success = await _favoritesService!.removeFromFavorites(calculatorId);
+      final success = await _favoritesService!.removeFromFavorites(
+        calculatorId,
+      );
       if (success) {
         await loadFavorites();
         debugPrint(
@@ -189,15 +187,12 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Carrega todos os templates
   Future<void> loadTemplates() async {
     if (_templateService == null) return;
-    
+
     state = state.copyWith(isLoadingTemplates: true, clearError: true);
 
     try {
       final templates = await _templateService!.getAllTemplates();
-      state = state.copyWith(
-        templates: templates,
-        isLoadingTemplates: false,
-      );
+      state = state.copyWith(templates: templates, isLoadingTemplates: false);
       _applyTemplateFilters();
       debugPrint(
         'CalculatorFeaturesNotifier: Templates carregados - ${templates.length} itens',
@@ -216,7 +211,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
     String calculatorId,
   ) async {
     if (_templateService == null) return [];
-    
+
     try {
       return await _templateService!.getTemplatesForCalculator(calculatorId);
     } catch (e) {
@@ -230,7 +225,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Salva novo template
   Future<bool> saveTemplate(CalculationTemplate template) async {
     if (_templateService == null) return false;
-    
+
     try {
       final success = await _templateService!.saveTemplate(template);
       if (success) {
@@ -253,7 +248,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Remove template
   Future<bool> deleteTemplate(String templateId) async {
     if (_templateService == null) return false;
-    
+
     try {
       final success = await _templateService!.deleteTemplate(templateId);
       if (success) {
@@ -276,14 +271,19 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Marca template como usado
   Future<bool> markTemplateAsUsed(String templateId) async {
     if (_templateService == null) return false;
-    
+
     try {
       final success = await _templateService!.markTemplateAsUsed(templateId);
       if (success) {
-        final templateIndex = state.templates.indexWhere((t) => t.id == templateId);
+        final templateIndex = state.templates.indexWhere(
+          (t) => t.id == templateId,
+        );
         if (templateIndex != -1) {
-          final updatedTemplates = List<CalculationTemplate>.from(state.templates);
-          updatedTemplates[templateIndex] = updatedTemplates[templateIndex].markAsUsed();
+          final updatedTemplates = List<CalculationTemplate>.from(
+            state.templates,
+          );
+          updatedTemplates[templateIndex] = updatedTemplates[templateIndex]
+              .markAsUsed();
           state = state.copyWith(templates: updatedTemplates);
           _applyTemplateFilters();
         }
@@ -313,19 +313,14 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
     var filtered = List<CalculationTemplate>.from(state.templates);
     if (state.templateSearchQuery.isNotEmpty) {
       final query = state.templateSearchQuery.toLowerCase();
-      filtered =
-          filtered
-              .where(
-                (template) =>
-                    template.name.toLowerCase().contains(query) ||
-                    (template.description?.toLowerCase() ?? '').contains(
-                      query,
-                    ) ||
-                    template.tags.any(
-                      (tag) => tag.toLowerCase().contains(query),
-                    ),
-              )
-              .toList();
+      filtered = filtered
+          .where(
+            (template) =>
+                template.name.toLowerCase().contains(query) ||
+                (template.description?.toLowerCase() ?? '').contains(query) ||
+                template.tags.any((tag) => tag.toLowerCase().contains(query)),
+          )
+          .toList();
     }
     filtered.sort((a, b) {
       if (a.lastUsed != null && b.lastUsed == null) return -1;
@@ -342,7 +337,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Obtém templates recentes
   Future<List<CalculationTemplate>> getRecentTemplates({int limit = 5}) async {
     if (_templateService == null) return [];
-    
+
     try {
       return await _templateService!.getRecentTemplates(limit: limit);
     } catch (e) {
@@ -356,7 +351,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Obtém templates populares
   Future<List<CalculationTemplate>> getPopularTemplates({int limit = 5}) async {
     if (_templateService == null) return [];
-    
+
     try {
       return await _templateService!.getPopularTemplates(limit: limit);
     } catch (e) {
@@ -371,9 +366,9 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   Future<TemplateStats> getTemplateStats() async {
     if (_templateService == null) {
       return const TemplateStats(
-        totalTemplates: 0, 
-        recentlyUsed: 0, 
-        publicTemplates: 0, 
+        totalTemplates: 0,
+        recentlyUsed: 0,
+        publicTemplates: 0,
         hasBackup: false,
       );
     }
@@ -421,7 +416,7 @@ class CalculatorFeaturesNotifier extends _$CalculatorFeaturesNotifier {
   /// Exporta template como JSON
   Future<String?> exportTemplate(String templateId) async {
     if (_templateService == null) return null;
-    
+
     try {
       final template = await _templateService!.getTemplateById(templateId);
       if (template == null) return null;

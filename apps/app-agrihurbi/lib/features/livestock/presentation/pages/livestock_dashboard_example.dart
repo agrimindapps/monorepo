@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/bovine_entity.dart';
-import '../providers/livestock_coordinator_provider.dart';
+import '../providers/bovines_provider.dart';
+import '../providers/equines_provider.dart';
+import '../providers/livestock_sync_provider.dart';
 
 /// Exemplo de uso do sistema refatorado seguindo Single Responsibility Principle
 ///
@@ -21,39 +23,34 @@ class _LivestockDashboardExampleState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final coordinator = ref.read(livestockCoordinatorProvider);
-      coordinator?.initializeSystem();
-    });
+    // Initialization is handled by Riverpod providers automatically
   }
 
   @override
   Widget build(BuildContext context) {
-    final coordinator = ref.watch(livestockCoordinatorProvider);
-    if (coordinator == null) {
-      return const Scaffold(
-        body: Center(child: Text('Coordinator not available')),
-      );
-    }
+    final bovinesState = ref.watch(bovinesProvider);
+    final equinesState = ref.watch(equinesProvider);
+    final syncState = ref.watch(livestockSyncProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Livestock Dashboard'),
         actions: [
           IconButton(
-            icon: coordinator.syncProvider.isSyncing
+            icon: syncState.isSyncing
                 ? const CircularProgressIndicator()
                 : const Icon(Icons.sync),
-            onPressed: coordinator.syncProvider.isSyncing
+            onPressed: syncState.isSyncing
                 ? null
-                : () => coordinator.performCompleteSync(),
+                : () => ref.read(livestockSyncProvider.notifier).forceSyncNow(),
           ),
         ],
       ),
       body: Column(
         children: [
-          _buildStatisticsSection(coordinator),
-          _buildFiltersSection(coordinator),
-          Expanded(child: _buildBovinesList(coordinator)),
+          _buildStatisticsSection(bovinesState, equinesState),
+          _buildFiltersSection(),
+          Expanded(child: _buildBovinesList(bovinesState)),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -64,7 +61,10 @@ class _LivestockDashboardExampleState
   }
 
   /// Seção de estatísticas usando provider especializado
-  Widget _buildStatisticsSection(LivestockCoordinatorProvider coordinator) {
+  Widget _buildStatisticsSection(
+    BovinesState bovinesState,
+    EquinesState equinesState,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -81,26 +81,24 @@ class _LivestockDashboardExampleState
               children: [
                 _buildStatCard(
                   'Total Bovinos',
-                  '${coordinator.bovinesProvider.totalBovines}',
+                  '${bovinesState.bovines.length}',
                   Icons.pets,
                   Colors.blue,
                 ),
                 _buildStatCard(
                   'Bovinos Ativos',
-                  '${coordinator.bovinesProvider.totalActiveBovines}',
+                  '${bovinesState.bovines.where((b) => b.isActive).length}',
                   Icons.check_circle,
                   Colors.green,
                 ),
                 _buildStatCard(
                   'Equinos',
-                  '${coordinator.equinesProvider.totalEquines}',
+                  '${equinesState.equines.length}',
                   Icons.directions_run,
                   Colors.orange,
                 ),
               ],
             ),
-            if (coordinator.statisticsProvider.isLoading)
-              const LinearProgressIndicator(),
           ],
         ),
       ),
@@ -127,87 +125,29 @@ class _LivestockDashboardExampleState
   }
 
   /// Seção de filtros usando provider especializado
-  Widget _buildFiltersSection(LivestockCoordinatorProvider coordinator) {
+  Widget _buildFiltersSection() {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              decoration: const InputDecoration(
-                labelText: 'Buscar bovinos',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: coordinator.filtersProvider.updateSearchQuery,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    decoration: const InputDecoration(labelText: 'Raça'),
-                    initialValue: coordinator.filtersProvider.selectedBreed,
-                    items: coordinator.filtersProvider.availableBreeds
-                        .map(
-                          (breed) => DropdownMenuItem(
-                            value: breed,
-                            child: Text(breed),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: coordinator.filtersProvider.updateBreedFilter,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: DropdownButtonFormField<BovineAptitude>(
-                    decoration: const InputDecoration(labelText: 'Aptidão'),
-                    initialValue: coordinator.filtersProvider.selectedAptitude,
-                    items: coordinator.filtersProvider.availableAptitudes
-                        .map(
-                          (aptitude) => DropdownMenuItem(
-                            value: aptitude,
-                            child: Text(aptitude.displayName),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: coordinator.filtersProvider.updateAptitudeFilter,
-                  ),
-                ),
-              ],
-            ),
-            if (coordinator.filtersProvider.hasActiveFilters)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '${coordinator.filtersProvider.activeFiltersCount} filtros ativos',
-                    ),
-                    TextButton(
-                      onPressed: coordinator.filtersProvider.clearAllFilters,
-                      child: const Text('Limpar filtros'),
-                    ),
-                  ],
-                ),
-              ),
-          ],
+        child: TextField(
+          decoration: const InputDecoration(
+            labelText: 'Buscar bovinos',
+            prefixIcon: Icon(Icons.search),
+            border: OutlineInputBorder(),
+          ),
+          onChanged: (query) {
+            // TODO: Implement search functionality
+          },
         ),
       ),
     );
   }
 
   /// Lista de bovinos usando provider especializado
-  Widget _buildBovinesList(LivestockCoordinatorProvider coordinator) {
-    if (coordinator.bovinesProvider.isLoadingBovines) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  Widget _buildBovinesList(BovinesState bovinesState) {
+    final bovines = bovinesState.bovines;
 
-    final filteredBovines = coordinator.filteredBovines.cast<BovineEntity>();
-
-    if (filteredBovines.isEmpty) {
+    if (bovines.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -221,9 +161,9 @@ class _LivestockDashboardExampleState
     }
 
     return ListView.builder(
-      itemCount: filteredBovines.length,
+      itemCount: bovines.length,
       itemBuilder: (context, index) {
-        final bovine = filteredBovines[index];
+        final bovine = bovines[index];
         return Card(
           child: ListTile(
             leading: CircleAvatar(
@@ -248,7 +188,7 @@ class _LivestockDashboardExampleState
                 PopupMenuButton<String>(
                   onSelected: (action) => _handleBovineAction(
                     context,
-                    coordinator,
+                    bovinesState,
                     bovine,
                     action,
                   ),
@@ -277,9 +217,9 @@ class _LivestockDashboardExampleState
                 ),
               ],
             ),
-            onTap: () => coordinator.bovinesProvider.selectBovine(bovine),
-            selected:
-                coordinator.bovinesProvider.selectedBovine?.id == bovine.id,
+            onTap: () {
+              // TODO: Navigate to bovine details
+            },
           ),
         );
       },
@@ -288,16 +228,16 @@ class _LivestockDashboardExampleState
 
   void _handleBovineAction(
     BuildContext context,
-    LivestockCoordinatorProvider coordinator,
+    BovinesState bovinesState,
     BovineEntity bovine,
     String action,
   ) {
     switch (action) {
       case 'edit':
-        _showEditBovineDialog(context, coordinator, bovine);
+        _showEditBovineDialog(context, bovinesState, bovine);
         break;
       case 'delete':
-        _showDeleteConfirmation(context, coordinator, bovine);
+        _showDeleteConfirmation(context, bovinesState, bovine);
         break;
     }
   }
@@ -306,13 +246,15 @@ class _LivestockDashboardExampleState
 
   void _showEditBovineDialog(
     BuildContext context,
-    LivestockCoordinatorProvider coordinator,
+    BovinesState bovinesState,
     BovineEntity bovine,
-  ) {}
+  ) {
+    // TODO: Implement edit dialog
+  }
 
   void _showDeleteConfirmation(
     BuildContext context,
-    LivestockCoordinatorProvider coordinator,
+    BovinesState bovinesState,
     BovineEntity bovine,
   ) {
     showDialog<void>(
@@ -328,8 +270,7 @@ class _LivestockDashboardExampleState
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await coordinator.bovinesProvider.deleteBovine(bovine.id);
-
+              // TODO: Implement delete functionality
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -338,10 +279,7 @@ class _LivestockDashboardExampleState
                 );
               }
             },
-            child: const Text(
-              'Excluir',
-              style: TextStyle(color: Colors.red),
-            ),
+            child: const Text('Excluir', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

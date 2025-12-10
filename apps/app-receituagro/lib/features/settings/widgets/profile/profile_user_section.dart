@@ -10,11 +10,13 @@ class ProfileUserSection extends ConsumerWidget {
   const ProfileUserSection({
     required this.authData,
     this.onLoginTap,
+    this.onEditProfile,
     super.key,
   });
 
   final dynamic authData;
   final VoidCallback? onLoginTap;
+  final Function(String)? onEditProfile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -28,47 +30,71 @@ class ProfileUserSection extends ConsumerWidget {
       decoration: _getCardDecoration(context),
       margin: const EdgeInsets.symmetric(vertical: 4),
       child: InkWell(
-        onTap: !isAuthenticated ? onLoginTap : null,
+        onTap: isAuthenticated 
+            ? () => _showEditProfileDialog(context, ref, user)
+            : onLoginTap,
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isAuthenticated
-                        ? SettingsDesignTokens.primaryColor
-                        : Colors.grey.shade400,
-                    width: 3,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isAuthenticated
-                          ? SettingsDesignTokens.primaryColor.withValues(
-                              alpha: 0.3,
-                            )
-                          : Colors.grey.withValues(alpha: 0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
+              Stack(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: isAuthenticated
+                            ? SettingsDesignTokens.primaryColor
+                            : Colors.grey.shade400,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: isAuthenticated
+                              ? SettingsDesignTokens.primaryColor.withValues(
+                                  alpha: 0.3,
+                                )
+                              : Colors.grey.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: CircleAvatar(
-                  radius: 32,
-                  backgroundColor: isAuthenticated
-                      ? SettingsDesignTokens.primaryColor
-                      : Colors.grey.shade400,
-                  child: Text(
-                    _getInitials(_getUserDisplayTitle(user)),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                    child: CircleAvatar(
+                      radius: 32,
+                      backgroundColor: isAuthenticated
+                          ? SettingsDesignTokens.primaryColor
+                          : Colors.grey.shade400,
+                      child: Text(
+                        _getInitials(_getUserDisplayTitle(user)),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  if (isAuthenticated)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.edit,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                ],
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -123,10 +149,56 @@ class ProfileUserSection extends ConsumerWidget {
                 ),
               ),
               if (!isAuthenticated)
-                Icon(Icons.login, color: theme.colorScheme.onSurfaceVariant),
+                Icon(Icons.login, color: theme.colorScheme.onSurfaceVariant)
+              else
+                Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showEditProfileDialog(BuildContext context, WidgetRef ref, dynamic user) {
+    final nameController = TextEditingController(text: _getUserDisplayTitle(user));
+    
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Perfil'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Nome de Exibição',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final newName = nameController.text.trim();
+              if (newName.isNotEmpty && newName != _getUserDisplayTitle(user)) {
+                Navigator.pop(context); // Close dialog first
+                if (onEditProfile != null) {
+                  onEditProfile!(newName);
+                }
+              } else {
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
       ),
     );
   }

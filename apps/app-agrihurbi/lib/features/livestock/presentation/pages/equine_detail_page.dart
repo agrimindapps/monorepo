@@ -11,10 +11,7 @@ import '../providers/equines_provider.dart';
 /// Apresenta todas as informações do equino de forma organizada e visualmente
 /// atraente, seguindo padrões Material 3 e fornecendo navegação para edição
 class EquineDetailPage extends ConsumerStatefulWidget {
-  const EquineDetailPage({
-    super.key,
-    required this.equineId,
-  });
+  const EquineDetailPage({super.key, required this.equineId});
 
   /// ID do equino a ser exibido
   final String equineId;
@@ -42,7 +39,6 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
 
   Future<void> _loadEquineDetails() async {
     final notifier = ref.read(equinesProvider.notifier);
-    final state = ref.read(equinesProvider);
     var equine = notifier.getEquineById(widget.equineId);
     if (equine == null) {
       await notifier.loadEquineById(widget.equineId);
@@ -63,8 +59,8 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _equine == null
-              ? _buildErrorState()
-              : _buildDetailContent(),
+          ? _buildErrorState()
+          : _buildDetailContent(),
       floatingActionButton: _equine != null
           ? FloatingActionButton.extended(
               onPressed: () => _navigateToEdit(),
@@ -235,7 +231,8 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
                       const SizedBox(height: 4),
                       Text(
                         'Equino',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                             ),
                       ),
@@ -302,7 +299,11 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
-            _buildInfoRow('País de Origem', _equine!.originCountry, Icons.public),
+            _buildInfoRow(
+              'País de Origem',
+              _equine!.originCountry,
+              Icons.public,
+            ),
             _buildInfoRow(
               'Uso Principal',
               _equine!.primaryUse.displayName,
@@ -337,11 +338,7 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
               _equine!.temperament.displayName,
               Icons.psychology,
             ),
-            _buildInfoRow(
-              'Pelagem',
-              _equine!.coat.displayName,
-              Icons.palette,
-            ),
+            _buildInfoRow('Pelagem', _equine!.coat.displayName, Icons.palette),
           ],
         ),
       ),
@@ -406,8 +403,8 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ),
             ],
           ),
@@ -415,11 +412,11 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
           Text(
             value.isNotEmpty ? value : 'Não informado',
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: value.isEmpty
-                      ? Theme.of(context).colorScheme.outline
-                      : null,
-                ),
+              fontWeight: FontWeight.bold,
+              color: value.isEmpty
+                  ? Theme.of(context).colorScheme.outline
+                  : null,
+            ),
           ),
         ],
       ),
@@ -489,11 +486,7 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Theme.of(context).colorScheme.outline,
-          ),
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.outline),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -502,14 +495,11 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
+                Text(value, style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
           ),
@@ -532,12 +522,10 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
   void _shareEquine() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Funcionalidade de compartilhamento em desenvolvimento'),
-        action: SnackBarAction(
-          label: 'Copiar Texto',
-          onPressed: () {
-          },
+        content: const Text(
+          'Funcionalidade de compartilhamento em desenvolvimento',
         ),
+        action: SnackBarAction(label: 'Copiar Texto', onPressed: () {}),
       ),
     );
   }
@@ -574,7 +562,9 @@ class _EquineDetailPageState extends ConsumerState<EquineDetailPage> {
   void _deleteEquine() async {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Funcionalidade de exclusão de equinos em desenvolvimento'),
+        content: Text(
+          'Funcionalidade de exclusão de equinos em desenvolvimento',
+        ),
       ),
     );
     context.pop(); // Return to previous screen

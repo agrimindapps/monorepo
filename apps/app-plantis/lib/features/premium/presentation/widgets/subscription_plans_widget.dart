@@ -70,20 +70,17 @@ class _PlantisSubscriptionPlansWidgetState
             ? _getMockProducts()
             : widget.availableProducts;
 
+    // Sort products to have Annual in the middle or highlighted
+    // For vertical list, we usually want: Monthly, Annual (Hero), Semestral
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
+      child: Column(
         children:
-            products.asMap().entries.map((entry) {
-              final index = entry.key;
-              final product = entry.value;
-              return Expanded(
-                child: Container(
-                  margin: EdgeInsets.only(
-                    right: index < products.length - 1 ? 8 : 0,
-                  ),
-                  child: _buildPlanOption(product),
-                ),
+            products.map((product) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildPlanOption(product),
               );
             }).toList(),
       ),
@@ -170,87 +167,142 @@ class _PlantisSubscriptionPlansWidgetState
     String? badge,
     required bool isSelected,
   }) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color:
-            isSelected
-                ? PlantisColors.primary.withValues(alpha: 0.15)
-                : Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border:
-            isSelected
-                ? Border.all(
-                  color: Colors.white.withValues(alpha: 0.4),
-                  width: 2,
-                )
-                : Border.all(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  width: 1,
-                ),
-      ),
-      child: Stack(
-        children: [
-          if (badge != null)
-            Positioned(
-              top: 0,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: const BoxDecoration(
-                  color: PlantisColors.primary,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
-                  ),
-                ),
-                child: Text(
-                  badge,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedPlanId = product.productId;
-                });
-                widget.onPlanSelected(product.productId);
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    _buildRadioButton(isSelected),
-                    const SizedBox(height: 12),
-                    Column(
-                      children: [
-                        _buildPlanTitle(title, subtitle),
-                        const SizedBox(height: 8),
-                        _buildPlanPrice(product),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+    final isHero = badge != null; // Annual plan is hero
+    
+    // Dynamic colors based on selection and hero status
+    final borderColor = isSelected
+        ? (isHero ? const Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.6)) // Gold for hero
+        : Colors.white.withValues(alpha: 0.1);
+        
+    final backgroundColor = isSelected
+        ? (isHero ? const Color(0x33FFD700) : PlantisColors.primary.withValues(alpha: 0.15)) // Gold tint for hero
+        : Colors.white.withValues(alpha: 0.05);
+
+    return Transform.scale(
+      scale: isSelected && isHero ? 1.02 : 1.0,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: borderColor,
+            width: isSelected ? 2 : 1,
           ),
-        ],
+          boxShadow: isSelected && isHero
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  )
+                ]
+              : null,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            if (badge != null)
+              Positioned(
+                top: -10,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD700), // Gold
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    badge,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedPlanId = product.productId;
+                  });
+                  widget.onPlanSelected(product.productId);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      _buildRadioButton(isSelected, isHero),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (subtitle.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: isHero 
+                                          ? Colors.white.withValues(alpha: 0.15)
+                                          : PlantisColors.primary.withValues(alpha: 0.2),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      subtitle,
+                                      style: TextStyle(
+                                        color: isHero ? const Color(0xFFFFD700) : PlantisColors.primaryLight,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            _buildPlanPrice(product),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   /// Constrói o radio button customizado
-  Widget _buildRadioButton(bool isSelected) {
+  Widget _buildRadioButton(bool isSelected, bool isHero) {
+    final activeColor = isHero ? const Color(0xFFFFD700) : PlantisColors.primary;
+    
     return Container(
       width: 24,
       height: 24,
@@ -259,7 +311,7 @@ class _PlantisSubscriptionPlansWidgetState
         border: Border.all(
           color:
               isSelected
-                  ? PlantisColors.primary
+                  ? activeColor
                   : Colors.white.withValues(alpha: 0.4),
           width: 2,
         ),
@@ -271,9 +323,9 @@ class _PlantisSubscriptionPlansWidgetState
                 child: Container(
                   width: 12,
                   height: 12,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: PlantisColors.primary,
+                    color: activeColor,
                   ),
                 ),
               )
@@ -281,7 +333,7 @@ class _PlantisSubscriptionPlansWidgetState
     );
   }
 
-  /// Constrói o título do plano
+  /// Constrói o título do plano (Legacy - não usado no novo layout vertical)
   Widget _buildPlanTitle(String title, String subtitle) {
     return Column(
       children: [
@@ -332,24 +384,22 @@ class _PlantisSubscriptionPlansWidgetState
       period = '';
     }
 
-    return Column(
+    return Row(
       children: [
         Text(
           product.priceString,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
         if (period.isNotEmpty)
           Text(
             period,
-            textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
-              fontSize: 12,
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 14,
             ),
           ),
       ],

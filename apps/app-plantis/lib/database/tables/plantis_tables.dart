@@ -615,3 +615,49 @@ class PlantsSyncQueue extends Table {
   // Índice composto para buscar operações pendentes de um modelo específico
   // Não usa uniqueKeys pois pode haver múltiplas operações para o mesmo registro
 }
+
+// ============================================================================
+// 10. USER SUBSCRIPTIONS TABLE
+// ============================================================================
+
+/// Tabela de Assinaturas do Usuário
+///
+/// Armazena informações de assinatura localmente para acesso offline.
+/// Dados sensíveis são criptografados.
+class UserSubscriptions extends Table {
+  // ========== CAMPOS BASE ==========
+
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  
+  // ========== DADOS DA ASSINATURA (CRIPTOGRAFADOS) ==========
+  
+  TextColumn get productId => text()();
+  TextColumn get status => text()();
+  TextColumn get tier => text()();
+  
+  // ========== DADOS DA ASSINATURA (ABERTOS) ==========
+  
+  TextColumn get store => text()();
+  DateTimeColumn get expirationDate => dateTime().nullable()();
+  DateTimeColumn get purchaseDate => dateTime().nullable()();
+  DateTimeColumn get originalPurchaseDate => dateTime().nullable()();
+  BoolColumn get isSandbox => boolean().withDefault(const Constant(false))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(false))();
+
+  // ========== TIMESTAMPS ==========
+
+  DateTimeColumn get createdAt => dateTime().nullable()();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get lastSyncAt => dateTime().nullable()();
+
+  // ========== CONTROLE DE SINCRONIZAÇÃO ==========
+
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
+  TextColumn get firebaseId => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}

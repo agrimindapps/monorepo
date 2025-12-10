@@ -6,6 +6,7 @@ import '../widgets/premium_feature_tabs.dart';
 import '../widgets/premium_header.dart';
 import '../widgets/premium_pricing_section.dart';
 import '../widgets/premium_status_section.dart';
+import '../widgets/subscription_info_card.dart';
 
 /// Premium subscription page with animated entry.
 class PremiumPage extends ConsumerStatefulWidget {
@@ -63,6 +64,12 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
       error: (_, __) => false,
     );
 
+    final currentSubscription = premiumAsync.when(
+      data: (premiumState) => premiumState.premiumStatus.subscription,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+
     return Scaffold(
       body: FadeTransition(
         opacity: _fadeAnimation,
@@ -76,7 +83,16 @@ class _PremiumPageState extends ConsumerState<PremiumPage>
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      PremiumStatusSection(isPremium: isPremium),
+                      if (isPremium && currentSubscription != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 24.0),
+                          child: SubscriptionInfoCard(
+                            subscription: currentSubscription,
+                          ),
+                        )
+                      else
+                        PremiumStatusSection(isPremium: isPremium),
+
                       const SizedBox(height: 24),
                       PremiumFeatureTabs(tabController: _tabController),
                       const SizedBox(height: 16),

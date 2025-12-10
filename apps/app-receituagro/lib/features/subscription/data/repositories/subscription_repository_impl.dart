@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
+import 'package:app_receituagro/database/repositories/subscription_local_repository.dart';
 import '../../domain/repositories/i_subscription_repository.dart';
 import '../../presentation/services/subscription_error_message_service.dart';
 
@@ -11,11 +12,15 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
     this._coreRepository,
     this._localStorageRepository,
     this._errorService,
+    this._subscriptionLocalRepository,
+    this._authRepository,
   );
 
   final ISubscriptionRepository _coreRepository;
   final ILocalStorageRepository _localStorageRepository;
   final SubscriptionErrorMessageService _errorService;
+  final SubscriptionLocalRepository _subscriptionLocalRepository;
+  final IAuthRepository _authRepository;
 
   static const String _cacheKey = 'receituagro_premium_status';
 
@@ -94,6 +99,24 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
   @override
   Future<Either<Failure, bool?>> getCachedPremiumStatus() async {
     try {
+      // 1. Try to get from Drift (Secure & Offline)
+      try {
+        final user = await _authRepository.currentUser.first;
+        if (user != null) {
+          final localSub = await _subscriptionLocalRepository
+              .getActiveSubscription(user.id);
+          if (localSub != null) {
+            final now = DateTime.now();
+            if (localSub.expirationDate == null ||
+                localSub.expirationDate!.isAfter(now)) {
+              return const Right(true);
+            }
+          }
+        }
+      } catch (e) {
+        // Ignore auth/drift errors and fall back to shared prefs
+      }
+
       final result = await _localStorageRepository.get<Map<String, dynamic>>(
         key: _cacheKey,
       );

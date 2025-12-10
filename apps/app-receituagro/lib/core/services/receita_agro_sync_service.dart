@@ -12,14 +12,17 @@ class ReceitaAgroSyncService implements ISyncService {
   final _progressController = StreamController<ServiceProgress>.broadcast();
 
   SyncServiceStatus _currentStatus = SyncServiceStatus.uninitialized;
+  DateTime? _lastSyncTime;
   bool _isInitialized = false;
   StreamSubscription<dynamic>? _connectivitySubscription;
 
   final FavoritosRepositorySimplified? _favoritosRepository;
 
-  ReceitaAgroSyncService({
-    FavoritosRepositorySimplified? favoritosRepository,
-  }) : _favoritosRepository = favoritosRepository;
+  ReceitaAgroSyncService({FavoritosRepositorySimplified? favoritosRepository})
+    : _favoritosRepository = favoritosRepository;
+
+  SyncServiceStatus get syncState => _currentStatus;
+  DateTime? get lastSyncTime => _lastSyncTime;
 
   @override
   String get serviceId => 'receituagro';
@@ -162,6 +165,7 @@ class ReceitaAgroSyncService implements ISyncService {
       );
 
       final duration = DateTime.now().difference(startTime);
+      _lastSyncTime = DateTime.now();
       _updateStatus(SyncServiceStatus.completed);
 
       return Right(
@@ -358,10 +362,13 @@ class ReceitaAgroSyncService implements ISyncService {
     try {
       try {
         if (_favoritosRepository == null) {
-          if (kDebugMode) print('⚠️ FavoritosRepository not injected in ReceitaAgroSyncService');
+          if (kDebugMode)
+            print(
+              '⚠️ FavoritosRepository not injected in ReceitaAgroSyncService',
+            );
           return const Right(0);
         }
-        
+
         final favoritosRepo = _favoritosRepository;
 
         // Dispara sincronização dos favoritos (carrega da storage local)
@@ -373,7 +380,8 @@ class ReceitaAgroSyncService implements ISyncService {
         // Unwrap Either<Failure, FavoritosStats>
         final totalFavoritos = statsResult.fold(
           (failure) => 0, // On error, return 0
-          (stats) => stats.totalDefensivos +
+          (stats) =>
+              stats.totalDefensivos +
               stats.totalPragas +
               stats.totalDiagnosticos +
               stats.totalCulturas,
@@ -414,8 +422,6 @@ class ReceitaAgroSyncServiceFactory {
   static ReceitaAgroSyncService create({
     FavoritosRepositorySimplified? favoritosRepository,
   }) {
-    return ReceitaAgroSyncService(
-      favoritosRepository: favoritosRepository,
-    );
+    return ReceitaAgroSyncService(favoritosRepository: favoritosRepository);
   }
 }

@@ -1,7 +1,10 @@
 import 'dart:async';
+
+import 'package:core/core.dart' hide Column, subscriptionRepositoryProvider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart' hide Column;
+import '../../../../core/providers/repository_providers.dart';
+import '../../../../database/repositories/subscription_local_repository.dart';
 
 part 'premium_notifier.g.dart';
 
@@ -78,6 +81,8 @@ class PremiumState {
 class PremiumNotifier extends _$PremiumNotifier {
   late final ISubscriptionRepository _subscriptionRepository;
   late final IAnalyticsRepository _analytics;
+  late final SubscriptionLocalRepository _localRepository;
+  late final IAuthRepository _authRepository;
 
   @override
   Future<PremiumState> build() async {
@@ -86,11 +91,29 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   void _initializeRepositories() {
-    // TODO: Inject repositories via Riverpod
+    _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
+    _localRepository = ref.watch(subscriptionLocalRepositoryProvider);
+    _analytics = ref.watch(firebaseAnalyticsServiceProvider);
+    _authRepository = ref.watch(authRepositoryProvider);
   }
 
   Future<PremiumState> _initialize() async {
     try {
+      // 1. Try to load from local cache first
+      try {
+        final user = await _authRepository.currentUser.first;
+        if (user != null) {
+          final localSub = await _localRepository.getActiveSubscription(
+            user.id,
+          );
+          if (localSub != null) {
+            return PremiumState(currentSubscription: localSub);
+          }
+        }
+      } catch (e) {
+        // Ignore local cache errors
+      }
+
       final result = await _subscriptionRepository.getCurrentSubscription();
       return result.fold(
         (failure) => PremiumState(
@@ -99,7 +122,13 @@ class PremiumNotifier extends _$PremiumNotifier {
             message: failure.message,
           ),
         ),
-        (subscription) => PremiumState(currentSubscription: subscription),
+        (subscription) {
+          // Save to local cache
+          if (subscription != null) {
+            _localRepository.saveSubscription(subscription);
+          }
+          return PremiumState(currentSubscription: subscription);
+        },
       );
     } catch (e) {
       return PremiumState(
@@ -179,6 +208,9 @@ class PremiumNotifier extends _$PremiumNotifier {
             ),
           );
 
+          // Save to local cache
+          _localRepository.saveSubscription(subscription);
+
           unawaited(
             _analytics.logEvent(
               'premium_purchased',
@@ -230,13 +262,17 @@ class PremiumNotifier extends _$PremiumNotifier {
         (subscriptions) {
           final active = subscriptions.where((s) => s.isActive).toList();
           if (active.isNotEmpty) {
+            final subscription = active.first;
             state = AsyncValue.data(
               currentState.copyWith(
-                currentSubscription: active.first,
+                currentSubscription: subscription,
                 isLoading: false,
                 error: null,
               ),
             );
+
+            // Save to local cache
+            _localRepository.saveSubscription(subscription);
           } else {
             state = AsyncValue.data(
               currentState.copyWith(isLoading: false, error: null),
@@ -314,6 +350,11 @@ class PremiumNotifier extends _$PremiumNotifier {
               syncRetryCount: 0,
             ),
           );
+
+          // Save to local cache
+          if (subscription != null) {
+            _localRepository.saveSubscription(subscription);
+          }
         },
       );
     } catch (e) {

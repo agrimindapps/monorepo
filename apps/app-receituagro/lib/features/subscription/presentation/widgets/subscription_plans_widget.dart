@@ -110,18 +110,23 @@ class SubscriptionPlansWidget extends ConsumerWidget {
               planType: 'monthly',
               isSelected: notifier.isPlanSelected('monthly'),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16), // Increased spacing
 
-            // Plano Anual (com badge)
-            _buildPlanOption(
-              ref: ref,
-              notifier: notifier,
-              product: annualProduct,
-              planType: 'yearly',
-              isSelected: notifier.isPlanSelected('yearly'),
-              badge: 'MELHOR VALOR',
+            // Plano Anual (com badge e destaque)
+            Transform.scale(
+              scale: 1.02, // Slight scale up for emphasis
+              child: _buildPlanOption(
+                ref: ref,
+                notifier: notifier,
+                product: annualProduct,
+                planType: 'yearly',
+                isSelected: notifier.isPlanSelected('yearly'),
+                badge: 'MELHOR VALOR',
+                isHero: true, // New parameter for hero styling
+                savings: 'Economize 40%', // Explicit savings
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
 
             // Plano Semestral
             _buildPlanOption(
@@ -156,6 +161,8 @@ class SubscriptionPlansWidget extends ConsumerWidget {
     required String planType,
     required bool isSelected,
     String? badge,
+    bool isHero = false,
+    String? savings,
   }) {
     // Extrai título do período
     String title;
@@ -171,55 +178,138 @@ class SubscriptionPlansWidget extends ConsumerWidget {
 
     // Usa o preço real do produto
     final price = product.priceString;
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: isSelected
-            ? const Color(0x26388E3C)  // 15% opacity green for selected
-            : Colors.white.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(16),
-        border: isSelected
-            ? Border.all(color: Colors.white.withValues(alpha: 0.4), width: 2)
-            : Border.all(color: Colors.white.withValues(alpha: 0.1), width: 1),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () => notifier.selectPlan(planType),
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                _buildRadioButton(isSelected),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildPlanTitle(title, badge),
-                      const SizedBox(height: 4),
-                      _buildPlanPrice(price),
-                    ],
-                  ),
+    
+    // Cores dinâmicas baseadas na seleção e tipo
+    final borderColor = isSelected
+        ? (isHero ? const Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.6)) // Gold for hero
+        : Colors.white.withValues(alpha: 0.1);
+        
+    final backgroundColor = isSelected
+        ? (isHero ? const Color(0x33FFD700) : const Color(0x26388E3C)) // Gold tint for hero
+        : Colors.white.withValues(alpha: 0.05);
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: borderColor,
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected && isHero
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFFFFD700).withValues(alpha: 0.2),
+                      blurRadius: 12,
+                      spreadRadius: 2,
+                    )
+                  ]
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => notifier.selectPlan(planType),
+              borderRadius: BorderRadius.circular(16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  children: [
+                    _buildRadioButton(isSelected, isHero),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                title,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              if (savings != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    savings,
+                                    style: const TextStyle(
+                                      color: Color(0xFFFFD700), // Gold text
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          _buildPlanPrice(price),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        
+        // Badge flutuante para o plano Hero
+        if (badge != null)
+          Positioned(
+            top: -10,
+            right: 36,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFD700), // Gold background
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                badge,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
   /// Constrói o radio button customizado
-  Widget _buildRadioButton(bool isSelected) {
+  Widget _buildRadioButton(bool isSelected, bool isHero) {
+    final activeColor = isHero ? const Color(0xFFFFD700) : Colors.white;
+    
     return Container(
-      width: 20,
-      height: 20,
+      width: 22,
+      height: 22,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.5),
+          color: isSelected ? activeColor : Colors.white.withValues(alpha: 0.5),
           width: isSelected ? 6 : 2,
         ),
         color: Colors.transparent,
@@ -227,7 +317,7 @@ class SubscriptionPlansWidget extends ConsumerWidget {
     );
   }
 
-  /// Constrói o título do plano com badge opcional
+  /// Constrói o título do plano com badge opcional (Legacy - mantido para compatibilidade se necessário)
   Widget _buildPlanTitle(String title, String? badge) {
     return Row(
       children: [
@@ -247,7 +337,7 @@ class SubscriptionPlansWidget extends ConsumerWidget {
     );
   }
 
-  /// Constrói o badge destacado
+  /// Constrói o badge destacado (Legacy)
   Widget _buildBadge(String text) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

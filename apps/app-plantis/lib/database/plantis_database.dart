@@ -41,6 +41,7 @@ part 'plantis_database.g.dart';
     ConflictHistory,
     PlantImages,
     PlantsSyncQueue,
+    UserSubscriptions,
   ],
 )
 class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
@@ -50,7 +51,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   ///
   /// Incrementar quando houver mudanças estruturais nas tabelas
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Factory constructor para ambiente de produção
   ///
@@ -114,6 +115,12 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
             // Migração v1 -> v2: Adiciona tabela PlantImages
             print('📦 Adding PlantImages table...');
             await m.createTable(plantImages);
+          }
+
+          if (from < 3) {
+            // Migração v2 -> v3: Adiciona tabela UserSubscriptions
+            print('📦 Adding UserSubscriptions table...');
+            await m.createTable(userSubscriptions);
           }
 
           print('✅ Migration completed successfully!');

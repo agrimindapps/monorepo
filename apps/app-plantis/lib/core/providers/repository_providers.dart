@@ -1,9 +1,12 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/sync/sync_queue_drift_service.dart';
 import '../../database/providers/database_providers.dart';
+import '../../database/repositories/subscription_local_repository.dart';
 import '../../database/repositories/sync_queue_drift_repository.dart';
+import '../../database/sync/adapters/subscription_drift_sync_adapter.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/plants/data/datasources/local/plant_tasks_local_datasource.dart';
 import '../../features/plants/data/datasources/local/plants_local_datasource.dart';
@@ -66,7 +69,24 @@ IAuthRepository authRepository(Ref ref) {
 
 @riverpod
 ISubscriptionRepository subscriptionRepository(Ref ref) {
+  if (kDebugMode && kIsWeb) {
+    return MockSubscriptionService();
+  }
   return RevenueCatService();
+}
+
+@riverpod
+SubscriptionLocalRepository subscriptionLocalRepository(Ref ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  return SubscriptionLocalRepository(db);
+}
+
+@riverpod
+SubscriptionDriftSyncAdapter subscriptionSyncAdapter(Ref ref) {
+  final db = ref.watch(plantisDatabaseProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final connectivity = ref.watch(connectivityServiceProvider);
+  return SubscriptionDriftSyncAdapter(db, firestore, connectivity);
 }
 
 @riverpod

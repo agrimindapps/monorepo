@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/equine_entity.dart';
@@ -39,7 +38,9 @@ class EquinesState {
   }) {
     return EquinesState(
       equines: equines ?? this.equines,
-      selectedEquine: clearSelectedEquine ? null : (selectedEquine ?? this.selectedEquine),
+      selectedEquine: clearSelectedEquine
+          ? null
+          : (selectedEquine ?? this.selectedEquine),
       isLoading: isLoading ?? this.isLoading,
       isLoadingDetail: isLoadingDetail ?? this.isLoadingDetail,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
@@ -60,14 +61,14 @@ class EquinesState {
           .where(
             (equine) =>
                 equine.commonName.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
+                  searchQuery.toLowerCase(),
+                ) ||
                 equine.registrationId.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
+                  searchQuery.toLowerCase(),
+                ) ||
                 equine.originCountry.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ),
+                  searchQuery.toLowerCase(),
+                ),
           )
           .toList();
     }
@@ -82,8 +83,9 @@ class EquinesState {
 
   /// Países de origem únicos para filtros
   List<String> get uniqueOriginCountries {
-    final countries =
-        activeEquines.map((equine) => equine.originCountry).toSet();
+    final countries = activeEquines
+        .map((equine) => equine.originCountry)
+        .toSet();
     return countries.toList()..sort();
   }
 }
@@ -91,9 +93,11 @@ class EquinesState {
 /// Equines Notifier using Riverpod code generation
 @riverpod
 class EquinesNotifier extends _$EquinesNotifier {
-  GetAllEquinesUseCase get _getAllEquines => ref.read(getAllEquinesUseCaseProvider);
+  GetAllEquinesUseCase get _getAllEquines =>
+      ref.read(getAllEquinesUseCaseProvider);
   GetEquinesUseCase get _getEquines => ref.read(getEquinesUseCaseProvider);
-  GetEquineByIdUseCase get _getEquineById => ref.read(getEquineByIdUseCaseProvider);
+  GetEquineByIdUseCase get _getEquineById =>
+      ref.read(getEquineByIdUseCaseProvider);
 
   @override
   EquinesState build() {
@@ -122,19 +126,13 @@ class EquinesNotifier extends _$EquinesNotifier {
 
     result.fold(
       (Failure failure) {
-        state = state.copyWith(
-          errorMessage: failure.message,
-          isLoading: false,
-        );
+        state = state.copyWith(errorMessage: failure.message, isLoading: false);
         debugPrint(
           'EquinesNotifier: Erro ao carregar equinos - ${failure.message}',
         );
       },
       (List<EquineEntity> equines) {
-        state = state.copyWith(
-          equines: equines,
-          isLoading: false,
-        );
+        state = state.copyWith(equines: equines, isLoading: false);
         debugPrint(
           'EquinesNotifier: Equinos carregados - ${equines.length} itens',
         );
@@ -151,19 +149,13 @@ class EquinesNotifier extends _$EquinesNotifier {
 
     result.fold(
       (Failure failure) {
-        state = state.copyWith(
-          errorMessage: failure.message,
-          isLoading: false,
-        );
+        state = state.copyWith(errorMessage: failure.message, isLoading: false);
         debugPrint(
           'EquinesNotifier: Erro ao carregar equinos filtrados - ${failure.message}',
         );
       },
       (List<EquineEntity> equines) {
-        state = state.copyWith(
-          equines: equines,
-          isLoading: false,
-        );
+        state = state.copyWith(equines: equines, isLoading: false);
         debugPrint(
           'EquinesNotifier: Equinos filtrados carregados - ${equines.length} itens',
         );
@@ -293,7 +285,9 @@ class EquinesNotifier extends _$EquinesNotifier {
 
     state = state.copyWith(
       equines: updatedEquines,
-      selectedEquine: state.selectedEquine?.id == equineId ? null : state.selectedEquine,
+      selectedEquine: state.selectedEquine?.id == equineId
+          ? null
+          : state.selectedEquine,
       clearSelectedEquine: state.selectedEquine?.id == equineId,
     );
     debugPrint('EquinesNotifier: Equino removido da lista local - $equineId');

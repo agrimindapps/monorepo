@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../subscription/presentation/widgets/subscription_info_card.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 
@@ -56,6 +57,15 @@ class NewPremiumSection extends ConsumerWidget {
     final hasPremium = premiumState.isPremium;
     final isTrialActive = premiumState.isTrialActive;
 
+    if (hasPremium && premiumState.currentSubscription != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SubscriptionInfoCard(
+          subscription: premiumState.currentSubscription!,
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Container(
@@ -63,15 +73,10 @@ class NewPremiumSection extends ConsumerWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           gradient: LinearGradient(
-            colors: hasPremium
-                ? [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.primaryContainer,
-                  ]
-                : [
-                    Theme.of(context).colorScheme.surfaceContainerHighest,
-                    Theme.of(context).colorScheme.surface,
-                  ],
+            colors: [
+              Theme.of(context).colorScheme.surfaceContainerHighest,
+              Theme.of(context).colorScheme.surface,
+            ],
           ),
         ),
         child: Column(
@@ -81,12 +86,9 @@ class NewPremiumSection extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  hasPremium ? 'Plano Premium' : 'Plano Gratuito',
+                  'Plano Gratuito',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: hasPremium
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : null,
                   ),
                 ),
                 if (isTrialActive)
@@ -112,11 +114,7 @@ class NewPremiumSection extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               _getStatusDescription(premiumState),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: hasPremium
-                    ? Theme.of(context).colorScheme.onPrimary
-                    : null,
-              ),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ),

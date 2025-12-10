@@ -41,8 +41,7 @@ class LoginNotifier extends _$LoginNotifier {
   }
 
   /// Helper para acessar o auth notifier via Riverpod
-  AuthNotifier get _authNotifier =>
-      ref.read(authProvider.notifier);
+  AuthNotifier get _authNotifier => ref.read(authProvider.notifier);
 
   TextEditingController get emailController => _emailController;
   TextEditingController get passwordController => _passwordController;
@@ -254,7 +253,7 @@ class LoginNotifier extends _$LoginNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      await _authNotifier.sendPasswordResetEmail(email: email);
+      await _authNotifier.sendPasswordResetEmail(email);
       if (kDebugMode) {
         print('✅ LoginNotifier: Email de recuperação enviado');
       }

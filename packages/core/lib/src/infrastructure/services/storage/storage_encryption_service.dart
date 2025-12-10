@@ -15,7 +15,7 @@ class StorageEncryptionService {
   late final List<int> _keyBytes;
 
   StorageEncryptionService({String? encryptionKey})
-      : _encryptionKey = encryptionKey ?? _generateDefaultKey() {
+    : _encryptionKey = encryptionKey ?? _generateDefaultKey() {
     _keyBytes = _deriveKey(_encryptionKey);
   }
 
@@ -83,15 +83,4 @@ class StorageEncryptionService {
       return false;
     }
   }
-}
-
-/// Configuração de encryption
-class EncryptionConfig {
-  final String? customKey;
-  final bool enabled;
-
-  const EncryptionConfig({
-    this.customKey,
-    this.enabled = true,
-  });
 }

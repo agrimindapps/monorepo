@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/bovine_entity.dart';
@@ -51,7 +50,9 @@ class BovinesState {
   }) {
     return BovinesState(
       bovines: bovines ?? this.bovines,
-      selectedBovine: clearSelectedBovine ? null : (selectedBovine ?? this.selectedBovine),
+      selectedBovine: clearSelectedBovine
+          ? null
+          : (selectedBovine ?? this.selectedBovine),
       isLoading: isLoading ?? this.isLoading,
       isLoadingBovine: isLoadingBovine ?? this.isLoadingBovine,
       isCreating: isCreating ?? this.isCreating,
@@ -75,14 +76,14 @@ class BovinesState {
           .where(
             (bovine) =>
                 bovine.commonName.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
+                  searchQuery.toLowerCase(),
+                ) ||
                 bovine.breed.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ) ||
+                  searchQuery.toLowerCase(),
+                ) ||
                 bovine.registrationId.toLowerCase().contains(
-                      searchQuery.toLowerCase(),
-                    ),
+                  searchQuery.toLowerCase(),
+                ),
           )
           .toList();
     }
@@ -108,11 +109,16 @@ class BovinesState {
 /// Separado do provider principal para otimização e modularização
 @riverpod
 class BovinesNotifier extends _$BovinesNotifier {
-  GetAllBovinesUseCase get _getAllBovines => ref.read(getAllBovinesUseCaseProvider);
-  GetBovineByIdUseCase get _getBovineById => ref.read(getBovineByIdUseCaseProvider);
-  CreateBovineUseCase get _createBovine => ref.read(createBovineUseCaseProvider);
-  UpdateBovineUseCase get _updateBovine => ref.read(updateBovineUseCaseProvider);
-  DeleteBovineUseCase get _deleteBovine => ref.read(deleteBovineUseCaseProvider);
+  GetAllBovinesUseCase get _getAllBovines =>
+      ref.read(getAllBovinesUseCaseProvider);
+  GetBovineByIdUseCase get _getBovineById =>
+      ref.read(getBovineByIdUseCaseProvider);
+  CreateBovineUseCase get _createBovine =>
+      ref.read(createBovineUseCaseProvider);
+  UpdateBovineUseCase get _updateBovine =>
+      ref.read(updateBovineUseCaseProvider);
+  DeleteBovineUseCase get _deleteBovine =>
+      ref.read(deleteBovineUseCaseProvider);
 
   @override
   BovinesState build() {
@@ -144,19 +150,13 @@ class BovinesNotifier extends _$BovinesNotifier {
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          errorMessage: failure.message,
-          isLoading: false,
-        );
+        state = state.copyWith(errorMessage: failure.message, isLoading: false);
         debugPrint(
           'BovinesNotifier: Erro ao carregar bovinos - ${failure.message}',
         );
       },
       (loadedBovines) {
-        state = state.copyWith(
-          bovines: loadedBovines,
-          isLoading: false,
-        );
+        state = state.copyWith(bovines: loadedBovines, isLoading: false);
         debugPrint(
           'BovinesNotifier: Bovinos carregados - ${loadedBovines.length} itens',
         );
@@ -231,11 +231,11 @@ class BovinesNotifier extends _$BovinesNotifier {
         if (index != -1) {
           final updatedBovines = List<BovineEntity>.from(state.bovines);
           updatedBovines[index] = updatedBovine;
-          
+
           state = state.copyWith(
             bovines: updatedBovines,
-            selectedBovine: state.selectedBovine?.id == updatedBovine.id 
-                ? updatedBovine 
+            selectedBovine: state.selectedBovine?.id == updatedBovine.id
+                ? updatedBovine
                 : state.selectedBovine,
             isUpdating: false,
           );
@@ -277,12 +277,14 @@ class BovinesNotifier extends _$BovinesNotifier {
         final index = state.bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
           final updatedBovines = List<BovineEntity>.from(state.bovines);
-          updatedBovines[index] = updatedBovines[index].copyWith(isActive: false);
-          
+          updatedBovines[index] = updatedBovines[index].copyWith(
+            isActive: false,
+          );
+
           state = state.copyWith(
             bovines: updatedBovines,
-            selectedBovine: state.selectedBovine?.id == bovineId 
-                ? null 
+            selectedBovine: state.selectedBovine?.id == bovineId
+                ? null
                 : state.selectedBovine,
             clearSelectedBovine: state.selectedBovine?.id == bovineId,
             isDeleting: false,
@@ -349,9 +351,11 @@ class BovinesNotifier extends _$BovinesNotifier {
           );
         },
         (bovine) {
-          final existingIndex = state.bovines.indexWhere((b) => b.id == bovine.id);
+          final existingIndex = state.bovines.indexWhere(
+            (b) => b.id == bovine.id,
+          );
           final updatedBovines = List<BovineEntity>.from(state.bovines);
-          
+
           if (existingIndex == -1) {
             updatedBovines.add(bovine);
           } else {

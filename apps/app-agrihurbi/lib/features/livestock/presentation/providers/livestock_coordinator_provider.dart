@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/bovine_entity.dart';
@@ -16,13 +15,9 @@ part 'livestock_coordinator_provider.g.dart';
 class LivestockCoordinatorState {
   final bool isInitialized;
 
-  const LivestockCoordinatorState({
-    this.isInitialized = false,
-  });
+  const LivestockCoordinatorState({this.isInitialized = false});
 
-  LivestockCoordinatorState copyWith({
-    bool? isInitialized,
-  }) {
+  LivestockCoordinatorState copyWith({bool? isInitialized}) {
     return LivestockCoordinatorState(
       isInitialized: isInitialized ?? this.isInitialized,
     );
@@ -41,32 +36,29 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
   }
 
   // Provider accessors
-  BovinesManagementNotifier get bovinesNotifier => 
-      ref.read(bovinesManagementNotifierProvider.notifier);
+  BovinesManagementNotifier get bovinesNotifier =>
+      ref.read(bovinesManagementProvider.notifier);
   EquinesManagementNotifier get equinesNotifier =>
-      ref.read(equinesManagementNotifierProvider.notifier);
+      ref.read(equinesManagementProvider.notifier);
   BovinesFilterNotifier get filtersNotifier =>
-      ref.read(bovinesFilterNotifierProvider.notifier);
+      ref.read(bovinesFilterProvider.notifier);
   LivestockSearchNotifier get searchNotifier =>
-      ref.read(livestockSearchNotifierProvider.notifier);
+      ref.read(livestockSearchProvider.notifier);
   LivestockStatisticsNotifier get statisticsNotifier =>
-      ref.read(livestockStatisticsNotifierProvider.notifier);
+      ref.read(livestockStatisticsProvider.notifier);
   LivestockSyncNotifier get syncNotifier =>
-      ref.read(livestockSyncNotifierProvider.notifier);
+      ref.read(livestockSyncProvider.notifier);
 
   // Convenience getters for state access
-  BovinesManagementState get bovinesState => 
-      ref.read(bovinesManagementNotifierProvider);
+  BovinesManagementState get bovinesState =>
+      ref.read(bovinesManagementProvider);
   EquinesManagementState get equinesState =>
-      ref.read(equinesManagementNotifierProvider);
-  BovinesFilterState get filtersState =>
-      ref.read(bovinesFilterNotifierProvider);
-  LivestockSearchState get searchState =>
-      ref.read(livestockSearchNotifierProvider);
+      ref.read(equinesManagementProvider);
+  BovinesFilterState get filtersState => ref.read(bovinesFilterProvider);
+  LivestockSearchState get searchState => ref.read(livestockSearchProvider);
   LivestockStatisticsState get statisticsState =>
-      ref.read(livestockStatisticsNotifierProvider);
-  LivestockSyncState get syncState =>
-      ref.read(livestockSyncNotifierProvider);
+      ref.read(livestockStatisticsProvider);
+  LivestockSyncState get syncState => ref.read(livestockSyncProvider);
 
   /// Verifica se alguma operação está em andamento
   bool get isAnyOperationInProgress =>
@@ -105,8 +97,7 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
   }
 
   /// Total de animais
-  int get totalAnimals =>
-      bovinesState.totalBovines + equinesState.totalEquines;
+  int get totalAnimals => bovinesState.totalBovines + equinesState.totalEquines;
 
   /// Inicialização completa do sistema livestock
   Future<void> initializeSystem() async {
@@ -142,9 +133,7 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
     debugPrint(
       'LivestockCoordinatorNotifier: Iniciando sincronização completa',
     );
-    final syncSuccess = await syncNotifier.forceSyncNow(
-      onProgress: onProgress,
-    );
+    final syncSuccess = await syncNotifier.forceSyncNow(onProgress: onProgress);
 
     if (syncSuccess) {
       await refreshAllData();
@@ -192,10 +181,3 @@ class LivestockCoordinatorNotifier extends _$LivestockCoordinatorNotifier {
     filtersNotifier.updateAvailableValues(bovinesState.bovines);
   }
 }
-
-/// Legacy compatibility provider - will be removed after full migration
-final livestockCoordinatorProvider =
-    Provider<LivestockCoordinatorNotifier?>((ref) {
-  // Return the new notifier for compatibility
-  return ref.read(livestockCoordinatorNotifierProvider.notifier);
-});

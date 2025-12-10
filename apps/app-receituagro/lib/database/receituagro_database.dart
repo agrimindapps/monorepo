@@ -38,6 +38,7 @@ part 'receituagro_database.g.dart';
     Favoritos,
     Comentarios,
     AppSettings,
+    UserSubscriptions,
     // Static data (JSON assets)
     Culturas,
     PlantasInf,
@@ -53,7 +54,7 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
   ReceituagroDatabase(super.e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Factory para ambiente de produção
   factory ReceituagroDatabase.production() {
@@ -105,6 +106,12 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
       if (from < 2) {
         await m.createTable(staticDataVersion);
         print('⬆️ Migration v1→v2: StaticDataVersion table added');
+      }
+      
+      // Migration from version 2 to 3: Add UserSubscriptions table
+      if (from < 3) {
+        await m.createTable(userSubscriptions);
+        print('⬆️ Migration v2→v3: UserSubscriptions table added');
       }
     },
     beforeOpen: (details) async {

@@ -33,6 +33,8 @@ docs/
 │   ├── settings/
 │   └── ...
 │
+├── planning/              # 💡 RFCs e funcionalidades futuras
+├── adr/                   # 🏛️ Registros de Decisões Arquiteturais (ADRs)
 ├── backlog/               # 📋 Tarefas globais
 │
 └── guides/                # 📖 Guias de desenvolvimento

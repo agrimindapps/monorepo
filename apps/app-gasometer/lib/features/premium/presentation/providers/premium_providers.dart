@@ -1,10 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../auth/presentation/providers/auth_usecase_providers.dart';
+import '../../../../database/providers/database_providers.dart';
+import '../../../../database/repositories/subscription_local_repository.dart';
+import '../../../../database/sync/adapters/subscription_drift_sync_adapter.dart';
 import '../../data/datasources/premium_firebase_data_source.dart';
 import '../../data/datasources/premium_local_data_source.dart';
 import '../../data/datasources/premium_remote_data_source.dart';
@@ -107,6 +111,9 @@ class StubSubscriptionRepository implements core.ISubscriptionRepository {
 
 final subscriptionRepositoryProvider =
     Provider<core.ISubscriptionRepository>((ref) {
+  if (kDebugMode && kIsWeb) {
+    return core.MockSubscriptionService();
+  }
   return StubSubscriptionRepository();
 });
 
@@ -156,10 +163,26 @@ final premiumLocalDataSourceProvider = Provider<PremiumLocalDataSource>((ref) {
 
 final premiumRemoteDataSourceProvider =
     Provider<PremiumRemoteDataSource>((ref) {
+  if (kDebugMode && kIsWeb) {
+    final subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
+    return PremiumRemoteDataSourceImpl(subscriptionRepository);
+  }
   // For apps without subscription feature, use a stub
   // final subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
   // return PremiumRemoteDataSourceImpl(subscriptionRepository);
   return PremiumRemoteDataSourceStub();
+});
+
+final subscriptionLocalRepositoryProvider = Provider<SubscriptionLocalRepository>((ref) {
+  final db = ref.watch(gasometerDatabaseProvider);
+  return SubscriptionLocalRepository(db);
+});
+
+final subscriptionSyncAdapterProvider = Provider<SubscriptionDriftSyncAdapter>((ref) {
+  final db = ref.watch(gasometerDatabaseProvider);
+  final firestore = FirebaseFirestore.instance;
+  final connectivity = ref.watch(core.connectivityServiceProvider);
+  return SubscriptionDriftSyncAdapter(db, firestore, connectivity);
 });
 
 final premiumFirebaseDataSourceProvider =
@@ -180,12 +203,14 @@ final premiumSyncServiceProvider = Provider<PremiumSyncService>((ref) {
   final firebaseDataSource = ref.watch(premiumFirebaseDataSourceProvider);
   final webhookDataSource = ref.watch(premiumWebhookDataSourceProvider);
   final authRepository = ref.watch(authRepositoryProvider);
+  final localRepository = ref.watch(subscriptionLocalRepositoryProvider);
 
   return PremiumSyncService(
     remoteDataSource,
     firebaseDataSource,
     webhookDataSource,
     authRepository as core.IAuthRepository,
+    localRepository: localRepository,
   );
 });
 

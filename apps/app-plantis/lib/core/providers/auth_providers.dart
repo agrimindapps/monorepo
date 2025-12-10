@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart' hide Column, User;
+import 'package:core/core.dart' hide Column, User, subscriptionRepositoryProvider;
 import 'package:flutter/foundation.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';

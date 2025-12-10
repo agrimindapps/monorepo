@@ -42,6 +42,7 @@ part 'gasometer_database.g.dart';
     VehicleImages,
     ReceiptImages,
     AuditTrail,
+    UserSubscriptions,
   ],
 )
 
@@ -93,7 +94,7 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   }
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Estratégia de migração do banco de dados
   ///
@@ -178,6 +179,12 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
         ''');
 
         print('✅ Migration v2→v3: Tabelas de imagens criadas');
+      }
+
+      if (from < 4) {
+        // Migração v3 -> v4: Adiciona tabela UserSubscriptions
+        print('📦 Adding UserSubscriptions table...');
+        await m.createTable(userSubscriptions);
       }
 
       // Migrações futuras virão aqui

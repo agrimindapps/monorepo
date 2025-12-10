@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../subscription/presentation/providers/subscription_notifier.dart';
-import '../../../subscription/presentation/widgets/subscription_progress_widget.dart';
+import '../../../subscription/presentation/widgets/subscription_info_card.dart';
 
 /// Widget para exibir status de assinatura premium
 /// Responsabilidade: Display de assinatura, botão de upgrade
@@ -26,45 +26,55 @@ class ProfileSubscriptionSection extends ConsumerWidget {
             ),
           ),
         ),
-        DecoratedBox(
-          decoration: _getCardDecoration(context),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Consumer(
-              builder: (context, ref, child) {
-                final subscriptionAsync = ref.watch(
-                  subscriptionManagementProvider,
-                );
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Consumer(
+            builder: (context, ref, child) {
+              final subscriptionAsync = ref.watch(
+                subscriptionManagementProvider,
+              );
 
-                return subscriptionAsync.when(
-                  data: (subscriptionState) {
-                    if (!subscriptionState.hasActiveSubscription ||
-                        subscriptionState.currentSubscription == null) {
-                      return _buildNoPremiumWidget(context);
-                    }
-
-                    final subscription = subscriptionState.currentSubscription;
-                    if (subscription?.expirationDate == null) {
-                      return _buildNoPremiumWidget(context);
-                    }
-
-                    return SubscriptionProgressWidget(
-                      expirationDate: subscription!.expirationDate!,
-                      purchaseDate: subscription.purchaseDate,
-                      isSandbox: subscription.isSandbox,
-                      isCompact: true,
+              return subscriptionAsync.when(
+                data: (subscriptionState) {
+                  if (!subscriptionState.hasActiveSubscription ||
+                      subscriptionState.currentSubscription == null) {
+                    return DecoratedBox(
+                      decoration: _getCardDecoration(context),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildNoPremiumWidget(context),
+                      ),
                     );
-                  },
-                  loading: () => const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: CircularProgressIndicator(),
-                    ),
+                  }
+
+                  final subscription = subscriptionState.currentSubscription;
+                  if (subscription?.expirationDate == null) {
+                    return DecoratedBox(
+                      decoration: _getCardDecoration(context),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _buildNoPremiumWidget(context),
+                      ),
+                    );
+                  }
+
+                  return SubscriptionInfoCard(subscription: subscription!);
+                },
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
                   ),
-                  error: (error, stack) => _buildNoPremiumWidget(context),
-                );
-              },
-            ),
+                ),
+                error: (error, stack) => DecoratedBox(
+                  decoration: _getCardDecoration(context),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: _buildNoPremiumWidget(context),
+                  ),
+                ),
+              );
+            },
           ),
         ),
       ],

@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/animal_base_entity.dart';
@@ -95,13 +94,23 @@ class LivestockState {
       bovines: bovines ?? this.bovines,
       equines: equines ?? this.equines,
       searchResults: searchResults ?? this.searchResults,
-      selectedBovine: clearSelectedBovine ? null : (selectedBovine ?? this.selectedBovine),
-      selectedEquine: clearSelectedEquine ? null : (selectedEquine ?? this.selectedEquine),
+      selectedBovine: clearSelectedBovine
+          ? null
+          : (selectedBovine ?? this.selectedBovine),
+      selectedEquine: clearSelectedEquine
+          ? null
+          : (selectedEquine ?? this.selectedEquine),
       searchQuery: searchQuery ?? this.searchQuery,
       selectedBreed: clearBreed ? null : (selectedBreed ?? this.selectedBreed),
-      selectedOriginCountry: clearOriginCountry ? null : (selectedOriginCountry ?? this.selectedOriginCountry),
-      selectedAptitude: clearAptitude ? null : (selectedAptitude ?? this.selectedAptitude),
-      selectedBreedingSystem: clearBreedingSystem ? null : (selectedBreedingSystem ?? this.selectedBreedingSystem),
+      selectedOriginCountry: clearOriginCountry
+          ? null
+          : (selectedOriginCountry ?? this.selectedOriginCountry),
+      selectedAptitude: clearAptitude
+          ? null
+          : (selectedAptitude ?? this.selectedAptitude),
+      selectedBreedingSystem: clearBreedingSystem
+          ? null
+          : (selectedBreedingSystem ?? this.selectedBreedingSystem),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       statistics: statistics ?? this.statistics,
     );
@@ -115,31 +124,49 @@ class LivestockState {
       filtered = filtered
           .where(
             (bovine) =>
-                bovine.commonName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                bovine.breed.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                bovine.registrationId.toLowerCase().contains(searchQuery.toLowerCase()),
+                bovine.commonName.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ) ||
+                bovine.breed.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ) ||
+                bovine.registrationId.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ),
           )
           .toList();
     }
 
     if (selectedBreed != null) {
       filtered = filtered
-          .where((bovine) => bovine.breed.toLowerCase().contains(selectedBreed!.toLowerCase()))
+          .where(
+            (bovine) => bovine.breed.toLowerCase().contains(
+              selectedBreed!.toLowerCase(),
+            ),
+          )
           .toList();
     }
 
     if (selectedOriginCountry != null) {
       filtered = filtered
-          .where((bovine) => bovine.originCountry.toLowerCase().contains(selectedOriginCountry!.toLowerCase()))
+          .where(
+            (bovine) => bovine.originCountry.toLowerCase().contains(
+              selectedOriginCountry!.toLowerCase(),
+            ),
+          )
           .toList();
     }
 
     if (selectedAptitude != null) {
-      filtered = filtered.where((bovine) => bovine.aptitude == selectedAptitude).toList();
+      filtered = filtered
+          .where((bovine) => bovine.aptitude == selectedAptitude)
+          .toList();
     }
 
     if (selectedBreedingSystem != null) {
-      filtered = filtered.where((bovine) => bovine.breedingSystem == selectedBreedingSystem).toList();
+      filtered = filtered
+          .where((bovine) => bovine.breedingSystem == selectedBreedingSystem)
+          .toList();
     }
 
     return filtered;
@@ -153,8 +180,12 @@ class LivestockState {
       filtered = filtered
           .where(
             (equine) =>
-                equine.commonName.toLowerCase().contains(searchQuery.toLowerCase()) ||
-                equine.registrationId.toLowerCase().contains(searchQuery.toLowerCase()),
+                equine.commonName.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ) ||
+                equine.registrationId.toLowerCase().contains(
+                  searchQuery.toLowerCase(),
+                ),
           )
           .toList();
     }
@@ -196,12 +227,17 @@ class LivestockState {
 @riverpod
 class LivestockNotifier extends _$LivestockNotifier {
   LivestockRepository get _repository => ref.read(livestockRepositoryProvider);
-  GetAllBovinesUseCase get _getAllBovines => ref.read(getAllBovinesUseCaseProvider);
+  GetAllBovinesUseCase get _getAllBovines =>
+      ref.read(getAllBovinesUseCaseProvider);
   GetEquinesUseCase get _getEquines => ref.read(getEquinesUseCaseProvider);
-  CreateBovineUseCase get _createBovine => ref.read(createBovineUseCaseProvider);
-  UpdateBovineUseCase get _updateBovine => ref.read(updateBovineUseCaseProvider);
-  DeleteBovineUseCase get _deleteBovine => ref.read(deleteBovineUseCaseProvider);
-  search_use_case.SearchAnimalsUseCase get _searchAnimals => ref.read(searchAnimalsUseCaseProvider);
+  CreateBovineUseCase get _createBovine =>
+      ref.read(createBovineUseCaseProvider);
+  UpdateBovineUseCase get _updateBovine =>
+      ref.read(updateBovineUseCaseProvider);
+  DeleteBovineUseCase get _deleteBovine =>
+      ref.read(deleteBovineUseCaseProvider);
+  search_use_case.SearchAnimalsUseCase get _searchAnimals =>
+      ref.read(searchAnimalsUseCaseProvider);
 
   @override
   LivestockState build() {
@@ -243,7 +279,10 @@ class LivestockNotifier extends _$LivestockNotifier {
 
     result.fold(
       (failure) {
-        state = state.copyWith(errorMessage: failure.message, isLoadingBovines: false);
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoadingBovines: false,
+        );
         debugPrint('Erro ao carregar bovinos: ${failure.message}');
       },
       (loadedBovines) {
@@ -255,7 +294,10 @@ class LivestockNotifier extends _$LivestockNotifier {
 
   /// Seleciona um bovino específico
   void selectBovine(BovineEntity? bovine) {
-    state = state.copyWith(selectedBovine: bovine, clearSelectedBovine: bovine == null);
+    state = state.copyWith(
+      selectedBovine: bovine,
+      clearSelectedBovine: bovine == null,
+    );
   }
 
   /// Cria um novo bovino
@@ -267,7 +309,10 @@ class LivestockNotifier extends _$LivestockNotifier {
     bool success = false;
     result.fold(
       (failure) {
-        state = state.copyWith(errorMessage: failure.message, isCreating: false);
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isCreating: false,
+        );
         debugPrint('Erro ao criar bovino: ${failure.message}');
       },
       (createdBovine) {
@@ -290,7 +335,10 @@ class LivestockNotifier extends _$LivestockNotifier {
     bool success = false;
     result.fold(
       (failure) {
-        state = state.copyWith(errorMessage: failure.message, isUpdating: false);
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isUpdating: false,
+        );
         debugPrint('Erro ao atualizar bovino: ${failure.message}');
       },
       (updatedBovine) {
@@ -300,7 +348,9 @@ class LivestockNotifier extends _$LivestockNotifier {
           updatedBovines[index] = updatedBovine;
           state = state.copyWith(
             bovines: updatedBovines,
-            selectedBovine: state.selectedBovine?.id == updatedBovine.id ? updatedBovine : state.selectedBovine,
+            selectedBovine: state.selectedBovine?.id == updatedBovine.id
+                ? updatedBovine
+                : state.selectedBovine,
             isUpdating: false,
           );
           success = true;
@@ -321,17 +371,24 @@ class LivestockNotifier extends _$LivestockNotifier {
     bool success = false;
     result.fold(
       (failure) {
-        state = state.copyWith(errorMessage: failure.message, isDeleting: false);
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isDeleting: false,
+        );
         debugPrint('Erro ao deletar bovino: ${failure.message}');
       },
       (_) {
         final index = state.bovines.indexWhere((b) => b.id == bovineId);
         if (index != -1) {
           final updatedBovines = List<BovineEntity>.from(state.bovines);
-          updatedBovines[index] = updatedBovines[index].copyWith(isActive: false);
+          updatedBovines[index] = updatedBovines[index].copyWith(
+            isActive: false,
+          );
           state = state.copyWith(
             bovines: updatedBovines,
-            selectedBovine: state.selectedBovine?.id == bovineId ? null : state.selectedBovine,
+            selectedBovine: state.selectedBovine?.id == bovineId
+                ? null
+                : state.selectedBovine,
             clearSelectedBovine: state.selectedBovine?.id == bovineId,
             isDeleting: false,
           );
@@ -352,7 +409,10 @@ class LivestockNotifier extends _$LivestockNotifier {
 
     result.fold(
       (failure) {
-        state = state.copyWith(errorMessage: failure.message, isLoadingEquines: false);
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isLoadingEquines: false,
+        );
         debugPrint('Erro ao carregar equinos: ${failure.message}');
       },
       (loadedEquines) {
@@ -364,7 +424,10 @@ class LivestockNotifier extends _$LivestockNotifier {
 
   /// Seleciona um equino específico
   void selectEquine(EquineEntity? equine) {
-    state = state.copyWith(selectedEquine: equine, clearSelectedEquine: equine == null);
+    state = state.copyWith(
+      selectedEquine: equine,
+      clearSelectedEquine: equine == null,
+    );
   }
 
   /// Atualiza query de busca
@@ -379,17 +442,26 @@ class LivestockNotifier extends _$LivestockNotifier {
 
   /// Atualiza filtro de país de origem
   void updateOriginCountryFilter(String? country) {
-    state = state.copyWith(selectedOriginCountry: country, clearOriginCountry: country == null);
+    state = state.copyWith(
+      selectedOriginCountry: country,
+      clearOriginCountry: country == null,
+    );
   }
 
   /// Atualiza filtro de aptidão
   void updateAptitudeFilter(BovineAptitude? aptitude) {
-    state = state.copyWith(selectedAptitude: aptitude, clearAptitude: aptitude == null);
+    state = state.copyWith(
+      selectedAptitude: aptitude,
+      clearAptitude: aptitude == null,
+    );
   }
 
   /// Atualiza filtro de sistema de criação
   void updateBreedingSystemFilter(BreedingSystem? system) {
-    state = state.copyWith(selectedBreedingSystem: system, clearBreedingSystem: system == null);
+    state = state.copyWith(
+      selectedBreedingSystem: system,
+      clearBreedingSystem: system == null,
+    );
   }
 
   /// Limpa todos os filtros
@@ -416,7 +488,10 @@ class LivestockNotifier extends _$LivestockNotifier {
         debugPrint('Erro ao buscar animais: ${failure.message}');
       },
       (results) {
-        state = state.copyWith(searchResults: results.allAnimals, isLoading: false);
+        state = state.copyWith(
+          searchResults: results.allAnimals,
+          isLoading: false,
+        );
         debugPrint('Resultados da busca: ${results.totalCount}');
       },
     );

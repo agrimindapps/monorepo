@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart' as core;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../database/receituagro_database.dart';
 import '../../database/repositories/repositories.dart';
+import '../../database/repositories/subscription_local_repository.dart';
 import '../../database/sync/adapters/comentarios_drift_sync_adapter.dart';
 import '../../database/sync/adapters/favoritos_drift_sync_adapter.dart';
+import '../../database/sync/adapters/subscription_drift_sync_adapter.dart';
 import '../../features/analytics/analytics_providers.dart';
 import '../../features/analytics/analytics_service.dart';
 import '../../features/favoritos/presentation/providers/favoritos_providers.dart';
@@ -120,6 +123,9 @@ final enhancedAccountDeletionServiceProvider = Provider<core.EnhancedAccountDele
 
 /// Provider do repositório de subscription
 final subscriptionRepositoryProvider = Provider<core.ISubscriptionRepository>((ref) {
+  if (kDebugMode && kIsWeb) {
+    return core.MockSubscriptionService();
+  }
   return core.RevenueCatService();
 });
 
@@ -194,12 +200,26 @@ final appSettingsRepositoryProvider = Provider<AppSettingsRepository>((ref) {
   return AppSettingsRepository(db);
 });
 
+/// Provider do repositório local de assinaturas
+final subscriptionLocalRepositoryProvider = Provider<SubscriptionLocalRepository>((ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  return SubscriptionLocalRepository(db);
+});
+
 /// Provider do adapter de sincronização de favoritos
 final favoritosSyncAdapterProvider = Provider<FavoritosDriftSyncAdapter>((ref) {
   final db = ref.watch(receituagroDatabaseProvider);
   final firestore = ref.watch(firebaseFirestoreProvider);
-  final connectivity = ref.watch(connectivityServiceProvider);
+  final connectivity = ref.watch(core.connectivityServiceProvider);
   return FavoritosDriftSyncAdapter(db, firestore, connectivity);
+});
+
+/// Provider do adapter de sincronização de assinaturas
+final subscriptionSyncAdapterProvider = Provider<SubscriptionDriftSyncAdapter>((ref) {
+  final db = ref.watch(receituagroDatabaseProvider);
+  final firestore = ref.watch(firebaseFirestoreProvider);
+  final connectivity = ref.watch(core.connectivityServiceProvider);
+  return SubscriptionDriftSyncAdapter(db, firestore, connectivity);
 });
 
 /// Provider do adapter de sincronização de comentários
@@ -323,12 +343,14 @@ final premiumServiceProvider = Provider<ReceitaAgroPremiumService>((ref) {
   final cloudFunctions = ref.watch(cloudFunctionsServiceProvider);
   final remoteConfig = ref.watch(remoteConfigServiceProvider);
   final subscriptionRepo = ref.watch(subscriptionRepositoryProvider);
+  final localRepo = ref.watch(subscriptionLocalRepositoryProvider);
 
   final service = ReceitaAgroPremiumService(
     analytics: analytics,
     cloudFunctions: cloudFunctions,
     remoteConfig: remoteConfig,
     subscriptionRepository: subscriptionRepo,
+    localRepository: localRepo,
   );
 
   ReceitaAgroPremiumService.setInstance(service);

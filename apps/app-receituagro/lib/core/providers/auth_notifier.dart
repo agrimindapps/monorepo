@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide AuthState, Column, analyticsServiceProvider;
+import 'package:core/core.dart'
+    hide AuthState, Column, analyticsServiceProvider;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -52,7 +53,9 @@ class AuthNotifier extends _$AuthNotifier {
           final currentState = state.value;
           if (currentState != null) {
             state = AsyncValue.data(
-              currentState.copyWith(errorMessage: 'Erro na autenticação: $error'),
+              currentState.copyWith(
+                errorMessage: 'Erro na autenticação: $error',
+              ),
             );
           }
         },
@@ -270,7 +273,8 @@ class AuthNotifier extends _$AuthNotifier {
     final currentState = state.value;
     if (currentState == null) return false;
 
-    if (currentState.currentUser == null || currentState.currentUser!.isAnonymous) {
+    if (currentState.currentUser == null ||
+        currentState.currentUser!.isAnonymous) {
       if (kDebugMode) {
         print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
       }
@@ -326,15 +330,103 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
+  Future<AuthResult> updateProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado inválido');
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true));
+
+    try {
+      final result = await _authRepository.updateProfile(
+        displayName: displayName,
+        photoUrl: photoUrl,
+      );
+
+      return result.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isLoading: false,
+              errorMessage: failure.message,
+            ),
+          );
+          return AuthResult.failure(failure.message);
+        },
+        (user) {
+          state = AsyncValue.data(
+            currentState.copyWith(isLoading: false, currentUser: user),
+          );
+          return AuthResult.success(user);
+        },
+      );
+    } catch (e) {
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
+      );
+      return AuthResult.failure(e.toString());
+    }
+  }
+
+  Future<AuthResult> sendPasswordResetEmail(String email) async {
+    final currentState = state.value;
+    if (currentState == null) return AuthResult.failure('Estado inválido');
+
+    state = AsyncValue.data(currentState.copyWith(isLoading: true));
+
+    try {
+      final result = await _authRepository.sendPasswordResetEmail(email: email);
+
+      return result.fold(
+        (failure) {
+          state = AsyncValue.data(
+            currentState.copyWith(
+              isLoading: false,
+              errorMessage: failure.message,
+            ),
+          );
+          return AuthResult.failure(failure.message);
+        },
+        (_) {
+          state = AsyncValue.data(currentState.copyWith(isLoading: false));
+          // Retorna sucesso com usuário atual (ou null se não logado, mas o método requer email)
+          // Como é reset de senha, geralmente o usuário não está logado ou está logado e quer mudar.
+          // Se estiver logado, retornamos o usuário atual. Se não, criamos um dummy ou retornamos sucesso sem user.
+          // AuthResult espera um UserEntity para sucesso.
+          // Vamos usar o currentUser se existir, ou um dummy se for fluxo de "esqueci minha senha" deslogado.
+          return AuthResult.success(
+            currentState.currentUser ??
+                const UserEntity(
+                  id: 'reset_flow',
+                  email: '',
+                  displayName: '',
+                  provider: AuthProvider.email,
+                ),
+          );
+        },
+      );
+    } catch (e) {
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: false, errorMessage: e.toString()),
+      );
+      return AuthResult.failure(e.toString());
+    }
+  }
+
   Future<AuthResult> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
     final currentState = state.value;
-    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+    if (currentState == null)
+      return AuthResult.failure('Estado não inicializado');
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, clearError: true),
+      );
 
       _analytics.trackAuthFunnelStep('login_attempt');
 
@@ -387,10 +479,13 @@ class AuthNotifier extends _$AuthNotifier {
     required String displayName,
   }) async {
     final currentState = state.value;
-    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+    if (currentState == null)
+      return AuthResult.failure('Estado não inicializado');
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, clearError: true),
+      );
 
       _analytics.trackAuthFunnelStep('signup_attempt');
 
@@ -441,10 +536,13 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<AuthResult> signInAnonymously() async {
     final currentState = state.value;
-    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+    if (currentState == null)
+      return AuthResult.failure('Estado não inicializado');
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, clearError: true),
+      );
 
       final result = await _authRepository.signInAnonymously();
 
@@ -490,10 +588,13 @@ class AuthNotifier extends _$AuthNotifier {
     required String displayName,
   }) async {
     final currentState = state.value;
-    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+    if (currentState == null)
+      return AuthResult.failure('Estado não inicializado');
 
     try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, clearError: true),
+      );
 
       if (!currentState.isAnonymous) {
         return AuthResult.failure('Usuário não é anônimo');
@@ -554,7 +655,7 @@ class AuthNotifier extends _$AuthNotifier {
 
       final result = await _authRepository.signOut();
 
-      result.fold(
+      await result.fold(
         (failure) {
           final errorState = state.value;
           if (errorState != null) {
@@ -591,53 +692,10 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  Future<void> sendPasswordResetEmail({required String email}) async {
-    final currentState = state.value;
-    if (currentState == null) return;
-
-    try {
-      state = AsyncValue.data(currentState.copyWith(isLoading: true));
-
-      final result = await _authRepository.sendPasswordResetEmail(email: email);
-
-      result.fold(
-        (failure) {
-          final errorState = state.value;
-          if (errorState != null) {
-            state = AsyncValue.data(
-              errorState.copyWith(
-                isLoading: false,
-                errorMessage: failure.message,
-              ),
-            );
-          }
-        },
-        (_) {
-          final successState = state.value;
-          if (successState != null) {
-            state = AsyncValue.data(
-              successState.copyWith(isLoading: false, clearError: true),
-            );
-          }
-          _analytics.trackEvent('password_reset_sent');
-        },
-      );
-    } catch (e) {
-      final errorState = state.value;
-      if (errorState != null) {
-        state = AsyncValue.data(
-          errorState.copyWith(
-            isLoading: false,
-            errorMessage: 'Erro ao enviar email: $e',
-          ),
-        );
-      }
-    }
-  }
-
   Future<AuthResult> deleteAccount({String? password}) async {
     final currentState = state.value;
-    if (currentState == null) return AuthResult.failure('Estado não inicializado');
+    if (currentState == null)
+      return AuthResult.failure('Estado não inicializado');
 
     try {
       if (currentState.currentUser == null) {
@@ -647,7 +705,9 @@ class AuthNotifier extends _$AuthNotifier {
         return AuthResult.failure('Nenhum usuário autenticado');
       }
 
-      state = AsyncValue.data(currentState.copyWith(isLoading: true, clearError: true));
+      state = AsyncValue.data(
+        currentState.copyWith(isLoading: true, clearError: true),
+      );
 
       if (kDebugMode) {
         debugPrint('🗑️ AuthNotifier: Iniciando exclusão de conta');
@@ -672,7 +732,10 @@ class AuthNotifier extends _$AuthNotifier {
           final errorState = state.value;
           if (errorState != null) {
             state = AsyncValue.data(
-              errorState.copyWith(isLoading: false, errorMessage: error.message),
+              errorState.copyWith(
+                isLoading: false,
+                errorMessage: error.message,
+              ),
             );
           }
           _analytics.trackEvent(

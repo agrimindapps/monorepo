@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
+import '../../database/repositories/subscription_local_repository.dart';
 import '../../features/analytics/analytics_service.dart';
 import 'cloud_functions_service.dart';
 import 'remote_config_service.dart';
@@ -120,6 +121,7 @@ class ReceitaAgroPremiumService {
   final ReceitaAgroCloudFunctionsService _cloudFunctions;
   final ReceitaAgroRemoteConfigService _remoteConfig;
   final ISubscriptionRepository _subscriptionRepository;
+  final SubscriptionLocalRepository? _localRepository;
 
   /// Constructor with dependency injection
   ReceitaAgroPremiumService({
@@ -127,10 +129,12 @@ class ReceitaAgroPremiumService {
     required ReceitaAgroCloudFunctionsService cloudFunctions,
     required ReceitaAgroRemoteConfigService remoteConfig,
     required ISubscriptionRepository subscriptionRepository,
+    SubscriptionLocalRepository? localRepository,
   })  : _analytics = analytics,
         _cloudFunctions = cloudFunctions,
         _remoteConfig = remoteConfig,
-        _subscriptionRepository = subscriptionRepository;
+        _subscriptionRepository = subscriptionRepository,
+        _localRepository = localRepository;
 
   /// Factory for singleton pattern (optional, for backward compatibility)
   /// DEPRECATED: Use constructor injection via DI container instead
@@ -469,6 +473,13 @@ class ReceitaAgroPremiumService {
     if (subscription != null) {
       _updatePremiumStatusFromEntity(subscription);
       _syncSubscriptionWithCloudFunctions(subscription);
+      
+      // Save to local cache for offline access
+      if (_localRepository != null) {
+        _localRepository!.saveSubscription(subscription).catchError((e) {
+          developer.log('⚠️ Failed to save local subscription: $e', name: 'PremiumService');
+        });
+      }
     } else {
       _status = PremiumStatus.free();
       onStateChanged?.call();

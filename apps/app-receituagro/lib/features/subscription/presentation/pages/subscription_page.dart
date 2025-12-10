@@ -65,28 +65,43 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     return subscriptionState.when(
       data: (state) {
         return Scaffold(
-          body: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                children: [
-                  ModernHeaderWidget(
-                    title: 'Planos',
-                    subtitle: 'Gerencie sua assinatura premium',
-                    leftIcon: Icons.workspace_premium,
-                    isDark: Theme.of(context).brightness == Brightness.dark,
-                    showBackButton: true,
-                    showActions: false,
-                  ),
-                  const SizedBox(height: 12),
-                  Expanded(
-                    child: state.isLoading
-                        ? _buildLoadingView()
-                        : state.hasActiveSubscription
-                            ? _buildActiveSubscriptionView()
-                            : _buildPlansView(),
-                  ),
+          extendBodyBehindAppBar: true,
+          backgroundColor: Colors.transparent,
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF052E16), // Very dark green (Premium)
+                  Color(0xFF14532D), // Dark green
+                  Color(0xFF1B4D3E), // Deep Teal/Green
                 ],
+              ),
+            ),
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                child: Column(
+                  children: [
+                    ModernHeaderWidget(
+                      title: 'Planos',
+                      subtitle: 'Gerencie sua assinatura premium',
+                      leftIcon: Icons.workspace_premium,
+                      isDark: true, // Force dark mode style for white text
+                      showBackButton: true,
+                      showActions: false,
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: state.isLoading
+                          ? _buildLoadingView()
+                          : state.hasActiveSubscription
+                              ? _buildActiveSubscriptionView()
+                              : _buildPlansView(),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

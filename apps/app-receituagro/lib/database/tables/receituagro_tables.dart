@@ -163,6 +163,51 @@ class Comentarios extends Table {
   TextColumn get texto => text()();
 }
 
+/// Tabela de Assinaturas do Usuário (Cache Local)
+///
+/// Armazena o estado da assinatura para acesso offline.
+/// Atualizado sempre que o RevenueCat/Mock retorna um novo status.
+class UserSubscriptions extends Table {
+  // ========== PRIMARY KEY ==========
+  TextColumn get id => text()(); // ID da assinatura (purchase token ou gerado)
+
+  // ========== FIREBASE SYNC ==========
+  TextColumn get firebaseId =>
+      text().nullable()(); // Para sync futuro se necessário
+  TextColumn get userId => text()(); // Vínculo com o usuário
+  TextColumn get moduleName =>
+      text().withDefault(const Constant('receituagro'))();
+
+  // ========== SUBSCRIPTION DATA ==========
+  TextColumn get productId => text()();
+  TextColumn get status => text()(); // active, expired, etc.
+  TextColumn get tier => text()(); // free, premium, etc.
+  TextColumn get store => text()(); // appStore, playStore, etc.
+
+  DateTimeColumn get expirationDate => dateTime().nullable()();
+  DateTimeColumn get purchaseDate => dateTime().nullable()();
+  DateTimeColumn get originalPurchaseDate => dateTime().nullable()();
+
+  BoolColumn get isSandbox => boolean().withDefault(const Constant(false))();
+  BoolColumn get isAutoRenewing =>
+      boolean().withDefault(const Constant(true))();
+  BoolColumn get isActive => boolean().withDefault(const Constant(false))();
+
+  // ========== TIMESTAMPS ==========
+  DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
+  DateTimeColumn get lastSyncAt =>
+      dateTime().nullable()(); // Quando foi validado com a loja
+
+  // ========== SYNC FIELDS ==========
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// ========== STATIC DATA TABLES (READ-ONLY) ==========
 
 /// Tabela de Culturas (Dados estáticos - JSON)

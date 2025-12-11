@@ -48,29 +48,22 @@ class PlantModel extends Plant {
       species: json['species'] as String?,
       spaceId: json['spaceId'] as String?,
       imageBase64: json['imageBase64'] as String?,
-      imageUrls:
-          json['imageUrls'] != null
-              ? List<String>.from(json['imageUrls'] as List)
-              : const [],
-      plantingDate:
-          json['plantingDate'] != null
-              ? DateTime.parse(json['plantingDate'] as String)
-              : null,
+      imageUrls: json['imageUrls'] != null
+          ? List<String>.from(json['imageUrls'] as List)
+          : const [],
+      plantingDate: json['plantingDate'] != null
+          ? DateTime.parse(json['plantingDate'] as String)
+          : null,
       notes: json['notes'] as String?,
-      config:
-          json['config'] != null
-              ? PlantConfigModel.fromJson(
-                json['config'] as Map<String, dynamic>,
-              )
-              : null,
-      createdAt:
-          json['createdAt'] != null
-              ? DateTime.parse(json['createdAt'] as String)
-              : null,
-      updatedAt:
-          json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
+      config: json['config'] != null
+          ? PlantConfigModel.fromJson(json['config'] as Map<String, dynamic>)
+          : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
       isDeleted: json['isDeleted'] as bool? ?? false,
       isDirty: json['isDirty'] as bool? ?? false,
       isFavorited: json['isFavorited'] as bool? ?? false,
@@ -88,8 +81,9 @@ class PlantModel extends Plant {
       'imageUrls': imageUrls,
       'plantingDate': plantingDate?.toIso8601String(),
       'notes': notes,
-      'config':
-          config != null ? PlantConfigModel.fromEntity(config!).toJson() : null,
+      'config': config != null
+          ? PlantConfigModel.fromEntity(config!).toJson()
+          : null,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
       'isDeleted': isDeleted,
@@ -195,15 +189,13 @@ class PlantConfigModel extends PlantConfig {
       idealTemperature: (json['idealTemperature'] as num?)?.toDouble(),
       idealHumidity: (json['idealHumidity'] as num?)?.toDouble(),
       enableWateringCare: json['enableWateringCare'] as bool?,
-      lastWateringDate:
-          json['lastWateringDate'] != null
-              ? DateTime.parse(json['lastWateringDate'] as String)
-              : null,
+      lastWateringDate: json['lastWateringDate'] != null
+          ? DateTime.parse(json['lastWateringDate'] as String)
+          : null,
       enableFertilizerCare: json['enableFertilizerCare'] as bool?,
-      lastFertilizerDate:
-          json['lastFertilizerDate'] != null
-              ? DateTime.parse(json['lastFertilizerDate'] as String)
-              : null,
+      lastFertilizerDate: json['lastFertilizerDate'] != null
+          ? DateTime.parse(json['lastFertilizerDate'] as String)
+          : null,
     );
   }
 

@@ -169,11 +169,8 @@ class AppRouter {
           },
         ),
         ShellRoute(
-          builder:
-              (context, state, child) =>
-                  WebOptimizedNavigationShell(
-                    child: child,
-                  ).withKeyboardShortcuts(),
+          builder: (context, state, child) =>
+              WebOptimizedNavigationShell(child: child).withKeyboardShortcuts(),
           routes: [
             GoRoute(
               path: plants,
@@ -280,6 +277,7 @@ class AppRouter {
     );
   }
 }
+
 class ErrorPage extends StatelessWidget {
   final Object? error;
 

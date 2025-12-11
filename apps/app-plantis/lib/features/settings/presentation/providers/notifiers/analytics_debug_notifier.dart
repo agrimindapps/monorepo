@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/entities/settings_entity.dart';
@@ -30,8 +29,7 @@ class AnalyticsDebugNotifier extends _$AnalyticsDebugNotifier {
   Future<void> updateBackupSettings(BackupSettingsEntity newSettings) async {
     try {
       final currentSettings = state.settings;
-      final updatedSettings =
-          currentSettings.copyWith(backup: newSettings);
+      final updatedSettings = currentSettings.copyWith(backup: newSettings);
 
       state = state.copyWith(
         settings: updatedSettings,
@@ -49,8 +47,7 @@ class AnalyticsDebugNotifier extends _$AnalyticsDebugNotifier {
   Future<void> updateAccountSettings(AccountSettingsEntity newSettings) async {
     try {
       final currentSettings = state.settings;
-      final updatedSettings =
-          currentSettings.copyWith(account: newSettings);
+      final updatedSettings = currentSettings.copyWith(account: newSettings);
 
       state = state.copyWith(
         settings: updatedSettings,
@@ -143,10 +140,7 @@ class AnalyticsDebugNotifier extends _$AnalyticsDebugNotifier {
 
   /// Clears messages
   void clearMessages() {
-    state = state.copyWith(
-      clearError: true,
-      clearSuccess: true,
-    );
+    state = state.copyWith(clearError: true, clearSuccess: true);
   }
 
   /// Revokes device access

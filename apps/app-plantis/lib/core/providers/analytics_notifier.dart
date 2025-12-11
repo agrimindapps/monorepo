@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../constants/app_constants.dart';
 import 'analytics_state.dart';

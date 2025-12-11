@@ -33,7 +33,9 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
         _onConnectivityChanged,
         onError: (Object error) {
           if (kDebugMode) {
-            print('⚠️ PlantsConnectivityService: Connectivity monitoring error: $error');
+            print(
+              '⚠️ PlantsConnectivityService: Connectivity monitoring error: $error',
+            );
           }
         },
       );
@@ -41,7 +43,9 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
       _isMonitoring = true;
 
       if (kDebugMode) {
-        print('✅ PlantsConnectivityService: Real-time connectivity monitoring started');
+        print(
+          '✅ PlantsConnectivityService: Real-time connectivity monitoring started',
+        );
       }
     } catch (e) {
       if (kDebugMode) {

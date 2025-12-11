@@ -12,9 +12,7 @@ mixin PlantTaskAdapter {
   ///
   /// Necessário para usar TaskCompletionDialog que espera Task.
   /// Mapeia campos compatíveis e define valores padrão para campos específicos da Task.
-  static task_entity.Task plantTaskToTask(
-    plant_task.PlantTask plantTask,
-  ) {
+  static task_entity.Task plantTaskToTask(plant_task.PlantTask plantTask) {
     return task_entity.Task(
       id: plantTask.id,
       createdAt: plantTask.createdAt,

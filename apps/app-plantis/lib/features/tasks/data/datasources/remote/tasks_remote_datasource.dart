@@ -39,20 +39,18 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     try {
       await _rateLimiter.checkLimit('tasks.getTasks');
 
-      final querySnapshot =
-          await _getTasksCollection(
-            userId,
-          ).where('is_deleted', isEqualTo: false).get();
+      final querySnapshot = await _getTasksCollection(
+        userId,
+      ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks =
-          querySnapshot.docs
-              .map(
-                (doc) => TaskModel.fromFirebaseMap({
-                  'id': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                }),
-              )
-              .toList();
+      final tasks = querySnapshot.docs
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({
+              'id': doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            }),
+          )
+          .toList();
       tasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
       });
@@ -69,21 +67,19 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     String userId,
   ) async {
     try {
-      final querySnapshot =
-          await _getTasksCollection(userId)
-              .where('plant_id', isEqualTo: plantId)
-              .where('is_deleted', isEqualTo: false)
-              .get();
+      final querySnapshot = await _getTasksCollection(userId)
+          .where('plant_id', isEqualTo: plantId)
+          .where('is_deleted', isEqualTo: false)
+          .get();
 
-      final tasks =
-          querySnapshot.docs
-              .map(
-                (doc) => TaskModel.fromFirebaseMap({
-                  'id': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                }),
-              )
-              .toList();
+      final tasks = querySnapshot.docs
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({
+              'id': doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            }),
+          )
+          .toList();
       tasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
       });
@@ -100,21 +96,19 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     String userId,
   ) async {
     try {
-      final querySnapshot =
-          await _getTasksCollection(userId)
-              .where('status', isEqualTo: status.key)
-              .where('is_deleted', isEqualTo: false)
-              .get();
+      final querySnapshot = await _getTasksCollection(userId)
+          .where('status', isEqualTo: status.key)
+          .where('is_deleted', isEqualTo: false)
+          .get();
 
-      final tasks =
-          querySnapshot.docs
-              .map(
-                (doc) => TaskModel.fromFirebaseMap({
-                  'id': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                }),
-              )
-              .toList();
+      final tasks = querySnapshot.docs
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({
+              'id': doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            }),
+          )
+          .toList();
       tasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
       });
@@ -129,25 +123,21 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
   Future<List<TaskModel>> getOverdueTasks(String userId) async {
     try {
       final now = DateTime.now();
-      final querySnapshot =
-          await _getTasksCollection(
-            userId,
-          ).where('is_deleted', isEqualTo: false).get();
+      final querySnapshot = await _getTasksCollection(
+        userId,
+      ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks =
-          querySnapshot.docs
-              .map(
-                (doc) => TaskModel.fromFirebaseMap({
-                  'id': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                }),
-              )
-              .toList();
-      final filteredTasks =
-          tasks.where((task) {
-            return task.status == TaskStatus.pending &&
-                task.dueDate.isBefore(now);
-          }).toList();
+      final tasks = querySnapshot.docs
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({
+              'id': doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            }),
+          )
+          .toList();
+      final filteredTasks = tasks.where((task) {
+        return task.status == TaskStatus.pending && task.dueDate.isBefore(now);
+      }).toList();
 
       filteredTasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
@@ -165,28 +155,25 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
       final today = DateTime.now();
       final startOfDay = DateTime(today.year, today.month, today.day);
       final endOfDay = DateTime(today.year, today.month, today.day, 23, 59, 59);
-      final querySnapshot =
-          await _getTasksCollection(
-            userId,
-          ).where('is_deleted', isEqualTo: false).get();
+      final querySnapshot = await _getTasksCollection(
+        userId,
+      ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks =
-          querySnapshot.docs
-              .map(
-                (doc) => TaskModel.fromFirebaseMap({
-                  'id': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                }),
-              )
-              .toList();
-      final filteredTasks =
-          tasks.where((task) {
-            return task.status == TaskStatus.pending &&
-                task.dueDate.isAfter(
-                  startOfDay.subtract(const Duration(seconds: 1)),
-                ) &&
-                task.dueDate.isBefore(endOfDay.add(const Duration(seconds: 1)));
-          }).toList();
+      final tasks = querySnapshot.docs
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({
+              'id': doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            }),
+          )
+          .toList();
+      final filteredTasks = tasks.where((task) {
+        return task.status == TaskStatus.pending &&
+            task.dueDate.isAfter(
+              startOfDay.subtract(const Duration(seconds: 1)),
+            ) &&
+            task.dueDate.isBefore(endOfDay.add(const Duration(seconds: 1)));
+      }).toList();
 
       filteredTasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order
@@ -203,26 +190,23 @@ class TasksRemoteDataSourceImpl implements TasksRemoteDataSource {
     try {
       final now = DateTime.now();
       final nextWeek = now.add(const Duration(days: 7));
-      final querySnapshot =
-          await _getTasksCollection(
-            userId,
-          ).where('is_deleted', isEqualTo: false).get();
+      final querySnapshot = await _getTasksCollection(
+        userId,
+      ).where('is_deleted', isEqualTo: false).get();
 
-      final tasks =
-          querySnapshot.docs
-              .map(
-                (doc) => TaskModel.fromFirebaseMap({
-                  'id': doc.id,
-                  ...doc.data() as Map<String, dynamic>,
-                }),
-              )
-              .toList();
-      final filteredTasks =
-          tasks.where((task) {
-            return task.status == TaskStatus.pending &&
-                task.dueDate.isAfter(now) &&
-                task.dueDate.isBefore(nextWeek.add(const Duration(seconds: 1)));
-          }).toList();
+      final tasks = querySnapshot.docs
+          .map(
+            (doc) => TaskModel.fromFirebaseMap({
+              'id': doc.id,
+              ...doc.data() as Map<String, dynamic>,
+            }),
+          )
+          .toList();
+      final filteredTasks = tasks.where((task) {
+        return task.status == TaskStatus.pending &&
+            task.dueDate.isAfter(now) &&
+            task.dueDate.isBefore(nextWeek.add(const Duration(seconds: 1)));
+      }).toList();
 
       filteredTasks.sort((a, b) {
         return a.dueDate.compareTo(b.dueDate); // ascending order

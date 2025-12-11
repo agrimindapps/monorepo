@@ -83,16 +83,14 @@ class AccountInfoSection extends ConsumerWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color:
-                      isAnonymous
-                          ? PlantisColors.warning.withValues(alpha: 0.1)
-                          : PlantisColors.success.withValues(alpha: 0.1),
+                  color: isAnonymous
+                      ? PlantisColors.warning.withValues(alpha: 0.1)
+                      : PlantisColors.success.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color:
-                        isAnonymous
-                            ? PlantisColors.warning
-                            : PlantisColors.success,
+                    color: isAnonymous
+                        ? PlantisColors.warning
+                        : PlantisColors.success,
                     width: 1,
                   ),
                 ),
@@ -102,19 +100,17 @@ class AccountInfoSection extends ConsumerWidget {
                     Icon(
                       isAnonymous ? Icons.warning : Icons.verified,
                       size: 16,
-                      color:
-                          isAnonymous
-                              ? PlantisColors.warning
-                              : PlantisColors.success,
+                      color: isAnonymous
+                          ? PlantisColors.warning
+                          : PlantisColors.success,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       isAnonymous ? 'Conta Temporária' : 'Conta Verificada',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color:
-                            isAnonymous
-                                ? PlantisColors.warning
-                                : PlantisColors.success,
+                        color: isAnonymous
+                            ? PlantisColors.warning
+                            : PlantisColors.success,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -136,21 +132,18 @@ class AccountInfoSection extends ConsumerWidget {
           ),
         );
       },
-      loading:
-          () => const PlantisCard(
-            child: Center(child: CircularProgressIndicator()),
-          ),
-      error:
-          (error, stack) => PlantisCard(
-            child: Center(
-              child: Text(
-                'Erro ao carregar informações da conta',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.error,
-                ),
-              ),
+      loading: () =>
+          const PlantisCard(child: Center(child: CircularProgressIndicator())),
+      error: (error, stack) => PlantisCard(
+        child: Center(
+          child: Text(
+            'Erro ao carregar informações da conta',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.error,
             ),
           ),
+        ),
+      ),
     );
   }
 }

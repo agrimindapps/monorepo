@@ -24,11 +24,10 @@ class LicenseStatusPage extends ConsumerWidget {
       body: ResponsiveLayout(
         child: licenseState.when(
           loading: () => const _LoadingView(),
-          error:
-              (error, stack) => _ErrorView(
-                error: error.toString(),
-                onRetry: () => ref.refresh(licenseNotifierProvider),
-              ),
+          error: (error, stack) => _ErrorView(
+            error: error.toString(),
+            onRetry: () => ref.refresh(licenseNotifierProvider),
+          ),
           data: (state) {
             if (state.isLoading) {
               return const _LoadingView();
@@ -37,11 +36,9 @@ class LicenseStatusPage extends ConsumerWidget {
             if (state.error != null) {
               return _ErrorView(
                 error: state.error!,
-                onRetry:
-                    () =>
-                        ref
-                            .read(licenseNotifierProvider.notifier)
-                            .refreshLicenseInfo(),
+                onRetry: () => ref
+                    .read(licenseNotifierProvider.notifier)
+                    .refreshLicenseInfo(),
               );
             }
 
@@ -196,7 +193,9 @@ class _LicenseStatusCard extends StatelessWidget {
                 _buildDetailRow(
                   context,
                   'Data de expiração',
-                  _formatDate(licenseInfo.license!.expirationDate ?? DateTime.now()),
+                  _formatDate(
+                    licenseInfo.license!.expirationDate ?? DateTime.now(),
+                  ),
                   Icons.event,
                 ),
               ],
@@ -317,10 +316,9 @@ class _FeaturesOverviewCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color:
-                  available
-                      ? PlantisColors.primary.withValues(alpha: 0.1)
-                      : Colors.grey.withValues(alpha: 0.1),
+              color: available
+                  ? PlantisColors.primary.withValues(alpha: 0.1)
+                  : Colors.grey.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
@@ -397,13 +395,11 @@ class _ActionsSection extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
-                onPressed:
-                    licenseState.isLoading
-                        ? null
-                        : () =>
-                            ref
-                                .read(licenseNotifierProvider.notifier)
-                                .refreshLicenseInfo(),
+                onPressed: licenseState.isLoading
+                    ? null
+                    : () => ref
+                          .read(licenseNotifierProvider.notifier)
+                          .refreshLicenseInfo(),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Atualizar Status'),
                 style: OutlinedButton.styleFrom(
@@ -501,58 +497,56 @@ class _DevelopmentTools extends StatelessWidget {
   void _showExtendTrialDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Estender Trial'),
-            content: const Text('Quantos dias adicionar ao trial?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  ref.read(licenseNotifierProvider.notifier).extendTrial(30);
-                },
-                child: const Text('30 dias'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  ref.read(licenseNotifierProvider.notifier).extendTrial(7);
-                },
-                child: const Text('7 dias'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Estender Trial'),
+        content: const Text('Quantos dias adicionar ao trial?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ref.read(licenseNotifierProvider.notifier).extendTrial(30);
+            },
+            child: const Text('30 dias'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ref.read(licenseNotifierProvider.notifier).extendTrial(7);
+            },
+            child: const Text('7 dias'),
+          ),
+        ],
+      ),
     );
   }
 
   void _showResetLicenseDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Resetar Licença'),
-            content: const Text(
-              'Isso irá remover a licença atual. Esta ação não pode ser desfeita.',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Cancelar'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  ref.read(licenseNotifierProvider.notifier).resetLicense();
-                },
-                style: TextButton.styleFrom(foregroundColor: Colors.red),
-                child: const Text('Resetar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Resetar Licença'),
+        content: const Text(
+          'Isso irá remover a licença atual. Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              ref.read(licenseNotifierProvider.notifier).resetLicense();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Resetar'),
+          ),
+        ],
+      ),
     );
   }
 }

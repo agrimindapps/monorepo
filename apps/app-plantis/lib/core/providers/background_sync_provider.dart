@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/presentation/providers/plants_providers.dart';
@@ -153,10 +152,7 @@ class BackgroundSync extends _$BackgroundSync {
     required String dataType,
   }) async {
     final service = ref.read(backgroundSyncServiceProvider);
-    await service.syncSpecificData(
-      userId: userId,
-      dataType: dataType,
-    );
+    await service.syncSpecificData(userId: userId, dataType: dataType);
 
     state = state.copyWith(
       isSyncInProgress: service.isSyncInProgress,
@@ -196,8 +192,9 @@ double syncProgress(Ref ref) {
 
   if (operations.isEmpty) return 0.0;
 
-  final completedCount =
-      operations.values.where((completed) => completed).length;
+  final completedCount = operations.values
+      .where((completed) => completed)
+      .length;
   return completedCount / operations.length;
 }
 

@@ -219,4 +219,24 @@ class Game2048Notifier extends _$Game2048Notifier {
 
   /// Checks if current score is a new high score
   bool get isNewHighScore => state.score > _currentBestScore.score;
+
+  /// Updates score from external source (Flame game)
+  void updateScore(int score) {
+    state = state.copyWith(score: score);
+    if (score > state.bestScore) {
+      state = state.copyWith(bestScore: score);
+    }
+  }
+
+  /// Marks game as over and saves score
+  void gameOver() {
+    state = state.markAsGameOver();
+    _saveCurrentScore();
+  }
+
+  /// Marks game as won and saves score
+  void win() {
+    state = state.markAsWon();
+    _saveCurrentScore();
+  }
 }

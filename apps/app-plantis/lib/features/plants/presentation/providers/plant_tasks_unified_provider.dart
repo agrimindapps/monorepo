@@ -7,8 +7,10 @@ import '../../../tasks/presentation/notifiers/tasks_notifier.dart';
 ///
 /// This replaces the old PlantTaskNotifier for plant details, ensuring
 /// that the same tasks shown in TasksListPage are also shown in PlantDetailsView.
-final plantTasksUnifiedProvider =
-    Provider.family<List<Task>, String>((ref, plantId) {
+final plantTasksUnifiedProvider = Provider.family<List<Task>, String>((
+  ref,
+  plantId,
+) {
   final tasksState = ref.watch(tasksNotifierProvider);
 
   return tasksState.when(
@@ -24,8 +26,10 @@ final plantTasksUnifiedProvider =
 });
 
 /// Provider that returns pending tasks count for a plant
-final plantPendingTasksCountProvider =
-    Provider.family<int, String>((ref, plantId) {
+final plantPendingTasksCountProvider = Provider.family<int, String>((
+  ref,
+  plantId,
+) {
   final tasks = ref.watch(plantTasksUnifiedProvider(plantId));
   return tasks
       .where(
@@ -37,20 +41,25 @@ final plantPendingTasksCountProvider =
 });
 
 /// Provider that returns completed tasks for a plant (for history)
-final plantCompletedTasksProvider =
-    Provider.family<List<Task>, String>((ref, plantId) {
+final plantCompletedTasksProvider = Provider.family<List<Task>, String>((
+  ref,
+  plantId,
+) {
   final tasks = ref.watch(plantTasksUnifiedProvider(plantId));
   return tasks
       .where((Task task) => task.status == TaskStatus.completed)
       .toList()
-    ..sort((Task a, Task b) => (b.completedAt ?? b.dueDate).compareTo(
-          a.completedAt ?? a.dueDate,
-        ));
+    ..sort(
+      (Task a, Task b) =>
+          (b.completedAt ?? b.dueDate).compareTo(a.completedAt ?? a.dueDate),
+    );
 });
 
 /// Provider that returns pending tasks for a plant
-final plantPendingTasksProvider =
-    Provider.family<List<Task>, String>((ref, plantId) {
+final plantPendingTasksProvider = Provider.family<List<Task>, String>((
+  ref,
+  plantId,
+) {
   final tasks = ref.watch(plantTasksUnifiedProvider(plantId));
   return tasks
       .where(

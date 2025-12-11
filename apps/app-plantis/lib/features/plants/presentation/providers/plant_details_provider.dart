@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
@@ -56,9 +56,7 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
   }
 
   Future<void> _loadPlant(String plantId, {required bool forceReload}) async {
-    if (!forceReload &&
-        state.plant?.id == plantId &&
-        !state.hasError) {
+    if (!forceReload && state.plant?.id == plantId && !state.hasError) {
       return;
     }
 
@@ -139,8 +137,9 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
     state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
-      final updatedPlant =
-          state.plant!.copyWith(isFavorited: !state.plant!.isFavorited);
+      final updatedPlant = state.plant!.copyWith(
+        isFavorited: !state.plant!.isFavorited,
+      );
 
       final params = UpdatePlantParams(
         id: plantId,
@@ -216,10 +215,7 @@ UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
 
-  return UpdatePlantUseCase(
-    repository,
-    generateInitialTasks,
-  );
+  return UpdatePlantUseCase(repository, generateInitialTasks);
 }
 
 /// Alias for backwards compatibility with existing code

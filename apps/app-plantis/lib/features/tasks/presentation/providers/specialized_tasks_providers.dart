@@ -13,9 +13,7 @@ IScheduleService scheduleService(Ref ref) {
 
 /// TaskRecommendationService Provider (DIP)
 @riverpod
-ITaskRecommendationService taskRecommendationService(
-  Ref ref,
-) {
+ITaskRecommendationService taskRecommendationService(Ref ref) {
   return TaskRecommendationService();
 }
 

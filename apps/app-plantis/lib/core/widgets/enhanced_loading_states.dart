@@ -66,18 +66,17 @@ class EnhancedLoadingStates {
               height: height,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors:
-                      isDark
-                          ? [
-                            Colors.grey[800]!,
-                            Colors.grey[700]!,
-                            Colors.grey[800]!,
-                          ]
-                          : [
-                            Colors.grey[300]!,
-                            Colors.grey[100]!,
-                            Colors.grey[300]!,
-                          ],
+                  colors: isDark
+                      ? [
+                          Colors.grey[800]!,
+                          Colors.grey[700]!,
+                          Colors.grey[800]!,
+                        ]
+                      : [
+                          Colors.grey[300]!,
+                          Colors.grey[100]!,
+                          Colors.grey[300]!,
+                        ],
                   stops: const [0.0, 0.5, 1.0],
                   begin: const Alignment(-1.0, 0.0),
                   end: const Alignment(1.0, 0.0),
@@ -104,11 +103,10 @@ class EnhancedLoadingStates {
         return Container(
           width: double.infinity,
           height: double.infinity,
-          color:
-              showBackground
-                  ? (backgroundColor ??
-                      theme.colorScheme.surface.withValues(alpha: 0.8))
-                  : Colors.transparent,
+          color: showBackground
+              ? (backgroundColor ??
+                    theme.colorScheme.surface.withValues(alpha: 0.8))
+              : Colors.transparent,
           child: Center(
             child: Card(
               elevation: 8,

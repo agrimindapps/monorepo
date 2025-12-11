@@ -286,10 +286,9 @@ class _HoverButtonWidgetState extends State<_HoverButtonWidget> {
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
-      cursor:
-          widget.onPressed != null
-              ? SystemMouseCursors.click
-              : SystemMouseCursors.forbidden,
+      cursor: widget.onPressed != null
+          ? SystemMouseCursors.click
+          : SystemMouseCursors.forbidden,
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
@@ -303,8 +302,9 @@ class _HoverButtonWidgetState extends State<_HoverButtonWidget> {
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
-                blurRadius:
-                    _isHovered ? widget.hoverElevation : widget.elevation,
+                blurRadius: _isHovered
+                    ? widget.hoverElevation
+                    : widget.elevation,
                 offset: Offset(
                   0,
                   _isHovered ? widget.hoverElevation / 2 : widget.elevation / 2,

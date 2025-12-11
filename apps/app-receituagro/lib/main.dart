@@ -6,8 +6,6 @@ import 'package:flutter/services.dart';
 
 import 'core/init/app_initialization.dart';
 import 'core/navigation/app_router.dart' as app_router;
-import 'core/navigation/providers/navigation_state_provider.dart';
-import 'core/navigation/widgets/navigation_shell.dart';
 import 'core/providers/theme_notifier.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
@@ -202,27 +200,9 @@ class ReceitaAgroApp extends ConsumerStatefulWidget {
 }
 
 class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
-  late final BottomNavVisibilityObserver _bottomNavObserver;
-  
   @override
   void initState() {
     super.initState();
-    
-    // Cria o observer uma única vez para evitar recriação a cada build
-    // Usa Future.microtask para evitar modificar provider durante build
-    _bottomNavObserver = BottomNavVisibilityObserver(
-      onStateChanged: (visible, tabIndex) {
-        Future.microtask(() {
-          if (mounted) {
-            final notifier = ref.read(navigationStateProvider.notifier);
-            notifier.setBottomNavVisibility(visible);
-            if (tabIndex != null) {
-              notifier.selectTab(tabIndex);
-            }
-          }
-        });
-      },
-    );
     
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
     if (kDebugMode) {
@@ -270,20 +250,14 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
   @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeProvider);
+    final router = ref.watch(app_router.appRouterProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Pragas Soja',
       theme: ReceitaAgroTheme.lightTheme,
       darkTheme: ReceitaAgroTheme.darkTheme,
       themeMode: themeMode,
-      initialRoute: '/home-defensivos',
-      onGenerateRoute: app_router.AppRouter.generateRoute,
-      // REMOVIDO: navigatorKey causava erro de GlobalKey duplicada
-      // navigatorKey: NavigationService.navigatorKey,
-      navigatorObservers: [
-        // Observer para sincronizar estado do BottomNav com rotas
-        _bottomNavObserver,
-      ],
+      routerConfig: router,
       debugShowCheckedModeBanner: false,
     );
   }

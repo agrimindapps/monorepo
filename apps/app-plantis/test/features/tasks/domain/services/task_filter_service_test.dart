@@ -1,7 +1,9 @@
-import 'package:app_plantis/features/tasks/domain/entities/task.dart' as task_entity;
+import 'package:app_plantis/features/tasks/domain/entities/task.dart'
+    as task_entity;
 import 'package:app_plantis/features/tasks/domain/services/task_filter_service.dart';
 import 'package:app_plantis/features/tasks/domain/services/task_filter_strategies.dart';
-import 'package:app_plantis/features/tasks/presentation/providers/tasks_state.dart' hide Task, TaskPriority;
+import 'package:app_plantis/features/tasks/presentation/providers/tasks_state.dart'
+    hide Task, TaskPriority;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../helpers/test_fixtures.dart';
@@ -34,8 +36,7 @@ void main() {
       final tasks = TestFixtures.createTestTasks(count: 5);
 
       // Act
-      final result =
-          filterService.filterByStatus(tasks, TasksFilterType.all);
+      final result = filterService.filterByStatus(tasks, TasksFilterType.all);
 
       // Assert
       expect(result.length, equals(5));
@@ -60,8 +61,7 @@ void main() {
       final tasks = [taskToday, taskTomorrow];
 
       // Act
-      final result =
-          filterService.filterByStatus(tasks, TasksFilterType.today);
+      final result = filterService.filterByStatus(tasks, TasksFilterType.today);
 
       // Assert
       expect(result.length, equals(1));
@@ -87,8 +87,10 @@ void main() {
       final tasks = [overdueTask, futureTask];
 
       // Act
-      final result =
-          filterService.filterByStatus(tasks, TasksFilterType.overdue);
+      final result = filterService.filterByStatus(
+        tasks,
+        TasksFilterType.overdue,
+      );
 
       // Assert
       expect(result.length, equals(1));
@@ -111,15 +113,17 @@ void main() {
       final tasks = [completedTask, pendingTask];
 
       // Act
-      final result = filterService.filterByStatus(tasks, TasksFilterType.completed);
+      final result = filterService.filterByStatus(
+        tasks,
+        TasksFilterType.completed,
+      );
 
       // Assert
       expect(result.length, equals(1));
       expect(result[0].status, equals(task_entity.TaskStatus.completed));
     });
 
-    test('should allow custom filter strategy registration (Open/Closed)',
-        () {
+    test('should allow custom filter strategy registration (Open/Closed)', () {
       // Arrange - Create a custom filter strategy
       final customStrategy = _CustomHighPriorityStrategy();
 
@@ -127,10 +131,7 @@ void main() {
       strategyRegistry.register(customStrategy);
 
       // Assert - Verify strategy was registered
-      expect(
-        strategyRegistry.hasStrategy(TasksFilterType.all),
-        true,
-      );
+      expect(strategyRegistry.hasStrategy(TasksFilterType.all), true);
     });
 
     test('should return all tasks if strategy not found', () {
@@ -227,10 +228,9 @@ void main() {
       final tasks = [highPriorityTask, lowPriorityTask];
 
       // Act
-      final result = filterService.filterByPriorities(
-        tasks,
-        [task_entity.TaskPriority.high],
-      );
+      final result = filterService.filterByPriorities(tasks, [
+        task_entity.TaskPriority.high,
+      ]);
 
       // Assert
       expect(result.length, equals(1));
@@ -256,10 +256,13 @@ void main() {
       final tasks = [taskFutureHigh, taskFutureLow];
 
       // Act
-      var result =
-          filterService.filterByStatus(tasks, TasksFilterType.allFuture);
-      result = filterService.filterByPriorities(
-          result, [task_entity.TaskPriority.high]);
+      var result = filterService.filterByStatus(
+        tasks,
+        TasksFilterType.allFuture,
+      );
+      result = filterService.filterByPriorities(result, [
+        task_entity.TaskPriority.high,
+      ]);
 
       // Assert
       expect(result.length, equals(1));
@@ -293,7 +296,10 @@ void main() {
       final allStrategies = strategyRegistry.getAllStrategies();
 
       // Assert
-      expect(allStrategies.length, greaterThanOrEqualTo(7)); // 7 default strategies
+      expect(
+        allStrategies.length,
+        greaterThanOrEqualTo(7),
+      ); // 7 default strategies
     });
   });
 }

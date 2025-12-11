@@ -157,10 +157,9 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
     await _submitAuthAction(
       formKey: _loginFormKey,
       loadingMessage: 'Fazendo login...',
-      authFuture: () => ref.read(authProvider.notifier).login(
-            _loginEmailController.text,
-            _loginPasswordController.text,
-          ),
+      authFuture: () => ref
+          .read(authProvider.notifier)
+          .login(_loginEmailController.text, _loginPasswordController.text),
     );
   }
 
@@ -246,7 +245,8 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
       child: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(
-          vertical: MediaQuery.of(context).padding.top +
+          vertical:
+              MediaQuery.of(context).padding.top +
               (keyboardHeight > 0 ? 8 : 16),
           horizontal: 16,
         ),
@@ -363,10 +363,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
         const SizedBox(height: 8),
         Text(
           'Faça login para acessar suas plantas',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey.shade600,
-          ),
+          style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 32),
@@ -409,7 +406,6 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           onAppleLogin: _showSocialLoginDialog,
           onMicrosoftLogin: _showSocialLoginDialog,
         ),
-
       ],
     );
   }

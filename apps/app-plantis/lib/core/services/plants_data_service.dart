@@ -22,11 +22,11 @@ class PlantsDataService {
     required AddPlantUseCase addPlantUseCase,
     required UpdatePlantUseCase updatePlantUseCase,
     required DeletePlantUseCase deletePlantUseCase,
-  })  : _authProvider = authProvider,
-        _getPlantsUseCase = getPlantsUseCase,
-        _addPlantUseCase = addPlantUseCase,
-        _updatePlantUseCase = updatePlantUseCase,
-        _deletePlantUseCase = deletePlantUseCase;
+  }) : _authProvider = authProvider,
+       _getPlantsUseCase = getPlantsUseCase,
+       _addPlantUseCase = addPlantUseCase,
+       _updatePlantUseCase = updatePlantUseCase,
+       _deletePlantUseCase = deletePlantUseCase;
 
   /// Carrega todas as plantas do usuário
   Future<Either<Failure, List<Plant>>> loadPlants() async {
@@ -36,14 +36,11 @@ class PlantsDataService {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
       final result = await _getPlantsUseCase.call(const NoParams());
-      
-      return result.fold(
-        (failure) => Left(failure),
-        (plants) {
-          final activePlants = plants.where((plant) => !plant.isDeleted).toList();
-          return Right(activePlants);
-        },
-      );
+
+      return result.fold((failure) => Left(failure), (plants) {
+        final activePlants = plants.where((plant) => !plant.isDeleted).toList();
+        return Right(activePlants);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao carregar plantas: $e'));
     }
@@ -57,11 +54,8 @@ class PlantsDataService {
       }
 
       final result = await _addPlantUseCase.call(params);
-      
-      return result.fold(
-        (failure) => Left(failure),
-        (plant) => Right(plant),
-      );
+
+      return result.fold((failure) => Left(failure), (plant) => Right(plant));
     } catch (e) {
       return Left(CacheFailure('Erro ao adicionar planta: $e'));
     }
@@ -75,11 +69,8 @@ class PlantsDataService {
       }
 
       final result = await _updatePlantUseCase.call(params);
-      
-      return result.fold(
-        (failure) => Left(failure),
-        (plant) => Right(plant),
-      );
+
+      return result.fold((failure) => Left(failure), (plant) => Right(plant));
     } catch (e) {
       return Left(CacheFailure('Erro ao atualizar planta: $e'));
     }
@@ -93,7 +84,7 @@ class PlantsDataService {
       }
 
       final result = await _deletePlantUseCase.call(plantId);
-      
+
       return result.fold(
         (failure) => Left(failure),
         (success) => const Right(null),
@@ -107,14 +98,11 @@ class PlantsDataService {
   Future<Either<Failure, Plant?>> getPlantById(String plantId) async {
     try {
       final plantsResult = await loadPlants();
-      
-      return plantsResult.fold(
-        (failure) => Left(failure),
-        (plants) {
-          final plant = plants.where((p) => p.id == plantId).firstOrNull;
-          return Right(plant);
-        },
-      );
+
+      return plantsResult.fold((failure) => Left(failure), (plants) {
+        final plant = plants.where((p) => p.id == plantId).firstOrNull;
+        return Right(plant);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar planta: $e'));
     }
@@ -130,17 +118,15 @@ class PlantsDataService {
   Future<Either<Failure, List<Plant>>> getPlantsBySpace(String? spaceId) async {
     try {
       final plantsResult = await loadPlants();
-      
-      return plantsResult.fold(
-        (failure) => Left(failure),
-        (plants) {
-          final filteredPlants = plants.where((plant) => plant.spaceId == spaceId).toList();
-          return Right(filteredPlants);
-        },
-      );
+
+      return plantsResult.fold((failure) => Left(failure), (plants) {
+        final filteredPlants = plants
+            .where((plant) => plant.spaceId == spaceId)
+            .toList();
+        return Right(filteredPlants);
+      });
     } catch (e) {
       return Left(CacheFailure('Erro ao buscar plantas por espaço: $e'));
     }
   }
 }
-

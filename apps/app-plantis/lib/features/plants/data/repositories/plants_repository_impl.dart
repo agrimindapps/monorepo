@@ -42,8 +42,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user =
-            await authService.currentUser.timeout(timeoutDuration).first;
+        final user = await authService.currentUser
+            .timeout(timeoutDuration)
+            .first;
 
         if (user != null && user.id.isNotEmpty) {
           return user.id;
@@ -79,7 +80,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
       var localPlants = await localDatasource.getPlants();
 
       if (kDebugMode) {
-        print('📱 PlantsRepository.getPlants - Loaded ${localPlants.length} plants from local datasource');
+        print(
+          '📱 PlantsRepository.getPlants - Loaded ${localPlants.length} plants from local datasource',
+        );
       }
 
       if (await networkInfo.isConnected) {
@@ -146,12 +149,16 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       if (resolved != null) {
         if (kDebugMode) {
-          print('✅ PlantsRepositoryImpl.getPlantById - Returning plant: ${resolved.name}');
+          print(
+            '✅ PlantsRepositoryImpl.getPlantById - Returning plant: ${resolved.name}',
+          );
         }
         return Right(resolved);
       } else {
         if (kDebugMode) {
-          print('❌ PlantsRepositoryImpl.getPlantById - Plant not found in local datasource');
+          print(
+            '❌ PlantsRepositoryImpl.getPlantById - Plant not found in local datasource',
+          );
         }
         return const Left(NotFoundFailure('Planta não encontrada'));
       }
@@ -250,7 +257,9 @@ class PlantsRepositoryImpl implements PlantsRepository {
                 }
               } catch (deleteError) {
                 if (kDebugMode) {
-                  print('⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError');
+                  print(
+                    '⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError',
+                  );
                   print('   Mas versão remota foi salva com sucesso');
                 }
               }
@@ -322,22 +331,28 @@ class PlantsRepositoryImpl implements PlantsRepository {
         print('   plant.spaceId: ${plant.spaceId}');
         print('   plant.config: ${plant.config}');
         if (plant.config != null) {
-          print('   config.wateringIntervalDays: ${plant.config!.wateringIntervalDays}');
-          print('   config.fertilizingIntervalDays: ${plant.config!.fertilizingIntervalDays}');
-          print('   config.pruningIntervalDays: ${plant.config!.pruningIntervalDays}');
+          print(
+            '   config.wateringIntervalDays: ${plant.config!.wateringIntervalDays}',
+          );
+          print(
+            '   config.fertilizingIntervalDays: ${plant.config!.fertilizingIntervalDays}',
+          );
+          print(
+            '   config.pruningIntervalDays: ${plant.config!.pruningIntervalDays}',
+          );
         }
       }
 
       final plantModel = PlantModel.fromEntity(plant);
-      
+
       if (kDebugMode) {
         print('🔄 PlantsRepositoryImpl.updatePlant() - PlantModel criado');
         print('   plantModel.spaceId: ${plantModel.spaceId}');
         print('   plantModel.config: ${plantModel.config}');
       }
-      
+
       await localDatasource.updatePlant(plantModel);
-      
+
       if (kDebugMode) {
         print('✅ PlantsRepositoryImpl.updatePlant() - Salvo localmente');
       }
@@ -349,7 +364,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
             userId,
           );
           await localDatasource.updatePlant(remotePlant);
-          
+
           if (kDebugMode) {
             print('✅ PlantsRepositoryImpl.updatePlant() - Salvo remotamente');
             print('   remotePlant.spaceId: ${remotePlant.spaceId}');

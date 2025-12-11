@@ -37,11 +37,7 @@ class CompleteTaskParams {
   final String? notes;
   final DateTime? nextDueDate;
 
-  CompleteTaskParams({
-    required this.taskId,
-    this.notes,
-    this.nextDueDate,
-  });
+  CompleteTaskParams({required this.taskId, this.notes, this.nextDueDate});
 }
 
 class DeleteTaskParams {

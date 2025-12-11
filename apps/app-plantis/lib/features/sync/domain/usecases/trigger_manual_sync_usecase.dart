@@ -35,8 +35,7 @@ import '../repositories/i_sync_orchestration_repository.dart';
 ///   },
 /// );
 /// ```
-class TriggerManualSyncUseCase
-    implements UseCase<PlantisSyncResult, NoParams> {
+class TriggerManualSyncUseCase implements UseCase<PlantisSyncResult, NoParams> {
   final ISyncOrchestrationRepository _repository;
 
   const TriggerManualSyncUseCase(this._repository);

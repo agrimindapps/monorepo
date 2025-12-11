@@ -67,6 +67,7 @@ class SpacesState {
       return null;
     }
   }
+
   List<Space> getSpacesByLightCondition(String lightCondition) {
     return spaces
         .where((space) => space.lightCondition == lightCondition)
@@ -83,8 +84,9 @@ class SpacesState {
   }) {
     return SpacesState(
       spaces: spaces ?? this.spaces,
-      selectedSpace:
-          clearSelectedSpace ? null : (selectedSpace ?? this.selectedSpace),
+      selectedSpace: clearSelectedSpace
+          ? null
+          : (selectedSpace ?? this.selectedSpace),
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
     );
@@ -195,9 +197,7 @@ class SpacesNotifier extends _$SpacesNotifier {
       },
       (space) {
         final currentState = state.value ?? const SpacesState();
-        state = AsyncValue.data(
-          currentState.copyWith(selectedSpace: space),
-        );
+        state = AsyncValue.data(currentState.copyWith(selectedSpace: space));
         return space;
       },
     );
@@ -216,10 +216,7 @@ class SpacesNotifier extends _$SpacesNotifier {
       (failure) {
         final newState = state.value ?? const SpacesState();
         state = AsyncValue.data(
-          newState.copyWith(
-            error: _getErrorMessage(failure),
-            isLoading: false,
-          ),
+          newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
         );
         return false;
       },
@@ -251,27 +248,22 @@ class SpacesNotifier extends _$SpacesNotifier {
       (failure) {
         final newState = state.value ?? const SpacesState();
         state = AsyncValue.data(
-          newState.copyWith(
-            error: _getErrorMessage(failure),
-            isLoading: false,
-          ),
+          newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
         );
         return false;
       },
       (updatedSpace) {
         final newState = state.value ?? const SpacesState();
-        final updatedSpaces =
-            newState.spaces.map((s) {
-              return s.id == updatedSpace.id ? updatedSpace : s;
-            }).toList();
+        final updatedSpaces = newState.spaces.map((s) {
+          return s.id == updatedSpace.id ? updatedSpace : s;
+        }).toList();
 
         state = AsyncValue.data(
           newState.copyWith(
             spaces: updatedSpaces,
-            selectedSpace:
-                newState.selectedSpace?.id == updatedSpace.id
-                    ? updatedSpace
-                    : newState.selectedSpace,
+            selectedSpace: newState.selectedSpace?.id == updatedSpace.id
+                ? updatedSpace
+                : newState.selectedSpace,
             isLoading: false,
             clearError: true,
           ),
@@ -294,17 +286,15 @@ class SpacesNotifier extends _$SpacesNotifier {
       (failure) {
         final newState = state.value ?? const SpacesState();
         state = AsyncValue.data(
-          newState.copyWith(
-            error: _getErrorMessage(failure),
-            isLoading: false,
-          ),
+          newState.copyWith(error: _getErrorMessage(failure), isLoading: false),
         );
         return false;
       },
       (_) {
         final newState = state.value ?? const SpacesState();
-        final updatedSpaces =
-            newState.spaces.where((space) => space.id != id).toList();
+        final updatedSpaces = newState.spaces
+            .where((space) => space.id != id)
+            .toList();
 
         state = AsyncValue.data(
           newState.copyWith(
@@ -323,9 +313,7 @@ class SpacesNotifier extends _$SpacesNotifier {
   void clearSelectedSpace() {
     final currentState = state.value ?? const SpacesState();
     if (currentState.selectedSpace != null) {
-      state = AsyncValue.data(
-        currentState.copyWith(clearSelectedSpace: true),
-      );
+      state = AsyncValue.data(currentState.copyWith(clearSelectedSpace: true));
     }
   }
 

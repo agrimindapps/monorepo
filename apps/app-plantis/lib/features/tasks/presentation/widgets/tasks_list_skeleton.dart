@@ -54,19 +54,13 @@ class TasksListSkeleton extends StatelessWidget {
               // Texto do header (skeleton)
               const Bone.text(
                 words: 3,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
             ],
           ),
         ),
         // Tarefas do grupo
-        ...List.generate(
-          taskCount,
-          (index) => _buildTaskCardSkeleton(context),
-        ),
+        ...List.generate(taskCount, (index) => _buildTaskCardSkeleton(context)),
       ],
     );
   }
@@ -87,16 +81,10 @@ class TasksListSkeleton extends StatelessWidget {
               children: [
                 Bone.text(
                   words: 2,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 SizedBox(height: 4),
-                Bone.text(
-                  words: 2,
-                  style: TextStyle(fontSize: 14),
-                ),
+                Bone.text(words: 2, style: TextStyle(fontSize: 14)),
               ],
             ),
           ),
@@ -135,7 +123,11 @@ class TasksFiltersSkeleton extends StatelessWidget {
             children: [
               _buildFilterChipSkeleton('Atrasadas', hasCount: true),
               const SizedBox(width: 12),
-              _buildFilterChipSkeleton('Hoje', hasCount: true, isSelected: true),
+              _buildFilterChipSkeleton(
+                'Hoje',
+                hasCount: true,
+                isSelected: true,
+              ),
               const SizedBox(width: 12),
               _buildFilterChipSkeleton('Próxima', hasCount: true),
               const SizedBox(width: 12),
@@ -164,11 +156,7 @@ class TasksFiltersSkeleton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (isSelected) ...[
-            const Icon(
-              Icons.check,
-              size: 18,
-              color: PlantisColors.primary,
-            ),
+            const Icon(Icons.check, size: 18, color: PlantisColors.primary),
             const SizedBox(width: 4),
           ],
           Text(

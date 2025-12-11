@@ -35,10 +35,13 @@ class PlantFirebaseMapper {
       'config': plant.config != null
           ? {
               'watering_interval_days': plant.config!.wateringIntervalDays,
-              'fertilizing_interval_days': plant.config!.fertilizingIntervalDays,
+              'fertilizing_interval_days':
+                  plant.config!.fertilizingIntervalDays,
               'pruning_interval_days': plant.config!.pruningIntervalDays,
-              'sunlight_check_interval_days': plant.config!.sunlightCheckIntervalDays,
-              'pest_inspection_interval_days': plant.config!.pestInspectionIntervalDays,
+              'sunlight_check_interval_days':
+                  plant.config!.sunlightCheckIntervalDays,
+              'pest_inspection_interval_days':
+                  plant.config!.pestInspectionIntervalDays,
               'replanting_interval_days': plant.config!.replantingIntervalDays,
               'light_requirement': plant.config!.lightRequirement,
               'water_amount': plant.config!.waterAmount,
@@ -51,7 +54,9 @@ class PlantFirebaseMapper {
                   : null,
               'enable_fertilizer_care': plant.config!.enableFertilizerCare,
               'last_fertilizer_date': plant.config!.lastFertilizerDate != null
-                  ? Timestamp.fromDate(plant.config!.lastFertilizerDate!.toUtc())
+                  ? Timestamp.fromDate(
+                      plant.config!.lastFertilizerDate!.toUtc(),
+                    )
                   : null,
             }
           : null,
@@ -91,10 +96,13 @@ class PlantFirebaseMapper {
       final configData = json['config'] as Map<String, dynamic>;
       config = PlantConfigModel(
         wateringIntervalDays: configData['watering_interval_days'] as int?,
-        fertilizingIntervalDays: configData['fertilizing_interval_days'] as int?,
+        fertilizingIntervalDays:
+            configData['fertilizing_interval_days'] as int?,
         pruningIntervalDays: configData['pruning_interval_days'] as int?,
-        sunlightCheckIntervalDays: configData['sunlight_check_interval_days'] as int?,
-        pestInspectionIntervalDays: configData['pest_inspection_interval_days'] as int?,
+        sunlightCheckIntervalDays:
+            configData['sunlight_check_interval_days'] as int?,
+        pestInspectionIntervalDays:
+            configData['pest_inspection_interval_days'] as int?,
         replantingIntervalDays: configData['replanting_interval_days'] as int?,
         lightRequirement: configData['light_requirement'] as String?,
         waterAmount: configData['water_amount'] as String?,

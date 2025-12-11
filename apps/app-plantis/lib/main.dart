@@ -94,9 +94,7 @@ void main() async {
         // await _performanceRepository.markFirstFrame();
         runApp(
           ProviderScope(
-            overrides: [
-              sharedPreferencesProvider.overrideWithValue(prefs),
-            ],
+            overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
             child: const PlantisApp(),
           ),
         );

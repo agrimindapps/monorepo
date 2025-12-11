@@ -27,7 +27,9 @@ class DeviceActionsWidget extends ConsumerWidget {
                     subtitle: 'Registrar este aparelho',
                     icon: Icons.verified,
                     color: Colors.blue,
-                    enabled: !deviceState.isValidating && deviceState.canAddMoreDevices,
+                    enabled:
+                        !deviceState.isValidating &&
+                        deviceState.canAddMoreDevices,
                     loading: deviceState.isValidating,
                     onTap: () => _validateCurrentDevice(context, ref),
                   ),
@@ -44,12 +46,15 @@ class DeviceActionsWidget extends ConsumerWidget {
                     color: Colors.green,
                     enabled: true,
                     loading: false,
-                    onTap: () => ref.read(deviceManagementNotifierProvider.notifier).refresh(),
+                    onTap: () => ref
+                        .read(deviceManagementNotifierProvider.notifier)
+                        .refresh(),
                   ),
                 ),
               ],
             ),
-            if (deviceState.hasDevices && deviceState.activeDeviceCount > 1) ...[
+            if (deviceState.hasDevices &&
+                deviceState.activeDeviceCount > 1) ...[
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -63,7 +68,8 @@ class DeviceActionsWidget extends ConsumerWidget {
                       color: Colors.red,
                       enabled: !deviceState.isRevoking,
                       loading: deviceState.isRevoking,
-                      onTap: () => _showRevokeAllDialog(context, ref, deviceState),
+                      onTap: () =>
+                          _showRevokeAllDialog(context, ref, deviceState),
                     ),
                   ),
 
@@ -74,7 +80,9 @@ class DeviceActionsWidget extends ConsumerWidget {
                       title: '${deviceState.activeDeviceCount}/3',
                       subtitle: 'Dispositivos ativos',
                       icon: Icons.devices,
-                      color: deviceState.hasReachedDeviceLimit ? Colors.orange : Colors.grey,
+                      color: deviceState.hasReachedDeviceLimit
+                          ? Colors.orange
+                          : Colors.grey,
                     ),
                   ),
                 ],
@@ -115,27 +123,25 @@ class DeviceActionsWidget extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color:
-                      enabled
-                          ? color.withValues(alpha: 0.1)
-                          : Colors.grey.withValues(alpha: 0.1),
+                  color: enabled
+                      ? color.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child:
-                    loading
-                        ? SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(color),
-                          ),
-                        )
-                        : Icon(
-                          icon,
-                          color: enabled ? color : Colors.grey,
-                          size: 24,
+                child: loading
+                    ? SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(color),
                         ),
+                      )
+                    : Icon(
+                        icon,
+                        color: enabled ? color : Colors.grey,
+                        size: 24,
+                      ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -143,10 +149,9 @@ class DeviceActionsWidget extends ConsumerWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color:
-                      enabled
-                          ? Theme.of(context).textTheme.titleMedium?.color
-                          : Colors.grey,
+                  color: enabled
+                      ? Theme.of(context).textTheme.titleMedium?.color
+                      : Colors.grey,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -155,10 +160,9 @@ class DeviceActionsWidget extends ConsumerWidget {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color:
-                      enabled
-                          ? Theme.of(context).textTheme.bodySmall?.color
-                          : Colors.grey,
+                  color: enabled
+                      ? Theme.of(context).textTheme.bodySmall?.color
+                      : Colors.grey,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -273,15 +277,13 @@ class DeviceActionsWidget extends ConsumerWidget {
         SnackBar(
           content: Text(message),
           backgroundColor: Colors.red,
-          action:
-              isLimitExceeded
-                  ? SnackBarAction(
-                    label: 'Ver Dispositivos',
-                    textColor: Colors.white,
-                    onPressed: () {
-                    },
-                  )
-                  : null,
+          action: isLimitExceeded
+              ? SnackBarAction(
+                  label: 'Ver Dispositivos',
+                  textColor: Colors.white,
+                  onPressed: () {},
+                )
+              : null,
         ),
       );
     }
@@ -355,9 +357,9 @@ class DeviceActionsWidget extends ConsumerWidget {
     );
 
     if (confirmed == true && context.mounted) {
-      final result = await ref.read(deviceManagementNotifierProvider.notifier).revokeAllOtherDevices(
-            reason: 'Logout remoto via ações rápidas',
-          );
+      final result = await ref
+          .read(deviceManagementNotifierProvider.notifier)
+          .revokeAllOtherDevices(reason: 'Logout remoto via ações rápidas');
 
       if (result && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

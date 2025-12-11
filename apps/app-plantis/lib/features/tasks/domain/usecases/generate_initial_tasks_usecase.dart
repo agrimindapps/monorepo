@@ -109,11 +109,10 @@ class GenerateInitialTasksUseCase
         }
         return Left(firstFailure);
       }
-      final savedTasks =
-          saveResults
-              .map((result) => result.fold((_) => null, (task) => task))
-              .whereType<task_entity.Task>()
-              .toList();
+      final savedTasks = saveResults
+          .map((result) => result.fold((_) => null, (task) => task))
+          .whereType<task_entity.Task>()
+          .toList();
 
       if (kDebugMode) {
         print(

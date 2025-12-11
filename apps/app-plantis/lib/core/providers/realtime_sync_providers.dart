@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -31,7 +30,7 @@ RealtimeSyncService realtimeSyncService(Ref ref) {
     if (kDebugMode) {
       print('[RealtimeSync] Event received: $event');
     }
-    
+
     // Invalida providers baseado na coleção que mudou
     switch (event.collection) {
       case 'plants':

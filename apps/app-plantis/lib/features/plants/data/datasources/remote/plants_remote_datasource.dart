@@ -35,20 +35,18 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     try {
       await rateLimiter.checkLimit('plants.getPlants');
 
-      final snapshot =
-          await _getPlantsCollection(
-            userId,
-          ).where('isDeleted', isEqualTo: false).get();
+      final snapshot = await _getPlantsCollection(
+        userId,
+      ).where('isDeleted', isEqualTo: false).get();
 
-      final plants =
-          snapshot.docs
-              .map(
-                (doc) => PlantModel.fromJson({
-                  ...doc.data() as Map<String, dynamic>,
-                  'id': doc.id,
-                }),
-              )
-              .toList();
+      final plants = snapshot.docs
+          .map(
+            (doc) => PlantModel.fromJson({
+              ...doc.data() as Map<String, dynamic>,
+              'id': doc.id,
+            }),
+          )
+          .toList();
       plants.sort((a, b) {
         final aDate = a.createdAt ?? DateTime(1970);
         final bDate = b.createdAt ?? DateTime(1970);
@@ -210,21 +208,19 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
     try {
       await rateLimiter.checkLimit('plants.getPlantsBySpace');
 
-      final snapshot =
-          await _getPlantsCollection(userId)
-              .where('isDeleted', isEqualTo: false)
-              .where('spaceId', isEqualTo: spaceId)
-              .get();
+      final snapshot = await _getPlantsCollection(userId)
+          .where('isDeleted', isEqualTo: false)
+          .where('spaceId', isEqualTo: spaceId)
+          .get();
 
-      final plants =
-          snapshot.docs
-              .map(
-                (doc) => PlantModel.fromJson({
-                  ...doc.data() as Map<String, dynamic>,
-                  'id': doc.id,
-                }),
-              )
-              .toList();
+      final plants = snapshot.docs
+          .map(
+            (doc) => PlantModel.fromJson({
+              ...doc.data() as Map<String, dynamic>,
+              'id': doc.id,
+            }),
+          )
+          .toList();
       plants.sort((a, b) {
         final aDate = a.createdAt ?? DateTime(1970);
         final bDate = b.createdAt ?? DateTime(1970);

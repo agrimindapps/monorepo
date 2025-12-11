@@ -18,9 +18,7 @@ AuthDialogManager authDialogManager(Ref ref) {
 /// Provides CredentialsPersistenceManager instance
 /// Injects SharedPreferences to ensure singleton pattern
 @riverpod
-CredentialsPersistenceManager credentialsPersistenceManager(
-  Ref ref,
-) {
+CredentialsPersistenceManager credentialsPersistenceManager(Ref ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return CredentialsPersistenceManager(prefs: prefs);
 }
@@ -33,9 +31,7 @@ AuthSubmissionManager authSubmissionManager(Ref ref) {
 
 /// Provides ForgotPasswordDialogManager instance
 @riverpod
-ForgotPasswordDialogManager forgotPasswordDialogManager(
-  Ref ref,
-) {
+ForgotPasswordDialogManager forgotPasswordDialogManager(Ref ref) {
   return ForgotPasswordDialogManager(
     onError: (message) {
       // Error handling can be provided via callbacks

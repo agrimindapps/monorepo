@@ -79,8 +79,9 @@ class AccessibilityTokens {
     bool isLargeText = false,
   }) {
     final contrast = _calculateContrast(foreground, background);
-    final requiredContrast =
-        isLargeText ? _largeTextContrast : _normalTextContrast;
+    final requiredContrast = isLargeText
+        ? _largeTextContrast
+        : _normalTextContrast;
     return contrast >= requiredContrast;
   }
 
@@ -195,12 +196,11 @@ extension AccessibilityExtension on Widget {
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
-      onFocusChange:
-          onFocusChange != null
-              ? (hasFocus) {
-                if (hasFocus) onFocusChange();
-              }
-              : null,
+      onFocusChange: onFocusChange != null
+          ? (hasFocus) {
+              if (hasFocus) onFocusChange();
+            }
+          : null,
       child: this,
     );
   }
@@ -256,8 +256,7 @@ mixin AccessibilityFocusMixin<T extends StatefulWidget> on State<T> {
             renderObject.size != Size.zero) {
           _layoutStable = true;
           return true;
-        }
-        else if (renderObject is! RenderBox) {
+        } else if (renderObject is! RenderBox) {
           _layoutStable = true;
           return true;
         }
@@ -419,13 +418,12 @@ class AccessibleButton extends StatelessWidget {
     return Tooltip(
       message: tooltip ?? semanticLabel ?? '',
       child: ElevatedButton(
-        onPressed:
-            onPressed == null
-                ? null
-                : () {
-                  AccessibilityTokens.performHapticFeedback(hapticPattern);
-                  onPressed!();
-                },
+        onPressed: onPressed == null
+            ? null
+            : () {
+                AccessibilityTokens.performHapticFeedback(hapticPattern);
+                onPressed!();
+              },
         focusNode: focusNode,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,

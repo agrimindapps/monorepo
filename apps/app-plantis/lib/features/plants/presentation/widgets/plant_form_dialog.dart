@@ -146,9 +146,9 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                 Text(
                   isEditing ? 'Editar Planta' : 'Nova Planta',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: colorScheme.onSurface,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -156,8 +156,8 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
                       ? 'Atualize as informações da sua planta'
                       : 'Adicione uma nova planta ao seu jardim',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -222,8 +222,8 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
             Text(
               errorMessage ?? 'Erro desconhecido',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                color: colorScheme.onSurfaceVariant,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -301,8 +301,9 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         children: [
           TabBar(
             labelColor: Theme.of(context).colorScheme.primary,
-            unselectedLabelColor:
-                Theme.of(context).colorScheme.onSurfaceVariant,
+            unselectedLabelColor: Theme.of(
+              context,
+            ).colorScheme.onSurfaceVariant,
             indicatorColor: Theme.of(context).colorScheme.primary,
             tabs: const [
               Tab(text: 'Informações'),
@@ -375,8 +376,9 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
               ),
               const SizedBox(width: 16),
               FilledButton(
-                onPressed:
-                    (isFormValid && !isSaving) ? () => _handleSave() : null,
+                onPressed: (isFormValid && !isSaving)
+                    ? () => _handleSave()
+                    : null,
                 child: isSaving
                     ? const SizedBox(
                         width: 16,
@@ -446,7 +448,9 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         // Recarregar detalhes se editando
         if (plantId != null) {
           try {
-            ref.read(plantDetailsNotifierProvider.notifier).reloadPlant(plantId);
+            ref
+                .read(plantDetailsNotifierProvider.notifier)
+                .reloadPlant(plantId);
           } catch (_) {
             // Ignora erro de atualização dos detalhes
           }

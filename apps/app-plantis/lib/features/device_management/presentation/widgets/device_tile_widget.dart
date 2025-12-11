@@ -28,10 +28,9 @@ class DeviceTileWidget extends StatelessWidget {
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side:
-            isCurrentDevice
-                ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
-                : BorderSide.none,
+        side: isCurrentDevice
+            ? BorderSide(color: Theme.of(context).primaryColor, width: 2)
+            : BorderSide.none,
       ),
       child: InkWell(
         onTap: onTap,
@@ -222,19 +221,18 @@ class DeviceTileWidget extends StatelessWidget {
           context,
         ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
       ),
-      itemBuilder:
-          (context) => [
-            const PopupMenuItem(
-              value: 'revoke',
-              child: ListTile(
-                leading: Icon(Icons.block, color: Colors.red),
-                title: Text('Revogar'),
-                subtitle: Text('Desconectar dispositivo'),
-                dense: true,
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-          ],
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'revoke',
+          child: ListTile(
+            leading: Icon(Icons.block, color: Colors.red),
+            title: Text('Revogar'),
+            subtitle: Text('Desconectar dispositivo'),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
     );
   }
 

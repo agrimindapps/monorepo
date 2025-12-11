@@ -72,25 +72,25 @@ class SyncStatus extends _$SyncStatus {
     final connectivityService = core.ConnectivityService.instance;
 
     // Listen to network changes
-    _networkSubscription = connectivityService.networkStatusStream.listen(
-      (core.ConnectivityType status) {
-        switch (status) {
-          case core.ConnectivityType.offline:
-          case core.ConnectivityType.none:
-            _updateSyncState(SyncStatusState.offline);
-            break;
-          case core.ConnectivityType.mobile:
-          case core.ConnectivityType.wifi:
-          case core.ConnectivityType.online:
-          case core.ConnectivityType.ethernet:
-          case core.ConnectivityType.vpn:
-          case core.ConnectivityType.other:
-          case core.ConnectivityType.bluetooth:
-            _updateSyncState(SyncStatusState.idle);
-            break;
-        }
-      },
-    );
+    _networkSubscription = connectivityService.networkStatusStream.listen((
+      core.ConnectivityType status,
+    ) {
+      switch (status) {
+        case core.ConnectivityType.offline:
+        case core.ConnectivityType.none:
+          _updateSyncState(SyncStatusState.offline);
+          break;
+        case core.ConnectivityType.mobile:
+        case core.ConnectivityType.wifi:
+        case core.ConnectivityType.online:
+        case core.ConnectivityType.ethernet:
+        case core.ConnectivityType.vpn:
+        case core.ConnectivityType.other:
+        case core.ConnectivityType.bluetooth:
+          _updateSyncState(SyncStatusState.idle);
+          break;
+      }
+    });
   }
 
   /// Updates sync state if different from current
@@ -104,8 +104,8 @@ class SyncStatus extends _$SyncStatus {
   Future<void> checkSyncStatus() async {
     final connectivityService = core.ConnectivityService.instance;
 
-    final networkStatusResult =
-        await connectivityService.getCurrentNetworkStatus();
+    final networkStatusResult = await connectivityService
+        .getCurrentNetworkStatus();
 
     networkStatusResult.fold(
       (failure) => _updateSyncState(SyncStatusState.error),

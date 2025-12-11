@@ -27,22 +27,20 @@ void main() {
         failedCount: 0,
       );
 
-      when(() => mockRepository.getCurrentSyncStatus())
-          .thenAnswer((_) async => Right(syncStatus));
+      when(
+        () => mockRepository.getCurrentSyncStatus(),
+      ).thenAnswer((_) async => Right(syncStatus));
 
       // Act
       final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return success'),
-        (status) {
-          expect(status.state, PlantisSyncState.idle);
-          expect(status.pendingCount, 0);
-          expect(status.lastSyncAt, isNotNull);
-        },
-      );
+      result.fold((_) => fail('Should return success'), (status) {
+        expect(status.state, PlantisSyncState.idle);
+        expect(status.pendingCount, 0);
+        expect(status.lastSyncAt, isNotNull);
+      });
 
       verify(() => mockRepository.getCurrentSyncStatus()).called(1);
     });
@@ -57,21 +55,19 @@ void main() {
         progress: 0.6,
       );
 
-      when(() => mockRepository.getCurrentSyncStatus())
-          .thenAnswer((_) async => Right(syncStatus));
+      when(
+        () => mockRepository.getCurrentSyncStatus(),
+      ).thenAnswer((_) async => Right(syncStatus));
 
       // Act
       final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return success'),
-        (status) {
-          expect(status.state, PlantisSyncState.syncing);
-          expect(status.progress, 0.6);
-        },
-      );
+      result.fold((_) => fail('Should return success'), (status) {
+        expect(status.state, PlantisSyncState.syncing);
+        expect(status.progress, 0.6);
+      });
     });
 
     test('should show pending changes when offline', () async {
@@ -83,40 +79,36 @@ void main() {
         failedCount: 0,
       );
 
-      when(() => mockRepository.getCurrentSyncStatus())
-          .thenAnswer((_) async => Right(syncStatus));
+      when(
+        () => mockRepository.getCurrentSyncStatus(),
+      ).thenAnswer((_) async => Right(syncStatus));
 
       // Act
       final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return success'),
-        (status) {
-          expect(status.pendingCount, 10);
-        },
-      );
+      result.fold((_) => fail('Should return success'), (status) {
+        expect(status.pendingCount, 10);
+      });
     });
 
     test('should return failure when repository fails', () async {
       // Arrange
       const failure = CacheFailure('Failed to get sync status');
 
-      when(() => mockRepository.getCurrentSyncStatus())
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.getCurrentSyncStatus(),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(const NoParams());
 
       // Assert
       expect(result.isLeft(), true);
-      result.fold(
-        (f) {
-          expect(f, isA<CacheFailure>());
-        },
-        (_) => fail('Should return failure'),
-      );
+      result.fold((f) {
+        expect(f, isA<CacheFailure>());
+      }, (_) => fail('Should return failure'));
     });
   });
 }

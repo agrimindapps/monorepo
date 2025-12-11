@@ -175,10 +175,7 @@ class PlantDetailsErrorState extends StatelessWidget {
 class ErrorDetailsSection extends StatelessWidget {
   final String errorMessage;
 
-  const ErrorDetailsSection({
-    super.key,
-    required this.errorMessage,
-  });
+  const ErrorDetailsSection({super.key, required this.errorMessage});
 
   @override
   Widget build(BuildContext context) {
@@ -236,10 +233,9 @@ class TroubleshootingTipsSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : theme.colorScheme.surfaceContainer,
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.2),
@@ -283,10 +279,7 @@ class TroubleshootingTipsSection extends StatelessWidget {
 class TipItem extends StatelessWidget {
   final String tip;
 
-  const TipItem({
-    super.key,
-    required this.tip,
-  });
+  const TipItem({super.key, required this.tip});
 
   @override
   Widget build(BuildContext context) {
@@ -331,17 +324,16 @@ class ErrorHelpDialog {
   static void show(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text(AppStrings.needHelp),
-            content: const Text(AppStrings.helpMessage),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(AppStrings.understood),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text(AppStrings.needHelp),
+        content: const Text(AppStrings.helpMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(AppStrings.understood),
           ),
+        ],
+      ),
     );
   }
 }

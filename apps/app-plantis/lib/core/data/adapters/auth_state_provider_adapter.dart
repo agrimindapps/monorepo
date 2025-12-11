@@ -7,9 +7,9 @@ import '../../interfaces/i_auth_state_provider.dart';
 /// Resolve violação DIP mantendo compatibilidade com código existente
 class AuthStateProviderAdapter implements IAuthStateProvider {
   final AuthStateNotifier _authStateNotifier;
-  
+
   AuthStateProviderAdapter(this._authStateNotifier);
-  
+
   /// Factory para usar o singleton existente
   factory AuthStateProviderAdapter.instance() {
     return AuthStateProviderAdapter(AuthStateNotifier.instance);

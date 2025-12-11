@@ -13,12 +13,9 @@ class SyncSettingsUseCase {
     try {
       final result = await _repository.loadSettings();
 
-      return result.fold(
-        (failure) => Left(failure),
-        (settings) {
-          return const Right(null);
-        },
-      );
+      return result.fold((failure) => Left(failure), (settings) {
+        return const Right(null);
+      });
     } catch (e) {
       return Left(
         CacheFailure('Erro ao sincronizar configurações: ${e.toString()}'),

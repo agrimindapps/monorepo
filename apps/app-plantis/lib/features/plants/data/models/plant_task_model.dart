@@ -38,26 +38,23 @@ class PlantTaskModel extends PlantTask {
       title: json['title'] as String,
       description: json['description'] as String?,
       scheduledDate: DateTime.parse(json['scheduledDate'] as String),
-      completedDate:
-          json['completedDate'] != null
-              ? DateTime.parse(json['completedDate'] as String)
-              : null,
+      completedDate: json['completedDate'] != null
+          ? DateTime.parse(json['completedDate'] as String)
+          : null,
       status: TaskStatus.values.firstWhere(
         (e) => e.name == json['status'],
         orElse: () => TaskStatus.pending,
       ),
       intervalDays: json['intervalDays'] as int,
       createdAt: DateTime.parse(json['createdAt'] as String),
-      nextScheduledDate:
-          json['nextScheduledDate'] != null
-              ? DateTime.parse(json['nextScheduledDate'] as String)
-              : null,
+      nextScheduledDate: json['nextScheduledDate'] != null
+          ? DateTime.parse(json['nextScheduledDate'] as String)
+          : null,
       isDirty: json['isDirty'] as bool? ?? false,
       isDeleted: json['isDeleted'] as bool? ?? false,
-      updatedAt:
-          json['updatedAt'] != null
-              ? DateTime.parse(json['updatedAt'] as String)
-              : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 

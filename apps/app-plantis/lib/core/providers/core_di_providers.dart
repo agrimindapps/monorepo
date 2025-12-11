@@ -53,95 +53,102 @@ IPerformanceRepository performanceRepository(Ref ref) {
 
 class _StubPerformanceRepository implements IPerformanceRepository {
   @override
-  Future<bool> startPerformanceTracking({PerformanceConfig? config}) async => true;
-  
+  Future<bool> startPerformanceTracking({PerformanceConfig? config}) async =>
+      true;
+
   @override
   Future<bool> stopPerformanceTracking() async => true;
-  
+
   @override
   Future<bool> pausePerformanceTracking() async => true;
-  
+
   @override
   Future<bool> resumePerformanceTracking() async => true;
-  
+
   @override
-  PerformanceMonitoringState getMonitoringState() => PerformanceMonitoringState.stopped;
-  
+  PerformanceMonitoringState getMonitoringState() =>
+      PerformanceMonitoringState.stopped;
+
   @override
-  Future<void> setPerformanceThresholds(PerformanceThresholds thresholds) async {}
-  
+  Future<void> setPerformanceThresholds(
+    PerformanceThresholds thresholds,
+  ) async {}
+
   @override
   Stream<double> getFpsStream() => Stream.value(60.0);
-  
+
   @override
   Future<double> getCurrentFps() async => 60.0;
-  
+
   @override
-  Future<FpsMetrics> getFpsMetrics({Duration? period}) async => const FpsMetrics(
-    currentFps: 60,
-    averageFps: 60,
-    minFps: 60,
-    maxFps: 60,
-    frameDrops: 0,
-    jankFrames: 0,
-    measurementDuration: Duration(seconds: 1),
-  );
-  
+  Future<FpsMetrics> getFpsMetrics({Duration? period}) async =>
+      const FpsMetrics(
+        currentFps: 60,
+        averageFps: 60,
+        minFps: 60,
+        maxFps: 60,
+        frameDrops: 0,
+        jankFrames: 0,
+        measurementDuration: Duration(seconds: 1),
+      );
+
   @override
   Future<bool> isFpsHealthy() async => true;
-  
+
   @override
-  Stream<MemoryUsage> getMemoryStream() => Stream.value(const MemoryUsage(
-    usedMemory: 0,
-    totalMemory: 0,
-    availableMemory: 0,
-  ));
-  
-  @override
-  Future<MemoryUsage> getMemoryUsage() async => const MemoryUsage(
-    usedMemory: 0,
-    totalMemory: 0,
-    availableMemory: 0,
+  Stream<MemoryUsage> getMemoryStream() => Stream.value(
+    const MemoryUsage(usedMemory: 0, totalMemory: 0, availableMemory: 0),
   );
-  
+
+  @override
+  Future<MemoryUsage> getMemoryUsage() async =>
+      const MemoryUsage(usedMemory: 0, totalMemory: 0, availableMemory: 0);
+
   @override
   Future<bool> isMemoryHealthy() async => true;
-  
+
   @override
   Future<void> forceGarbageCollection() async {}
-  
+
   @override
   Future<double> getCpuUsage() async => 0.0;
-  
+
   @override
   Stream<double> getCpuStream() => Stream.value(0.0);
-  
+
   @override
   Future<bool> isCpuHealthy() async => true;
-  
+
   @override
-  Future<AppStartupMetrics> getStartupMetrics() async => const AppStartupMetrics(
-    coldStartTime: Duration(seconds: 1),
-    warmStartTime: Duration(milliseconds: 500),
-    firstFrameTime: Duration(milliseconds: 100),
-    timeToInteractive: Duration(milliseconds: 500),
-  );
-  
+  Future<AppStartupMetrics> getStartupMetrics() async =>
+      const AppStartupMetrics(
+        coldStartTime: Duration(seconds: 1),
+        warmStartTime: Duration(milliseconds: 500),
+        firstFrameTime: Duration(milliseconds: 100),
+        timeToInteractive: Duration(milliseconds: 500),
+      );
+
   @override
   Future<void> markAppStarted() async {}
-  
+
   @override
   Future<void> markFirstFrame() async {}
-  
+
   @override
   Future<void> markAppInteractive() async {}
-  
+
   @override
-  Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {}
-  
+  Future<void> startTrace(
+    String traceName, {
+    Map<String, String>? attributes,
+  }) async {}
+
   @override
-  Future<TraceResult?> stopTrace(String traceName, {Map<String, double>? metrics}) async => null;
-  
+  Future<TraceResult?> stopTrace(
+    String traceName, {
+    Map<String, double>? metrics,
+  }) async => null;
+
   @override
   Future<Duration> measureOperationTime<T>(
     String operationName,
@@ -153,10 +160,10 @@ class _StubPerformanceRepository implements IPerformanceRepository {
     stopwatch.stop();
     return stopwatch.elapsed;
   }
-  
+
   @override
   List<String> getActiveTraces() => [];
-  
+
   @override
   Future<void> recordCustomMetric({
     required String name,
@@ -165,16 +172,27 @@ class _StubPerformanceRepository implements IPerformanceRepository {
     String? unit,
     Map<String, String>? tags,
   }) async {}
-  
+
   @override
-  Future<void> incrementCounter(String name, {Map<String, String>? tags}) async {}
-  
+  Future<void> incrementCounter(
+    String name, {
+    Map<String, String>? tags,
+  }) async {}
+
   @override
-  Future<void> recordGauge(String name, double value, {Map<String, String>? tags}) async {}
-  
+  Future<void> recordGauge(
+    String name,
+    double value, {
+    Map<String, String>? tags,
+  }) async {}
+
   @override
-  Future<void> recordTiming(String name, Duration duration, {Map<String, String>? tags}) async {}
-  
+  Future<void> recordTiming(
+    String name,
+    Duration duration, {
+    Map<String, String>? tags,
+  }) async {}
+
   @override
   Future<PerformanceMetrics> getCurrentMetrics() async => PerformanceMetrics(
     timestamp: DateTime.now(),
@@ -186,56 +204,56 @@ class _StubPerformanceRepository implements IPerformanceRepository {
     ),
     cpuUsage: 0,
   );
-  
+
   @override
   Future<List<PerformanceMetrics>> getPerformanceHistory({
     DateTime? since,
     int? limit,
     Duration? period,
   }) async => [];
-  
+
   @override
   Future<Map<String, dynamic>> getPerformanceReport({
     DateTime? startTime,
     DateTime? endTime,
   }) async => {};
-  
+
   @override
   Future<String> exportPerformanceData({
     required String format,
     DateTime? startTime,
     DateTime? endTime,
   }) async => '';
-  
+
   @override
   Stream<Map<String, dynamic>> getPerformanceAlertsStream() => Stream.value({});
-  
+
   @override
   Future<List<String>> checkPerformanceIssues() async => [];
-  
+
   @override
   Future<void> setPerformanceAlertCallback(
     void Function(String alertType, Map<String, dynamic> data) callback,
   ) async {}
-  
+
   @override
   Future<bool> syncWithFirebase() async => true;
-  
+
   @override
   Future<void> enableFirebaseSync({Duration? interval}) async {}
-  
+
   @override
   Future<void> disableFirebaseSync() async {}
-  
+
   @override
   Future<void> clearOldPerformanceData({Duration? olderThan}) async {}
-  
+
   @override
   Future<Map<String, dynamic>> getDevicePerformanceInfo() async => {};
-  
+
   @override
   Future<Map<String, bool>> getFeatureSupport() async => {};
-  
+
   @override
   Future<void> resetAllMetrics() async {}
 }
@@ -265,9 +283,7 @@ IAppRatingRepository appRatingRepository(Ref ref) {
   );
 }
 
-
 // localStorageRepository removed (duplicate)
-
 
 /// IFileRepository provider - File manager service
 @riverpod
@@ -281,9 +297,7 @@ IFileRepository fileRepository(Ref ref) {
 
 /// Enhanced Secure Storage Service
 @riverpod
-EnhancedSecureStorageService enhancedSecureStorageService(
-  Ref ref,
-) {
+EnhancedSecureStorageService enhancedSecureStorageService(Ref ref) {
   return EnhancedSecureStorageService(
     appIdentifier: AppConstants.appId,
     config: const SecureStorageConfig.plantis(),
@@ -318,9 +332,7 @@ ImageService imageService(Ref ref) {
 
 /// Plantis Image Service Adapter
 @riverpod
-PlantisImageServiceAdapter plantisImageServiceAdapter(
-  Ref ref,
-) {
+PlantisImageServiceAdapter plantisImageServiceAdapter(Ref ref) {
   return PlantisImageServiceAdapterFactory.createForPlantis();
 }
 
@@ -352,17 +364,13 @@ DataCleanerService dataCleanerService(Ref ref) {
 
 /// Plantis Notification Service
 @riverpod
-PlantisNotificationService plantisNotificationService(
-  Ref ref,
-) {
+PlantisNotificationService plantisNotificationService(Ref ref) {
   return PlantisNotificationService();
 }
 
 /// Task Notification Scheduler
 @riverpod
-ITaskNotificationScheduler taskNotificationScheduler(
-  Ref ref,
-) {
+ITaskNotificationScheduler taskNotificationScheduler(Ref ref) {
   final notificationService = ref.watch(plantisNotificationServiceProvider);
   return TaskNotificationScheduler(notificationService);
 }
@@ -395,33 +403,26 @@ NotificationManager notificationManager(Ref ref) {
 
 /// ITaskNotificationManager implementation
 @riverpod
-ITaskNotificationManager taskNotificationManager(
-  Ref ref,
-) {
+ITaskNotificationManager taskNotificationManager(Ref ref) {
   return ref.watch(notificationManagerProvider);
 }
 
 /// IPlantNotificationManager implementation
 @riverpod
-IPlantNotificationManager plantNotificationManager(
-  Ref ref,
-) {
+IPlantNotificationManager plantNotificationManager(Ref ref) {
   return ref.watch(notificationManagerProvider);
 }
 
 /// INotificationPermissionManager implementation
 @riverpod
-INotificationPermissionManager notificationPermissionManager(
-  Ref ref,
-) {
-  return ref.watch(notificationManagerProvider) as INotificationPermissionManager;
+INotificationPermissionManager notificationPermissionManager(Ref ref) {
+  return ref.watch(notificationManagerProvider)
+      as INotificationPermissionManager;
 }
 
 /// INotificationScheduleManager implementation
 @riverpod
-INotificationScheduleManager notificationScheduleManager(
-  Ref ref,
-) {
+INotificationScheduleManager notificationScheduleManager(Ref ref) {
   return ref.watch(notificationManagerProvider);
 }
 

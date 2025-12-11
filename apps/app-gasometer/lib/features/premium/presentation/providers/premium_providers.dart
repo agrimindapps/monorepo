@@ -5,10 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
-import '../../../auth/presentation/providers/auth_usecase_providers.dart';
 import '../../../../database/providers/database_providers.dart';
 import '../../../../database/repositories/subscription_local_repository.dart';
 import '../../../../database/sync/adapters/subscription_drift_sync_adapter.dart';
+import '../../../auth/presentation/providers/auth_usecase_providers.dart';
+import '../../data/adapters/auth_repository_adapter.dart';
 import '../../data/datasources/premium_firebase_data_source.dart';
 import '../../data/datasources/premium_local_data_source.dart';
 import '../../data/datasources/premium_remote_data_source.dart';
@@ -37,52 +38,54 @@ class StubSubscriptionRepository implements core.ISubscriptionRepository {
 
   @override
   Future<Either<core.Failure, core.SubscriptionEntity?>>
-      getCurrentSubscription() async => const Right(null);
+  getCurrentSubscription() async => const Right(null);
 
   @override
   Future<Either<core.Failure, List<core.SubscriptionEntity>>>
-      getUserSubscriptions() async => const Right([]);
+  getUserSubscriptions() async => const Right([]);
 
   @override
-  Future<Either<core.Failure, List<core.ProductInfo>>> getAvailableProducts(
-          {required List<String> productIds}) async =>
-      const Right([]);
+  Future<Either<core.Failure, List<core.ProductInfo>>> getAvailableProducts({
+    required List<String> productIds,
+  }) async => const Right([]);
 
   @override
-  Future<Either<core.Failure, core.SubscriptionEntity>> purchaseProduct(
-          {required String productId}) async =>
-      const Left(core.UnknownFailure('Not implemented'));
+  Future<Either<core.Failure, core.SubscriptionEntity>> purchaseProduct({
+    required String productId,
+  }) async => const Left(core.UnknownFailure('Not implemented'));
 
   @override
   Future<Either<core.Failure, List<core.SubscriptionEntity>>>
-      restorePurchases() async => const Right([]);
+  restorePurchases() async => const Right([]);
 
   @override
-  Future<Either<core.Failure, void>> setUser(
-          {required String userId, Map<String, String>? attributes}) async =>
+  Future<Either<core.Failure, void>> setUser({
+    required String userId,
+    Map<String, String>? attributes,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<core.Failure, void>> setUserAttributes({
+    required Map<String, String> attributes,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<core.Failure, bool>> isEligibleForTrial({
+    required String productId,
+  }) async => const Right(false);
+
+  @override
+  Future<Either<core.Failure, String?>> getManagementUrl() async =>
       const Right(null);
-
-  @override
-  Future<Either<core.Failure, void>> setUserAttributes(
-          {required Map<String, String> attributes}) async =>
-      const Right(null);
-
-  @override
-  Future<Either<core.Failure, bool>> isEligibleForTrial(
-          {required String productId}) async =>
-      const Right(false);
-
-  @override
-  Future<Either<core.Failure, String?>> getManagementUrl() async => const Right(null);
 
   @override
   Future<Either<core.Failure, String?>> getSubscriptionManagementUrl() async =>
       const Right(null);
 
   @override
-  Future<Either<core.Failure, void>> cancelSubscription(
-          {String? reason}) async =>
-      const Right(null);
+  Future<Either<core.Failure, void>> cancelSubscription({
+    String? reason,
+  }) async => const Right(null);
 
   @override
   Future<Either<core.Failure, bool>> hasPlantisSubscription() async =>
@@ -94,11 +97,11 @@ class StubSubscriptionRepository implements core.ISubscriptionRepository {
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getPlantisProducts() async => const Right([]);
+  getPlantisProducts() async => const Right([]);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getReceitaAgroProducts() async => const Right([]);
+  getReceitaAgroProducts() async => const Right([]);
 
   @override
   Future<Either<core.Failure, bool>> hasGasometerSubscription() async =>
@@ -106,11 +109,12 @@ class StubSubscriptionRepository implements core.ISubscriptionRepository {
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getGasometerProducts() async => const Right([]);
+  getGasometerProducts() async => const Right([]);
 }
 
-final subscriptionRepositoryProvider =
-    Provider<core.ISubscriptionRepository>((ref) {
+final subscriptionRepositoryProvider = Provider<core.ISubscriptionRepository>((
+  ref,
+) {
   if (kDebugMode && kIsWeb) {
     return core.MockSubscriptionService();
   }
@@ -128,31 +132,34 @@ class PremiumRemoteDataSourceStub implements PremiumRemoteDataSource {
 
   @override
   Future<Either<core.Failure, core.SubscriptionEntity?>>
-      getCurrentSubscription() async => const Right(null);
+  getCurrentSubscription() async => const Right(null);
 
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
-      getAvailableProducts() async => const Right([]);
+  getAvailableProducts() async => const Right([]);
 
   @override
-  Future<Either<core.Failure, core.SubscriptionEntity>> purchaseProduct(
-          {required String productId}) async =>
-      const Left(core.UnknownFailure('Not implemented'));
+  Future<Either<core.Failure, core.SubscriptionEntity>> purchaseProduct({
+    required String productId,
+  }) async => const Left(core.UnknownFailure('Not implemented'));
 
   @override
   Future<Either<core.Failure, List<core.SubscriptionEntity>>>
-      restorePurchases() async => const Right([]);
+  restorePurchases() async => const Right([]);
 
   @override
-  Future<Either<core.Failure, void>> setUser(
-          {required String userId, Map<String, String>? attributes}) async =>
+  Future<Either<core.Failure, void>> setUser({
+    required String userId,
+    Map<String, String>? attributes,
+  }) async => const Right(null);
+
+  @override
+  Future<Either<core.Failure, String?>> getManagementUrl() async =>
       const Right(null);
 
   @override
-  Future<Either<core.Failure, String?>> getManagementUrl() async => const Right(null);
-
-  @override
-  Future<Either<core.Failure, bool>> isEligibleForTrial() async => const Right(false);
+  Future<Either<core.Failure, bool>> isEligibleForTrial() async =>
+      const Right(false);
 }
 
 // Data Sources
@@ -161,8 +168,9 @@ final premiumLocalDataSourceProvider = Provider<PremiumLocalDataSource>((ref) {
   return PremiumLocalDataSourceImpl(sharedPreferences);
 });
 
-final premiumRemoteDataSourceProvider =
-    Provider<PremiumRemoteDataSource>((ref) {
+final premiumRemoteDataSourceProvider = Provider<PremiumRemoteDataSource>((
+  ref,
+) {
   if (kDebugMode && kIsWeb) {
     final subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
     return PremiumRemoteDataSourceImpl(subscriptionRepository);
@@ -173,27 +181,31 @@ final premiumRemoteDataSourceProvider =
   return PremiumRemoteDataSourceStub();
 });
 
-final subscriptionLocalRepositoryProvider = Provider<SubscriptionLocalRepository>((ref) {
-  final db = ref.watch(gasometerDatabaseProvider);
-  return SubscriptionLocalRepository(db);
-});
+final subscriptionLocalRepositoryProvider =
+    Provider<SubscriptionLocalRepository>((ref) {
+      final db = ref.watch(gasometerDatabaseProvider);
+      return SubscriptionLocalRepository(db);
+    });
 
-final subscriptionSyncAdapterProvider = Provider<SubscriptionDriftSyncAdapter>((ref) {
+final subscriptionSyncAdapterProvider = Provider<SubscriptionDriftSyncAdapter>((
+  ref,
+) {
   final db = ref.watch(gasometerDatabaseProvider);
   final firestore = FirebaseFirestore.instance;
   final connectivity = ref.watch(core.connectivityServiceProvider);
   return SubscriptionDriftSyncAdapter(db, firestore, connectivity);
 });
 
-final premiumFirebaseDataSourceProvider =
-    Provider<PremiumFirebaseDataSource>((ref) {
+final premiumFirebaseDataSourceProvider = Provider<PremiumFirebaseDataSource>((
+  ref,
+) {
   final authRepository = ref.watch(authRepositoryProvider);
-  return PremiumFirebaseDataSource(
-      FirebaseFirestore.instance, authRepository as core.IAuthRepository);
+  return PremiumFirebaseDataSource(FirebaseFirestore.instance, authRepository);
 });
 
-final premiumWebhookDataSourceProvider =
-    Provider<PremiumWebhookDataSource>((ref) {
+final premiumWebhookDataSourceProvider = Provider<PremiumWebhookDataSource>((
+  ref,
+) {
   return PremiumWebhookDataSource(FirebaseFirestore.instance);
 });
 
@@ -209,7 +221,7 @@ final premiumSyncServiceProvider = Provider<PremiumSyncService>((ref) {
     remoteDataSource,
     firebaseDataSource,
     webhookDataSource,
-    authRepository as core.IAuthRepository,
+    AuthRepositoryAdapter(authRepository),
     localRepository: localRepository,
   );
 });
@@ -244,8 +256,9 @@ final canAddFuelRecordProvider = Provider<CanAddFuelRecord>((ref) {
   return CanAddFuelRecord(ref.watch(premiumRepositoryProvider));
 });
 
-final canAddMaintenanceRecordProvider =
-    Provider<CanAddMaintenanceRecord>((ref) {
+final canAddMaintenanceRecordProvider = Provider<CanAddMaintenanceRecord>((
+  ref,
+) {
   return CanAddMaintenanceRecord(ref.watch(premiumRepositoryProvider));
 });
 

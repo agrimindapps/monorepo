@@ -13,6 +13,7 @@ PlantCommentsRepository plantCommentsRepository(Ref ref) {
   final driftRepository = ref.watch(commentsDriftRepositoryProvider);
   return PlantCommentsRepositoryImpl(driftRepository);
 }
+
 @immutable
 class CommentsState {
   final List<ComentarioModel> comments;
@@ -180,8 +181,9 @@ class CommentsNotifier extends _$CommentsNotifier {
 
     final currentState = state.value ?? CommentsState.initial();
 
-    final commentIndex =
-        currentState.comments.indexWhere((c) => c.id == commentId);
+    final commentIndex = currentState.comments.indexWhere(
+      (c) => c.id == commentId,
+    );
     if (commentIndex == -1) {
       state = AsyncData(
         currentState.copyWith(errorMessage: 'Comentário não encontrado'),
@@ -215,7 +217,9 @@ class CommentsNotifier extends _$CommentsNotifier {
         if (kDebugMode) {
           print('✅ Updated comment: ${comment.id}');
         }
-        final updatedComments = List<ComentarioModel>.from(currentState.comments);
+        final updatedComments = List<ComentarioModel>.from(
+          currentState.comments,
+        );
         updatedComments[commentIndex] = comment;
         state = AsyncData(
           currentState.copyWith(
@@ -233,8 +237,9 @@ class CommentsNotifier extends _$CommentsNotifier {
   Future<bool> deleteComment(String commentId) async {
     final currentState = state.value ?? CommentsState.initial();
 
-    final commentIndex =
-        currentState.comments.indexWhere((c) => c.id == commentId);
+    final commentIndex = currentState.comments.indexWhere(
+      (c) => c.id == commentId,
+    );
     if (commentIndex == -1) {
       state = AsyncData(
         currentState.copyWith(errorMessage: 'Comentário não encontrado'),
@@ -263,8 +268,9 @@ class CommentsNotifier extends _$CommentsNotifier {
         if (kDebugMode) {
           print('✅ Deleted comment: $commentId');
         }
-        final updatedComments = List<ComentarioModel>.from(currentState.comments)
-          ..removeAt(commentIndex);
+        final updatedComments = List<ComentarioModel>.from(
+          currentState.comments,
+        )..removeAt(commentIndex);
         state = AsyncData(
           currentState.copyWith(
             comments: updatedComments,
@@ -304,7 +310,9 @@ class CommentsNotifier extends _$CommentsNotifier {
     if (currentState == null) return null;
 
     try {
-      return currentState.comments.firstWhere((comment) => comment.id == commentId);
+      return currentState.comments.firstWhere(
+        (comment) => comment.id == commentId,
+      );
     } catch (e) {
       return null;
     }
@@ -320,10 +328,7 @@ class CommentsNotifier extends _$CommentsNotifier {
 
 /// Provider for comments for a specific plant (family modifier for better performance)
 @riverpod
-AsyncValue<List<ComentarioModel>> plantComments(
-  Ref ref,
-  String plantId,
-) {
+AsyncValue<List<ComentarioModel>> plantComments(Ref ref, String plantId) {
   final commentsState = ref.watch(commentsNotifierProvider);
 
   return commentsState.when(
@@ -336,10 +341,7 @@ AsyncValue<List<ComentarioModel>> plantComments(
       }
       if (state.currentPlantId == plantId) {
         if (state.errorMessage != null) {
-          return AsyncError(
-            Exception(state.errorMessage),
-            StackTrace.current,
-          );
+          return AsyncError(Exception(state.errorMessage), StackTrace.current);
         }
         return AsyncData(state.comments);
       }

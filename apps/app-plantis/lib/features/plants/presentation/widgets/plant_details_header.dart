@@ -159,10 +159,9 @@ class PlantDetailsHeader extends StatelessWidget {
       );
     }
 
-    final daysSincePlanting =
-        plant.plantingDate != null
-            ? DateTime.now().difference(plant.plantingDate!).inDays
-            : 0;
+    final daysSincePlanting = plant.plantingDate != null
+        ? DateTime.now().difference(plant.plantingDate!).inDays
+        : 0;
 
     final wateringInterval = plant.config!.wateringIntervalDays!;
     final daysSinceLastWatering = daysSincePlanting % wateringInterval;

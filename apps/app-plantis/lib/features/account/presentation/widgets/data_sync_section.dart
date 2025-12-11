@@ -53,20 +53,19 @@ class DataSyncSection extends ConsumerWidget {
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                trailing:
-                    isSyncing
-                        ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                        : IconButton(
-                          onPressed: () {
-                            ref.read(syncProvider.notifier).triggerManualSync();
-                          },
-                          icon: const Icon(Icons.refresh),
-                          tooltip: 'Sincronizar agora',
-                        ),
+                trailing: isSyncing
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : IconButton(
+                        onPressed: () {
+                          ref.read(syncProvider.notifier).triggerManualSync();
+                        },
+                        icon: const Icon(Icons.refresh),
+                        tooltip: 'Sincronizar agora',
+                      ),
               ),
               ListTile(
                 leading: Container(

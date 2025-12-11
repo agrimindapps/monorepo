@@ -52,9 +52,7 @@ class ConflictHistoryDriftRepository {
       query.where((c) => c.resolvedAt.isNotNull());
     }
 
-    query.orderBy([
-      (c) => OrderingTerm.desc(c.occurredAt),
-    ]);
+    query.orderBy([(c) => OrderingTerm.desc(c.occurredAt)]);
 
     final conflicts = await query.get();
     return conflicts.map(_conflictDriftToModel).toList();
@@ -80,27 +78,26 @@ class ConflictHistoryDriftRepository {
 
   /// Marcar conflito como resolvido
   Future<bool> markAsResolved(String firebaseId, int resolvedAtMs) async {
-    final updated = await (_db.update(
-      _db.conflictHistory,
-    )..where((c) => c.firebaseId.equals(firebaseId)))
-        .write(
-      db.ConflictHistoryCompanion(
-        resolvedAt: Value(resolvedAtMs),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.conflictHistory,
+        )..where((c) => c.firebaseId.equals(firebaseId))).write(
+          db.ConflictHistoryCompanion(
+            resolvedAt: Value(resolvedAtMs),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return updated > 0;
   }
 
   /// Obter conflitos não resolvidos
   Future<List<ConflictHistoryModel>> getUnresolvedConflicts() async {
-    final conflicts = await (_db.select(_db.conflictHistory)
-          ..where((c) => c.resolvedAt.isNull())
-          ..orderBy([
-            (c) => OrderingTerm.desc(c.occurredAt),
-          ]))
-        .get();
+    final conflicts =
+        await (_db.select(_db.conflictHistory)
+              ..where((c) => c.resolvedAt.isNull())
+              ..orderBy([(c) => OrderingTerm.desc(c.occurredAt)]))
+            .get();
 
     return conflicts.map(_conflictDriftToModel).toList();
   }
@@ -112,8 +109,7 @@ class ConflictHistoryDriftRepository {
 
     return await (_db.delete(
       _db.conflictHistory,
-    )..where((c) => c.occurredAt.isSmallerThanValue(cutoffMs)))
-        .go();
+    )..where((c) => c.occurredAt.isSmallerThanValue(cutoffMs))).go();
   }
 
   /// Contagem de conflitos não resolvidos

@@ -37,7 +37,8 @@ class SolidDIFactory {
     // TODO: Implement proper dependency injection
     // For now, return a stub implementation
     throw UnimplementedError(
-        'PlantsDataService creation not implemented in DI factory');
+      'PlantsDataService creation not implemented in DI factory',
+    );
   }
 
   PlantsFilterService createPlantsFilterService() {

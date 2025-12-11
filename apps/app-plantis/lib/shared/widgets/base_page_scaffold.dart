@@ -50,17 +50,16 @@ class BasePageScaffold extends StatelessWidget {
     final backgroundGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors:
-          backgroundColor != null
-              ? [backgroundColor!, backgroundColor!]
-              : isDark
-              ? [const Color(0xFF1C1C1E), const Color(0xFF1A1A1C)]
-              : [
-                const Color(
-                  0xFFF0F2F5,
-                ), // Cinza mais escuro para melhor contraste com branco
-                const Color(0xFFE8ECEF), // Cinza levemente mais escuro ainda
-              ],
+      colors: backgroundColor != null
+          ? [backgroundColor!, backgroundColor!]
+          : isDark
+          ? [const Color(0xFF1C1C1E), const Color(0xFF1A1A1C)]
+          : [
+              const Color(
+                0xFFF0F2F5,
+              ), // Cinza mais escuro para melhor contraste com branco
+              const Color(0xFFE8ECEF), // Cinza levemente mais escuro ainda
+            ],
     );
 
     Widget content = DecoratedBox(
@@ -139,21 +138,19 @@ class PlantisCard extends StatelessWidget {
       borderRadius: borderRadius ?? BorderRadius.circular(16.0),
       boxShadow: [
         BoxShadow(
-          color:
-              isDark
-                  ? Colors.black.withValues(alpha: 0.3)
-                  : const Color(
-                    0xFF000000,
-                  ).withValues(alpha: 0.12), // Sombra mais forte para contraste
+          color: isDark
+              ? Colors.black.withValues(alpha: 0.3)
+              : const Color(
+                  0xFF000000,
+                ).withValues(alpha: 0.12), // Sombra mais forte para contraste
           offset: const Offset(0, 3),
           blurRadius: 12,
           spreadRadius: 0,
         ),
         BoxShadow(
-          color:
-              isDark
-                  ? Colors.black.withValues(alpha: 0.1)
-                  : const Color(0xFF000000).withValues(alpha: 0.06),
+          color: isDark
+              ? Colors.black.withValues(alpha: 0.1)
+              : const Color(0xFF000000).withValues(alpha: 0.06),
           offset: const Offset(0, 1),
           blurRadius: 4,
           spreadRadius: 0,

@@ -344,8 +344,9 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         width: widget.width,
         height: widget.height,
         decoration: BoxDecoration(
-          shape:
-              widget.useCircularBorder ? BoxShape.circle : BoxShape.rectangle,
+          shape: widget.useCircularBorder
+              ? BoxShape.circle
+              : BoxShape.rectangle,
           color:
               widget.placeholderColor ?? theme.colorScheme.surfaceContainerHigh,
           border: Border.all(

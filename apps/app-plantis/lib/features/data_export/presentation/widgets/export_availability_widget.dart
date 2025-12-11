@@ -21,7 +21,8 @@ class ExportAvailabilityWidget extends ConsumerStatefulWidget {
       _ExportAvailabilityWidgetState();
 }
 
-class _ExportAvailabilityWidgetState extends ConsumerState<ExportAvailabilityWidget> {
+class _ExportAvailabilityWidgetState
+    extends ConsumerState<ExportAvailabilityWidget> {
   @override
   void initState() {
     super.initState();
@@ -31,9 +32,9 @@ class _ExportAvailabilityWidgetState extends ConsumerState<ExportAvailabilityWid
   }
 
   Future<void> _checkAvailability() async {
-    await ref.read(dataExportNotifierProvider.notifier).checkExportAvailability(
-      requestedDataTypes: widget.requestedDataTypes,
-    );
+    await ref
+        .read(dataExportNotifierProvider.notifier)
+        .checkExportAvailability(requestedDataTypes: widget.requestedDataTypes);
 
     if (widget.onAvailabilityChecked != null) {
       widget.onAvailabilityChecked!();
@@ -57,10 +58,8 @@ class _ExportAvailabilityWidgetState extends ConsumerState<ExportAvailabilityWid
         );
       },
       loading: () => const _LoadingWidget(),
-      error: (error, _) => _ErrorWidget(
-        error: error.toString(),
-        onRetry: _checkAvailability,
-      ),
+      error: (error, _) =>
+          _ErrorWidget(error: error.toString(), onRetry: _checkAvailability),
     );
   }
 }
@@ -340,17 +339,15 @@ class _AvailableWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final availableTypes =
-        availability.availableDataTypes.entries
-            .where((entry) => entry.value)
-            .map((entry) => entry.key)
-            .toSet();
+    final availableTypes = availability.availableDataTypes.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toSet();
 
-    final unavailableTypes =
-        availability.availableDataTypes.entries
-            .where((entry) => !entry.value)
-            .map((entry) => entry.key)
-            .toSet();
+    final unavailableTypes = availability.availableDataTypes.entries
+        .where((entry) => !entry.value)
+        .map((entry) => entry.key)
+        .toSet();
 
     return Card(
       elevation: 2,
@@ -409,7 +406,11 @@ class _AvailableWidget extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.storage, color: PlantisColors.primary, size: 20),
+                    const Icon(
+                      Icons.storage,
+                      color: PlantisColors.primary,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       'Tamanho estimado: ${_formatFileSize(availability.estimatedSizeInBytes!)}',
@@ -437,7 +438,11 @@ class _AvailableWidget extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     children: [
-                      const Icon(Icons.eco, color: PlantisColors.leaf, size: 16),
+                      const Icon(
+                        Icons.eco,
+                        color: PlantisColors.leaf,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -473,8 +478,9 @@ class _AvailableWidget extends StatelessWidget {
                         child: Text(
                           type.displayName,
                           style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),

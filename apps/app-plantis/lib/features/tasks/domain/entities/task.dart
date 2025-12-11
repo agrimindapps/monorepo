@@ -204,6 +204,7 @@ class Task extends BaseSyncEntity {
   String toString() {
     return 'Task{id: $id, title: $title, plantId: $plantId, type: ${type.displayName}, status: ${status.displayName}, dueDate: $dueDate}';
   }
+
   @override
   Map<String, dynamic> toFirebaseMap() {
     return {
@@ -281,6 +282,7 @@ class Task extends BaseSyncEntity {
           return TaskType.custom;
       }
     }
+
     TaskPriority mapPriority(String tipoCuidado) {
       switch (tipoCuidado) {
         case 'agua':
@@ -316,10 +318,9 @@ class Task extends BaseSyncEntity {
       description: _getTaskDescription(tarefaModel.tipoCuidado as String),
       plantId: tarefaModel.plantaId as String,
       type: taskType,
-      status:
-          ((tarefaModel.concluida as bool?) ?? false)
-              ? TaskStatus.completed
-              : TaskStatus.pending,
+      status: ((tarefaModel.concluida as bool?) ?? false)
+          ? TaskStatus.completed
+          : TaskStatus.pending,
       priority: mapPriority(tarefaModel.tipoCuidado as String),
       dueDate: tarefaModel.dataExecucao as DateTime,
       completedAt: tarefaModel.dataConclusao as DateTime?,
@@ -395,26 +396,23 @@ class Task extends BaseSyncEntity {
         orElse: () => TaskPriority.medium,
       ),
       dueDate: DateTime.fromMillisecondsSinceEpoch(json['dueDate'] as int),
-      completedAt:
-          json['completedAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['completedAt'] as int)
-              : null,
+      completedAt: json['completedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['completedAt'] as int)
+          : null,
       completionNotes: json['completionNotes'] as String?,
       isRecurring: json['isRecurring'] as bool? ?? false,
       recurringIntervalDays: json['recurringIntervalDays'] as int?,
-      nextDueDate:
-          json['nextDueDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['nextDueDate'] as int)
-              : null,
+      nextDueDate: json['nextDueDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['nextDueDate'] as int)
+          : null,
       isDirty: json['isDirty'] as bool? ?? false,
       isDeleted: json['isDeleted'] as bool? ?? false,
       version: json['version'] as int? ?? 1,
       userId: json['userId'] as String?,
       moduleName: json['moduleName'] as String?,
-      lastSyncAt:
-          json['lastSyncAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
-              : null,
+      lastSyncAt: json['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
+          : null,
     );
   }
 
@@ -448,17 +446,15 @@ class Task extends BaseSyncEntity {
         orElse: () => TaskPriority.medium,
       ),
       dueDate: DateTime.parse(map['due_date'] as String),
-      completedAt:
-          map['completed_at'] != null
-              ? DateTime.parse(map['completed_at'] as String)
-              : null,
+      completedAt: map['completed_at'] != null
+          ? DateTime.parse(map['completed_at'] as String)
+          : null,
       completionNotes: map['completion_notes'] as String?,
       isRecurring: map['is_recurring'] as bool? ?? false,
       recurringIntervalDays: map['recurring_interval_days'] as int?,
-      nextDueDate:
-          map['next_due_date'] != null
-              ? DateTime.parse(map['next_due_date'] as String)
-              : null,
+      nextDueDate: map['next_due_date'] != null
+          ? DateTime.parse(map['next_due_date'] as String)
+          : null,
     );
   }
 }

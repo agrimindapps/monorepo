@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/settings_notifier.dart';
-import '../shared/settings_card.dart';
-import '../shared/settings_item.dart';
+import '../shared/new_settings_card.dart';
+import '../shared/new_settings_list_tile.dart';
+import '../shared/section_header.dart';
 
 /// Seção de notificações - gerencia configurações de notificações
 class NotificationSection extends ConsumerWidget {
@@ -14,24 +16,31 @@ class NotificationSection extends ConsumerWidget {
     final settingsAsync = ref.watch(settingsProvider);
     final notificationsEnabled =
         settingsAsync.value?.notificationsEnabled ?? true;
+    const isWebPlatform = kIsWeb;
 
-    return SettingsCard(
-      title: 'Notificações',
-      icon: Icons.notifications,
+    return Column(
       children: [
-        SettingsItem(
-          icon: Icons.notifications_active,
-          title: 'Receber Notificações',
-          subtitle: 'Ativar ou desativar todas as notificações',
-          trailing: Switch(
-            value: notificationsEnabled,
-            onChanged: settingsAsync.isLoading
-                ? null
-                : (value) {
-                    ref
-                        .read(settingsProvider.notifier)
-                        .toggleNotifications(value);
-                  },
+        const SectionHeader(title: 'Notificações'),
+        NewSettingsCard(
+          child: NewSettingsListTile(
+            leadingIcon: isWebPlatform
+                ? Icons.notifications_off_outlined
+                : Icons.notifications_active,
+            title: 'Receber Notificações',
+            subtitle: isWebPlatform
+                ? 'Não disponível na versão web'
+                : 'Ativar ou desativar todas as notificações',
+            enabled: !isWebPlatform,
+            trailing: Switch(
+              value: isWebPlatform ? false : notificationsEnabled,
+              onChanged: isWebPlatform || settingsAsync.isLoading
+                  ? null
+                  : (value) {
+                      ref
+                          .read(settingsProvider.notifier)
+                          .toggleNotifications(value);
+                    },
+            ),
           ),
         ),
       ],

@@ -315,10 +315,9 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
         width: 28,
         height: 28,
         child: CircularProgressIndicator(
-          value:
-              widget.controller.progressType == ProgressType.determinate
-                  ? widget.controller.progress
-                  : null,
+          value: widget.controller.progressType == ProgressType.determinate
+              ? widget.controller.progress
+              : null,
           strokeWidth: 3,
           valueColor: AlwaysStoppedAnimation<Color>(color),
         ),
@@ -410,12 +409,11 @@ class CheckmarkPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = color
-          ..strokeWidth = 3.0
-          ..style = PaintingStyle.stroke
-          ..strokeCap = StrokeCap.round;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 3.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
 
     final path = Path();
     final centerX = size.width * 0.5;

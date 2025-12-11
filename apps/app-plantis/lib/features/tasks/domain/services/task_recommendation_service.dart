@@ -29,45 +29,41 @@ abstract class ITaskRecommendationService {
 
 class TaskRecommendationService implements ITaskRecommendationService {
   @override
-  List<task_entity.Task> getHighPriorityTasks(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> getHighPriorityTasks(List<task_entity.Task> tasks) {
     return tasks
-        .where((t) =>
-            (t.priority == task_entity.TaskPriority.urgent ||
-                t.priority == task_entity.TaskPriority.high) &&
-            t.status == task_entity.TaskStatus.pending)
+        .where(
+          (t) =>
+              (t.priority == task_entity.TaskPriority.urgent ||
+                  t.priority == task_entity.TaskPriority.high) &&
+              t.status == task_entity.TaskStatus.pending,
+        )
         .toList()
-        ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
 
   @override
-  List<task_entity.Task> getTodaySuggestions(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> getTodaySuggestions(List<task_entity.Task> tasks) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
 
-    return tasks
-        .where((t) {
-          final dueDate = t.dueDate;
-          return !dueDate.isBefore(today) &&
-              dueDate.isBefore(tomorrow) &&
-              t.status == task_entity.TaskStatus.pending;
-        })
-        .toList()
-        ..sort((a, b) {
-          // Sort by priority (higher first)
-          const priorityOrder = {
-            task_entity.TaskPriority.urgent: 0,
-            task_entity.TaskPriority.high: 1,
-            task_entity.TaskPriority.medium: 2,
-            task_entity.TaskPriority.low: 3,
-          };
-          return (priorityOrder[a.priority] ?? 4)
-              .compareTo(priorityOrder[b.priority] ?? 4);
-        });
+    return tasks.where((t) {
+      final dueDate = t.dueDate;
+      return !dueDate.isBefore(today) &&
+          dueDate.isBefore(tomorrow) &&
+          t.status == task_entity.TaskStatus.pending;
+    }).toList()..sort((a, b) {
+      // Sort by priority (higher first)
+      const priorityOrder = {
+        task_entity.TaskPriority.urgent: 0,
+        task_entity.TaskPriority.high: 1,
+        task_entity.TaskPriority.medium: 2,
+        task_entity.TaskPriority.low: 3,
+      };
+      return (priorityOrder[a.priority] ?? 4).compareTo(
+        priorityOrder[b.priority] ?? 4,
+      );
+    });
   }
 
   @override
@@ -76,11 +72,13 @@ class TaskRecommendationService implements ITaskRecommendationService {
     String plantId,
   ) {
     return tasks
-        .where((t) =>
-            t.plantId == plantId &&
-            t.status == task_entity.TaskStatus.pending)
+        .where(
+          (t) =>
+              t.plantId == plantId &&
+              t.status == task_entity.TaskStatus.pending,
+        )
         .toList()
-        ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
+      ..sort((a, b) => a.dueDate.compareTo(b.dueDate));
   }
 
   @override
@@ -90,25 +88,29 @@ class TaskRecommendationService implements ITaskRecommendationService {
     }
 
     final overdueCount = tasks
-        .where((t) =>
-            t.dueDate.isBefore(DateTime.now()) &&
-            t.status != task_entity.TaskStatus.completed)
+        .where(
+          (t) =>
+              t.dueDate.isBefore(DateTime.now()) &&
+              t.status != task_entity.TaskStatus.completed,
+        )
         .length;
 
     final highPriorityCount = tasks
-        .where((t) =>
-            (t.priority == task_entity.TaskPriority.urgent ||
-                t.priority == task_entity.TaskPriority.high) &&
-            t.status == task_entity.TaskStatus.pending)
+        .where(
+          (t) =>
+              (t.priority == task_entity.TaskPriority.urgent ||
+                  t.priority == task_entity.TaskPriority.high) &&
+              t.status == task_entity.TaskStatus.pending,
+        )
         .length;
 
     final completionRate = tasks.isEmpty
         ? 0
         : (tasks
-                .where((t) => t.status == task_entity.TaskStatus.completed)
-                .length /
-            tasks.length *
-            100);
+                  .where((t) => t.status == task_entity.TaskStatus.completed)
+                  .length /
+              tasks.length *
+              100);
 
     final recommendations = <String>[];
 

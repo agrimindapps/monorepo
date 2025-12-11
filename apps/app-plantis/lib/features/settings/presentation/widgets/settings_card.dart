@@ -244,22 +244,21 @@ class _SettingsCardState extends State<SettingsCard>
                 color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: _getBorderColor(), width: 2),
-                boxShadow:
-                    _isHovered
-                        ? [
-                          BoxShadow(
-                            color: _getHeaderColor().withValues(alpha: 0.1),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ]
-                        : [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                boxShadow: _isHovered
+                    ? [
+                        BoxShadow(
+                          color: _getHeaderColor().withValues(alpha: 0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ]
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
               ),
               child: Column(
                 children: [

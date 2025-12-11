@@ -1,6 +1,5 @@
 import 'base_sync_model.dart';
 
-
 // ignore: must_be_immutable
 class ConflictHistoryModel extends BaseSyncModel {
   @override
@@ -40,14 +39,12 @@ class ConflictHistoryModel extends BaseSyncModel {
     String? moduleName,
   }) : super(
          id: id,
-         createdAt:
-             createdAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
-                 : null,
-         updatedAt:
-             updatedAtMs != null
-                 ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
-                 : null,
+         createdAt: createdAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(createdAtMs)
+             : null,
+         updatedAt: updatedAtMs != null
+             ? DateTime.fromMillisecondsSinceEpoch(updatedAtMs)
+             : null,
          version: version ?? 1,
          moduleName: moduleName ?? 'plantis',
        );

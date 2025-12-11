@@ -83,106 +83,150 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      ShellRoute(
-        builder: (context, state, child) {
-          return AdaptiveMainNavigation(child: child);
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AdaptiveMainNavigation(navigationShell: navigationShell);
         },
-        routes: [
-          GoRoute(path: '/', redirect: (context, state) => '/vehicles'),
-          GoRoute(
-            path: '/vehicles',
-            name: 'vehicles',
-            builder: (context, state) => const VehiclesPage(),
+        branches: [
+          // Branch 0: Vehicles
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-vehicle',
-                builder: (context, state) => const AddVehiclePage(),
+                path: '/',
+                redirect: (context, state) => '/vehicles',
+              ),
+              GoRoute(
+                path: '/vehicles',
+                name: 'vehicles',
+                builder: (context, state) => const VehiclesPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-vehicle',
+                    builder: (context, state) => const AddVehiclePage(),
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/fuel',
-            name: 'fuel',
-            builder: (context, state) => const FuelPage(),
+
+          // Branch 1: Odometer
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-fuel',
-                builder: (context, state) => const AddFuelPage(),
+                path: '/odometer',
+                name: 'odometer',
+                builder: (context, state) => const OdometerPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-odometer',
+                    builder: (context, state) => const AddOdometerPage(),
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/odometer',
-            name: 'odometer',
-            builder: (context, state) => const OdometerPage(),
+
+          // Branch 2: Fuel
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-odometer',
-                builder: (context, state) => const AddOdometerPage(),
+                path: '/fuel',
+                name: 'fuel',
+                builder: (context, state) => const FuelPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-fuel',
+                    builder: (context, state) => const AddFuelPage(),
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/maintenance',
-            name: 'maintenance',
-            builder: (context, state) => const MaintenancePage(),
+
+          // Branch 3: Expenses
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-maintenance',
-                builder: (context, state) => const AddMaintenancePage(),
+                path: '/expenses',
+                name: 'expenses',
+                builder: (context, state) => const ExpensesPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-expense',
+                    builder: (context, state) => const AddExpensePage(),
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/expenses',
-            name: 'expenses',
-            builder: (context, state) => const ExpensesPage(),
+
+          // Branch 4: Maintenance
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-expense',
-                builder: (context, state) => const AddExpensePage(),
+                path: '/maintenance',
+                name: 'maintenance',
+                builder: (context, state) => const MaintenancePage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-maintenance',
+                    builder: (context, state) => const AddMaintenancePage(),
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/reports',
-            name: 'reports',
-            builder: (context, state) => const ReportsPage(),
+
+          // Branch 5: Reports
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/reports',
+                name: 'reports',
+                builder: (context, state) => const ReportsPage(),
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/settings',
-            name: 'settings',
-            builder: (context, state) => const SettingsPage(),
-          ),
-          GoRoute(
-            path: '/privacy-policy',
-            name: 'privacy-policy',
-            builder: (context, state) => const PrivacyPolicyPage(),
-          ),
-          GoRoute(
-            path: '/terms-of-service',
-            name: 'terms-of-service',
-            builder: (context, state) => const TermsOfServicePage(),
-          ),
-          GoRoute(
-            path: '/account-deletion-policy',
-            name: 'account-deletion-policy',
-            builder: (context, state) => const AccountDeletionPolicyPage(),
-          ),
-          GoRoute(
-            path: '/profile',
-            name: 'profile',
-            builder: (context, state) => const ProfilePage(),
-          ),
-          GoRoute(
-            path: '/premium',
-            name: 'premium',
-            builder: (context, state) => const PremiumPage(),
+
+          // Branch 6: Settings (and others)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                name: 'settings',
+                builder: (context, state) => const SettingsPage(),
+              ),
+              GoRoute(
+                path: '/privacy-policy',
+                name: 'privacy-policy',
+                builder: (context, state) => const PrivacyPolicyPage(),
+              ),
+              GoRoute(
+                path: '/terms-of-service',
+                name: 'terms-of-service',
+                builder: (context, state) => const TermsOfServicePage(),
+              ),
+              GoRoute(
+                path: '/account-deletion-policy',
+                name: 'account-deletion-policy',
+                builder: (context, state) => const AccountDeletionPolicyPage(),
+              ),
+              GoRoute(
+                path: '/profile',
+                name: 'profile',
+                builder: (context, state) => const ProfilePage(),
+              ),
+              GoRoute(
+                path: '/premium',
+                name: 'premium',
+                builder: (context, state) => const PremiumPage(),
+              ),
+            ],
           ),
         ],
       ),

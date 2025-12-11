@@ -24,7 +24,8 @@ class DeviceManagementSection extends ConsumerWidget {
           child: deviceManagementAsync.when(
             data: (deviceState) => _buildDeviceContent(context, deviceState),
             loading: () => _buildLoadingState(),
-            error: (error, stack) => _buildErrorState(context, error.toString()),
+            error: (error, stack) =>
+                _buildErrorState(context, error.toString()),
           ),
         ),
       ],
@@ -126,11 +127,7 @@ class DeviceManagementSection extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          Icon(
-            Icons.error_outline,
-            size: 48,
-            color: theme.colorScheme.error,
-          ),
+          Icon(Icons.error_outline, size: 48, color: theme.colorScheme.error),
           const SizedBox(height: 12),
           Text(
             'Erro ao carregar dispositivos',

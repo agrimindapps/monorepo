@@ -4,7 +4,6 @@ import 'package:core/core.dart' hide Column, Consumer, FormState;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/auth_providers.dart' as auth_providers;
 import '../../../../core/theme/accessibility_tokens.dart';
@@ -196,9 +195,7 @@ class LoginForm extends ConsumerWidget {
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
                 )
@@ -429,8 +426,9 @@ class RegisterForm extends ConsumerWidget {
             'Criar conta',
           ),
           tooltip: 'Criar nova conta',
-          backgroundColor:
-              state.isLoading ? Colors.grey.shade400 : PlantisColors.primary,
+          backgroundColor: state.isLoading
+              ? Colors.grey.shade400
+              : PlantisColors.primary,
           foregroundColor: Colors.white,
           minimumSize: const Size(
             double.infinity,
@@ -449,9 +447,7 @@ class RegisterForm extends ConsumerWidget {
                     width: 24,
                     child: CircularProgressIndicator(
                       strokeWidth: 2.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.white,
-                      ),
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
                 )
@@ -551,8 +547,9 @@ class PasswordVisibilityToggle extends StatelessWidget {
         onPressed: () {
           AccessibilityTokens.performHapticFeedback('light');
           onToggle(!isObscured);
-          final message =
-              !isObscured ? '$fieldName ocultada' : '$fieldName visível';
+          final message = !isObscured
+              ? '$fieldName ocultada'
+              : '$fieldName visível';
           SemanticsService.announce(message, ui.TextDirection.ltr);
         },
       ),
@@ -595,8 +592,9 @@ class RememberMeSection extends StatelessWidget {
                     width: 20,
                     height: 20,
                     decoration: BoxDecoration(
-                      color:
-                          rememberMe ? PlantisColors.primary : Colors.transparent,
+                      color: rememberMe
+                          ? PlantisColors.primary
+                          : Colors.transparent,
                       border: Border.all(
                         color: rememberMe
                             ? PlantisColors.primary
@@ -606,11 +604,7 @@ class RememberMeSection extends StatelessWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: rememberMe
-                        ? const Icon(
-                            Icons.check,
-                            color: Colors.white,
-                            size: 14,
-                          )
+                        ? const Icon(Icons.check, color: Colors.white, size: 14)
                         : null,
                   ),
                   const SizedBox(width: 8),
@@ -630,10 +624,7 @@ class RememberMeSection extends StatelessWidget {
         TextButton(
           onPressed: onForgotPassword,
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             minimumSize: Size.zero,
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
@@ -689,11 +680,7 @@ class SocialLoginSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildSocialButton(
-              'G',
-              Colors.red.shade600,
-              onGoogleLogin,
-            ),
+            _buildSocialButton('G', Colors.red.shade600, onGoogleLogin),
             _buildSocialButton(
               null,
               Colors.black,
@@ -765,10 +752,7 @@ class SocialLoginSection extends StatelessWidget {
 class AnonymousLoginSection extends ConsumerWidget {
   final VoidCallback onAnonymousLogin;
 
-  const AnonymousLoginSection({
-    required this.onAnonymousLogin,
-    super.key,
-  });
+  const AnonymousLoginSection({required this.onAnonymousLogin, super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -167,11 +167,12 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     ThemeData theme,
   ) {
     final spaces = spacesState.allSpaces;
-    
+
     // Verificar se o spaceId selecionado existe na lista de espaços
-    final spaceExists = _selectedSpaceId == null || 
+    final spaceExists =
+        _selectedSpaceId == null ||
         spaces.any((space) => space.id == _selectedSpaceId);
-    
+
     // Se o spaceId não existe mais, resetar para null
     final effectiveSpaceId = spaceExists ? _selectedSpaceId : null;
 
@@ -220,7 +221,7 @@ class _SpaceSelectorWidgetState extends ConsumerState<SpaceSelectorWidget> {
     ];
 
     return DropdownButtonFormField<String?>(
-      value: effectiveSpaceId,
+      initialValue: effectiveSpaceId,
       dropdownColor: theme.brightness == Brightness.dark
           ? const Color(0xFF2D2D2D)
           : Colors.white,

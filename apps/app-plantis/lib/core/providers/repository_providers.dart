@@ -165,15 +165,13 @@ SpacesRemoteDatasource spacesRemoteDatasource(Ref ref) {
 }
 
 @riverpod
-PlantTasksLocalDatasource plantTasksLocalDatasource(
-    Ref ref) {
+PlantTasksLocalDatasource plantTasksLocalDatasource(Ref ref) {
   final driftRepo = ref.watch(plantTasksDriftRepositoryProvider);
   return PlantTasksLocalDatasourceImpl(driftRepo);
 }
 
 @riverpod
-PlantTasksRemoteDatasource plantTasksRemoteDatasource(
-    Ref ref) {
+PlantTasksRemoteDatasource plantTasksRemoteDatasource(Ref ref) {
   final firestore = ref.watch(firebaseFirestoreProvider);
   return PlantTasksRemoteDatasourceImpl(firestore);
 }
@@ -181,8 +179,7 @@ PlantTasksRemoteDatasource plantTasksRemoteDatasource(
 /// === SERVICES ===
 
 @riverpod
-PlantsConnectivityService plantsConnectivityService(
-    Ref ref) {
+PlantsConnectivityService plantsConnectivityService(Ref ref) {
   return PlantsConnectivityServiceImpl(
     networkInfo: ref.watch(networkInfoProvider),
   );
@@ -279,8 +276,7 @@ ResetPasswordUseCase resetPasswordUseCase(Ref ref) {
 /// === SETTINGS ===
 
 @riverpod
-SettingsLocalDataSource settingsLocalDataSource(
-    Ref ref) {
+SettingsLocalDataSource settingsLocalDataSource(Ref ref) {
   return SettingsLocalDataSource(prefs: ref.watch(sharedPreferencesProvider));
 }
 
@@ -299,8 +295,7 @@ SyncSettingsUseCase syncSettingsUseCase(Ref ref) {
 /// === SYNC QUEUE ===
 
 @riverpod
-SyncQueueDriftRepository syncQueueDriftRepository(
-    Ref ref) {
+SyncQueueDriftRepository syncQueueDriftRepository(Ref ref) {
   final db = ref.watch(plantisDatabaseProvider);
   return SyncQueueDriftRepository(db);
 }

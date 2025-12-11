@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../presentation/providers/index.dart';
@@ -39,6 +40,8 @@ class NewNotificationSection extends ConsumerWidget {
     WidgetRef ref,
     NotificationState notificationState,
   ) {
+    const isWebPlatform = kIsWeb;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
@@ -49,13 +52,16 @@ class NewNotificationSection extends ConsumerWidget {
             children: [
               Text(
                 'Notificações Gerais',
-                style: Theme.of(
-                  context,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  color: isWebPlatform ? Theme.of(context).disabledColor : null,
+                ),
               ),
               const SizedBox(height: 4),
               Text(
-                'Receba alertas e atualizações importantes',
+                isWebPlatform
+                    ? 'Não disponível na versão web'
+                    : 'Receba alertas e atualizações importantes',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -63,12 +69,16 @@ class NewNotificationSection extends ConsumerWidget {
             ],
           ),
           Switch(
-            value: notificationState.settings.notificationsEnabled,
-            onChanged: (value) {
-              ref
-                  .read(notificationSettingsProvider.notifier)
-                  .toggleNotifications();
-            },
+            value: isWebPlatform
+                ? false
+                : notificationState.settings.notificationsEnabled,
+            onChanged: isWebPlatform
+                ? null
+                : (value) {
+                    ref
+                        .read(notificationSettingsProvider.notifier)
+                        .toggleNotifications();
+                  },
           ),
         ],
       ),

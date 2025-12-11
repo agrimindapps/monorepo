@@ -1,4 +1,5 @@
-import 'package:app_plantis/features/tasks/domain/entities/task.dart' as task_entity;
+import 'package:app_plantis/features/tasks/domain/entities/task.dart'
+    as task_entity;
 import 'package:app_plantis/features/tasks/domain/services/task_filter_service.dart';
 import 'package:app_plantis/features/tasks/presentation/notifiers/tasks_schedule_notifier.dart';
 import 'package:app_plantis/features/tasks/presentation/providers/tasks_state.dart';
@@ -178,7 +179,7 @@ void main() {
         dueDate: DateTime.now(),
         completed: true,
       );
-      
+
       // Create a version with recurring enabled
       final recurringTask = task_entity.Task(
         id: completedTask.id,
@@ -210,10 +211,7 @@ void main() {
     });
 
     test('generateNextRecurringTask returns null for non-recurring tasks', () {
-      final task = TestFixtures.createTestTask(
-        id: 'task-1',
-        completed: true,
-      );
+      final task = TestFixtures.createTestTask(id: 'task-1', completed: true);
 
       final container = ProviderContainer();
       final notifier = container.read(tasksScheduleNotifierProvider.notifier);

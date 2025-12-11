@@ -76,7 +76,8 @@ class _ModernSidebarState extends State<ModernSidebar>
   late Animation<double> _widthAnimation;
 
   bool _isExpanded = true;
-  bool _showExpandedContent = true; // Controla quando mostrar conteúdo expandido
+  bool _showExpandedContent =
+      true; // Controla quando mostrar conteúdo expandido
   static const double _expandedWidth = 280.0;
   static const double _collapsedWidth = 80.0;
 
@@ -97,13 +98,13 @@ class _ModernSidebarState extends State<ModernSidebar>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _widthAnimation =
-        Tween<double>(begin: _expandedWidth, end: _expandedWidth).animate(
-      CurvedAnimation(
-        parent: _widthAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _widthAnimation = Tween<double>(begin: _expandedWidth, end: _expandedWidth)
+        .animate(
+          CurvedAnimation(
+            parent: _widthAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     // Listener para controlar quando mostrar conteúdo expandido
     _widthAnimationController.addStatusListener((status) {
@@ -141,15 +142,16 @@ class _ModernSidebarState extends State<ModernSidebar>
       _isExpanded = !_isExpanded;
     });
 
-    _widthAnimation = Tween<double>(
-      begin: _isExpanded ? _collapsedWidth : _expandedWidth,
-      end: _isExpanded ? _expandedWidth : _collapsedWidth,
-    ).animate(
-      CurvedAnimation(
-        parent: _widthAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _widthAnimation =
+        Tween<double>(
+          begin: _isExpanded ? _collapsedWidth : _expandedWidth,
+          end: _isExpanded ? _expandedWidth : _collapsedWidth,
+        ).animate(
+          CurvedAnimation(
+            parent: _widthAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     _widthAnimationController.reset();
     _widthAnimationController.forward();
@@ -187,7 +189,9 @@ class _ModernSidebarState extends State<ModernSidebar>
             child: Column(
               children: [
                 _SidebarHeader(isExpanded: _showExpandedContent),
-                Expanded(child: _NavigationList(isExpanded: _showExpandedContent)),
+                Expanded(
+                  child: _NavigationList(isExpanded: _showExpandedContent),
+                ),
                 _SidebarFooter(
                   isExpanded: _showExpandedContent,
                   onToggle: _toggleSidebar,
@@ -228,7 +232,10 @@ class _SidebarHeader extends StatelessWidget {
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [PlantisColors.primary, PlantisColors.primaryLight],
+                      colors: [
+                        PlantisColors.primary,
+                        PlantisColors.primaryLight,
+                      ],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
@@ -311,10 +318,10 @@ class _NavigationList extends StatelessWidget {
               child: Text(
                 'PRINCIPAIS',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
               ),
             ),
           ],
@@ -390,15 +397,15 @@ class _SettingsIconButtonState extends State<_SettingsIconButton> {
               color: isActive
                   ? PlantisColors.primary
                   : _isHovered
-                      ? PlantisColors.primary.withValues(alpha: 0.2)
-                      : PlantisColors.primary.withValues(alpha: 0.1),
+                  ? PlantisColors.primary.withValues(alpha: 0.2)
+                  : PlantisColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
                 color: isActive
                     ? PlantisColors.primary
                     : _isHovered
-                        ? PlantisColors.primary.withValues(alpha: 0.5)
-                        : PlantisColors.primary.withValues(alpha: 0.3),
+                    ? PlantisColors.primary.withValues(alpha: 0.5)
+                    : PlantisColors.primary.withValues(alpha: 0.3),
                 width: _isHovered || isActive ? 1.5 : 1,
               ),
               boxShadow: _isHovered || isActive
@@ -417,8 +424,8 @@ class _SettingsIconButtonState extends State<_SettingsIconButton> {
               color: isActive
                   ? Colors.white
                   : _isHovered
-                      ? PlantisColors.primary
-                      : theme.colorScheme.onSurfaceVariant,
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ),
@@ -536,9 +543,9 @@ class _NavigationItemState extends State<_NavigationItem>
                       color: isActive
                           ? PlantisColors.primary
                           : _isHovering
-                              ? theme.colorScheme.surfaceContainerHighest
-                                  .withValues(alpha: 0.5)
-                              : Colors.transparent,
+                          ? theme.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5)
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: isActive
                           ? [
@@ -670,13 +677,16 @@ class _SidebarFooterState extends State<_SidebarFooter> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: widget.isExpanded ? 20 : 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: widget.isExpanded ? 20 : 16,
+          ),
           child: Consumer(
             builder: (BuildContext context, WidgetRef ref, Widget? child) {
               final authState = ref.watch(authProvider);
 
               // Get user data from auth state
-              final displayName = authState.whenData((auth) {
+              final displayName =
+                  authState.whenData((auth) {
                     return DataSanitizationService.sanitizeDisplayName(
                       auth.currentUser,
                       auth.isAnonymous,
@@ -684,7 +694,8 @@ class _SidebarFooterState extends State<_SidebarFooter> {
                   }).value ??
                   'Usuário Anônimo';
 
-              final statusText = authState.whenData((auth) {
+              final statusText =
+                  authState.whenData((auth) {
                     return auth.isAnonymous ? 'Modo Offline' : 'Online';
                   }).value ??
                   'Carregando...';
@@ -752,10 +763,15 @@ class _SidebarFooterState extends State<_SidebarFooter> {
               } else {
                 footerContent = AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: _isUserHovered
-                        ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
+                        ? theme.colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.5,
+                          )
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -880,9 +896,8 @@ class _SidebarFooterState extends State<_SidebarFooter> {
                           Text(
                             'v1.0.0',
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant.withValues(
-                                alpha: 0.7,
-                              ),
+                              color: theme.colorScheme.onSurfaceVariant
+                                  .withValues(alpha: 0.7),
                               fontSize: 9,
                             ),
                           ),
@@ -892,7 +907,10 @@ class _SidebarFooterState extends State<_SidebarFooter> {
                     const SizedBox(width: 8),
                     const _SettingsIconButton(),
                     const SizedBox(width: 8),
-                    _ToggleButton(isExpanded: widget.isExpanded, onToggle: widget.onToggle),
+                    _ToggleButton(
+                      isExpanded: widget.isExpanded,
+                      onToggle: widget.onToggle,
+                    ),
                   ],
                 )
               : Column(
@@ -900,7 +918,10 @@ class _SidebarFooterState extends State<_SidebarFooter> {
                   children: [
                     const _SettingsIconButton(),
                     const SizedBox(height: 8),
-                    _ToggleButton(isExpanded: widget.isExpanded, onToggle: widget.onToggle),
+                    _ToggleButton(
+                      isExpanded: widget.isExpanded,
+                      onToggle: widget.onToggle,
+                    ),
                   ],
                 ),
         ),

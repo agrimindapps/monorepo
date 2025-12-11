@@ -5,7 +5,6 @@ import '../../core/providers/auth_providers.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
 import 'presentation/providers/user_settings_notifier.dart';
-import 'presentation/providers/settings_providers.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
 import 'widgets/sections/legal_section.dart';
@@ -131,6 +130,107 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       showBackButton: false,
       showActions: true,
       isDark: isDark,
+      additionalActions: [
+        IconButton(
+          onPressed: () => _showThemeDialog(context),
+          icon: const Icon(Icons.brightness_auto, color: Colors.white, size: 19),
+          tooltip: 'Alterar tema',
+        ),
+      ],
+    );
+  }
+
+  void _showThemeDialog(BuildContext context) {
+    final settingsState = ref.read(userSettingsProvider).value;
+    final isDark = settingsState?.isDarkTheme ?? false;
+
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Escolher Tema'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(
+              'Claro',
+              'Tema claro sempre ativo',
+              Icons.brightness_high,
+              !isDark,
+              () => _changeTheme(false),
+            ),
+            _buildThemeOption(
+              'Escuro',
+              'Tema escuro sempre ativo',
+              Icons.brightness_2,
+              isDark,
+              () => _changeTheme(true),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _changeTheme(bool isDark) {
+    ref.read(userSettingsProvider.notifier).setDarkTheme(isDark);
+  }
+
+  Widget _buildThemeOption(
+    String title,
+    String subtitle,
+    IconData icon,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: () {
+        Navigator.of(context).pop();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          onTap();
+        });
+      },
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.all(8),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).textTheme.bodyMedium?.color,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      color: isSelected
+                          ? Theme.of(context).primaryColor
+                          : Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Icon(Icons.check, color: Theme.of(context).primaryColor),
+          ],
+        ),
+      ),
     );
   }
 

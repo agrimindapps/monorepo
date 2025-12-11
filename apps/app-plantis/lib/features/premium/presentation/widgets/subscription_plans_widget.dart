@@ -65,24 +65,22 @@ class _PlantisSubscriptionPlansWidgetState
 
   @override
   Widget build(BuildContext context) {
-    final products =
-        widget.availableProducts.isEmpty
-            ? _getMockProducts()
-            : widget.availableProducts;
+    final products = widget.availableProducts.isEmpty
+        ? _getMockProducts()
+        : widget.availableProducts;
 
     // Sort products to have Annual in the middle or highlighted
     // For vertical list, we usually want: Monthly, Annual (Hero), Semestral
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children:
-            products.map((product) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildPlanOption(product),
-              );
-            }).toList(),
+        children: products.map((product) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildPlanOption(product),
+          );
+        }).toList(),
       ),
     );
   }
@@ -168,14 +166,20 @@ class _PlantisSubscriptionPlansWidgetState
     required bool isSelected,
   }) {
     final isHero = badge != null; // Annual plan is hero
-    
+
     // Dynamic colors based on selection and hero status
     final borderColor = isSelected
-        ? (isHero ? const Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.6)) // Gold for hero
+        ? (isHero
+              ? const Color(0xFFFFD700)
+              : Colors.white.withValues(alpha: 0.6)) // Gold for hero
         : Colors.white.withValues(alpha: 0.1);
-        
+
     final backgroundColor = isSelected
-        ? (isHero ? const Color(0x33FFD700) : PlantisColors.primary.withValues(alpha: 0.15)) // Gold tint for hero
+        ? (isHero
+              ? const Color(0x33FFD700)
+              : PlantisColors.primary.withValues(
+                  alpha: 0.15,
+                )) // Gold tint for hero
         : Colors.white.withValues(alpha: 0.05);
 
     return Transform.scale(
@@ -184,17 +188,14 @@ class _PlantisSubscriptionPlansWidgetState
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 2 : 1,
-          ),
+          border: Border.all(color: borderColor, width: isSelected ? 2 : 1),
           boxShadow: isSelected && isHero
               ? [
                   BoxShadow(
                     color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                     blurRadius: 12,
                     spreadRadius: 2,
-                  )
+                  ),
                 ]
               : null,
         ),
@@ -265,17 +266,24 @@ class _PlantisSubscriptionPlansWidgetState
                                 ),
                                 if (subtitle.isNotEmpty)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: isHero 
+                                      color: isHero
                                           ? Colors.white.withValues(alpha: 0.15)
-                                          : PlantisColors.primary.withValues(alpha: 0.2),
+                                          : PlantisColors.primary.withValues(
+                                              alpha: 0.2,
+                                            ),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: Text(
                                       subtitle,
                                       style: TextStyle(
-                                        color: isHero ? const Color(0xFFFFD700) : PlantisColors.primaryLight,
+                                        color: isHero
+                                            ? const Color(0xFFFFD700)
+                                            : PlantisColors.primaryLight,
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -301,35 +309,33 @@ class _PlantisSubscriptionPlansWidgetState
 
   /// Constrói o radio button customizado
   Widget _buildRadioButton(bool isSelected, bool isHero) {
-    final activeColor = isHero ? const Color(0xFFFFD700) : PlantisColors.primary;
-    
+    final activeColor = isHero
+        ? const Color(0xFFFFD700)
+        : PlantisColors.primary;
+
     return Container(
       width: 24,
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color:
-              isSelected
-                  ? activeColor
-                  : Colors.white.withValues(alpha: 0.4),
+          color: isSelected ? activeColor : Colors.white.withValues(alpha: 0.4),
           width: 2,
         ),
         color: Colors.transparent,
       ),
-      child:
-          isSelected
-              ? Center(
-                child: Container(
-                  width: 12,
-                  height: 12,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: activeColor,
-                  ),
+      child: isSelected
+          ? Center(
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: activeColor,
                 ),
-              )
-              : null,
+              ),
+            )
+          : null,
     );
   }
 

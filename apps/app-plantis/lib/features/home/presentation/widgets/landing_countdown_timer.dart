@@ -63,12 +63,8 @@ class _LandingCountdownTimerState extends State<LandingCountdownTimer> {
       child: Column(
         children: [
           if (widget.style.showLabel)
-            Text(
-              widget.style.label,
-              style: widget.style.labelStyle,
-            ),
-          if (widget.style.showLabel)
-            SizedBox(height: widget.style.spacing),
+            Text(widget.style.label, style: widget.style.labelStyle),
+          if (widget.style.showLabel) SizedBox(height: widget.style.spacing),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -131,10 +127,7 @@ class _TimerUnit extends StatelessWidget {
           ),
         ),
         SizedBox(height: style.labelSpacing),
-        Text(
-          label,
-          style: style.labelStyle,
-        ),
+        Text(label, style: style.labelStyle),
       ],
     );
   }
@@ -168,12 +161,7 @@ class CountdownTimerStyle {
     this.decoration = const BoxDecoration(
       color: Color(0xFFF0F9F0),
       borderRadius: BorderRadius.all(Radius.circular(16)),
-      border: Border(
-        bottom: BorderSide(
-          color: Color(0xFF4CAF50),
-          width: 4,
-        ),
-      ),
+      border: Border(bottom: BorderSide(color: Color(0xFF4CAF50), width: 4)),
     ),
     this.showLabel = true,
     this.label = 'Lançamento em:',

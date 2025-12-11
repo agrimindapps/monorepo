@@ -18,7 +18,11 @@ abstract class PlantsFirebaseDataSource {
   Future<String> createPlant(PlantModel plant, String userId);
   Future<PlantModel> getPlantByFirebaseId(String firebaseId, String userId);
   Future<void> updatePlant(PlantModel plant, String userId);
-  Future<void> deletePlant(String firebaseId, String userId, {bool hardDelete = false});
+  Future<void> deletePlant(
+    String firebaseId,
+    String userId, {
+    bool hardDelete = false,
+  });
   Future<List<PlantModel>> fetchPlantsSince(DateTime? timestamp, String userId);
   Future<List<PlantModel>> getAllUserPlants(String userId);
 }
@@ -56,7 +60,9 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       if (e.code == 'permission-denied') {
         throw const AuthFailure('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkFailure(
+          'Firebase network error - service unavailable',
+        );
       } else {
         throw ServerFailure('Firebase error: ${e.message}');
       }
@@ -105,7 +111,9 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       if (e.code == 'permission-denied') {
         throw const AuthFailure('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkFailure(
+          'Firebase network error - service unavailable',
+        );
       } else {
         throw ServerFailure('Firebase error: ${e.message}');
       }
@@ -136,16 +144,18 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       final plantData = PlantFirebaseMapper.toJson(plant);
 
       // Update document in Firestore (merge=true for safety)
-      await _getPlantsCollection(userId)
-          .doc(plant.id)
-          .set(plantData, SetOptions(merge: true));
+      await _getPlantsCollection(
+        userId,
+      ).doc(plant.id).set(plantData, SetOptions(merge: true));
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
         throw const AuthFailure('User not authenticated or permission denied');
       } else if (e.code == 'not-found') {
         throw NotFoundFailure('Plant not found with ID: ${plant.id}');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkFailure(
+          'Firebase network error - service unavailable',
+        );
       } else {
         throw ServerFailure('Firebase error: ${e.message}');
       }
@@ -192,7 +202,9 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       if (e.code == 'permission-denied') {
         throw const AuthFailure('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkFailure(
+          'Firebase network error - service unavailable',
+        );
       } else {
         throw ServerFailure('Firebase error: ${e.message}');
       }
@@ -219,8 +231,9 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
         throw const AuthFailure('User ID cannot be empty');
       }
 
-      Query query = _getPlantsCollection(userId)
-          .where('is_deleted', isEqualTo: false);
+      Query query = _getPlantsCollection(
+        userId,
+      ).where('is_deleted', isEqualTo: false);
 
       // Incremental sync: Only fetch plants modified after timestamp
       if (timestamp != null) {
@@ -239,7 +252,9 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       if (e.code == 'permission-denied') {
         throw const AuthFailure('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkFailure(
+          'Firebase network error - service unavailable',
+        );
       } else {
         throw ServerFailure('Firebase error: ${e.message}');
       }
@@ -275,7 +290,9 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       if (e.code == 'permission-denied') {
         throw const AuthFailure('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkFailure(
+          'Firebase network error - service unavailable',
+        );
       } else {
         throw ServerFailure('Firebase error: ${e.message}');
       }

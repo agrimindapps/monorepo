@@ -16,17 +16,17 @@ class PlantValidator {
   /// Validate plant name
   Either<ValidationFailure, Unit> validateName(String name) {
     final trimmedName = name.trim();
-    
+
     if (trimmedName.isEmpty) {
       return const Left(ValidationFailure('Nome da planta é obrigatório'));
     }
-    
+
     if (trimmedName.length > 100) {
       return const Left(
         ValidationFailure('Nome muito longo (máximo 100 caracteres)'),
       );
     }
-    
+
     return const Right(unit);
   }
 
@@ -58,20 +58,18 @@ class PlantValidator {
   Either<ValidationFailure, Unit> validatePlantingDate(DateTime? plantingDate) {
     if (plantingDate != null) {
       final now = DateTime.now();
-      
+
       // Check if date is not in the future
       if (plantingDate.isAfter(now)) {
         return const Left(
           ValidationFailure('Data de plantio não pode ser no futuro'),
         );
       }
-      
+
       // Check if date is not too far in the past (e.g., 100 years)
       final hundredYearsAgo = now.subtract(const Duration(days: 36500));
       if (plantingDate.isBefore(hundredYearsAgo)) {
-        return const Left(
-          ValidationFailure('Data de plantio muito antiga'),
-        );
+        return const Left(ValidationFailure('Data de plantio muito antiga'));
       }
     }
     return const Right(unit);
@@ -101,9 +99,8 @@ class PlantValidator {
         (_) => validateSpecies(plant.species).flatMap(
           (_) => validateNotes(plant.notes).flatMap(
             (_) => validatePlantingDate(plant.plantingDate).flatMap(
-              (_) => validateWateringInterval(
-                plant.config?.wateringIntervalDays,
-              ),
+              (_) =>
+                  validateWateringInterval(plant.config?.wateringIntervalDays),
             ),
           ),
         ),
@@ -118,7 +115,7 @@ class PlantValidator {
     if (nameValidation.isLeft()) {
       return nameValidation;
     }
-    
+
     // Then validate the complete plant
     return validatePlant(plant);
   }
@@ -130,7 +127,7 @@ class PlantValidator {
     if (idValidation.isLeft()) {
       return idValidation;
     }
-    
+
     // Then validate the complete plant
     return validatePlant(plant);
   }
@@ -141,9 +138,6 @@ extension EitherValidationExtension on Either<ValidationFailure, Unit> {
   Either<ValidationFailure, Unit> flatMap(
     Either<ValidationFailure, Unit> Function(Unit) f,
   ) {
-    return fold(
-      (failure) => Left(failure),
-      (unit) => f(unit),
-    );
+    return fold((failure) => Left(failure), (unit) => f(unit));
   }
 }

@@ -136,20 +136,15 @@ class PlantImageSection extends StatelessWidget {
                     right: index < plant.imageUrls.length - 1 ? 12 : 0,
                   ),
                   child: GestureDetector(
-                    onTap:
-                        () =>
-                            _showImagePreview(context, plant.imageUrls, index),
+                    onTap: () =>
+                        _showImagePreview(context, plant.imageUrls, index),
                     child: Container(
                       width: 100,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
-                        border:
-                            index == 0
-                                ? Border.all(
-                                  color: PlantisColors.primary,
-                                  width: 2,
-                                )
-                                : null,
+                        border: index == 0
+                            ? Border.all(color: PlantisColors.primary, width: 2)
+                            : null,
                         boxShadow: [
                           BoxShadow(
                             color: theme.colorScheme.shadow.withValues(
@@ -206,128 +201,122 @@ class PlantImageSection extends StatelessWidget {
     showDialog<void>(
       context: context,
       barrierColor: Colors.black87,
-      builder:
-          (context) => Dialog.fullscreen(
-            backgroundColor: Colors.black,
-            child: Stack(
-              children: [
-                PageView.builder(
-                  controller: PageController(initialPage: initialIndex),
-                  itemCount: imageUrls.length,
-                  itemBuilder: (context, index) {
-                    return Center(
-                      child: InteractiveViewer(
-                        minScale: 0.5,
-                        maxScale: 3.0,
-                        child: OptimizedImageWidget(
-                          imageUrl: imageUrls[index],
-                          fit: BoxFit.contain,
-                          cacheKey: index,
-                          enablePreloading:
-                              false, // Disable for fullscreen view
-                        ),
-                      ),
-                    );
-                  },
-                ),
-                Positioned(
-                  top: MediaQuery.of(context).padding.top + 16,
-                  left: 16,
-                  child: IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        color: Colors.black54,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.close, color: Colors.white),
+      builder: (context) => Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: PageController(initialPage: initialIndex),
+              itemCount: imageUrls.length,
+              itemBuilder: (context, index) {
+                return Center(
+                  child: InteractiveViewer(
+                    minScale: 0.5,
+                    maxScale: 3.0,
+                    child: OptimizedImageWidget(
+                      imageUrl: imageUrls[index],
+                      fit: BoxFit.contain,
+                      cacheKey: index,
+                      enablePreloading: false, // Disable for fullscreen view
                     ),
                   ),
-                ),
-                if (imageUrls.length > 1)
-                  Positioned(
-                    bottom: 32,
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        imageUrls.length,
-                        (index) => Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color:
-                                index == initialIndex
-                                    ? Colors.white
-                                    : Colors.white54,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
+                );
+              },
             ),
-          ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 16,
+              left: 16,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white),
+                ),
+              ),
+            ),
+            if (imageUrls.length > 1)
+              Positioned(
+                bottom: 32,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    imageUrls.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: index == initialIndex
+                            ? Colors.white
+                            : Colors.white54,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 
   void _showFullGallery(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder:
-            (context) => Scaffold(
-              backgroundColor: Colors.black,
-              appBar: AppBar(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                title: Text('Fotos de ${plant.displayName}'),
-                elevation: 0,
-              ),
-              body: GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1,
-                ),
-                itemCount: plant.imageUrls.length,
-                itemBuilder: (context, index) {
-                  return GestureDetector(
-                    onTap:
-                        () =>
-                            _showImagePreview(context, plant.imageUrls, index),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: OptimizedImageWidget(
-                          imageUrl: plant.imageUrls[index],
-                          fit: BoxFit.cover,
-                          borderRadius: BorderRadius.circular(12),
-                          cacheKey: index,
-                          enablePreloading:
-                              false, // Gallery view doesn't need preloading
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+        builder: (context) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            title: Text('Fotos de ${plant.displayName}'),
+            elevation: 0,
+          ),
+          body: GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1,
             ),
+            itemCount: plant.imageUrls.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () => _showImagePreview(context, plant.imageUrls, index),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: OptimizedImageWidget(
+                      imageUrl: plant.imageUrls[index],
+                      fit: BoxFit.cover,
+                      borderRadius: BorderRadius.circular(12),
+                      cacheKey: index,
+                      enablePreloading:
+                          false, // Gallery view doesn't need preloading
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

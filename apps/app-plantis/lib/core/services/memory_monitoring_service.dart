@@ -68,8 +68,7 @@ class MemoryMonitoringService {
       try {
         usedMemoryMB = 50; // Placeholder estimate
         heapMemoryMB = 100; // Placeholder estimate
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     final imageCacheStats =
         <String, dynamic>{}; // OptimizedPlantImageWidget.getCacheStats();
@@ -129,7 +128,6 @@ class MemoryMonitoringService {
   /// Clear all caches to free memory
   void clearAllCaches() {
     try {
-
       debugPrint('🧹 All caches cleared');
     } catch (e) {
       debugPrint('❌ Error clearing caches: $e');
@@ -149,12 +147,11 @@ class MemoryMonitoringService {
     }
 
     final current = _snapshots.last;
-    final usedMemories =
-        _snapshots
-            .map((s) => s.usedMemoryMB)
-            .where((m) => m != null)
-            .cast<int>()
-            .toList();
+    final usedMemories = _snapshots
+        .map((s) => s.usedMemoryMB)
+        .where((m) => m != null)
+        .cast<int>()
+        .toList();
 
     double? averageMemory;
     int? peakMemory;

@@ -12,9 +12,9 @@ abstract class IImageService {
 /// Adapter para o ImageService - Cross-platform
 class ImageServiceAdapter implements IImageService {
   final ImageService _imageService;
-  
+
   ImageServiceAdapter(this._imageService);
-  
+
   @override
   Future<Either<Failure, String>> pickFromCamera() async {
     try {
@@ -27,38 +27,50 @@ class ImageServiceAdapter implements IImageService {
       return Left(CacheFailure('Erro ao capturar imagem: $e'));
     }
   }
-  
+
   @override
   Future<Either<Failure, String>> pickFromGallery() async {
     try {
       debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Iniciando');
       final result = await _imageService.pickImageFromGallery();
-      debugPrint('📷 [ImageServiceAdapter] pickFromGallery - pickImageFromGallery concluído: ${result.isSuccess ? "Sucesso" : "Erro"}');
-      
+      debugPrint(
+        '📷 [ImageServiceAdapter] pickFromGallery - pickImageFromGallery concluído: ${result.isSuccess ? "Sucesso" : "Erro"}',
+      );
+
       return result.fold(
         (error) {
-          debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Erro: ${error.message}');
+          debugPrint(
+            '📷 [ImageServiceAdapter] pickFromGallery - Erro: ${error.message}',
+          );
           return Left(CacheFailure(error.message));
         },
         (image) {
-          debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Imagem recebida: ${image.name}, ${image.sizeInKB.toStringAsFixed(2)} KB');
+          debugPrint(
+            '📷 [ImageServiceAdapter] pickFromGallery - Imagem recebida: ${image.name}, ${image.sizeInKB.toStringAsFixed(2)} KB',
+          );
           final base64 = image.toBase64DataUri();
-          debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Convertido para Base64, tamanho: ${base64.length} chars');
+          debugPrint(
+            '📷 [ImageServiceAdapter] pickFromGallery - Convertido para Base64, tamanho: ${base64.length} chars',
+          );
           return Right(base64);
         },
       );
     } catch (e, stackTrace) {
       debugPrint('📷 [ImageServiceAdapter] pickFromGallery - EXCEÇÃO: $e');
-      debugPrint('📷 [ImageServiceAdapter] pickFromGallery - StackTrace: $stackTrace');
+      debugPrint(
+        '📷 [ImageServiceAdapter] pickFromGallery - StackTrace: $stackTrace',
+      );
       return Left(CacheFailure('Erro ao selecionar imagem: $e'));
     }
   }
-  
+
   @override
-  Future<Either<Failure, List<String>>> uploadImages(List<String> base64Images) async {
+  Future<Either<Failure, List<String>>> uploadImages(
+    List<String> base64Images,
+  ) async {
     try {
       final results = <String>[];
-      
+
       for (final base64Data in base64Images) {
         final image = PickedImage.fromBase64(base64Data);
         final result = await _imageService.uploadImage(image);
@@ -67,13 +79,13 @@ class ImageServiceAdapter implements IImageService {
           (uploadResult) => results.add(uploadResult.downloadUrl),
         );
       }
-      
+
       return Right(results);
     } catch (e) {
       return Left(NetworkFailure('Erro ao enviar imagens: $e'));
     }
   }
-  
+
   @override
   Future<Either<Failure, void>> deleteImage(String imageUrl) async {
     try {
@@ -92,23 +104,25 @@ class ImageServiceAdapter implements IImageService {
 /// Resolve violação SRP - separando lógica de imagens do estado UI
 class ImageManagementService {
   final IImageService _imageService;
-  
+
   ImageManagementService({required IImageService imageService})
-      : _imageService = imageService;
-  
+    : _imageService = imageService;
+
   /// Factory usando dependency injection
   factory ImageManagementService.create({IImageService? imageService}) {
     final service = imageService ?? ImageServiceAdapter(ImageService());
     return ImageManagementService(imageService: service);
   }
-  
+
   /// Captura imagem da câmera
   Future<Either<Failure, String>> captureFromCamera() async {
     try {
       final result = await _imageService.pickFromCamera();
-      
+
       return result.fold(
-        (failure) => Left(_mapImageFailure(failure, 'Erro ao capturar imagem da câmera')),
+        (failure) => Left(
+          _mapImageFailure(failure, 'Erro ao capturar imagem da câmera'),
+        ),
         (base64Image) {
           if (_isValidBase64Image(base64Image)) {
             return Right(base64Image);
@@ -121,97 +135,105 @@ class ImageManagementService {
       return Left(CacheFailure('Erro inesperado ao capturar imagem: $e'));
     }
   }
-  
+
   /// Seleciona imagem da galeria
   Future<Either<Failure, String>> selectFromGallery() async {
     try {
       debugPrint('📷 [ImageManagementService] selectFromGallery - Iniciando');
       final result = await _imageService.pickFromGallery();
-      debugPrint('📷 [ImageManagementService] selectFromGallery - pickFromGallery concluído: ${result.isRight() ? "Sucesso" : "Falha"}');
-      
+      debugPrint(
+        '📷 [ImageManagementService] selectFromGallery - pickFromGallery concluído: ${result.isRight() ? "Sucesso" : "Falha"}',
+      );
+
       return result.fold(
         (failure) {
-          debugPrint('📷 [ImageManagementService] selectFromGallery - Falha: ${failure.message}');
-          return Left(_mapImageFailure(failure, 'Erro ao selecionar imagem da galeria'));
+          debugPrint(
+            '📷 [ImageManagementService] selectFromGallery - Falha: ${failure.message}',
+          );
+          return Left(
+            _mapImageFailure(failure, 'Erro ao selecionar imagem da galeria'),
+          );
         },
         (base64Image) {
-          debugPrint('📷 [ImageManagementService] selectFromGallery - Base64 recebido, tamanho: ${base64Image.length}');
+          debugPrint(
+            '📷 [ImageManagementService] selectFromGallery - Base64 recebido, tamanho: ${base64Image.length}',
+          );
           if (_isValidBase64Image(base64Image)) {
-            debugPrint('📷 [ImageManagementService] selectFromGallery - Imagem válida');
+            debugPrint(
+              '📷 [ImageManagementService] selectFromGallery - Imagem válida',
+            );
             return Right(base64Image);
           } else {
-            debugPrint('📷 [ImageManagementService] selectFromGallery - Imagem inválida');
+            debugPrint(
+              '📷 [ImageManagementService] selectFromGallery - Imagem inválida',
+            );
             return const Left(ValidationFailure('Imagem selecionada inválida'));
           }
         },
       );
     } catch (e, stackTrace) {
       debugPrint('📷 [ImageManagementService] selectFromGallery - EXCEÇÃO: $e');
-      debugPrint('📷 [ImageManagementService] selectFromGallery - StackTrace: $stackTrace');
+      debugPrint(
+        '📷 [ImageManagementService] selectFromGallery - StackTrace: $stackTrace',
+      );
       return Left(CacheFailure('Erro inesperado ao selecionar imagem: $e'));
     }
   }
-  
+
   /// Adiciona imagem à lista
   ImageListResult addImageToList(List<String> currentImages, String newImage) {
     const maxImages = 5; // Limite máximo de imagens por planta
-    
+
     if (currentImages.length >= maxImages) {
       return ImageListResult.error(
         'Máximo de $maxImages imagens permitidas por planta',
         currentImages,
       );
     }
-    
+
     if (currentImages.contains(newImage)) {
       return ImageListResult.error(
         'Esta imagem já foi adicionada',
         currentImages,
       );
     }
-    
+
     final updatedList = List<String>.from(currentImages)..add(newImage);
-    
+
     return ImageListResult.success(
       'Imagem adicionada com sucesso',
       updatedList,
     );
   }
-  
+
   /// Remove imagem da lista
   ImageListResult removeImageFromList(List<String> currentImages, int index) {
     if (index < 0 || index >= currentImages.length) {
-      return ImageListResult.error(
-        'Índice da imagem inválido',
-        currentImages,
-      );
+      return ImageListResult.error('Índice da imagem inválido', currentImages);
     }
-    
+
     final updatedList = List<String>.from(currentImages)..removeAt(index);
-    
-    return ImageListResult.success(
-      'Imagem removida com sucesso',
-      updatedList,
-    );
+
+    return ImageListResult.success('Imagem removida com sucesso', updatedList);
   }
-  
+
   /// Remove imagem específica da lista
-  ImageListResult removeSpecificImage(List<String> currentImages, String imageToRemove) {
+  ImageListResult removeSpecificImage(
+    List<String> currentImages,
+    String imageToRemove,
+  ) {
     if (!currentImages.contains(imageToRemove)) {
       return ImageListResult.error(
         'Imagem não encontrada na lista',
         currentImages,
       );
     }
-    
+
     final updatedList = List<String>.from(currentImages)..remove(imageToRemove);
-    
-    return ImageListResult.success(
-      'Imagem removida com sucesso',
-      updatedList,
-    );
+
+    return ImageListResult.success('Imagem removida com sucesso', updatedList);
   }
-  
+
   /// Upload de múltiplas imagens (Cross-platform)
   /// Funciona em Web, Mobile e Desktop
   Future<Either<Failure, List<String>>> uploadImages(
@@ -225,7 +247,9 @@ class ImageManagementService {
     try {
       for (final image in base64Images) {
         if (!_isValidBase64Image(image)) {
-          return const Left(ValidationFailure('Uma ou mais imagens são inválidas'));
+          return const Left(
+            ValidationFailure('Uma ou mais imagens são inválidas'),
+          );
         }
       }
 
@@ -258,7 +282,7 @@ class ImageManagementService {
   /// Valida se uma imagem base64 é válida
   bool _isValidBase64Image(String base64Image) {
     if (base64Image.trim().isEmpty) return false;
-    
+
     try {
       if (!base64Image.startsWith('data:image/')) {
         return false;
@@ -270,13 +294,13 @@ class ImageManagementService {
       if (base64Image.length > maxSizeBytes) {
         return false;
       }
-      
+
       return true;
     } catch (e) {
       return false;
     }
   }
-  
+
   /// Mapeia falhas de imagem para mensagens mais específicas
   Failure _mapImageFailure(Failure originalFailure, String context) {
     switch (originalFailure) {
@@ -292,11 +316,11 @@ class ImageManagementService {
         return CacheFailure('$context: ${originalFailure.message}');
     }
   }
-  
+
   /// Obtém informações sobre as imagens
   ImageListInfo getImageListInfo(List<String> images) {
     const maxImages = 5;
-    
+
     return ImageListInfo(
       currentCount: images.length,
       maxCount: maxImages,
@@ -306,16 +330,16 @@ class ImageManagementService {
       isFull: images.length >= maxImages,
     );
   }
-  
+
   /// Valida lista de imagens
   ImageListValidation validateImageList(List<String> images) {
     const maxImages = 5;
     final errors = <String>[];
-    
+
     if (images.length > maxImages) {
       errors.add('Máximo de $maxImages imagens permitidas');
     }
-    
+
     for (int i = 0; i < images.length; i++) {
       if (!_isValidBase64Image(images[i])) {
         errors.add('Imagem ${i + 1} é inválida');
@@ -325,11 +349,8 @@ class ImageManagementService {
     if (uniqueImages.length != images.length) {
       errors.add('Existem imagens duplicadas');
     }
-    
-    return ImageListValidation(
-      isValid: errors.isEmpty,
-      errors: errors,
-    );
+
+    return ImageListValidation(isValid: errors.isEmpty, errors: errors);
   }
 }
 
@@ -338,13 +359,13 @@ class ImageListResult {
   final bool isSuccess;
   final String message;
   final List<String> updatedImages;
-  
+
   const ImageListResult._({
     required this.isSuccess,
     required this.message,
     required this.updatedImages,
   });
-  
+
   factory ImageListResult.success(String message, List<String> images) {
     return ImageListResult._(
       isSuccess: true,
@@ -352,7 +373,7 @@ class ImageListResult {
       updatedImages: images,
     );
   }
-  
+
   factory ImageListResult.error(String message, List<String> currentImages) {
     return ImageListResult._(
       isSuccess: false,
@@ -360,7 +381,7 @@ class ImageListResult {
       updatedImages: currentImages,
     );
   }
-  
+
   bool get isError => !isSuccess;
 }
 
@@ -372,7 +393,7 @@ class ImageListInfo {
   final int remainingSlots;
   final bool isEmpty;
   final bool isFull;
-  
+
   const ImageListInfo({
     required this.currentCount,
     required this.maxCount,
@@ -387,11 +408,8 @@ class ImageListInfo {
 class ImageListValidation {
   final bool isValid;
   final List<String> errors;
-  
-  const ImageListValidation({
-    required this.isValid,
-    required this.errors,
-  });
-  
+
+  const ImageListValidation({required this.isValid, required this.errors});
+
   bool get hasErrors => errors.isNotEmpty;
 }

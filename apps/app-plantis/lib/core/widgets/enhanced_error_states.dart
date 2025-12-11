@@ -96,10 +96,9 @@ class EnhancedErrorStates {
   }) {
     return adaptiveError(
       title: 'Erro no servidor',
-      message:
-          errorCode != null
-              ? 'Ocorreu um problema no servidor (Código: $errorCode). Tente novamente em alguns instantes.'
-              : 'Ocorreu um problema no servidor. Tente novamente em alguns instantes.',
+      message: errorCode != null
+          ? 'Ocorreu um problema no servidor (Código: $errorCode). Tente novamente em alguns instantes.'
+          : 'Ocorreu um problema no servidor. Tente novamente em alguns instantes.',
       icon: Icons.cloud_off,
       onRetry: onRetry,
       severity: ErrorSeverity.critical,

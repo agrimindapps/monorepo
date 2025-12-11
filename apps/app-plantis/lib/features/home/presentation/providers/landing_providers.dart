@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
@@ -20,9 +19,7 @@ part 'landing_providers.g.dart';
 
 /// Provider for LandingContentDataSource
 @riverpod
-LandingContentDataSource landingContentDataSource(
-  Ref ref,
-) {
+LandingContentDataSource landingContentDataSource(Ref ref) {
   return LandingContentDataSource();
 }
 
@@ -41,9 +38,7 @@ LandingAuthRepository landingAuthRepository(Ref ref) {
 
 /// Provider for LandingContentRepository
 @riverpod
-LandingContentRepository landingContentRepository(
-  Ref ref,
-) {
+LandingContentRepository landingContentRepository(Ref ref) {
   final dataSource = ref.watch(landingContentDataSourceProvider);
   return LandingContentRepositoryImpl(dataSource: dataSource);
 }
@@ -61,9 +56,7 @@ CheckAuthStatusUseCase checkAuthStatusUseCase(Ref ref) {
 
 /// Provider for GetLandingContentUseCase
 @riverpod
-GetLandingContentUseCase getLandingContentUseCase(
-  Ref ref,
-) {
+GetLandingContentUseCase getLandingContentUseCase(Ref ref) {
   final repository = ref.watch(landingContentRepositoryProvider);
   return GetLandingContentUseCase(repository);
 }
@@ -90,9 +83,7 @@ Future<LandingAuthStatus> landingAuthStatus(Ref ref) async {
 ///
 /// Watches for changes in authentication status
 @riverpod
-Stream<LandingAuthStatus> landingAuthStatusStream(
-  Ref ref,
-) {
+Stream<LandingAuthStatus> landingAuthStatusStream(Ref ref) {
   final useCase = ref.watch(checkAuthStatusUseCaseProvider);
   return useCase.watch();
 }

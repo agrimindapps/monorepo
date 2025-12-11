@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/task.dart' as task_entity;

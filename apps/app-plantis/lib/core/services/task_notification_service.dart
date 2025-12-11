@@ -85,7 +85,8 @@ class TaskNotificationService {
         return false;
       }
 
-      final hasPermission = await _permissionManager.requestNotificationPermissions();
+      final hasPermission = await _permissionManager
+          .requestNotificationPermissions();
       if (!hasPermission) {
         debugPrint('⚠️ Notification permissions not granted');
       }
@@ -185,10 +186,9 @@ class TaskNotificationService {
       debugPrint('🔄 Rescheduling notifications for ${allTasks.length} tasks');
       await cancelAllTaskNotifications();
 
-      final List<task_entity.Task> pendingTasks =
-          allTasks
-              .where((task) => task.status == task_entity.TaskStatus.pending)
-              .toList();
+      final List<task_entity.Task> pendingTasks = allTasks
+          .where((task) => task.status == task_entity.TaskStatus.pending)
+          .toList();
 
       final List<Future<void>> schedulingFutures = [];
 
@@ -257,8 +257,8 @@ class TaskNotificationService {
   Future<int> getScheduledNotificationsCount() async {
     try {
       await _ensureInitialized();
-      final pendingNotifications =
-          await _notificationService.getPendingNotifications();
+      final pendingNotifications = await _notificationService
+          .getPendingNotifications();
       return (pendingNotifications as List).length;
     } catch (e) {
       debugPrint('❌ Error getting scheduled notifications count: $e');

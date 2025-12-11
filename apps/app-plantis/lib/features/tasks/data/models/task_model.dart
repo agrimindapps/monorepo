@@ -55,14 +55,12 @@ class TaskModel extends Task {
   factory TaskModel.fromJson(Map<String, dynamic> json) {
     return TaskModel(
       id: json['id'] as String,
-      createdAt:
-          json['created_at'] != null
-              ? DateTime.parse(json['created_at'] as String)
-              : DateTime.now(),
-      updatedAt:
-          json['updated_at'] != null
-              ? DateTime.parse(json['updated_at'] as String)
-              : DateTime.now(),
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : DateTime.now(),
       title: json['title'] as String,
       description: json['description'] as String?,
       plantId: json['plant_id'] as String,
@@ -79,21 +77,18 @@ class TaskModel extends Task {
         orElse: () => TaskPriority.medium,
       ),
       dueDate: DateTime.parse(json['due_date'] as String),
-      completedAt:
-          json['completed_at'] != null
-              ? DateTime.parse(json['completed_at'] as String)
-              : null,
+      completedAt: json['completed_at'] != null
+          ? DateTime.parse(json['completed_at'] as String)
+          : null,
       completionNotes: json['completion_notes'] as String?,
       isRecurring: json['is_recurring'] as bool? ?? false,
       recurringIntervalDays: json['recurring_interval_days'] as int?,
-      nextDueDate:
-          json['next_due_date'] != null
-              ? DateTime.parse(json['next_due_date'] as String)
-              : null,
-      lastSyncAt:
-          json['last_sync_at'] != null
-              ? DateTime.parse(json['last_sync_at'] as String)
-              : null,
+      nextDueDate: json['next_due_date'] != null
+          ? DateTime.parse(json['next_due_date'] as String)
+          : null,
+      lastSyncAt: json['last_sync_at'] != null
+          ? DateTime.parse(json['last_sync_at'] as String)
+          : null,
       isDirty: json['is_dirty'] as bool? ?? false,
       isDeleted: json['is_deleted'] as bool? ?? false,
       version: json['version'] as int? ?? 1,
@@ -131,17 +126,15 @@ class TaskModel extends Task {
         orElse: () => TaskPriority.medium,
       ),
       dueDate: DateTime.parse(map['due_date'] as String),
-      completedAt:
-          map['completed_at'] != null
-              ? DateTime.parse(map['completed_at'] as String)
-              : null,
+      completedAt: map['completed_at'] != null
+          ? DateTime.parse(map['completed_at'] as String)
+          : null,
       completionNotes: map['completion_notes'] as String?,
       isRecurring: map['is_recurring'] as bool? ?? false,
       recurringIntervalDays: map['recurring_interval_days'] as int?,
-      nextDueDate:
-          map['next_due_date'] != null
-              ? DateTime.parse(map['next_due_date'] as String)
-              : null,
+      nextDueDate: map['next_due_date'] != null
+          ? DateTime.parse(map['next_due_date'] as String)
+          : null,
     );
   }
 

@@ -36,10 +36,7 @@ class LandingComingSoonBanner extends StatelessWidget {
                 size: style.iconSize,
               ),
               SizedBox(width: style.spacing),
-              Text(
-                label,
-                style: style.labelStyle,
-              ),
+              Text(label, style: style.labelStyle),
             ],
           ),
           if (message != null) ...[
@@ -83,12 +80,7 @@ class ComingSoonBannerStyle {
     this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
     this.decoration = const BoxDecoration(
       color: Color(0xFFFFF3E0),
-      border: Border(
-        bottom: BorderSide(
-          color: Color(0xFFFF9800),
-          width: 3,
-        ),
-      ),
+      border: Border(bottom: BorderSide(color: Color(0xFFFF9800), width: 3)),
     ),
     this.iconColor = const Color(0xFFFF6F00),
     this.iconSize = 24,

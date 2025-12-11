@@ -68,8 +68,7 @@ class LandingHeroSection extends StatelessWidget {
             onPressed: comingSoon ? null : onCtaPressed,
             style: ElevatedButton.styleFrom(
               backgroundColor: comingSoon ? Colors.grey[400] : Colors.white,
-              foregroundColor:
-                  comingSoon ? Colors.grey : PlantisColors.primary,
+              foregroundColor: comingSoon ? Colors.grey : PlantisColors.primary,
               padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),

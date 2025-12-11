@@ -52,7 +52,7 @@ void main() {
 
       // First set an error
       await notifier.setDarkTheme();
-      
+
       // Then set a new theme
       await notifier.setLightTheme();
       final state2 = container.read(themeNotifierProvider);

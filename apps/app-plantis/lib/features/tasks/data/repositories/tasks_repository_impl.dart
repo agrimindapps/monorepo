@@ -37,8 +37,9 @@ class TasksRepositoryImpl implements TasksRepository {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user =
-            await authService.currentUser.timeout(timeoutDuration).first;
+        final user = await authService.currentUser
+            .timeout(timeoutDuration)
+            .first;
 
         if (user != null && user.id.isNotEmpty) {
           return user.id;
@@ -86,19 +87,17 @@ class TasksRepositoryImpl implements TasksRepository {
             <
               String
             >{}, // If we can't get plants, return empty set (no filtering)
-        (plants) =>
-            plants
-                .where((plant) => !plant.isDeleted)
-                .map((plant) => plant.id)
-                .toSet(),
+        (plants) => plants
+            .where((plant) => !plant.isDeleted)
+            .map((plant) => plant.id)
+            .toSet(),
       );
 
       // Filter tasks to only include those from active (non-deleted) plants
       if (activePlantIds.isNotEmpty) {
-        tasksToReturn =
-            tasksToReturn
-                .where((task) => activePlantIds.contains(task.plantId))
-                .toList();
+        tasksToReturn = tasksToReturn
+            .where((task) => activePlantIds.contains(task.plantId))
+            .toList();
       }
 
       if (tasksToReturn.isNotEmpty) {
@@ -112,12 +111,11 @@ class TasksRepositoryImpl implements TasksRepository {
         try {
           final remoteTasks = await remoteDataSource.getTasks(userId);
           // Also filter remote tasks
-          final filteredRemoteTasks =
-              activePlantIds.isNotEmpty
-                  ? remoteTasks
-                      .where((task) => activePlantIds.contains(task.plantId))
-                      .toList()
-                  : remoteTasks;
+          final filteredRemoteTasks = activePlantIds.isNotEmpty
+              ? remoteTasks
+                    .where((task) => activePlantIds.contains(task.plantId))
+                    .toList()
+              : remoteTasks;
           await localDataSource.cacheTasks(filteredRemoteTasks);
           return Right(filteredRemoteTasks.cast<Task>());
         } catch (e) {
@@ -137,18 +135,16 @@ class TasksRepositoryImpl implements TasksRepository {
       final plantsResult = await plantsRepository.getPlants();
       final activePlantIds = plantsResult.fold(
         (failure) => <String>{},
-        (plants) =>
-            plants
-                .where((plant) => !plant.isDeleted)
-                .map((plant) => plant.id)
-                .toSet(),
+        (plants) => plants
+            .where((plant) => !plant.isDeleted)
+            .map((plant) => plant.id)
+            .toSet(),
       );
-      final filteredTasks =
-          activePlantIds.isNotEmpty
-              ? localTasks
-                  .where((task) => activePlantIds.contains(task.plantId))
-                  .toList()
-              : localTasks;
+      final filteredTasks = activePlantIds.isNotEmpty
+          ? localTasks
+                .where((task) => activePlantIds.contains(task.plantId))
+                .toList()
+          : localTasks;
       return Right(filteredTasks.cast<Task>());
     }
   }
@@ -601,7 +597,7 @@ class TasksRepositoryImpl implements TasksRepository {
 
         // Atualiza a tarefa atual como concluída
         final updateResult = await updateTask(completedTask);
-        
+
         // Se é uma tarefa recorrente, cria a próxima com a data informada
         if (task.isRecurring && nextDueDate != null) {
           await _createNextRecurringTaskWithDate(task, nextDueDate);
@@ -615,7 +611,10 @@ class TasksRepositoryImpl implements TasksRepository {
   }
 
   /// Cria a próxima tarefa recorrente com a data informada pelo usuário
-  Future<void> _createNextRecurringTaskWithDate(Task completedTask, DateTime nextDueDate) async {
+  Future<void> _createNextRecurringTaskWithDate(
+    Task completedTask,
+    DateTime nextDueDate,
+  ) async {
     try {
       final newTask = Task(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -631,7 +630,9 @@ class TasksRepositoryImpl implements TasksRepository {
         isRecurring: true,
         recurringIntervalDays: completedTask.recurringIntervalDays,
         nextDueDate: completedTask.recurringIntervalDays != null
-            ? nextDueDate.add(Duration(days: completedTask.recurringIntervalDays!))
+            ? nextDueDate.add(
+                Duration(days: completedTask.recurringIntervalDays!),
+              )
             : null,
       );
 
@@ -712,11 +713,16 @@ class TasksRepositoryImpl implements TasksRepository {
     final result = await getTasks();
     return result.fold(
       (failure) => Left(failure),
-      (tasks) => Right(tasks
-          .where((t) =>
-              t.title.toLowerCase().contains(query.toLowerCase()) ||
-              (t.description?.toLowerCase().contains(query.toLowerCase()) ?? false))
-          .toList()),
+      (tasks) => Right(
+        tasks
+            .where(
+              (t) =>
+                  t.title.toLowerCase().contains(query.toLowerCase()) ||
+                  (t.description?.toLowerCase().contains(query.toLowerCase()) ??
+                      false),
+            )
+            .toList(),
+      ),
     );
   }
 
@@ -734,36 +740,34 @@ class TasksRepositoryImpl implements TasksRepository {
   @override
   Future<Either<Failure, Map<String, dynamic>>> getStatistics() async {
     final result = await getTasks();
-    return result.fold(
-      (failure) => Left(failure),
-      (tasks) {
-        final totalCount = tasks.length;
-        final completedCount =
-            tasks.where((t) => t.status == TaskStatus.completed).length;
-        final pendingCount =
-            tasks.where((t) => t.status == TaskStatus.pending).length;
-        final overdueCount = tasks
-            .where((t) =>
+    return result.fold((failure) => Left(failure), (tasks) {
+      final totalCount = tasks.length;
+      final completedCount = tasks
+          .where((t) => t.status == TaskStatus.completed)
+          .length;
+      final pendingCount = tasks
+          .where((t) => t.status == TaskStatus.pending)
+          .length;
+      final overdueCount = tasks
+          .where(
+            (t) =>
                 t.dueDate.isBefore(DateTime.now()) &&
-                t.status != TaskStatus.completed)
-            .length;
+                t.status != TaskStatus.completed,
+          )
+          .length;
 
-        return Right({
-          'total': totalCount,
-          'completed': completedCount,
-          'pending': pendingCount,
-          'overdue': overdueCount,
-          'completionRate': totalCount > 0 ? completedCount / totalCount * 100 : 0,
-        });
-      },
-    );
+      return Right({
+        'total': totalCount,
+        'completed': completedCount,
+        'pending': pendingCount,
+        'overdue': overdueCount,
+        'completionRate': totalCount > 0
+            ? completedCount / totalCount * 100
+            : 0,
+      });
+    });
   }
 }
 
 /// ENHANCED FEATURE: Sync strategies based on connection type and quality
-enum SyncStrategy {
-  aggressive,
-  conservative,
-  minimal,
-  disabled,
-}
+enum SyncStrategy { aggressive, conservative, minimal, disabled }

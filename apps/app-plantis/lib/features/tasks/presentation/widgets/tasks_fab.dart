@@ -39,11 +39,16 @@ class TasksFab extends ConsumerWidget {
     );
 
     try {
-      final success = await ref.read(tasksNotifierProvider.notifier).addTask(task);
+      final success = await ref
+          .read(tasksNotifierProvider.notifier)
+          .addTask(task);
       if (!context.mounted) return;
 
       if (success) {
-        _showSuccessSnackbar(context, 'Tarefa "${result.title}" criada com sucesso!');
+        _showSuccessSnackbar(
+          context,
+          'Tarefa "${result.title}" criada com sucesso!',
+        );
       } else {
         _showErrorSnackbar(context, 'Erro ao criar tarefa. Tente novamente.');
       }

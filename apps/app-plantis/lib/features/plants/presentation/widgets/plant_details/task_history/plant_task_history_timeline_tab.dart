@@ -77,24 +77,20 @@ class _PlantTaskHistoryTimelineTabState
       }
 
       if (startDate != null) {
-        filtered =
-            filtered.where((task) {
-              return task.completedDate != null &&
-                  task.completedDate!.isAfter(startDate!);
-            }).toList();
+        filtered = filtered.where((task) {
+          return task.completedDate != null &&
+              task.completedDate!.isAfter(startDate!);
+        }).toList();
       }
     }
     if (_searchQuery.isNotEmpty) {
-      filtered =
-          filtered.where((task) {
-            return task.title.toLowerCase().contains(
+      filtered = filtered.where((task) {
+        return task.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            (task.description?.toLowerCase().contains(
                   _searchQuery.toLowerCase(),
-                ) ||
-                (task.description?.toLowerCase().contains(
-                      _searchQuery.toLowerCase(),
-                    ) ??
-                    false);
-          }).toList();
+                ) ??
+                false);
+      }).toList();
     }
     filtered.sort(
       (a, b) => (b.completedDate ?? DateTime(1970)).compareTo(
@@ -169,14 +165,9 @@ class _PlantTaskHistoryTimelineTabState
         children: [
           _buildFiltersSection(context),
           Expanded(
-            child:
-                filteredTasks.isEmpty
-                    ? _buildEmptyState(context)
-                    : _buildTimelineContent(
-                      context,
-                      groupedTasks,
-                      hasMoreTasks,
-                    ),
+            child: filteredTasks.isEmpty
+                ? _buildEmptyState(context)
+                : _buildTimelineContent(context, groupedTasks, hasMoreTasks),
           ),
         ],
       ),
@@ -203,19 +194,18 @@ class _PlantTaskHistoryTimelineTabState
             decoration: InputDecoration(
               hintText: 'Buscar por título ou descrição...',
               prefixIcon: const Icon(Icons.search),
-              suffixIcon:
-                  _searchQuery.isNotEmpty
-                      ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                            _currentPage = 0;
-                          });
-                        },
-                      )
-                      : null,
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                          _currentPage = 0;
+                        });
+                      },
+                    )
+                  : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -287,15 +277,13 @@ class _PlantTaskHistoryTimelineTabState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              _selectedPeriod != 'all'
-                  ? PlantisColors.primary.withValues(alpha: 0.1)
-                  : theme.colorScheme.surface,
+          color: _selectedPeriod != 'all'
+              ? PlantisColors.primary.withValues(alpha: 0.1)
+              : theme.colorScheme.surface,
           border: Border.all(
-            color:
-                _selectedPeriod != 'all'
-                    ? PlantisColors.primary.withValues(alpha: 0.3)
-                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+            color: _selectedPeriod != 'all'
+                ? PlantisColors.primary.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -305,19 +293,17 @@ class _PlantTaskHistoryTimelineTabState
             Icon(
               Icons.calendar_today,
               size: 16,
-              color:
-                  _selectedPeriod != 'all'
-                      ? PlantisColors.primary
-                      : theme.colorScheme.onSurfaceVariant,
+              color: _selectedPeriod != 'all'
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 6),
             Text(
               _getPeriodLabel(_selectedPeriod),
               style: theme.textTheme.bodySmall?.copyWith(
-                color:
-                    _selectedPeriod != 'all'
-                        ? PlantisColors.primary
-                        : theme.colorScheme.onSurfaceVariant,
+                color: _selectedPeriod != 'all'
+                    ? PlantisColors.primary
+                    : theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -325,25 +311,20 @@ class _PlantTaskHistoryTimelineTabState
             Icon(
               Icons.arrow_drop_down,
               size: 16,
-              color:
-                  _selectedPeriod != 'all'
-                      ? PlantisColors.primary
-                      : theme.colorScheme.onSurfaceVariant,
+              color: _selectedPeriod != 'all'
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),
       ),
-      itemBuilder:
-          (context) => [
-            const PopupMenuItem(value: 'all', child: Text('Todos os períodos')),
-            const PopupMenuItem(value: 'week', child: Text('Última semana')),
-            const PopupMenuItem(value: 'month', child: Text('Último mês')),
-            const PopupMenuItem(
-              value: 'quarter',
-              child: Text('Últimos 3 meses'),
-            ),
-            const PopupMenuItem(value: 'year', child: Text('Último ano')),
-          ],
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: 'all', child: Text('Todos os períodos')),
+        const PopupMenuItem(value: 'week', child: Text('Última semana')),
+        const PopupMenuItem(value: 'month', child: Text('Último mês')),
+        const PopupMenuItem(value: 'quarter', child: Text('Últimos 3 meses')),
+        const PopupMenuItem(value: 'year', child: Text('Último ano')),
+      ],
     );
   }
 
@@ -361,15 +342,13 @@ class _PlantTaskHistoryTimelineTabState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color:
-              _selectedType != null
-                  ? PlantisColors.primary.withValues(alpha: 0.1)
-                  : theme.colorScheme.surface,
+          color: _selectedType != null
+              ? PlantisColors.primary.withValues(alpha: 0.1)
+              : theme.colorScheme.surface,
           border: Border.all(
-            color:
-                _selectedType != null
-                    ? PlantisColors.primary.withValues(alpha: 0.3)
-                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+            color: _selectedType != null
+                ? PlantisColors.primary.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -381,19 +360,17 @@ class _PlantTaskHistoryTimelineTabState
                   ? _getTaskTypeIcon(_selectedType!)
                   : Icons.category,
               size: 16,
-              color:
-                  _selectedType != null
-                      ? PlantisColors.primary
-                      : theme.colorScheme.onSurfaceVariant,
+              color: _selectedType != null
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 6),
             Text(
               _selectedType?.displayName ?? 'Todos os tipos',
               style: theme.textTheme.bodySmall?.copyWith(
-                color:
-                    _selectedType != null
-                        ? PlantisColors.primary
-                        : theme.colorScheme.onSurfaceVariant,
+                color: _selectedType != null
+                    ? PlantisColors.primary
+                    : theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -401,30 +378,28 @@ class _PlantTaskHistoryTimelineTabState
             Icon(
               Icons.arrow_drop_down,
               size: 16,
-              color:
-                  _selectedType != null
-                      ? PlantisColors.primary
-                      : theme.colorScheme.onSurfaceVariant,
+              color: _selectedType != null
+                  ? PlantisColors.primary
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),
       ),
-      itemBuilder:
-          (context) => [
-            const PopupMenuItem(value: null, child: Text('Todos os tipos')),
-            ...TaskType.values.map(
-              (type) => PopupMenuItem(
-                value: type,
-                child: Row(
-                  children: [
-                    Icon(_getTaskTypeIcon(type), size: 16),
-                    const SizedBox(width: 8),
-                    Text(type.displayName),
-                  ],
-                ),
-              ),
+      itemBuilder: (context) => [
+        const PopupMenuItem(value: null, child: Text('Todos os tipos')),
+        ...TaskType.values.map(
+          (type) => PopupMenuItem(
+            value: type,
+            child: Row(
+              children: [
+                Icon(_getTaskTypeIcon(type), size: 16),
+                const SizedBox(width: 8),
+                Text(type.displayName),
+              ],
             ),
-          ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -684,14 +659,13 @@ class _PlantTaskHistoryTimelineTabState
     return Center(
       child: OutlinedButton.icon(
         onPressed: _isLoadingMore ? null : _loadMoreTasks,
-        icon:
-            _isLoadingMore
-                ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-                : const Icon(Icons.expand_more),
+        icon: _isLoadingMore
+            ? const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.expand_more),
         label: Text(_isLoadingMore ? 'Carregando...' : 'Carregar mais'),
         style: OutlinedButton.styleFrom(
           foregroundColor: PlantisColors.primary,

@@ -63,6 +63,7 @@ class PremiumState {
   PremiumState clearError() {
     return copyWith(lastError: null);
   }
+
   bool get isPremium => status.isPremium;
   bool get isActive => status.isActive;
   bool get isTrialActive => status.isTrialActive;
@@ -97,25 +98,56 @@ class PremiumNotifier extends _$PremiumNotifier {
     try {
       if (kIsWeb) {
         developer.log(
-          '🌐 Premium Service: Skipping on web platform',
+          '🌐 Premium Service: Running on web platform with MockSubscriptionService',
           name: 'PremiumNotifier',
         );
 
-        return PremiumState.initial().copyWith(
+        // ✅ FIX: Na web, escuta o MockSubscriptionService para permitir teste de premium
+        _subscriptionStreamSubscription = _subscriptionRepository
+            .subscriptionStatus
+            .listen(
+              _handleSubscriptionUpdate,
+              onError: (Object error) {
+                developer.log(
+                  '⚠️ Subscription stream error: $error',
+                  name: 'PremiumNotifier',
+                  error: error,
+                );
+              },
+            );
+
+        final currentSubscription = await _loadCurrentSubscription();
+        final availableProducts = await _loadProducts();
+
+        PremiumStatus status = PremiumStatus.free();
+        if (currentSubscription != null) {
+          status = _createPremiumStatusFromEntity(currentSubscription);
+          developer.log(
+            '✅ Web Mock Subscription loaded: ${currentSubscription.productId}',
+            name: 'PremiumNotifier',
+          );
+        }
+
+        return PremiumState(
           isInitialized: true,
-          status: PremiumStatus.free(),
+          isLoading: false,
+          status: status,
+          availableProducts: availableProducts,
+          currentSubscription: currentSubscription,
         );
       }
-      _subscriptionStreamSubscription = _subscriptionRepository.subscriptionStatus.listen(
-        _handleSubscriptionUpdate,
-        onError: (Object error) {
-          developer.log(
-            '⚠️ Subscription stream error: $error',
-            name: 'PremiumNotifier',
-            error: error,
+      _subscriptionStreamSubscription = _subscriptionRepository
+          .subscriptionStatus
+          .listen(
+            _handleSubscriptionUpdate,
+            onError: (Object error) {
+              developer.log(
+                '⚠️ Subscription stream error: $error',
+                name: 'PremiumNotifier',
+                error: error,
+              );
+            },
           );
-        },
-      );
       final currentSubscription = await _loadCurrentSubscription();
       final availableProducts = await _loadProducts();
 
@@ -138,12 +170,9 @@ class PremiumNotifier extends _$PremiumNotifier {
         );
       }
 
-      await _analytics.logEvent(
-        ReceitaAgroAnalyticsEvent.appOpened.eventName,
-        {
-          'premium_status': status.isPremium ? 'premium' : 'free',
-        },
-      );
+      await _analytics.logEvent(ReceitaAgroAnalyticsEvent.appOpened.eventName, {
+        'premium_status': status.isPremium ? 'premium' : 'free',
+      });
 
       return PremiumState(
         isInitialized: true,
@@ -173,20 +202,23 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   /// Purchase a premium subscription
-  Future<Either<String, SubscriptionEntity>> purchaseProduct(String productId) async {
+  Future<Either<String, SubscriptionEntity>> purchaseProduct(
+    String productId,
+  ) async {
     final currentState = state.value;
     if (currentState == null || !currentState.isInitialized) {
       return const Left('Premium Service not initialized');
     }
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
-      await _analytics.logSubscriptionEvent(
-        'purchase_started',
-        productId,
-      );
+      await _analytics.logSubscriptionEvent('purchase_started', productId);
 
-      final result = await _subscriptionRepository.purchaseProduct(productId: productId);
+      final result = await _subscriptionRepository.purchaseProduct(
+        productId: productId,
+      );
 
       return result.fold(
         (failure) {
@@ -250,7 +282,9 @@ class PremiumNotifier extends _$PremiumNotifier {
     if (currentState == null || !currentState.isInitialized) {
       return const Left('Premium Service not initialized');
     }
-    state = AsyncValue.data(currentState.copyWith(isLoading: true).clearError());
+    state = AsyncValue.data(
+      currentState.copyWith(isLoading: true).clearError(),
+    );
 
     try {
       final result = await _subscriptionRepository.restorePurchases();
@@ -280,7 +314,9 @@ class PremiumNotifier extends _$PremiumNotifier {
             ReceitaAgroAnalyticsEvent.subscriptionViewed.eventName,
             {
               'action': 'restore',
-              'active_subscriptions': subscriptions.where((s) => s.isActive).length,
+              'active_subscriptions': subscriptions
+                  .where((s) => s.isActive)
+                  .length,
             },
           );
 
@@ -318,12 +354,16 @@ class PremiumNotifier extends _$PremiumNotifier {
     if (currentState == null) return false;
     switch (feature) {
       case PremiumFeature.advancedDiagnostics:
-        if (!_remoteConfig.isFeatureEnabled(ReceitaAgroFeatureFlag.enableAdvancedDiagnostics)) {
+        if (!_remoteConfig.isFeatureEnabled(
+          ReceitaAgroFeatureFlag.enableAdvancedDiagnostics,
+        )) {
           return false;
         }
         break;
       case PremiumFeature.offlineMode:
-        if (!_remoteConfig.isFeatureEnabled(ReceitaAgroFeatureFlag.enableOfflineMode)) {
+        if (!_remoteConfig.isFeatureEnabled(
+          ReceitaAgroFeatureFlag.enableOfflineMode,
+        )) {
           return false;
         }
         break;
@@ -339,7 +379,9 @@ class PremiumNotifier extends _$PremiumNotifier {
     final currentState = state.value;
     if (currentState == null) return 'Serviço não inicializado';
 
-    if (!_remoteConfig.isFeatureEnabled(ReceitaAgroFeatureFlag.enablePremiumFeatures)) {
+    if (!_remoteConfig.isFeatureEnabled(
+      ReceitaAgroFeatureFlag.enablePremiumFeatures,
+    )) {
       return 'Feature temporariamente indisponível';
     }
 
@@ -370,7 +412,9 @@ class PremiumNotifier extends _$PremiumNotifier {
   /// Get current subscription data (compatibility method)
   Map<String, dynamic>? getCurrentSubscription() {
     final currentState = state.value;
-    if (currentState == null || !currentState.status.isPremium || !currentState.status.isActive) {
+    if (currentState == null ||
+        !currentState.status.isPremium ||
+        !currentState.status.isActive) {
       return null;
     }
 
@@ -406,16 +450,13 @@ class PremiumNotifier extends _$PremiumNotifier {
   Future<SubscriptionEntity?> _loadCurrentSubscription() async {
     try {
       final result = await _subscriptionRepository.getCurrentSubscription();
-      return result.fold(
-        (failure) {
-          developer.log(
-            '⚠️ Failed to load subscription: ${failure.message}',
-            name: 'PremiumNotifier',
-          );
-          return null;
-        },
-        (subscription) => subscription,
-      );
+      return result.fold((failure) {
+        developer.log(
+          '⚠️ Failed to load subscription: ${failure.message}',
+          name: 'PremiumNotifier',
+        );
+        return null;
+      }, (subscription) => subscription);
     } catch (e) {
       developer.log(
         '⚠️ Failed to load current subscription: $e',
@@ -430,16 +471,13 @@ class PremiumNotifier extends _$PremiumNotifier {
   Future<List<ProductInfo>> _loadProducts() async {
     try {
       final result = await _subscriptionRepository.getReceitaAgroProducts();
-      return result.fold(
-        (failure) {
-          developer.log(
-            '⚠️ Failed to load products: ${failure.message}',
-            name: 'PremiumNotifier',
-          );
-          return [];
-        },
-        (products) => products,
-      );
+      return result.fold((failure) {
+        developer.log(
+          '⚠️ Failed to load products: ${failure.message}',
+          name: 'PremiumNotifier',
+        );
+        return [];
+      }, (products) => products);
     } catch (e) {
       developer.log(
         '⚠️ Failed to load products: $e',
@@ -475,13 +513,19 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   /// Create premium status from subscription entity
-  PremiumStatus _createPremiumStatusFromEntity(SubscriptionEntity subscription) {
+  PremiumStatus _createPremiumStatusFromEntity(
+    SubscriptionEntity subscription,
+  ) {
     if (subscription.isActive && subscription.isReceitaAgroSubscription) {
       return PremiumStatus.premium(
-        expirationDate: subscription.expirationDate ?? DateTime.now().add(const Duration(days: 30)),
+        expirationDate:
+            subscription.expirationDate ??
+            DateTime.now().add(const Duration(days: 30)),
         productId: subscription.productId,
         isTrialActive: subscription.isTrialActive,
-        maxDevices: _remoteConfig.getIntConfig(ReceitaAgroConfigKey.maxDevicesPerSubscription),
+        maxDevices: _remoteConfig.getIntConfig(
+          ReceitaAgroConfigKey.maxDevicesPerSubscription,
+        ),
       );
     } else {
       return PremiumStatus.free();
@@ -489,11 +533,14 @@ class PremiumNotifier extends _$PremiumNotifier {
   }
 
   /// Sync subscription with cloud functions
-  Future<void> _syncSubscriptionWithCloudFunctions(SubscriptionEntity subscription) async {
+  Future<void> _syncSubscriptionWithCloudFunctions(
+    SubscriptionEntity subscription,
+  ) async {
     try {
       if (subscription.isActive) {
         await _cloudFunctions.syncRevenueCatPurchase(
-          receiptData: subscription.originalPurchaseDate?.toIso8601String() ?? '',
+          receiptData:
+              subscription.originalPurchaseDate?.toIso8601String() ?? '',
           productId: subscription.productId,
           purchaseToken: subscription.id,
         );
@@ -541,7 +588,9 @@ class PremiumNotifier extends _$PremiumNotifier {
               // Update state with restored subscription
               final currentState = state.value;
               if (currentState != null) {
-                final newStatus = _createPremiumStatusFromEntity(activeSubscription);
+                final newStatus = _createPremiumStatusFromEntity(
+                  activeSubscription,
+                );
                 await _syncSubscriptionWithCloudFunctions(activeSubscription);
 
                 state = AsyncValue.data(

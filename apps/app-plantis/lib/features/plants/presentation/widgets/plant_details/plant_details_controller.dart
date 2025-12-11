@@ -111,7 +111,9 @@ class PlantDetailsController {
   /// controller.editPlant(selectedPlant);
   /// ```
   void editPlant(Plant plant) {
-    debugPrint('🔧 PlantDetailsController.editPlant - plantId: ${plant.id}, plantName: ${plant.name}');
+    debugPrint(
+      '🔧 PlantDetailsController.editPlant - plantId: ${plant.id}, plantName: ${plant.name}',
+    );
     onNavigateToEdit?.call(plant.id);
   }
 
@@ -222,8 +224,8 @@ class PlantDetailsController {
   /// ```
   Future<void> deletePlant(String plantId) async {
     try {
-      final success =
-          await provider.deletePlant(); // Deleta a planta atual no provider
+      final success = await provider
+          .deletePlant(); // Deleta a planta atual no provider
 
       if (success) {
         onPlantDeleted?.call(plantId);

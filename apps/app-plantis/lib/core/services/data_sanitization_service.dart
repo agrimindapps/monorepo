@@ -89,12 +89,11 @@ class DataSanitizationService {
       return 'UA';
     }
 
-    final names =
-        displayName
-            .trim()
-            .split(RegExp(r'\s+'))
-            .where((name) => name.isNotEmpty)
-            .toList();
+    final names = displayName
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((name) => name.isNotEmpty)
+        .toList();
 
     if (names.isEmpty) return 'UA';
 
@@ -103,8 +102,9 @@ class DataSanitizationService {
     }
 
     final firstInitial = names[0].isNotEmpty ? names[0][0] : '';
-    final lastInitial =
-        names[names.length - 1].isNotEmpty ? names[names.length - 1][0] : '';
+    final lastInitial = names[names.length - 1].isNotEmpty
+        ? names[names.length - 1][0]
+        : '';
 
     if (firstInitial.isEmpty && lastInitial.isEmpty) return 'UA';
     if (firstInitial.isEmpty) return lastInitial.toUpperCase();

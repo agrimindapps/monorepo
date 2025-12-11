@@ -166,36 +166,28 @@ extension TasksStateX on TasksState {
   int get totalTasks => allTasks.length;
 
   /// Number of completed tasks
-  int get completedTasks =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where((t) => t.status == task_entity.TaskStatus.completed)
-          .length;
+  int get completedTasks => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.status == task_entity.TaskStatus.completed)
+      .length;
 
   /// Number of pending tasks
-  int get pendingTasks =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where((t) => t.status == task_entity.TaskStatus.pending)
-          .length;
+  int get pendingTasks => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.status == task_entity.TaskStatus.pending)
+      .length;
 
   /// Number of overdue tasks
-  int get overdueTasks =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where(
-            (t) => t.isOverdue && t.status == task_entity.TaskStatus.pending,
-          )
-          .length;
+  int get overdueTasks => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.isOverdue && t.status == task_entity.TaskStatus.pending)
+      .length;
 
   /// Number of tasks due today
-  int get todayTasks =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where(
-            (t) => t.isDueToday && t.status == task_entity.TaskStatus.pending,
-          )
-          .length;
+  int get todayTasks => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.isDueToday && t.status == task_entity.TaskStatus.pending)
+      .length;
 
   /// Number of upcoming tasks (within next 15 days)
   int get upcomingTasksCount {
@@ -240,22 +232,16 @@ extension TasksStateX on TasksState {
   }
 
   /// Get overdue tasks list
-  List<task_entity.Task> get overdueTasksList =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where(
-            (t) => t.isOverdue && t.status == task_entity.TaskStatus.pending,
-          )
-          .toList();
+  List<task_entity.Task> get overdueTasksList => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.isOverdue && t.status == task_entity.TaskStatus.pending)
+      .toList();
 
   /// Get today's tasks
-  List<task_entity.Task> get todayTasksList =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where(
-            (t) => t.isDueToday && t.status == task_entity.TaskStatus.pending,
-          )
-          .toList();
+  List<task_entity.Task> get todayTasksList => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.isDueToday && t.status == task_entity.TaskStatus.pending)
+      .toList();
 
   /// Get upcoming tasks
   List<task_entity.Task> get upcomingTasks {
@@ -275,36 +261,32 @@ extension TasksStateX on TasksState {
   }
 
   /// Get completed tasks
-  List<task_entity.Task> get completedTasksList =>
-      allTasks
-          .whereType<task_entity.Task>()
-          .where((t) => t.status == task_entity.TaskStatus.completed)
-          .toList();
+  List<task_entity.Task> get completedTasksList => allTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.status == task_entity.TaskStatus.completed)
+      .toList();
 
   /// Get high priority tasks (high and urgent)
-  List<task_entity.Task> get highPriorityTasks =>
-      filteredTasks
-          .whereType<task_entity.Task>()
-          .where(
-            (t) =>
-                t.priority == task_entity.TaskPriority.high ||
-                t.priority == task_entity.TaskPriority.urgent,
-          )
-          .toList();
+  List<task_entity.Task> get highPriorityTasks => filteredTasks
+      .whereType<task_entity.Task>()
+      .where(
+        (t) =>
+            t.priority == task_entity.TaskPriority.high ||
+            t.priority == task_entity.TaskPriority.urgent,
+      )
+      .toList();
 
   /// Get medium priority tasks
-  List<task_entity.Task> get mediumPriorityTasks =>
-      filteredTasks
-          .whereType<task_entity.Task>()
-          .where((t) => t.priority == task_entity.TaskPriority.medium)
-          .toList();
+  List<task_entity.Task> get mediumPriorityTasks => filteredTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.priority == task_entity.TaskPriority.medium)
+      .toList();
 
   /// Get low priority tasks
-  List<task_entity.Task> get lowPriorityTasks =>
-      filteredTasks
-          .whereType<task_entity.Task>()
-          .where((t) => t.priority == task_entity.TaskPriority.low)
-          .toList();
+  List<task_entity.Task> get lowPriorityTasks => filteredTasks
+      .whereType<task_entity.Task>()
+      .where((t) => t.priority == task_entity.TaskPriority.low)
+      .toList();
 
   // ==================== Custom CopyWith Extensions ====================
 

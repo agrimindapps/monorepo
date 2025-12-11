@@ -132,7 +132,10 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
           labelColor: PlantisColors.primary,
           unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
           indicatorColor: PlantisColors.primary,
-          tabs: const [Tab(text: 'Exportar Dados'), Tab(text: 'Histórico')],
+          tabs: const [
+            Tab(text: 'Exportar Dados'),
+            Tab(text: 'Histórico'),
+          ],
         ),
       ),
       body: ResponsiveLayout(
@@ -255,9 +258,9 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                 child: ElevatedButton.icon(
                   onPressed:
                       _selectedDataTypes.isEmpty ||
-                              (availabilityResult?.isAvailable != true)
-                          ? null
-                          : () => _requestExport(ref),
+                          (availabilityResult?.isAvailable != true)
+                      ? null
+                      : () => _requestExport(ref),
                   icon: const Icon(Icons.download),
                   label: const Text('Exportar Dados'),
                   style: ElevatedButton.styleFrom(
@@ -436,19 +439,18 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
                       }
                     }
                   },
-                  itemBuilder:
-                      (context) => [
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Deletar'),
-                            ],
-                          ),
-                        ),
-                      ],
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text('Deletar'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -549,24 +551,21 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   Future<bool> _showDeleteConfirmation() async {
     final result = await showDialog<bool>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Deletar exportação'),
-            content: const Text(
-              'Tem certeza que deseja deletar esta exportação?',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text('Cancelar'),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                child: const Text('Deletar'),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text('Deletar exportação'),
+        content: const Text('Tem certeza que deseja deletar esta exportação?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
           ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Deletar'),
+          ),
+        ],
+      ),
     );
     return result ?? false;
   }
@@ -574,62 +573,58 @@ class _DataExportPageState extends ConsumerState<DataExportPage>
   void _showHelpDialog() {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.help_outline, color: PlantisColors.primary),
-                SizedBox(width: 8),
-                Text('Ajuda - Exportação de Dados'),
-              ],
-            ),
-            content: const SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Sobre a LGPD:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'A Lei Geral de Proteção de Dados garante o seu direito de exportar seus dados pessoais em formato estruturado.',
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Tipos de dados incluídos:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text('• Plantas cadastradas por você'),
-                  Text('• Tarefas e lembretes criados'),
-                  Text('• Espaços organizacionais'),
-                  Text('• Configurações personalizadas'),
-                  Text('• Metadados de fotos (não as imagens)'),
-                  SizedBox(height: 16),
-                  Text(
-                    'Segurança:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text('• Limite de uma exportação por hora'),
-                  Text('• Arquivos válidos por 30 dias'),
-                  Text('• Dados criptografados durante o processamento'),
-                ],
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.help_outline, color: PlantisColors.primary),
+            SizedBox(width: 8),
+            Text('Ajuda - Exportação de Dados'),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Sobre a LGPD:',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: PlantisColors.primary,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Entendi'),
+              SizedBox(height: 8),
+              Text(
+                'A Lei Geral de Proteção de Dados garante o seu direito de exportar seus dados pessoais em formato estruturado.',
               ),
+              SizedBox(height: 16),
+              Text(
+                'Tipos de dados incluídos:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text('• Plantas cadastradas por você'),
+              Text('• Tarefas e lembretes criados'),
+              Text('• Espaços organizacionais'),
+              Text('• Configurações personalizadas'),
+              Text('• Metadados de fotos (não as imagens)'),
+              SizedBox(height: 16),
+              Text('Segurança:', style: TextStyle(fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Text('• Limite de uma exportação por hora'),
+              Text('• Arquivos válidos por 30 dias'),
+              Text('• Dados criptografados durante o processamento'),
             ],
           ),
+        ),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PlantisColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Entendi'),
+          ),
+        ],
+      ),
     );
   }
 }

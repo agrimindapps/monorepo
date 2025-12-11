@@ -59,10 +59,9 @@ class TaskHistoryModel extends TaskHistory {
       userId: json['userId'] as String,
       notes: json['notes'] as String?,
       photosUrls: List<String>.from(json['photosUrls'] as List? ?? []),
-      timeSpent:
-          json['timeSpent'] != null
-              ? Duration(minutes: json['timeSpent'] as int)
-              : null,
+      timeSpent: json['timeSpent'] != null
+          ? Duration(minutes: json['timeSpent'] as int)
+          : null,
       status: TaskHistoryStatus.values.firstWhere(
         (e) => e.key == json['status'],
         orElse: () => TaskHistoryStatus.completed,
@@ -95,10 +94,9 @@ class TaskHistoryModel extends TaskHistory {
       userId: map['userId'] as String,
       notes: map['notes'] as String?,
       photosUrls: List<String>.from(map['photosUrls'] as List? ?? []),
-      timeSpent:
-          map['timeSpent'] != null
-              ? Duration(minutes: map['timeSpent'] as int)
-              : null,
+      timeSpent: map['timeSpent'] != null
+          ? Duration(minutes: map['timeSpent'] as int)
+          : null,
       status: TaskHistoryStatus.values.firstWhere(
         (e) => e.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
@@ -131,10 +129,9 @@ class TaskHistoryModel extends TaskHistory {
       userId: map['userId'] as String,
       notes: map['notes'] as String?,
       photosUrls: List<String>.from(map['photosUrls'] as List? ?? []),
-      timeSpent:
-          map['timeSpent'] != null
-              ? Duration(minutes: map['timeSpent'] as int)
-              : null,
+      timeSpent: map['timeSpent'] != null
+          ? Duration(minutes: map['timeSpent'] as int)
+          : null,
       status: TaskHistoryStatus.values.firstWhere(
         (e) => e.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,

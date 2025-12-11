@@ -15,10 +15,10 @@ class WebImageUploadManager {
     app_compression.ImageCompressionService? compressionService,
     LocalImageCacheService? cacheService,
     ImageService? imageService,
-  })  : _compressionService =
-            compressionService ?? app_compression.ImageCompressionService(),
-        _cacheService = cacheService ?? LocalImageCacheService(),
-        _imageService = imageService ?? ImageService();
+  }) : _compressionService =
+           compressionService ?? app_compression.ImageCompressionService(),
+       _cacheService = cacheService ?? LocalImageCacheService(),
+       _imageService = imageService ?? ImageService();
 
   /// Faz upload de imagem com compressão e cache automáticos
   /// Fluxo completo:
@@ -88,15 +88,12 @@ class WebImageUploadManager {
           );
         },
         (downloadUrl) async {
-          await _cacheService.markAsSynced(imageId,
-              downloadUrl: downloadUrl);
+          await _cacheService.markAsSynced(imageId, downloadUrl: downloadUrl);
           return Right(downloadUrl);
         },
       );
     } catch (e) {
-      return Left(
-        NetworkFailure('Erro no upload com compressão: $e'),
-      );
+      return Left(NetworkFailure('Erro no upload com compressão: $e'));
     }
   }
 
@@ -107,45 +104,39 @@ class WebImageUploadManager {
     try {
       final unsyncedResult = await _cacheService.getUnsyncedImages();
 
-      return await unsyncedResult.fold(
-        (failure) => Left(failure),
-        (unsynced) async {
-          final results = <String, String>{};
-          final total = unsynced.length;
+      return await unsyncedResult.fold((failure) => Left(failure), (
+        unsynced,
+      ) async {
+        final results = <String, String>{};
+        final total = unsynced.length;
 
-          for (int i = 0; i < unsynced.length; i++) {
-            final image = unsynced[i];
-            onProgress?.call(i + 1, total);
+        for (int i = 0; i < unsynced.length; i++) {
+          final image = unsynced[i];
+          onProgress?.call(i + 1, total);
 
-            // Tenta fazer upload de novo
-            final uploadResult = await _tryUploadWithFallback(
-              image.base64Data,
-              folder: image.folder,
-              fileName: image.fileName,
-              mimeType: image.mimeType ?? 'image/jpeg',
+          // Tenta fazer upload de novo
+          final uploadResult = await _tryUploadWithFallback(
+            image.base64Data,
+            folder: image.folder,
+            fileName: image.fileName,
+            mimeType: image.mimeType ?? 'image/jpeg',
+          );
+
+          uploadResult.fold((_) => null, (downloadUrl) async {
+            results[image.id] = downloadUrl;
+
+            // Marca como sincronizado
+            await _cacheService.markAsSynced(
+              image.id,
+              downloadUrl: downloadUrl,
             );
+          });
+        }
 
-            uploadResult.fold(
-              (_) => null,
-              (downloadUrl) async {
-                results[image.id] = downloadUrl;
-
-                // Marca como sincronizado
-                await _cacheService.markAsSynced(
-                  image.id,
-                  downloadUrl: downloadUrl,
-                );
-              },
-            );
-          }
-
-          return Right(results);
-        },
-      );
+        return Right(results);
+      });
     } catch (e) {
-      return Left(
-        NetworkFailure('Erro ao sincronizar imagens: $e'),
-      );
+      return Left(NetworkFailure('Erro ao sincronizar imagens: $e'));
     }
   }
 
@@ -183,9 +174,7 @@ class WebImageUploadManager {
         NetworkFailure('Upload de Base64 não suportado em mobile/desktop'),
       );
     } catch (e) {
-      return Left(
-        NetworkFailure('Erro ao fazer upload: $e'),
-      );
+      return Left(NetworkFailure('Erro ao fazer upload: $e'));
     }
   }
 
@@ -194,22 +183,19 @@ class WebImageUploadManager {
     try {
       final imagesResult = await _cacheService.listCachedImages();
 
-      return await imagesResult.fold(
-        (failure) => Left(failure),
-        (images) async {
-          for (final image in images) {
-            if (image.syncedToServer) {
-              await _cacheService.removeImage(image.id);
-            }
+      return await imagesResult.fold((failure) => Left(failure), (
+        images,
+      ) async {
+        for (final image in images) {
+          if (image.syncedToServer) {
+            await _cacheService.removeImage(image.id);
           }
+        }
 
-          return const Right(null);
-        },
-      );
+        return const Right(null);
+      });
     } catch (e) {
-      return Left(
-        NetworkFailure('Erro ao limpar cache: $e'),
-      );
+      return Left(NetworkFailure('Erro ao limpar cache: $e'));
     }
   }
 
@@ -223,36 +209,31 @@ class WebImageUploadManager {
     try {
       final imagesResult = await _cacheService.listCachedImages();
 
-      return await imagesResult.fold(
-        (failure) => Left(failure),
-        (images) {
-          int synced = 0;
-          int unsynced = 0;
-          int totalSizeMB = 0;
+      return await imagesResult.fold((failure) => Left(failure), (images) {
+        int synced = 0;
+        int unsynced = 0;
+        int totalSizeMB = 0;
 
-          for (final img in images) {
-            if (img.syncedToServer) {
-              synced++;
-            } else {
-              unsynced++;
-            }
-            // Estima tamanho do Base64
-            totalSizeMB += (img.base64Data.length / (1024 * 1024)).ceil();
+        for (final img in images) {
+          if (img.syncedToServer) {
+            synced++;
+          } else {
+            unsynced++;
           }
+          // Estima tamanho do Base64
+          totalSizeMB += (img.base64Data.length / (1024 * 1024)).ceil();
+        }
 
-          return Right({
-            'totalImages': images.length,
-            'syncedImages': synced,
-            'unsyncedImages': unsynced,
-            'estimatedCacheSizeMB': totalSizeMB,
-            'maxCachedImages': _cacheService.config.maxCachedImages,
-          });
-        },
-      );
+        return Right({
+          'totalImages': images.length,
+          'syncedImages': synced,
+          'unsyncedImages': unsynced,
+          'estimatedCacheSizeMB': totalSizeMB,
+          'maxCachedImages': _cacheService.config.maxCachedImages,
+        });
+      });
     } catch (e) {
-      return Left(
-        NetworkFailure('Erro ao obter estatísticas: $e'),
-      );
+      return Left(NetworkFailure('Erro ao obter estatísticas: $e'));
     }
   }
 }

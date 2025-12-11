@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:core/core.dart' as core;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../interfaces/i_premium_service.dart';
+import '../providers/core_providers.dart' as local_providers;
 import '../providers/premium_notifier.dart';
 
 /// Real implementation of IPremiumService that syncs with Riverpod PremiumNotifier
@@ -11,7 +13,8 @@ import '../providers/premium_notifier.dart';
 /// with the Riverpod-based PremiumNotifier state management.
 class RiverpodPremiumService implements IPremiumService {
   final ProviderContainer _container;
-  final StreamController<bool> _statusController = StreamController<bool>.broadcast();
+  final StreamController<bool> _statusController =
+      StreamController<bool>.broadcast();
   ProviderSubscription<AsyncValue<PremiumState>>? _subscription;
 
   RiverpodPremiumService(this._container) {
@@ -171,12 +174,38 @@ class RiverpodPremiumService implements IPremiumService {
 
   @override
   Future<void> generateTestSubscription() async {
-    // Test subscriptions are handled by RevenueCat/SubscriptionNotifier
+    // For web/mock testing, delegate to SubscriptionRepository (MockSubscriptionService)
+    final subscriptionRepo = _container.read(
+      local_providers.subscriptionRepositoryProvider,
+    );
+
+    // If using MockSubscriptionService, trigger purchase
+    if (subscriptionRepo is core.MockSubscriptionService) {
+      await subscriptionRepo.purchaseProduct(
+        productId: 'receituagro_premium_monthly',
+      );
+
+      // Force refresh premium state
+      _container.invalidate(premiumProvider);
+      await checkPremiumStatus();
+    }
   }
 
   @override
   Future<void> removeTestSubscription() async {
-    // Test subscriptions are handled by RevenueCat/SubscriptionNotifier
+    // For web/mock testing, delegate to SubscriptionRepository (MockSubscriptionService)
+    final subscriptionRepo = _container.read(
+      local_providers.subscriptionRepositoryProvider,
+    );
+
+    // If using MockSubscriptionService, trigger cancellation
+    if (subscriptionRepo is core.MockSubscriptionService) {
+      await subscriptionRepo.cancelSubscription();
+
+      // Force refresh premium state
+      _container.invalidate(premiumProvider);
+      await checkPremiumStatus();
+    }
   }
 
   @override

@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/task.dart' as task_entity;
@@ -35,15 +34,17 @@ class TasksRecommendationNotifier extends _$TasksRecommendationNotifier {
   List<task_entity.Task> getRecommendedHighPriorityTasks() {
     return state.allTasks
         .whereType<task_entity.Task>()
-        .where((task) =>
-            (task.priority == task_entity.TaskPriority.high ||
-                task.priority == task_entity.TaskPriority.urgent) &&
-            task.status == task_entity.TaskStatus.pending)
+        .where(
+          (task) =>
+              (task.priority == task_entity.TaskPriority.high ||
+                  task.priority == task_entity.TaskPriority.urgent) &&
+              task.status == task_entity.TaskStatus.pending,
+        )
         .toList()
-        ..sort((a, b) {
-          // Sort by due date (nearest first)
-          return a.dueDate.compareTo(b.dueDate);
-        });
+      ..sort((a, b) {
+        // Sort by due date (nearest first)
+        return a.dueDate.compareTo(b.dueDate);
+      });
   }
 
   /// Gets recommended tasks to complete today
@@ -52,19 +53,17 @@ class TasksRecommendationNotifier extends _$TasksRecommendationNotifier {
     final today = DateTime(now.year, now.month, now.day);
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
 
-    return state.allTasks
-        .whereType<task_entity.Task>()
-        .where((task) {
-          final dueDate = task.dueDate;
-          return !dueDate.isBefore(today) &&
-              dueDate.isBefore(tomorrow) &&
-              task.status == task_entity.TaskStatus.pending;
-        })
-        .toList()
-        ..sort((a, b) {
-          // Sort by priority (higher first) - using enum index
-          return _getPriorityValue(b.priority).compareTo(_getPriorityValue(a.priority));
-        });
+    return state.allTasks.whereType<task_entity.Task>().where((task) {
+      final dueDate = task.dueDate;
+      return !dueDate.isBefore(today) &&
+          dueDate.isBefore(tomorrow) &&
+          task.status == task_entity.TaskStatus.pending;
+    }).toList()..sort((a, b) {
+      // Sort by priority (higher first) - using enum index
+      return _getPriorityValue(
+        b.priority,
+      ).compareTo(_getPriorityValue(a.priority));
+    });
   }
 
   /// Helper to convert TaskPriority enum to numeric value for comparison
@@ -85,14 +84,16 @@ class TasksRecommendationNotifier extends _$TasksRecommendationNotifier {
   List<task_entity.Task> getPlantHealthSuggestions(String plantId) {
     return state.allTasks
         .whereType<task_entity.Task>()
-        .where((task) =>
-            task.plantId == plantId &&
-            task.status == task_entity.TaskStatus.pending)
+        .where(
+          (task) =>
+              task.plantId == plantId &&
+              task.status == task_entity.TaskStatus.pending,
+        )
         .toList()
-        ..sort((a, b) {
-          // Prioritize by due date
-          return a.dueDate.compareTo(b.dueDate);
-        });
+      ..sort((a, b) {
+        // Prioritize by due date
+        return a.dueDate.compareTo(b.dueDate);
+      });
   }
 
   /// Gets optimization recommendations
@@ -104,23 +105,29 @@ class TasksRecommendationNotifier extends _$TasksRecommendationNotifier {
     }
 
     final overdueCount = allTasks
-        .where((t) =>
-            t.dueDate.isBefore(DateTime.now()) &&
-            t.status != task_entity.TaskStatus.completed)
+        .where(
+          (t) =>
+              t.dueDate.isBefore(DateTime.now()) &&
+              t.status != task_entity.TaskStatus.completed,
+        )
         .length;
 
     final highPriorityCount = allTasks
-        .where((t) =>
-            (t.priority == task_entity.TaskPriority.high ||
-                t.priority == task_entity.TaskPriority.urgent) &&
-            t.status == task_entity.TaskStatus.pending)
+        .where(
+          (t) =>
+              (t.priority == task_entity.TaskPriority.high ||
+                  t.priority == task_entity.TaskPriority.urgent) &&
+              t.status == task_entity.TaskStatus.pending,
+        )
         .length;
 
     final completionRate = allTasks.isEmpty
         ? 0
-        : (allTasks.where((t) => t.status == task_entity.TaskStatus.completed).length /
-            allTasks.length *
-            100);
+        : (allTasks
+                  .where((t) => t.status == task_entity.TaskStatus.completed)
+                  .length /
+              allTasks.length *
+              100);
 
     final recommendations = <String>[];
 
@@ -161,7 +168,8 @@ class TasksRecommendationNotifier extends _$TasksRecommendationNotifier {
     for (final task in allTasks) {
       // Task type distribution
       final taskType = task.type.key;
-      taskTypeDistribution[taskType] = (taskTypeDistribution[taskType] ?? 0) + 1;
+      taskTypeDistribution[taskType] =
+          (taskTypeDistribution[taskType] ?? 0) + 1;
 
       // Plant distribution
       final plantId = task.plantId;

@@ -78,27 +78,25 @@ class WebOptimizedFormActions extends StatelessWidget {
     return AdaptiveLayout(
       mobile: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children:
-            children
-                .map(
-                  (child) => Padding(
-                    padding: EdgeInsets.only(bottom: spacing),
-                    child: child,
-                  ),
-                )
-                .toList(),
+        children: children
+            .map(
+              (child) => Padding(
+                padding: EdgeInsets.only(bottom: spacing),
+                child: child,
+              ),
+            )
+            .toList(),
       ),
       desktop: Row(
         mainAxisAlignment: mainAxisAlignment,
-        children:
-            children
-                .map(
-                  (child) => Padding(
-                    padding: EdgeInsets.only(left: spacing),
-                    child: child,
-                  ),
-                )
-                .toList(),
+        children: children
+            .map(
+              (child) => Padding(
+                padding: EdgeInsets.only(left: spacing),
+                child: child,
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -121,15 +119,14 @@ class WebOptimizedFormRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return AdaptiveLayout(
       mobile: Column(
-        children:
-            children
-                .map(
-                  (child) => Padding(
-                    padding: EdgeInsets.only(bottom: spacing),
-                    child: child,
-                  ),
-                )
-                .toList(),
+        children: children
+            .map(
+              (child) => Padding(
+                padding: EdgeInsets.only(bottom: spacing),
+                child: child,
+              ),
+            )
+            .toList(),
       ),
       desktop: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,18 +245,17 @@ class _WebOptimizedTextFieldState extends State<WebOptimizedTextField> {
       duration: const Duration(milliseconds: 150),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
-        boxShadow:
-            _isFocused
-                ? [
-                  BoxShadow(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-                : null,
+        boxShadow: _isFocused
+            ? [
+                BoxShadow(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.2),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: TextFormField(
         controller: widget.controller,
@@ -420,20 +416,19 @@ class WebOptimizedFormButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child =
-        isLoading
-            ? const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-            : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
-                Text(text),
-              ],
-            );
+    Widget child = isLoading
+        ? const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (icon != null) ...[Icon(icon), const SizedBox(width: 8)],
+              Text(text),
+            ],
+          );
 
     if (isPrimary) {
       return ElevatedButton(

@@ -517,7 +517,9 @@ class PlantaConfigModel extends BaseSyncModel {
       fertilizingIntervalDays: aduboAtivo ? intervaloAdubacaoDias : null,
       pruningIntervalDays: podaAtiva ? intervaloPodaDias : null,
       sunlightCheckIntervalDays: banhoSolAtivo ? intervaloBanhoSolDias : null,
-      pestInspectionIntervalDays: inspecaoPragasAtiva ? intervaloInspecaoPragasDias : null,
+      pestInspectionIntervalDays: inspecaoPragasAtiva
+          ? intervaloInspecaoPragasDias
+          : null,
       replantingIntervalDays: replantarAtivo ? intervaloReplantarDias : null,
       enableWateringCare: aguaAtiva,
       enableFertilizerCare: aduboAtivo,

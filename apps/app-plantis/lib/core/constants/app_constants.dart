@@ -5,6 +5,7 @@ class AppConstants {
   static const String appId = 'plantis';
   static const String appName = 'Plantis';
   static const String packageName = 'br.com.agrimsolution.plantis';
+
   /// App Store ID - Update this before production release
   static const String appStoreId = '123456789';
 
@@ -25,18 +26,28 @@ class AppConstants {
   static const String errorSettingUser = 'Erro ao definir usuário';
   static const String errorSettingProperty = 'Erro ao definir propriedade';
   static const String errorRegisteringError = 'Erro ao registrar erro';
-  static const String errorRegisteringPlantCreation = 'Erro ao registrar criação de planta';
-  static const String errorRegisteringPlantDeletion = 'Erro ao registrar exclusão de planta';
-  static const String errorRegisteringPlantUpdate = 'Erro ao registrar atualização de planta';
-  static const String errorProcessingNotificationData = 'Error processing plant care notification data';
+  static const String errorRegisteringPlantCreation =
+      'Erro ao registrar criação de planta';
+  static const String errorRegisteringPlantDeletion =
+      'Erro ao registrar exclusão de planta';
+  static const String errorRegisteringPlantUpdate =
+      'Erro ao registrar atualização de planta';
+  static const String errorProcessingNotificationData =
+      'Error processing plant care notification data';
   static const String errorHandlingAction = 'Error handling plant care action';
-  static const String errorSchedulingReminder = 'Error scheduling plant care reminder';
-  static const String errorSchedulingRecurring = 'Error scheduling recurring plant care';
-  static const String errorCancellingNotifications = 'Error cancelling plant notifications';
-  static const String errorGettingNotifications = 'Error getting plant notifications';
-  static const String errorUpdatingSchedule = 'Error updating plant notification schedule';
+  static const String errorSchedulingReminder =
+      'Error scheduling plant care reminder';
+  static const String errorSchedulingRecurring =
+      'Error scheduling recurring plant care';
+  static const String errorCancellingNotifications =
+      'Error cancelling plant notifications';
+  static const String errorGettingNotifications =
+      'Error getting plant notifications';
+  static const String errorUpdatingSchedule =
+      'Error updating plant notification schedule';
   static const String errorSnoozingReminder = 'Error snoozing reminder';
-  static const String errorInitializingSyncService = 'Error initializing Plantis sync service';
+  static const String errorInitializingSyncService =
+      'Error initializing Plantis sync service';
   static const String errorDuringInitialSync = 'Error during initial sync';
   static const String errorClearingSyncData = 'Error clearing sync data';
   static const String exceptionNotificationNotFound = 'Notification not found';

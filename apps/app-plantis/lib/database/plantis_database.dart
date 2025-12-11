@@ -100,43 +100,45 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   /// **onUpgrade:** Executado quando schemaVersion aumenta
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          print('📦 Creating Plantis Database schema v$schemaVersion...');
+    onCreate: (Migrator m) async {
+      print('📦 Creating Plantis Database schema v$schemaVersion...');
 
-          // Cria todas as tabelas definidas em @DriftDatabase
-          await m.createAll();
+      // Cria todas as tabelas definidas em @DriftDatabase
+      await m.createAll();
 
-          print('✅ Plantis Database schema created successfully!');
-        },
-        onUpgrade: (Migrator m, int from, int to) async {
-          print('🔄 Migrating Plantis Database from v$from to v$to...');
+      print('✅ Plantis Database schema created successfully!');
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      print('🔄 Migrating Plantis Database from v$from to v$to...');
 
-          if (from < 2) {
-            // Migração v1 -> v2: Adiciona tabela PlantImages
-            print('📦 Adding PlantImages table...');
-            await m.createTable(plantImages);
-          }
+      if (from < 2) {
+        // Migração v1 -> v2: Adiciona tabela PlantImages
+        print('📦 Adding PlantImages table...');
+        await m.createTable(plantImages);
+      }
 
-          if (from < 3) {
-            // Migração v2 -> v3: Adiciona tabela UserSubscriptions
-            print('📦 Adding UserSubscriptions table...');
-            await m.createTable(userSubscriptions);
-          }
+      if (from < 3) {
+        // Migração v2 -> v3: Adiciona tabela UserSubscriptions
+        print('📦 Adding UserSubscriptions table...');
+        await m.createTable(userSubscriptions);
+      }
 
-          print('✅ Migration completed successfully!');
-        },
-        beforeOpen: (details) async {
-          // CRÍTICO: Habilita foreign keys no SQLite
-          await customStatement('PRAGMA foreign_keys = ON');
+      print('✅ Migration completed successfully!');
+    },
+    beforeOpen: (details) async {
+      // CRÍTICO: Habilita foreign keys no SQLite
+      await customStatement('PRAGMA foreign_keys = ON');
 
-          if (details.wasCreated) {
-            print('🎉 Plantis Database criado com sucesso!');
-            print('📊 Tabelas: Spaces, Plants, PlantConfigs, PlantTasks, Tasks, Comments, ConflictHistory, PlantImages, PlantsSyncQueue');
-          } else {
-            print('🔄 Plantis Database aberto (versão $schemaVersion)');
-          }
-        },
-      );
+      if (details.wasCreated) {
+        print('🎉 Plantis Database criado com sucesso!');
+        print(
+          '📊 Tabelas: Spaces, Plants, PlantConfigs, PlantTasks, Tasks, Comments, ConflictHistory, PlantImages, PlantsSyncQueue',
+        );
+      } else {
+        print('🔄 Plantis Database aberto (versão $schemaVersion)');
+      }
+    },
+  );
 
   // =========================================================================
   // MÉTODOS AUXILIARES PARA QUERIES COMUNS
@@ -146,9 +148,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   Future<List<Plant>> getActivePlants() async {
     return (select(plants)
           ..where((p) => p.isDeleted.equals(false))
-          ..orderBy([
-            (p) => OrderingTerm.asc(p.name),
-          ]))
+          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
         .get();
   }
 
@@ -156,27 +156,22 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   Future<List<Plant>> getPlantsBySpace(int spaceId) async {
     return (select(plants)
           ..where((p) => p.spaceId.equals(spaceId) & p.isDeleted.equals(false))
-          ..orderBy([
-            (p) => OrderingTerm.asc(p.name),
-          ]))
+          ..orderBy([(p) => OrderingTerm.asc(p.name)]))
         .get();
   }
 
   /// Retorna configuração de uma planta específica
   Future<PlantConfig?> getPlantConfig(int plantId) async {
-    return (select(plantConfigs)..where((c) => c.plantId.equals(plantId)))
-        .getSingleOrNull();
+    return (select(
+      plantConfigs,
+    )..where((c) => c.plantId.equals(plantId))).getSingleOrNull();
   }
 
   /// Retorna todas as tarefas pendentes
   Future<List<Task>> getPendingTasks() async {
     return (select(tasks)
-          ..where((t) =>
-              t.status.equals('pending') &
-              t.isDeleted.equals(false))
-          ..orderBy([
-            (t) => OrderingTerm.asc(t.dueDate),
-          ]))
+          ..where((t) => t.status.equals('pending') & t.isDeleted.equals(false))
+          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
         .get();
   }
 
@@ -184,9 +179,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   Future<List<PlantsSyncQueueData>> getPendingSyncItems() async {
     return (select(plantsSyncQueue)
           ..where((s) => s.isSynced.equals(false))
-          ..orderBy([
-            (s) => OrderingTerm.asc(s.timestamp),
-          ]))
+          ..orderBy([(s) => OrderingTerm.asc(s.timestamp)]))
         .get();
   }
 
@@ -209,9 +202,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
     final count = countAll();
     final query = selectOnly(tasks)
       ..addColumns([count])
-      ..where(
-        tasks.status.equals('pending') & tasks.isDeleted.equals(false),
-      );
+      ..where(tasks.status.equals('pending') & tasks.isDeleted.equals(false));
 
     return query.map((row) => row.read(count)!).getSingle();
   }

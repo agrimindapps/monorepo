@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/plantis_realtime_service.dart';
 
@@ -146,10 +146,7 @@ class RealtimeSync extends _$RealtimeSync {
 
       await _updateInitialState();
 
-      developer.log(
-        'RealtimeSync provider initialized',
-        name: 'RealtimeSync',
-      );
+      developer.log('RealtimeSync provider initialized', name: 'RealtimeSync');
     } catch (e) {
       developer.log(
         'Error initializing RealtimeSync: $e',
@@ -198,47 +195,50 @@ class RealtimeSync extends _$RealtimeSync {
 
   /// Configura listener do status global de sync
   void _setupGlobalSyncListener() {
-    _globalSyncSubscription =
-        UnifiedSyncManager.instance.globalSyncStatusStream.listen(
-      (statusMap) {
-        final plantisStatus = statusMap['plantis'];
-        if (plantisStatus != null && plantisStatus != state.currentSyncStatus) {
-          state = state.copyWith(
-            currentSyncStatus: plantisStatus,
-            lastSyncTime: DateTime.now(),
-          );
+    _globalSyncSubscription = UnifiedSyncManager.instance.globalSyncStatusStream
+        .listen(
+          (statusMap) {
+            final plantisStatus = statusMap['plantis'];
+            if (plantisStatus != null &&
+                plantisStatus != state.currentSyncStatus) {
+              state = state.copyWith(
+                currentSyncStatus: plantisStatus,
+                lastSyncTime: DateTime.now(),
+              );
 
-          _addRecentEvent('Status: ${_getStatusDescription(plantisStatus)}');
-        }
-      },
-      onError: (Object error) {
-        developer.log(
-          'Error in global sync listener: $error',
-          name: 'RealtimeSync',
+              _addRecentEvent(
+                'Status: ${_getStatusDescription(plantisStatus)}',
+              );
+            }
+          },
+          onError: (Object error) {
+            developer.log(
+              'Error in global sync listener: $error',
+              name: 'RealtimeSync',
+            );
+          },
         );
-      },
-    );
   }
 
   /// Configura listener de eventos individuais de sync
   void _setupSyncEventsListener() {
-    _syncEventsSubscription =
-        UnifiedSyncManager.instance.syncEventStream.listen(
-      (event) {
-        if (event.appName == 'plantis') {
-          _updatePendingChanges();
-          _addRecentEvent(
-            '${_getActionDescription(event.action)}: ${event.entityType}',
-          );
-        }
-      },
-      onError: (Object error) {
-        developer.log(
-          'Error in sync events listener: $error',
-          name: 'RealtimeSync',
+    _syncEventsSubscription = UnifiedSyncManager.instance.syncEventStream
+        .listen(
+          (event) {
+            if (event.appName == 'plantis') {
+              _updatePendingChanges();
+              _addRecentEvent(
+                '${_getActionDescription(event.action)}: ${event.entityType}',
+              );
+            }
+          },
+          onError: (Object error) {
+            developer.log(
+              'Error in sync events listener: $error',
+              name: 'RealtimeSync',
+            );
+          },
         );
-      },
-    );
   }
 
   /// Configura listener de conectividade
@@ -248,7 +248,8 @@ class RealtimeSync extends _$RealtimeSync {
     _connectivitySubscription = connectivitySvc.networkStatusStream.listen(
       (status) {
         final wasOnline = state.isOnline;
-        final isOnline = status != ConnectivityType.offline &&
+        final isOnline =
+            status != ConnectivityType.offline &&
             status != ConnectivityType.none;
 
         if (isOnline != wasOnline) {
@@ -310,10 +311,7 @@ class RealtimeSync extends _$RealtimeSync {
 
       state = state.copyWith(pendingChanges: totalPending);
     } catch (e) {
-      developer.log(
-        'Error updating pending changes: $e',
-        name: 'RealtimeSync',
-      );
+      developer.log('Error updating pending changes: $e', name: 'RealtimeSync');
     }
   }
 

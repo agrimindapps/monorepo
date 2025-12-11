@@ -32,10 +32,9 @@ class PlantCareSection extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -156,10 +155,9 @@ class PlantCareSection extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color.withValues(alpha: 0.2)),
         boxShadow: [
@@ -281,10 +279,9 @@ class PlantCareSection extends StatelessWidget {
         Wrap(
           spacing: 12,
           runSpacing: 12,
-          children:
-              requirements
-                  .map((req) => _buildRequirementChip(context, req))
-                  .toList(),
+          children: requirements
+              .map((req) => _buildRequirementChip(context, req))
+              .toList(),
         ),
       ],
     );

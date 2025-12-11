@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/presentation/providers/plants_notifier.dart';
 import 'realtime_sync_notifier.dart';
@@ -17,33 +17,29 @@ class SyncCompletionListener extends _$SyncCompletionListener {
   @override
   void build() {
     // Escuta mudanças no status de sincronização
-    ref.listen(
-      currentSyncStatusProvider,
-      (previous, current) async {
+    ref.listen(currentSyncStatusProvider, (previous, current) async {
+      developer.log(
+        'Sync status changed: ${_previousStatus?.name} -> ${current.name}',
+        name: 'SyncCompletionListener',
+      );
+
+      // Detecta quando sync foi concluído (estava syncing e agora está synced)
+      if (_previousStatus == SyncStatus.syncing &&
+          current == SyncStatus.synced) {
         developer.log(
-          'Sync status changed: ${_previousStatus?.name} -> ${current.name}',
+          '✅ Sync completed - triggering plants reload',
           name: 'SyncCompletionListener',
         );
 
-        // Detecta quando sync foi concluído (estava syncing e agora está synced)
-        if (_previousStatus == SyncStatus.syncing &&
-            current == SyncStatus.synced) {
-          developer.log(
-            '✅ Sync completed - triggering plants reload',
-            name: 'SyncCompletionListener',
-          );
+        // Aguarda um pequeno delay para garantir que dados estão salvos
+        await Future<void>.delayed(const Duration(milliseconds: 500));
 
-          // Aguarda um pequeno delay para garantir que dados estão salvos
-          await Future<void>.delayed(const Duration(milliseconds: 500));
+        // Recarrega a lista de plantas
+        await _reloadPlants();
+      }
 
-          // Recarrega a lista de plantas
-          await _reloadPlants();
-        }
-
-        _previousStatus = current;
-      },
-      fireImmediately: false,
-    );
+      _previousStatus = current;
+    }, fireImmediately: false);
 
     developer.log(
       'SyncCompletionListener initialized',

@@ -63,7 +63,8 @@ class _PlantCardState extends ConsumerState<PlantCard> {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: widget.onTap ??
+            onTap:
+                widget.onTap ??
                 () => context.push(AppRouter.plantDetailsPath(widget.plant.id)),
             borderRadius: BorderRadius.circular(16),
             child: Padding(
@@ -78,8 +79,9 @@ class _PlantCardState extends ConsumerState<PlantCard> {
                     widget.plant.displayName,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color:
-                          isDark ? Colors.white : theme.colorScheme.onSurface,
+                      color: isDark
+                          ? Colors.white
+                          : theme.colorScheme.onSurface,
                       fontSize: 18,
                     ),
                     maxLines: 1,
@@ -92,9 +94,7 @@ class _PlantCardState extends ConsumerState<PlantCard> {
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: isDark
                           ? Colors.white.withValues(alpha: 0.7)
-                          : theme.colorScheme.onSurface.withValues(
-                              alpha: 0.7,
-                            ),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontSize: 14,
                     ),
                     maxLines: 1,

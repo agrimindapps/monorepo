@@ -64,22 +64,20 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
           child: const Text('Decidir Depois'),
         ),
         ElevatedButton(
-          onPressed:
-              _selectedVersion != null && !_isResolving
-                  ? _resolveConflict
-                  : null,
+          onPressed: _selectedVersion != null && !_isResolving
+              ? _resolveConflict
+              : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.green,
             foregroundColor: Colors.white,
           ),
-          child:
-              _isResolving
-                  ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                  : const Text('Confirmar Escolha'),
+          child: _isResolving
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Confirmar Escolha'),
         ),
       ],
     );
@@ -133,10 +131,9 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
                   label,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color:
-                        isSelected
-                            ? Colors.blue.shade700
-                            : Colors.grey.shade700,
+                    color: isSelected
+                        ? Colors.blue.shade700
+                        : Colors.grey.shade700,
                   ),
                 ),
                 if (isSelected) ...[
@@ -185,25 +182,18 @@ class _ConflictResolutionDialogState extends State<ConflictResolutionDialog> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          differences.map((diff) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.arrow_right,
-                    size: 16,
-                    color: Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(diff, style: const TextStyle(fontSize: 12)),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
+      children: differences.map((diff) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            children: [
+              Icon(Icons.arrow_right, size: 16, color: Colors.grey.shade600),
+              const SizedBox(width: 4),
+              Expanded(child: Text(diff, style: const TextStyle(fontSize: 12))),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,7 +27,9 @@ class LocalImageStorageService {
     bool isPrimary = false,
     String? userId,
   }) async {
-    debugPrint('📷 [LocalImageStorageService] Salvando imagem para planta $plantId');
+    debugPrint(
+      '📷 [LocalImageStorageService] Salvando imagem para planta $plantId',
+    );
 
     // Extrair dados base64
     final mimeType = _extractMimeType(base64Image);
@@ -36,7 +37,9 @@ class LocalImageStorageService {
 
     // Converter para bytes
     final bytes = base64Decode(pureBase64);
-    debugPrint('📷 [LocalImageStorageService] Imagem decodificada: ${bytes.length} bytes, mimeType: $mimeType');
+    debugPrint(
+      '📷 [LocalImageStorageService] Imagem decodificada: ${bytes.length} bytes, mimeType: $mimeType',
+    );
 
     // Salvar no Drift
     final imageId = await _repository.saveImage(
@@ -78,9 +81,9 @@ class LocalImageStorageService {
 
   /// Stream de imagens de uma planta (bytes)
   Stream<List<Uint8List>> watchPlantImages(int plantId) {
-    return _repository.watchImagesByPlantId(plantId).map(
-          (images) => images.map((img) => img.imageData).toList(),
-        );
+    return _repository
+        .watchImagesByPlantId(plantId)
+        .map((images) => images.map((img) => img.imageData).toList());
   }
 
   /// Define imagem como primária
@@ -118,7 +121,9 @@ class LocalImageStorageService {
 }
 
 /// Provider para LocalImageStorageService
-final localImageStorageServiceProvider = Provider<LocalImageStorageService>((ref) {
+final localImageStorageServiceProvider = Provider<LocalImageStorageService>((
+  ref,
+) {
   final repository = ref.watch(plantImagesDriftRepositoryProvider);
   return LocalImageStorageService(repository);
 });

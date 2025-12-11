@@ -8,10 +8,7 @@ import 'package:flutter/material.dart';
 class PromoHeroCountdownBadge extends StatefulWidget {
   final DateTime launchDate;
 
-  const PromoHeroCountdownBadge({
-    required this.launchDate,
-    super.key,
-  });
+  const PromoHeroCountdownBadge({required this.launchDate, super.key});
 
   @override
   State<PromoHeroCountdownBadge> createState() =>

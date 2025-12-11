@@ -38,37 +38,39 @@ class PlantTasksDriftRepository {
   }
 
   Future<List<PlantTaskModel>> getAllPlantTasks() async {
-    final tasks = await (_db.select(_db.plantTasks)
-          ..where((t) => t.isDeleted.equals(false))
-          ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
-        .get();
+    final tasks =
+        await (_db.select(_db.plantTasks)
+              ..where((t) => t.isDeleted.equals(false))
+              ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
+            .get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
 
   Future<List<PlantTaskModel>> getPendingPlantTasks() async {
-    final tasks = await (_db.select(_db.plantTasks)
-          ..where(
-            (t) => t.isDeleted.equals(false) & t.completedDate.isNull(),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
-        .get();
+    final tasks =
+        await (_db.select(_db.plantTasks)
+              ..where(
+                (t) => t.isDeleted.equals(false) & t.completedDate.isNull(),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
+            .get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
 
   Future<bool> completePlantTask(String firebaseId) async {
-    final updated = await (_db.update(
-      _db.plantTasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .write(
-      db.PlantTasksCompanion(
-        completedDate: Value(DateTime.now()),
-        status: const Value('completed'),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.plantTasks,
+        )..where((t) => t.firebaseId.equals(firebaseId))).write(
+          db.PlantTasksCompanion(
+            completedDate: Value(DateTime.now()),
+            status: const Value('completed'),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return updated > 0;
   }
@@ -77,8 +79,7 @@ class PlantTasksDriftRepository {
   Future<PlantTaskModel?> getPlantTaskById(String firebaseId) async {
     final task = await (_db.select(
       _db.plantTasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     return task != null ? _taskDriftToModel(task) : null;
   }
@@ -90,12 +91,14 @@ class PlantTasksDriftRepository {
     final localPlantId = await _resolvePlantId(plantFirebaseId);
     if (localPlantId == null) return [];
 
-    final tasks = await (_db.select(_db.plantTasks)
-          ..where(
-            (t) => t.plantId.equals(localPlantId) & t.isDeleted.equals(false),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
-        .get();
+    final tasks =
+        await (_db.select(_db.plantTasks)
+              ..where(
+                (t) =>
+                    t.plantId.equals(localPlantId) & t.isDeleted.equals(false),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.scheduledDate)]))
+            .get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
@@ -104,42 +107,43 @@ class PlantTasksDriftRepository {
   Future<bool> updatePlantTask(PlantTaskModel model) async {
     final localPlantId = await _resolvePlantId(model.plantId);
 
-    final updated = await (_db.update(
-      _db.plantTasks,
-    )..where((t) => t.firebaseId.equals(model.id)))
-        .write(
-      db.PlantTasksCompanion(
-        plantId:
-            localPlantId != null ? Value(localPlantId) : const Value.absent(),
-        type: Value(model.type.name),
-        title: Value(model.title),
-        description: Value(model.description),
-        scheduledDate: Value(model.scheduledDate),
-        completedDate: Value(model.completedDate),
-        status: Value(model.status.name),
-        intervalDays: Value(model.intervalDays),
-        nextScheduledDate: Value(model.nextScheduledDate),
-        updatedAt: Value(model.updatedAt ?? DateTime.now()),
-        isDirty: Value(model.isDirty),
-        isDeleted: Value(model.isDeleted),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.plantTasks,
+        )..where((t) => t.firebaseId.equals(model.id))).write(
+          db.PlantTasksCompanion(
+            plantId: localPlantId != null
+                ? Value(localPlantId)
+                : const Value.absent(),
+            type: Value(model.type.name),
+            title: Value(model.title),
+            description: Value(model.description),
+            scheduledDate: Value(model.scheduledDate),
+            completedDate: Value(model.completedDate),
+            status: Value(model.status.name),
+            intervalDays: Value(model.intervalDays),
+            nextScheduledDate: Value(model.nextScheduledDate),
+            updatedAt: Value(model.updatedAt ?? DateTime.now()),
+            isDirty: Value(model.isDirty),
+            isDeleted: Value(model.isDeleted),
+          ),
+        );
 
     return updated > 0;
   }
 
   /// Delete plant task (soft delete)
   Future<bool> deletePlantTask(String firebaseId) async {
-    final updated = await (_db.update(
-      _db.plantTasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .write(
-      db.PlantTasksCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.plantTasks,
+        )..where((t) => t.firebaseId.equals(firebaseId))).write(
+          db.PlantTasksCompanion(
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return updated > 0;
   }
@@ -151,8 +155,7 @@ class PlantTasksDriftRepository {
 
     return await (_db.update(
       _db.plantTasks,
-    )..where((t) => t.plantId.equals(localPlantId)))
-        .write(
+    )..where((t) => t.plantId.equals(localPlantId))).write(
       db.PlantTasksCompanion(
         isDeleted: const Value(true),
         isDirty: const Value(true),
@@ -212,8 +215,7 @@ class PlantTasksDriftRepository {
 
     final plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(plantFirebaseId)))
-        .getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(plantFirebaseId))).getSingleOrNull();
     return plant?.id;
   }
 }

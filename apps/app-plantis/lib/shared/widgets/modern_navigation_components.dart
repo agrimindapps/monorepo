@@ -260,24 +260,20 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                   curve: Curves.easeInOut,
                   height: 48,
                   decoration: BoxDecoration(
-                    color:
-                        widget.isSelected
-                            ? PlantisColors.primary.withValues(alpha: 0.1)
-                            : _isHovered
-                            ? colorScheme.surfaceContainerHighest.withValues(
-                              alpha: 0.6,
-                            )
-                            : Colors.transparent,
+                    color: widget.isSelected
+                        ? PlantisColors.primary.withValues(alpha: 0.1)
+                        : _isHovered
+                        ? colorScheme.surfaceContainerHighest.withValues(
+                            alpha: 0.6,
+                          )
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
-                    border:
-                        widget.isSelected
-                            ? Border.all(
-                              color: PlantisColors.primary.withValues(
-                                alpha: 0.3,
-                              ),
-                              width: 1,
-                            )
-                            : null,
+                    border: widget.isSelected
+                        ? Border.all(
+                            color: PlantisColors.primary.withValues(alpha: 0.3),
+                            width: 1,
+                          )
+                        : null,
                   ),
                   child: Row(
                     children: [
@@ -292,14 +288,13 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                               duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color:
-                                    widget.isSelected
-                                        ? PlantisColors.primary
-                                        : _isHovered
-                                        ? PlantisColors.primary.withValues(
-                                          alpha: 0.1,
-                                        )
-                                        : Colors.transparent,
+                                color: widget.isSelected
+                                    ? PlantisColors.primary
+                                    : _isHovered
+                                    ? PlantisColors.primary.withValues(
+                                        alpha: 0.1,
+                                      )
+                                    : Colors.transparent,
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: AnimatedSwitcher(
@@ -309,12 +304,11 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                       ? widget.selectedIcon
                                       : widget.icon,
                                   key: ValueKey(widget.isSelected),
-                                  color:
-                                      widget.isSelected
-                                          ? Colors.white
-                                          : _isHovered
-                                          ? PlantisColors.primary
-                                          : colorScheme.onSurfaceVariant,
+                                  color: widget.isSelected
+                                      ? Colors.white
+                                      : _isHovered
+                                      ? PlantisColors.primary
+                                      : colorScheme.onSurfaceVariant,
                                   size: 20,
                                 ),
                               ),
@@ -399,15 +393,13 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                       widget.label,
                                       style: theme.textTheme.titleSmall
                                           ?.copyWith(
-                                            color:
-                                                widget.isSelected
-                                                    ? colorScheme.onSurface
-                                                    : colorScheme.onSurface
-                                                        .withValues(alpha: 0.9),
-                                            fontWeight:
-                                                widget.isSelected
-                                                    ? FontWeight.w600
-                                                    : FontWeight.w500,
+                                            color: widget.isSelected
+                                                ? colorScheme.onSurface
+                                                : colorScheme.onSurface
+                                                      .withValues(alpha: 0.9),
+                                            fontWeight: widget.isSelected
+                                                ? FontWeight.w600
+                                                : FontWeight.w500,
                                           ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -417,11 +409,9 @@ class _ModernNavigationTileState extends State<ModernNavigationTile>
                                       widget.description,
                                       style: theme.textTheme.bodySmall
                                           ?.copyWith(
-                                            color:
-                                                widget.isSelected
-                                                    ? PlantisColors.primary
-                                                    : colorScheme
-                                                        .onSurfaceVariant,
+                                            color: widget.isSelected
+                                                ? PlantisColors.primary
+                                                : colorScheme.onSurfaceVariant,
                                             fontSize: 11,
                                           ),
                                       maxLines: 1,

@@ -1,8 +1,9 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import 'package:core/core.dart' hide Column, User, subscriptionRepositoryProvider;
+import 'package:core/core.dart'
+    hide Column, User, subscriptionRepositoryProvider;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/device_management/data/models/device_model.dart';
@@ -16,12 +17,7 @@ export 'auth_state_provider.dart';
 
 part 'auth_providers.g.dart';
 
-enum AuthOperation {
-  signIn,
-  signUp,
-  logout,
-  anonymous,
-}
+enum AuthOperation { signIn, signUp, logout, anonymous }
 
 /// Auth State model for Riverpod state management
 class AuthState {
@@ -134,7 +130,9 @@ class AuthNotifier extends _$AuthNotifier {
     _logoutUseCase = ref.watch(logoutUseCaseProvider);
     _resetPasswordUseCase = ref.watch(resetPasswordUseCaseProvider);
     _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
-    _deviceManagementService = ref.watch(device_management_providers.plantisDeviceManagementServiceProvider);
+    _deviceManagementService = ref.watch(
+      device_management_providers.plantisDeviceManagementServiceProvider,
+    );
 
     ref.onDispose(() {
       _userSubscription?.cancel();
@@ -320,7 +318,6 @@ class AuthNotifier extends _$AuthNotifier {
           ),
         );
         _authStateNotifier.updateUser(user);
-        
       },
     );
   }
@@ -378,7 +375,9 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
-      final result = await _deviceManagementService!.validateDevice(currentDevice.toEntity());
+      final result = await _deviceManagementService!.validateDevice(
+        currentDevice.toEntity(),
+      );
 
       result.fold(
         (failure) {
@@ -471,7 +470,6 @@ class AuthNotifier extends _$AuthNotifier {
         state = const AsyncData(AuthState());
         _authStateNotifier.updateUser(null);
         _authStateNotifier.updatePremiumStatus(false);
-        
       },
     );
   }
@@ -590,7 +588,6 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (_) {
-        
         return true;
       },
     );

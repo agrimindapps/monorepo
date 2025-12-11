@@ -33,8 +33,7 @@ class TodayTasksFilterStrategy implements TaskFilterStrategy {
   List<task_entity.Task> apply(List<task_entity.Task> tasks) {
     return tasks
         .where(
-          (t) =>
-              t.isDueToday && t.status == task_entity.TaskStatus.pending,
+          (t) => t.isDueToday && t.status == task_entity.TaskStatus.pending,
         )
         .toList();
   }

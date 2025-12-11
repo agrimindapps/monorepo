@@ -33,10 +33,10 @@ class BackgroundSyncService extends ChangeNotifier {
     GetTasksUseCase? getTasksUseCase,
     SyncUserProfileUseCase? syncUserProfileUseCase,
     SyncSettingsUseCase? syncSettingsUseCase,
-  })  : _getPlantsUseCase = getPlantsUseCase,
-        _getTasksUseCase = getTasksUseCase,
-        _syncUserProfileUseCase = syncUserProfileUseCase,
-        _syncSettingsUseCase = syncSettingsUseCase;
+  }) : _getPlantsUseCase = getPlantsUseCase,
+       _getTasksUseCase = getTasksUseCase,
+       _syncUserProfileUseCase = syncUserProfileUseCase,
+       _syncSettingsUseCase = syncSettingsUseCase;
 
   void _initializeDependencies() {
     // Dependencies are injected via constructor
@@ -432,9 +432,7 @@ class BackgroundSyncService extends ChangeNotifier {
       );
     }
     if (kDebugMode) {
-      debugPrint(
-        'ℹ️ BackgroundSync: Providers managed by Riverpod',
-      );
+      debugPrint('ℹ️ BackgroundSync: Providers managed by Riverpod');
     }
   }
 

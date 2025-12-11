@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/plantis_realtime_service.dart';
 
@@ -230,8 +230,8 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
     final isRealtimeActive = _realtimeService.isRealtimeActive;
     final currentSyncStatus = _syncManager.getAppSyncStatus('plantis');
 
-    final connectivityResult =
-        await _connectivityService.getCurrentNetworkStatus();
+    final connectivityResult = await _connectivityService
+        .getCurrentNetworkStatus();
     final isOnline = connectivityResult.fold(
       (failure) => false,
       (status) =>
@@ -363,7 +363,8 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
         final currentState = state.value;
         if (currentState == null) return;
 
-        final isOnline = status != ConnectivityType.offline &&
+        final isOnline =
+            status != ConnectivityType.offline &&
             status != ConnectivityType.none;
 
         if (isOnline != currentState.isOnline) {
@@ -400,10 +401,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
         state = AsyncValue.data(updatedState);
       }
     } catch (e) {
-      developer.log(
-        'Error forcing sync: $e',
-        name: 'RealtimeSyncNotifier',
-      );
+      developer.log('Error forcing sync: $e', name: 'RealtimeSyncNotifier');
 
       final currentState = state.value;
       if (currentState != null) {
@@ -447,8 +445,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   /// Configura notificações de sync
   void setSyncNotifications(bool enabled) {
     final currentState = state.value;
-    if (currentState == null ||
-        currentState.showSyncNotifications == enabled) {
+    if (currentState == null || currentState.showSyncNotifications == enabled) {
       return;
     }
 
@@ -473,9 +470,7 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
     final newState = currentState.copyWith(enableBackgroundSync: enabled);
     final updatedState = _addRecentEvent(
       newState,
-      enabled
-          ? 'Sync em background ativado'
-          : 'Sync em background desativado',
+      enabled ? 'Sync em background ativado' : 'Sync em background desativado',
     );
 
     state = AsyncValue.data(updatedState);
@@ -537,7 +532,10 @@ class RealtimeSyncNotifier extends _$RealtimeSyncNotifier {
   }
 
   /// Adiciona evento à lista de eventos recentes (retorna novo state)
-  RealtimeSyncState _addRecentEvent(RealtimeSyncState currentState, String event) {
+  RealtimeSyncState _addRecentEvent(
+    RealtimeSyncState currentState,
+    String event,
+  ) {
     final timestampedEvent = '${_formatTimestamp(DateTime.now())}: $event';
     final updatedEvents = [timestampedEvent, ...currentState.recentEvents];
     final trimmedEvents = updatedEvents.length > 10

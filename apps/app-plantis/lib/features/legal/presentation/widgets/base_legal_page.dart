@@ -268,48 +268,43 @@ abstract class BaseLegalPageState<T extends BaseLegalPage> extends State<T> {
         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
-      child:
-          widget.footerIcon != null && widget.footerTitle != null
-              ? Column(
-                children: [
-                  Icon(
-                    widget.footerIcon,
-                    color: PlantisColors.primary,
-                    size: 32,
+      child: widget.footerIcon != null && widget.footerTitle != null
+          ? Column(
+              children: [
+                Icon(widget.footerIcon, color: PlantisColors.primary, size: 32),
+                const SizedBox(height: 8),
+                Text(
+                  widget.footerTitle!,
+                  style: TextStyle(
+                    color: theme.colorScheme.onSurface,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
+                  textAlign: TextAlign.center,
+                ),
+                if (widget.footerDescription != null) ...[
                   const SizedBox(height: 8),
                   Text(
-                    widget.footerTitle!,
+                    widget.footerDescription!,
                     style: TextStyle(
-                      color: theme.colorScheme.onSurface,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontSize: 14,
+                      fontStyle: FontStyle.italic,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  if (widget.footerDescription != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      widget.footerDescription!,
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontSize: 14,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
                 ],
-              )
-              : Text(
-                widget.footerMessage,
-                style: TextStyle(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontSize: 14,
-                  fontStyle: FontStyle.italic,
-                ),
-                textAlign: TextAlign.center,
+              ],
+            )
+          : Text(
+              widget.footerMessage,
+              style: TextStyle(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontSize: 14,
+                fontStyle: FontStyle.italic,
               ),
+              textAlign: TextAlign.center,
+            ),
     );
   }
 

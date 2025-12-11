@@ -53,50 +53,48 @@ class PlantisSyncStatus extends Equatable {
     this.errorMessage,
     this.progress,
   }) : assert(
-          progress == null || (progress >= 0.0 && progress <= 1.0),
-          'Progress must be between 0.0 and 1.0',
-        );
+         progress == null || (progress >= 0.0 && progress <= 1.0),
+         'Progress must be between 0.0 and 1.0',
+       );
 
   /// Creates an idle sync status with no pending operations
   const PlantisSyncStatus.idle()
-      : state = PlantisSyncState.idle,
-        pendingCount = 0,
-        failedCount = 0,
-        lastSyncAt = null,
-        errorMessage = null,
-        progress = null;
+    : state = PlantisSyncState.idle,
+      pendingCount = 0,
+      failedCount = 0,
+      lastSyncAt = null,
+      errorMessage = null,
+      progress = null;
 
   /// Creates a syncing status with optional progress
-  const PlantisSyncStatus.syncing({
-    required int pendingCount,
-    double? progress,
-  })  : state = PlantisSyncState.syncing,
-        pendingCount = pendingCount,
-        failedCount = 0,
-        lastSyncAt = null,
-        errorMessage = null,
-        progress = progress;
+  const PlantisSyncStatus.syncing({required int pendingCount, double? progress})
+    : state = PlantisSyncState.syncing,
+      pendingCount = pendingCount,
+      failedCount = 0,
+      lastSyncAt = null,
+      errorMessage = null,
+      progress = progress;
 
   /// Creates a success status after sync completion
   PlantisSyncStatus.success({DateTime? syncTime})
-      : state = PlantisSyncState.success,
-        pendingCount = 0,
-        failedCount = 0,
-        lastSyncAt = syncTime ?? DateTime.now(),
-        errorMessage = null,
-        progress = null;
+    : state = PlantisSyncState.success,
+      pendingCount = 0,
+      failedCount = 0,
+      lastSyncAt = syncTime ?? DateTime.now(),
+      errorMessage = null,
+      progress = null;
 
   /// Creates an error status with failure details
   const PlantisSyncStatus.error({
     required String message,
     int pendingCount = 0,
     int failedCount = 0,
-  })  : state = PlantisSyncState.error,
-        pendingCount = pendingCount,
-        failedCount = failedCount,
-        lastSyncAt = null,
-        errorMessage = message,
-        progress = null;
+  }) : state = PlantisSyncState.error,
+       pendingCount = pendingCount,
+       failedCount = failedCount,
+       lastSyncAt = null,
+       errorMessage = message,
+       progress = null;
 
   /// Computed properties for UI
   bool get isIdle => state == PlantisSyncState.idle;
@@ -131,13 +129,13 @@ class PlantisSyncStatus extends Equatable {
 
   @override
   List<Object?> get props => [
-        state,
-        pendingCount,
-        failedCount,
-        lastSyncAt,
-        errorMessage,
-        progress,
-      ];
+    state,
+    pendingCount,
+    failedCount,
+    lastSyncAt,
+    errorMessage,
+    progress,
+  ];
 
   @override
   String toString() {

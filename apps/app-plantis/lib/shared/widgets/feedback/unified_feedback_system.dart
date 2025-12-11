@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/providers/feedback_providers.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'confirmation_system.dart';
 import 'feedback_system.dart';
@@ -33,7 +35,13 @@ class UnifiedFeedbackSystem {
     bool includeHaptic = true,
     bool showToast = true,
     Duration? timeout,
+    ProviderContainer? container,
   }) async {
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final hapticService = providerContainer.read(hapticServiceProvider);
+    final toastService = providerContainer.read(toastServiceProvider);
+    final feedbackService = providerContainer.read(feedbackServiceProvider);
+
     ContextualLoadingManager.startLoading(
       operationKey,
       message: loadingMessage,
@@ -42,39 +50,46 @@ class UnifiedFeedbackSystem {
     );
 
     if (includeHaptic) {
-      // TODO: Inject HapticService via Riverpod
+      await hapticService.light();
     }
 
     try {
       final result = await operation();
       ContextualLoadingManager.stopLoading(operationKey);
       if (includeHaptic) {
-        // TODO: Inject HapticService via Riverpod
+        await hapticService.success();
       }
 
       if (showToast && context.mounted) {
-        // TODO: Inject ToastService via Riverpod
+        toastService.showSuccess(
+          context: context,
+          message: successMessage ?? 'Operação concluída!',
+        );
       }
       if (context.mounted) {
-        // TODO: Inject FeedbackService via Riverpod
+        feedbackService.showSuccess(
+          context: context,
+          message: successMessage ?? 'Sucesso!',
+          animation: successAnimation,
+        );
       }
 
       return result;
     } catch (error) {
       ContextualLoadingManager.stopLoading(operationKey);
       if (includeHaptic) {
-        // TODO: Inject HapticService via Riverpod
+        await hapticService.heavy();
       }
 
-      // Error message available for future use if needed
-      final _ = errorMessage ?? 'Erro na operação: ${error.toString()}';
+      final finalErrorMessage =
+          errorMessage ?? 'Erro na operação: ${error.toString()}';
 
       if (showToast && context.mounted) {
-        // TODO: Inject ToastService via Riverpod
+        toastService.showError(context: context, message: finalErrorMessage);
       }
 
       if (context.mounted) {
-        // TODO: Inject FeedbackService via Riverpod
+        feedbackService.showError(context: context, message: finalErrorMessage);
       }
 
       rethrow;
@@ -126,8 +141,7 @@ class UnifiedFeedbackSystem {
         errorMessage: 'Erro: ${error.toString()}',
         showToast: showToast,
         includeHaptic: includeHaptic,
-        onRetry: () {
-        },
+        onRetry: () {},
       );
 
       rethrow;
@@ -145,10 +159,12 @@ class UnifiedFeedbackSystem {
       context: context,
       operationKey: 'save_plant_${DateTime.now().millisecondsSinceEpoch}',
       operation: saveOperation,
-      loadingMessage:
-          isEdit ? 'Atualizando $plantName...' : 'Salvando $plantName...',
-      successMessage:
-          isEdit ? 'Planta atualizada!' : 'Planta salva com sucesso!',
+      loadingMessage: isEdit
+          ? 'Atualizando $plantName...'
+          : 'Salvando $plantName...',
+      successMessage: isEdit
+          ? 'Planta atualizada!'
+          : 'Planta salva com sucesso!',
       loadingType: LoadingType.save,
       successAnimation: SuccessAnimationType.bounce,
     );
@@ -182,10 +198,9 @@ class UnifiedFeedbackSystem {
       operationKey: 'login_${DateTime.now().millisecondsSinceEpoch}',
       operation: loginOperation,
       loadingMessage: 'Fazendo login...',
-      successMessage:
-          userName != null
-              ? 'Bem-vindo, $userName!'
-              : 'Login realizado com sucesso!',
+      successMessage: userName != null
+          ? 'Bem-vindo, $userName!'
+          : 'Login realizado com sucesso!',
       loadingType: LoadingType.auth,
       successAnimation: SuccessAnimationType.checkmark,
     );
@@ -266,9 +281,22 @@ class UnifiedFeedbackSystem {
     String cancelLabel = 'Cancelar',
     ConfirmationType type = ConfirmationType.info,
     IconData? icon,
+    ProviderContainer? container,
   }) async {
-    // TODO: Inject ConfirmationService via Riverpod
-    return false;
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final confirmationService = providerContainer.read(
+      confirmationServiceProvider,
+    );
+
+    return await confirmationService.showConfirmation(
+      context: context,
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel,
+      cancelLabel: cancelLabel,
+      type: type,
+      icon: icon,
+    );
   }
 
   /// Confirmação destrutiva com feedback
@@ -278,14 +306,31 @@ class UnifiedFeedbackSystem {
     required String message,
     String confirmLabel = 'Deletar',
     bool requireDouble = false,
+    ProviderContainer? container,
   }) async {
-    // TODO: Inject ConfirmationService via Riverpod
-    return false;
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final confirmationService = providerContainer.read(
+      confirmationServiceProvider,
+    );
+
+    return await confirmationService.showDestructiveConfirmation(
+      context: context,
+      title: title,
+      message: message,
+      confirmLabel: confirmLabel,
+      requiresDoubleConfirmation: requireDouble,
+    );
   }
 
   /// Toast de sucesso rápido
-  static void successToast(BuildContext context, String message) {
-    // TODO: Inject ToastService via Riverpod
+  static void successToast(
+    BuildContext context,
+    String message, {
+    ProviderContainer? container,
+  }) {
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final toastService = providerContainer.read(toastServiceProvider);
+    toastService.showSuccess(context: context, message: message);
   }
 
   /// Toast de erro com ação
@@ -293,54 +338,129 @@ class UnifiedFeedbackSystem {
     BuildContext context,
     String message, {
     VoidCallback? onRetry,
+    ProviderContainer? container,
   }) {
-    // TODO: Inject ToastService via Riverpod
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final toastService = providerContainer.read(toastServiceProvider);
+    toastService.showError(
+      context: context,
+      message: message,
+      onAction: onRetry,
+      actionLabel: onRetry != null ? 'Tentar novamente' : null,
+    );
   }
 
   /// Toast de info
-  static void infoToast(BuildContext context, String message) {
-    // TODO: Inject ToastService via Riverpod
+  static void infoToast(
+    BuildContext context,
+    String message, {
+    ProviderContainer? container,
+  }) {
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final toastService = providerContainer.read(toastServiceProvider);
+    toastService.showInfo(context: context, message: message);
   }
 
   /// Toast de warning
-  static void warningToast(BuildContext context, String message) {
-    // TODO: Inject ToastService via Riverpod
+  static void warningToast(
+    BuildContext context,
+    String message, {
+    ProviderContainer? container,
+  }) {
+    final providerContainer = container ?? ProviderScope.containerOf(context);
+    final toastService = providerContainer.read(toastServiceProvider);
+    toastService.showWarning(context: context, message: message);
   }
 
   /// Haptic para ações básicas
-  static Future<void> lightHaptic() async {
-    // TODO: Inject HapticService via Riverpod
+  static Future<void> lightHaptic({
+    BuildContext? context,
+    ProviderContainer? container,
+  }) async {
+    final providerContainer =
+        container ??
+        (context != null ? ProviderScope.containerOf(context) : null);
+    if (providerContainer != null) {
+      final hapticService = providerContainer.read(hapticServiceProvider);
+      await hapticService.light();
+    }
   }
 
   /// Haptic para ações importantes
-  static Future<void> mediumHaptic() async {
-    // TODO: Inject HapticService via Riverpod
+  static Future<void> mediumHaptic({
+    BuildContext? context,
+    ProviderContainer? container,
+  }) async {
+    final providerContainer =
+        container ??
+        (context != null ? ProviderScope.containerOf(context) : null);
+    if (providerContainer != null) {
+      final hapticService = providerContainer.read(hapticServiceProvider);
+      await hapticService.medium();
+    }
   }
 
   /// Haptic para ações críticas
-  static Future<void> heavyHaptic() async {
-    // TODO: Inject HapticService via Riverpod
+  static Future<void> heavyHaptic({
+    BuildContext? context,
+    ProviderContainer? container,
+  }) async {
+    final providerContainer =
+        container ??
+        (context != null ? ProviderScope.containerOf(context) : null);
+    if (providerContainer != null) {
+      final hapticService = providerContainer.read(hapticServiceProvider);
+      await hapticService.heavy();
+    }
   }
 
   /// Haptic contextual
-  static Future<void> contextualHaptic(String context) async {
-    // TODO: Inject HapticService via Riverpod
+  static Future<void> contextualHaptic(
+    String contextType, {
+    BuildContext? context,
+    ProviderContainer? container,
+  }) async {
+    final providerContainer =
+        container ??
+        (context != null ? ProviderScope.containerOf(context) : null);
+    if (providerContainer != null) {
+      final hapticService = providerContainer.read(hapticServiceProvider);
+      // Mapeia contextos para métodos específicos do HapticService
+      switch (contextType) {
+        case 'button_tap':
+          await hapticService.buttonTap();
+          break;
+        case 'task_complete':
+          await hapticService.completeTask();
+          break;
+        case 'plant_save':
+          await hapticService.addPlant();
+          break;
+        case 'premium_purchase':
+          await hapticService.purchaseSuccess();
+          break;
+        case 'error':
+          await hapticService.error();
+          break;
+        case 'success':
+          await hapticService.success();
+          break;
+        default:
+          await hapticService.light();
+      }
+    }
   }
 
   /// Limpa todos os sistemas de feedback
-  static void dispose() {
-    // TODO: Inject FeedbackService via Riverpod
+  static void dispose({BuildContext? context, ProviderContainer? container}) {
     ContextualLoadingManager.dispose();
     ProgressTracker.clearAll();
-    // TODO: Inject ToastService via Riverpod
   }
 
   /// Para todas as operações ativas
-  static void stopAll() {
-    // TODO: Inject FeedbackService via Riverpod
+  static void stopAll({BuildContext? context, ProviderContainer? container}) {
     ContextualLoadingManager.stopAllLoadings();
     ProgressTracker.clearAll();
-    // TODO: Inject ToastService via Riverpod
   }
 }
 
@@ -382,9 +502,6 @@ class _UnifiedFeedbackProviderState extends State<UnifiedFeedbackProvider> {
   Widget build(BuildContext context) {
     Widget child = widget.child;
     child = ContextualLoadingListener(child: child);
-    if (widget.enableFeedbackOverlay) {
-      // TODO: Inject FeedbackService via Riverpod
-    }
     if (widget.enableProgressOverlay) {
       child = Stack(
         children: [

@@ -57,18 +57,9 @@ class _PlantsGroupedBySpacesViewState
         final plants = entry.value;
 
         return spacesAsync.maybeWhen(
-          data: (spacesState) => _buildSpaceSection(
-            context,
-            spaceId,
-            plants,
-            spacesState,
-          ),
-          orElse: () => _buildSpaceSection(
-            context,
-            spaceId,
-            plants,
-            null,
-          ),
+          data: (spacesState) =>
+              _buildSpaceSection(context, spaceId, plants, spacesState),
+          orElse: () => _buildSpaceSection(context, spaceId, plants, null),
         );
       },
     );

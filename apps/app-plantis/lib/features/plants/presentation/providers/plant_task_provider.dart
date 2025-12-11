@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
 import '../../domain/entities/plant.dart';
@@ -82,13 +82,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           }
         },
         (tasks) {
-          final updatedTasks =
-              Map<String, List<PlantTask>>.from(state.plantTasks);
-          updatedTasks[plantId] = tasks;
-          state = state.copyWith(
-            plantTasks: updatedTasks,
-            isLoading: false,
+          final updatedTasks = Map<String, List<PlantTask>>.from(
+            state.plantTasks,
           );
+          updatedTasks[plantId] = tasks;
+          state = state.copyWith(plantTasks: updatedTasks, isLoading: false);
           if (kDebugMode) {
             print(
               '✅ PlantTaskProvider: ${tasks.length} tasks carregadas para planta $plantId',
@@ -173,13 +171,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
             }
           },
           (savedTasks) {
-            final updatedTasks =
-                Map<String, List<PlantTask>>.from(state.plantTasks);
-            updatedTasks[plant.id] = savedTasks;
-            state = state.copyWith(
-              plantTasks: updatedTasks,
-              isLoading: false,
+            final updatedTasks = Map<String, List<PlantTask>>.from(
+              state.plantTasks,
             );
+            updatedTasks[plant.id] = savedTasks;
+            state = state.copyWith(plantTasks: updatedTasks, isLoading: false);
             if (kDebugMode) {
               print(
                 '✅ PlantTaskProvider: ${savedTasks.length} tasks persistidas com sucesso',
@@ -188,13 +184,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           },
         );
       } else {
-        final updatedTasks =
-            Map<String, List<PlantTask>>.from(state.plantTasks);
-        updatedTasks[plant.id] = tasks;
-        state = state.copyWith(
-          plantTasks: updatedTasks,
-          isLoading: false,
+        final updatedTasks = Map<String, List<PlantTask>>.from(
+          state.plantTasks,
         );
+        updatedTasks[plant.id] = tasks;
+        state = state.copyWith(plantTasks: updatedTasks, isLoading: false);
         if (kDebugMode) {
           print(
             '⚠️ PlantTaskProvider: Repository não disponível, tasks mantidas em memória',

@@ -1,4 +1,3 @@
-
 /// Exceção lançada quando o rate limit é excedido
 class RateLimitException implements Exception {
   final String message;
@@ -184,8 +183,7 @@ class RateLimitStats {
     required this.canRequest,
   });
 
-  double get usagePercentage =>
-      (requestsInWindow / maxRequestsPerWindow) * 100;
+  double get usagePercentage => (requestsInWindow / maxRequestsPerWindow) * 100;
 
   @override
   String toString() {

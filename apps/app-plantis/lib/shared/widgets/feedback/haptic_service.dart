@@ -347,17 +347,16 @@ class HapticWrapper extends StatelessWidget {
     }
 
     return GestureDetector(
-      onTap:
-          enabled
-              ? () async {
-                if (hapticContext != null) {
-                  await _executeContextualHaptic();
-                } else {
-                  await hapticService._executeHapticType(hapticType);
-                }
-                onTap?.call();
+      onTap: enabled
+          ? () async {
+              if (hapticContext != null) {
+                await _executeContextualHaptic();
+              } else {
+                await hapticService._executeHapticType(hapticType);
               }
-              : onTap,
+              onTap?.call();
+            }
+          : onTap,
       child: child,
     );
   }

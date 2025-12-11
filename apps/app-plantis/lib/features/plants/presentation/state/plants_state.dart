@@ -5,13 +5,7 @@ import '../../domain/entities/space.dart';
 part 'plants_state.freezed.dart';
 
 /// View states for plants feature
-enum PlantsViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-  empty,
-}
+enum PlantsViewState { initial, loading, loaded, error, empty }
 
 /// Filtro de visualização
 enum PlantsViewFilter {
@@ -80,15 +74,19 @@ extension PlantsStateX on PlantsState {
         break;
       case PlantsViewFilter.needsWater:
         filtered = filtered.where((p) {
-          if (p.lastWatered == null || p.wateringFrequency == null) return false;
-          final daysSinceWatered =
-              DateTime.now().difference(p.lastWatered!).inDays;
+          if (p.lastWatered == null || p.wateringFrequency == null)
+            return false;
+          final daysSinceWatered = DateTime.now()
+              .difference(p.lastWatered!)
+              .inDays;
           return daysSinceWatered >= p.wateringFrequency!;
         }).toList();
         break;
       case PlantsViewFilter.bySpace:
         if (selectedSpaceId != null) {
-          filtered = filtered.where((p) => p.spaceId == selectedSpaceId).toList();
+          filtered = filtered
+              .where((p) => p.spaceId == selectedSpaceId)
+              .toList();
         }
         break;
       case PlantsViewFilter.all:
@@ -130,15 +128,14 @@ extension PlantsStateX on PlantsState {
   }
 
   /// Plantas favoritas
-  List<Plant> get favoritePlants =>
-      plants.where((p) => p.isFavorited).toList();
+  List<Plant> get favoritePlants => plants.where((p) => p.isFavorited).toList();
 
   /// Plantas que precisam de água
   List<Plant> get plantsNeedingWater => plants.where((p) {
-        if (p.lastWatered == null || p.wateringFrequency == null) return false;
-        final daysSinceWatered = DateTime.now().difference(p.lastWatered!).inDays;
-        return daysSinceWatered >= p.wateringFrequency!;
-      }).toList();
+    if (p.lastWatered == null || p.wateringFrequency == null) return false;
+    final daysSinceWatered = DateTime.now().difference(p.lastWatered!).inDays;
+    return daysSinceWatered >= p.wateringFrequency!;
+  }).toList();
 
   /// Conta total de plantas
   int get totalPlants => plants.length;
@@ -206,10 +203,10 @@ extension PlantsStateX on PlantsState {
 
   /// Reseta filtros
   PlantsState resetFilters() => copyWith(
-        viewFilter: PlantsViewFilter.all,
-        selectedSpaceId: null,
-        searchQuery: '',
-        sortBy: 'name',
-        isAscending: true,
-      );
+    viewFilter: PlantsViewFilter.all,
+    selectedSpaceId: null,
+    searchQuery: '',
+    sortBy: 'name',
+    isAscending: true,
+  );
 }

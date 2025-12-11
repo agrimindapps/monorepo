@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column, SyncQueue, SyncQueueItem;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../data/models/sync_queue_item.dart';
 import '../sync/sync_queue.dart';
@@ -76,25 +76,25 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
   }
 
   void _initializeListeners() {
-    _networkSubscription = _connectivityService.networkStatusStream.listen(
-      (status) {
-        switch (status) {
-          case ConnectivityType.offline:
-          case ConnectivityType.none:
-            _updateSyncState(SyncState.offline);
-            break;
-          case ConnectivityType.mobile:
-          case ConnectivityType.wifi:
-          case ConnectivityType.online:
-          case ConnectivityType.ethernet:
-          case ConnectivityType.vpn:
-          case ConnectivityType.other:
-          case ConnectivityType.bluetooth:
-            _updateSyncState(SyncState.idle);
-            break;
-        }
-      },
-    );
+    _networkSubscription = _connectivityService.networkStatusStream.listen((
+      status,
+    ) {
+      switch (status) {
+        case ConnectivityType.offline:
+        case ConnectivityType.none:
+          _updateSyncState(SyncState.offline);
+          break;
+        case ConnectivityType.mobile:
+        case ConnectivityType.wifi:
+        case ConnectivityType.online:
+        case ConnectivityType.ethernet:
+        case ConnectivityType.vpn:
+        case ConnectivityType.other:
+        case ConnectivityType.bluetooth:
+          _updateSyncState(SyncState.idle);
+          break;
+      }
+    });
   }
 
   /// Set the sync queue (called from outside with proper type)
@@ -103,10 +103,7 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
     _queueSubscription?.cancel();
     _queueSubscription = queue.queueStream.listen((List<SyncQueueItem> items) {
       final newState = items.isEmpty ? SyncState.idle : SyncState.syncing;
-      state = state.copyWith(
-        pendingItems: items,
-        currentState: newState,
-      );
+      state = state.copyWith(pendingItems: items, currentState: newState);
     });
   }
 
@@ -118,28 +115,28 @@ class SyncStatusNotifier extends _$SyncStatusNotifier {
 
   /// Method to manually trigger sync or check sync status
   Future<void> checkSyncStatus() async {
-    final networkStatusResult =
-        await _connectivityService.getCurrentNetworkStatus();
+    final networkStatusResult = await _connectivityService
+        .getCurrentNetworkStatus();
 
-    networkStatusResult.fold(
-      (failure) => _updateSyncState(SyncState.error),
-      (networkStatus) async {
-        if (networkStatus == ConnectivityType.offline ||
-            networkStatus == ConnectivityType.none) {
-          _updateSyncState(SyncState.offline);
-        } else if (_syncQueue != null) {
-          final pendingItems = await _syncQueue!.getPendingItemsAsync();
+    networkStatusResult.fold((failure) => _updateSyncState(SyncState.error), (
+      networkStatus,
+    ) async {
+      if (networkStatus == ConnectivityType.offline ||
+          networkStatus == ConnectivityType.none) {
+        _updateSyncState(SyncState.offline);
+      } else if (_syncQueue != null) {
+        final pendingItems = await _syncQueue!.getPendingItemsAsync();
 
-          final newState =
-              pendingItems.isEmpty ? SyncState.idle : SyncState.syncing;
+        final newState = pendingItems.isEmpty
+            ? SyncState.idle
+            : SyncState.syncing;
 
-          state = state.copyWith(
-            currentState: newState,
-            pendingItems: pendingItems,
-          );
-        }
-      },
-    );
+        state = state.copyWith(
+          currentState: newState,
+          pendingItems: pendingItems,
+        );
+      }
+    });
   }
 
   /// Force update sync state (useful for manual refresh)

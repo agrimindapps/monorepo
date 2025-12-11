@@ -152,32 +152,29 @@ class _AccountDeletionDialogState extends State<AccountDeletionDialog> {
           ),
         ),
         ElevatedButton(
-          onPressed:
-              _isConfirmationValid
-                  ? () async {
-                    Navigator.of(context).pop();
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Funcionalidade de exclusão de conta será implementada em breve.',
-                          ),
-                          backgroundColor: Colors.orange,
-                          behavior: SnackBarBehavior.floating,
+          onPressed: _isConfirmationValid
+              ? () async {
+                  Navigator.of(context).pop();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Funcionalidade de exclusão de conta será implementada em breve.',
                         ),
-                      );
-                    }
+                        backgroundColor: Colors.orange,
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
                   }
-                  : null,
+                }
+              : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor:
-                _isConfirmationValid
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.12),
-            foregroundColor:
-                _isConfirmationValid
-                    ? Colors.white
-                    : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            backgroundColor: _isConfirmationValid
+                ? theme.colorScheme.error
+                : theme.colorScheme.onSurface.withValues(alpha: 0.12),
+            foregroundColor: _isConfirmationValid
+                ? Colors.white
+                : theme.colorScheme.onSurface.withValues(alpha: 0.38),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),

@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/task.dart' as task_entity;
@@ -124,17 +124,15 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
 
   /// Helper: Get task with ownership validation
   Future<task_entity.Task> _getTaskWithOwnershipValidation(
-      String taskId) async {
+    String taskId,
+  ) async {
     final currentState = state;
 
     // 1. Try to find in local state first (fastest)
     final localTask = currentState.allTasks
         .whereType<task_entity.Task>()
         .cast<task_entity.Task?>()
-        .firstWhere(
-          (t) => t?.id == taskId,
-          orElse: () => null,
-        );
+        .firstWhere((t) => t?.id == taskId, orElse: () => null);
 
     if (localTask != null) {
       _ownershipValidator.validateOwnershipOrThrow(localTask);
@@ -198,10 +196,7 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
   }
 
   /// Helper: Complete task optimistically
-  void _completeTaskOptimistically(
-    task_entity.Task task,
-    String? notes,
-  ) {
+  void _completeTaskOptimistically(task_entity.Task task, String? notes) {
     final completedTask = task.copyWithTaskData(
       status: task_entity.TaskStatus.completed,
       completedAt: DateTime.now(),
@@ -211,9 +206,7 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
   }
 
   /// Helper: Apply current filters to task list
-  List<task_entity.Task> _applyCurrentFilters(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> _applyCurrentFilters(List<task_entity.Task> tasks) {
     final currentState = state;
     return _filterService.applyFilters(
       tasks,

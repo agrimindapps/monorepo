@@ -293,11 +293,8 @@ extension AsyncStateExtensions<T> on AsyncState<T> {
     return when(
       loading: () => const AsyncState.loading(),
       error: (error) => AsyncState.error(error),
-      success:
-          (data) =>
-              predicate(data)
-                  ? AsyncState.success(data)
-                  : const AsyncState.empty(),
+      success: (data) =>
+          predicate(data) ? AsyncState.success(data) : const AsyncState.empty(),
       empty: () => const AsyncState.empty(),
     );
   }

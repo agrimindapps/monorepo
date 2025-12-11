@@ -210,10 +210,9 @@ class _SaveIndicatorState extends State<SaveIndicator>
       icon: widget.customIcon ?? const Icon(Icons.save),
       label: Text(widget.saveText ?? 'Salvar'),
       style: ElevatedButton.styleFrom(
-        backgroundColor:
-            widget.hasUnsavedChanges
-                ? theme.colorScheme.primary
-                : theme.colorScheme.surfaceContainer,
+        backgroundColor: widget.hasUnsavedChanges
+            ? theme.colorScheme.primary
+            : theme.colorScheme.surfaceContainer,
       ),
     );
   }

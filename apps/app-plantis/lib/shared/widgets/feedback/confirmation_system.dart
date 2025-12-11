@@ -31,15 +31,14 @@ class ConfirmationService {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => ConfirmationDialog(
-            title: title,
-            message: message,
-            confirmLabel: confirmLabel,
-            cancelLabel: cancelLabel,
-            icon: icon,
-            type: type,
-          ),
+      builder: (context) => ConfirmationDialog(
+        title: title,
+        message: message,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        icon: icon,
+        type: type,
+      ),
     );
 
     return result ?? false;
@@ -64,15 +63,14 @@ class ConfirmationService {
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => DestructiveConfirmationDialog(
-            title: title,
-            message: message,
-            confirmLabel: confirmLabel,
-            cancelLabel: cancelLabel,
-            icon: icon,
-            requiresDoubleConfirmation: requiresDoubleConfirmation,
-          ),
+      builder: (context) => DestructiveConfirmationDialog(
+        title: title,
+        message: message,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        icon: icon,
+        requiresDoubleConfirmation: requiresDoubleConfirmation,
+      ),
     );
 
     return result ?? false;
@@ -100,18 +98,17 @@ class ConfirmationService {
     final result = await showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => InputConfirmationDialog(
-            title: title,
-            message: message,
-            initialValue: initialValue,
-            hintText: hintText,
-            confirmLabel: confirmLabel,
-            cancelLabel: cancelLabel,
-            icon: icon,
-            keyboardType: keyboardType,
-            validator: validator,
-          ),
+      builder: (context) => InputConfirmationDialog(
+        title: title,
+        message: message,
+        initialValue: initialValue,
+        hintText: hintText,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        icon: icon,
+        keyboardType: keyboardType,
+        validator: validator,
+      ),
     );
 
     return result;
@@ -137,16 +134,15 @@ class ConfirmationService {
     final result = await showDialog<List<String>>(
       context: context,
       barrierDismissible: false,
-      builder:
-          (context) => ChecklistConfirmationDialog(
-            title: title,
-            message: message,
-            items: items,
-            confirmLabel: confirmLabel,
-            cancelLabel: cancelLabel,
-            icon: icon,
-            requireAllChecked: requireAllChecked,
-          ),
+      builder: (context) => ChecklistConfirmationDialog(
+        title: title,
+        message: message,
+        items: items,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        icon: icon,
+        requireAllChecked: requireAllChecked,
+      ),
     );
 
     return result;
@@ -172,15 +168,14 @@ class ConfirmationService {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => ConfirmationBottomSheet(
-            title: title,
-            message: message,
-            confirmLabel: confirmLabel,
-            cancelLabel: cancelLabel,
-            icon: icon,
-            type: type,
-          ),
+      builder: (context) => ConfirmationBottomSheet(
+        title: title,
+        message: message,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        icon: icon,
+        type: type,
+      ),
     );
 
     return result ?? false;
@@ -397,14 +392,12 @@ class _DestructiveConfirmationDialogState
       setState(() {
         _firstConfirmation = true;
       });
-      // TODO: Inject HapticService via Riverpod
       _shakeController.forward().then((_) {
         _shakeController.reset();
       });
       return;
     }
 
-    // TODO: Inject HapticService via Riverpod
     Navigator.of(context).pop(true);
   }
 
@@ -475,7 +468,6 @@ class _DestructiveConfirmationDialogState
         actions: [
           TextButton(
             onPressed: () {
-              // TODO: Inject HapticService via Riverpod
               Navigator.of(context).pop(false);
             },
             style: TextButton.styleFrom(
@@ -484,21 +476,21 @@ class _DestructiveConfirmationDialogState
             child: Text(widget.cancelLabel),
           ),
           ElevatedButton(
-            onPressed:
-                (_countdown <= 0 || !widget.requiresDoubleConfirmation)
-                    ? _handleConfirm
-                    : null,
+            onPressed: (_countdown <= 0 || !widget.requiresDoubleConfirmation)
+                ? _handleConfirm
+                : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  _firstConfirmation ? Colors.red.shade700 : Colors.red,
+              backgroundColor: _firstConfirmation
+                  ? Colors.red.shade700
+                  : Colors.red,
               foregroundColor: Colors.white,
             ),
             child: Text(
               _firstConfirmation
                   ? 'CONFIRMAR EXCLUSÃO'
                   : (_countdown > 0 && widget.requiresDoubleConfirmation
-                      ? '${widget.confirmLabel} ($_countdown)'
-                      : widget.confirmLabel),
+                        ? '${widget.confirmLabel} ($_countdown)'
+                        : widget.confirmLabel),
             ),
           ),
         ],
@@ -555,11 +547,8 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
 
   void _handleConfirm() {
     if (_formKey.currentState?.validate() ?? false) {
-      // TODO: Inject HapticService via Riverpod
       Navigator.of(context).pop(_controller.text.trim());
-    } else {
-      // TODO: Inject HapticService via Riverpod
-    }
+    } else {}
   }
 
   @override
@@ -624,7 +613,6 @@ class _InputConfirmationDialogState extends State<InputConfirmationDialog> {
       actions: [
         TextButton(
           onPressed: () {
-            // TODO: Inject HapticService via Riverpod
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -690,7 +678,6 @@ class _ChecklistConfirmationDialogState
 
   void _handleConfirm() {
     if (_canConfirm) {
-      // TODO: Inject HapticService via Riverpod
       final selectedItems = <String>[];
       for (int i = 0; i < widget.items.length; i++) {
         if (_checkedItems[i]) {
@@ -698,9 +685,7 @@ class _ChecklistConfirmationDialogState
         }
       }
       Navigator.of(context).pop(selectedItems);
-    } else {
-      // TODO: Inject HapticService via Riverpod
-    }
+    } else {}
   }
 
   @override
@@ -751,7 +736,6 @@ class _ChecklistConfirmationDialogState
                   setState(() {
                     _checkedItems[index] = value ?? false;
                   });
-                  // TODO: Inject HapticService via Riverpod
                 },
                 title: Text(item.title),
                 subtitle: item.subtitle != null ? Text(item.subtitle!) : null,
@@ -765,7 +749,6 @@ class _ChecklistConfirmationDialogState
       actions: [
         TextButton(
           onPressed: () {
-            // TODO: Inject HapticService via Riverpod
             Navigator.of(context).pop(null);
           },
           style: TextButton.styleFrom(
@@ -869,7 +852,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      // TODO: Inject HapticService via Riverpod
                       Navigator.of(context).pop(false);
                     },
                     style: OutlinedButton.styleFrom(
@@ -884,7 +866,6 @@ class ConfirmationBottomSheet extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: Inject HapticService via Riverpod
                       Navigator.of(context).pop(true);
                     },
                     style: ElevatedButton.styleFrom(
@@ -961,5 +942,5 @@ class ConfirmationColors {
 
 /// Contextos pré-definidos para confirmações
 class ConfirmationContexts {
-  // TODO: Refactor to use Riverpod provider
+  // Removed legacy static methods - use ConfirmationService via Riverpod provider
 }

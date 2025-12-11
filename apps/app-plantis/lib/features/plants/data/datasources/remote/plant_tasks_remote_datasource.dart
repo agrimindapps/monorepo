@@ -40,16 +40,14 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
         );
       }
 
-      final querySnapshot =
-          await _getUserPlantTasksCollection(
-            userId,
-          ).where('isDeleted', isEqualTo: false).orderBy('scheduledDate').get();
+      final querySnapshot = await _getUserPlantTasksCollection(
+        userId,
+      ).where('isDeleted', isEqualTo: false).orderBy('scheduledDate').get();
 
-      final tasks =
-          querySnapshot.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return PlantTaskModel.fromJson({...data, 'id': doc.id});
-          }).toList();
+      final tasks = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return PlantTaskModel.fromJson({...data, 'id': doc.id});
+      }).toList();
 
       if (kDebugMode) {
         print(
@@ -78,18 +76,16 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
         );
       }
 
-      final querySnapshot =
-          await _getUserPlantTasksCollection(userId)
-              .where('plantId', isEqualTo: plantId)
-              .where('isDeleted', isEqualTo: false)
-              .orderBy('scheduledDate')
-              .get();
+      final querySnapshot = await _getUserPlantTasksCollection(userId)
+          .where('plantId', isEqualTo: plantId)
+          .where('isDeleted', isEqualTo: false)
+          .orderBy('scheduledDate')
+          .get();
 
-      final tasks =
-          querySnapshot.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return PlantTaskModel.fromJson({...data, 'id': doc.id});
-          }).toList();
+      final tasks = querySnapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return PlantTaskModel.fromJson({...data, 'id': doc.id});
+      }).toList();
 
       if (kDebugMode) {
         print(
@@ -111,8 +107,9 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   @override
   Future<PlantTaskModel?> getPlantTaskById(String id, String userId) async {
     try {
-      final docSnapshot =
-          await _getUserPlantTasksCollection(userId).doc(id).get();
+      final docSnapshot = await _getUserPlantTasksCollection(
+        userId,
+      ).doc(id).get();
 
       if (!docSnapshot.exists) {
         return null;
@@ -301,10 +298,9 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
         );
       }
 
-      final querySnapshot =
-          await _getUserPlantTasksCollection(
-            userId,
-          ).where('plantId', isEqualTo: plantId).get();
+      final querySnapshot = await _getUserPlantTasksCollection(
+        userId,
+      ).where('plantId', isEqualTo: plantId).get();
 
       final batch = _firestore.batch();
 

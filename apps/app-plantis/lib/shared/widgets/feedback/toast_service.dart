@@ -184,13 +184,12 @@ class ToastService {
 
     final overlay = Overlay.of(context);
     final overlayEntry = OverlayEntry(
-      builder:
-          (context) => ToastWidget(
-            controller: controller,
-            onDismiss: () {
-              dismiss();
-            },
-          ),
+      builder: (context) => ToastWidget(
+        controller: controller,
+        onDismiss: () {
+          dismiss();
+        },
+      ),
     );
 
     _currentToast = overlayEntry;
@@ -482,6 +481,4 @@ class ToastColors {
 enum ToastType { success, error, warning, info, custom }
 
 /// Contextos pré-definidos para toasts
-class ToastContexts {
-  // TODO: Refactor to use Riverpod provider
-}
+class ToastContexts {}

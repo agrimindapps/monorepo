@@ -130,8 +130,7 @@ class TaskNotificationScheduler implements ITaskNotificationScheduler {
       final String body = _getDailySummaryBody(todayTasks);
       final String payload = _createDailySummaryPayload(todayTasks);
 
-      const int notificationId =
-          TasksConstants.dailySummaryNotificationId;
+      const int notificationId = TasksConstants.dailySummaryNotificationId;
 
       await _scheduleNotificationWithActions(
         id: notificationId,
@@ -253,10 +252,9 @@ class TaskNotificationScheduler implements ITaskNotificationScheduler {
   /// Get daily summary body text
   String _getDailySummaryBody(List<task_entity.Task> todayTasks) {
     final int totalTasks = todayTasks.length;
-    final int urgentTasks =
-        todayTasks
-            .where((t) => t.priority == task_entity.TaskPriority.urgent)
-            .length;
+    final int urgentTasks = todayTasks
+        .where((t) => t.priority == task_entity.TaskPriority.urgent)
+        .length;
 
     if (totalTasks == 1) {
       return '${AppStrings.oneTaskToday}${todayTasks.first.title}';

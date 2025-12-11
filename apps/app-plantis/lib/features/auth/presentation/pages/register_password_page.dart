@@ -8,7 +8,8 @@ class RegisterPasswordPage extends ConsumerStatefulWidget {
   const RegisterPasswordPage({super.key});
 
   @override
-  ConsumerState<RegisterPasswordPage> createState() => _RegisterPasswordPageState();
+  ConsumerState<RegisterPasswordPage> createState() =>
+      _RegisterPasswordPageState();
 }
 
 class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
@@ -39,14 +40,14 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
   Future<void> _handleCreateAccount() async {
     if (_formKey.currentState!.validate()) {
       if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Senhas não coincidem')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Senhas não coincidem')));
         return;
       }
 
       showRegisterLoading(message: 'Criando conta...');
-      
+
       updateRegisterLoadingMessage('Conectando ao servidor...');
       await Future<void>.delayed(const Duration(seconds: 1));
 
@@ -104,12 +105,11 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                         const SizedBox(width: 8),
                         Text(
                           'Inside Garden',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.headlineSmall?.copyWith(
-                            color: PlantisColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                color: PlantisColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
@@ -172,24 +172,22 @@ class _RegisterPasswordPageState extends ConsumerState<RegisterPasswordPage>
                     const SizedBox(height: 32),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children:
-                          List.generate(3, (index) {
-                            final steps = [true, true, true];
-                            return [
-                              Container(
-                                width: 40,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color:
-                                      steps[index]
-                                          ? PlantisColors.primary
-                                          : Colors.grey.shade300,
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              ),
-                              if (index < 2) const SizedBox(width: 8),
-                            ];
-                          }).expand((widget) => widget).toList(),
+                      children: List.generate(3, (index) {
+                        final steps = [true, true, true];
+                        return [
+                          Container(
+                            width: 40,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: steps[index]
+                                  ? PlantisColors.primary
+                                  : Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                          if (index < 2) const SizedBox(width: 8),
+                        ];
+                      }).expand((widget) => widget).toList(),
                     ),
                     const SizedBox(height: 48),
                     Form(

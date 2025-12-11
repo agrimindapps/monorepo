@@ -128,6 +128,11 @@ class TowerGameNotifier extends _$TowerGameNotifier {
     );
   }
 
+  /// Saves high score from external source (Flame)
+  Future<void> saveScore(int score) async {
+    await _saveHighScoreIfNeeded(score);
+  }
+
   /// Saves high score if current score is higher
   Future<void> _saveHighScoreIfNeeded(int score) async {
     if (score > _highScore) {

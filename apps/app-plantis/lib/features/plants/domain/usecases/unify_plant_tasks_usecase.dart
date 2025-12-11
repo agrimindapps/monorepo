@@ -172,10 +172,9 @@ class UnifyPlantTasksUseCase
       );
     }
 
-    final tasksFromPlantTasks =
-        tasks
-            .where((task) => PlantTaskTaskAdapter.isTaskFromPlantTask(task))
-            .length;
+    final tasksFromPlantTasks = tasks
+        .where((task) => PlantTaskTaskAdapter.isTaskFromPlantTask(task))
+        .length;
 
     if (kDebugMode) {
       print('📊 UnifyPlantTasksUseCase: Sincronização simulada:');

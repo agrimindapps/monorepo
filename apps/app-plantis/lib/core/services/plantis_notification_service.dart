@@ -10,8 +10,9 @@ class PlantisNotificationService {
       PlantisNotificationService._internal();
   factory PlantisNotificationService() => _instance;
   PlantisNotificationService._internal();
-  final INotificationRepository _notificationService =
-      kIsWeb ? WebNotificationService() : LocalNotificationService();
+  final INotificationRepository _notificationService = kIsWeb
+      ? WebNotificationService()
+      : LocalNotificationService();
 
   bool _isInitialized = false;
 
@@ -318,8 +319,8 @@ class PlantisNotificationService {
   /// Cancela todas as notificações de uma planta
   Future<bool> cancelAllPlantNotifications(String plantId) async {
     try {
-      final pendingNotifications =
-          await _notificationService.getPendingNotifications();
+      final pendingNotifications = await _notificationService
+          .getPendingNotifications();
       bool allCancelled = true;
 
       for (final notification in pendingNotifications) {
@@ -334,8 +335,7 @@ class PlantisNotificationService {
               );
               if (!cancelled) allCancelled = false;
             }
-          } catch (e) {
-          }
+          } catch (e) {}
         }
       }
 
@@ -363,8 +363,8 @@ class PlantisNotificationService {
     String plantId,
   ) async {
     try {
-      final allNotifications =
-          await _notificationService.getPendingNotifications();
+      final allNotifications = await _notificationService
+          .getPendingNotifications();
 
       return allNotifications.where((notification) {
         if (notification.payload != null) {

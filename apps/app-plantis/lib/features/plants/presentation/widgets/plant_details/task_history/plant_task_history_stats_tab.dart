@@ -163,10 +163,9 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
       'current': currentStreak,
     });
     final typeDistribution = _calculateTypeDistribution();
-    final maxTypePercentage =
-        typeDistribution.values.isEmpty
-            ? 0.0
-            : typeDistribution.values.reduce(math.max);
+    final maxTypePercentage = typeDistribution.values.isEmpty
+        ? 0.0
+        : typeDistribution.values.reduce(math.max);
 
     achievements.add({
       'title': 'Especialização',
@@ -420,67 +419,65 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  children:
-                      weeklyData.map((data) {
-                        final count = data['count'] as int;
-                        final day = data['day'] as String;
-                        final height =
-                            maxCount > 0 ? (count / maxCount) * 160 : 0.0;
+                  children: weeklyData.map((data) {
+                    final count = data['count'] as int;
+                    final day = data['day'] as String;
+                    final height = maxCount > 0
+                        ? (count / maxCount) * 160
+                        : 0.0;
 
-                        return AnimatedBuilder(
-                          animation: _chartController,
-                          builder: (context, child) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(
-                                  '$count',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        count > 0
-                                            ? PlantisColors.primary
-                                            : theme.colorScheme.onSurfaceVariant
-                                                .withValues(alpha: 0.5),
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  width: 24,
-                                  height: height * _chartController.value,
-                                  decoration: BoxDecoration(
-                                    gradient:
-                                        count > 0
-                                            ? const LinearGradient(
-                                              begin: Alignment.bottomCenter,
-                                              end: Alignment.topCenter,
-                                              colors: [
-                                                PlantisColors.primary,
-                                                PlantisColors.primaryLight,
-                                              ],
-                                            )
-                                            : null,
-                                    color:
-                                        count == 0
-                                            ? theme.colorScheme.outline
-                                                .withValues(alpha: 0.2)
-                                            : null,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  day,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+                    return AnimatedBuilder(
+                      animation: _chartController,
+                      builder: (context, child) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              '$count',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: count > 0
+                                    ? PlantisColors.primary
+                                    : theme.colorScheme.onSurfaceVariant
+                                          .withValues(alpha: 0.5),
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Container(
+                              width: 24,
+                              height: height * _chartController.value,
+                              decoration: BoxDecoration(
+                                gradient: count > 0
+                                    ? const LinearGradient(
+                                        begin: Alignment.bottomCenter,
+                                        end: Alignment.topCenter,
+                                        colors: [
+                                          PlantisColors.primary,
+                                          PlantisColors.primaryLight,
+                                        ],
+                                      )
+                                    : null,
+                                color: count == 0
+                                    ? theme.colorScheme.outline.withValues(
+                                        alpha: 0.2,
+                                      )
+                                    : null,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              day,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         );
-                      }).toList(),
+                      },
+                    );
+                  }).toList(),
                 ),
               ),
             ],
@@ -629,29 +626,24 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient:
-            achieved
-                ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    color.withValues(alpha: 0.2),
-                    color.withValues(alpha: 0.1),
-                  ],
-                )
-                : null,
-        color:
-            achieved
-                ? null
-                : theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.3,
-                ),
+        gradient: achieved
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  color.withValues(alpha: 0.2),
+                  color.withValues(alpha: 0.1),
+                ],
+              )
+            : null,
+        color: achieved
+            ? null
+            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              achieved
-                  ? color.withValues(alpha: 0.5)
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color: achieved
+              ? color.withValues(alpha: 0.5)
+              : theme.colorScheme.outline.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -661,12 +653,9 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
             children: [
               Icon(
                 achievement['icon'] as IconData,
-                color:
-                    achieved
-                        ? color
-                        : theme.colorScheme.onSurfaceVariant.withValues(
-                          alpha: 0.5,
-                        ),
+                color: achieved
+                    ? color
+                    : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 size: 24,
               ),
               const Spacer(),
@@ -693,10 +682,9 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           const Spacer(),
           LinearProgressIndicator(
             value: progress,
-            backgroundColor:
-                achieved
-                    ? color.withValues(alpha: 0.3)
-                    : theme.colorScheme.outline.withValues(alpha: 0.3),
+            backgroundColor: achieved
+                ? color.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.3),
             valueColor: AlwaysStoppedAnimation<Color>(
               achieved ? color : theme.colorScheme.onSurfaceVariant,
             ),
@@ -707,12 +695,9 @@ class _PlantTaskHistoryStatsTabState extends State<PlantTaskHistoryStatsTab>
           Text(
             '${achievement['current']}/${achievement['target']}',
             style: theme.textTheme.bodySmall?.copyWith(
-              color:
-                  achieved
-                      ? color
-                      : theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.7,
-                      ),
+              color: achieved
+                  ? color
+                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
               fontWeight: FontWeight.w500,
             ),
           ),

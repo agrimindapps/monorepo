@@ -57,8 +57,9 @@ class SettingsState {
       isLoading: isLoading ?? this.isLoading,
       isInitialized: isInitialized ?? this.isInitialized,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      successMessage:
-          clearSuccess ? null : (successMessage ?? this.successMessage),
+      successMessage: clearSuccess
+          ? null
+          : (successMessage ?? this.successMessage),
       currentDevice: clearDevice ? null : (currentDevice ?? this.currentDevice),
       connectedDevices: connectedDevices ?? this.connectedDevices,
     );
@@ -110,8 +111,9 @@ class SettingsState {
     if (difference.inHours < 1) return '${difference.inMinutes}m atrás';
     if (difference.inDays < 1) return '${difference.inHours}h atrás';
     if (difference.inDays < 7) return '${difference.inDays}d atrás';
-    if (difference.inDays < 30)
+    if (difference.inDays < 30) {
       return '${(difference.inDays / 7).floor()}sem atrás';
+    }
     return '${(difference.inDays / 30).floor()}m atrás';
   }
 }
@@ -124,15 +126,14 @@ Future<SettingsLocalDataSource> settingsLocalDataSource(Ref ref) async {
 
 @riverpod
 Future<ISettingsRepository> settingsRepository(Ref ref) async {
-  final localDataSource =
-      await ref.watch(settingsLocalDataSourceProvider.future);
+  final localDataSource = await ref.watch(
+    settingsLocalDataSourceProvider.future,
+  );
   return SettingsRepository(localDataSource: localDataSource);
 }
 
 @riverpod
-PlantisNotificationService plantisNotificationService(
-  Ref ref,
-) {
+PlantisNotificationService plantisNotificationService(Ref ref) {
   return PlantisNotificationService();
 }
 
@@ -192,8 +193,8 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> _syncWithServices() async {
     try {
       final currentState = state.value ?? SettingsState.initial();
-      final hasPermissions =
-          await _notificationService.areNotificationsEnabled();
+      final hasPermissions = await _notificationService
+          .areNotificationsEnabled();
 
       if (currentState.settings.notifications.permissionsGranted !=
           hasPermissions) {
@@ -589,7 +590,8 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> revokeDevice(String deviceUuid) async {
     if (kDebugMode) {
       debugPrint(
-          'ℹ️ Settings: Device revoke não implementado ainda - $deviceUuid');
+        'ℹ️ Settings: Device revoke não implementado ainda - $deviceUuid',
+      );
     }
   }
 
@@ -610,7 +612,9 @@ class SettingsNotifier extends _$SettingsNotifier {
 
 @riverpod
 SettingsEntity currentSettingsValue(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.settings,
         loading: () => SettingsEntity.defaults(),
         error: (_, __) => SettingsEntity.defaults(),
@@ -619,7 +623,9 @@ SettingsEntity currentSettingsValue(Ref ref) {
 
 @riverpod
 NotificationSettingsEntity notificationSettings(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.notificationSettings,
         loading: () => NotificationSettingsEntity.defaults(),
         error: (_, __) => NotificationSettingsEntity.defaults(),
@@ -628,7 +634,9 @@ NotificationSettingsEntity notificationSettings(Ref ref) {
 
 @riverpod
 BackupSettingsEntity backupSettings(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.backupSettings,
         loading: () => BackupSettingsEntity.defaults(),
         error: (_, __) => BackupSettingsEntity.defaults(),
@@ -637,7 +645,9 @@ BackupSettingsEntity backupSettings(Ref ref) {
 
 @riverpod
 ThemeSettingsEntity themeSettings(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.themeSettings,
         loading: () => ThemeSettingsEntity.defaults(),
         error: (_, __) => ThemeSettingsEntity.defaults(),
@@ -646,7 +656,9 @@ ThemeSettingsEntity themeSettings(Ref ref) {
 
 @riverpod
 AccountSettingsEntity accountSettings(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.accountSettings,
         loading: () => AccountSettingsEntity.defaults(),
         error: (_, __) => AccountSettingsEntity.defaults(),
@@ -655,7 +667,9 @@ AccountSettingsEntity accountSettings(Ref ref) {
 
 @riverpod
 bool notificationsEnabled(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.notificationsEnabled,
         loading: () => true,
         error: (_, __) => true,
@@ -664,7 +678,9 @@ bool notificationsEnabled(Ref ref) {
 
 @riverpod
 bool isDarkMode(Ref ref) {
-  return ref.watch(settingsNotifierProvider).when(
+  return ref
+      .watch(settingsNotifierProvider)
+      .when(
         data: (state) => state.isDarkMode,
         loading: () => false,
         error: (_, __) => false,

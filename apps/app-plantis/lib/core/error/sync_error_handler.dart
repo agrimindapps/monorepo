@@ -153,10 +153,9 @@ class SyncErrorHandler {
   Stream<String> get recoveryStream => _recoveryController.stream;
   List<SyncError> get errorHistory => List.unmodifiable(_errorHistory);
 
-  bool get hasRecentErrors =>
-      _errorHistory
-          .where((e) => DateTime.now().difference(e.timestamp).inMinutes < 5)
-          .isNotEmpty;
+  bool get hasRecentErrors => _errorHistory
+      .where((e) => DateTime.now().difference(e.timestamp).inMinutes < 5)
+      .isNotEmpty;
 
   /// Inicializa o handler
   void initialize() {
@@ -470,10 +469,9 @@ class SyncErrorHandler {
   /// Obtém estatísticas de erro
   Map<String, dynamic> getErrorStats() {
     final now = DateTime.now();
-    final last24h =
-        _errorHistory
-            .where((e) => now.difference(e.timestamp).inHours < 24)
-            .toList();
+    final last24h = _errorHistory
+        .where((e) => now.difference(e.timestamp).inHours < 24)
+        .toList();
 
     final byType = <SyncErrorType, int>{};
     final bySeverity = <SyncErrorSeverity, int>{};

@@ -1,8 +1,9 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/campo_minado_game_notifier.dart';
 import '../widgets/game_header_widget.dart';
-import '../widgets/minefield_widget.dart';
+import '../game/minesweeper_game.dart';
 import '../widgets/game_over_dialog.dart';
 import '../widgets/achievements_dialog.dart';
 import '../../domain/entities/enums.dart';
@@ -17,6 +18,8 @@ class CampoMinadoPage extends ConsumerStatefulWidget {
 
 class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
     with WidgetsBindingObserver {
+  late MinesweeperGame _game;
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +27,15 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
 
     // Initialize local data source
     _initializeDataSource();
+    
+    _game = MinesweeperGame(
+      onCellTap: (row, col) {
+        ref.read(campoMinadoGameProvider.notifier).revealCell(row, col);
+      },
+      onCellLongPress: (row, col) {
+        ref.read(campoMinadoGameProvider.notifier).toggleFlag(row, col);
+      },
+    );
   }
 
   @override
@@ -53,6 +65,11 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
 
   @override
   Widget build(BuildContext context) {
+    final gameState = ref.watch(campoMinadoGameProvider);
+    
+    // Update game state
+    _game.updateState(gameState);
+
     // Listen to game state for game over dialog
     ref.listen<GameStatus>(
       campoMinadoGameProvider.select((state) => state.status),
@@ -107,14 +124,9 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
               // Main minefield grid
               Expanded(
                 child: Center(
-                  child: SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: 600,
-                        maxHeight: 800,
-                      ),
-                      child: const MinefieldWidget(),
-                    ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: GameWidget(game: _game),
                   ),
                 ),
               ),

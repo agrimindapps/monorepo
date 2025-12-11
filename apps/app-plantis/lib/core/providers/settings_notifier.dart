@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/services/plantis_notification_service.dart';
 import '../../features/settings/domain/entities/settings_entity.dart';
@@ -18,9 +18,7 @@ ISettingsRepository settingsRepository(Ref ref) {
 
 /// Provider do serviço de notificações
 @riverpod
-PlantisNotificationService plantisNotificationService(
-  Ref ref,
-) {
+PlantisNotificationService plantisNotificationService(Ref ref) {
   return PlantisNotificationService();
 }
 
@@ -62,19 +60,18 @@ class Settings extends _$Settings {
   Future<void> _loadSettings() async {
     final result = await _repository.loadSettings();
 
-    result.fold(
-      (Failure failure) => throw Exception(failure.message),
-      (SettingsEntity settings) {
-        state = state.copyWith(settings: settings);
-      },
-    );
+    result.fold((Failure failure) => throw Exception(failure.message), (
+      SettingsEntity settings,
+    ) {
+      state = state.copyWith(settings: settings);
+    });
   }
 
   /// Sincroniza com services externos
   Future<void> _syncWithServices() async {
     try {
-      final hasPermissions =
-          await _notificationService.areNotificationsEnabled();
+      final hasPermissions = await _notificationService
+          .areNotificationsEnabled();
 
       if (state.settings.notifications.permissionsGranted != hasPermissions) {
         await updateNotificationSettings(
@@ -109,15 +106,14 @@ class Settings extends _$Settings {
     try {
       final result = await _repository.saveSettings(newSettings);
 
-      result.fold(
-        (Failure failure) => throw Exception(failure.message),
-        (void _) {
-          state = state
-              .copyWith(settings: newSettings, isLoading: false)
-              .withSuccess('Configurações salvas com sucesso');
-          _applyCascadeEffects(newSettings);
-        },
-      );
+      result.fold((Failure failure) => throw Exception(failure.message), (
+        void _,
+      ) {
+        state = state
+            .copyWith(settings: newSettings, isLoading: false)
+            .withSuccess('Configurações salvas com sucesso');
+        _applyCascadeEffects(newSettings);
+      });
     } catch (e) {
       state = state
           .copyWith(isLoading: false)
@@ -285,12 +281,11 @@ class Settings extends _$Settings {
     try {
       final exportResult = await _repository.exportSettings();
 
-      exportResult.fold(
-        (Failure failure) => throw Exception(failure.message),
-        (Map<String, dynamic> data) {
-          state = state.withSuccess('Configurações incluídas no próximo backup');
-        },
-      );
+      exportResult.fold((Failure failure) => throw Exception(failure.message), (
+        Map<String, dynamic> data,
+      ) {
+        state = state.withSuccess('Configurações incluídas no próximo backup');
+      });
     } catch (e) {
       state = state.withError('Erro ao preparar backup: $e');
     }
@@ -303,16 +298,15 @@ class Settings extends _$Settings {
     try {
       final result = await _repository.resetToDefaults();
 
-      result.fold(
-        (Failure failure) => throw Exception(failure.message),
-        (void _) async {
-          final newSettings = SettingsEntity.defaults();
-          state = state
-              .copyWith(settings: newSettings, isLoading: false)
-              .withSuccess('Configurações resetadas com sucesso');
-          _syncWithServices();
-        },
-      );
+      result.fold((Failure failure) => throw Exception(failure.message), (
+        void _,
+      ) async {
+        final newSettings = SettingsEntity.defaults();
+        state = state
+            .copyWith(settings: newSettings, isLoading: false)
+            .withSuccess('Configurações resetadas com sucesso');
+        _syncWithServices();
+      });
     } catch (e) {
       state = state.copyWith(isLoading: false).withError('Erro inesperado: $e');
     }

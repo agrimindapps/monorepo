@@ -96,11 +96,7 @@ class FeedbackService {
   }
 
   /// Atualiza progresso de um feedback ativo
-  void updateProgress(
-    String key, {
-    required double progress,
-    String? message,
-  }) {
+  void updateProgress(String key, {required double progress, String? message}) {
     final controller = _activeControllers[key];
     if (controller != null) {
       controller.updateProgress(progress, message: message);
@@ -156,10 +152,7 @@ class FeedbackService {
     _notifyListeners();
   }
 
-  void _showFeedback(
-    BuildContext context,
-    FeedbackController controller,
-  ) {
+  void _showFeedback(BuildContext context, FeedbackController controller) {
     final key = DateTime.now().millisecondsSinceEpoch.toString();
     _activeControllers[key] = controller;
     if (controller.duration != null) {
@@ -235,8 +228,7 @@ class FeedbackController extends ChangeNotifier {
     this.onAction,
     this.onComplete,
     double progress = 0.0,
-  }) :
-       _message = message,
+  }) : _message = message,
        _progress = progress,
        _state = FeedbackState.active;
 
@@ -495,10 +487,9 @@ class _FeedbackWidgetState extends State<FeedbackWidget>
         width: 24,
         height: 24,
         child: CircularProgressIndicator(
-          value:
-              widget.controller.progressType == ProgressType.determinate
-                  ? widget.controller.progress
-                  : null,
+          value: widget.controller.progressType == ProgressType.determinate
+              ? widget.controller.progress
+              : null,
           strokeWidth: 3,
           valueColor: AlwaysStoppedAnimation<Color>(color),
         ),

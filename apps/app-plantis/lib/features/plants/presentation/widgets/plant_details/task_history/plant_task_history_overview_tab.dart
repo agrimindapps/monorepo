@@ -149,12 +149,11 @@ class _PlantTaskHistoryOverviewTabState
     final currentMonth = DateTime(now.year, now.month);
     final nextMonth = DateTime(now.year, now.month + 1);
 
-    final monthTasks =
-        widget.completedTasks.where((task) {
-          if (task.completedDate == null) return false;
-          return task.completedDate!.isAfter(currentMonth) &&
-              task.completedDate!.isBefore(nextMonth);
-        }).toList();
+    final monthTasks = widget.completedTasks.where((task) {
+      if (task.completedDate == null) return false;
+      return task.completedDate!.isAfter(currentMonth) &&
+          task.completedDate!.isBefore(nextMonth);
+    }).toList();
 
     final typeCount = <TaskType, int>{};
     for (final task in monthTasks) {
@@ -164,14 +163,13 @@ class _PlantTaskHistoryOverviewTabState
     return {
       'total': monthTasks.length,
       'byType': typeCount,
-      'daysWithCare':
-          monthTasks
-              .map(
-                (t) =>
-                    '${t.completedDate!.year}-${t.completedDate!.month}-${t.completedDate!.day}',
-              )
-              .toSet()
-              .length,
+      'daysWithCare': monthTasks
+          .map(
+            (t) =>
+                '${t.completedDate!.year}-${t.completedDate!.month}-${t.completedDate!.day}',
+          )
+          .toSet()
+          .length,
     };
   }
 

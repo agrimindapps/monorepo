@@ -1,10 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../plantis_database.dart';
 import '../repositories/comments_drift_repository.dart';
-import '../repositories/plant_tasks_drift_repository.dart';
 import '../repositories/plant_images_drift_repository.dart';
+import '../repositories/plant_tasks_drift_repository.dart';
 import '../repositories/plants_drift_repository.dart';
 import '../repositories/spaces_drift_repository.dart';
 import '../repositories/tasks_drift_repository.dart';
@@ -97,7 +96,9 @@ final pendingTasksProvider = FutureProvider<List<Task>>((ref) async {
 });
 
 /// Provider para itens pendentes de sincronização
-final pendingSyncItemsProvider = FutureProvider<List<PlantsSyncQueueData>>((ref) async {
+final pendingSyncItemsProvider = FutureProvider<List<PlantsSyncQueueData>>((
+  ref,
+) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPendingSyncItems();
 });
@@ -112,7 +113,10 @@ final pendingSyncItemsProvider = FutureProvider<List<PlantsSyncQueueData>>((ref)
 /// ```dart
 /// final spacePlantsAsync = ref.watch(plantsBySpaceProvider(spaceId: 1));
 /// ```
-final plantsBySpaceProvider = FutureProvider.family<List<Plant>, int>((ref, spaceId) async {
+final plantsBySpaceProvider = FutureProvider.family<List<Plant>, int>((
+  ref,
+  spaceId,
+) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPlantsBySpace(spaceId);
 });
@@ -123,7 +127,10 @@ final plantsBySpaceProvider = FutureProvider.family<List<Plant>, int>((ref, spac
 /// ```dart
 /// final configAsync = ref.watch(plantConfigProvider(plantId: 1));
 /// ```
-final plantConfigProvider = FutureProvider.family<PlantConfig?, int>((ref, plantId) async {
+final plantConfigProvider = FutureProvider.family<PlantConfig?, int>((
+  ref,
+  plantId,
+) async {
   final db = ref.watch(plantisDatabaseProvider);
   return db.getPlantConfig(plantId);
 });
@@ -142,7 +149,9 @@ final plantsDriftRepositoryProvider = Provider<PlantsDriftRepository>((ref) {
   return PlantsDriftRepository(db);
 });
 
-final plantTasksDriftRepositoryProvider = Provider<PlantTasksDriftRepository>((ref) {
+final plantTasksDriftRepositoryProvider = Provider<PlantTasksDriftRepository>((
+  ref,
+) {
   final db = ref.watch(plantisDatabaseProvider);
   return PlantTasksDriftRepository(db);
 });
@@ -152,12 +161,16 @@ final spacesDriftRepositoryProvider = Provider<SpacesDriftRepository>((ref) {
   return SpacesDriftRepository(db);
 });
 
-final commentsDriftRepositoryProvider = Provider<CommentsDriftRepository>((ref) {
+final commentsDriftRepositoryProvider = Provider<CommentsDriftRepository>((
+  ref,
+) {
   final db = ref.watch(plantisDatabaseProvider);
   return CommentsDriftRepository(db);
 });
 
-final plantImagesDriftRepositoryProvider = Provider<PlantImagesDriftRepository>((ref) {
-  final db = ref.watch(plantisDatabaseProvider);
-  return PlantImagesDriftRepository(db);
-});
+final plantImagesDriftRepositoryProvider = Provider<PlantImagesDriftRepository>(
+  (ref) {
+    final db = ref.watch(plantisDatabaseProvider);
+    return PlantImagesDriftRepository(db);
+  },
+);

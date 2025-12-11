@@ -23,10 +23,10 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
     required PlantCommentsRepository commentsRepository,
     required TasksRepository tasksRepository,
     required SpacesRepository spacesRepository,
-  })  : _plantsRepository = plantsRepository,
-        _commentsRepository = commentsRepository,
-        _tasksRepository = tasksRepository,
-        _spacesRepository = spacesRepository;
+  }) : _plantsRepository = plantsRepository,
+       _commentsRepository = commentsRepository,
+       _tasksRepository = tasksRepository,
+       _spacesRepository = spacesRepository;
 
   @override
   Future<List<PlantExportData>> getUserPlantsData(String userId) async {
@@ -36,44 +36,39 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
       return plantsResult.fold(
         (failure) =>
             throw Exception('Erro ao buscar plantas: ${failure.message}'),
-        (plants) =>
-            plants
-                .map(
-                  (plant) => PlantExportData(
-                    id: plant.id,
-                    name: plant.name,
-                    species: plant.species,
-                    spaceId: plant.spaceId,
-                    imageUrls: plant.imageUrls,
-                    plantingDate: plant.plantingDate,
-                    notes: plant.notes,
-                    config:
-                        plant.config != null
-                            ? PlantConfigExportData(
-                              wateringIntervalDays:
-                                  plant.config!.wateringIntervalDays,
-                              fertilizingIntervalDays:
-                                  plant.config!.fertilizingIntervalDays,
-                              pruningIntervalDays:
-                                  plant.config!.pruningIntervalDays,
-                              lightRequirement: plant.config!.lightRequirement,
-                              waterAmount: plant.config!.waterAmount,
-                              soilType: plant.config!.soilType,
-                              enableWateringCare:
-                                  plant.config!.enableWateringCare,
-                              lastWateringDate: plant.config!.lastWateringDate,
-                              enableFertilizerCare:
-                                  plant.config!.enableFertilizerCare,
-                              lastFertilizerDate:
-                                  plant.config!.lastFertilizerDate,
-                            )
-                            : null,
-                    isFavorited: plant.isFavorited,
-                    createdAt: plant.createdAt,
-                    updatedAt: plant.updatedAt,
-                  ),
-                )
-                .toList(),
+        (plants) => plants
+            .map(
+              (plant) => PlantExportData(
+                id: plant.id,
+                name: plant.name,
+                species: plant.species,
+                spaceId: plant.spaceId,
+                imageUrls: plant.imageUrls,
+                plantingDate: plant.plantingDate,
+                notes: plant.notes,
+                config: plant.config != null
+                    ? PlantConfigExportData(
+                        wateringIntervalDays:
+                            plant.config!.wateringIntervalDays,
+                        fertilizingIntervalDays:
+                            plant.config!.fertilizingIntervalDays,
+                        pruningIntervalDays: plant.config!.pruningIntervalDays,
+                        lightRequirement: plant.config!.lightRequirement,
+                        waterAmount: plant.config!.waterAmount,
+                        soilType: plant.config!.soilType,
+                        enableWateringCare: plant.config!.enableWateringCare,
+                        lastWateringDate: plant.config!.lastWateringDate,
+                        enableFertilizerCare:
+                            plant.config!.enableFertilizerCare,
+                        lastFertilizerDate: plant.config!.lastFertilizerDate,
+                      )
+                    : null,
+                isFavorited: plant.isFavorited,
+                createdAt: plant.createdAt,
+                updatedAt: plant.updatedAt,
+              ),
+            )
+            .toList(),
       );
     } catch (e) {
       throw Exception('Erro ao buscar dados de plantas: ${e.toString()}');
@@ -92,14 +87,11 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
         (tasks) {
           // Create plant ID to name map for lookup
           final plantNameMap = <String, String>{};
-          plantsResult.fold(
-            (_) => <String, String>{},
-            (plants) {
-              for (final plant in plants) {
-                plantNameMap[plant.id] = plant.name;
-              }
-            },
-          );
+          plantsResult.fold((_) => <String, String>{}, (plants) {
+            for (final plant in plants) {
+              plantNameMap[plant.id] = plant.name;
+            }
+          });
 
           return tasks
               .map(
@@ -109,8 +101,7 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
                   description: task.description,
                   plantId: task.plantId,
                   plantName:
-                      plantNameMap[task.plantId] ??
-                      'Planta ID ${task.plantId}',
+                      plantNameMap[task.plantId] ?? 'Planta ID ${task.plantId}',
                   type: task.type.name,
                   status: task.status.name,
                   priority: task.priority.name,
@@ -139,18 +130,17 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
       return spacesResult.fold(
         (failure) =>
             throw Exception('Erro ao buscar espaços: ${failure.message}'),
-        (spaces) =>
-            spaces
-                .map(
-                  (space) => SpaceExportData(
-                    id: space.id,
-                    name: space.name,
-                    description: space.description,
-                    createdAt: space.createdAt,
-                    updatedAt: space.updatedAt,
-                  ),
-                )
-                .toList(),
+        (spaces) => spaces
+            .map(
+              (space) => SpaceExportData(
+                id: space.id,
+                name: space.name,
+                description: space.description,
+                createdAt: space.createdAt,
+                updatedAt: space.updatedAt,
+              ),
+            )
+            .toList(),
       );
     } catch (e) {
       throw Exception('Erro ao buscar dados de espaços: ${e.toString()}');
@@ -178,9 +168,7 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
                   plantName: plant.name,
                   photoUrls: plant.imageUrls,
                   takenAt: plant.createdAt,
-                  caption:
-                      plant.notes ??
-                      'Fotos de ${plant.name}',
+                  caption: plant.notes ?? 'Fotos de ${plant.name}',
                 ),
               );
             }
@@ -214,9 +202,8 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
 
           // Fetch comments for each plant
           for (final plant in plants) {
-            final commentsResult = await _commentsRepository.getCommentsForPlant(
-              plant.id,
-            );
+            final commentsResult = await _commentsRepository
+                .getCommentsForPlant(plant.id);
 
             commentsResult.fold(
               (failure) {
@@ -229,7 +216,8 @@ class PlantsExportLocalDataSource implements PlantsExportDataSource {
                       id: comment.id,
                       plantId: comment.plantId ?? plant.id,
                       plantName:
-                          plantNameMap[comment.plantId ?? plant.id] ?? plant.name,
+                          plantNameMap[comment.plantId ?? plant.id] ??
+                          plant.name,
                       content: comment.conteudo,
                       createdAt: comment.createdAt ?? comment.dataCriacao,
                       updatedAt: comment.updatedAt ?? comment.dataAtualizacao,

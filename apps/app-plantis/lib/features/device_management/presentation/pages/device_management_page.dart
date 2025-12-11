@@ -292,7 +292,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
     // Usar o limite centralizado do provider
     final maxDevices = ref.watch(maxDevicesProvider);
     final effectiveMaxDevices = maxDevices == -1 ? 3 : maxDevices;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -384,12 +384,10 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
     if (!success) {
       if (!context.mounted) return;
       final deviceStateAsync = ref.read(deviceManagementNotifierProvider);
-      final errorMsg = deviceStateAsync.value?.errorMessage ?? 'Falha na validação';
+      final errorMsg =
+          deviceStateAsync.value?.errorMessage ?? 'Falha na validação';
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMsg),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(errorMsg), backgroundColor: Colors.red),
       );
     }
   }
@@ -437,7 +435,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage>
     // Usar o limite centralizado do provider
     final maxDevices = ref.watch(maxDevicesProvider);
     final effectiveMaxDevices = maxDevices == -1 ? 3 : maxDevices;
-    
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(

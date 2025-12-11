@@ -20,24 +20,27 @@ class PlantTasksHelper {
       if (!tasksAsync.hasValue) return 0;
 
       final tasksState = tasksAsync.value!;
-      
+
       // DEBUG: Log para investigar o problema
-      debugPrint('🔍 PlantTasksHelper.getPendingTasksCount - plantId: $plantId');
+      debugPrint(
+        '🔍 PlantTasksHelper.getPendingTasksCount - plantId: $plantId',
+      );
       debugPrint('🔍 Total de tarefas no state: ${tasksState.allTasks.length}');
-      
-      final plantTasks = tasksState.allTasks
-          .whereType<task_entity.Task>()
-          .where((task) {
-            final matches = task.plantId == plantId && !task.isDeleted;
-            if (task.plantId.isNotEmpty) {
-              debugPrint('🔍 Task "${task.title}" plantId: ${task.plantId}, match: $matches, isDeleted: ${task.isDeleted}, status: ${task.status}');
-            }
-            return matches;
-          })
-          .toList();
-          
+
+      final plantTasks = tasksState.allTasks.whereType<task_entity.Task>().where((
+        task,
+      ) {
+        final matches = task.plantId == plantId && !task.isDeleted;
+        if (task.plantId.isNotEmpty) {
+          debugPrint(
+            '🔍 Task "${task.title}" plantId: ${task.plantId}, match: $matches, isDeleted: ${task.isDeleted}, status: ${task.status}',
+          );
+        }
+        return matches;
+      }).toList();
+
       debugPrint('🔍 Tarefas filtradas para planta: ${plantTasks.length}');
-      
+
       final pendingTasks = plantTasks
           .where(
             (task) =>

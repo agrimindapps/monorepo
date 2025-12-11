@@ -45,19 +45,13 @@ abstract class ITaskFilterService {
   );
 
   /// Returns high priority tasks (high or urgent)
-  List<task_entity.Task> getHighPriorityTasks(
-    List<task_entity.Task> tasks,
-  );
+  List<task_entity.Task> getHighPriorityTasks(List<task_entity.Task> tasks);
 
   /// Returns medium priority tasks
-  List<task_entity.Task> getMediumPriorityTasks(
-    List<task_entity.Task> tasks,
-  );
+  List<task_entity.Task> getMediumPriorityTasks(List<task_entity.Task> tasks);
 
   /// Returns low priority tasks
-  List<task_entity.Task> getLowPriorityTasks(
-    List<task_entity.Task> tasks,
-  );
+  List<task_entity.Task> getLowPriorityTasks(List<task_entity.Task> tasks);
 }
 
 /// Implementation of task filtering service
@@ -66,9 +60,8 @@ abstract class ITaskFilterService {
 class TaskFilterService implements ITaskFilterService {
   final TaskFilterStrategyRegistry _strategyRegistry;
 
-  TaskFilterService({
-    TaskFilterStrategyRegistry? strategyRegistry,
-  }) : _strategyRegistry = strategyRegistry ?? TaskFilterStrategyRegistry();
+  TaskFilterService({TaskFilterStrategyRegistry? strategyRegistry})
+    : _strategyRegistry = strategyRegistry ?? TaskFilterStrategyRegistry();
 
   @override
   List<task_entity.Task> applyFilters(
@@ -167,9 +160,7 @@ class TaskFilterService implements ITaskFilterService {
   }
 
   @override
-  List<task_entity.Task> getHighPriorityTasks(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> getHighPriorityTasks(List<task_entity.Task> tasks) {
     return tasks
         .where(
           (t) =>
@@ -180,18 +171,14 @@ class TaskFilterService implements ITaskFilterService {
   }
 
   @override
-  List<task_entity.Task> getMediumPriorityTasks(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> getMediumPriorityTasks(List<task_entity.Task> tasks) {
     return tasks
         .where((t) => t.priority == task_entity.TaskPriority.medium)
         .toList();
   }
 
   @override
-  List<task_entity.Task> getLowPriorityTasks(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> getLowPriorityTasks(List<task_entity.Task> tasks) {
     return tasks
         .where((t) => t.priority == task_entity.TaskPriority.low)
         .toList();
@@ -207,11 +194,17 @@ class TaskFilterService implements ITaskFilterService {
       }
 
       // Then by priority
-      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(a.priority);
-      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(b.priority);
+      final aPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        a.priority,
+      );
+      final bPriorityIndex = task_entity.TaskPriority.values.indexOf(
+        b.priority,
+      );
 
       if (aPriorityIndex != bPriorityIndex) {
-        return bPriorityIndex.compareTo(aPriorityIndex); // Higher priority first
+        return bPriorityIndex.compareTo(
+          aPriorityIndex,
+        ); // Higher priority first
       }
 
       // Finally by due date

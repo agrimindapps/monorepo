@@ -1,4 +1,3 @@
-
 import '../data/models/conflict_history_model.dart';
 import 'conflict_history_drift_service.dart';
 

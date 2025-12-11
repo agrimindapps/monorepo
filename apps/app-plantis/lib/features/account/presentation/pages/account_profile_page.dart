@@ -92,10 +92,9 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                                       'Seus dados estão armazenados apenas neste dispositivo. Para maior segurança e sincronização entre dispositivos, recomendamos criar uma conta.',
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
-                                            color:
-                                                theme
-                                                    .colorScheme
-                                                    .onSurfaceVariant,
+                                            color: theme
+                                                .colorScheme
+                                                .onSurfaceVariant,
                                           ),
                                     ),
                                     const SizedBox(height: 16),
@@ -144,13 +143,11 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                           ],
                         );
                       },
-                      loading:
-                          () =>
-                              const Center(child: CircularProgressIndicator()),
-                      error:
-                          (error, stack) => Center(
-                            child: Text('Erro ao carregar perfil: $error'),
-                          ),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
+                      error: (error, stack) => Center(
+                        child: Text('Erro ao carregar perfil: $error'),
+                      ),
                     ),
               ), // SingleChildScrollView
             ), // Expanded

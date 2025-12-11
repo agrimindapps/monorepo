@@ -124,6 +124,25 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
     }
   }
 
+  /// Save high score from external source (Flame)
+  Future<void> saveScore(int score) async {
+    if (score > _highScore) {
+      final result = await _saveHighScoreUseCase(score: score);
+      result.fold(
+        (failure) {}, // Ignore failure
+        (_) {
+          _highScore = score;
+          _isNewHighScore = true;
+          // Update state if possible to reflect high score change in UI
+          if (state.value != null) {
+             // We can't easily update the whole state since it's complex, 
+             // but the high score is exposed via getter
+          }
+        },
+      );
+    }
+  }
+
   /// Start a new game with optional mode and difficulty
   Future<void> startGame({
     SnakeGameMode? gameMode,

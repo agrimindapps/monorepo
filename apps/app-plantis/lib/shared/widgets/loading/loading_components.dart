@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'contextual_loading_manager.dart';
@@ -49,10 +48,12 @@ class LoadingUtils {
   static void showSaveLoading(String context, {String? itemName}) {
     showLoadingWithTimeout(
       context,
-      message:
-          itemName != null ? 'Salvando $itemName...' : 'Salvando alterações...',
-      semanticLabel:
-          itemName != null ? 'Salvando $itemName' : 'Salvando alterações',
+      message: itemName != null
+          ? 'Salvando $itemName...'
+          : 'Salvando alterações...',
+      semanticLabel: itemName != null
+          ? 'Salvando $itemName'
+          : 'Salvando alterações',
       type: LoadingType.save,
     );
   }
@@ -61,14 +62,12 @@ class LoadingUtils {
   static void showPurchaseLoading(String context, {String? productName}) {
     showLoadingWithTimeout(
       context,
-      message:
-          productName != null
-              ? 'Processando compra de $productName...'
-              : 'Processando compra...',
-      semanticLabel:
-          productName != null
-              ? 'Processando compra de $productName'
-              : 'Processando compra',
+      message: productName != null
+          ? 'Processando compra de $productName...'
+          : 'Processando compra...',
+      semanticLabel: productName != null
+          ? 'Processando compra de $productName'
+          : 'Processando compra',
       type: LoadingType.purchase,
       timeout: LoadingConstants.longTimeout, // Purchases may take longer
     );
@@ -78,12 +77,12 @@ class LoadingUtils {
   static void showSyncLoading(String context, {String? syncType}) {
     showLoadingWithTimeout(
       context,
-      message:
-          syncType != null
-              ? 'Sincronizando $syncType...'
-              : 'Sincronizando dados...',
-      semanticLabel:
-          syncType != null ? 'Sincronizando $syncType' : 'Sincronizando dados',
+      message: syncType != null
+          ? 'Sincronizando $syncType...'
+          : 'Sincronizando dados...',
+      semanticLabel: syncType != null
+          ? 'Sincronizando $syncType'
+          : 'Sincronizando dados',
       type: LoadingType.sync,
     );
   }

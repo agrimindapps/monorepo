@@ -46,8 +46,12 @@ class PlantisImageServiceAdapter {
   }
 
   /// Pick multiple images (Cross-platform)
-  Future<Either<Failure, List<PickedImage>>> pickMultipleImages({int? maxImages}) async {
-    final result = await _coreImageService.pickMultipleImages(maxImages: maxImages);
+  Future<Either<Failure, List<PickedImage>>> pickMultipleImages({
+    int? maxImages,
+  }) async {
+    final result = await _coreImageService.pickMultipleImages(
+      maxImages: maxImages,
+    );
     return result.toEither();
   }
 
@@ -59,7 +63,9 @@ class PlantisImageServiceAdapter {
     String? uploadType,
     void Function(double progress)? onProgress,
   }) async {
-    final sanitizedFileName = fileName != null ? _sanitizeFileName(fileName) : null;
+    final sanitizedFileName = fileName != null
+        ? _sanitizeFileName(fileName)
+        : null;
 
     final result = await _coreImageService.uploadImage(
       image,

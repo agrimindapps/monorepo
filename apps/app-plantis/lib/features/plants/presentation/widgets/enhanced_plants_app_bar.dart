@@ -217,10 +217,9 @@ class _EnhancedSearchBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border:
-            focusNode.hasFocus
-                ? Border.all(color: PlantisColors.primary, width: 2)
-                : Border.all(color: Colors.transparent),
+        border: focusNode.hasFocus
+            ? Border.all(color: PlantisColors.primary, width: 2)
+            : Border.all(color: Colors.transparent),
       ),
       child: TextField(
         controller: controller,
@@ -236,19 +235,18 @@ class _EnhancedSearchBar extends StatelessWidget {
             Icons.search,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          suffixIcon:
-              searchQuery.isNotEmpty
-                  ? IconButton(
-                    icon: Icon(
-                      Icons.clear,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                    onPressed: () {
-                      controller.clear();
-                      searchDelegate.onClearSearch();
-                    },
-                  )
-                  : null,
+          suffixIcon: searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  onPressed: () {
+                    controller.clear();
+                    searchDelegate.onClearSearch();
+                  },
+                )
+              : null,
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -280,10 +278,9 @@ class _ViewModeToggle extends StatelessWidget {
       ),
       child: IconButton(
         onPressed: () {
-          final newMode =
-              viewMode == AppBarViewMode.list
-                  ? AppBarViewMode.grid
-                  : AppBarViewMode.list;
+          final newMode = viewMode == AppBarViewMode.list
+              ? AppBarViewMode.grid
+              : AppBarViewMode.list;
           viewModeDelegate.onViewModeChanged(newMode);
         },
         icon: AnimatedSwitcher(
@@ -294,10 +291,9 @@ class _ViewModeToggle extends StatelessWidget {
             color: PlantisColors.primary,
           ),
         ),
-        tooltip:
-            viewMode == AppBarViewMode.list
-                ? 'Visualizar em grade'
-                : 'Visualizar em lista',
+        tooltip: viewMode == AppBarViewMode.list
+            ? 'Visualizar em grade'
+            : 'Visualizar em lista',
       ),
     );
   }

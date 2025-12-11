@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/domain/entities/plant.dart';
 import '../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -97,8 +97,9 @@ class PlantsState {
 
   /// Groups plants by spaces for grouped view
   Map<String?, List<Plant>> get plantsGroupedBySpaces {
-    final plantsToGroup =
-        searchQuery.isNotEmpty ? searchResults : filteredPlants;
+    final plantsToGroup = searchQuery.isNotEmpty
+        ? searchResults
+        : filteredPlants;
     final Map<String?, List<Plant>> groupedPlants = {};
 
     for (final plant in plantsToGroup) {
@@ -272,13 +273,16 @@ class PlantsState {
   bool _isPlantInGoodCondition(Plant plant, DateTime now) {
     final waterGood =
         !_checkWaterStatus(plant, now, 0) && !_checkWaterStatus(plant, now, 2);
-    final fertilizerGood = !_checkFertilizerStatus(plant, now, 0) &&
+    final fertilizerGood =
+        !_checkFertilizerStatus(plant, now, 0) &&
         !_checkFertilizerStatus(plant, now, 2);
 
     final config = plant.config;
-    final hasWaterCare = config?.enableWateringCare == true ||
+    final hasWaterCare =
+        config?.enableWateringCare == true ||
         config?.wateringIntervalDays != null;
-    final hasFertilizerCare = config?.enableFertilizerCare == true ||
+    final hasFertilizerCare =
+        config?.enableFertilizerCare == true ||
         config?.fertilizingIntervalDays != null;
     return (hasWaterCare ? waterGood : true) &&
         (hasFertilizerCare ? fertilizerGood : true);
@@ -441,16 +445,15 @@ class PlantsNotifier extends _$PlantsNotifier {
     if (_authStateNotifier.isInitialized &&
         _authStateNotifier.currentUser != null) {
       final result = await _getPlantsUseCase.call(const NoParams());
-      return result.fold(
-        (failure) => PlantsState(error: failure.message),
-        (plants) {
-          final sortedPlants = _sortPlants(plants, SortBy.newest);
-          return PlantsState(
-            allPlants: sortedPlants,
-            // filteredPlants computed automatically via getter
-          );
-        },
-      );
+      return result.fold((failure) => PlantsState(error: failure.message), (
+        plants,
+      ) {
+        final sortedPlants = _sortPlants(plants, SortBy.newest);
+        return PlantsState(
+          allPlants: sortedPlants,
+          // filteredPlants computed automatically via getter
+        );
+      });
     }
 
     return const PlantsState();
@@ -626,9 +629,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       final currentState = state.value ?? const PlantsState();
       final shouldShowLoading = currentState.allPlants.isEmpty;
       if (shouldShowLoading) {
-        state = AsyncData(
-          currentState.copyWith(isLoading: true, error: null),
-        );
+        state = AsyncData(currentState.copyWith(isLoading: true, error: null));
       }
       final result = await _getPlantsUseCase.call(const NoParams());
 
@@ -728,10 +729,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
     if (query.trim().isEmpty) {
       state = AsyncData(
-        currentState.copyWith(
-          isSearching: false,
-          searchQuery: '',
-        ),
+        currentState.copyWith(isSearching: false, searchQuery: ''),
       );
       return;
     }
@@ -741,17 +739,12 @@ class PlantsNotifier extends _$PlantsNotifier {
     // via the getter, so we just need to set the searchQuery
     if (currentState.allPlants.isNotEmpty) {
       state = AsyncData(
-        currentState.copyWith(
-          isSearching: true,
-          searchQuery: query,
-        ),
+        currentState.copyWith(isSearching: true, searchQuery: query),
       );
 
       // Simulate async search completion
       final newState = state.value ?? const PlantsState();
-      state = AsyncData(
-        newState.copyWith(isSearching: false),
-      );
+      state = AsyncData(newState.copyWith(isSearching: false));
       return;
     }
 
@@ -868,8 +861,9 @@ class PlantsNotifier extends _$PlantsNotifier {
       },
       (_) {
         final newState = state.value ?? const PlantsState();
-        final updatedPlants =
-            newState.allPlants.where((plant) => plant.id != id).toList();
+        final updatedPlants = newState.allPlants
+            .where((plant) => plant.id != id)
+            .toList();
 
         state = AsyncData(
           newState.copyWith(
@@ -899,10 +893,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       final sortedPlants = _sortPlants(currentState.allPlants, sort);
 
       state = AsyncData(
-        currentState.copyWith(
-          allPlants: sortedPlants,
-          sortBy: sort,
-        ),
+        currentState.copyWith(allPlants: sortedPlants, sortBy: sort),
       );
     }
   }
@@ -948,10 +939,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         loadInitialData();
       } else {
         state = AsyncData(
-          currentState.copyWith(
-            searchQuery: '',
-            isSearching: false,
-          ),
+          currentState.copyWith(searchQuery: '', isSearching: false),
         );
 
         if (kDebugMode) {
@@ -1097,8 +1085,9 @@ class PlantsNotifier extends _$PlantsNotifier {
             ? failure.message
             : 'Dados não encontrados';
       default:
-        final errorContext =
-            kDebugMode ? ' (${failure.runtimeType}: ${failure.message})' : '';
+        final errorContext = kDebugMode
+            ? ' (${failure.runtimeType}: ${failure.message})'
+            : '';
         return 'Ops! Algo deu errado$errorContext';
     }
   }

@@ -32,7 +32,9 @@ class PromoNavigationBar extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: Container(
-          color: const Color(0xFF0F2F21).withValues(alpha: 0.8), // Deep Forest Green with opacity
+          color: const Color(
+            0xFF0F2F21,
+          ).withValues(alpha: 0.8), // Deep Forest Green with opacity
           padding: EdgeInsets.symmetric(
             horizontal: isMobile ? 16 : screenSize.width * 0.08,
             vertical: 16,
@@ -58,7 +60,10 @@ class PromoNavigationBar extends StatelessWidget {
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
-                colors: [Color(0xFF10B981), Color(0xFF059669)], // Emerald Gradient
+                colors: [
+                  Color(0xFF10B981),
+                  Color(0xFF059669),
+                ], // Emerald Gradient
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
@@ -120,64 +125,60 @@ class PromoNavigationBar extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder:
-          (context) => Container(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildMobileMenuItem(
-                  'Funcionalidades',
-                  () => _navigateToSection(featuresKey),
-                  context,
-                ),
-                _buildMobileMenuItem(
-                  'Como Funciona',
-                  () => _navigateToSection(howItWorksKey),
-                  context,
-                ),
-                _buildMobileMenuItem(
-                  'Depoimentos',
-                  () => _navigateToSection(testimonialsKey),
-                  context,
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      _navigateToLogin(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Entrar',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
+            const SizedBox(height: 20),
+            _buildMobileMenuItem(
+              'Funcionalidades',
+              () => _navigateToSection(featuresKey),
+              context,
+            ),
+            _buildMobileMenuItem(
+              'Como Funciona',
+              () => _navigateToSection(howItWorksKey),
+              context,
+            ),
+            _buildMobileMenuItem(
+              'Depoimentos',
+              () => _navigateToSection(testimonialsKey),
+              context,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _navigateToLogin(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Entrar',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -198,7 +199,11 @@ class PromoNavigationBar extends StatelessWidget {
         Navigator.pop(context);
         onTap();
       },
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 16,
+        color: Colors.white54,
+      ),
     );
   }
 
@@ -297,10 +302,9 @@ class PromoNavigationBar extends StatelessWidget {
             vertical: isSmallDesktop ? 6 : 8,
           ),
           decoration: BoxDecoration(
-            color:
-                isActive
-                    ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                    : Colors.transparent,
+            color: isActive
+                ? const Color(0xFF10B981).withValues(alpha: 0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(

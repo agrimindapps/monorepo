@@ -452,10 +452,11 @@ class _StatusBadge extends StatelessWidget {
           SizedBox(width: isCompact ? 4 : 6),
           Text(
             text,
-            style: (isCompact
-                    ? theme.textTheme.bodySmall
-                    : theme.textTheme.bodyMedium)
-                ?.copyWith(color: color, fontWeight: FontWeight.w600),
+            style:
+                (isCompact
+                        ? theme.textTheme.bodySmall
+                        : theme.textTheme.bodyMedium)
+                    ?.copyWith(color: color, fontWeight: FontWeight.w600),
           ),
         ],
       ),

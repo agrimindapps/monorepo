@@ -326,19 +326,18 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
           const SizedBox(width: 8),
           ElevatedButton.icon(
             onPressed: _isRetrying ? null : () => _handleRetry(),
-            icon:
-                _isRetrying
-                    ? SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Theme.of(context).colorScheme.onPrimary,
-                        ),
+            icon: _isRetrying
+                ? SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Theme.of(context).colorScheme.onPrimary,
                       ),
-                    )
-                    : const Icon(Icons.refresh, size: 18),
+                    ),
+                  )
+                : const Icon(Icons.refresh, size: 18),
             label: Text(
               _isRetrying
                   ? 'Tentando...'
@@ -370,14 +369,13 @@ class _ErrorRecoveryState extends State<ErrorRecovery>
           ),
         TextButton.icon(
           onPressed: _isRetrying ? null : () => _handleRetry(),
-          icon:
-              _isRetrying
-                  ? const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 1.5),
-                  )
-                  : const Icon(Icons.refresh, size: 14),
+          icon: _isRetrying
+              ? const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(strokeWidth: 1.5),
+                )
+              : const Icon(Icons.refresh, size: 14),
           label: Text(
             _isRetrying ? 'Tentando...' : 'Tentar',
             style: const TextStyle(fontSize: 12),
@@ -445,10 +443,9 @@ class NetworkErrorRecovery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ErrorRecovery(
-      errorMessage:
-          isOffline
-              ? 'Você está offline. Algumas funcionalidades podem estar limitadas.'
-              : 'Problema de conexão com a internet.',
+      errorMessage: isOffline
+          ? 'Você está offline. Algumas funcionalidades podem estar limitadas.'
+          : 'Problema de conexão com a internet.',
       onRetry: onRetry,
       style: ErrorRecoveryStyle.banner,
       customErrorWidget: _buildNetworkErrorWidget(context),
@@ -461,10 +458,9 @@ class NetworkErrorRecovery extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            isOffline
-                ? Colors.orange.withValues(alpha: 0.1)
-                : theme.colorScheme.errorContainer,
+        color: isOffline
+            ? Colors.orange.withValues(alpha: 0.1)
+            : theme.colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -484,10 +480,9 @@ class NetworkErrorRecovery extends StatelessWidget {
                   isOffline ? 'Modo Offline' : 'Sem Conexão',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color:
-                        isOffline
-                            ? Colors.orange
-                            : theme.colorScheme.onErrorContainer,
+                    color: isOffline
+                        ? Colors.orange
+                        : theme.colorScheme.onErrorContainer,
                   ),
                 ),
                 Text(
@@ -495,10 +490,9 @@ class NetworkErrorRecovery extends StatelessWidget {
                       ? 'Trabalhando com dados locais'
                       : 'Verifique sua conexão com a internet',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color:
-                        isOffline
-                            ? Colors.orange
-                            : theme.colorScheme.onErrorContainer,
+                    color: isOffline
+                        ? Colors.orange
+                        : theme.colorScheme.onErrorContainer,
                   ),
                 ),
               ],

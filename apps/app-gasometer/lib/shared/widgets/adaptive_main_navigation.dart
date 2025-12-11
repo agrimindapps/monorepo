@@ -15,8 +15,12 @@ import 'responsive_sidebar.dart';
 /// Main adaptive navigation shell that changes layout based on screen size
 class AdaptiveMainNavigation extends StatefulWidget {
   
-  const AdaptiveMainNavigation({super.key, required this.child});
-  final Widget child;
+  const AdaptiveMainNavigation({
+    super.key,
+    required this.navigationShell,
+  });
+
+  final StatefulNavigationShell navigationShell;
 
   @override
   State<AdaptiveMainNavigation> createState() => _AdaptiveMainNavigationState();
@@ -77,7 +81,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
                     ),
                   ),
                   child: ResponsiveContentArea(
-                    child: widget.child,
+                    child: widget.navigationShell,
                   ),
                 );
               },
@@ -94,7 +98,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: _getCurrentNavigationIndex(context),
+            selectedIndex: widget.navigationShell.currentIndex,
             onDestinationSelected: _onNavigationSelected,
             labelType: NavigationRailLabelType.selected,
             backgroundColor: Theme.of(context).colorScheme.surface, // Theme-aware surface
@@ -136,7 +140,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
                       bottomLeft: Radius.circular(20),
                     ),
                   ),
-                  child: ResponsiveContentArea(child: widget.child),
+                  child: ResponsiveContentArea(child: widget.navigationShell),
                 );
               },
             ),
@@ -149,59 +153,21 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   /// Mobile layout with bottom navigation
   Widget _buildMobileBottomNavLayout() {
     return Scaffold(
-      body: widget.child,
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _getCurrentNavigationIndex(context),
-        onTap: _onNavigationSelected,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600),
-        items: _getBottomNavigationItems(),
+      body: widget.navigationShell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: widget.navigationShell.currentIndex,
+        onDestinationSelected: _onNavigationSelected,
+        destinations: _getNavigationDestinations(),
       ),
     );
   }
   
-  /// Get current navigation index based on route
-  int _getCurrentNavigationIndex(BuildContext context) {
-    final location = GoRouterState.of(context).uri.toString();
-    
-    if (location == '/' || location.startsWith('/vehicle')) return 0;
-    if (location.startsWith('/odometer')) return 1;
-    if (location.startsWith('/fuel')) return 2;
-    if (location.startsWith('/expenses')) return 3;
-    if (location.startsWith('/maintenance')) return 4;
-    if (location.startsWith('/reports')) return 5;
-    if (location.startsWith('/settings')) return 6;
-    
-    return 0; // Default to vehicles
-  }
-  
   /// Handle navigation selection
   void _onNavigationSelected(int index) {
-    switch (index) {
-      case 0:
-        context.go('/');
-        break;
-      case 1:
-        context.go('/odometer');
-        break;
-      case 2:
-        context.go('/fuel');
-        break;
-      case 3:
-        context.go('/expenses');
-        break;
-      case 4:
-        context.go('/maintenance');
-        break;
-      case 5:
-        context.go('/reports');
-        break;
-      case 6:
-        context.go('/settings');
-        break;
-    }
+    widget.navigationShell.goBranch(
+      index,
+      initialLocation: index == widget.navigationShell.currentIndex,
+    );
   }
   
   /// Get navigation destinations for rail layout
@@ -245,42 +211,42 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
     ];
   }
   
-  /// Get navigation items for bottom navigation
-  List<BottomNavigationBarItem> _getBottomNavigationItems() {
+  /// Get navigation destinations for NavigationBar
+  List<NavigationDestination> _getNavigationDestinations() {
     return const [
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.directions_car_outlined),
-        activeIcon: Icon(Icons.directions_car),
+        selectedIcon: Icon(Icons.directions_car),
         label: 'Veículos',
       ),
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.speed_outlined),
-        activeIcon: Icon(Icons.speed),
+        selectedIcon: Icon(Icons.speed),
         label: 'Odômetro',
       ),
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.local_gas_station_outlined),
-        activeIcon: Icon(Icons.local_gas_station),
+        selectedIcon: Icon(Icons.local_gas_station),
         label: 'Combustível',
       ),
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.attach_money_outlined),
-        activeIcon: Icon(Icons.attach_money),
+        selectedIcon: Icon(Icons.attach_money),
         label: 'Despesas',
       ),
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.build_outlined),
-        activeIcon: Icon(Icons.build),
+        selectedIcon: Icon(Icons.build),
         label: 'Manutenção',
       ),
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.bar_chart_outlined),
-        activeIcon: Icon(Icons.bar_chart),
+        selectedIcon: Icon(Icons.bar_chart),
         label: 'Estatísticas',
       ),
-      BottomNavigationBarItem(
+      NavigationDestination(
         icon: Icon(Icons.settings_outlined),
-        activeIcon: Icon(Icons.settings),
+        selectedIcon: Icon(Icons.settings),
         label: 'Configurações',
       ),
     ];

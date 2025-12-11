@@ -216,8 +216,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                   fontSize: 16,
                   fontWeight:
                       tasksState.currentFilter == TasksFilterType.overdue
-                          ? FontWeight.w600
-                          : FontWeight.w500,
+                      ? FontWeight.w600
+                      : FontWeight.w500,
                 ),
               ),
               const SizedBox(width: 12),
@@ -368,8 +368,8 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 fontSize: 16,
                 fontWeight:
                     tasksState.currentFilter == TasksFilterType.allFuture
-                        ? FontWeight.w600
-                        : FontWeight.w500,
+                    ? FontWeight.w600
+                    : FontWeight.w500,
               ),
             ),
           ],
@@ -388,7 +388,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
     final groupedTasks = _groupTasksByDate(tasksState.filteredTasks);
     final shouldShowViewAllButton =
         tasksState.currentFilter == TasksFilterType.upcoming &&
-            tasksState.allTasks.length > tasksState.filteredTasks.length;
+        tasksState.allTasks.length > tasksState.filteredTasks.length;
 
     return CustomScrollView(
       slivers: [
@@ -489,8 +489,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             (p) => p.id == task.plantId,
           );
           plantName = plant.name;
-          plantImageUrl =
-              plant.imageUrls.isNotEmpty ? plant.imageUrls.first : null;
+          plantImageUrl = plant.imageUrls.isNotEmpty
+              ? plant.imageUrls.first
+              : null;
         } catch (e) {
           plantName = 'Planta não encontrada';
         }
@@ -559,9 +560,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                         errorBuilder: (context, error, stackTrace) {
                           return Icon(
                             Icons.local_florist,
-                            color: PlantisColors.primary.withValues(
-                              alpha: 0.6,
-                            ),
+                            color: PlantisColors.primary.withValues(alpha: 0.6),
                             size: 24,
                           );
                         },
@@ -615,11 +614,11 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               onTap: isLoading
                   ? null
                   : () => _showTaskCompletionDialog(
-                        context,
-                        task,
-                        plantName,
-                        ref,
-                      ),
+                      context,
+                      task,
+                      plantName,
+                      ref,
+                    ),
               child: Container(
                 width: 20,
                 height: 20,
@@ -660,11 +659,13 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
     if (result != null && context.mounted) {
       try {
-        await ref.read(tasksNotifierProvider.notifier).completeTask(
-          task.id,
-          notes: result.notes,
-          nextDueDate: result.nextDueDate,
-        );
+        await ref
+            .read(tasksNotifierProvider.notifier)
+            .completeTask(
+              task.id,
+              notes: result.notes,
+              nextDueDate: result.nextDueDate,
+            );
 
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -765,10 +766,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
       left: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: theme.colorScheme.primary,

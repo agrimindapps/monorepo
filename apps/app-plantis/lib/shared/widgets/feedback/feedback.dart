@@ -47,6 +47,7 @@ export 'haptic_service.dart';
 export 'progress_tracker.dart';
 export 'toast_service.dart';
 export 'unified_feedback_system.dart';
+
 class FeedbackOperations {
   static const String taskComplete = 'task_complete';
   static const String taskCreate = 'task_create';
@@ -68,6 +69,7 @@ class FeedbackOperations {
   static const String saveSettings = 'save_settings';
   static const String resetData = 'reset_data';
 }
+
 /// Utility class for common feedback patterns
 final class FeedbackPatterns {
   FeedbackPatterns._();
@@ -83,8 +85,9 @@ final class FeedbackPatterns {
       context: context,
       operationKey: 'save_${itemName}_${DateTime.now().millisecondsSinceEpoch}',
       operation: operation,
-      loadingMessage:
-          isUpdate ? 'Atualizando $itemName...' : 'Salvando $itemName...',
+      loadingMessage: isUpdate
+          ? 'Atualizando $itemName...'
+          : 'Salvando $itemName...',
       successMessage: isUpdate ? '$itemName atualizado!' : '$itemName salvo!',
       loadingType: LoadingType.save,
       successAnimation: SuccessAnimationType.checkmark,
@@ -134,7 +137,7 @@ final class FeedbackPatterns {
   static Future<T> uploadFile<T>({
     required BuildContext context,
     required Future<T> Function(void Function(double, String?) onProgress)
-        operation,
+    operation,
     required String fileName,
   }) {
     return UnifiedFeedbackSystem.uploadImage<T>(
@@ -183,7 +186,7 @@ final class FeedbackPatterns {
   static Future<T> backupData<T>({
     required BuildContext context,
     required Future<T> Function(void Function(double, String?) onProgress)
-        operation,
+    operation,
   }) {
     return UnifiedFeedbackSystem.backup<T>(
       context: context,

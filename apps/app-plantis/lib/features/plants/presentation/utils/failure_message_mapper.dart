@@ -16,19 +16,19 @@ class FailureMessageMapper {
     switch (failure.runtimeType) {
       case const (ValidationFailure):
         return _mapValidationFailure(failure);
-      
+
       case const (CacheFailure):
         return _mapCacheFailure(failure);
-      
+
       case const (NetworkFailure):
         return _mapNetworkFailure(failure);
-      
+
       case const (ServerFailure):
         return _mapServerFailure(failure);
-      
+
       case const (NotFoundFailure):
         return _mapNotFoundFailure(failure);
-      
+
       default:
         return _mapUnknownFailure(failure);
     }
@@ -46,12 +46,12 @@ class FailureMessageMapper {
         failure.message.contains('TypeAdapter')) {
       return 'Erro ao acessar dados locais. O app será reiniciado para corrigir o problema.';
     }
-    
+
     if (failure.message.contains('DatabaseError') ||
         failure.message.contains('corrupted')) {
       return 'Dados locais corrompidos. Sincronizando com servidor...';
     }
-    
+
     return failure.message.isNotEmpty
         ? 'Cache: ${failure.message}'
         : 'Erro ao acessar dados locais';
@@ -68,19 +68,19 @@ class FailureMessageMapper {
         failure.message.contains('Usuário não autenticado')) {
       return 'Sessão expirada. Tente fazer login novamente.';
     }
-    
+
     // Handle permission errors
     if (failure.message.contains('403') ||
         failure.message.contains('Forbidden')) {
       return 'Acesso negado. Verifique suas permissões.';
     }
-    
+
     // Handle server errors
     if (failure.message.contains('500') ||
         failure.message.contains('Internal')) {
       return 'Erro no servidor. Tente novamente em alguns instantes.';
     }
-    
+
     return failure.message.isNotEmpty
         ? 'Servidor: ${failure.message}'
         : 'Erro no servidor';
@@ -104,22 +104,22 @@ class FailureMessageMapper {
     switch (failure.runtimeType) {
       case const (ValidationFailure):
         return 'Dados inválidos';
-      
+
       case const (CacheFailure):
         return 'Erro local';
-      
+
       case const (NetworkFailure):
         return 'Sem internet';
-      
+
       case const (ServerFailure):
         if (failure.message.contains('não autenticado')) {
           return 'Sessão expirada';
         }
         return 'Erro no servidor';
-      
+
       case const (NotFoundFailure):
         return 'Não encontrado';
-      
+
       default:
         return 'Erro';
     }
@@ -137,18 +137,18 @@ class FailureMessageMapper {
     if (failure is NetworkFailure) {
       return 'Verifique sua conexão e tente novamente';
     }
-    
+
     if (failure is ServerFailure &&
         failure.message.contains('não autenticado')) {
       return 'Faça login novamente';
     }
-    
+
     if (failure is CacheFailure &&
         (failure.message.contains('corrupted') ||
             failure.message.contains('TypeAdapter'))) {
       return 'Reinicie o aplicativo';
     }
-    
+
     return null;
   }
 }

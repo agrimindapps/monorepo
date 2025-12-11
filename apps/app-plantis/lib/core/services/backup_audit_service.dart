@@ -160,16 +160,15 @@ class BackupAuditService {
   }) async {
     try {
       final logs = await _getAllLogs();
-      var filteredLogs =
-          logs.where((log) {
-            if (userId != null && log.userId != userId) return false;
-            if (operation != null && log.operation != operation) return false;
-            if (startDate != null && log.timestamp.isBefore(startDate)) {
-              return false;
-            }
-            if (endDate != null && log.timestamp.isAfter(endDate)) return false;
-            return true;
-          }).toList();
+      var filteredLogs = logs.where((log) {
+        if (userId != null && log.userId != userId) return false;
+        if (operation != null && log.operation != operation) return false;
+        if (startDate != null && log.timestamp.isBefore(startDate)) {
+          return false;
+        }
+        if (endDate != null && log.timestamp.isAfter(endDate)) return false;
+        return true;
+      }).toList();
       filteredLogs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       if (limit != null && filteredLogs.length > limit) {
         filteredLogs = filteredLogs.take(limit).toList();

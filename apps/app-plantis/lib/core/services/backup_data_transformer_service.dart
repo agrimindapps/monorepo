@@ -165,8 +165,9 @@ class BackupDataTransformerService {
       species: backup.species,
       spaceId: backup.spaceId,
       imageBase64: backup.imageBase64,
-      imageUrls:
-          backup.imageUrls.isNotEmpty ? backup.imageUrls : existing.imageUrls,
+      imageUrls: backup.imageUrls.isNotEmpty
+          ? backup.imageUrls
+          : existing.imageUrls,
       plantingDate: backup.plantingDate ?? existing.plantingDate,
       notes: backup.notes ?? existing.notes,
       isFavorited: backup.isFavorited,

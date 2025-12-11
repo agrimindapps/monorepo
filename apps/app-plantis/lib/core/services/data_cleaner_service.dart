@@ -389,6 +389,7 @@ class DataCleanerService implements IAppDataCleaner {
       return result;
     }
   }
+
   Future<Either<Failure, void>> clearAllData() async {
     try {
       final plantsResult = await plantsRepository.getPlants();

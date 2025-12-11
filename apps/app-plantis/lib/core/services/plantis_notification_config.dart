@@ -116,10 +116,9 @@ class PlantisNotificationConfig {
       body: body,
       payload: jsonEncode(payload),
       scheduledDate: scheduledDate,
-      priority:
-          careType == 'watering'
-              ? NotificationPriorityEntity.high
-              : NotificationPriorityEntity.defaultPriority,
+      priority: careType == 'watering'
+          ? NotificationPriorityEntity.high
+          : NotificationPriorityEntity.defaultPriority,
       actions: const [
         NotificationActionEntity(id: 'mark_done', title: 'Marcar como Feito'),
         NotificationActionEntity(id: 'snooze', title: 'Lembrar em 1h'),

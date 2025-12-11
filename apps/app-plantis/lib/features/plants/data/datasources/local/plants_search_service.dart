@@ -84,11 +84,10 @@ class PlantsSearchService {
 
   /// Search for plants containing all words in the query
   Future<List<Plant>> _searchMultiWord(String query) async {
-    final queryWords =
-        query
-            .split(' ')
-            .where((word) => word.isNotEmpty && word.length > 2)
-            .toList();
+    final queryWords = query
+        .split(' ')
+        .where((word) => word.isNotEmpty && word.length > 2)
+        .toList();
 
     if (queryWords.isEmpty) return [];
     Set<String>? matchingIds;

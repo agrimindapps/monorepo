@@ -48,18 +48,15 @@ abstract class BaseSyncModel extends BaseSyncEntity with SyncEntityMixin {
   static Map<String, dynamic> parseBaseFields(Map<String, dynamic> map) {
     return {
       'id': map['id'] as String,
-      'createdAt':
-          map['createdAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
-              : null,
-      'updatedAt':
-          map['updatedAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
-              : null,
-      'lastSyncAt':
-          map['lastSyncAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
-              : null,
+      'createdAt': map['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['createdAt'] as int)
+          : null,
+      'updatedAt': map['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['updatedAt'] as int)
+          : null,
+      'lastSyncAt': map['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(map['lastSyncAt'] as int)
+          : null,
       'isDirty': map['isDirty'] as bool? ?? false,
       'isDeleted': map['isDeleted'] as bool? ?? false,
       'version': map['version'] as int? ?? 1,
@@ -151,10 +148,9 @@ abstract class BaseSyncModel extends BaseSyncEntity with SyncEntityMixin {
     return {
       ...baseFields,
       'lastModifiedBy': map['last_modified_by'] as String?,
-      'syncStatus':
-          map['sync_status'] != null
-              ? local.SyncStatus.values[map['sync_status'] as int]
-              : local.SyncStatus.pending,
+      'syncStatus': map['sync_status'] != null
+          ? local.SyncStatus.values[map['sync_status'] as int]
+          : local.SyncStatus.pending,
       'conflictData': map['conflict_data'] as Map<String, dynamic>?,
     };
   }
@@ -164,18 +160,15 @@ abstract class BaseSyncModel extends BaseSyncEntity with SyncEntityMixin {
     Map<String, dynamic> map,
   ) {
     return {
-      'createdAt':
-          map['created_at'] != null
-              ? DateTime.parse(map['created_at'] as String)
-              : null,
-      'updatedAt':
-          map['updated_at'] != null
-              ? DateTime.parse(map['updated_at'] as String)
-              : null,
-      'lastSyncAt':
-          map['last_sync_at'] != null
-              ? DateTime.parse(map['last_sync_at'] as String)
-              : null,
+      'createdAt': map['created_at'] != null
+          ? DateTime.parse(map['created_at'] as String)
+          : null,
+      'updatedAt': map['updated_at'] != null
+          ? DateTime.parse(map['updated_at'] as String)
+          : null,
+      'lastSyncAt': map['last_sync_at'] != null
+          ? DateTime.parse(map['last_sync_at'] as String)
+          : null,
     };
   }
 

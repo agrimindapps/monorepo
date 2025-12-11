@@ -11,27 +11,29 @@ import '../../../../core/theme/design_tokens.dart';
 /// - Tempo restante
 /// - Barra de progresso visual
 class SubscriptionInfoCard extends StatelessWidget {
-  final SubscriptionEntity subscription;
-
   const SubscriptionInfoCard({
     super.key,
     required this.subscription,
+    this.onManageTap,
   });
+
+  final SubscriptionEntity subscription;
+  final VoidCallback? onManageTap;
 
   @override
   Widget build(BuildContext context) {
     final expirationDate = subscription.expirationDate;
     final purchaseDate = subscription.purchaseDate;
-    
+
     if (expirationDate == null) return const SizedBox.shrink();
 
     // Cálculos de tempo
     final now = DateTime.now();
     final totalDuration = expirationDate.difference(purchaseDate ?? now).inDays;
     final daysRemaining = expirationDate.difference(now).inDays;
-    
+
     // Evita divisão por zero e garante range 0.0 - 1.0
-    final progress = totalDuration > 0 
+    final progress = totalDuration > 0
         ? ((totalDuration - daysRemaining) / totalDuration).clamp(0.0, 1.0)
         : 0.0;
 
@@ -42,7 +44,7 @@ class SubscriptionInfoCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            GasometerDesignTokens.colorPrimaryDark, // Dark Orange
+            GasometerDesignTokens.colorPremiumGold, // Gold/Greenish
             GasometerDesignTokens.colorPrimary, // Orange
           ],
         ),
@@ -70,7 +72,7 @@ class SubscriptionInfoCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -104,15 +106,24 @@ class SubscriptionInfoCard extends StatelessWidget {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.check_circle, color: GasometerDesignTokens.colorPremiumGold, size: 14),
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.white,
+                            size: 14,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'ATIVO',
@@ -160,7 +171,9 @@ class SubscriptionInfoCard extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: progress,
                         backgroundColor: Colors.black.withValues(alpha: 0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(GasometerDesignTokens.colorPremiumGold),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.white,
+                        ),
                         minHeight: 6,
                       ),
                     ),
@@ -189,6 +202,32 @@ class SubscriptionInfoCard extends StatelessWidget {
                     ],
                   ),
                 ),
+
+                if (onManageTap != null) ...[
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: onManageTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: GasometerDesignTokens.colorPrimary,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Gerenciar Assinatura',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -223,9 +262,15 @@ class SubscriptionInfoCard extends StatelessWidget {
 
   String _getPlanName(String productId) {
     final lower = productId.toLowerCase();
-    if (lower.contains('anual') || lower.contains('year')) return 'Plano Anual';
-    if (lower.contains('semestral') || lower.contains('semester')) return 'Plano Semestral';
-    if (lower.contains('mensal') || lower.contains('month')) return 'Plano Mensal';
+    if (lower.contains('anual') || lower.contains('year')) {
+      return 'Premium Anual';
+    }
+    if (lower.contains('semestral') || lower.contains('semester')) {
+      return 'Premium Semestral';
+    }
+    if (lower.contains('mensal') || lower.contains('month')) {
+      return 'Premium Mensal';
+    }
     return 'Premium';
   }
 

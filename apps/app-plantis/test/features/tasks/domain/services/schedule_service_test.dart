@@ -126,13 +126,13 @@ void main() {
 
     test('calculateNextDueDate case-insensitive interval matching', () {
       final currentDate = DateTime(2024, 11, 15);
-      
+
       final nextDaily = scheduleService.calculateNextDueDate(
         currentDate,
         'DAILY',
         null,
       );
-      
+
       final nextWeekly = scheduleService.calculateNextDueDate(
         currentDate,
         'WeEkLy',

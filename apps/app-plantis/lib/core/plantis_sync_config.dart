@@ -61,97 +61,129 @@ abstract final class PlantisSyncConfig {
   }
 }
 
-
 /// Minimal no-op implementation for ILocalStorageRepository
 class _NoOpLocalStorageRepository implements ILocalStorageRepository {
   @override
   Future<Either<Failure, void>> initialize() async => const Right(null);
-  
+
   @override
-  Future<Either<Failure, void>> save<T>({String? box, required T data, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> save<T>({
+    String? box,
+    required T data,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, T?>> get<T>({String? box, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, T?>> get<T>({
+    String? box,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, void>> remove({String? box, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> remove({
+    String? box,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, void>> clear({String? box}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> clear({String? box}) async => const Right(null);
+
   @override
-  Future<Either<Failure, bool>> contains({String? box, required String key}) async =>
-      const Right(false);
-  
+  Future<Either<Failure, bool>> contains({
+    String? box,
+    required String key,
+  }) async => const Right(false);
+
   @override
-  Future<Either<Failure, void>> saveList<T>({String? box, required List<T> data, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> saveList<T>({
+    String? box,
+    required List<T> data,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, List<T>>> getList<T>({String? box, required String key}) async =>
-      const Right([]);
-  
+  Future<Either<Failure, List<T>>> getList<T>({
+    String? box,
+    required String key,
+  }) async => const Right([]);
+
   @override
-  Future<Either<Failure, void>> addToList<T>({String? box, required T item, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> addToList<T>({
+    String? box,
+    required T item,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, void>> removeFromList<T>({String? box, required T item, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> removeFromList<T>({
+    String? box,
+    required T item,
+    required String key,
+  }) async => const Right(null);
+
   @override
   Future<Either<Failure, void>> cleanExpiredData({String? box}) async =>
       const Right(null);
-  
+
   @override
-  Future<Either<Failure, int>> length({String? box}) async =>
-      const Right(0);
-  
+  Future<Either<Failure, int>> length({String? box}) async => const Right(0);
+
   @override
-  Future<Either<Failure, void>> saveWithTTL<T>({String? box, required T data, required Duration ttl, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> saveWithTTL<T>({
+    String? box,
+    required T data,
+    required Duration ttl,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, T?>> getWithTTL<T>({String? box, required String key}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, T?>> getWithTTL<T>({
+    String? box,
+    required String key,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, void>> saveUserSetting({required String key, required dynamic value}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> saveUserSetting({
+    required String key,
+    required dynamic value,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, T?>> getUserSetting<T>({required String key, T? defaultValue}) async =>
-      Right(defaultValue);
-  
+  Future<Either<Failure, T?>> getUserSetting<T>({
+    required String key,
+    T? defaultValue,
+  }) async => Right(defaultValue);
+
   @override
   Future<Either<Failure, Map<String, dynamic>>> getAllUserSettings() async =>
       const Right({});
-  
+
   @override
   Future<Either<Failure, List<String>>> getKeys({String? box}) async =>
       const Right([]);
-  
+
   @override
   Future<Either<Failure, List<T>>> getValues<T>({String? box}) async =>
       const Right([]);
-  
+
   @override
-  Future<Either<Failure, void>> saveOfflineData<T>({required String key, required T data, DateTime? lastSync}) async =>
-      const Right(null);
-  
+  Future<Either<Failure, void>> saveOfflineData<T>({
+    required String key,
+    required T data,
+    DateTime? lastSync,
+  }) async => const Right(null);
+
   @override
-  Future<Either<Failure, OfflineData<T>?>> getOfflineData<T>({required String key}) async {
+  Future<Either<Failure, OfflineData<T>?>> getOfflineData<T>({
+    required String key,
+  }) async {
     return Future.value(const Right(null));
   }
-  
+
   @override
   Future<Either<Failure, void>> markAsSynced({required String key}) async =>
       const Right(null);
-  
+
   @override
   Future<Either<Failure, List<String>>> getUnsyncedKeys() async =>
       const Right([]);

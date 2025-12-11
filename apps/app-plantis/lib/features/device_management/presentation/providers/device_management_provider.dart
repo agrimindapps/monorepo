@@ -229,8 +229,9 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
           _setError('Erro ao carregar dispositivos: ${failure.message}');
         },
         (devices) {
-          final deviceModels =
-              devices.map((entity) => DeviceModel.fromEntity(entity)).toList();
+          final deviceModels = devices
+              .map((entity) => DeviceModel.fromEntity(entity))
+              .toList();
           state = state.copyWith(devices: deviceModels);
           _clearError();
 
@@ -333,8 +334,9 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
         },
         (_) {
           _setSuccess('Dispositivo revogado com sucesso');
-          final updatedDevices =
-              state.devices.where((d) => d.uuid != deviceUuid).toList();
+          final updatedDevices = state.devices
+              .where((d) => d.uuid != deviceUuid)
+              .toList();
           state = state.copyWith(devices: updatedDevices);
           _loadDevices(showLoading: false);
 

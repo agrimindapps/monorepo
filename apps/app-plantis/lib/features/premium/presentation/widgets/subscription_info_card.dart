@@ -13,25 +13,22 @@ import '../../../../core/theme/plantis_colors.dart';
 class SubscriptionInfoCard extends StatelessWidget {
   final SubscriptionEntity subscription;
 
-  const SubscriptionInfoCard({
-    super.key,
-    required this.subscription,
-  });
+  const SubscriptionInfoCard({super.key, required this.subscription});
 
   @override
   Widget build(BuildContext context) {
     final expirationDate = subscription.expirationDate;
     final purchaseDate = subscription.purchaseDate;
-    
+
     if (expirationDate == null) return const SizedBox.shrink();
 
     // Cálculos de tempo
     final now = DateTime.now();
     final totalDuration = expirationDate.difference(purchaseDate ?? now).inDays;
     final daysRemaining = expirationDate.difference(now).inDays;
-    
+
     // Evita divisão por zero e garante range 0.0 - 1.0
-    final progress = totalDuration > 0 
+    final progress = totalDuration > 0
         ? ((totalDuration - daysRemaining) / totalDuration).clamp(0.0, 1.0)
         : 0.0;
 
@@ -70,7 +67,7 @@ class SubscriptionInfoCard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
@@ -104,15 +101,24 @@ class SubscriptionInfoCard extends StatelessWidget {
                       ],
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: const Row(
                         children: [
-                          Icon(Icons.check_circle, color: PlantisColors.secondaryLight, size: 14),
+                          Icon(
+                            Icons.check_circle,
+                            color: PlantisColors.secondaryLight,
+                            size: 14,
+                          ),
                           SizedBox(width: 6),
                           Text(
                             'ATIVO',
@@ -160,7 +166,9 @@ class SubscriptionInfoCard extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: progress,
                         backgroundColor: Colors.black.withValues(alpha: 0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(PlantisColors.secondaryLight),
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          PlantisColors.secondaryLight,
+                        ),
                         minHeight: 6,
                       ),
                     ),
@@ -224,8 +232,10 @@ class SubscriptionInfoCard extends StatelessWidget {
   String _getPlanName(String productId) {
     final lower = productId.toLowerCase();
     if (lower.contains('anual') || lower.contains('year')) return 'Plano Anual';
-    if (lower.contains('semestral') || lower.contains('semester')) return 'Plano Semestral';
-    if (lower.contains('mensal') || lower.contains('month')) return 'Plano Mensal';
+    if (lower.contains('semestral') || lower.contains('semester'))
+      return 'Plano Semestral';
+    if (lower.contains('mensal') || lower.contains('month'))
+      return 'Plano Mensal';
     return 'Premium';
   }
 

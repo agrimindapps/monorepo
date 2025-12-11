@@ -103,10 +103,12 @@ class ErrorHandler {
     final last24h = now.subtract(const Duration(hours: 24));
     final last7days = now.subtract(const Duration(days: 7));
 
-    final recent24h =
-        _errorHistory.where((e) => e.timestamp.isAfter(last24h)).length;
-    final recent7days =
-        _errorHistory.where((e) => e.timestamp.isAfter(last7days)).length;
+    final recent24h = _errorHistory
+        .where((e) => e.timestamp.isAfter(last24h))
+        .length;
+    final recent7days = _errorHistory
+        .where((e) => e.timestamp.isAfter(last7days))
+        .length;
 
     final byCategory = <ErrorCategory, int>{};
     final bySeverity = <ErrorSeverity, int>{};
@@ -175,8 +177,7 @@ class ErrorHandler {
     }
   }
 
-  void _reportToExternalServices(AppError error) {
-  }
+  void _reportToExternalServices(AppError error) {}
 }
 
 /// Interface para listeners de erro

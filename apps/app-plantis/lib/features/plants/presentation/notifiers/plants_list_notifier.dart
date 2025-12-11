@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
@@ -88,10 +87,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
       (plants) {
         final currentState = state.value ?? const PlantsListState();
         state = AsyncValue.data(
-          currentState.copyWith(
-            plants: plants,
-            isLoading: false,
-          ),
+          currentState.copyWith(plants: plants, isLoading: false),
         );
         if (currentState.searchQuery.isNotEmpty) {
           _applySearch();
@@ -115,9 +111,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
         final currentState = state.value ?? const PlantsListState();
         final updatedPlants = [...currentState.plants, addedPlant];
 
-        state = AsyncValue.data(
-          currentState.copyWith(plants: updatedPlants),
-        );
+        state = AsyncValue.data(currentState.copyWith(plants: updatedPlants));
         _applySearch();
       },
     );
@@ -140,9 +134,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
           return p.id == updatedPlant.id ? updatedPlant : p;
         }).toList();
 
-        state = AsyncValue.data(
-          currentState.copyWith(plants: updatedPlants),
-        );
+        state = AsyncValue.data(currentState.copyWith(plants: updatedPlants));
         _applySearch();
       },
     );
@@ -161,8 +153,9 @@ class PlantsListNotifier extends _$PlantsListNotifier {
       },
       (_) {
         final currentState = state.value ?? const PlantsListState();
-        final updatedPlants =
-            currentState.plants.where((plant) => plant.id != id).toList();
+        final updatedPlants = currentState.plants
+            .where((plant) => plant.id != id)
+            .toList();
         final updatedFilteredPlants = currentState.filteredPlants
             .where((plant) => plant.id != id)
             .toList();
@@ -191,10 +184,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
   void clearSearch() {
     final currentState = state.value ?? const PlantsListState();
     state = AsyncValue.data(
-      currentState.copyWith(
-        searchQuery: '',
-        filteredPlants: [],
-      ),
+      currentState.copyWith(searchQuery: '', filteredPlants: []),
     );
   }
 

@@ -19,9 +19,7 @@ class ProgressTracker {
     bool showToast = true,
     bool includeHaptic = true,
   }) {
-    if (includeHaptic) {
-      // TODO: Inject HapticService via Riverpod
-    }
+    if (includeHaptic) {}
 
     final operation = ProgressOperation(
       key: key,
@@ -53,9 +51,7 @@ class ProgressTracker {
         description: description,
       );
 
-      if (includeHaptic) {
-        // TODO: Inject HapticService via Riverpod
-      }
+      if (includeHaptic) {}
 
       _notifyListeners();
     }
@@ -72,13 +68,9 @@ class ProgressTracker {
     if (operation != null) {
       operation._complete(successMessage);
 
-      if (includeHaptic) {
-        // TODO: Inject HapticService via Riverpod
-      }
+      if (includeHaptic) {}
 
-      if (showToast && operation.context != null) {
-        // TODO: Inject ToastService via Riverpod
-      }
+      if (showToast && operation.context != null) {}
       Future.delayed(const Duration(seconds: 2), () {
         _activeOperations.remove(key);
         _notifyListeners();
@@ -98,13 +90,9 @@ class ProgressTracker {
     if (operation != null) {
       operation._fail(errorMessage);
 
-      if (includeHaptic) {
-        // TODO: Inject HapticService via Riverpod
-      }
+      if (includeHaptic) {}
 
-      if (showToast && operation.context != null) {
-        // TODO: Inject ToastService via Riverpod
-      }
+      if (showToast && operation.context != null) {}
 
       _notifyListeners();
     }
@@ -138,13 +126,9 @@ class ProgressTracker {
     if (operation != null) {
       operation._cancel();
 
-      if (includeHaptic) {
-        // TODO: Inject HapticService via Riverpod
-      }
+      if (includeHaptic) {}
 
-      if (showToast && operation.context != null) {
-        // TODO: Inject ToastService via Riverpod
-      }
+      if (showToast && operation.context != null) {}
 
       _activeOperations.remove(key);
       _notifyListeners();
@@ -449,10 +433,9 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
           width: 24,
           height: 24,
           child: CircularProgressIndicator(
-            value:
-                _operation!.type == ProgressType.determinate
-                    ? _operation!.progress
-                    : null,
+            value: _operation!.type == ProgressType.determinate
+                ? _operation!.progress
+                : null,
             strokeWidth: 3,
             valueColor: AlwaysStoppedAnimation<Color>(
               theme.colorScheme.primary,
@@ -478,10 +461,9 @@ class _ProgressTrackerWidgetState extends State<ProgressTrackerWidget> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4),
       child: LinearProgressIndicator(
-        value:
-            _operation!.type == ProgressType.determinate
-                ? _operation!.progress
-                : null,
+        value: _operation!.type == ProgressType.determinate
+            ? _operation!.progress
+            : null,
         backgroundColor: theme.colorScheme.outline.withValues(alpha: 0.2),
         valueColor: AlwaysStoppedAnimation<Color>(_getProgressColor(theme)),
         minHeight: 6,
@@ -611,30 +593,28 @@ class _ProgressTrackerPanelState extends State<ProgressTrackerPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final operations =
-        ProgressTracker.activeOperations.values.where((op) {
-          if (widget.showOnlyActive) {
-            return op.state == OperationState.running ||
-                op.state == OperationState.paused;
-          }
-          return true;
-        }).toList();
+    final operations = ProgressTracker.activeOperations.values.where((op) {
+      if (widget.showOnlyActive) {
+        return op.state == OperationState.running ||
+            op.state == OperationState.paused;
+      }
+      return true;
+    }).toList();
 
     if (operations.isEmpty) {
       return const SizedBox.shrink();
     }
 
     return Column(
-      children:
-          operations
-              .map(
-                (operation) => ProgressTrackerWidget(
-                  operationKey: operation.key,
-                  showDetails: true,
-                  showActions: true,
-                ),
-              )
-              .toList(),
+      children: operations
+          .map(
+            (operation) => ProgressTrackerWidget(
+              operationKey: operation.key,
+              showDetails: true,
+              showActions: true,
+            ),
+          )
+          .toList(),
     );
   }
 }
@@ -649,6 +629,7 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
+
   static String backupData() {
     return ProgressTracker.startOperation(
       key: 'backup_data_${DateTime.now().millisecondsSinceEpoch}',
@@ -657,6 +638,7 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
+
   static String restoreData() {
     return ProgressTracker.startOperation(
       key: 'restore_data_${DateTime.now().millisecondsSinceEpoch}',
@@ -665,6 +647,7 @@ class ProgressContexts {
       type: ProgressType.determinate,
     ).key;
   }
+
   static String syncData() {
     return ProgressTracker.startOperation(
       key: 'sync_data_${DateTime.now().millisecondsSinceEpoch}',
@@ -673,6 +656,7 @@ class ProgressContexts {
       type: ProgressType.indeterminate,
     ).key;
   }
+
   static String processData(String operation) {
     return ProgressTracker.startOperation(
       key: 'process_${operation}_${DateTime.now().millisecondsSinceEpoch}',

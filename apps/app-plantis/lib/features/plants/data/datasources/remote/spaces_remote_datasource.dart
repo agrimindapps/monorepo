@@ -32,11 +32,10 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
     try {
       await rateLimiter.checkLimit('spaces.getSpaces');
 
-      final snapshot =
-          await _getSpacesCollection(userId)
-              .where('isDeleted', isEqualTo: false)
-              .orderBy('createdAt', descending: true)
-              .get();
+      final snapshot = await _getSpacesCollection(userId)
+          .where('isDeleted', isEqualTo: false)
+          .orderBy('createdAt', descending: true)
+          .get();
 
       return snapshot.docs
           .map(

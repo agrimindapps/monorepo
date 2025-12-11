@@ -111,8 +111,9 @@ class PlantTaskMonitoringService {
       increment: true,
     );
     if (task.completedDate != null) {
-      final daysToComplete =
-          task.completedDate!.difference(task.scheduledDate).inDays;
+      final daysToComplete = task.completedDate!
+          .difference(task.scheduledDate)
+          .inDays;
       _updateMetric('avg_days_to_complete', daysToComplete);
 
       if (daysToComplete > 0) {
@@ -564,8 +565,9 @@ class PlantTaskSystemDiagnostic {
   });
 
   String generateReport() {
-    final criticalAlerts =
-        recentAlerts.where((a) => a.severity == 'critical').length;
+    final criticalAlerts = recentAlerts
+        .where((a) => a.severity == 'critical')
+        .length;
     final highAlerts = recentAlerts.where((a) => a.severity == 'high').length;
 
     return '''

@@ -100,10 +100,7 @@ class PlantDetailsLoadingState extends StatelessWidget {
 class LoadingImageSection extends StatelessWidget {
   final BuildContext context;
 
-  const LoadingImageSection({
-    super.key,
-    required this.context,
-  });
+  const LoadingImageSection({super.key, required this.context});
 
   @override
   Widget build(BuildContext context) {
@@ -167,10 +164,7 @@ class LoadingImageSection extends StatelessWidget {
 class LoadingTabsSection extends StatelessWidget {
   final BuildContext context;
 
-  const LoadingTabsSection({
-    super.key,
-    required this.context,
-  });
+  const LoadingTabsSection({super.key, required this.context});
 
   @override
   Widget build(BuildContext context) {
@@ -180,10 +174,9 @@ class LoadingTabsSection extends StatelessWidget {
       height: AppSpacing.tabHeight,
       margin: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? _LoadingConstants.darkCardColor
-                : _LoadingConstants.lightBackgroundColor,
+        color: theme.brightness == Brightness.dark
+            ? _LoadingConstants.darkCardColor
+            : _LoadingConstants.lightBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -196,10 +189,9 @@ class LoadingTabsSection extends StatelessWidget {
               child: Container(
                 margin: const EdgeInsets.all(AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color:
-                      theme.brightness == Brightness.dark
-                          ? Colors.white.withValues(alpha: 0.1)
-                          : Colors.grey.withValues(alpha: 0.2),
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.grey.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(
                     AppSpacing.borderRadiusSmall,
                   ),
@@ -219,10 +211,7 @@ class LoadingTabsSection extends StatelessWidget {
 class LoadingCardWidget extends StatelessWidget {
   final BuildContext context;
 
-  const LoadingCardWidget({
-    super.key,
-    required this.context,
-  });
+  const LoadingCardWidget({super.key, required this.context});
 
   @override
   Widget build(BuildContext context) {
@@ -231,10 +220,9 @@ class LoadingCardWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? _LoadingConstants.darkCardColor
-                : _LoadingConstants.lightBackgroundColor,
+        color: theme.brightness == Brightness.dark
+            ? _LoadingConstants.darkCardColor
+            : _LoadingConstants.lightBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -272,10 +260,9 @@ class LoadingShimmer extends StatelessWidget {
       height: height,
       width: width,
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? Colors.white.withValues(alpha: 0.1)
-                : Colors.grey.withValues(alpha: 0.2),
+        color: theme.brightness == Brightness.dark
+            ? Colors.white.withValues(alpha: 0.1)
+            : Colors.grey.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(AppSpacing.borderRadiusSmall),
       ),
     );

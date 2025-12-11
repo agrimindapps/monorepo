@@ -2,7 +2,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
 import 'promo_hero_countdown_badge.dart';
 
 class PromoHeaderSection extends StatefulWidget {
@@ -55,7 +54,7 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
             ),
           ),
         ),
-        
+
         // Content
         Center(
           child: ConstrainedBox(
@@ -97,10 +96,7 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
           ),
         ),
         const SizedBox(width: 60),
-        Expanded(
-          flex: 5,
-          child: _buildAppShowcase(),
-        ),
+        Expanded(flex: 5, child: _buildAppShowcase()),
       ],
     );
   }
@@ -196,8 +192,9 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
 
   Widget _buildActionButtons({bool isCentered = false}) {
     return Row(
-      mainAxisAlignment:
-          isCentered ? MainAxisAlignment.center : MainAxisAlignment.start,
+      mainAxisAlignment: isCentered
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
       children: [
         ElevatedButton(
           onPressed: () {},
@@ -244,8 +241,9 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
     ];
 
     return Row(
-      mainAxisAlignment:
-          isCentered ? MainAxisAlignment.center : MainAxisAlignment.start,
+      mainAxisAlignment: isCentered
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
       children: stats.asMap().entries.map((entry) {
         final index = entry.key;
         final stat = entry.value;
@@ -382,10 +380,12 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
                                       Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: const Icon(
                                           Icons.notifications_outlined,
@@ -501,10 +501,7 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
               ),
               Text(
                 subtitle,
-                style: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[500], fontSize: 12),
               ),
             ],
           ),
@@ -557,10 +554,7 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
               ),
               Text(
                 subtitle,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[600], fontSize: 12),
               ),
             ],
           ),
@@ -605,11 +599,7 @@ class _NatureBackgroundPainter extends CustomPainter {
       final radius = random.nextDouble() * 100 + 50;
       final offset = animation.value * 50 * (i % 2 == 0 ? 1 : -1);
 
-      canvas.drawCircle(
-        Offset(x + offset, y + offset),
-        radius,
-        particlePaint,
-      );
+      canvas.drawCircle(Offset(x + offset, y + offset), radius, particlePaint);
     }
   }
 

@@ -72,10 +72,9 @@ class _SpaceHeaderWidgetState extends ConsumerState<SpaceHeaderWidget> {
 
           const SizedBox(width: 12),
           Expanded(
-            child:
-                _isEditing
-                    ? _buildEditingField(theme)
-                    : _buildDisplayName(theme),
+            child: _isEditing
+                ? _buildEditingField(theme)
+                : _buildDisplayName(theme),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

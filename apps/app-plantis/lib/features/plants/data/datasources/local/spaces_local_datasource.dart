@@ -79,7 +79,9 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final success = await _driftRepo.updateSpace(espaco);
 
       if (!success) {
-        throw CacheFailure('Espaço não encontrado para atualização: ${space.id}');
+        throw CacheFailure(
+          'Espaço não encontrado para atualização: ${space.id}',
+        );
       }
     } catch (e) {
       throw CacheFailure(

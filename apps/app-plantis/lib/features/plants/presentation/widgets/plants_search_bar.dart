@@ -50,33 +50,31 @@ class _PlantsSearchBarState extends State<PlantsSearchBar> {
           hintStyle: TextStyle(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
           ),
-          prefixIcon:
-              widget.isSearching
-                  ? Padding(
-                    padding: const EdgeInsets.all(14.0),
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation(
-                          theme.colorScheme.primary,
-                        ),
+          prefixIcon: widget.isSearching
+              ? Padding(
+                  padding: const EdgeInsets.all(14.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(
+                        theme.colorScheme.primary,
                       ),
                     ),
-                  )
-                  : Icon(Icons.search, color: theme.colorScheme.primary),
-          suffixIcon:
-              widget.searchQuery.isNotEmpty
-                  ? IconButton(
-                    icon: Icon(
-                      Icons.clear,
-                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-                    ),
-                    onPressed: _clearSearch,
-                    tooltip: 'Limpar busca',
-                  )
-                  : null,
+                  ),
+                )
+              : Icon(Icons.search, color: theme.colorScheme.primary),
+          suffixIcon: widget.searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                  ),
+                  onPressed: _clearSearch,
+                  tooltip: 'Limpar busca',
+                )
+              : null,
           filled: true,
           fillColor: theme.colorScheme.surface,
           border: OutlineInputBorder(

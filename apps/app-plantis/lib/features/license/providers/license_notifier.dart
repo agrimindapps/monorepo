@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'license_notifier.g.dart';
 

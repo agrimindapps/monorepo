@@ -17,7 +17,8 @@ class ForgotPasswordDialog extends ConsumerStatefulWidget {
   const ForgotPasswordDialog({super.key});
 
   @override
-  ConsumerState<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+  ConsumerState<ForgotPasswordDialog> createState() =>
+      _ForgotPasswordDialogState();
 }
 
 class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
@@ -281,23 +282,19 @@ class _ForgotPasswordDialogState extends ConsumerState<ForgotPasswordDialog> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child:
-                _isLoading
-                    ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      ),
-                    )
-                    : const Text(
-                      'Enviar',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
+            child: _isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
+                  )
+                : const Text(
+                    'Enviar',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
           ),
         ),
       ],

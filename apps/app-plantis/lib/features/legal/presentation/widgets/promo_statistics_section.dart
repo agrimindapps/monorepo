@@ -13,7 +13,11 @@ class PromoStatisticsSection extends StatelessWidget {
     final statistics = [
       {'number': '0', 'label': 'Plantas Cadastradas', 'icon': Icons.eco},
       {'number': '0', 'label': 'Jardineiros Ativos', 'icon': Icons.people},
-      {'number': '0', 'label': 'Lembretes Enviados', 'icon': Icons.notifications},
+      {
+        'number': '0',
+        'label': 'Lembretes Enviados',
+        'icon': Icons.notifications,
+      },
       {'number': '0', 'label': 'Avaliação Média', 'icon': Icons.star},
     ];
 
@@ -90,11 +94,7 @@ class PromoStatisticsSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: isMobile ? 32 : 48,
-            color: PlantisColors.primary,
-          ),
+          Icon(icon, size: isMobile ? 32 : 48, color: PlantisColors.primary),
           const SizedBox(height: 16),
           Text(
             number,

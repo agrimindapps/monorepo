@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Import core providers
@@ -29,8 +28,7 @@ PlantTaskGenerator plantTaskGenerator(Ref ref) {
 
 // UseCases
 @riverpod
-GenerateInitialTasksUseCase generateInitialTasksUseCase(
-    Ref ref) {
+GenerateInitialTasksUseCase generateInitialTasksUseCase(Ref ref) {
   return GenerateInitialTasksUseCase(
     tasksRepository: ref.watch(tasksRepositoryProvider),
     taskGenerationService: ref.watch(taskGenerationServiceProvider),
@@ -60,10 +58,7 @@ AddPlantUseCase addPlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
 
-  return AddPlantUseCase(
-    repository,
-    generateInitialTasks,
-  );
+  return AddPlantUseCase(repository, generateInitialTasks);
 }
 
 @riverpod
@@ -71,10 +66,7 @@ UpdatePlantUseCase updatePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   final generateInitialTasks = ref.watch(generateInitialTasksUseCaseProvider);
 
-  return UpdatePlantUseCase(
-    repository,
-    generateInitialTasks,
-  );
+  return UpdatePlantUseCase(repository, generateInitialTasks);
 }
 
 @riverpod

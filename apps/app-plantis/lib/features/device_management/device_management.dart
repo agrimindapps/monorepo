@@ -2,7 +2,7 @@
 ///
 /// Este arquivo centraliza todas as exportações da funcionalidade de
 /// gerenciamento de dispositivos do app-plantis.
-/// 
+///
 /// NOTA: A lógica base (entities, services, repositories) vem do core package.
 /// Este módulo contém apenas:
 /// - DeviceModel: Extensão específica do plantis da DeviceEntity do core
@@ -33,8 +33,8 @@ export 'data/models/device_model.dart';
 export 'presentation/pages/device_management_page.dart';
 // Provider do plantis para device management
 export 'presentation/providers/device_management_provider.dart';
-export 'presentation/providers/device_management_providers.dart' 
-    show 
+export 'presentation/providers/device_management_providers.dart'
+    show
         plantisDeviceLimitConfigProvider,
         plantisDeviceManagementServiceProvider,
         plantisUserDevicesProvider,

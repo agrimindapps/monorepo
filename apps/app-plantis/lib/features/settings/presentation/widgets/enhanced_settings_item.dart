@@ -159,16 +159,15 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
       decoration: BoxDecoration(
         color: _getIconColor(theme),
         borderRadius: BorderRadius.circular(8),
-        boxShadow:
-            widget.enabled
-                ? [
-                  BoxShadow(
-                    color: _getIconColor(theme).withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-                : null,
+        boxShadow: widget.enabled
+            ? [
+                BoxShadow(
+                  color: _getIconColor(theme).withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: Icon(widget.icon, color: Colors.white, size: 18),
     );
@@ -210,10 +209,9 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
     return Icon(
       Icons.chevron_right,
-      color:
-          widget.enabled
-              ? theme.colorScheme.onSurfaceVariant
-              : theme.colorScheme.onSurface.withValues(alpha: 0.38),
+      color: widget.enabled
+          ? theme.colorScheme.onSurfaceVariant
+          : theme.colorScheme.onSurface.withValues(alpha: 0.38),
       size: 20,
     );
   }
@@ -237,10 +235,9 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                 onTapUp: _handleTapUp,
                 onTapCancel: _handleTapCancel,
                 onTap: widget.enabled && !widget.loading ? widget.onTap : null,
-                onLongPress:
-                    widget.enabled && !widget.loading
-                        ? widget.onLongPress
-                        : null,
+                onLongPress: widget.enabled && !widget.loading
+                    ? widget.onLongPress
+                    : null,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(
@@ -249,26 +246,23 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                   ),
                   decoration: BoxDecoration(
                     color: _getBackgroundColor(theme),
-                    border:
-                        !widget.isLast
-                            ? Border(
-                              bottom: BorderSide(
-                                color: theme.colorScheme.outline.withValues(
-                                  alpha: 0.3,
-                                ),
-                                width: 0.5,
+                    border: !widget.isLast
+                        ? Border(
+                            bottom: BorderSide(
+                              color: theme.colorScheme.outline.withValues(
+                                alpha: 0.3,
                               ),
-                            )
-                            : null,
+                              width: 0.5,
+                            ),
+                          )
+                        : null,
                     borderRadius: BorderRadius.vertical(
-                      top:
-                          widget.isFirst
-                              ? const Radius.circular(12)
-                              : Radius.zero,
-                      bottom:
-                          widget.isLast
-                              ? const Radius.circular(12)
-                              : Radius.zero,
+                      top: widget.isFirst
+                          ? const Radius.circular(12)
+                          : Radius.zero,
+                      bottom: widget.isLast
+                          ? const Radius.circular(12)
+                          : Radius.zero,
                     ),
                   ),
                   child: Row(
@@ -285,11 +279,10 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                   child: Text(
                                     widget.title,
                                     style: TextStyle(
-                                      color:
-                                          widget.enabled
-                                              ? theme.colorScheme.onSurface
-                                              : theme.colorScheme.onSurface
-                                                  .withValues(alpha: 0.38),
+                                      color: widget.enabled
+                                          ? theme.colorScheme.onSurface
+                                          : theme.colorScheme.onSurface
+                                                .withValues(alpha: 0.38),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -333,11 +326,11 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                               Text(
                                 widget.subtitle!,
                                 style: TextStyle(
-                                  color:
-                                      widget.enabled
-                                          ? theme.colorScheme.onSurfaceVariant
-                                          : theme.colorScheme.onSurface
-                                              .withValues(alpha: 0.38),
+                                  color: widget.enabled
+                                      ? theme.colorScheme.onSurfaceVariant
+                                      : theme.colorScheme.onSurface.withValues(
+                                          alpha: 0.38,
+                                        ),
                                   fontSize: 14,
                                 ),
                               ),

@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:core/core.dart' as core;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/premium_status.dart';
 
 /// Data source responsável por sincronizar status premium via Firebase
@@ -18,7 +18,7 @@ class PremiumFirebaseDataSource {
     _initializeFirebaseSync();
   }
   final FirebaseFirestore _firestore;
-  final core.IAuthRepository _authService;
+  final AuthRepository _authService;
 
   final StreamController<PremiumStatus> _statusController =
       StreamController<PremiumStatus>.broadcast();
@@ -30,14 +30,22 @@ class PremiumFirebaseDataSource {
 
   /// Inicializa sincronização com Firebase
   void _initializeFirebaseSync() {
-    _authService.currentUser.listen((user) {
-      if (user != null) {
-        _startFirebaseListener(user.id);
-        _startPeriodicSync();
-      } else {
-        _stopFirebaseListener();
-        _stopPeriodicSync();
-      }
+    _authService.watchAuthState().listen((result) {
+      result.fold(
+        (failure) {
+          _stopFirebaseListener();
+          _stopPeriodicSync();
+        },
+        (user) {
+          if (user != null) {
+            _startFirebaseListener(user.id);
+            _startPeriodicSync();
+          } else {
+            _stopFirebaseListener();
+            _stopPeriodicSync();
+          }
+        },
+      );
     });
   }
 
@@ -79,8 +87,9 @@ class PremiumFirebaseDataSource {
   /// Inicia sincronização periódica (fallback)
   void _startPeriodicSync() {
     _stopPeriodicSync();
-    _syncTimer = Timer.periodic(const Duration(minutes: 15), (timer) {
-      _authService.currentUser.first.then((user) {
+    _syncTimer = Timer.periodic(const Duration(minutes: 15), (timer) async {
+      final result = await _authService.getCurrentUser();
+      result.fold((failure) {}, (user) {
         if (user != null) {
           _syncPremiumStatus(user.id);
         }
@@ -119,8 +128,10 @@ class PremiumFirebaseDataSource {
     required String userId,
   }) async {
     try {
-      final doc =
-          await _firestore.collection('user_subscriptions').doc(userId).get();
+      final doc = await _firestore
+          .collection('user_subscriptions')
+          .doc(userId)
+          .get();
 
       if (!doc.exists || doc.data() == null) {
         return const Right(null);
@@ -181,8 +192,10 @@ class PremiumFirebaseDataSource {
     required String userId,
   }) async {
     try {
-      final doc =
-          await _firestore.collection('premium_cache').doc(userId).get();
+      final doc = await _firestore
+          .collection('premium_cache')
+          .doc(userId)
+          .get();
 
       if (!doc.exists || doc.data() == null) {
         return const Right(null);

@@ -76,9 +76,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       final tasks = await _driftRepo.getPendingTasks();
       final now = DateTime.now();
 
-      return tasks
-          .where((task) => task.dueDate.isBefore(now))
-          .toList();
+      return tasks.where((task) => task.dueDate.isBefore(now)).toList();
     } catch (e) {
       throw CacheFailure('Erro ao buscar tarefas atrasadas: $e');
     }
@@ -113,8 +111,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       return tasks
           .where(
             (task) =>
-                task.dueDate.isAfter(now) &&
-                task.dueDate.isBefore(nextWeek),
+                task.dueDate.isAfter(now) && task.dueDate.isBefore(nextWeek),
           )
           .toList();
     } catch (e) {
@@ -147,7 +144,9 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       if (msg.contains('Plant not found locally')) {
         // Skip caching task until its plant is available locally
         if (kDebugMode) {
-          print('⚠️ TasksLocalDataSource: Skipping task ${task.id} - ${task.title} because plant is not cached yet');
+          print(
+            '⚠️ TasksLocalDataSource: Skipping task ${task.id} - ${task.title} because plant is not cached yet',
+          );
         }
         return;
       }

@@ -13,6 +13,9 @@ abstract class AccountService {
   /// Atualiza o avatar do usuário
   Future<bool> updateAvatar(WidgetRef ref, String base64Image);
 
+  /// Atualiza o nome do usuário
+  Future<bool> updateName(WidgetRef ref, String name);
+
   /// Exclui permanentemente a conta do usuário
   Future<bool> deleteAccount(WidgetRef ref);
 }
@@ -33,6 +36,18 @@ class AccountServiceImpl implements AccountService {
   @override
   Future<bool> updateAvatar(WidgetRef ref, String base64Image) async {
     return await ref.read(profileProvider.notifier).updateAvatar(base64Image);
+  }
+
+  @override
+  Future<bool> updateName(WidgetRef ref, String name) async {
+    try {
+      await ref
+          .read(profileProvider.notifier)
+          .updateUserProfile(displayName: name);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   @override

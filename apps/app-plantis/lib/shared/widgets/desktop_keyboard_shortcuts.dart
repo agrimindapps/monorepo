@@ -29,18 +29,12 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
     }
 
     final shortcuts = <LogicalKeySet, Intent>{
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.digit1,
-      ): const NavigateToIntent('/tasks'),
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.digit2,
-      ): const NavigateToIntent('/plants'),
-      LogicalKeySet(
-        LogicalKeyboardKey.control,
-        LogicalKeyboardKey.digit3,
-      ): const NavigateToIntent('/settings'),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit1):
+          const NavigateToIntent('/tasks'),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit2):
+          const NavigateToIntent('/plants'),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit3):
+          const NavigateToIntent('/settings'),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
           const CreateNewPlantIntent(),
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyS):
@@ -79,6 +73,7 @@ class _DesktopKeyboardShortcutsState extends State<DesktopKeyboardShortcuts> {
     );
   }
 }
+
 class NavigateToIntent extends Intent {
   final String route;
   const NavigateToIntent(this.route);
@@ -112,10 +107,10 @@ class CustomIntent extends Intent {
   final VoidCallback callback;
   const CustomIntent(this.callback);
 }
+
 class NavigateToAction extends Action<NavigateToIntent> {
   @override
   Object? invoke(NavigateToIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -123,7 +118,6 @@ class NavigateToAction extends Action<NavigateToIntent> {
 class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
   @override
   Object? invoke(CreateNewPlantIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -131,7 +125,6 @@ class CreateNewPlantAction extends Action<CreateNewPlantIntent> {
 class SaveAction extends Action<SaveIntent> {
   @override
   Object? invoke(SaveIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -139,7 +132,6 @@ class SaveAction extends Action<SaveIntent> {
 class EscapeAction extends Action<EscapeIntent> {
   @override
   Object? invoke(EscapeIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -147,7 +139,6 @@ class EscapeAction extends Action<EscapeIntent> {
 class GoBackAction extends Action<GoBackIntent> {
   @override
   Object? invoke(GoBackIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -155,7 +146,6 @@ class GoBackAction extends Action<GoBackIntent> {
 class SearchAction extends Action<SearchIntent> {
   @override
   Object? invoke(SearchIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -163,7 +153,6 @@ class SearchAction extends Action<SearchIntent> {
 class RefreshAction extends Action<RefreshIntent> {
   @override
   Object? invoke(RefreshIntent intent) {
-    // TODO: Replace with Riverpod provider or context.go directly
     return null;
   }
 }
@@ -175,6 +164,7 @@ class CustomAction extends Action<CustomIntent> {
     return null;
   }
 }
+
 class SaveNotifier extends InheritedNotifier<ValueNotifier<void>> {
   const SaveNotifier({
     super.key,
@@ -226,6 +216,7 @@ class RefreshNotifier extends InheritedWidget {
     return refresh != oldWidget.refresh;
   }
 }
+
 class KeyboardShortcutsHelp extends StatelessWidget {
   const KeyboardShortcutsHelp({super.key});
 
@@ -284,6 +275,7 @@ class KeyboardShortcutsHelp extends StatelessWidget {
     );
   }
 }
+
 extension DesktopKeyboardShortcutsExtension on Widget {
   /// Aplica atalhos de teclado desktop
   Widget withKeyboardShortcuts({
@@ -295,6 +287,7 @@ extension DesktopKeyboardShortcutsExtension on Widget {
     );
   }
 }
+
 class PlatformHelper {
   const PlatformHelper._(); // Private constructor to prevent instantiation
 

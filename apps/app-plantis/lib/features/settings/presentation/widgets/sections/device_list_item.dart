@@ -41,7 +41,9 @@ class DeviceListItem extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: _getPlatformColor(device.platform).withValues(alpha: 0.1),
+                    color: _getPlatformColor(
+                      device.platform,
+                    ).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(
@@ -164,11 +166,7 @@ class DeviceListItem extends StatelessWidget {
               const SizedBox(height: 8),
               Row(
                 children: [
-                  Icon(
-                    Icons.block,
-                    size: 14,
-                    color: Colors.red.shade700,
-                  ),
+                  Icon(Icons.block, size: 14, color: Colors.red.shade700),
                   const SizedBox(width: 4),
                   Text(
                     'Acesso revogado',
@@ -260,7 +258,8 @@ class DeviceListItem extends StatelessWidget {
     if (difference.inHours < 1) return '${difference.inMinutes}m atrás';
     if (difference.inDays < 1) return '${difference.inHours}h atrás';
     if (difference.inDays < 7) return '${difference.inDays}d atrás';
-    if (difference.inDays < 30) return '${(difference.inDays / 7).floor()} sem atrás';
+    if (difference.inDays < 30)
+      return '${(difference.inDays / 7).floor()} sem atrás';
 
     return DateFormat('dd/MM/yyyy').format(lastActive);
   }

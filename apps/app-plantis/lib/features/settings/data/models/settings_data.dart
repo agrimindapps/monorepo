@@ -394,10 +394,9 @@ class BackupSettings {
       frequency: _parseFrequency(map['frequency'] as String?),
       wifiOnlyEnabled: map['wifiOnlyEnabled'] as bool? ?? true,
       maxBackupsToKeep: map['maxBackupsToKeep'] as int? ?? 5,
-      lastBackupTime:
-          map['lastBackupTime'] != null
-              ? DateTime.parse(map['lastBackupTime'] as String)
-              : null,
+      lastBackupTime: map['lastBackupTime'] != null
+          ? DateTime.parse(map['lastBackupTime'] as String)
+          : null,
     );
   }
 

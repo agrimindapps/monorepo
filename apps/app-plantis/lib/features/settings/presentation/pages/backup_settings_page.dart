@@ -31,9 +31,7 @@ class BackupSettingsPage extends ConsumerWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: ResponsiveLayout(
-        child: _buildPremiumRequired(context, theme),
-      ),
+      body: ResponsiveLayout(child: _buildPremiumRequired(context, theme)),
     );
   }
 

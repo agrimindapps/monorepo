@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/services/notification_permission_status.dart';
@@ -285,17 +285,15 @@ class TasksNotifier extends _$TasksNotifier {
 
   /// Helper: Get task with ownership validation
   Future<task_entity.Task> _getTaskWithOwnershipValidation(
-      String taskId) async {
+    String taskId,
+  ) async {
     final currentState = state.value ?? TasksStateX.initial();
 
     // 1. Try to find in local state first (fastest)
     final localTask = currentState.allTasks
         .whereType<task_entity.Task>()
         .cast<task_entity.Task?>()
-        .firstWhere(
-          (t) => t?.id == taskId,
-          orElse: () => null,
-        );
+        .firstWhere((t) => t?.id == taskId, orElse: () => null);
 
     if (localTask != null) {
       _ownershipValidator.validateOwnershipOrThrow(localTask);
@@ -359,10 +357,7 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   /// Helper: Complete task optimistically
-  void _completeTaskOptimistically(
-    task_entity.Task task,
-    String? notes,
-  ) {
+  void _completeTaskOptimistically(task_entity.Task task, String? notes) {
     final completedTask = task.copyWithTaskData(
       status: task_entity.TaskStatus.completed,
       completedAt: DateTime.now(),
@@ -372,9 +367,7 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   /// Helper: Apply current filters to task list
-  List<task_entity.Task> _applyCurrentFilters(
-    List<task_entity.Task> tasks,
-  ) {
+  List<task_entity.Task> _applyCurrentFilters(List<task_entity.Task> tasks) {
     final currentState = state.value ?? TasksStateX.initial();
     return _filterService.applyFilters(
       tasks,
@@ -413,10 +406,7 @@ class TasksNotifier extends _$TasksNotifier {
   }
 
   /// Sets task type filter
-  void setFilter(
-    TasksFilterType filter, {
-    String? plantId,
-  }) {
+  void setFilter(TasksFilterType filter, {String? plantId}) {
     final currentState = state.value ?? TasksStateX.initial();
     if (currentState.allTasks.isEmpty) return;
 
@@ -502,7 +492,6 @@ class TasksNotifier extends _$TasksNotifier {
       priorities,
     );
   }
-
 
   /// Initializes the notification service with comprehensive setup
   Future<void> _initializeNotificationService() async {

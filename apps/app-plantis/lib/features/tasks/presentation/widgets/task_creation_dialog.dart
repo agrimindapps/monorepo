@@ -287,25 +287,24 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
                   ? const Color(0xFF2D2D2D)
                   : Colors.white,
               onChanged: _onTaskTypeChanged,
-              items:
-                  TaskType.values.map((type) {
-                    return DropdownMenuItem(
-                      value: type,
-                      child: Row(
-                        children: [
-                          Icon(
-                            _getTaskTypeIcon(type),
-                            size: TasksConstants.taskTypeIconSize,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(
-                            width: TasksConstants.taskDialogIconSpacing,
-                          ),
-                          Text(type.displayName),
-                        ],
+              items: TaskType.values.map((type) {
+                return DropdownMenuItem(
+                  value: type,
+                  child: Row(
+                    children: [
+                      Icon(
+                        _getTaskTypeIcon(type),
+                        size: TasksConstants.taskTypeIconSize,
+                        color: theme.colorScheme.primary,
                       ),
-                    );
-                  }).toList(),
+                      const SizedBox(
+                        width: TasksConstants.taskDialogIconSpacing,
+                      ),
+                      Text(type.displayName),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ),
@@ -374,46 +373,44 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
                 onChanged: (plantId) {
                   setState(() => _selectedPlantId = plantId);
                 },
-                items:
-                    _plants.map((plant) {
-                      return DropdownMenuItem(
-                        value: plant.id,
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.local_florist,
-                              size: TasksConstants.taskTypeIconSize,
-                              color: theme.colorScheme.secondary,
-                            ),
-                            const SizedBox(
-                              width: TasksConstants.taskDialogIconSpacing,
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    plant.displayName,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  if (plant.species != null)
-                                    Text(
-                                      plant.displaySpecies,
-                                      style: theme.textTheme.bodySmall
-                                          ?.copyWith(
-                                            color: theme.colorScheme.onSurface
-                                                .withValues(alpha: 0.6),
-                                          ),
-                                    ),
-                                ],
-                              ),
-                            ),
-                          ],
+                items: _plants.map((plant) {
+                  return DropdownMenuItem(
+                    value: plant.id,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.local_florist,
+                          size: TasksConstants.taskTypeIconSize,
+                          color: theme.colorScheme.secondary,
                         ),
-                      );
-                    }).toList(),
+                        const SizedBox(
+                          width: TasksConstants.taskDialogIconSpacing,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                plant.displayName,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              if (plant.species != null)
+                                Text(
+                                  plant.displaySpecies,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.6),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
               ),
             ),
           ),
@@ -592,25 +589,24 @@ class _TaskCreationDialogState extends ConsumerState<TaskCreationDialog> {
                   setState(() => _selectedPriority = priority);
                 }
               },
-              items:
-                  TaskPriority.values.map((priority) {
-                    return DropdownMenuItem(
-                      value: priority,
-                      child: Row(
-                        children: [
-                          Icon(
-                            _getPriorityIcon(priority),
-                            size: TasksConstants.priorityIconSize,
-                            color: _getPriorityColor(priority, theme),
-                          ),
-                          const SizedBox(
-                            width: TasksConstants.taskDialogIconSpacing,
-                          ),
-                          Text(priority.displayName),
-                        ],
+              items: TaskPriority.values.map((priority) {
+                return DropdownMenuItem(
+                  value: priority,
+                  child: Row(
+                    children: [
+                      Icon(
+                        _getPriorityIcon(priority),
+                        size: TasksConstants.priorityIconSize,
+                        color: _getPriorityColor(priority, theme),
                       ),
-                    );
-                  }).toList(),
+                      const SizedBox(
+                        width: TasksConstants.taskDialogIconSpacing,
+                      ),
+                      Text(priority.displayName),
+                    ],
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ),

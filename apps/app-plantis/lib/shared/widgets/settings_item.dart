@@ -37,15 +37,14 @@ class SettingsItem extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            border:
-                !isLast
-                    ? Border(
-                      bottom: BorderSide(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.3),
-                        width: 0.5,
-                      ),
-                    )
-                    : null,
+            border: !isLast
+                ? Border(
+                    bottom: BorderSide(
+                      color: theme.colorScheme.outline.withValues(alpha: 0.3),
+                      width: 0.5,
+                    ),
+                  )
+                : null,
           ),
           child: Row(
             children: [

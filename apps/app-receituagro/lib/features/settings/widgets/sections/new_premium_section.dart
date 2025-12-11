@@ -1,10 +1,10 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, SubscriptionState;
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/premium_notifier.dart';
+import '../../../../core/theme/receituagro_colors.dart';
+import '../../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../../subscription/presentation/widgets/subscription_info_card.dart';
 import '../shared/section_header.dart';
-import '../shared/settings_card.dart';
 
 /// Premium Settings Section
 /// Allows users to view premium features and settings
@@ -13,218 +13,118 @@ class NewPremiumSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final premiumAsync = ref.watch(premiumProvider);
+    // ✅ Usa o mesmo provider que o profile usa (subscriptionManagementProvider)
+    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
 
-    return premiumAsync.when(
+    return subscriptionAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _buildErrorWidget(context, error.toString()),
-      data: (premiumState) => Column(
-        children: [
-          SectionHeader(
-            title: premiumState.isPremium ? 'Premium ✨' : 'Plano Atual',
-          ),
-          SettingsCard(
-            child: Column(
-              children: [
-                _buildStatusCard(context, premiumState),
-                const Divider(height: 1),
-                _buildFeaturesSection(context, premiumState),
-                if (premiumState.isLoading) const Divider(height: 1),
-                if (premiumState.isLoading) _buildLoadingIndicator(),
-                if (premiumState.lastError != null)
-                  _buildErrorMessage(context, premiumState.lastError!),
-              ],
-            ),
-          ),
-        ],
-      ),
+      data: (subscriptionState) {
+        final isPremium = subscriptionState.hasActiveSubscription;
+
+        return _buildStatusCard(context, subscriptionState);
+      },
     );
   }
 
   Widget _buildErrorWidget(BuildContext context, String error) {
-    return SettingsCard(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'Erro ao carregar status premium: $error',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Text(
+        'Erro ao carregar status premium: $error',
+        style: TextStyle(color: Theme.of(context).colorScheme.error),
       ),
     );
   }
 
-  Widget _buildStatusCard(BuildContext context, PremiumState premiumState) {
-    final hasPremium = premiumState.isPremium;
-    final isTrialActive = premiumState.isTrialActive;
+  Widget _buildStatusCard(
+    BuildContext context,
+    SubscriptionState subscriptionState,
+  ) {
+    final hasPremium = subscriptionState.hasActiveSubscription;
+    final subscription = subscriptionState.currentSubscription;
 
-    if (hasPremium && premiumState.currentSubscription != null) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SubscriptionInfoCard(
-          subscription: premiumState.currentSubscription!,
-        ),
+    if (hasPremium &&
+        subscription != null &&
+        subscription.expirationDate != null) {
+      // ✅ Usa o card bonito com gradiente verde
+      return SubscriptionInfoCard(
+        subscription: subscription,
+        showDetailsButton: true,
+        onDetailsPressed: () {
+          Navigator.pushNamed(context, '/subscription');
+        },
       );
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          gradient: LinearGradient(
-            colors: [
-              Theme.of(context).colorScheme.surfaceContainerHighest,
-              Theme.of(context).colorScheme.surface,
-            ],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Plano Gratuito',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                if (isTrialActive)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'TRIAL',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              _getStatusDescription(premiumState),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
+    // Card gratuito com visual estilo Plantis (Banner)
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            ReceitaAgroColors.primary,
+            ReceitaAgroColors.primaryDark,
           ],
         ),
-      ),
-    );
-  }
-
-  String _getStatusDescription(PremiumState state) {
-    if (state.isPremium && state.isActive) {
-      if (state.isTrialActive) {
-        return 'Período de teste ativo';
-      }
-      final expDate = state.currentSubscription?.expirationDate;
-      if (expDate != null) {
-        final daysLeft = expDate.difference(DateTime.now()).inDays;
-        return 'Ativo - $daysLeft dias restantes';
-      }
-      return 'Assinatura ativa';
-    }
-    return 'Atualize para Premium para desbloquear todas as funcionalidades';
-  }
-
-  Widget _buildFeaturesSection(
-    BuildContext context,
-    PremiumState premiumState,
-  ) {
-    final hasPremium = premiumState.isPremium;
-    final features = hasPremium
-        ? [
-            'Diagnósticos avançados',
-            'Busca ilimitada',
-            'Modo offline',
-            'Exportar relatórios',
-            'Suporte prioritário',
-          ]
-        : [
-            'Diagnósticos básicos',
-            '5 buscas por dia',
-          ];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Funcionalidades Disponíveis',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w500),
-          ),
-          const SizedBox(height: 12),
-          ...features.map(
-            (feature) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 6),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: Theme.of(context).colorScheme.primary,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      feature,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLoadingIndicator() {
-    return const Padding(
-      padding: EdgeInsets.all(12),
-      child: SizedBox(
-        height: 24,
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
-    );
-  }
-
-  Widget _buildErrorMessage(BuildContext context, String error) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Icon(
-            Icons.error_outline,
-            color: Theme.of(context).colorScheme.error,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              error,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => Navigator.pushNamed(context, '/subscription'),
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.workspace_premium,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '✨ Premium ✨',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Desbloqueie recursos avançados',
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right, color: Colors.white),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }

@@ -58,7 +58,9 @@ class PlantTaskValidationService {
       errors.add('Data de conclusão não pode ser no futuro');
     }
 
-    if (task.createdAt.isAfter(DateTime.now().add(const Duration(minutes: 5)))) {
+    if (task.createdAt.isAfter(
+      DateTime.now().add(const Duration(minutes: 5)),
+    )) {
       warnings.add('Data de criação parece estar no futuro');
     }
     _validateTaskTypeSpecific(task, errors, warnings);
@@ -130,8 +132,9 @@ class PlantTaskValidationService {
 
     final validTasks = results.where((r) => r.isValid).length;
     final invalidTasks = results.where((r) => !r.isValid).length;
-    final tasksWithWarnings =
-        results.where((r) => r.warnings.isNotEmpty).length;
+    final tasksWithWarnings = results
+        .where((r) => r.warnings.isNotEmpty)
+        .length;
 
     final batchResult = PlantTaskBatchValidationResult(
       totalTasks: tasks.length,
@@ -249,27 +252,29 @@ class PlantTaskValidationService {
   ) {
     final validation = validatePlantTasks(tasks, plantsById);
     final now = DateTime.now();
-    final pendingTasks =
-        tasks.where((t) => t.status == TaskStatus.pending).length;
-    final completedTasks =
-        tasks.where((t) => t.status == TaskStatus.completed).length;
-    final overdueTasks =
-        tasks.where((t) => t.status == TaskStatus.overdue).length;
+    final pendingTasks = tasks
+        .where((t) => t.status == TaskStatus.pending)
+        .length;
+    final completedTasks = tasks
+        .where((t) => t.status == TaskStatus.completed)
+        .length;
+    final overdueTasks = tasks
+        .where((t) => t.status == TaskStatus.overdue)
+        .length;
     final todayTasks = tasks.where((t) => t.isDueToday).length;
-    final upcomingTasks =
-        tasks.where((t) => t.isDueSoon && !t.isDueToday).length;
-    final oldestTask =
-        tasks.isEmpty
-            ? null
-            : tasks.reduce((a, b) => a.createdAt.isBefore(b.createdAt) ? a : b);
+    final upcomingTasks = tasks
+        .where((t) => t.isDueSoon && !t.isDueToday)
+        .length;
+    final oldestTask = tasks.isEmpty
+        ? null
+        : tasks.reduce((a, b) => a.createdAt.isBefore(b.createdAt) ? a : b);
     final tasksByType = <TaskType, int>{};
     for (final task in tasks) {
       tasksByType[task.type] = (tasksByType[task.type] ?? 0) + 1;
     }
-    final plantsWithoutTasks =
-        plantsById.values
-            .where((plant) => !tasks.any((task) => task.plantId == plant.id))
-            .length;
+    final plantsWithoutTasks = plantsById.values
+        .where((plant) => !tasks.any((task) => task.plantId == plant.id))
+        .length;
 
     final healthScore = _calculateHealthScore(validation, tasks, plantsById);
 
@@ -287,10 +292,9 @@ class PlantTaskValidationService {
       temporalStatistics: {
         'today': todayTasks,
         'upcoming': upcomingTasks,
-        'oldest_task_age_days':
-            oldestTask != null
-                ? now.difference(oldestTask.createdAt).inDays
-                : 0,
+        'oldest_task_age_days': oldestTask != null
+            ? now.difference(oldestTask.createdAt).inDays
+            : 0,
       },
       typeStatistics: tasksByType,
       plantsWithoutTasks: plantsWithoutTasks,
@@ -331,8 +335,9 @@ class PlantTaskValidationService {
     final inconsistentRatio =
         validation.inconsistentIntervals.length / validation.totalTasks;
     score -= inconsistentRatio * 15;
-    final overdueTasks =
-        tasks.where((t) => t.status == TaskStatus.overdue).length;
+    final overdueTasks = tasks
+        .where((t) => t.status == TaskStatus.overdue)
+        .length;
     final overdueRatio = overdueTasks / tasks.length;
     score -= overdueRatio * 25;
     final plantsWithTasks = tasks.map((t) => t.plantId).toSet().length;

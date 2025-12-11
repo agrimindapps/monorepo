@@ -1,6 +1,5 @@
 import 'dart:async';
 
-
 import '../../database/repositories/conflict_history_drift_repository.dart';
 import '../data/models/conflict_history_model.dart';
 

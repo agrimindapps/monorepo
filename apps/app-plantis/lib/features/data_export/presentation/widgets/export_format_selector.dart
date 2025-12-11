@@ -91,141 +91,132 @@ class _ExportFormatSelectorState extends State<ExportFormatSelector> {
         ),
         const SizedBox(height: 16),
         Column(
-          children:
-              ExportFormat.values.map((format) {
-                final isSelected = widget.selectedFormat == format;
-                final color = _getFormatColor(format);
+          children: ExportFormat.values.map((format) {
+            final isSelected = widget.selectedFormat == format;
+            final color = _getFormatColor(format);
 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => widget.onFormatChanged(format),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => widget.onFormatChanged(format),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? color.withAlpha(30)
+                          : Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color:
-                              isSelected
-                                  ? color.withAlpha(30)
-                                  : Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color:
-                                isSelected
-                                    ? color.withAlpha(100)
-                                    : Theme.of(
-                                      context,
-                                    ).colorScheme.outline.withAlpha(100),
-                            width: isSelected ? 2 : 1,
+                      border: Border.all(
+                        color: isSelected
+                            ? color.withAlpha(100)
+                            : Theme.of(
+                                context,
+                              ).colorScheme.outline.withAlpha(100),
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? color.withAlpha(50)
+                                : color.withAlpha(30),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            _getFormatIcon(format),
+                            color: color,
+                            size: 24,
                           ),
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 48,
-                              height: 48,
-                              decoration: BoxDecoration(
-                                color:
-                                    isSelected
-                                        ? color.withAlpha(50)
-                                        : color.withAlpha(30),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Icon(
-                                _getFormatIcon(format),
-                                color: color,
-                                size: 24,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
                                 children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        format.displayName,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color:
-                                              Theme.of(
-                                                context,
-                                              ).colorScheme.onSurface,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 6,
-                                          vertical: 2,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: color.withAlpha(30),
-                                          borderRadius: BorderRadius.circular(
-                                            6,
-                                          ),
-                                        ),
-                                        child: Text(
-                                          _getFormatTag(format),
-                                          style: TextStyle(
-                                            fontSize: 10,
-                                            fontWeight: FontWeight.bold,
-                                            color: color,
-                                            letterSpacing: 0.5,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 6),
                                   Text(
-                                    _getFormatDescription(format),
+                                    format.displayName,
                                     style: TextStyle(
-                                      fontSize: 13,
-                                      color:
-                                          Theme.of(
-                                            context,
-                                          ).colorScheme.onSurfaceVariant,
-                                      height: 1.3,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.withAlpha(30),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      _getFormatTag(format),
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: color,
+                                        letterSpacing: 0.5,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              width: 24,
-                              height: 24,
-                              decoration: BoxDecoration(
-                                color: isSelected ? color : Colors.transparent,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected ? color : Colors.grey,
-                                  width: 2,
+                              const SizedBox(height: 6),
+                              Text(
+                                _getFormatDescription(format),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                  height: 1.3,
                                 ),
                               ),
-                              child:
-                                  isSelected
-                                      ? const Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                        size: 16,
-                                      )
-                                      : null,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: isSelected ? color : Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: isSelected ? color : Colors.grey,
+                              width: 2,
+                            ),
+                          ),
+                          child: isSelected
+                              ? const Icon(
+                                  Icons.check,
+                                  color: Colors.white,
+                                  size: 16,
+                                )
+                              : null,
+                        ),
+                      ],
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+              ),
+            );
+          }).toList(),
         ),
         Container(
           width: double.infinity,

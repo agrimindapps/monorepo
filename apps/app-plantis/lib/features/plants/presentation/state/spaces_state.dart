@@ -6,13 +6,7 @@ import '../../domain/entities/space.dart';
 part 'spaces_state.freezed.dart';
 
 /// View states for spaces feature
-enum SpacesViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-  empty,
-}
+enum SpacesViewState { initial, loading, loaded, error, empty }
 
 /// State imutável para gerenciamento de espaços
 ///
@@ -185,11 +179,8 @@ extension SpacesStateX on SpacesState {
   SpacesState clearSelection() => copyWith(selectedSpace: null);
 
   /// Reseta filtros
-  SpacesState resetFilters() => copyWith(
-        searchQuery: '',
-        sortBy: 'name',
-        isAscending: true,
-      );
+  SpacesState resetFilters() =>
+      copyWith(searchQuery: '', sortBy: 'name', isAscending: true);
 
   /// Atualiza cache de plantas por espaço
   SpacesState updatePlantsBySpace(Map<String, List<Plant>> newPlantsBySpace) =>

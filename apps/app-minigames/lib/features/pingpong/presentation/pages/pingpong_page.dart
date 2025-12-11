@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flame/game.dart';
+
 import '../../domain/entities/enums.dart';
-import '../providers/pingpong_notifier.dart';
-import '../widgets/ball_widget.dart';
-import '../widgets/paddle_widget.dart';
 import '../widgets/score_display_widget.dart';
-import '../widgets/court_widget.dart';
 import '../widgets/game_over_dialog.dart';
+import '../game/ping_pong_game.dart';
 
 class PingpongPage extends ConsumerStatefulWidget {
   const PingpongPage({super.key});
@@ -16,90 +15,103 @@ class PingpongPage extends ConsumerStatefulWidget {
 }
 
 class _PingpongPageState extends ConsumerState<PingpongPage> {
-  PaddleDirection _currentDirection = PaddleDirection.stop;
+  late PingPongGame _game;
+  int _playerScore = 0;
+  int _aiScore = 0;
+  GameDifficulty _difficulty = GameDifficulty.medium;
+  bool _gameStarted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initGame();
+  }
+  
+  void _initGame() {
+    _game = PingPongGame(
+      difficulty: _difficulty,
+      onPlayerScoreChanged: (score) {
+        setState(() {
+          _playerScore = score;
+        });
+      },
+      onAiScoreChanged: (score) {
+        setState(() {
+          _aiScore = score;
+        });
+      },
+      onGameOver: () {
+        // Save score logic here if needed
+        setState(() {}); // Rebuild to show game over overlay
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final gameState = ref.watch(pingpongGameProvider);
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: gameState.status == GameStatus.initial
+        child: !_gameStarted
             ? _buildMenu()
             : Stack(
                 children: [
-                  const CourtWidget(),
+                  GameWidget(
+                    game: _game,
+                  ),
+                  
+                  // Touch controls overlay (invisible)
                   GestureDetector(
                     onVerticalDragUpdate: (details) {
-                      if (gameState.status != GameStatus.playing) return;
-
-                      final direction = details.delta.dy < 0
-                          ? PaddleDirection.up
-                          : PaddleDirection.down;
-
-                      if (_currentDirection != direction) {
-                        _currentDirection = direction;
-                        ref.read(pingpongGameProvider.notifier).movePaddle(direction);
+                      if (_game.isPlaying) {
+                        _game.movePlayerPaddle(details.delta.dy);
                       }
-                    },
-                    onVerticalDragEnd: (_) {
-                      _currentDirection = PaddleDirection.stop;
                     },
                     child: Container(color: Colors.transparent),
                   ),
-                  PaddleWidget(
-                    paddle: gameState.playerPaddle,
-                    screenWidth: size.width,
-                    screenHeight: size.height,
-                  ),
-                  PaddleWidget(
-                    paddle: gameState.aiPaddle,
-                    screenWidth: size.width,
-                    screenHeight: size.height,
-                  ),
-                  BallWidget(
-                    ball: gameState.ball,
-                    screenWidth: size.width,
-                    screenHeight: size.height,
-                  ),
+                  
                   ScoreDisplayWidget(
-                    playerScore: gameState.playerScore,
-                    aiScore: gameState.aiScore,
+                    playerScore: _playerScore,
+                    aiScore: _aiScore,
                   ),
-                  if (gameState.status == GameStatus.paused)
+                  
+                  if (!_game.isPlaying && !_game.isGameOver)
                     _buildPauseOverlay(),
-                  if (gameState.isGameOver)
+                    
+                  if (_game.isGameOver)
                     GameOverDialog(
-                      playerWon: gameState.playerWon,
-                      finalScore: gameState.calculateFinalScore(),
-                      gameDuration: gameState.elapsedTime ?? Duration.zero,
-                      highScore: gameState.highScore,
+                      playerWon: _playerScore > _aiScore,
+                      finalScore: _playerScore * 100, // Simplified score
+                      gameDuration: Duration.zero, // TODO: Track duration
+                      highScore: null, // TODO: Get high score
                       onPlayAgain: () {
-                        ref.read(pingpongGameProvider.notifier).resetGame();
-                        ref.read(pingpongGameProvider.notifier).startGame(gameState.difficulty);
+                        _game.restartGame();
+                        setState(() {});
                       },
                       onExit: () {
-                        ref.read(pingpongGameProvider.notifier).resetGame();
+                        setState(() {
+                          _gameStarted = false;
+                        });
                       },
                     ),
+                    
                   Positioned(
                     top: 16,
                     right: 16,
                     child: IconButton(
                       icon: Icon(
-                        gameState.status == GameStatus.paused
+                        !_game.isPlaying
                             ? Icons.play_arrow
                             : Icons.pause,
                         color: Colors.white,
                       ),
                       onPressed: () {
-                        if (gameState.status == GameStatus.paused) {
-                          ref.read(pingpongGameProvider.notifier).resumeGame();
-                        } else if (gameState.status == GameStatus.playing) {
-                          ref.read(pingpongGameProvider.notifier).pauseGame();
+                        if (_game.isPlaying) {
+                          _game.pauseGame();
+                        } else {
+                          _game.startGame();
                         }
+                        setState(() {});
                       },
                     ),
                   ),
@@ -146,7 +158,16 @@ class _PingpongPageState extends ConsumerState<PingpongPage> {
   Widget _buildDifficultyButton(String label, GameDifficulty difficulty) {
     return ElevatedButton(
       onPressed: () {
-        ref.read(pingpongGameProvider.notifier).startGame(difficulty);
+        setState(() {
+          _difficulty = difficulty;
+          _gameStarted = true;
+          _initGame();
+          // Auto start after a short delay? Or let user press play
+          Future.delayed(const Duration(milliseconds: 500), () {
+             _game.startGame();
+             setState(() {});
+          });
+        });
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
@@ -169,19 +190,31 @@ class _PingpongPageState extends ConsumerState<PingpongPage> {
   Widget _buildPauseOverlay() {
     return Container(
       color: Colors.black87,
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.pause_circle_outline, color: Colors.white, size: 80),
-            SizedBox(height: 20),
-            Text(
+            const Icon(Icons.pause_circle_outline, color: Colors.white, size: 80),
+            const SizedBox(height: 20),
+            const Text(
               'PAUSADO',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
               ),
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                _game.startGame();
+                setState(() {});
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              ),
+              child: const Text('CONTINUAR', style: TextStyle(fontSize: 20)),
             ),
           ],
         ),

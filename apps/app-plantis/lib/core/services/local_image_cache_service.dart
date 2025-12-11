@@ -25,27 +25,27 @@ class CachedImage {
 
   /// Converte para JSON para armazenamento
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'base64Data': base64Data,
-        'fileName': fileName,
-        'folder': folder,
-        'cachedAt': cachedAt.toIso8601String(),
-        'mimeType': mimeType,
-        'syncedToServer': syncedToServer,
-        'downloadUrl': downloadUrl,
-      };
+    'id': id,
+    'base64Data': base64Data,
+    'fileName': fileName,
+    'folder': folder,
+    'cachedAt': cachedAt.toIso8601String(),
+    'mimeType': mimeType,
+    'syncedToServer': syncedToServer,
+    'downloadUrl': downloadUrl,
+  };
 
   /// Cria a partir de JSON
   factory CachedImage.fromJson(Map<String, dynamic> json) => CachedImage(
-        id: json['id'] as String,
-        base64Data: json['base64Data'] as String,
-        fileName: json['fileName'] as String?,
-        folder: json['folder'] as String?,
-        cachedAt: DateTime.parse(json['cachedAt'] as String),
-        mimeType: json['mimeType'] as String?,
-        syncedToServer: json['syncedToServer'] as bool? ?? false,
-        downloadUrl: json['downloadUrl'] as String?,
-      );
+    id: json['id'] as String,
+    base64Data: json['base64Data'] as String,
+    fileName: json['fileName'] as String?,
+    folder: json['folder'] as String?,
+    cachedAt: DateTime.parse(json['cachedAt'] as String),
+    mimeType: json['mimeType'] as String?,
+    syncedToServer: json['syncedToServer'] as bool? ?? false,
+    downloadUrl: json['downloadUrl'] as String?,
+  );
 }
 
 /// Configuração para cache local
@@ -78,9 +78,8 @@ class LocalImageCacheService {
   late final SharedPreferences _prefs;
   bool _initialized = false;
 
-  LocalImageCacheService({
-    LocalImageCacheConfig? config,
-  }) : config = config ?? const LocalImageCacheConfig();
+  LocalImageCacheService({LocalImageCacheConfig? config})
+    : config = config ?? const LocalImageCacheConfig();
 
   /// Inicializa o serviço
   Future<Either<Failure, void>> initialize() async {
@@ -93,9 +92,7 @@ class LocalImageCacheService {
       _initialized = true;
       return const Right(null);
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao inicializar cache local: $e'),
-      );
+      return Left(CacheFailure('Erro ao inicializar cache local: $e'));
     }
   }
 
@@ -141,22 +138,15 @@ class LocalImageCacheService {
 
       // Salva no SharedPreferences
       final key = '${config.keyPrefix}$id';
-      final success = await _prefs.setString(
-        key,
-        _encodeImage(cachedImage),
-      );
+      final success = await _prefs.setString(key, _encodeImage(cachedImage));
 
       if (!success) {
-        return const Left(
-          CacheFailure('Erro ao salvar imagem em cache'),
-        );
+        return const Left(CacheFailure('Erro ao salvar imagem em cache'));
       }
 
       return Right(cachedImage);
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao salvar imagem em cache: $e'),
-      );
+      return Left(CacheFailure('Erro ao salvar imagem em cache: $e'));
     }
   }
 
@@ -175,9 +165,7 @@ class LocalImageCacheService {
       final data = _prefs.getString(key);
 
       if (data == null) {
-        return Left(
-          CacheFailure('Imagem não encontrada em cache: $id'),
-        );
+        return Left(CacheFailure('Imagem não encontrada em cache: $id'));
       }
 
       final image = _decodeImage(data);
@@ -185,16 +173,12 @@ class LocalImageCacheService {
       // Verifica se expirou
       if (_hasExpired(image)) {
         await removeImage(id);
-        return Left(
-          CacheFailure('Imagem expirada: $id'),
-        );
+        return Left(CacheFailure('Imagem expirada: $id'));
       }
 
       return Right(image);
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao recuperar imagem do cache: $e'),
-      );
+      return Left(CacheFailure('Erro ao recuperar imagem do cache: $e'));
     }
   }
 
@@ -234,9 +218,7 @@ class LocalImageCacheService {
 
       return Right(images);
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao listar imagens em cache: $e'),
-      );
+      return Left(CacheFailure('Erro ao listar imagens em cache: $e'));
     }
   }
 
@@ -251,9 +233,7 @@ class LocalImageCacheService {
       await _prefs.remove(key);
       return const Right(null);
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao remover imagem do cache: $e'),
-      );
+      return Left(CacheFailure('Erro ao remover imagem do cache: $e'));
     }
   }
 
@@ -272,9 +252,7 @@ class LocalImageCacheService {
 
       return const Right(null);
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao limpar cache: $e'),
-      );
+      return Left(CacheFailure('Erro ao limpar cache: $e'));
     }
   }
 
@@ -290,37 +268,29 @@ class LocalImageCacheService {
 
       final imageResult = await getImage(id);
 
-      return await imageResult.fold(
-        (failure) => Left(failure),
-        (image) async {
-          final syncedImage = CachedImage(
-            id: image.id,
-            base64Data: image.base64Data,
-            fileName: image.fileName,
-            folder: image.folder,
-            cachedAt: image.cachedAt,
-            mimeType: image.mimeType,
-            syncedToServer: true,
-            downloadUrl: downloadUrl,
-          );
+      return await imageResult.fold((failure) => Left(failure), (image) async {
+        final syncedImage = CachedImage(
+          id: image.id,
+          base64Data: image.base64Data,
+          fileName: image.fileName,
+          folder: image.folder,
+          cachedAt: image.cachedAt,
+          mimeType: image.mimeType,
+          syncedToServer: true,
+          downloadUrl: downloadUrl,
+        );
 
-          final key = '${config.keyPrefix}$id';
-          final success = await _prefs.setString(
-            key,
-            _encodeImage(syncedImage),
-          );
+        final key = '${config.keyPrefix}$id';
+        final success = await _prefs.setString(key, _encodeImage(syncedImage));
 
-          if (!success) {
-            return const Left(CacheFailure('Erro ao atualizar cache'));
-          }
+        if (!success) {
+          return const Left(CacheFailure('Erro ao atualizar cache'));
+        }
 
-          return const Right(null);
-        },
-      );
+        return const Right(null);
+      });
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao marcar como sincronizado: $e'),
-      );
+      return Left(CacheFailure('Erro ao marcar como sincronizado: $e'));
     }
   }
 
@@ -331,21 +301,20 @@ class LocalImageCacheService {
 
       return imagesResult.fold(
         (failure) => Left(failure),
-        (images) => Right(
-          images.where((img) => !img.syncedToServer).toList(),
-        ),
+        (images) => Right(images.where((img) => !img.syncedToServer).toList()),
       );
     } catch (e) {
-      return Left(
-        CacheFailure('Erro ao listar imagens não sincronizadas: $e'),
-      );
+      return Left(CacheFailure('Erro ao listar imagens não sincronizadas: $e'));
     }
   }
 
   // ============ HELPERS ============
 
   int _getImageCount() {
-    return _prefs.getKeys().where((key) => key.startsWith(config.keyPrefix)).length;
+    return _prefs
+        .getKeys()
+        .where((key) => key.startsWith(config.keyPrefix))
+        .length;
   }
 
   Future<void> _removeOldestImage() async {

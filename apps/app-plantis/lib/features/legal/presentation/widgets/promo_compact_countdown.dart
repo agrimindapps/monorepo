@@ -75,15 +75,12 @@ class _PromoCompactCountdownState extends State<PromoCompactCountdown> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.schedule,
-            size: 16,
-            color: Color(0xFFFF6F00),
-          ),
+          const Icon(Icons.schedule, size: 16, color: Color(0xFFFF6F00)),
           const SizedBox(width: 6),
           Text(
             _displayText,
-            style: widget.textStyle ??
+            style:
+                widget.textStyle ??
                 const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,

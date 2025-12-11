@@ -12,7 +12,7 @@ class CredentialsPersistenceManager {
   final SharedPreferences _prefs;
 
   CredentialsPersistenceManager({required SharedPreferences prefs})
-      : _prefs = prefs;
+    : _prefs = prefs;
 
   /// Saves or removes remembered credentials based on rememberMe flag
   Future<void> saveRememberedCredentials({

@@ -72,10 +72,7 @@ class TaskGenerationResult {
 }
 
 class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
-  AddPlantUseCase(
-    this.repository,
-    this.generateInitialTasksUseCase,
-  );
+  AddPlantUseCase(this.repository, this.generateInitialTasksUseCase);
 
   final PlantsRepository repository;
   final GenerateInitialTasksUseCase generateInitialTasksUseCase;
@@ -101,7 +98,8 @@ class AddPlantUseCase implements UseCase<Plant, AddPlantParams> {
     if (currentUser == null) {
       return const Left(AuthFailure('Usuário não está autenticado'));
     }
-    final generatedId = params.id ??
+    final generatedId =
+        params.id ??
         FirebaseFirestore.instance
             .collection('users/${currentUser.id}/plants')
             .doc()

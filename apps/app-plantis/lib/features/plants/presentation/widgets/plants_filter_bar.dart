@@ -84,18 +84,16 @@ class _FilterChip extends StatelessWidget {
         avatar: Icon(
           icon,
           size: 16,
-          color:
-              isSelected
-                  ? theme.colorScheme.onPrimary
-                  : theme.colorScheme.primary,
+          color: isSelected
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.primary,
         ),
         label: Text(
           label,
           style: TextStyle(
-            color:
-                isSelected
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.primary,
+            color: isSelected
+                ? theme.colorScheme.onPrimary
+                : theme.colorScheme.primary,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
@@ -105,10 +103,9 @@ class _FilterChip extends StatelessWidget {
         backgroundColor: theme.colorScheme.surface,
         checkmarkColor: theme.colorScheme.onPrimary,
         side: BorderSide(
-          color:
-              isSelected
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.outline.withValues(alpha: 0.3),
+          color: isSelected
+              ? theme.colorScheme.primary
+              : theme.colorScheme.outline.withValues(alpha: 0.3),
           width: isSelected ? 2 : 1,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

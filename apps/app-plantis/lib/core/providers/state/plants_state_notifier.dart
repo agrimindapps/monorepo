@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:core/core.dart' hide Column;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../features/plants/domain/entities/plant.dart';
 import '../../../features/plants/domain/usecases/add_plant_usecase.dart';
@@ -66,8 +66,9 @@ class PlantsState {
     return PlantsState(
       allPlants: allPlants ?? this.allPlants,
       filteredPlants: filteredPlants ?? this.filteredPlants,
-      selectedPlant:
-          clearSelectedPlant ? null : (selectedPlant ?? this.selectedPlant),
+      selectedPlant: clearSelectedPlant
+          ? null
+          : (selectedPlant ?? this.selectedPlant),
       isLoading: isLoading ?? this.isLoading,
       isSearching: isSearching ?? this.isSearching,
       error: clearError ? null : (error ?? this.error),
@@ -187,10 +188,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
       await result.fold(
         (failure) async {
           state = AsyncValue.data(
-            currentState.copyWith(
-              isLoading: false,
-              error: failure.message,
-            ),
+            currentState.copyWith(isLoading: false, error: failure.message),
           );
         },
         (plants) async {
@@ -205,10 +203,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
       );
     } catch (e) {
       state = AsyncValue.data(
-        currentState.copyWith(
-          isLoading: false,
-          error: 'Erro inesperado: $e',
-        ),
+        currentState.copyWith(isLoading: false, error: 'Erro inesperado: $e'),
       );
     }
   }
@@ -223,9 +218,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     return result.fold(
       (failure) {
         final currentState = state.value ?? const PlantsState();
-        state = AsyncValue.data(
-          currentState.copyWith(error: failure.message),
-        );
+        state = AsyncValue.data(currentState.copyWith(error: failure.message));
         return false;
       },
       (plant) {
@@ -245,9 +238,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     return result.fold(
       (failure) {
         final currentState = state.value ?? const PlantsState();
-        state = AsyncValue.data(
-          currentState.copyWith(error: failure.message),
-        );
+        state = AsyncValue.data(currentState.copyWith(error: failure.message));
         return false;
       },
       (updatedPlant) {
@@ -270,9 +261,7 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
     return result.fold(
       (failure) {
         final currentState = state.value ?? const PlantsState();
-        state = AsyncValue.data(
-          currentState.copyWith(error: failure.message),
-        );
+        state = AsyncValue.data(currentState.copyWith(error: failure.message));
         return false;
       },
       (_) {
@@ -322,16 +311,18 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
 
   Future<void> setFavoritesFilter(bool showOnlyFavorites) async {
     final currentState = state.value ?? const PlantsState();
-    final newState =
-        currentState.copyWith(showOnlyFavorites: showOnlyFavorites);
+    final newState = currentState.copyWith(
+      showOnlyFavorites: showOnlyFavorites,
+    );
     state = AsyncValue.data(newState);
     await _applyFiltersToState(newState);
   }
 
   Future<void> setNeedingWaterFilter(bool showOnlyNeedingWater) async {
     final currentState = state.value ?? const PlantsState();
-    final newState =
-        currentState.copyWith(showOnlyNeedingWater: showOnlyNeedingWater);
+    final newState = currentState.copyWith(
+      showOnlyNeedingWater: showOnlyNeedingWater,
+    );
     state = AsyncValue.data(newState);
     await _applyFiltersToState(newState);
   }
@@ -365,8 +356,9 @@ class PlantsStateNotifier extends _$PlantsStateNotifier {
   Future<void> _applyFiltersToState(PlantsState currentState) async {
     final filtered = _filterService.searchWithFilters(
       plants: currentState.allPlants,
-      searchTerm:
-          currentState.searchQuery.isNotEmpty ? currentState.searchQuery : null,
+      searchTerm: currentState.searchQuery.isNotEmpty
+          ? currentState.searchQuery
+          : null,
       spaceId: currentState.filterBySpace,
       careStatus: _mapToServiceCareStatus(currentState.filterByCareStatus),
       onlyFavorites: currentState.showOnlyFavorites,
@@ -461,14 +453,12 @@ PlantsDataService plantsDataServiceLegacy(Ref ref) {
 }
 
 @riverpod
-filter_service.PlantsFilterService plantsFilterServiceLegacy(
-    Ref ref) {
+filter_service.PlantsFilterService plantsFilterServiceLegacy(Ref ref) {
   return ref.watch(plantsFilterServiceProvider);
 }
 
 @riverpod
-care_service.PlantsCareCalculator plantsCareCalculatorLegacy(
-    Ref ref) {
+care_service.PlantsCareCalculator plantsCareCalculatorLegacy(Ref ref) {
   return ref.watch(plantsCareCalculatorProvider);
 }
 

@@ -1,8 +1,8 @@
 /// Device Management Providers for app-plantis
-/// 
+///
 /// Este arquivo configura os providers de device management específicos do plantis,
 /// utilizando a implementação base do core package.
-/// 
+///
 /// A lógica de negócio está toda no core. Aqui apenas:
 /// - Configuramos os overrides necessários para o plantis
 /// - Re-exportamos os providers do core para uso no app
@@ -32,12 +32,10 @@ DeviceLimitConfig plantisDeviceLimitConfig(Ref ref) {
 @riverpod
 DeviceManagementService plantisDeviceManagementService(Ref ref) {
   final limitConfig = ref.watch(plantisDeviceLimitConfigProvider);
-  final firebaseDeviceService = FirebaseDeviceService(
-    limitConfig: limitConfig,
-  );
+  final firebaseDeviceService = FirebaseDeviceService(limitConfig: limitConfig);
   final authService = ref.watch(firebaseAuthServiceProvider);
   final analyticsService = ref.watch(firebaseAnalyticsServiceProvider);
-  
+
   // Usa FirebaseDeviceService como repository (implementa IDeviceRepository)
   return DeviceManagementService(
     firebaseDeviceService: firebaseDeviceService,
@@ -52,11 +50,8 @@ DeviceManagementService plantisDeviceManagementService(Ref ref) {
 Future<List<DeviceEntity>> plantisUserDevices(Ref ref) async {
   final service = ref.watch(plantisDeviceManagementServiceProvider);
   final result = await service.getUserDevices();
-  
-  return result.fold(
-    (failure) => [],
-    (devices) => devices,
-  );
+
+  return result.fold((failure) => [], (devices) => devices);
 }
 
 /// Provider para verificar se pode adicionar mais dispositivos
@@ -64,11 +59,8 @@ Future<List<DeviceEntity>> plantisUserDevices(Ref ref) async {
 Future<bool> plantisCanAddMoreDevices(Ref ref) async {
   final service = ref.watch(plantisDeviceManagementServiceProvider);
   final result = await service.canAddMoreDevices();
-  
-  return result.fold(
-    (failure) => false,
-    (canAdd) => canAdd,
-  );
+
+  return result.fold((failure) => false, (canAdd) => canAdd);
 }
 
 /// Provider para estatísticas de dispositivos
@@ -76,9 +68,6 @@ Future<bool> plantisCanAddMoreDevices(Ref ref) async {
 Future<DeviceStatistics?> plantisDeviceStatistics(Ref ref) async {
   final service = ref.watch(plantisDeviceManagementServiceProvider);
   final result = await service.getDeviceStatistics();
-  
-  return result.fold(
-    (failure) => null,
-    (stats) => stats,
-  );
+
+  return result.fold((failure) => null, (stats) => stats);
 }

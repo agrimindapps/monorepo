@@ -39,8 +39,7 @@ class Spaces extends Table {
   TextColumn get userId => text().nullable()();
 
   /// Nome do módulo (sempre 'plantis')
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -85,9 +84,9 @@ class Spaces extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        // Garante que firebaseId seja único quando não for null
-        {firebaseId},
-      ];
+    // Garante que firebaseId seja único quando não for null
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -103,8 +102,7 @@ class Plants extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -121,8 +119,11 @@ class Plants extends Table {
   // ========== RELACIONAMENTO ==========
 
   /// ID do espaço onde a planta está localizada (foreign key)
-  IntColumn get spaceId =>
-      integer().nullable().references(Spaces, #id, onDelete: KeyAction.setNull)();
+  IntColumn get spaceId => integer().nullable().references(
+    Spaces,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
 
   // ========== DADOS DA PLANTA ==========
 
@@ -151,8 +152,8 @@ class Plants extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-      ];
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -168,8 +169,7 @@ class PlantConfigs extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -216,11 +216,13 @@ class PlantConfigs extends Table {
   // ========== CONFIGURAÇÕES DE PODA ==========
 
   BoolColumn get podaAtiva => boolean().withDefault(const Constant(true))();
-  IntColumn get intervaloPodaDias => integer().withDefault(const Constant(30))();
+  IntColumn get intervaloPodaDias =>
+      integer().withDefault(const Constant(30))();
 
   // ========== CONFIGURAÇÕES DE REPLANTIO ==========
 
-  BoolColumn get replantarAtivo => boolean().withDefault(const Constant(true))();
+  BoolColumn get replantarAtivo =>
+      boolean().withDefault(const Constant(true))();
   IntColumn get intervaloReplantarDias =>
       integer().withDefault(const Constant(180))();
 
@@ -228,9 +230,9 @@ class PlantConfigs extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-        {plantId}, // Garante relação 1:1
-      ];
+    {firebaseId},
+    {plantId}, // Garante relação 1:1
+  ];
 }
 
 // ============================================================================
@@ -246,8 +248,7 @@ class PlantTasks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -297,8 +298,8 @@ class PlantTasks extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-      ];
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -314,8 +315,7 @@ class Tasks extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -374,8 +374,8 @@ class Tasks extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-      ];
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -391,8 +391,7 @@ class Comments extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -409,8 +408,11 @@ class Comments extends Table {
   // ========== RELACIONAMENTO ==========
 
   /// ID da planta (foreign key)
-  IntColumn get plantId =>
-      integer().nullable().references(Plants, #id, onDelete: KeyAction.cascade)();
+  IntColumn get plantId => integer().nullable().references(
+    Plants,
+    #id,
+    onDelete: KeyAction.cascade,
+  )();
 
   // ========== DADOS DO COMENTÁRIO ==========
 
@@ -427,8 +429,8 @@ class Comments extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-      ];
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -444,8 +446,7 @@ class ConflictHistory extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -495,8 +496,8 @@ class ConflictHistory extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-      ];
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -513,8 +514,7 @@ class PlantImages extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get firebaseId => text().nullable()();
   TextColumn get userId => text().nullable()();
-  TextColumn get moduleName =>
-      text().withDefault(const Constant('plantis'))();
+  TextColumn get moduleName => text().withDefault(const Constant('plantis'))();
 
   // ========== TIMESTAMPS ==========
 
@@ -562,8 +562,8 @@ class PlantImages extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {firebaseId},
-      ];
+    {firebaseId},
+  ];
 }
 
 // ============================================================================
@@ -629,15 +629,15 @@ class UserSubscriptions extends Table {
 
   TextColumn get id => text()();
   TextColumn get userId => text()();
-  
+
   // ========== DADOS DA ASSINATURA (CRIPTOGRAFADOS) ==========
-  
+
   TextColumn get productId => text()();
   TextColumn get status => text()();
   TextColumn get tier => text()();
-  
+
   // ========== DADOS DA ASSINATURA (ABERTOS) ==========
-  
+
   TextColumn get store => text()();
   DateTimeColumn get expirationDate => dateTime().nullable()();
   DateTimeColumn get purchaseDate => dateTime().nullable()();

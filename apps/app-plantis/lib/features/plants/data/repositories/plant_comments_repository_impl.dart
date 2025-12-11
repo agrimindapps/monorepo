@@ -21,17 +21,17 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
       if (kDebugMode) {
         print('🔍 getCommentsForPlant - plantId: $plantId');
       }
-      
+
       // Try to sync from Firebase first (non-blocking if fails)
       await _syncCommentsFromFirebase(plantId);
-      
+
       // Get comments from local Drift database
       final comments = await _driftRepository.getCommentsByPlant(plantId);
-      
+
       if (kDebugMode) {
         print('✅ Found ${comments.length} comments for plant $plantId');
       }
-      
+
       return Right(comments);
     } catch (e) {
       if (kDebugMode) {
@@ -47,24 +47,24 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
       if (kDebugMode) {
         print('☁️ Syncing comments from Firebase for plant $plantId');
       }
-      
+
       // Get comments from Firebase using UnifiedSyncManager
-      final result = await UnifiedSyncManager.instance.findWhere<ComentarioModel>(
-        _appName,
-        {'plantId': plantId},
-      );
-      
+      final result = await UnifiedSyncManager.instance
+          .findWhere<ComentarioModel>(_appName, {'plantId': plantId});
+
       await result.fold(
         (Failure failure) async {
           if (kDebugMode) {
-            print('⚠️ Firebase sync failed (using local data): ${failure.message}');
+            print(
+              '⚠️ Firebase sync failed (using local data): ${failure.message}',
+            );
           }
         },
         (List<ComentarioModel> remoteComments) async {
           if (kDebugMode) {
             print('☁️ Found ${remoteComments.length} comments in Firebase');
           }
-          
+
           // Merge remote comments with local ones
           for (final remoteComment in remoteComments) {
             // Skip deleted comments
@@ -73,10 +73,12 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
               await _driftRepository.softDeleteComment(remoteComment.id);
               continue;
             }
-            
+
             // Check if comment exists locally
-            final localComment = await _driftRepository.getCommentById(remoteComment.id);
-            
+            final localComment = await _driftRepository.getCommentById(
+              remoteComment.id,
+            );
+
             if (localComment == null) {
               // Insert new comment from Firebase
               await _driftRepository.insertComment(remoteComment);
@@ -85,13 +87,21 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
               }
             } else {
               // Update if remote is newer
-              final remoteUpdated = remoteComment.updatedAt ?? remoteComment.createdAt ?? DateTime.now();
-              final localUpdated = localComment.updatedAt ?? localComment.createdAt ?? DateTime.now();
-              
+              final remoteUpdated =
+                  remoteComment.updatedAt ??
+                  remoteComment.createdAt ??
+                  DateTime.now();
+              final localUpdated =
+                  localComment.updatedAt ??
+                  localComment.createdAt ??
+                  DateTime.now();
+
               if (remoteUpdated.isAfter(localUpdated)) {
                 await _driftRepository.updateComment(remoteComment);
                 if (kDebugMode) {
-                  print('🔄 Updated comment from Firebase: ${remoteComment.id}');
+                  print(
+                    '🔄 Updated comment from Firebase: ${remoteComment.id}',
+                  );
                 }
               }
             }
@@ -123,7 +133,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
 
       // Save to local Drift database
       await _driftRepository.insertComment(comment);
-      
+
       if (kDebugMode) {
         print('✅ Comment saved locally: ${comment.id}');
       }
@@ -144,11 +154,9 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
   void _syncToFirebaseInBackground(ComentarioModel comment) {
     Future.microtask(() async {
       try {
-        final result = await UnifiedSyncManager.instance.create<ComentarioModel>(
-          _appName,
-          comment,
-        );
-        
+        final result = await UnifiedSyncManager.instance
+            .create<ComentarioModel>(_appName, comment);
+
         result.fold(
           (failure) {
             if (kDebugMode) {
@@ -179,7 +187,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
       // For now, delete and re-insert (Drift repository doesn't have update)
       // This maintains data integrity
       // TODO: Add proper update method to CommentsDriftRepository
-      
+
       if (kDebugMode) {
         print('📝 Updating comment: ${comment.id}');
       }
@@ -190,7 +198,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
         comment.id,
         updatedComment,
       );
-      
+
       return result.fold(
         (failure) => Left(failure),
         (_) => Right(updatedComment),
@@ -219,7 +227,9 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
       // Soft delete in local Drift database
       final deleted = await _driftRepository.softDeleteComment(commentId);
       if (!deleted) {
-        return const Left(CacheFailure('Falha ao deletar comentário localmente'));
+        return const Left(
+          CacheFailure('Falha ao deletar comentário localmente'),
+        );
       }
 
       if (kDebugMode) {
@@ -243,16 +253,15 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     Future.microtask(() async {
       try {
         final deletedComment = comment.markAsDeleted();
-        final result = await UnifiedSyncManager.instance.update<ComentarioModel>(
-          _appName,
-          comment.id,
-          deletedComment,
-        );
+        final result = await UnifiedSyncManager.instance
+            .update<ComentarioModel>(_appName, comment.id, deletedComment);
 
         result.fold(
           (failure) {
             if (kDebugMode) {
-              print('⚠️ Firebase delete sync failed (will retry): ${failure.message}');
+              print(
+                '⚠️ Firebase delete sync failed (will retry): ${failure.message}',
+              );
             }
           },
           (_) {
@@ -274,15 +283,12 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     try {
       final commentsResult = await getCommentsForPlant(plantId);
 
-      return commentsResult.fold(
-        (failure) => Left(failure),
-        (comments) async {
-          for (final comment in comments) {
-            await deleteComment(comment.id);
-          }
-          return const Right(null);
-        },
-      );
+      return commentsResult.fold((failure) => Left(failure), (comments) async {
+        for (final comment in comments) {
+          await deleteComment(comment.id);
+        }
+        return const Right(null);
+      });
     } catch (e) {
       return Left(CacheFailure('Failed to delete comments for plant: $e'));
     }

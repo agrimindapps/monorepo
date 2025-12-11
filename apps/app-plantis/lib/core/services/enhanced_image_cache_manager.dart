@@ -71,11 +71,10 @@ class EnhancedImageCacheManager {
   /// Cleanup memory cache using LRU eviction
   Future<void> _cleanupMemoryCache(int newImageSize) async {
     final now = DateTime.now();
-    final expiredKeys =
-        _cacheAccess.entries
-            .where((entry) => now.difference(entry.value) > cacheExpiration)
-            .map((entry) => entry.key)
-            .toList();
+    final expiredKeys = _cacheAccess.entries
+        .where((entry) => now.difference(entry.value) > cacheExpiration)
+        .map((entry) => entry.key)
+        .toList();
 
     for (final key in expiredKeys) {
       _removeFromCache(key);
@@ -83,10 +82,9 @@ class EnhancedImageCacheManager {
     while ((_currentMemoryBytes + newImageSize > maxMemoryBytes) ||
         (_memoryCache.length >= maxMemoryCacheSize)) {
       if (_cacheAccess.isEmpty) break;
-      final oldestKey =
-          _cacheAccess.entries
-              .reduce((a, b) => a.value.isBefore(b.value) ? a : b)
-              .key;
+      final oldestKey = _cacheAccess.entries
+          .reduce((a, b) => a.value.isBefore(b.value) ? a : b)
+          .key;
 
       _removeFromCache(oldestKey);
     }
@@ -214,8 +212,8 @@ extension OptimizedCachedNetworkImage on CachedNetworkImage {
       height: height,
       fit: fit,
       placeholder: (context, url) => placeholder ?? const SizedBox(),
-      errorWidget:
-          (context, url, error) => errorWidget ?? const Icon(Icons.error),
+      errorWidget: (context, url, error) =>
+          errorWidget ?? const Icon(Icons.error),
       fadeInDuration: fadeInDuration,
       memCacheWidth: width?.round(),
       memCacheHeight: height?.round(),

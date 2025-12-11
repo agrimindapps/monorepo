@@ -11,9 +11,9 @@ class SecureStorageService {
   SecureStorageService._();
   late final EnhancedSecureStorageService _coreStorage =
       EnhancedSecureStorageService(
-    appIdentifier: 'plantis',
-    config: const SecureStorageConfig.plantis(),
-  );
+        appIdentifier: 'plantis',
+        config: const SecureStorageConfig.plantis(),
+      );
   static const String _userCredentialsKey = 'user_credentials';
   static const String _locationDataKey = 'location_data';
   static const String _personalInfoKey = 'personal_info';
@@ -26,13 +26,10 @@ class SecureStorageService {
       data: credentials.toJson(),
     );
 
-    result.fold(
-      (failure) {
-        debugPrint('❌ Error storing user credentials: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (_) => debugPrint('🔒 User credentials stored securely'),
-    );
+    result.fold((failure) {
+      debugPrint('❌ Error storing user credentials: ${failure.message}');
+      throw Exception(failure.message);
+    }, (_) => debugPrint('🔒 User credentials stored securely'));
   }
 
   /// Retrieve user credentials
@@ -41,13 +38,10 @@ class SecureStorageService {
       key: _userCredentialsKey,
     );
 
-    return result.fold(
-      (failure) {
-        debugPrint('❌ Error retrieving user credentials: ${failure.message}');
-        return null;
-      },
-      (json) => json != null ? UserCredentials.fromJson(json) : null,
-    );
+    return result.fold((failure) {
+      debugPrint('❌ Error retrieving user credentials: ${failure.message}');
+      return null;
+    }, (json) => json != null ? UserCredentials.fromJson(json) : null);
   }
 
   /// Store location data securely
@@ -57,13 +51,10 @@ class SecureStorageService {
       data: locationData.toJson(),
     );
 
-    result.fold(
-      (failure) {
-        debugPrint('❌ Error storing location data: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (_) => debugPrint('🔒 Location data stored securely'),
-    );
+    result.fold((failure) {
+      debugPrint('❌ Error storing location data: ${failure.message}');
+      throw Exception(failure.message);
+    }, (_) => debugPrint('🔒 Location data stored securely'));
   }
 
   /// Retrieve location data
@@ -72,13 +63,10 @@ class SecureStorageService {
       key: _locationDataKey,
     );
 
-    return result.fold(
-      (failure) {
-        debugPrint('❌ Error retrieving location data: ${failure.message}');
-        return null;
-      },
-      (json) => json != null ? LocationData.fromJson(json) : null,
-    );
+    return result.fold((failure) {
+      debugPrint('❌ Error retrieving location data: ${failure.message}');
+      return null;
+    }, (json) => json != null ? LocationData.fromJson(json) : null);
   }
 
   /// Store personal information securely
@@ -88,13 +76,10 @@ class SecureStorageService {
       data: personalInfo.toJson(),
     );
 
-    result.fold(
-      (failure) {
-        debugPrint('❌ Error storing personal info: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (_) => debugPrint('🔒 Personal info stored securely'),
-    );
+    result.fold((failure) {
+      debugPrint('❌ Error storing personal info: ${failure.message}');
+      throw Exception(failure.message);
+    }, (_) => debugPrint('🔒 Personal info stored securely'));
   }
 
   /// Retrieve personal information
@@ -103,39 +88,30 @@ class SecureStorageService {
       key: _personalInfoKey,
     );
 
-    return result.fold(
-      (failure) {
-        debugPrint('❌ Error retrieving personal info: ${failure.message}');
-        return null;
-      },
-      (json) => json != null ? PersonalInfo.fromJson(json) : null,
-    );
+    return result.fold((failure) {
+      debugPrint('❌ Error retrieving personal info: ${failure.message}');
+      return null;
+    }, (json) => json != null ? PersonalInfo.fromJson(json) : null);
   }
 
   /// Store biometric data hash
   Future<void> storeBiometricData(String biometricHash) async {
     final result = await _coreStorage.storeBiometricHash(biometricHash);
 
-    result.fold(
-      (failure) {
-        debugPrint('❌ Error storing biometric data: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (_) => debugPrint('🔒 Biometric data stored securely'),
-    );
+    result.fold((failure) {
+      debugPrint('❌ Error storing biometric data: ${failure.message}');
+      throw Exception(failure.message);
+    }, (_) => debugPrint('🔒 Biometric data stored securely'));
   }
 
   /// Retrieve biometric data hash
   Future<String?> getBiometricData() async {
     final result = await _coreStorage.getBiometricHash();
 
-    return result.fold(
-      (failure) {
-        debugPrint('❌ Error retrieving biometric data: ${failure.message}');
-        return null;
-      },
-      (hash) => hash,
-    );
+    return result.fold((failure) {
+      debugPrint('❌ Error retrieving biometric data: ${failure.message}');
+      return null;
+    }, (hash) => hash);
   }
 
   /// Clear specific secure data
@@ -163,13 +139,10 @@ class SecureStorageService {
   Future<void> clearAllSecureData() async {
     final result = await _coreStorage.clearAllSecureData();
 
-    result.fold(
-      (failure) {
-        debugPrint('❌ Error clearing secure data: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (_) => debugPrint('🗑️ All secure data cleared'),
-    );
+    result.fold((failure) {
+      debugPrint('❌ Error clearing secure data: ${failure.message}');
+      throw Exception(failure.message);
+    }, (_) => debugPrint('🗑️ All secure data cleared'));
   }
 
   /// Check if secure storage is available
@@ -180,13 +153,10 @@ class SecureStorageService {
   /// Generic methods for simple data types
   Future<String?> getString(String key) async {
     final result = await _coreStorage.getSecureData<String>(key: key);
-    return result.fold(
-      (failure) {
-        debugPrint('❌ Error reading string for key $key: ${failure.message}');
-        return null;
-      },
-      (value) => value,
-    );
+    return result.fold((failure) {
+      debugPrint('❌ Error reading string for key $key: ${failure.message}');
+      return null;
+    }, (value) => value);
   }
 
   Future<void> setString(String key, String value) async {
@@ -195,13 +165,10 @@ class SecureStorageService {
       data: value,
     );
 
-    result.fold(
-      (failure) {
-        debugPrint('❌ Error writing string for key $key: ${failure.message}');
-        throw Exception(failure.message);
-      },
-      (_) {},
-    );
+    result.fold((failure) {
+      debugPrint('❌ Error writing string for key $key: ${failure.message}');
+      throw Exception(failure.message);
+    }, (_) {});
   }
 
   Future<bool?> getBool(String key) async {
@@ -280,10 +247,9 @@ class UserCredentials {
         email: json['email'] as String,
         accessToken: json['accessToken'] as String?,
         refreshToken: json['refreshToken'] as String?,
-        tokenExpiry:
-            json['tokenExpiry'] != null
-                ? DateTime.parse(json['tokenExpiry'] as String)
-                : null,
+        tokenExpiry: json['tokenExpiry'] != null
+            ? DateTime.parse(json['tokenExpiry'] as String)
+            : null,
       );
 }
 
@@ -341,14 +307,12 @@ class PersonalInfo {
   factory PersonalInfo.fromJson(Map<String, dynamic> json) => PersonalInfo(
     fullName: json['fullName'] as String?,
     phoneNumber: json['phoneNumber'] as String?,
-    dateOfBirth:
-        json['dateOfBirth'] != null
-            ? DateTime.parse(json['dateOfBirth'] as String)
-            : null,
+    dateOfBirth: json['dateOfBirth'] != null
+        ? DateTime.parse(json['dateOfBirth'] as String)
+        : null,
     address: json['address'] as String?,
-    customFields:
-        json['customFields'] != null
-            ? Map<String, String>.from(json['customFields'] as Map)
-            : null,
+    customFields: json['customFields'] != null
+        ? Map<String, String>.from(json['customFields'] as Map)
+        : null,
   );
 }

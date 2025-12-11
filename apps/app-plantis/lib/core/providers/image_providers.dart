@@ -20,9 +20,7 @@ IImageService imageServiceAdapter(Ref ref) {
 
 /// Provider for ImageManagementService (specialized SOLID service)
 @riverpod
-ImageManagementService imageManagementService(
-  Ref ref,
-) {
+ImageManagementService imageManagementService(Ref ref) {
   final imageService = ref.watch(imageServiceAdapterProvider);
   return ImageManagementService(imageService: imageService);
 }

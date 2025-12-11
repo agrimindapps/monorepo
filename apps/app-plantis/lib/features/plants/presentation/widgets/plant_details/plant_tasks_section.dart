@@ -40,10 +40,9 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -79,27 +78,26 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
 
   Widget _buildTasksList(BuildContext context, List<Task> tasks) {
     final overdueTasks = tasks.where((task) => task.isOverdue).toList();
-    final upcomingTasks =
-        tasks
-            .where(
-              (task) =>
-                  task.status == TaskStatus.pending &&
-                  !task.isOverdue &&
-                  (task.isDueToday || task.isDueTomorrow),
-            )
-            .toList();
-    final pendingTasks =
-        tasks
-            .where(
-              (task) =>
-                  task.status == TaskStatus.pending &&
-                  !task.isOverdue &&
-                  !task.isDueToday &&
-                  !task.isDueTomorrow,
-            )
-            .toList();
-    final completedTasks =
-        tasks.where((task) => task.status == TaskStatus.completed).toList();
+    final upcomingTasks = tasks
+        .where(
+          (task) =>
+              task.status == TaskStatus.pending &&
+              !task.isOverdue &&
+              (task.isDueToday || task.isDueTomorrow),
+        )
+        .toList();
+    final pendingTasks = tasks
+        .where(
+          (task) =>
+              task.status == TaskStatus.pending &&
+              !task.isOverdue &&
+              !task.isDueToday &&
+              !task.isDueTomorrow,
+        )
+        .toList();
+    final completedTasks = tasks
+        .where((task) => task.status == TaskStatus.completed)
+        .toList();
 
     overdueTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
     upcomingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
@@ -201,16 +199,14 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF),
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color:
-              isCompleted
-                  ? Colors.green.withValues(alpha: 0.3)
-                  : color.withValues(alpha: 0.2),
+          color: isCompleted
+              ? Colors.green.withValues(alpha: 0.3)
+              : color.withValues(alpha: 0.2),
         ),
         boxShadow: [
           BoxShadow(
@@ -221,10 +217,9 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
         ],
       ),
       child: InkWell(
-        onTap:
-            isCompleted
-                ? null
-                : () => _showTaskCompletionDialog(context, task),
+        onTap: isCompleted
+            ? null
+            : () => _showTaskCompletionDialog(context, task),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -247,12 +242,12 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
                       task.title,
                       style: theme.textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color:
-                            isCompleted
-                                ? theme.colorScheme.onSurfaceVariant
-                                : theme.colorScheme.onSurface,
-                        decoration:
-                            isCompleted ? TextDecoration.lineThrough : null,
+                        color: isCompleted
+                            ? theme.colorScheme.onSurfaceVariant
+                            : theme.colorScheme.onSurface,
+                        decoration: isCompleted
+                            ? TextDecoration.lineThrough
+                            : null,
                       ),
                     ),
                     if (task.description?.isNotEmpty == true) ...[
@@ -351,10 +346,9 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color:
-                  theme.brightness == Brightness.dark
-                      ? const Color(0xFF2C2C2E)
-                      : const Color(0xFFFFFFFF),
+              color: theme.brightness == Brightness.dark
+                  ? const Color(0xFF2C2C2E)
+                  : const Color(0xFFFFFFFF),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
                 color: PlantisColors.primary.withValues(alpha: 0.3),
@@ -413,21 +407,20 @@ class _PlantTasksSectionState extends ConsumerState<PlantTasksSection> {
         AnimatedSize(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          child:
-              _showAllCompletedTasks
-                  ? Column(
-                    children: [
-                      const SizedBox(height: 16),
-                      _buildTaskSection(
-                        context,
-                        title: 'Tarefas concluídas',
-                        tasks: completedTasks,
-                        color: Colors.green,
-                        isCompleted: true,
-                      ),
-                    ],
-                  )
-                  : const SizedBox.shrink(),
+          child: _showAllCompletedTasks
+              ? Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    _buildTaskSection(
+                      context,
+                      title: 'Tarefas concluídas',
+                      tasks: completedTasks,
+                      color: Colors.green,
+                      isCompleted: true,
+                    ),
+                  ],
+                )
+              : const SizedBox.shrink(),
         ),
       ],
     );

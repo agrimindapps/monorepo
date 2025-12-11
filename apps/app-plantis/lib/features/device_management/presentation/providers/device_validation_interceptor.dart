@@ -22,8 +22,8 @@ class DeviceValidationInterceptor {
   DeviceValidationInterceptor({
     required DeviceManagementService deviceService,
     required AuthStateNotifier authStateNotifier,
-  })  : _deviceService = deviceService,
-        _authStateNotifier = authStateNotifier {
+  }) : _deviceService = deviceService,
+       _authStateNotifier = authStateNotifier {
     _startListening();
   }
 
@@ -86,7 +86,9 @@ class DeviceValidationInterceptor {
         return;
       }
 
-      final result = await _deviceService.validateDevice(currentDevice.toEntity());
+      final result = await _deviceService.validateDevice(
+        currentDevice.toEntity(),
+      );
 
       result.fold(
         (Failure failure) {
@@ -165,7 +167,9 @@ class DeviceValidationInterceptor {
         return DeviceValidationResult.invalid('Plataforma não suportada');
       }
 
-      final result = await _deviceService.validateDevice(currentDevice.toEntity());
+      final result = await _deviceService.validateDevice(
+        currentDevice.toEntity(),
+      );
 
       return result.fold(
         (Failure failure) {

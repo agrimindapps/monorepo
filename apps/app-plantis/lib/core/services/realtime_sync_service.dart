@@ -23,9 +23,10 @@ class RealtimeSyncService {
   final SpacesDriftRepository _spacesRepository;
   final IAuthRepository _authRepository;
 
-  final Map<String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>> _subscriptions = {};
+  final Map<String, StreamSubscription<QuerySnapshot<Map<String, dynamic>>>>
+  _subscriptions = {};
   final _changesController = StreamController<RealtimeSyncEvent>.broadcast();
-  
+
   String? _currentUserId;
   bool _isListening = false;
 
@@ -36,12 +37,12 @@ class RealtimeSyncService {
     required PlantTasksDriftRepository tasksRepository,
     required SpacesDriftRepository spacesRepository,
     required IAuthRepository authRepository,
-  })  : _firestore = firestore,
-        _plantsRepository = plantsRepository,
-        _commentsRepository = commentsRepository,
-        _tasksRepository = tasksRepository,
-        _spacesRepository = spacesRepository,
-        _authRepository = authRepository;
+  }) : _firestore = firestore,
+       _plantsRepository = plantsRepository,
+       _commentsRepository = commentsRepository,
+       _tasksRepository = tasksRepository,
+       _spacesRepository = spacesRepository,
+       _authRepository = authRepository;
 
   /// Stream de eventos de sincronização para UI reagir
   Stream<RealtimeSyncEvent> get changesStream => _changesController.stream;
@@ -72,7 +73,9 @@ class RealtimeSyncService {
       _isListening = true;
 
       if (kDebugMode) {
-        print('[RealtimeSync] Starting realtime listeners for user: $_currentUserId');
+        print(
+          '[RealtimeSync] Starting realtime listeners for user: $_currentUserId',
+        );
       }
 
       // Inicia listeners para cada coleção
@@ -111,7 +114,7 @@ class RealtimeSyncService {
   }
 
   // ignore: cancel_subscriptions - subscriptions are stored in _subscriptions map and cancelled in stopListening()
-  
+
   /// Listener para Plants
   void _startPlantsListener() {
     if (_currentUserId == null) return;
@@ -122,17 +125,17 @@ class RealtimeSyncService {
         .collection('users/$_currentUserId/plants')
         .snapshots()
         .listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          await _handlePlantChange(change);
-        }
-      },
-      onError: (Object e) {
-        if (kDebugMode) {
-          print('[RealtimeSync] Plants listener error: $e');
-        }
-      },
-    );
+          (snapshot) async {
+            for (final change in snapshot.docChanges) {
+              await _handlePlantChange(change);
+            }
+          },
+          onError: (Object e) {
+            if (kDebugMode) {
+              print('[RealtimeSync] Plants listener error: $e');
+            }
+          },
+        );
 
     _subscriptions['plants'] = subscription;
     if (kDebugMode) {
@@ -149,17 +152,17 @@ class RealtimeSyncService {
         .collection('users/$_currentUserId/comments')
         .snapshots()
         .listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          await _handleCommentChange(change);
-        }
-      },
-      onError: (Object e) {
-        if (kDebugMode) {
-          print('[RealtimeSync] Comments listener error: $e');
-        }
-      },
-    );
+          (snapshot) async {
+            for (final change in snapshot.docChanges) {
+              await _handleCommentChange(change);
+            }
+          },
+          onError: (Object e) {
+            if (kDebugMode) {
+              print('[RealtimeSync] Comments listener error: $e');
+            }
+          },
+        );
 
     _subscriptions['comments'] = subscription;
     if (kDebugMode) {
@@ -176,17 +179,17 @@ class RealtimeSyncService {
         .collection('users/$_currentUserId/tasks')
         .snapshots()
         .listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          await _handleTaskChange(change);
-        }
-      },
-      onError: (Object e) {
-        if (kDebugMode) {
-          print('[RealtimeSync] Tasks listener error: $e');
-        }
-      },
-    );
+          (snapshot) async {
+            for (final change in snapshot.docChanges) {
+              await _handleTaskChange(change);
+            }
+          },
+          onError: (Object e) {
+            if (kDebugMode) {
+              print('[RealtimeSync] Tasks listener error: $e');
+            }
+          },
+        );
 
     _subscriptions['tasks'] = subscription;
     if (kDebugMode) {
@@ -203,17 +206,17 @@ class RealtimeSyncService {
         .collection('users/$_currentUserId/spaces')
         .snapshots()
         .listen(
-      (snapshot) async {
-        for (final change in snapshot.docChanges) {
-          await _handleSpaceChange(change);
-        }
-      },
-      onError: (Object e) {
-        if (kDebugMode) {
-          print('[RealtimeSync] Spaces listener error: $e');
-        }
-      },
-    );
+          (snapshot) async {
+            for (final change in snapshot.docChanges) {
+              await _handleSpaceChange(change);
+            }
+          },
+          onError: (Object e) {
+            if (kDebugMode) {
+              print('[RealtimeSync] Spaces listener error: $e');
+            }
+          },
+        );
 
     _subscriptions['spaces'] = subscription;
     if (kDebugMode) {
@@ -234,49 +237,59 @@ class RealtimeSyncService {
         case DocumentChangeType.added:
         case DocumentChangeType.modified:
           final plant = PlantModel.fromJson(data);
-          
+
           // Verifica se é deletado
           if (plant.isDeleted) {
             await _plantsRepository.deletePlant(docId);
-            _emitEvent(RealtimeSyncEvent(
-              collection: 'plants',
-              type: SyncEventType.deleted,
-              entityId: docId,
-            ));
+            _emitEvent(
+              RealtimeSyncEvent(
+                collection: 'plants',
+                type: SyncEventType.deleted,
+                entityId: docId,
+              ),
+            );
           } else {
             // Verifica se já existe localmente
             final existing = await _plantsRepository.getPlantById(docId);
             if (existing != null) {
               // Atualiza se remoto é mais recente
-              final remoteUpdated = plant.updatedAt ?? plant.createdAt ?? DateTime.now();
-              final localUpdated = existing.updatedAt ?? existing.createdAt ?? DateTime.now();
-              
+              final remoteUpdated =
+                  plant.updatedAt ?? plant.createdAt ?? DateTime.now();
+              final localUpdated =
+                  existing.updatedAt ?? existing.createdAt ?? DateTime.now();
+
               if (remoteUpdated.isAfter(localUpdated)) {
                 await _plantsRepository.updatePlant(plant);
-                _emitEvent(RealtimeSyncEvent(
-                  collection: 'plants',
-                  type: SyncEventType.updated,
-                  entityId: docId,
-                ));
+                _emitEvent(
+                  RealtimeSyncEvent(
+                    collection: 'plants',
+                    type: SyncEventType.updated,
+                    entityId: docId,
+                  ),
+                );
               }
             } else {
               await _plantsRepository.insertPlant(plant);
-              _emitEvent(RealtimeSyncEvent(
-                collection: 'plants',
-                type: SyncEventType.added,
-                entityId: docId,
-              ));
+              _emitEvent(
+                RealtimeSyncEvent(
+                  collection: 'plants',
+                  type: SyncEventType.added,
+                  entityId: docId,
+                ),
+              );
             }
           }
           break;
 
         case DocumentChangeType.removed:
           await _plantsRepository.deletePlant(docId);
-          _emitEvent(RealtimeSyncEvent(
-            collection: 'plants',
-            type: SyncEventType.deleted,
-            entityId: docId,
-          ));
+          _emitEvent(
+            RealtimeSyncEvent(
+              collection: 'plants',
+              type: SyncEventType.deleted,
+              entityId: docId,
+            ),
+          );
           break;
       }
 
@@ -303,38 +316,46 @@ class RealtimeSyncService {
         case DocumentChangeType.added:
         case DocumentChangeType.modified:
           final comment = ComentarioModel.fromFirebaseMap(data);
-          
+
           if (comment.isDeleted) {
             await _commentsRepository.softDeleteComment(docId);
-            _emitEvent(RealtimeSyncEvent(
-              collection: 'comments',
-              type: SyncEventType.deleted,
-              entityId: docId,
-              relatedId: comment.plantId,
-            ));
+            _emitEvent(
+              RealtimeSyncEvent(
+                collection: 'comments',
+                type: SyncEventType.deleted,
+                entityId: docId,
+                relatedId: comment.plantId,
+              ),
+            );
           } else {
             final existing = await _commentsRepository.getCommentById(docId);
             if (existing != null) {
-              final remoteUpdated = comment.updatedAt ?? comment.createdAt ?? DateTime.now();
-              final localUpdated = existing.updatedAt ?? existing.createdAt ?? DateTime.now();
-              
+              final remoteUpdated =
+                  comment.updatedAt ?? comment.createdAt ?? DateTime.now();
+              final localUpdated =
+                  existing.updatedAt ?? existing.createdAt ?? DateTime.now();
+
               if (remoteUpdated.isAfter(localUpdated)) {
                 await _commentsRepository.updateComment(comment);
-                _emitEvent(RealtimeSyncEvent(
-                  collection: 'comments',
-                  type: SyncEventType.updated,
-                  entityId: docId,
-                  relatedId: comment.plantId,
-                ));
+                _emitEvent(
+                  RealtimeSyncEvent(
+                    collection: 'comments',
+                    type: SyncEventType.updated,
+                    entityId: docId,
+                    relatedId: comment.plantId,
+                  ),
+                );
               }
             } else {
               await _commentsRepository.insertComment(comment);
-              _emitEvent(RealtimeSyncEvent(
-                collection: 'comments',
-                type: SyncEventType.added,
-                entityId: docId,
-                relatedId: comment.plantId,
-              ));
+              _emitEvent(
+                RealtimeSyncEvent(
+                  collection: 'comments',
+                  type: SyncEventType.added,
+                  entityId: docId,
+                  relatedId: comment.plantId,
+                ),
+              );
             }
           }
           break;
@@ -342,12 +363,14 @@ class RealtimeSyncService {
         case DocumentChangeType.removed:
           final comment = ComentarioModel.fromFirebaseMap(data);
           await _commentsRepository.softDeleteComment(docId);
-          _emitEvent(RealtimeSyncEvent(
-            collection: 'comments',
-            type: SyncEventType.deleted,
-            entityId: docId,
-            relatedId: comment.plantId,
-          ));
+          _emitEvent(
+            RealtimeSyncEvent(
+              collection: 'comments',
+              type: SyncEventType.deleted,
+              entityId: docId,
+              relatedId: comment.plantId,
+            ),
+          );
           break;
       }
 
@@ -374,38 +397,46 @@ class RealtimeSyncService {
         case DocumentChangeType.added:
         case DocumentChangeType.modified:
           final task = PlantTaskModel.fromJson(data);
-          
+
           if (task.isDeleted) {
             await _tasksRepository.deletePlantTask(docId);
-            _emitEvent(RealtimeSyncEvent(
-              collection: 'tasks',
-              type: SyncEventType.deleted,
-              entityId: docId,
-              relatedId: task.plantId,
-            ));
+            _emitEvent(
+              RealtimeSyncEvent(
+                collection: 'tasks',
+                type: SyncEventType.deleted,
+                entityId: docId,
+                relatedId: task.plantId,
+              ),
+            );
           } else {
             final existing = await _tasksRepository.getPlantTaskById(docId);
             if (existing != null) {
-              final remoteUpdated = task.updatedAt ?? task.createdAt ?? DateTime.now();
-              final localUpdated = existing.updatedAt ?? existing.createdAt ?? DateTime.now();
-              
+              final remoteUpdated =
+                  task.updatedAt ?? task.createdAt ?? DateTime.now();
+              final localUpdated =
+                  existing.updatedAt ?? existing.createdAt ?? DateTime.now();
+
               if (remoteUpdated.isAfter(localUpdated)) {
                 await _tasksRepository.updatePlantTask(task);
-                _emitEvent(RealtimeSyncEvent(
-                  collection: 'tasks',
-                  type: SyncEventType.updated,
-                  entityId: docId,
-                  relatedId: task.plantId,
-                ));
+                _emitEvent(
+                  RealtimeSyncEvent(
+                    collection: 'tasks',
+                    type: SyncEventType.updated,
+                    entityId: docId,
+                    relatedId: task.plantId,
+                  ),
+                );
               }
             } else {
               await _tasksRepository.insertPlantTask(task);
-              _emitEvent(RealtimeSyncEvent(
-                collection: 'tasks',
-                type: SyncEventType.added,
-                entityId: docId,
-                relatedId: task.plantId,
-              ));
+              _emitEvent(
+                RealtimeSyncEvent(
+                  collection: 'tasks',
+                  type: SyncEventType.added,
+                  entityId: docId,
+                  relatedId: task.plantId,
+                ),
+              );
             }
           }
           break;
@@ -413,12 +444,14 @@ class RealtimeSyncService {
         case DocumentChangeType.removed:
           final task = PlantTaskModel.fromJson(data);
           await _tasksRepository.deletePlantTask(docId);
-          _emitEvent(RealtimeSyncEvent(
-            collection: 'tasks',
-            type: SyncEventType.deleted,
-            entityId: docId,
-            relatedId: task.plantId,
-          ));
+          _emitEvent(
+            RealtimeSyncEvent(
+              collection: 'tasks',
+              type: SyncEventType.deleted,
+              entityId: docId,
+              relatedId: task.plantId,
+            ),
+          );
           break;
       }
 
@@ -454,46 +487,56 @@ class RealtimeSyncService {
             isDeleted: space.isDeleted,
             isDirty: space.isDirty,
           );
-          
+
           if (space.isDeleted) {
             await _spacesRepository.deleteSpace(docId);
-            _emitEvent(RealtimeSyncEvent(
-              collection: 'spaces',
-              type: SyncEventType.deleted,
-              entityId: docId,
-            ));
+            _emitEvent(
+              RealtimeSyncEvent(
+                collection: 'spaces',
+                type: SyncEventType.deleted,
+                entityId: docId,
+              ),
+            );
           } else {
             final existing = await _spacesRepository.getSpaceById(docId);
             if (existing != null) {
-              final remoteUpdated = space.updatedAt ?? space.createdAt ?? DateTime.now();
-              final localUpdated = existing.updatedAt ?? existing.createdAt ?? DateTime.now();
-              
+              final remoteUpdated =
+                  space.updatedAt ?? space.createdAt ?? DateTime.now();
+              final localUpdated =
+                  existing.updatedAt ?? existing.createdAt ?? DateTime.now();
+
               if (remoteUpdated.isAfter(localUpdated)) {
                 await _spacesRepository.updateSpace(espacoModel);
-                _emitEvent(RealtimeSyncEvent(
-                  collection: 'spaces',
-                  type: SyncEventType.updated,
-                  entityId: docId,
-                ));
+                _emitEvent(
+                  RealtimeSyncEvent(
+                    collection: 'spaces',
+                    type: SyncEventType.updated,
+                    entityId: docId,
+                  ),
+                );
               }
             } else {
               await _spacesRepository.insertSpace(espacoModel);
-              _emitEvent(RealtimeSyncEvent(
-                collection: 'spaces',
-                type: SyncEventType.added,
-                entityId: docId,
-              ));
+              _emitEvent(
+                RealtimeSyncEvent(
+                  collection: 'spaces',
+                  type: SyncEventType.added,
+                  entityId: docId,
+                ),
+              );
             }
           }
           break;
 
         case DocumentChangeType.removed:
           await _spacesRepository.deleteSpace(docId);
-          _emitEvent(RealtimeSyncEvent(
-            collection: 'spaces',
-            type: SyncEventType.deleted,
-            entityId: docId,
-          ));
+          _emitEvent(
+            RealtimeSyncEvent(
+              collection: 'spaces',
+              type: SyncEventType.deleted,
+              entityId: docId,
+            ),
+          );
           break;
       }
 
@@ -519,11 +562,7 @@ class RealtimeSyncService {
 }
 
 /// Tipos de evento de sincronização
-enum SyncEventType {
-  added,
-  updated,
-  deleted,
-}
+enum SyncEventType { added, updated, deleted }
 
 /// Evento de sincronização em tempo real
 class RealtimeSyncEvent {

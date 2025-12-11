@@ -206,12 +206,14 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: errorText != null
-              ? theme.colorScheme.error // Show error border
+              ? theme
+                    .colorScheme
+                    .error // Show error border
               : (isEnabled
-                  ? iconColor.withValues(
-                      alpha: 0.5,
-                    ) // Stronger border when enabled
-                  : Colors.grey[300]!),
+                    ? iconColor.withValues(
+                        alpha: 0.5,
+                      ) // Stronger border when enabled
+                    : Colors.grey[300]!),
           width: isEnabled ? 2.0 : 1.5, // Thicker border when enabled
         ),
         boxShadow: [
@@ -468,7 +470,8 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
         // Converte unidades para dias
         if (currentValue.contains('semana')) {
           currentDays = num * 7;
-        } else if (currentValue.contains('mês') || currentValue.contains('meses')) {
+        } else if (currentValue.contains('mês') ||
+            currentValue.contains('meses')) {
           currentDays = num * 30;
         } else if (currentValue.contains('ano')) {
           currentDays = num * 365;
@@ -585,108 +588,112 @@ class _IntervalPickerDialogState extends State<_IntervalPickerDialog> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 320),
         child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Título
-            Text(
-              'Selecionar Intervalo',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Título
+              Text(
+                'Selecionar Intervalo',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            // Texto formatado do intervalo selecionado
-            Text(
-              widget.formatIntervalText(_selectedDays),
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: PlantisColors.primary,
-                fontWeight: FontWeight.w600,
+              // Texto formatado do intervalo selecionado
+              Text(
+                widget.formatIntervalText(_selectedDays),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: PlantisColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // CupertinoPicker
-            SizedBox(
-              height: 200,
-              child: CupertinoPicker(
-                scrollController: _scrollController,
-                itemExtent: 44,
-                diameterRatio: 1.2,
-                selectionOverlay: Container(
-                  decoration: BoxDecoration(
-                    border: Border.symmetric(
-                      horizontal: BorderSide(
-                        color: PlantisColors.primary.withValues(alpha: 0.2),
-                        width: 1,
+              // CupertinoPicker
+              SizedBox(
+                height: 200,
+                child: CupertinoPicker(
+                  scrollController: _scrollController,
+                  itemExtent: 44,
+                  diameterRatio: 1.2,
+                  selectionOverlay: Container(
+                    decoration: BoxDecoration(
+                      border: Border.symmetric(
+                        horizontal: BorderSide(
+                          color: PlantisColors.primary.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                onSelectedItemChanged: (index) {
-                  setState(() {
-                    _selectedDays = index + 1; // índice 0 = 1 dia
-                  });
-                },
-                children: List.generate(365, (index) {
-                  final days = index + 1;
-                  final isSelected = days == _selectedDays;
-                  return Center(
-                    child: Text(
-                      '$days ${days == 1 ? 'dia' : 'dias'}',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        color: isSelected
-                            ? PlantisColors.primary
-                            : theme.colorScheme.onSurface,
+                  onSelectedItemChanged: (index) {
+                    setState(() {
+                      _selectedDays = index + 1; // índice 0 = 1 dia
+                    });
+                  },
+                  children: List.generate(365, (index) {
+                    final days = index + 1;
+                    final isSelected = days == _selectedDays;
+                    return Center(
+                      child: Text(
+                        '$days ${days == 1 ? 'dia' : 'dias'}',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: isSelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                          color: isSelected
+                              ? PlantisColors.primary
+                              : theme.colorScheme.onSurface,
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // Botões
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              // Botões
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        side: BorderSide(
+                          color: theme.colorScheme.outline.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
                       ),
-                      side: BorderSide(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.5),
-                      ),
+                      child: const Text('Cancelar'),
                     ),
-                    child: const Text('Cancelar'),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: () => Navigator.of(context).pop(_selectedDays),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: PlantisColors.primary,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(context).pop(_selectedDays),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: PlantisColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
+                      child: const Text('Confirmar'),
                     ),
-                    child: const Text('Confirmar'),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
       ),
     );
   }

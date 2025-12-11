@@ -17,7 +17,8 @@ class AnalyticsProvider {
          crashlytics: crashlyticsRepository,
          config: AnalyticsConfig.forApp(
            appId: AppConstants.appId,
-           version: AppConstants.defaultVersion, // Note: Version should be loaded from package_info in production
+           version: AppConstants
+               .defaultVersion, // Note: Version should be loaded from package_info in production
            enableAnalytics: EnvironmentConfig.enableAnalytics,
            enableLogging: kDebugMode || EnvironmentConfig.enableLogging,
          ),
@@ -86,11 +87,15 @@ class AnalyticsProvider {
   }
 
   Future<void> logAppOpen() async {
-    await _enhancedService.logEvent('app_open', {AppConstants.analyticsAppParam: AppConstants.appId});
+    await _enhancedService.logEvent('app_open', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
+    });
   }
 
   Future<void> logAppBackground() async {
-    await _enhancedService.logEvent('app_background', {AppConstants.analyticsAppParam: AppConstants.appId});
+    await _enhancedService.logEvent('app_background', {
+      AppConstants.analyticsAppParam: AppConstants.appId,
+    });
   }
 
   Future<void> logFeatureUsed(String featureName) async {

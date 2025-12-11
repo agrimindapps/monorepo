@@ -51,9 +51,9 @@ class Plant extends BaseSyncEntity {
 
   /// Compatibility getters for SOLID refactored services
   bool get isFavorite => isFavorited;
-  
+
   DateTime? get lastWatered => config?.lastWateringDate;
-  
+
   int? get wateringFrequency => config?.wateringIntervalDays;
 
   /// Convert from PlantaModel to Plant entity (migration compatibility)
@@ -72,135 +72,116 @@ class Plant extends BaseSyncEntity {
       try {
         final nome = plantaModel.nome;
         safeName = (nome is String && nome.trim().isNotEmpty) ? nome : '';
-      } catch (e) {
-      }
+      } catch (e) {}
 
       String? safeSpecies;
       try {
         final especie = plantaModel.especie;
-        safeSpecies =
-            (especie is String && especie.trim().isNotEmpty) ? especie : null;
-      } catch (e) {
-      }
+        safeSpecies = (especie is String && especie.trim().isNotEmpty)
+            ? especie
+            : null;
+      } catch (e) {}
 
       String? safeSpaceId;
       try {
         final espacoId = plantaModel.espacoId;
-        safeSpaceId =
-            (espacoId is String && espacoId.trim().isNotEmpty)
-                ? espacoId
-                : null;
-      } catch (e) {
-      }
+        safeSpaceId = (espacoId is String && espacoId.trim().isNotEmpty)
+            ? espacoId
+            : null;
+      } catch (e) {}
 
       String? safeImageBase64;
       try {
         final fotoBase64 = plantaModel.fotoBase64;
-        safeImageBase64 =
-            (fotoBase64 is String && fotoBase64.trim().isNotEmpty)
-                ? fotoBase64
-                : null;
-      } catch (e) {
-      }
+        safeImageBase64 = (fotoBase64 is String && fotoBase64.trim().isNotEmpty)
+            ? fotoBase64
+            : null;
+      } catch (e) {}
 
       List<String> safeImageUrls = [];
       try {
         final imagePaths = plantaModel.imagePaths;
         if (imagePaths is List) {
-          safeImageUrls =
-              imagePaths
-                  .where(
-                    (path) => path != null && path.toString().trim().isNotEmpty,
-                  )
-                  .map((path) => path.toString())
-                  .toList();
+          safeImageUrls = imagePaths
+              .where(
+                (path) => path != null && path.toString().trim().isNotEmpty,
+              )
+              .map((path) => path.toString())
+              .toList();
         }
-      } catch (e) {
-      }
+      } catch (e) {}
 
       DateTime? safePlantingDate;
       try {
         final dataCadastro = plantaModel.dataCadastro;
         safePlantingDate = (dataCadastro is DateTime) ? dataCadastro : null;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       String? safeNotes;
       try {
         final observacoes = plantaModel.observacoes;
-        safeNotes =
-            (observacoes is String && observacoes.trim().isNotEmpty)
-                ? observacoes
-                : null;
-      } catch (e) {
-      }
+        safeNotes = (observacoes is String && observacoes.trim().isNotEmpty)
+            ? observacoes
+            : null;
+      } catch (e) {}
 
       bool safeIsFavorited = false;
       try {
         final isFavorited = plantaModel.isFavorited;
         safeIsFavorited = (isFavorited is bool) ? isFavorited : false;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       DateTime? safeCreatedAt;
       try {
         final createdAt = plantaModel.createdAt;
         safeCreatedAt = (createdAt is DateTime) ? createdAt : null;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       DateTime? safeUpdatedAt;
       try {
         final updatedAt = plantaModel.updatedAt;
         safeUpdatedAt = (updatedAt is DateTime) ? updatedAt : null;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       DateTime? safeLastSyncAt;
       try {
         final lastSyncAt = plantaModel.lastSyncAt;
         safeLastSyncAt = (lastSyncAt is DateTime) ? lastSyncAt : null;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       bool safeIsDirty = false;
       try {
         final isDirty = plantaModel.isDirty;
         safeIsDirty = (isDirty is bool) ? isDirty : false;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       bool safeIsDeleted = false;
       try {
         final isDeleted = plantaModel.isDeleted;
         safeIsDeleted = (isDeleted is bool) ? isDeleted : false;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       int safeVersion = 1;
       try {
         final version = plantaModel.version;
         safeVersion = (version is int && version > 0) ? version : 1;
-      } catch (e) {
-      }
+      } catch (e) {}
 
       String? safeUserId;
       try {
         final userId = plantaModel.userId;
-        safeUserId =
-            (userId is String && userId.trim().isNotEmpty) ? userId : null;
-      } catch (e) {
-      }
+        safeUserId = (userId is String && userId.trim().isNotEmpty)
+            ? userId
+            : null;
+      } catch (e) {}
 
       String? safeModuleName;
       try {
         final moduleName = plantaModel.moduleName;
-        safeModuleName =
-            (moduleName is String && moduleName.trim().isNotEmpty)
-                ? moduleName
-                : null;
-      } catch (e) {
-      }
+        safeModuleName = (moduleName is String && moduleName.trim().isNotEmpty)
+            ? moduleName
+            : null;
+      } catch (e) {}
 
       return Plant(
         id: id.toString(),
@@ -266,30 +247,27 @@ class Plant extends BaseSyncEntity {
       'planting_date': plantingDate?.toIso8601String(),
       'notes': notes,
       'is_favorited': isFavorited,
-      'config':
-          config != null
-              ? {
-                'watering_interval_days': config!.wateringIntervalDays,
-                'fertilizing_interval_days': config!.fertilizingIntervalDays,
-                'pruning_interval_days': config!.pruningIntervalDays,
-                'sunlight_check_interval_days':
-                    config!.sunlightCheckIntervalDays,
-                'pest_inspection_interval_days':
-                    config!.pestInspectionIntervalDays,
-                'replanting_interval_days': config!.replantingIntervalDays,
-                'light_requirement': config!.lightRequirement,
-                'water_amount': config!.waterAmount,
-                'soil_type': config!.soilType,
-                'ideal_temperature': config!.idealTemperature,
-                'ideal_humidity': config!.idealHumidity,
-                'enable_watering_care': config!.enableWateringCare,
-                'last_watering_date':
-                    config!.lastWateringDate?.toIso8601String(),
-                'enable_fertilizer_care': config!.enableFertilizerCare,
-                'last_fertilizer_date':
-                    config!.lastFertilizerDate?.toIso8601String(),
-              }
-              : null,
+      'config': config != null
+          ? {
+              'watering_interval_days': config!.wateringIntervalDays,
+              'fertilizing_interval_days': config!.fertilizingIntervalDays,
+              'pruning_interval_days': config!.pruningIntervalDays,
+              'sunlight_check_interval_days': config!.sunlightCheckIntervalDays,
+              'pest_inspection_interval_days':
+                  config!.pestInspectionIntervalDays,
+              'replanting_interval_days': config!.replantingIntervalDays,
+              'light_requirement': config!.lightRequirement,
+              'water_amount': config!.waterAmount,
+              'soil_type': config!.soilType,
+              'ideal_temperature': config!.idealTemperature,
+              'ideal_humidity': config!.idealHumidity,
+              'enable_watering_care': config!.enableWateringCare,
+              'last_watering_date': config!.lastWateringDate?.toIso8601String(),
+              'enable_fertilizer_care': config!.enableFertilizerCare,
+              'last_fertilizer_date': config!.lastFertilizerDate
+                  ?.toIso8601String(),
+            }
+          : null,
     };
   }
 
@@ -400,27 +378,22 @@ class Plant extends BaseSyncEntity {
       imageBase64: json['imageBase64'] as String?,
       imageUrls: (json['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
       notes: json['notes'] as String?,
-      plantingDate:
-          json['plantingDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['plantingDate'] as int)
-              : null,
+      plantingDate: json['plantingDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['plantingDate'] as int)
+          : null,
       isFavorited: json['isFavorited'] as bool? ?? false,
-      config:
-          json['config'] != null
-              ? PlantConfig.fromJson(json['config'] as Map<String, dynamic>)
-              : null,
-      createdAt:
-          json['createdAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
-              : null,
-      updatedAt:
-          json['updatedAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int)
-              : null,
-      lastSyncAt:
-          json['lastSyncAt'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
-              : null,
+      config: json['config'] != null
+          ? PlantConfig.fromJson(json['config'] as Map<String, dynamic>)
+          : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['createdAt'] as int)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['updatedAt'] as int)
+          : null,
+      lastSyncAt: json['lastSyncAt'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastSyncAt'] as int)
+          : null,
       isDirty: json['isDirty'] as bool? ?? false,
       isDeleted: json['isDeleted'] as bool? ?? false,
       version: json['version'] as int? ?? 1,
@@ -447,56 +420,51 @@ class Plant extends BaseSyncEntity {
       species: map['species'] as String?,
       spaceId: map['space_id'] as String?,
       imageBase64: map['image_base64'] as String?,
-      imageUrls:
-          map['image_urls'] != null
-              ? List<String>.from(map['image_urls'] as List)
-              : const [],
-      plantingDate:
-          map['planting_date'] != null
-              ? DateTime.parse(map['planting_date'] as String)
-              : null,
+      imageUrls: map['image_urls'] != null
+          ? List<String>.from(map['image_urls'] as List)
+          : const [],
+      plantingDate: map['planting_date'] != null
+          ? DateTime.parse(map['planting_date'] as String)
+          : null,
       notes: map['notes'] as String?,
       isFavorited: map['is_favorited'] as bool? ?? false,
-      config:
-          map['config'] != null
-              ? PlantConfig(
-                wateringIntervalDays:
-                    map['config']['watering_interval_days'] as int?,
-                fertilizingIntervalDays:
-                    map['config']['fertilizing_interval_days'] as int?,
-                pruningIntervalDays:
-                    map['config']['pruning_interval_days'] as int?,
-                sunlightCheckIntervalDays:
-                    map['config']['sunlight_check_interval_days'] as int?,
-                pestInspectionIntervalDays:
-                    map['config']['pest_inspection_interval_days'] as int?,
-                replantingIntervalDays:
-                    map['config']['replanting_interval_days'] as int?,
-                lightRequirement: map['config']['light_requirement'] as String?,
-                waterAmount: map['config']['water_amount'] as String?,
-                soilType: map['config']['soil_type'] as String?,
-                idealTemperature:
-                    (map['config']['ideal_temperature'] as num?)?.toDouble(),
-                idealHumidity:
-                    (map['config']['ideal_humidity'] as num?)?.toDouble(),
-                enableWateringCare:
-                    map['config']['enable_watering_care'] as bool?,
-                lastWateringDate:
-                    map['config']['last_watering_date'] != null
-                        ? DateTime.parse(
-                          map['config']['last_watering_date'] as String,
-                        )
-                        : null,
-                enableFertilizerCare:
-                    map['config']['enable_fertilizer_care'] as bool?,
-                lastFertilizerDate:
-                    map['config']['last_fertilizer_date'] != null
-                        ? DateTime.parse(
-                          map['config']['last_fertilizer_date'] as String,
-                        )
-                        : null,
-              )
-              : null,
+      config: map['config'] != null
+          ? PlantConfig(
+              wateringIntervalDays:
+                  map['config']['watering_interval_days'] as int?,
+              fertilizingIntervalDays:
+                  map['config']['fertilizing_interval_days'] as int?,
+              pruningIntervalDays:
+                  map['config']['pruning_interval_days'] as int?,
+              sunlightCheckIntervalDays:
+                  map['config']['sunlight_check_interval_days'] as int?,
+              pestInspectionIntervalDays:
+                  map['config']['pest_inspection_interval_days'] as int?,
+              replantingIntervalDays:
+                  map['config']['replanting_interval_days'] as int?,
+              lightRequirement: map['config']['light_requirement'] as String?,
+              waterAmount: map['config']['water_amount'] as String?,
+              soilType: map['config']['soil_type'] as String?,
+              idealTemperature: (map['config']['ideal_temperature'] as num?)
+                  ?.toDouble(),
+              idealHumidity: (map['config']['ideal_humidity'] as num?)
+                  ?.toDouble(),
+              enableWateringCare:
+                  map['config']['enable_watering_care'] as bool?,
+              lastWateringDate: map['config']['last_watering_date'] != null
+                  ? DateTime.parse(
+                      map['config']['last_watering_date'] as String,
+                    )
+                  : null,
+              enableFertilizerCare:
+                  map['config']['enable_fertilizer_care'] as bool?,
+              lastFertilizerDate: map['config']['last_fertilizer_date'] != null
+                  ? DateTime.parse(
+                      map['config']['last_fertilizer_date'] as String,
+                    )
+                  : null,
+            )
+          : null,
     );
   }
 
@@ -642,19 +610,15 @@ class PlantConfig extends Equatable {
       idealTemperature: (json['idealTemperature'] as num?)?.toDouble(),
       idealHumidity: (json['idealHumidity'] as num?)?.toDouble(),
       enableWateringCare: json['enableWateringCare'] as bool?,
-      lastWateringDate:
-          json['lastWateringDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(
-                json['lastWateringDate'] as int,
-              )
-              : null,
+      lastWateringDate: json['lastWateringDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(json['lastWateringDate'] as int)
+          : null,
       enableFertilizerCare: json['enableFertilizerCare'] as bool?,
-      lastFertilizerDate:
-          json['lastFertilizerDate'] != null
-              ? DateTime.fromMillisecondsSinceEpoch(
-                json['lastFertilizerDate'] as int,
-              )
-              : null,
+      lastFertilizerDate: json['lastFertilizerDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(
+              json['lastFertilizerDate'] as int,
+            )
+          : null,
     );
   }
 

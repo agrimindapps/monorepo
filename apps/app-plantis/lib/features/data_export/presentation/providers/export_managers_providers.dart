@@ -42,9 +42,7 @@ ExportRateLimiter exportRateLimiter(Ref ref) {
 
 /// Provides access to export statistics calculator
 @riverpod
-ExportStatisticsCalculator exportStatisticsCalculator(
-  Ref ref,
-) {
+ExportStatisticsCalculator exportStatisticsCalculator(Ref ref) {
   return ExportStatisticsCalculator();
 }
 

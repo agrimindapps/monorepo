@@ -31,10 +31,9 @@ class PlantInfoSection extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? const Color(0xFF2C2C2E)
-                : const Color(0xFFFFFFFF), // Branco puro
+        color: theme.brightness == Brightness.dark
+            ? const Color(0xFF2C2C2E)
+            : const Color(0xFFFFFFFF), // Branco puro
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -89,10 +88,9 @@ class PlantInfoSection extends ConsumerWidget {
                   context,
                   icon: Icons.calendar_today_outlined,
                   label: 'Plantada há',
-                  value:
-                      plant.plantingDate != null
-                          ? '${plant.ageInDays} dias'
-                          : 'Data não informada',
+                  value: plant.plantingDate != null
+                      ? '${plant.ageInDays} dias'
+                      : 'Data não informada',
                 ),
               ),
               const SizedBox(width: 16),
@@ -192,10 +190,9 @@ class PlantInfoSection extends ConsumerWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color:
-                theme.brightness == Brightness.dark
-                    ? const Color(0xFF2C2C2E)
-                    : const Color(0xFFFFFFFF), // Branco puro
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : const Color(0xFFFFFFFF), // Branco puro
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.1),
@@ -250,15 +247,13 @@ class PlantInfoSection extends ConsumerWidget {
                     ? plant.notes!
                     : 'Nenhum comentário registrado para esta planta.',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color:
-                      plant.notes?.isNotEmpty == true
-                          ? theme.colorScheme.onSurface
-                          : theme.colorScheme.onSurfaceVariant,
+                  color: plant.notes?.isNotEmpty == true
+                      ? theme.colorScheme.onSurface
+                      : theme.colorScheme.onSurfaceVariant,
                   height: 1.5,
-                  fontStyle:
-                      plant.notes?.isNotEmpty == true
-                          ? FontStyle.normal
-                          : FontStyle.italic,
+                  fontStyle: plant.notes?.isNotEmpty == true
+                      ? FontStyle.normal
+                      : FontStyle.italic,
                 ),
               ),
             ],
@@ -323,7 +318,8 @@ class PlantInfoSection extends ConsumerWidget {
                     onPressed: () => Navigator.of(dialogContext).pop(),
                     icon: const Icon(Icons.close),
                     style: IconButton.styleFrom(
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                     ),
                   ),
                 ],
@@ -339,10 +335,13 @@ class PlantInfoSection extends ConsumerWidget {
                 decoration: InputDecoration(
                   hintText: 'Digite suas observações sobre a planta...',
                   hintStyle: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                    color: theme.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.6,
+                    ),
                   ),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  fillColor: theme.colorScheme.surfaceContainerHighest
+                      .withValues(alpha: 0.3),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide(
@@ -395,14 +394,18 @@ class PlantInfoSection extends ConsumerWidget {
                       );
 
                       // Chama o provider para atualizar
-                      final notifier = ref.read(plantsNotifierProvider.notifier);
+                      final notifier = ref.read(
+                        plantsNotifierProvider.notifier,
+                      );
                       final success = await notifier.updatePlant(updateParams);
 
                       navigator.pop();
 
                       // Atualiza o provider de detalhes para refletir as mudanças
                       if (success) {
-                        ref.read(plantDetailsNotifierProvider.notifier).loadPlant(plant.id);
+                        ref
+                            .read(plantDetailsNotifierProvider.notifier)
+                            .loadPlant(plant.id);
                         scaffoldMessenger.showSnackBar(
                           const SnackBar(
                             content: Row(
@@ -419,7 +422,8 @@ class PlantInfoSection extends ConsumerWidget {
                         );
                       } else {
                         // Obtém a mensagem de erro específica do provider
-                        final errorMessage = ref.read(plantsNotifierProvider).error ??
+                        final errorMessage =
+                            ref.read(plantsNotifierProvider).error ??
                             'Não foi possível atualizar as observações. Tente novamente.';
                         scaffoldMessenger.showSnackBar(
                           SnackBar(

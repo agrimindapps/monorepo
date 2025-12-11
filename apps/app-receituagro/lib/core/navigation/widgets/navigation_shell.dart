@@ -46,35 +46,33 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
     WidgetRef ref,
     NavigationStateData state,
   ) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: state.selectedTabIndex.clamp(0, 4),
-      onTap: (index) => _onBottomNavTap(context, ref, index),
-      elevation: 8,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shield),
-          activeIcon: Icon(Icons.shield, size: 28),
+    return NavigationBar(
+      selectedIndex: state.selectedTabIndex.clamp(0, 4),
+      onDestinationSelected: (index) => _onBottomNavTap(context, ref, index),
+      destinations: const [
+        NavigationDestination(
+          icon: Icon(Icons.shield_outlined),
+          selectedIcon: Icon(Icons.shield),
           label: 'Defensivos',
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.bug_report),
-          activeIcon: Icon(Icons.bug_report, size: 28),
+        NavigationDestination(
+          icon: Icon(Icons.bug_report_outlined),
+          selectedIcon: Icon(Icons.bug_report),
           label: 'Pragas',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.favorite_border),
-          activeIcon: Icon(Icons.favorite, size: 28),
+          selectedIcon: Icon(Icons.favorite),
           label: 'Favoritos',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.comment_outlined),
-          activeIcon: Icon(Icons.comment, size: 28),
+          selectedIcon: Icon(Icons.comment),
           label: 'Comentários',
         ),
-        BottomNavigationBarItem(
+        NavigationDestination(
           icon: Icon(Icons.settings_outlined),
-          activeIcon: Icon(Icons.settings, size: 28),
+          selectedIcon: Icon(Icons.settings),
           label: 'Config',
         ),
       ],

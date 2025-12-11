@@ -59,7 +59,9 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
 
   @override
   Widget build(BuildContext context) {
-    final contentAsync = ref.watch<AsyncValue<LandingContent>>(landingContentProvider);
+    final contentAsync = ref.watch<AsyncValue<LandingContent>>(
+      landingContentProvider,
+    );
 
     return Scaffold(
       body: Stack(

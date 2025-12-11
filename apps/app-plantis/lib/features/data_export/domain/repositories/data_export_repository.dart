@@ -31,9 +31,7 @@ abstract class DataExportRepository {
   );
 
   /// Get user's plant tasks data for export
-  Future<Either<Failure, List<TaskExportData>>> getUserTasksData(
-    String userId,
-  );
+  Future<Either<Failure, List<TaskExportData>>> getUserTasksData(String userId);
 
   /// Get user's spaces data for export
   Future<Either<Failure, List<SpaceExportData>>> getUserSpacesData(
@@ -52,7 +50,7 @@ abstract class DataExportRepository {
 
   /// Get user's plant comments data for export
   Future<Either<Failure, List<PlantCommentExportData>>>
-      getUserPlantCommentsData(String userId);
+  getUserPlantCommentsData(String userId);
 
   /// Generate export file in specified format
   Future<Either<Failure, String>> generateExportFile({

@@ -47,7 +47,11 @@ class NotificationsSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildNotificationStatusCard(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+  Widget _buildNotificationStatusCard(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsState settingsData,
+  ) {
     final theme = Theme.of(context);
 
     return Card(
@@ -81,13 +85,16 @@ class NotificationsSettingsPage extends ConsumerWidget {
               ),
             ),
 
-            if (!settingsData.hasPermissionsGranted && !settingsData.isWebPlatform)
+            if (!settingsData.hasPermissionsGranted &&
+                !settingsData.isWebPlatform)
               Column(
                 children: [
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     onPressed: () {
-                      ref.read(settingsNotifierProvider.notifier).openNotificationSettings();
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .openNotificationSettings();
                     },
                     icon: const Icon(Icons.settings),
                     label: const Text('Abrir Configurações'),
@@ -136,9 +143,14 @@ class NotificationsSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildGeneralSettings(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+  Widget _buildGeneralSettings(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsState settingsData,
+  ) {
     final theme = Theme.of(context);
-    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+    final hasPermissions =
+        settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
 
     return Card(
       child: Padding(
@@ -163,7 +175,9 @@ class NotificationsSettingsPage extends ConsumerWidget {
               value: settingsData.notificationSettings.taskRemindersEnabled,
               onChanged: hasPermissions
                   ? (value) {
-                      ref.read(settingsNotifierProvider.notifier).toggleTaskReminders(value);
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleTaskReminders(value);
                     }
                   : null,
               secondary: const Icon(Icons.task_alt),
@@ -174,10 +188,13 @@ class NotificationsSettingsPage extends ConsumerWidget {
               subtitle: const Text(
                 'Notificações para tarefas que passaram do prazo',
               ),
-              value: settingsData.notificationSettings.overdueNotificationsEnabled,
+              value:
+                  settingsData.notificationSettings.overdueNotificationsEnabled,
               onChanged: hasPermissions
                   ? (value) {
-                      ref.read(settingsNotifierProvider.notifier).toggleOverdueNotifications(value);
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleOverdueNotifications(value);
                     }
                   : null,
               secondary: const Icon(Icons.warning),
@@ -189,7 +206,9 @@ class NotificationsSettingsPage extends ConsumerWidget {
               value: settingsData.notificationSettings.dailySummaryEnabled,
               onChanged: hasPermissions
                   ? (value) {
-                      ref.read(settingsNotifierProvider.notifier).toggleDailySummary(value);
+                      ref
+                          .read(settingsNotifierProvider.notifier)
+                          .toggleDailySummary(value);
                     }
                   : null,
               secondary: const Icon(Icons.today),
@@ -200,9 +219,14 @@ class NotificationsSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTimeSettings(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+  Widget _buildTimeSettings(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsState settingsData,
+  ) {
     final theme = Theme.of(context);
-    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+    final hasPermissions =
+        settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
 
     return Card(
       child: Padding(
@@ -238,9 +262,15 @@ class NotificationsSettingsPage extends ConsumerWidget {
             ListTile(
               leading: const Icon(Icons.schedule),
               title: const Text('Horário do Resumo Diário'),
-              subtitle: Text(settingsData.notificationSettings.dailySummaryTime.format(context)),
+              subtitle: Text(
+                settingsData.notificationSettings.dailySummaryTime.format(
+                  context,
+                ),
+              ),
               trailing: const Icon(Icons.chevron_right),
-              onTap: hasPermissions && settingsData.notificationSettings.dailySummaryEnabled
+              onTap:
+                  hasPermissions &&
+                      settingsData.notificationSettings.dailySummaryEnabled
                   ? () {
                       _showDailySummaryTimeDialog(context, ref);
                     }
@@ -252,9 +282,14 @@ class NotificationsSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildTaskTypeSettings(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+  Widget _buildTaskTypeSettings(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsState settingsData,
+  ) {
     final theme = Theme.of(context);
-    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+    final hasPermissions =
+        settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
 
     return Card(
       child: Padding(
@@ -271,13 +306,17 @@ class NotificationsSettingsPage extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            ...settingsData.notificationSettings.taskTypeSettings.entries.map((entry) {
+            ...settingsData.notificationSettings.taskTypeSettings.entries.map((
+              entry,
+            ) {
               return SwitchListTile(
                 title: Text(entry.key),
                 value: entry.value,
                 onChanged: hasPermissions
                     ? (value) {
-                        ref.read(settingsNotifierProvider.notifier).toggleTaskType(entry.key, value);
+                        ref
+                            .read(settingsNotifierProvider.notifier)
+                            .toggleTaskType(entry.key, value);
                       }
                     : null,
                 secondary: _getTaskTypeIcon(entry.key),
@@ -289,9 +328,14 @@ class NotificationsSettingsPage extends ConsumerWidget {
     );
   }
 
-  Widget _buildActions(BuildContext context, WidgetRef ref, SettingsState settingsData) {
+  Widget _buildActions(
+    BuildContext context,
+    WidgetRef ref,
+    SettingsState settingsData,
+  ) {
     final theme = Theme.of(context);
-    final hasPermissions = settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
+    final hasPermissions =
+        settingsData.hasPermissionsGranted && !settingsData.isWebPlatform;
 
     return Column(
       children: [
@@ -355,14 +399,14 @@ class NotificationsSettingsPage extends ConsumerWidget {
     }
   }
 
-  void _showReminderTimeDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
-    final currentValue = ref.read(settingsNotifierProvider).maybeWhen(
+  void _showReminderTimeDialog(BuildContext context, WidgetRef ref) {
+    final currentValue = ref
+        .read(settingsNotifierProvider)
+        .maybeWhen(
           data: (state) => state.notificationSettings.reminderMinutesBefore,
-          orElse: () => 30);
-    
+          orElse: () => 30,
+        );
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -378,7 +422,9 @@ class NotificationsSettingsPage extends ConsumerWidget {
               // ignore: deprecated_member_use
               onChanged: (int? value) {
                 if (value != null) {
-                  ref.read(settingsNotifierProvider.notifier).setReminderMinutesBefore(value);
+                  ref
+                      .read(settingsNotifierProvider.notifier)
+                      .setReminderMinutesBefore(value);
                   Navigator.of(context).pop();
                 }
               },
@@ -389,19 +435,21 @@ class NotificationsSettingsPage extends ConsumerWidget {
     );
   }
 
-  void _showDailySummaryTimeDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  void _showDailySummaryTimeDialog(BuildContext context, WidgetRef ref) async {
     final TimeOfDay? time = await showTimePicker(
       context: context,
-      initialTime: ref.read(settingsNotifierProvider).maybeWhen(
-          data: (state) => state.notificationSettings.dailySummaryTime,
-          orElse: () => const TimeOfDay(hour: 8, minute: 0)),
+      initialTime: ref
+          .read(settingsNotifierProvider)
+          .maybeWhen(
+            data: (state) => state.notificationSettings.dailySummaryTime,
+            orElse: () => const TimeOfDay(hour: 8, minute: 0),
+          ),
     );
 
     if (time != null) {
-      await ref.read(settingsNotifierProvider.notifier).setDailySummaryTime(time);
+      await ref
+          .read(settingsNotifierProvider.notifier)
+          .setDailySummaryTime(time);
     }
   }
 
@@ -412,10 +460,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
     await ref.read(settingsNotifierProvider.notifier).sendTestNotification();
   }
 
-  void _showClearNotificationsDialog(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  void _showClearNotificationsDialog(BuildContext context, WidgetRef ref) {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -430,7 +475,9 @@ class NotificationsSettingsPage extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              ref.read(settingsNotifierProvider.notifier).clearAllNotifications();
+              ref
+                  .read(settingsNotifierProvider.notifier)
+                  .clearAllNotifications();
               Navigator.of(context).pop();
             },
             child: const Text('Limpar'),

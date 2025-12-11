@@ -35,14 +35,14 @@ class CommentsDriftRepository {
     final localPlantId = await _resolvePlantId(plantFirebaseId);
     if (localPlantId == null) return [];
 
-    final comments = await (_db.select(_db.comments)
-          ..where(
-            (c) => c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
-          )
-          ..orderBy([
-            (c) => OrderingTerm.desc(c.createdAt),
-          ]))
-        .get();
+    final comments =
+        await (_db.select(_db.comments)
+              ..where(
+                (c) =>
+                    c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
+              )
+              ..orderBy([(c) => OrderingTerm.desc(c.createdAt)]))
+            .get();
 
     return comments.map(_commentDriftToModel).toList();
   }
@@ -57,9 +57,7 @@ class CommentsDriftRepository {
             ..where(
               (c) => c.plantId.equals(localPlantId) & c.isDeleted.equals(false),
             )
-            ..orderBy([
-              (c) => OrderingTerm.desc(c.createdAt),
-            ]))
+            ..orderBy([(c) => OrderingTerm.desc(c.createdAt)]))
           .watch()
           .map((comments) => comments.map(_commentDriftToModel).toList());
     });
@@ -83,9 +81,9 @@ class CommentsDriftRepository {
 
   /// Get a comment by its Firebase ID
   Future<ComentarioModel?> getCommentById(String firebaseId) async {
-    final comment = await (_db.select(_db.comments)
-          ..where((c) => c.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final comment = await (_db.select(
+      _db.comments,
+    )..where((c) => c.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     if (comment == null) return null;
     return _commentDriftToModel(comment);
@@ -93,31 +91,33 @@ class CommentsDriftRepository {
 
   /// Soft delete a comment by its Firebase ID
   Future<bool> softDeleteComment(String firebaseId) async {
-    final rowsAffected = await (_db.update(_db.comments)
-          ..where((c) => c.firebaseId.equals(firebaseId)))
-        .write(
-      db.CommentsCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final rowsAffected =
+        await (_db.update(
+          _db.comments,
+        )..where((c) => c.firebaseId.equals(firebaseId))).write(
+          db.CommentsCompanion(
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
     return rowsAffected > 0;
   }
 
   /// Update an existing comment
   Future<bool> updateComment(ComentarioModel model) async {
-    final rowsAffected = await (_db.update(_db.comments)
-          ..where((c) => c.firebaseId.equals(model.id)))
-        .write(
-      db.CommentsCompanion(
-        conteudo: Value(model.conteudo),
-        updatedAt: Value(model.updatedAt ?? DateTime.now()),
-        lastSyncAt: Value(model.lastSyncAt),
-        isDirty: Value(model.isDirty),
-        version: Value(model.version),
-      ),
-    );
+    final rowsAffected =
+        await (_db.update(
+          _db.comments,
+        )..where((c) => c.firebaseId.equals(model.id))).write(
+          db.CommentsCompanion(
+            conteudo: Value(model.conteudo),
+            updatedAt: Value(model.updatedAt ?? DateTime.now()),
+            lastSyncAt: Value(model.lastSyncAt),
+            isDirty: Value(model.isDirty),
+            version: Value(model.version),
+          ),
+        );
     return rowsAffected > 0;
   }
 
@@ -138,8 +138,7 @@ class CommentsDriftRepository {
 
     final plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(plantFirebaseId)))
-        .getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(plantFirebaseId))).getSingleOrNull();
     return plant?.id;
   }
 }

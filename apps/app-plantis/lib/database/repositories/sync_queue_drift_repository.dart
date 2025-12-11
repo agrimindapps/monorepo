@@ -39,9 +39,9 @@ class SyncQueueDriftRepository {
   }
 
   Future<bool> markAsSynced(int id) async {
-    final updated = await (_db.update(_db.plantsSyncQueue)
-          ..where((s) => s.id.equals(id)))
-        .write(const db.PlantsSyncQueueCompanion(isSynced: Value(true)));
+    final updated =
+        await (_db.update(_db.plantsSyncQueue)..where((s) => s.id.equals(id)))
+            .write(const db.PlantsSyncQueueCompanion(isSynced: Value(true)));
 
     return updated > 0;
   }
@@ -49,14 +49,12 @@ class SyncQueueDriftRepository {
   Future<void> incrementSyncAttempts(int id, String? errorMessage) async {
     final item = await (_db.select(
       _db.plantsSyncQueue,
-    )..where((s) => s.id.equals(id)))
-        .getSingleOrNull();
+    )..where((s) => s.id.equals(id))).getSingleOrNull();
 
     if (item != null) {
       await (_db.update(
         _db.plantsSyncQueue,
-      )..where((s) => s.id.equals(id)))
-          .write(
+      )..where((s) => s.id.equals(id))).write(
         db.PlantsSyncQueueCompanion(
           attempts: Value(item.attempts + 1),
           lastAttemptAt: Value(DateTime.now()),
@@ -69,8 +67,7 @@ class SyncQueueDriftRepository {
   Future<void> clearSyncedItems() async {
     await (_db.delete(
       _db.plantsSyncQueue,
-    )..where((s) => s.isSynced.equals(true)))
-        .go();
+    )..where((s) => s.isSynced.equals(true))).go();
   }
 
   Future<int> countPendingItems() async {
@@ -121,9 +118,7 @@ class SyncQueueDriftRepository {
                 s.attempts.isBiggerOrEqualValue(maxRetries) &
                 s.isSynced.equals(false),
           )
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.lastAttemptAt),
-          ])
+          ..orderBy([(s) => OrderingTerm.desc(s.lastAttemptAt)])
           ..limit(limit))
         .get();
   }

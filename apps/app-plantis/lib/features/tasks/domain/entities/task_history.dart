@@ -120,10 +120,9 @@ class TaskHistory extends Equatable {
       photosUrls: List<String>.from(
         (map['photosUrls'] as List<dynamic>?) ?? [],
       ),
-      timeSpent:
-          map['timeSpent'] != null
-              ? Duration(minutes: (map['timeSpent'] as int))
-              : null,
+      timeSpent: map['timeSpent'] != null
+          ? Duration(minutes: (map['timeSpent'] as int))
+          : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,
@@ -162,10 +161,9 @@ class TaskHistory extends Equatable {
       photosUrls: List<String>.from(
         (map['photosUrls'] as List<dynamic>?) ?? [],
       ),
-      timeSpent:
-          map['timeSpent'] != null
-              ? Duration(minutes: (map['timeSpent'] as int))
-              : null,
+      timeSpent: map['timeSpent'] != null
+          ? Duration(minutes: (map['timeSpent'] as int))
+          : null,
       status: TaskHistoryStatus.values.firstWhere(
         (status) => status.key == map['status'],
         orElse: () => TaskHistoryStatus.completed,

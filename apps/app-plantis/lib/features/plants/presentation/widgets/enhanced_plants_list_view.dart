@@ -16,11 +16,7 @@ class TaskInfo {
   final DateTime? dueDate;
   final bool isOverdue;
 
-  const TaskInfo({
-    required this.type,
-    this.dueDate,
-    this.isOverdue = false,
-  });
+  const TaskInfo({required this.type, this.dueDate, this.isOverdue = false});
 }
 
 /// Enhanced Plants List View siguiendo principios SOLID
@@ -85,7 +81,9 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
 
   @override
   void onViewModeChanged(AppBarViewMode mode) {
-    ref.read(plantsProvider.notifier).setViewMode(
+    ref
+        .read(plantsProvider.notifier)
+        .setViewMode(
           mode == AppBarViewMode.grid ? ViewMode.grid : ViewMode.list,
         );
   }
@@ -138,9 +136,7 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
           ElevatedButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              await ref
-                  .read(plantsProvider.notifier)
-                  .deletePlant(plant.id);
+              await ref.read(plantsProvider.notifier).deletePlant(plant.id);
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -183,14 +179,12 @@ class _EnhancedPlantsListViewState extends ConsumerState<EnhancedPlantsListView>
     }
 
     if (state.error != null && state.plants.isEmpty) {
-      return PlantsErrorWidget(
-        error: state.error!,
-        onRetry: _loadInitialData,
-      );
+      return PlantsErrorWidget(error: state.error!, onRetry: _loadInitialData);
     }
 
-    final plantsToShow =
-        state.searchQuery.isNotEmpty ? state.searchResults : state.plants;
+    final plantsToShow = state.searchQuery.isNotEmpty
+        ? state.searchResults
+        : state.plants;
 
     if (plantsToShow.isEmpty) {
       return EmptyPlantsWidget(

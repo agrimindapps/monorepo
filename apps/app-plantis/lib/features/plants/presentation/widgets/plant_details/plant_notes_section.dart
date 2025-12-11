@@ -65,16 +65,12 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
         );
       },
       loading: () => _buildLoadingState(context),
-      error: (error, stack) => Center(
-        child: Text('Erro ao carregar comentários: $error'),
-      ),
+      error: (error, stack) =>
+          Center(child: Text('Erro ao carregar comentários: $error')),
     );
   }
 
-  Widget _buildAddCommentSection(
-    BuildContext context,
-    CommentsState state,
-  ) {
+  Widget _buildAddCommentSection(BuildContext context, CommentsState state) {
     final theme = Theme.of(context);
 
     return Container(
@@ -187,10 +183,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     );
   }
 
-  Widget _buildCommentsList(
-    BuildContext context,
-    CommentsState state,
-  ) {
+  Widget _buildCommentsList(BuildContext context, CommentsState state) {
     final theme = Theme.of(context);
     final comments = state.comments;
 
@@ -236,10 +229,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     );
   }
 
-  Widget _buildCommentCard(
-    BuildContext context,
-    ComentarioModel comment,
-  ) {
+  Widget _buildCommentCard(BuildContext context, ComentarioModel comment) {
     final theme = Theme.of(context);
 
     return Container(
@@ -301,10 +291,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                   const PopupMenuItem(
                     value: 'delete',
                     child: ListTile(
-                      leading: Icon(
-                        Icons.delete_outline,
-                        color: Colors.red,
-                      ),
+                      leading: Icon(Icons.delete_outline, color: Colors.red),
                       title: Text(
                         'Excluir',
                         style: TextStyle(color: Colors.red),
@@ -349,7 +336,8 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       print('   Plant Name: ${widget.plant.displayName}');
       print('   Content Length: ${text.length}');
       print(
-          '   Content: ${text.substring(0, text.length > 50 ? 50 : text.length)}...');
+        '   Content: ${text.substring(0, text.length > 50 ? 50 : text.length)}...',
+      );
     }
 
     try {
@@ -375,7 +363,8 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       } else {
         if (mounted) {
           final commentsState = ref.read(commentsNotifierProvider).value;
-          final errorMsg = commentsState?.errorMessage ??
+          final errorMsg =
+              commentsState?.errorMessage ??
               'Erro desconhecido ao adicionar comentário';
 
           if (kDebugMode) {
@@ -409,10 +398,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     }
   }
 
-  void _handleCommentAction(
-    String action,
-    ComentarioModel comment,
-  ) {
+  void _handleCommentAction(String action, ComentarioModel comment) {
     switch (action) {
       case 'edit':
         _editComment(comment);
@@ -430,7 +416,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
-        
+
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -489,10 +475,13 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                   decoration: InputDecoration(
                     hintText: 'Digite seu comentário...',
                     hintStyle: TextStyle(
-                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(
+                        alpha: 0.6,
+                      ),
                     ),
                     filled: true,
-                    fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                    fillColor: theme.colorScheme.surfaceContainerHighest
+                        .withValues(alpha: 0.3),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
@@ -526,7 +515,10 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                         Navigator.of(dialogContext).pop();
                       },
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
                       child: const Text('Cancelar'),
                     ),
@@ -556,8 +548,11 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                             );
                           } else {
                             if (!mounted) return;
-                            final commentsState = ref.read(commentsNotifierProvider).value;
-                            final errorMsg = commentsState?.errorMessage ??
+                            final commentsState = ref
+                                .read(commentsNotifierProvider)
+                                .value;
+                            final errorMsg =
+                                commentsState?.errorMessage ??
                                 'Não foi possível atualizar o comentário';
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -575,7 +570,10 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                       icon: const Icon(Icons.check, size: 18),
                       label: const Text('Salvar'),
                       style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
                     ),
                   ],
@@ -593,7 +591,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       context: context,
       builder: (dialogContext) {
         final theme = Theme.of(dialogContext);
-        
+
         return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
@@ -671,8 +669,11 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
                             );
                           } else {
                             if (!mounted) return;
-                            final commentsState = ref.read(commentsNotifierProvider).value;
-                            final errorMsg = commentsState?.errorMessage ??
+                            final commentsState = ref
+                                .read(commentsNotifierProvider)
+                                .value;
+                            final errorMsg =
+                                commentsState?.errorMessage ??
                                 'Não foi possível excluir o comentário';
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -766,10 +767,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     );
   }
 
-  Widget _buildErrorMessage(
-    BuildContext context,
-    CommentsState state,
-  ) {
+  Widget _buildErrorMessage(BuildContext context, CommentsState state) {
     final theme = Theme.of(context);
 
     return Container(

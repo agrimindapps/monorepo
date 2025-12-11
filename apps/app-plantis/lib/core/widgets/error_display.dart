@@ -216,10 +216,9 @@ class AuthErrorDisplay extends StatelessWidget {
     }
     return {
       'title': 'Erro de Autenticação',
-      'message':
-          error.isNotEmpty
-              ? error
-              : 'Ocorreu um erro inesperado. Tente novamente.',
+      'message': error.isNotEmpty
+          ? error
+          : 'Ocorreu um erro inesperado. Tente novamente.',
       'canRetry': true,
       'retryText': 'Tentar Novamente',
     };

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_di_providers.dart';
@@ -246,7 +245,9 @@ class DataExportNotifier extends _$DataExportNotifier {
       if (userId == null) {
         state = AsyncValue.data(
           currentState.copyWith(
-            currentProgress: const ExportProgress.error('Usuário não autenticado'),
+            currentProgress: const ExportProgress.error(
+              'Usuário não autenticado',
+            ),
           ),
         );
         return;

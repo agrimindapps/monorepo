@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-
 import '../../database/plantis_database.dart' as db;
 import '../../database/repositories/sync_queue_drift_repository.dart';
 
@@ -18,7 +17,8 @@ class SyncQueueDriftService {
   SyncQueueDriftService(this._repository);
 
   /// Stream de itens pendentes (para UI observar mudanças)
-  Stream<List<db.PlantsSyncQueueData>> get queueStream => _queueController.stream;
+  Stream<List<db.PlantsSyncQueueData>> get queueStream =>
+      _queueController.stream;
 
   /// Inicializar stream watcher
   void startWatching({int limit = 50}) {
@@ -48,7 +48,9 @@ class SyncQueueDriftService {
   }) async {
     // Validação de operation
     if (!['create', 'update', 'delete'].contains(operation)) {
-      throw ArgumentError('Invalid operation: $operation. Must be create/update/delete');
+      throw ArgumentError(
+        'Invalid operation: $operation. Must be create/update/delete',
+      );
     }
 
     await _repository.enqueue(

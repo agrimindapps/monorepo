@@ -1,6 +1,7 @@
-import 'package:core/core.dart' hide Column, DeleteAccountUseCase, LogoutUseCase;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:core/core.dart'
+    hide Column, DeleteAccountUseCase, LogoutUseCase;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/providers/repository_providers.dart';
@@ -22,9 +23,7 @@ part 'account_providers.g.dart';
 // ============================================================================
 
 @riverpod
-AccountRemoteDataSource accountRemoteDataSource(
-  Ref ref,
-) {
+AccountRemoteDataSource accountRemoteDataSource(Ref ref) {
   final firebaseAuth = fb.FirebaseAuth.instance;
   final firebaseFirestore = FirebaseFirestore.instance;
   return AccountRemoteDataSourceImpl(

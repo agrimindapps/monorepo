@@ -37,21 +37,9 @@ class LandingFeaturesSection extends StatelessWidget {
               runSpacing: 24,
               alignment: WrapAlignment.center,
               children: [
-                _StatisticCard(
-                  icon: '🌱',
-                  title: 'Plantas',
-                  value: '0',
-                ),
-                _StatisticCard(
-                  icon: '👥',
-                  title: 'Comunidade',
-                  value: '0',
-                ),
-                _StatisticCard(
-                  icon: '✅',
-                  title: 'Tarefas',
-                  value: '0',
-                ),
+                _StatisticCard(icon: '🌱', title: 'Plantas', value: '0'),
+                _StatisticCard(icon: '👥', title: 'Comunidade', value: '0'),
+                _StatisticCard(icon: '✅', title: 'Tarefas', value: '0'),
               ],
             ),
             const SizedBox(height: 60),

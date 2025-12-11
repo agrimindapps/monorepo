@@ -84,7 +84,8 @@ class PlantBrandingSide extends StatelessWidget {
                     animation: backgroundAnimation,
                     builder: (context, child) {
                       return Transform.scale(
-                        scale: 1.0 +
+                        scale:
+                            1.0 +
                             (0.1 *
                                 math.sin(
                                   backgroundAnimation.value * 2 * math.pi,
@@ -149,11 +150,7 @@ class MobileBranding extends StatelessWidget {
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: logoAnimation,
-      child: ModernLogo(
-        isWhite: false,
-        size: 32,
-        color: primaryColor,
-      ),
+      child: ModernLogo(isWhite: false, size: 32, color: primaryColor),
     );
   }
 }
@@ -162,10 +159,7 @@ class MobileBranding extends StatelessWidget {
 class CompactBranding extends StatelessWidget {
   final Color primaryColor;
 
-  const CompactBranding({
-    this.primaryColor = PlantisColors.primary,
-    super.key,
-  });
+  const CompactBranding({this.primaryColor = PlantisColors.primary, super.key});
 
   @override
   Widget build(BuildContext context) {

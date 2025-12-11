@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../managers/premium_managers_providers.dart';
 import '../providers/premium_notifier.dart';
@@ -51,7 +50,7 @@ class _PremiumSubscriptionPageState
     return Scaffold(
       extendBodyBehindAppBar: true,
       backgroundColor: Colors.transparent,
-      body: Container(
+      body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -107,7 +106,9 @@ class _PremiumSubscriptionPageState
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             style: IconButton.styleFrom(
               backgroundColor: Colors.white.withValues(alpha: 0.1),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
           const Text(

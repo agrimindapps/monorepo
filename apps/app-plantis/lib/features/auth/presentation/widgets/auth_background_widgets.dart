@@ -89,10 +89,7 @@ class PlantBackgroundPattern extends StatelessWidget {
 class FloatingPlantElements extends StatelessWidget {
   final Animation<double> animation;
 
-  const FloatingPlantElements({
-    required this.animation,
-    super.key,
-  });
+  const FloatingPlantElements({required this.animation, super.key});
 
   @override
   Widget build(BuildContext context) {

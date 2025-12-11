@@ -7,19 +7,16 @@ import '../../../core/providers/core_providers.dart';
 import '../../../core/widgets/modern_header_widget.dart';
 import '../../../core/widgets/responsive_content_wrapper.dart';
 import '../../auth/presentation/pages/login_page.dart';
-import '../../subscription/presentation/providers/subscription_notifier.dart';
-import '../constants/settings_design_tokens.dart';
 import '../presentation/providers/user_settings_notifier.dart';
 import '../widgets/dialogs/clear_data_dialog.dart';
 import '../widgets/dialogs/delete_account_dialog.dart';
 import '../widgets/dialogs/device_management_dialog.dart';
 import '../widgets/dialogs/logout_confirmation_dialog.dart';
 import '../widgets/profile/profile_account_actions_section.dart';
-import '../widgets/profile/profile_account_info_section.dart';
+import '../widgets/profile/profile_combined_info_section.dart';
 import '../widgets/profile/profile_data_sync_section.dart';
 import '../widgets/profile/profile_devices_section.dart';
 import '../widgets/profile/profile_subscription_section.dart';
-import '../widgets/profile/profile_user_section.dart';
 
 /// Página de perfil do usuário
 /// Funciona tanto para visitantes quanto usuários logados
@@ -52,9 +49,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final authAsync = ref.watch(authProvider);
     final settingsState = ref.watch(userSettingsProvider);
-    final premiumState = ref.watch(subscriptionManagementProvider);
-    final syncState = ref.watch(receitaAgroSyncServiceProvider).syncState;
-    final lastSync = ref.watch(receitaAgroSyncServiceProvider).lastSyncTime;
 
     // Handle AsyncValue states
     return authAsync.when(
@@ -105,19 +99,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         data: (settingsData) => SingleChildScrollView(
                           child: Column(
                             children: [
-                              ProfileUserSection(
+                              ProfileCombinedInfoSection(
                                 authData: authData,
                                 onLoginTap: () => _navigateToLoginPage(context),
-                                onEditProfile: (newName) =>
-                                    _handleEditProfile(context, ref, newName),
+                                onEditProfile: (newName, photoBase64) =>
+                                    _handleEditProfile(
+                                      context,
+                                      ref,
+                                      newName,
+                                      photoBase64,
+                                    ),
+                                onChangePassword: () =>
+                                    _handleChangePassword(context, ref),
                               ),
                               const SizedBox(height: 8),
                               if (isAuthenticated) ...[
                                 const ProfileSubscriptionSection(),
-                                const SizedBox(height: 8),
-                              ],
-                              if (isAuthenticated) ...[
-                                ProfileAccountInfoSection(authData: authData),
                                 const SizedBox(height: 8),
                               ],
                               if (isAuthenticated) ...[
@@ -180,10 +177,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     BuildContext context,
     WidgetRef ref,
     String newName,
+    String? photoBase64,
   ) async {
     final result = await ref
         .read(authProvider.notifier)
-        .updateProfile(displayName: newName);
+        .updateProfile(displayName: newName, photoUrl: photoBase64);
 
     if (context.mounted) {
       if (result.isSuccess) {
@@ -321,14 +319,5 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     if (email is String && email.isNotEmpty) return email.split('@').first;
 
     return 'Usuário';
-  }
-
-  String _getInitials(String name) {
-    if (name.isEmpty) return '?';
-    final words = name.split(' ').where((w) => w.isNotEmpty).toList();
-    if (words.isEmpty) return '?';
-    if (words.length == 1) return words[0].substring(0, 1).toUpperCase();
-    return '${words[0].substring(0, 1)}${words[1].substring(0, 1)}'
-        .toUpperCase();
   }
 }

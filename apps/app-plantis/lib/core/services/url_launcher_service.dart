@@ -161,10 +161,9 @@ class UrlLauncherService {
 
   /// Launch store page for app rating/review
   Future<UrlLaunchResult> launchStoreReview({String? source}) async {
-    final storeUrl =
-        defaultTargetPlatform == TargetPlatform.iOS
-            ? AppConfig.appStoreUrl
-            : AppConfig.googlePlayUrl;
+    final storeUrl = defaultTargetPlatform == TargetPlatform.iOS
+        ? AppConfig.appStoreUrl
+        : AppConfig.googlePlayUrl;
 
     return await launchUrl(
       storeUrl,

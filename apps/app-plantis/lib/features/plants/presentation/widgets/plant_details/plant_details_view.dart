@@ -104,11 +104,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         onNavigateToImages: (plantId) {},
         onNavigateToSchedule: (plantId) {},
         onShowSnackBar: _showSnackBar,
-        onShowSnackBarWithColor:
-            (message, type, {Color? backgroundColor}) => _showSnackBarWithColor(
-              message,
-              backgroundColor: backgroundColor,
-            ),
+        onShowSnackBarWithColor: (message, type, {Color? backgroundColor}) =>
+            _showSnackBarWithColor(message, backgroundColor: backgroundColor),
         onShowDialog: _onShowDialog,
         onShowBottomSheet: _onShowBottomSheet,
         onPlantDeleted: _syncPlantDeletion,
@@ -185,7 +182,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
 
             // Se está carregando E não tem planta, criar planta placeholder
             // para usar com Skeletonizer
-            final Plant displayPlant = plant ??
+            final Plant displayPlant =
+                plant ??
                 Plant(
                   id: 'loading',
                   name: 'Carregando nome da planta',
@@ -330,7 +328,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
 
                 // Usar o plantsNotifierProvider para deletar
                 // Isso garante que a lista seja atualizada automaticamente
-                final success = await ref.read(plantsNotifierProvider.notifier).deletePlant(plant.id);
+                final success = await ref
+                    .read(plantsNotifierProvider.notifier)
+                    .deletePlant(plant.id);
 
                 if (success) {
                   _showSnackBarWithColor(
@@ -340,7 +340,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                   _onBack();
                 } else {
                   // Obtém a mensagem de erro específica do provider
-                  final errorMessage = ref.read(plantsNotifierProvider).error ??
+                  final errorMessage =
+                      ref.read(plantsNotifierProvider).error ??
                       AppStrings.errorDeletingPlant;
                   _showSnackBarWithColor(
                     errorMessage,
@@ -413,9 +414,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
         Expanded(
           child: DecoratedBox(
             decoration: const BoxDecoration(
-              color:
-                  Colors
-                      .transparent, // Transparente para usar o fundo do BasePageScaffold
+              color: Colors
+                  .transparent, // Transparente para usar o fundo do BasePageScaffold
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             child: Column(
@@ -426,9 +426,8 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
                 Expanded(
                   child: DecoratedBox(
                     decoration: const BoxDecoration(
-                      color:
-                          Colors
-                              .transparent, // Transparente para usar o fundo do BasePageScaffold
+                      color: Colors
+                          .transparent, // Transparente para usar o fundo do BasePageScaffold
                     ),
                     child: TabBarView(
                       controller: _tabController,
@@ -452,10 +451,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   Widget _buildHeader(BuildContext context, Plant plant) {
     return PlantisHeader(
       title: plant.displayName,
-      subtitle:
-          plant.species?.isNotEmpty == true
-              ? plant.species!
-              : 'Detalhes da planta',
+      subtitle: plant.species?.isNotEmpty == true
+          ? plant.species!
+          : 'Detalhes da planta',
       margin: const EdgeInsets.only(
         bottom: 8,
         top: 4,
@@ -473,31 +471,27 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
           ),
           onSelected: (action) => _handleMenuAction(action, plant),
-          itemBuilder:
-              (context) => [
-                const PopupMenuItem(
-                  value: 'edit',
-                  child: ListTile(
-                    leading: Icon(Icons.edit_outlined),
-                    title: Text('Editar'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'edit',
+              child: ListTile(
+                leading: Icon(Icons.edit_outlined),
+                title: Text('Editar'),
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+            const PopupMenuItem(
+              value: 'delete',
+              child: ListTile(
+                leading: Icon(Icons.delete_outline, color: PlantisColors.error),
+                title: Text(
+                  'Excluir',
+                  style: TextStyle(color: PlantisColors.error),
                 ),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: ListTile(
-                    leading: Icon(
-                      Icons.delete_outline,
-                      color: PlantisColors.error,
-                    ),
-                    title: Text(
-                      'Excluir',
-                      style: TextStyle(color: PlantisColors.error),
-                    ),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-              ],
+                contentPadding: EdgeInsets.zero,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -526,21 +520,19 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
               ),
             ],
           ),
-          child:
-              plant.hasImage
-                  ? ClipRRect(
-                    borderRadius: BorderRadius.circular(58),
-                    child: Image.network(
-                      plant.primaryImageUrl!,
-                      width: 116,
-                      height: 116,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (context, error, stackTrace) =>
-                              _buildPlaceholderIcon(),
-                    ),
-                  )
-                  : _buildPlaceholderIcon(),
+          child: plant.hasImage
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(58),
+                  child: Image.network(
+                    plant.primaryImageUrl!,
+                    width: 116,
+                    height: 116,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        _buildPlaceholderIcon(),
+                  ),
+                )
+              : _buildPlaceholderIcon(),
         ),
       ),
     );
@@ -558,10 +550,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 0),
       decoration: BoxDecoration(
-        color:
-            theme.brightness == Brightness.dark
-                ? _PlantDetailsConstants.darkCardColor
-                : _PlantDetailsConstants.lightBackgroundColor,
+        color: theme.brightness == Brightness.dark
+            ? _PlantDetailsConstants.darkCardColor
+            : _PlantDetailsConstants.lightBackgroundColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: theme.colorScheme.outline.withValues(alpha: 0.1),

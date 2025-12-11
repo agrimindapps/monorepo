@@ -170,8 +170,9 @@ class _DataClearDialogState extends ConsumerState<DataClearDialog> {
                   });
 
                   try {
-                    final dataCleanerService =
-                        ref.read(dataCleanerServiceProvider);
+                    final dataCleanerService = ref.read(
+                      dataCleanerServiceProvider,
+                    );
                     final result = await dataCleanerService
                         .clearUserContentOnly();
 

@@ -30,15 +30,13 @@ class AccessiblePlantCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final lastWateredText =
-        lastWatered != null
-            ? 'Regada pela última vez há ${_daysSince(lastWatered!)} dias'
-            : 'Sem registro de rega';
+    final lastWateredText = lastWatered != null
+        ? 'Regada pela última vez há ${_daysSince(lastWatered!)} dias'
+        : 'Sem registro de rega';
 
-    final nextTaskText =
-        nextTask != null
-            ? 'Próxima tarefa: $nextTask'
-            : 'Nenhuma tarefa pendente';
+    final nextTaskText = nextTask != null
+        ? 'Próxima tarefa: $nextTask'
+        : 'Nenhuma tarefa pendente';
 
     return Semantics(
       label: 'Planta $plantName, tipo $plantType',
@@ -53,26 +51,23 @@ class AccessiblePlantCard extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side:
-              isSelected
-                  ? BorderSide(color: theme.colorScheme.primary, width: 2)
-                  : BorderSide.none,
+          side: isSelected
+              ? BorderSide(color: theme.colorScheme.primary, width: 2)
+              : BorderSide.none,
         ),
         child: InkWell(
-          onTap:
-              onTap != null
-                  ? () {
-                    AccessibilityTokens.performHapticFeedback('light');
-                    onTap!();
-                  }
-                  : null,
-          onLongPress:
-              onLongPress != null
-                  ? () {
-                    AccessibilityTokens.performHapticFeedback('heavy');
-                    onLongPress!();
-                  }
-                  : null,
+          onTap: onTap != null
+              ? () {
+                  AccessibilityTokens.performHapticFeedback('light');
+                  onTap!();
+                }
+              : null,
+          onLongPress: onLongPress != null
+              ? () {
+                  AccessibilityTokens.performHapticFeedback('heavy');
+                  onLongPress!();
+                }
+              : null,
           borderRadius: BorderRadius.circular(12),
           child: Container(
             constraints: const BoxConstraints(
@@ -104,18 +99,17 @@ class AccessiblePlantCard extends StatelessWidget {
           color: PlantisColors.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
-        child:
-            imageUrl != null
-                ? ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (context, error, stackTrace) => _buildPlaceholderIcon(),
-                  ),
-                )
-                : _buildPlaceholderIcon(),
+        child: imageUrl != null
+            ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      _buildPlaceholderIcon(),
+                ),
+              )
+            : _buildPlaceholderIcon(),
       ),
     );
   }
@@ -182,8 +176,9 @@ class AccessiblePlantCard extends StatelessWidget {
   }
 
   Widget _buildStatusIndicator(BuildContext context) {
-    final daysSinceWatering =
-        lastWatered != null ? _daysSince(lastWatered!) : 99;
+    final daysSinceWatering = lastWatered != null
+        ? _daysSince(lastWatered!)
+        : 99;
     final isOverdue = daysSinceWatering > 7;
     final isWarning = daysSinceWatering > 3;
 
@@ -278,21 +273,20 @@ class AccessibleSearchBar extends StatelessWidget {
               excludeSemantics: true,
               child: const Icon(Icons.search),
             ),
-            suffixIcon:
-                controller?.text.isNotEmpty == true
-                    ? Semantics(
-                      label: 'Limpar pesquisa',
-                      button: true,
-                      child: IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          AccessibilityTokens.performHapticFeedback('light');
-                          controller?.clear();
-                          onClear?.call();
-                        },
-                      ),
-                    )
-                    : null,
+            suffixIcon: controller?.text.isNotEmpty == true
+                ? Semantics(
+                    label: 'Limpar pesquisa',
+                    button: true,
+                    child: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        AccessibilityTokens.performHapticFeedback('light');
+                        controller?.clear();
+                        onClear?.call();
+                      },
+                    ),
+                  )
+                : null,
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 20,
@@ -513,19 +507,18 @@ class AccessibleSwitch extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
-        subtitle:
-            subtitle != null
-                ? Text(
-                  subtitle!,
-                  style: TextStyle(
-                    fontSize: AccessibilityTokens.getAccessibleFontSize(
-                      context,
-                      14,
-                    ),
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle!,
+                style: TextStyle(
+                  fontSize: AccessibilityTokens.getAccessibleFontSize(
+                    context,
+                    14,
                   ),
-                )
-                : null,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
+              )
+            : null,
         trailing: Switch(
           value: value,
           onChanged: (newValue) {
@@ -573,14 +566,13 @@ class AccessibleConfirmDialog extends StatelessWidget {
   }) {
     return showDialog<bool>(
       context: context,
-      builder:
-          (context) => AccessibleConfirmDialog(
-            title: title,
-            content: content,
-            confirmText: confirmText,
-            cancelText: cancelText,
-            isDestructive: isDestructive,
-          ),
+      builder: (context) => AccessibleConfirmDialog(
+        title: title,
+        content: content,
+        confirmText: confirmText,
+        cancelText: cancelText,
+        isDestructive: isDestructive,
+      ),
     );
   }
 
@@ -622,14 +614,12 @@ class AccessibleConfirmDialog extends StatelessWidget {
               Navigator.of(context).pop(true);
             },
             semanticLabel: confirmText,
-            backgroundColor:
-                isDestructive
-                    ? theme.colorScheme.error
-                    : theme.colorScheme.primary,
-            foregroundColor:
-                isDestructive
-                    ? theme.colorScheme.onError
-                    : theme.colorScheme.onPrimary,
+            backgroundColor: isDestructive
+                ? theme.colorScheme.error
+                : theme.colorScheme.primary,
+            foregroundColor: isDestructive
+                ? theme.colorScheme.onError
+                : theme.colorScheme.onPrimary,
             child: Text(confirmText),
           ),
         ],

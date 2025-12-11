@@ -23,19 +23,16 @@ class OverdueTaskMonitor implements IOverdueTaskMonitor {
 
   /// Handle overdue tasks detection - identifies overdue items and notifies
   @override
-  Future<void> handleOverdueTasksDetection(
-    List<task_entity.Task> tasks,
-  ) async {
+  Future<void> handleOverdueTasksDetection(List<task_entity.Task> tasks) async {
     try {
       final DateTime now = DateTime.now();
-      final List<task_entity.Task> overdueTasks =
-          tasks
-              .where(
-                (task) =>
-                    task.status == task_entity.TaskStatus.pending &&
-                    task.dueDate.isBefore(now),
-              )
-              .toList();
+      final List<task_entity.Task> overdueTasks = tasks
+          .where(
+            (task) =>
+                task.status == task_entity.TaskStatus.pending &&
+                task.dueDate.isBefore(now),
+          )
+          .toList();
 
       if (overdueTasks.isEmpty) {
         debugPrint('✅ No overdue tasks found');

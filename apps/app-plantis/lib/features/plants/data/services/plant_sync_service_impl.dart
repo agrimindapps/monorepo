@@ -21,7 +21,9 @@ class PlantSyncServiceImpl implements PlantSyncService {
     try {
       final remotePlants = await remoteDatasource.getPlants(userId);
 
-      final syncType = connectionRestored ? 'Connection restored sync' : 'Background sync';
+      final syncType = connectionRestored
+          ? 'Connection restored sync'
+          : 'Background sync';
       if (kDebugMode) {
         print(
           '✅ PlantSyncService: $syncType completed - ${remotePlants.length} plants',
@@ -43,7 +45,10 @@ class PlantSyncServiceImpl implements PlantSyncService {
   }
 
   @override
-  Future<void> syncSinglePlantInBackground(String plantId, String userId) async {
+  Future<void> syncSinglePlantInBackground(
+    String plantId,
+    String userId,
+  ) async {
     try {
       final remotePlant = await remoteDatasource.getPlantById(plantId, userId);
       await localDatasource.updatePlant(remotePlant);

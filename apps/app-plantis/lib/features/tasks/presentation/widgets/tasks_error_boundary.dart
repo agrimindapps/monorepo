@@ -83,8 +83,9 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF000000) : theme.colorScheme.surface,
+      backgroundColor: isDark
+          ? const Color(0xFF000000)
+          : theme.colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -292,10 +293,9 @@ class _TasksErrorBoundaryState extends ConsumerState<TasksErrorBoundary> {
   }
 
   void _handleReportIssue(BuildContext context) {
-    final errorInfo =
-        _errorDetails != null
-            ? 'Erro: ${_errorDetails!.exception}\n\nStack Trace:\n${_errorDetails!.stack}'
-            : 'Erro não identificado';
+    final errorInfo = _errorDetails != null
+        ? 'Erro: ${_errorDetails!.exception}\n\nStack Trace:\n${_errorDetails!.stack}'
+        : 'Erro não identificado';
     Clipboard.setData(ClipboardData(text: errorInfo));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

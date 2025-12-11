@@ -1,14 +1,15 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart' show GoRouterHelper;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../providers/settings_notifier.dart';
+import '../widgets/profile/profile_user_section.dart';
 import '../widgets/sections/about_section.dart';
-import '../widgets/sections/account_section.dart';
-import '../widgets/sections/app_section.dart';
 import '../widgets/sections/legal_section.dart';
+import '../widgets/sections/new_premium_section.dart';
 import '../widgets/sections/notification_section.dart';
 import '../widgets/sections/support_section.dart';
 
@@ -132,26 +133,56 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          // AccountSection - Ocultado em tablets/desktop (> 768px)
-          // Justificativa: Em telas maiores, logout é acessível via menu lateral
+          // Profile Section - Only on mobile
           if (isMobile) ...[
-            AccountSection(onLogoutTap: _showLogoutDialog),
-            const SizedBox(height: 24),
+            ProfileUserSection(
+              onLoginTap: () => context.push('/login'),
+            ),
+            const SizedBox(height: 16),
           ],
+
+          // Premium Section
+          const NewPremiumSection(),
+          const SizedBox(height: 16),
+
+          // Notifications
           const NotificationSection(),
-          const SizedBox(height: 24),
-          AppSection(onThemeTap: () => _showThemeDialog(context)),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // Legal
           const LegalSection(),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // Support
           SupportSection(
             onHelpTap: () =>
                 _showSnackBar('Central de ajuda estará disponível em breve!'),
             onFeedbackTap: _showFeedbackDialog,
             onRateTap: _showRateAppDialog,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+
+          // About
           AboutSection(onVersionTap: () => _showSnackBar('GasOMeter v1.0.0')),
+          
+          // Logout button if mobile (since it was in AccountSection)
+          if (isMobile) ...[
+             const SizedBox(height: 32),
+             SizedBox(
+               width: double.infinity,
+               child: OutlinedButton.icon(
+                 onPressed: _showLogoutDialog,
+                 icon: const Icon(Icons.logout),
+                 label: const Text('Sair da conta'),
+                 style: OutlinedButton.styleFrom(
+                   foregroundColor: Theme.of(context).colorScheme.error,
+                   side: BorderSide(color: Theme.of(context).colorScheme.error),
+                   padding: const EdgeInsets.symmetric(vertical: 12),
+                 ),
+               ),
+             ),
+             const SizedBox(height: 32),
+          ],
         ],
       ),
     );

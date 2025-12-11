@@ -111,12 +111,11 @@ class _PlantTaskHistoryButtonState extends State<PlantTaskHistoryButton>
     final currentMonth = DateTime(now.year, now.month);
     final nextMonth = DateTime(now.year, now.month + 1);
 
-    final monthTasks =
-        widget.completedTasks.where((task) {
-          if (task.completedDate == null) return false;
-          return task.completedDate!.isAfter(currentMonth) &&
-              task.completedDate!.isBefore(nextMonth);
-        }).toList();
+    final monthTasks = widget.completedTasks.where((task) {
+      if (task.completedDate == null) return false;
+      return task.completedDate!.isAfter(currentMonth) &&
+          task.completedDate!.isBefore(nextMonth);
+    }).toList();
 
     final typeCount = <TaskType, int>{};
     for (final task in monthTasks) {

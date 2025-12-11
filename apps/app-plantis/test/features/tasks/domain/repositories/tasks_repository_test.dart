@@ -52,12 +52,16 @@ class _TestTasksRepository implements TasksRepository {
   }
 
   Future<Either<Failure, List<Task>>> getCompletedTasks() async {
-    final results = _tasks.where((t) => t.status == TaskStatus.completed).toList();
+    final results = _tasks
+        .where((t) => t.status == TaskStatus.completed)
+        .toList();
     return Right(results);
   }
 
   Future<Either<Failure, List<Task>>> getPendingTasks() async {
-    final results = _tasks.where((t) => t.status == TaskStatus.pending).toList();
+    final results = _tasks
+        .where((t) => t.status == TaskStatus.pending)
+        .toList();
     return Right(results);
   }
 
@@ -65,7 +69,9 @@ class _TestTasksRepository implements TasksRepository {
   Future<Either<Failure, List<Task>>> getOverdueTasks() async {
     final now = DateTime.now();
     final results = _tasks
-        .where((t) => t.status != TaskStatus.completed && t.dueDate.isBefore(now))
+        .where(
+          (t) => t.status != TaskStatus.completed && t.dueDate.isBefore(now),
+        )
         .toList();
     return Right(results);
   }
@@ -94,9 +100,7 @@ class _TestTasksRepository implements TasksRepository {
     if (index == -1) {
       return const Left(NotFoundFailure('Task not found'));
     }
-    _tasks[index] = _tasks[index].copyWithTaskData(
-      status: TaskStatus.overdue,
-    );
+    _tasks[index] = _tasks[index].copyWithTaskData(status: TaskStatus.overdue);
     return const Right(null);
   }
 
@@ -123,7 +127,8 @@ class _TestTasksRepository implements TasksRepository {
 
   @override
   Future<Either<Failure, List<Task>>> getTasksByStatus(
-      TaskStatus status) async {
+    TaskStatus status,
+  ) async {
     final results = _tasks.where((t) => t.status == status).toList();
     return Right(results);
   }
@@ -131,10 +136,12 @@ class _TestTasksRepository implements TasksRepository {
   @override
   Future<Either<Failure, List<Task>>> getTodayTasks() async {
     final results = _tasks
-        .where((t) =>
-            t.isDueToday &&
-            t.status != TaskStatus.completed &&
-            t.status != TaskStatus.cancelled)
+        .where(
+          (t) =>
+              t.isDueToday &&
+              t.status != TaskStatus.completed &&
+              t.status != TaskStatus.cancelled,
+        )
         .toList();
     return Right(results);
   }
@@ -143,9 +150,7 @@ class _TestTasksRepository implements TasksRepository {
   Future<Either<Failure, List<Task>>> getUpcomingTasks() async {
     final now = DateTime.now();
     final results = _tasks
-        .where((t) =>
-            t.dueDate.isAfter(now) &&
-            t.status == TaskStatus.pending)
+        .where((t) => t.dueDate.isAfter(now) && t.status == TaskStatus.pending)
         .toList();
     return Right(results);
   }
@@ -165,13 +170,18 @@ class _TestTasksRepository implements TasksRepository {
   @override
   Future<Either<Failure, Map<String, dynamic>>> getStatistics() async {
     final total = _tasks.length;
-    final completed = _tasks.where((t) => t.status == TaskStatus.completed).length;
+    final completed = _tasks
+        .where((t) => t.status == TaskStatus.completed)
+        .length;
     final pending = _tasks.where((t) => t.status == TaskStatus.pending).length;
-    final overdue = _tasks.where((t) => 
-      t.status != TaskStatus.completed && 
-      t.dueDate.isBefore(DateTime.now())
-    ).length;
-    
+    final overdue = _tasks
+        .where(
+          (t) =>
+              t.status != TaskStatus.completed &&
+              t.dueDate.isBefore(DateTime.now()),
+        )
+        .length;
+
     return Right({
       'total': total,
       'completed': completed,
@@ -182,10 +192,14 @@ class _TestTasksRepository implements TasksRepository {
 
   @override
   Future<Either<Failure, List<Task>>> searchTasks(String query) async {
-    final results = _tasks.where((t) =>
-      t.title.toLowerCase().contains(query.toLowerCase()) ||
-      (t.description?.toLowerCase().contains(query.toLowerCase()) ?? false)
-    ).toList();
+    final results = _tasks
+        .where(
+          (t) =>
+              t.title.toLowerCase().contains(query.toLowerCase()) ||
+              (t.description?.toLowerCase().contains(query.toLowerCase()) ??
+                  false),
+        )
+        .toList();
     return Right(results);
   }
 }
@@ -209,13 +223,10 @@ void main() {
       // Assert
       expect(addResult.isRight(), true);
       expect(getResult.isRight(), true);
-      getResult.fold(
-        (_) => fail('Should return task'),
-        (retrievedTask) {
-          expect(retrievedTask.id, equals(task.id));
-          expect(retrievedTask.title, equals(task.title));
-        },
-      );
+      getResult.fold((_) => fail('Should return task'), (retrievedTask) {
+        expect(retrievedTask.id, equals(task.id));
+        expect(retrievedTask.title, equals(task.title));
+      });
     });
 
     test('should return NotFoundFailure when task does not exist', () async {
@@ -224,12 +235,9 @@ void main() {
 
       // Assert
       expect(result.isLeft(), true);
-      result.fold(
-        (failure) {
-          expect(failure, isA<NotFoundFailure>());
-        },
-        (_) => fail('Should return failure'),
-      );
+      result.fold((failure) {
+        expect(failure, isA<NotFoundFailure>());
+      }, (_) => fail('Should return failure'));
     });
 
     test('should get all tasks', () async {
@@ -244,12 +252,9 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return tasks'),
-        (retrievedTasks) {
-          expect(retrievedTasks.length, equals(3));
-        },
-      );
+      result.fold((_) => fail('Should return tasks'), (retrievedTasks) {
+        expect(retrievedTasks.length, equals(3));
+      });
     });
 
     test('should update existing task', () async {
@@ -257,21 +262,16 @@ void main() {
       final originalTask = TestFixtures.createTestTask(title: 'Original Title');
       await repository.addTask(originalTask);
 
-      final updatedTask = originalTask.copyWithTaskData(
-        title: 'Updated Title',
-      );
+      final updatedTask = originalTask.copyWithTaskData(title: 'Updated Title');
 
       // Act
       final result = await repository.updateTask(updatedTask);
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return updated task'),
-        (task) {
-          expect(task.title, equals('Updated Title'));
-        },
-      );
+      result.fold((_) => fail('Should return updated task'), (task) {
+        expect(task.title, equals('Updated Title'));
+      });
     });
 
     test('should return Left when updating non-existent task', () async {
@@ -316,13 +316,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return tasks'),
-        (tasks) {
-          expect(tasks.length, equals(1));
-          expect(tasks[0].plantId, equals('plant-1'));
-        },
-      );
+      result.fold((_) => fail('Should return tasks'), (tasks) {
+        expect(tasks.length, equals(1));
+        expect(tasks[0].plantId, equals('plant-1'));
+      });
     });
 
     test('should get completed tasks', () async {
@@ -345,13 +342,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return tasks'),
-        (tasks) {
-          expect(tasks.length, equals(1));
-          expect(tasks[0].status, equals(TaskStatus.completed));
-        },
-      );
+      result.fold((_) => fail('Should return tasks'), (tasks) {
+        expect(tasks.length, equals(1));
+        expect(tasks[0].status, equals(TaskStatus.completed));
+      });
     });
 
     test('should get pending tasks', () async {
@@ -374,13 +368,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return tasks'),
-        (tasks) {
-          expect(tasks.length, equals(1));
-          expect(tasks[0].status, equals(TaskStatus.pending));
-        },
-      );
+      result.fold((_) => fail('Should return tasks'), (tasks) {
+        expect(tasks.length, equals(1));
+        expect(tasks[0].status, equals(TaskStatus.pending));
+      });
     });
 
     test('should get overdue tasks', () async {
@@ -406,13 +397,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return tasks'),
-        (tasks) {
-          expect(tasks.length, equals(1));
-          expect(tasks[0].dueDate.isBefore(DateTime.now()), true);
-        },
-      );
+      result.fold((_) => fail('Should return tasks'), (tasks) {
+        expect(tasks.length, equals(1));
+        expect(tasks[0].dueDate.isBefore(DateTime.now()), true);
+      });
     });
   });
 }

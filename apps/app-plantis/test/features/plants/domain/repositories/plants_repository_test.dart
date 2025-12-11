@@ -20,9 +20,7 @@ class _TestPlantsRepository implements PlantsRepository {
       final plant = _plants.firstWhere((p) => p.id == id);
       return Right(plant);
     } catch (e) {
-      return Left(
-        NotFoundFailure('Plant with id $id not found'),
-      );
+      return Left(NotFoundFailure('Plant with id $id not found'));
     }
   }
 
@@ -51,9 +49,11 @@ class _TestPlantsRepository implements PlantsRepository {
   @override
   Future<Either<Failure, List<Plant>>> searchPlants(String query) async {
     final results = _plants
-        .where((p) =>
-            p.name.toLowerCase().contains(query.toLowerCase()) ||
-            (p.species?.toLowerCase().contains(query.toLowerCase()) ?? false))
+        .where(
+          (p) =>
+              p.name.toLowerCase().contains(query.toLowerCase()) ||
+              (p.species?.toLowerCase().contains(query.toLowerCase()) ?? false),
+        )
         .toList();
     return Right(results);
   }
@@ -99,13 +99,10 @@ void main() {
       // Assert
       expect(addResult.isRight(), true);
       expect(getResult.isRight(), true);
-      getResult.fold(
-        (_) => fail('Should return plant'),
-        (retrievedPlant) {
-          expect(retrievedPlant.id, equals(plant.id));
-          expect(retrievedPlant.name, equals(plant.name));
-        },
-      );
+      getResult.fold((_) => fail('Should return plant'), (retrievedPlant) {
+        expect(retrievedPlant.id, equals(plant.id));
+        expect(retrievedPlant.name, equals(plant.name));
+      });
     });
 
     test('should return NotFoundFailure when plant does not exist', () async {
@@ -114,12 +111,9 @@ void main() {
 
       // Assert
       expect(result.isLeft(), true);
-      result.fold(
-        (failure) {
-          expect(failure, isA<NotFoundFailure>());
-        },
-        (_) => fail('Should return failure'),
-      );
+      result.fold((failure) {
+        expect(failure, isA<NotFoundFailure>());
+      }, (_) => fail('Should return failure'));
     });
 
     test('should get all plants', () async {
@@ -134,15 +128,12 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return plants'),
-        (retrievedPlants) {
-          expect(retrievedPlants.length, equals(3));
-          expect(retrievedPlants[0].id, equals('plant-0'));
-          expect(retrievedPlants[1].id, equals('plant-1'));
-          expect(retrievedPlants[2].id, equals('plant-2'));
-        },
-      );
+      result.fold((_) => fail('Should return plants'), (retrievedPlants) {
+        expect(retrievedPlants.length, equals(3));
+        expect(retrievedPlants[0].id, equals('plant-0'));
+        expect(retrievedPlants[1].id, equals('plant-1'));
+        expect(retrievedPlants[2].id, equals('plant-2'));
+      });
     });
 
     test('should update existing plant', () async {
@@ -150,21 +141,16 @@ void main() {
       final originalPlant = TestFixtures.createTestPlant(name: 'Original Name');
       await repository.addPlant(originalPlant);
 
-      final updatedPlant = originalPlant.copyWith(
-        name: 'Updated Name',
-      );
+      final updatedPlant = originalPlant.copyWith(name: 'Updated Name');
 
       // Act
       final result = await repository.updatePlant(updatedPlant);
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return updated plant'),
-        (plant) {
-          expect(plant.name, equals('Updated Name'));
-        },
-      );
+      result.fold((_) => fail('Should return updated plant'), (plant) {
+        expect(plant.name, equals('Updated Name'));
+      });
     });
 
     test('should return Left when updating non-existent plant', () async {
@@ -176,12 +162,9 @@ void main() {
 
       // Assert
       expect(result.isLeft(), true);
-      result.fold(
-        (failure) {
-          expect(failure, isA<NotFoundFailure>());
-        },
-        (_) => fail('Should return failure'),
-      );
+      result.fold((failure) {
+        expect(failure, isA<NotFoundFailure>());
+      }, (_) => fail('Should return failure'));
     });
 
     test('should delete plant by id', () async {
@@ -215,13 +198,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return plants'),
-        (plants) {
-          expect(plants.length, equals(1));
-          expect(plants[0].name, equals('Monstera Deliciosa'));
-        },
-      );
+      result.fold((_) => fail('Should return plants'), (plants) {
+        expect(plants.length, equals(1));
+        expect(plants[0].name, equals('Monstera Deliciosa'));
+      });
     });
 
     test('should search plants by species', () async {
@@ -242,13 +222,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return plants'),
-        (plants) {
-          expect(plants.length, equals(1));
-          expect(plants[0].species, equals('Cactus Cereus'));
-        },
-      );
+      result.fold((_) => fail('Should return plants'), (plants) {
+        expect(plants.length, equals(1));
+        expect(plants[0].species, equals('Cactus Cereus'));
+      });
     });
 
     test('should get plants by space', () async {
@@ -269,13 +246,10 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return plants'),
-        (plants) {
-          expect(plants.length, equals(1));
-          expect(plants[0].spaceId, equals('living-room'));
-        },
-      );
+      result.fold((_) => fail('Should return plants'), (plants) {
+        expect(plants.length, equals(1));
+        expect(plants[0].spaceId, equals('living-room'));
+      });
     });
 
     test('should get plants count', () async {
@@ -290,12 +264,9 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Should return count'),
-        (count) {
-          expect(count, equals(5));
-        },
-      );
+      result.fold((_) => fail('Should return count'), (count) {
+        expect(count, equals(5));
+      });
     });
 
     test('should sync pending changes', () async {

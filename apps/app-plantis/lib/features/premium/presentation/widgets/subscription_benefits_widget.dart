@@ -146,7 +146,11 @@ class PlantisSubscriptionBenefitsWidget extends StatelessWidget {
         children: [
           Container(
             margin: const EdgeInsets.only(top: 2),
-            child: const Icon(Icons.check_circle, color: Colors.white, size: 20),
+            child: const Icon(
+              Icons.check_circle,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(

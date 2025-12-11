@@ -21,8 +21,9 @@ class PlantListTile extends ConsumerWidget {
     final spacesState = ref.watch(spacesNotifierProvider);
     return spacesState.when(
       data: (state) {
-        final space =
-            state.spaces.where((s) => s.id == plant.spaceId).firstOrNull;
+        final space = state.spaces
+            .where((s) => s.id == plant.spaceId)
+            .firstOrNull;
         return space?.name ?? '';
       },
       loading: () => '',

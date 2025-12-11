@@ -25,25 +25,16 @@ extension SettingsStateX on SettingsState {
 
   /// Remove mensagens
   SettingsState clearMessages() {
-    return copyWith(
-      errorMessage: null,
-      successMessage: null,
-    );
+    return copyWith(errorMessage: null, successMessage: null);
   }
 
   /// Define estado de erro
   SettingsState withError(String error) {
-    return copyWith(
-      errorMessage: error,
-      successMessage: null,
-    );
+    return copyWith(errorMessage: error, successMessage: null);
   }
 
   /// Define estado de sucesso
   SettingsState withSuccess(String success) {
-    return copyWith(
-      successMessage: success,
-      errorMessage: null,
-    );
+    return copyWith(successMessage: success, errorMessage: null);
   }
 }

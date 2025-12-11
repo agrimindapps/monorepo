@@ -138,8 +138,9 @@ class PlantFormState {
       isLoading: isLoading ?? this.isLoading,
       isSaving: isSaving ?? this.isSaving,
       isUploadingImages: isUploadingImages ?? this.isUploadingImages,
-      uploadProgress:
-          clearUploadProgress ? 0.0 : (uploadProgress ?? this.uploadProgress),
+      uploadProgress: clearUploadProgress
+          ? 0.0
+          : (uploadProgress ?? this.uploadProgress),
       uploadingImageIndex: clearUploadProgress
           ? null
           : (uploadingImageIndex ?? this.uploadingImageIndex),
@@ -147,8 +148,9 @@ class PlantFormState {
           ? null
           : (totalImagesToUpload ?? this.totalImagesToUpload),
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      originalPlant:
-          clearOriginalPlant ? null : (originalPlant ?? this.originalPlant),
+      originalPlant: clearOriginalPlant
+          ? null
+          : (originalPlant ?? this.originalPlant),
       name: name ?? this.name,
       species: species ?? this.species,
       spaceId: spaceId ?? this.spaceId,
@@ -291,22 +293,24 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
             lastFertilizerDate: plant.config?.lastFertilizerDate,
             // Pruning
             pruningIntervalDays: plant.config?.pruningIntervalDays,
-            enablePruning: plant.config?.pruningIntervalDays != null &&
+            enablePruning:
+                plant.config?.pruningIntervalDays != null &&
                 plant.config!.pruningIntervalDays! > 0,
             // Sunlight
             sunlightIntervalDays: plant.config?.sunlightCheckIntervalDays,
             enableSunlightCare:
                 plant.config?.sunlightCheckIntervalDays != null &&
-                    plant.config!.sunlightCheckIntervalDays! > 0,
+                plant.config!.sunlightCheckIntervalDays! > 0,
             // Pest Inspection
             pestInspectionIntervalDays:
                 plant.config?.pestInspectionIntervalDays,
             enablePestInspection:
                 plant.config?.pestInspectionIntervalDays != null &&
-                    plant.config!.pestInspectionIntervalDays! > 0,
+                plant.config!.pestInspectionIntervalDays! > 0,
             // Replanting
             replantingIntervalDays: plant.config?.replantingIntervalDays,
-            enableReplanting: plant.config?.replantingIntervalDays != null &&
+            enableReplanting:
+                plant.config?.replantingIntervalDays != null &&
                 plant.config!.replantingIntervalDays! > 0,
             // Other
             waterAmount: plant.config?.waterAmount,
@@ -366,7 +370,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    final effectiveIntervalDays = intervalDays ??
+    final effectiveIntervalDays =
+        intervalDays ??
         (enabled == true && state.wateringIntervalDays == null
             ? 7
             : state.wateringIntervalDays);
@@ -385,7 +390,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    final effectiveIntervalDays = intervalDays ??
+    final effectiveIntervalDays =
+        intervalDays ??
         (enabled == true && state.fertilizingIntervalDays == null
             ? 30
             : state.fertilizingIntervalDays);
@@ -419,8 +425,10 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
           );
         },
         (base64Image) {
-          final imageResult =
-              _imageService.addImageToList(state.imageUrls, base64Image);
+          final imageResult = _imageService.addImageToList(
+            state.imageUrls,
+            base64Image,
+          );
 
           if (imageResult.isSuccess) {
             state = state.copyWith(
@@ -446,40 +454,62 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
   /// Seleciona imagem da galeria
   Future<void> selectImageFromGallery() async {
-    debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Iniciando seleção');
+    debugPrint(
+      '📷 [PlantFormStateNotifier] selectImageFromGallery - Iniciando seleção',
+    );
     state = state.copyWith(isUploadingImages: true, clearError: true);
 
     try {
-      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Chamando _imageService.selectFromGallery()');
+      debugPrint(
+        '📷 [PlantFormStateNotifier] selectImageFromGallery - Chamando _imageService.selectFromGallery()',
+      );
       final result = await _imageService.selectFromGallery();
-      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Resultado recebido: ${result.isRight() ? "Sucesso" : "Falha"}');
+      debugPrint(
+        '📷 [PlantFormStateNotifier] selectImageFromGallery - Resultado recebido: ${result.isRight() ? "Sucesso" : "Falha"}',
+      );
 
       result.fold(
         (failure) {
-          debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - FALHA: ${failure.message}');
+          debugPrint(
+            '📷 [PlantFormStateNotifier] selectImageFromGallery - FALHA: ${failure.message}',
+          );
           state = state.copyWith(
             isUploadingImages: false,
             errorMessage: failure.message,
           );
         },
         (base64Image) {
-          debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Imagem recebida, tamanho: ${base64Image.length} chars');
-          debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Prefixo: ${base64Image.substring(0, base64Image.length > 50 ? 50 : base64Image.length)}...');
-          
-          final imageResult =
-              _imageService.addImageToList(state.imageUrls, base64Image);
+          debugPrint(
+            '📷 [PlantFormStateNotifier] selectImageFromGallery - Imagem recebida, tamanho: ${base64Image.length} chars',
+          );
+          debugPrint(
+            '📷 [PlantFormStateNotifier] selectImageFromGallery - Prefixo: ${base64Image.substring(0, base64Image.length > 50 ? 50 : base64Image.length)}...',
+          );
+
+          final imageResult = _imageService.addImageToList(
+            state.imageUrls,
+            base64Image,
+          );
 
           if (imageResult.isSuccess) {
-            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Imagem adicionada à lista com sucesso');
-            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - updatedImages.length: ${imageResult.updatedImages.length}');
+            debugPrint(
+              '📷 [PlantFormStateNotifier] selectImageFromGallery - Imagem adicionada à lista com sucesso',
+            );
+            debugPrint(
+              '📷 [PlantFormStateNotifier] selectImageFromGallery - updatedImages.length: ${imageResult.updatedImages.length}',
+            );
             state = state.copyWith(
               isUploadingImages: false,
               imageUrls: imageResult.updatedImages,
               clearError: true,
             );
-            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Novo state.imageUrls.length: ${state.imageUrls.length}');
+            debugPrint(
+              '📷 [PlantFormStateNotifier] selectImageFromGallery - Novo state.imageUrls.length: ${state.imageUrls.length}',
+            );
           } else {
-            debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - Erro ao adicionar imagem: ${imageResult.message}');
+            debugPrint(
+              '📷 [PlantFormStateNotifier] selectImageFromGallery - Erro ao adicionar imagem: ${imageResult.message}',
+            );
             state = state.copyWith(
               isUploadingImages: false,
               errorMessage: imageResult.message,
@@ -488,8 +518,12 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
         },
       );
     } catch (e, stackTrace) {
-      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - EXCEÇÃO: $e');
-      debugPrint('📷 [PlantFormStateNotifier] selectImageFromGallery - StackTrace: $stackTrace');
+      debugPrint(
+        '📷 [PlantFormStateNotifier] selectImageFromGallery - EXCEÇÃO: $e',
+      );
+      debugPrint(
+        '📷 [PlantFormStateNotifier] selectImageFromGallery - StackTrace: $stackTrace',
+      );
       state = state.copyWith(
         isUploadingImages: false,
         errorMessage: 'Erro inesperado: $e',
@@ -502,17 +536,14 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     final result = _imageService.removeImageFromList(state.imageUrls, index);
 
     if (result.isSuccess) {
-      state = state.copyWith(
-        imageUrls: result.updatedImages,
-        clearError: true,
-      );
+      state = state.copyWith(imageUrls: result.updatedImages, clearError: true);
     } else {
       state = state.copyWith(errorMessage: result.message);
     }
   }
 
   /// Salva planta
-  /// 
+  ///
   /// Fluxo offline-first:
   /// 1. Salva a planta com imagens base64 no estado (para display imediato)
   /// 2. Após salvar, armazena as imagens como BLOB no Drift local
@@ -548,16 +579,13 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isSaving: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isSaving: false, errorMessage: failure.message);
         return false;
       },
       (plant) async {
         // Salvar imagens localmente como BLOB (offline-first)
         await _saveImagesToLocalStorage(plant.id);
-        
+
         state = state.copyWith(
           isSaving: false,
           originalPlant: plant,
@@ -575,16 +603,13 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(
-          isSaving: false,
-          errorMessage: failure.message,
-        );
+        state = state.copyWith(isSaving: false, errorMessage: failure.message);
         return false;
       },
       (plant) async {
         // Salvar imagens localmente como BLOB (offline-first)
         await _saveImagesToLocalStorage(plant.id);
-        
+
         state = state.copyWith(
           isSaving: false,
           originalPlant: plant,
@@ -594,29 +619,37 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       },
     );
   }
-  
+
   /// Salva imagens base64 no armazenamento local como BLOB
   Future<void> _saveImagesToLocalStorage(String plantFirebaseId) async {
     final base64Images = state.imageUrls
         .where((url) => url.startsWith('data:image/'))
         .toList();
-    
+
     if (base64Images.isEmpty) return;
-    
-    debugPrint('📷 [PlantFormStateNotifier] Salvando ${base64Images.length} imagens localmente para planta $plantFirebaseId');
-    
+
+    debugPrint(
+      '📷 [PlantFormStateNotifier] Salvando ${base64Images.length} imagens localmente para planta $plantFirebaseId',
+    );
+
     try {
       // Obter o ID local do Drift pelo firebaseId
       final plantsRepo = ref.read(plantsDriftRepositoryProvider);
-      final localPlantId = await plantsRepo.getLocalIdByFirebaseId(plantFirebaseId);
-      
+      final localPlantId = await plantsRepo.getLocalIdByFirebaseId(
+        plantFirebaseId,
+      );
+
       if (localPlantId == null) {
-        debugPrint('📷 [PlantFormStateNotifier] Erro: não encontrou ID local para firebaseId: $plantFirebaseId');
+        debugPrint(
+          '📷 [PlantFormStateNotifier] Erro: não encontrou ID local para firebaseId: $plantFirebaseId',
+        );
         return;
       }
-      
-      debugPrint('📷 [PlantFormStateNotifier] ID local encontrado: $localPlantId');
-      
+
+      debugPrint(
+        '📷 [PlantFormStateNotifier] ID local encontrado: $localPlantId',
+      );
+
       for (int i = 0; i < base64Images.length; i++) {
         final isPrimary = i == 0; // Primeira imagem é a principal
         await _localImageService.saveBase64Image(
@@ -625,10 +658,14 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
           isPrimary: isPrimary,
         );
       }
-      
-      debugPrint('📷 [PlantFormStateNotifier] Imagens salvas localmente com sucesso');
+
+      debugPrint(
+        '📷 [PlantFormStateNotifier] Imagens salvas localmente com sucesso',
+      );
     } catch (e) {
-      debugPrint('📷 [PlantFormStateNotifier] Erro ao salvar imagens localmente: $e');
+      debugPrint(
+        '📷 [PlantFormStateNotifier] Erro ao salvar imagens localmente: $e',
+      );
       // Não falhar a operação de salvar - as imagens estão no state.imageUrls
     }
   }
@@ -636,20 +673,24 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   /// Constrói parâmetros para adicionar planta
   AddPlantParams _buildAddParams() {
     final config = PlantConfig(
-      wateringIntervalDays:
-          state.enableWateringCare == true ? state.wateringIntervalDays : null,
+      wateringIntervalDays: state.enableWateringCare == true
+          ? state.wateringIntervalDays
+          : null,
       fertilizingIntervalDays: state.enableFertilizerCare == true
           ? state.fertilizingIntervalDays
           : null,
-      pruningIntervalDays:
-          state.enablePruning == true ? state.pruningIntervalDays : null,
-      sunlightCheckIntervalDays:
-          state.enableSunlightCare == true ? state.sunlightIntervalDays : null,
+      pruningIntervalDays: state.enablePruning == true
+          ? state.pruningIntervalDays
+          : null,
+      sunlightCheckIntervalDays: state.enableSunlightCare == true
+          ? state.sunlightIntervalDays
+          : null,
       pestInspectionIntervalDays: state.enablePestInspection == true
           ? state.pestInspectionIntervalDays
           : null,
-      replantingIntervalDays:
-          state.enableReplanting == true ? state.replantingIntervalDays : null,
+      replantingIntervalDays: state.enableReplanting == true
+          ? state.replantingIntervalDays
+          : null,
       waterAmount: state.waterAmount?.trim().isNotEmpty == true
           ? state.waterAmount
           : null,
@@ -666,8 +707,9 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       notes: state.notes.trim().isEmpty ? null : state.notes.trim(),
       plantingDate: state.plantingDate,
       imageBase64: state.imageBase64,
-      imageUrls:
-          state.imageUrls.isEmpty ? null : List<String>.from(state.imageUrls),
+      imageUrls: state.imageUrls.isEmpty
+          ? null
+          : List<String>.from(state.imageUrls),
       config: config,
     );
   }
@@ -675,20 +717,24 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
   /// Constrói parâmetros para atualizar planta
   UpdatePlantParams _buildUpdateParams() {
     final config = PlantConfig(
-      wateringIntervalDays:
-          state.enableWateringCare == true ? state.wateringIntervalDays : null,
+      wateringIntervalDays: state.enableWateringCare == true
+          ? state.wateringIntervalDays
+          : null,
       fertilizingIntervalDays: state.enableFertilizerCare == true
           ? state.fertilizingIntervalDays
           : null,
-      pruningIntervalDays:
-          state.enablePruning == true ? state.pruningIntervalDays : null,
-      sunlightCheckIntervalDays:
-          state.enableSunlightCare == true ? state.sunlightIntervalDays : null,
+      pruningIntervalDays: state.enablePruning == true
+          ? state.pruningIntervalDays
+          : null,
+      sunlightCheckIntervalDays: state.enableSunlightCare == true
+          ? state.sunlightIntervalDays
+          : null,
       pestInspectionIntervalDays: state.enablePestInspection == true
           ? state.pestInspectionIntervalDays
           : null,
-      replantingIntervalDays:
-          state.enableReplanting == true ? state.replantingIntervalDays : null,
+      replantingIntervalDays: state.enableReplanting == true
+          ? state.replantingIntervalDays
+          : null,
       waterAmount: state.waterAmount?.trim().isNotEmpty == true
           ? state.waterAmount
           : null,
@@ -706,8 +752,9 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
       notes: state.notes.trim().isEmpty ? null : state.notes.trim(),
       plantingDate: state.plantingDate,
       imageBase64: state.imageBase64,
-      imageUrls:
-          state.imageUrls.isEmpty ? null : List<String>.from(state.imageUrls),
+      imageUrls: state.imageUrls.isEmpty
+          ? null
+          : List<String>.from(state.imageUrls),
       config: config,
     );
   }
@@ -718,7 +765,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    final effectiveIntervalDays = intervalDays ??
+    final effectiveIntervalDays =
+        intervalDays ??
         (enabled == true && state.sunlightIntervalDays == null
             ? 7
             : state.sunlightIntervalDays);
@@ -737,7 +785,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    final effectiveIntervalDays = intervalDays ??
+    final effectiveIntervalDays =
+        intervalDays ??
         (enabled == true && state.pestInspectionIntervalDays == null
             ? 14
             : state.pestInspectionIntervalDays);
@@ -756,7 +805,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    final effectiveIntervalDays = intervalDays ??
+    final effectiveIntervalDays =
+        intervalDays ??
         (enabled == true && state.pruningIntervalDays == null
             ? 30
             : state.pruningIntervalDays);
@@ -775,7 +825,8 @@ class PlantFormStateNotifier extends _$PlantFormStateNotifier {
     int? intervalDays,
     DateTime? lastDate,
   }) {
-    final effectiveIntervalDays = intervalDays ??
+    final effectiveIntervalDays =
+        intervalDays ??
         (enabled == true && state.replantingIntervalDays == null
             ? 180
             : state.replantingIntervalDays);

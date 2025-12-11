@@ -11,7 +11,6 @@ import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../managers/settings_dialog_manager.dart';
 import '../managers/settings_sections_builder.dart';
-import '../widgets/sections/device_management_section.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -73,13 +72,19 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                         // Hide user section on screens >= 768px (tablet and larger)
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            final shouldHideUserSection = constraints.maxWidth >= 768;
+                            final shouldHideUserSection =
+                                constraints.maxWidth >= 768;
                             if (shouldHideUserSection) {
                               return const SizedBox.shrink();
                             }
                             return Column(
                               children: [
-                                _buildUserSection(context, appTheme, user, authData),
+                                _buildUserSection(
+                                  context,
+                                  appTheme,
+                                  user,
+                                  authData,
+                                ),
                                 const SizedBox(height: 8),
                               ],
                             );
@@ -143,10 +148,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, 'Configurações'),
+        _buildSectionHeader(context, 'Notificações'),
         _buildSettingsCard(context, [
           _buildNotificationSwitchItem(context, settingsState),
-          const DeviceManagementSection(),
         ]),
       ],
     );

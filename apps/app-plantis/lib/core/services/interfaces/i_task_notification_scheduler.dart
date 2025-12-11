@@ -10,9 +10,7 @@ abstract class ITaskNotificationScheduler {
   Future<void> scheduleOverdueNotification(Task task);
 
   /// Schedule a daily summary notification
-  Future<void> scheduleDailySummaryNotification(
-    List<Task> todayTasks,
-  );
+  Future<void> scheduleDailySummaryNotification(List<Task> todayTasks);
 
   /// Cancel all notifications for a specific task
   Future<void> cancelTaskNotifications(String taskId);

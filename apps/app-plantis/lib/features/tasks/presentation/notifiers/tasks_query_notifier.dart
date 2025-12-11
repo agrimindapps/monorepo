@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/task.dart' as task_entity;
@@ -58,10 +57,7 @@ class TasksQueryNotifier extends _$TasksQueryNotifier {
   }
 
   /// Sets task type filter
-  void setFilter(
-    TasksFilterType filter, {
-    String? plantId,
-  }) {
+  void setFilter(TasksFilterType filter, {String? plantId}) {
     final currentState = state;
     if (currentState.allTasks.isEmpty) return;
 
@@ -111,10 +107,7 @@ class TasksQueryNotifier extends _$TasksQueryNotifier {
   }
 
   /// Filters tasks by plant ID
-  void filterTasks(
-    TasksFilterType filter, {
-    String? plantId,
-  }) {
+  void filterTasks(TasksFilterType filter, {String? plantId}) {
     setFilter(filter, plantId: plantId);
   }
 

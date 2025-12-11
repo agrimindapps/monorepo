@@ -107,10 +107,7 @@ class PlantsListNotifier extends _$PlantsListNotifier {
             return p.id == updatedPlant.id ? updatedPlant : p;
           }).toList();
 
-          state = state.copyWith(
-            plants: updatedPlants,
-            errorMessage: null,
-          );
+          state = state.copyWith(plants: updatedPlants, errorMessage: null);
           _applySearch();
         },
       );
@@ -132,8 +129,9 @@ class PlantsListNotifier extends _$PlantsListNotifier {
         (_) {
           state = state.copyWith(
             plants: state.plants.where((plant) => plant.id != id).toList(),
-            filteredPlants:
-                state.filteredPlants.where((plant) => plant.id != id).toList(),
+            filteredPlants: state.filteredPlants
+                .where((plant) => plant.id != id)
+                .toList(),
             errorMessage: null,
           );
         },

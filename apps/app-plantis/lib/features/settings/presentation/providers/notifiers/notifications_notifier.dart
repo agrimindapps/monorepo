@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/entities/settings_entity.dart';
@@ -22,8 +21,9 @@ class NotificationsNotifier extends _$NotificationsNotifier {
   ) async {
     try {
       final currentSettings = state.settings;
-      final updatedSettings =
-          currentSettings.copyWith(notifications: newSettings);
+      final updatedSettings = currentSettings.copyWith(
+        notifications: newSettings,
+      );
 
       state = state.copyWith(
         settings: updatedSettings,

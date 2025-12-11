@@ -156,13 +156,13 @@ class PlantisConflictItem extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        entityType,
-        localData,
-        remoteData,
-        timestamp,
-        strategy,
-      ];
+    id,
+    entityType,
+    localData,
+    remoteData,
+    timestamp,
+    strategy,
+  ];
 
   @override
   String toString() {

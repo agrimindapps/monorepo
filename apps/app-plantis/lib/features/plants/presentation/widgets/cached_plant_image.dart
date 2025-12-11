@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:typed_data';
 
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/image_providers.dart';
 
@@ -16,10 +16,7 @@ Future<Uint8List?> cachedImage(Ref ref, String imageUrl) async {
 
   final result = await enhancedImageService.loadImage(imageUrl);
 
-  return result.fold(
-    (error) => null,
-    (bytes) => bytes,
-  );
+  return result.fold((error) => null, (bytes) => bytes);
 }
 
 /// Widget para exibir imagem de planta com cache efetivo
@@ -73,12 +70,7 @@ class CachedPlantImage extends ConsumerWidget {
           return _buildPlaceholder(context);
         }
         return _buildImage(
-          Image.memory(
-            imageBytes,
-            fit: fit,
-            width: width,
-            height: height,
-          ),
+          Image.memory(imageBytes, fit: fit, width: width, height: height),
         );
       },
       loading: () => _buildPlaceholder(context),
@@ -92,21 +84,13 @@ class CachedPlantImage extends ConsumerWidget {
     final bytes = base64Decode(base64Data);
 
     return _buildImage(
-      Image.memory(
-        bytes,
-        fit: fit,
-        width: width,
-        height: height,
-      ),
+      Image.memory(bytes, fit: fit, width: width, height: height),
     );
   }
 
   Widget _buildImage(Widget image) {
     if (borderRadius != null) {
-      return ClipRRect(
-        borderRadius: borderRadius!,
-        child: image,
-      );
+      return ClipRRect(borderRadius: borderRadius!, child: image);
     }
     return image;
   }

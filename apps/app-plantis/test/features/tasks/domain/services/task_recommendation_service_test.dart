@@ -1,4 +1,5 @@
-import 'package:app_plantis/features/tasks/domain/entities/task.dart' as task_entity;
+import 'package:app_plantis/features/tasks/domain/entities/task.dart'
+    as task_entity;
 import 'package:app_plantis/features/tasks/domain/services/task_recommendation_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -26,9 +27,11 @@ void main() {
         priority: task_entity.TaskPriority.medium,
       );
 
-      final recommendations = recommendationService.getHighPriorityTasks(
-        [urgentTask, highTask, mediumTask],
-      );
+      final recommendations = recommendationService.getHighPriorityTasks([
+        urgentTask,
+        highTask,
+        mediumTask,
+      ]);
 
       expect(recommendations.length, 2);
       expect(recommendations.map((t) => t.id), ['task-1', 'task-2']);
@@ -45,9 +48,10 @@ void main() {
         priority: task_entity.TaskPriority.high,
       );
 
-      final recommendations = recommendationService.getHighPriorityTasks(
-        [urgentTask, highTask],
-      );
+      final recommendations = recommendationService.getHighPriorityTasks([
+        urgentTask,
+        highTask,
+      ]);
 
       expect(recommendations.length, 1);
       expect(recommendations.first.id, 'task-2');
@@ -66,9 +70,10 @@ void main() {
         dueDate: now.add(const Duration(days: 1)),
       );
 
-      final recommendations = recommendationService.getHighPriorityTasks(
-        [task1, task2],
-      );
+      final recommendations = recommendationService.getHighPriorityTasks([
+        task1,
+        task2,
+      ]);
 
       // Should be sorted by due date (task2 first, closer due date)
       expect(recommendations.first.id, 'task-2');
@@ -88,9 +93,10 @@ void main() {
         priority: task_entity.TaskPriority.high,
       );
 
-      final suggestions = recommendationService.getTodaySuggestions(
-        [todayTask, tomorrowTask],
-      );
+      final suggestions = recommendationService.getTodaySuggestions([
+        todayTask,
+        tomorrowTask,
+      ]);
 
       expect(suggestions.length, 1);
       expect(suggestions.first.id, 'task-1');
@@ -114,9 +120,11 @@ void main() {
         priority: task_entity.TaskPriority.medium,
       );
 
-      final suggestions = recommendationService.getTodaySuggestions(
-        [lowTask, urgentTask, mediumTask],
-      );
+      final suggestions = recommendationService.getTodaySuggestions([
+        lowTask,
+        urgentTask,
+        mediumTask,
+      ]);
 
       expect(suggestions.length, 3);
       expect(suggestions[0].id, 'task-2'); // Urgent first
@@ -136,9 +144,10 @@ void main() {
         dueDate: now,
       );
 
-      final suggestions = recommendationService.getTodaySuggestions(
-        [completedTask, pendingTask],
-      );
+      final suggestions = recommendationService.getTodaySuggestions([
+        completedTask,
+        pendingTask,
+      ]);
 
       expect(suggestions.length, 1);
       expect(suggestions.first.id, 'task-2');
@@ -158,10 +167,11 @@ void main() {
         plantId: 'plant-2',
       );
 
-      final recommendations = recommendationService.getPlantRecommendations(
-        [plantTask1, plantTask2, otherPlantTask],
-        'plant-1',
-      );
+      final recommendations = recommendationService.getPlantRecommendations([
+        plantTask1,
+        plantTask2,
+        otherPlantTask,
+      ], 'plant-1');
 
       expect(recommendations.length, 2);
       expect(recommendations.map((t) => t.id), ['task-1', 'task-2']);
@@ -192,9 +202,10 @@ void main() {
         dueDate: DateTime.now().add(const Duration(days: 1)),
       );
 
-      final optimizations = recommendationService.getOptimizations(
-        [overdueTask, upcomingTask],
-      );
+      final optimizations = recommendationService.getOptimizations([
+        overdueTask,
+        upcomingTask,
+      ]);
 
       expect(optimizations.containsKey('overdueTasks'), true);
       expect(optimizations['overdueTasks'], greaterThan(0));
@@ -225,9 +236,9 @@ void main() {
         isDirty: false,
       );
 
-      final recommendations = recommendationService.getHighPriorityTasks(
-        [urgentTask],
-      );
+      final recommendations = recommendationService.getHighPriorityTasks([
+        urgentTask,
+      ]);
 
       expect(recommendations.length, 1);
       expect(recommendations.first.id, 'task-1');

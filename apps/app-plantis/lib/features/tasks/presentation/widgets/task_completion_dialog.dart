@@ -83,10 +83,9 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
       contentPadding: const EdgeInsets.all(24),
       content: SingleChildScrollView(
         child: SizedBox(
-          width:
-              MediaQuery.of(context).size.width > 400
-                  ? 400
-                  : MediaQuery.of(context).size.width * 0.85,
+          width: MediaQuery.of(context).size.width > 400
+              ? 400
+              : MediaQuery.of(context).size.width * 0.85,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,7 +367,10 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
               GestureDetector(
                 onTap: _resetNextDueDate,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -429,7 +431,11 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   int _getDaysUntilNextDue() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final nextDue = DateTime(_nextDueDate.year, _nextDueDate.month, _nextDueDate.day);
+    final nextDue = DateTime(
+      _nextDueDate.year,
+      _nextDueDate.month,
+      _nextDueDate.day,
+    );
     return nextDue.difference(today).inDays;
   }
 

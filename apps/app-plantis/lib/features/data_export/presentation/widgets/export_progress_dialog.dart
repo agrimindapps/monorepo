@@ -12,7 +12,8 @@ class ExportProgressDialog extends ConsumerStatefulWidget {
   const ExportProgressDialog({super.key, required this.request});
 
   @override
-  ConsumerState<ExportProgressDialog> createState() => _ExportProgressDialogState();
+  ConsumerState<ExportProgressDialog> createState() =>
+      _ExportProgressDialogState();
 }
 
 class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
@@ -58,89 +59,83 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
                 data: (state) {
                   final progress = state.currentProgress;
                   return Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [PlantisColors.primary, PlantisColors.leaf],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                      Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  PlantisColors.primary,
+                                  PlantisColors.leaf,
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.eco,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                           ),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.eco,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              progress.isCompleted
-                                  ? 'Exportação Concluída!'
-                                  : progress.errorMessage != null
-                                  ? 'Erro na Exportação'
-                                  : 'Exportando Dados',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                    progress.errorMessage != null
-                                        ? Colors.red
-                                        : PlantisColors.primary,
-                              ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  progress.isCompleted
+                                      ? 'Exportação Concluída!'
+                                      : progress.errorMessage != null
+                                      ? 'Erro na Exportação'
+                                      : 'Exportando Dados',
+                                  style: Theme.of(context).textTheme.titleLarge
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: progress.errorMessage != null
+                                            ? Colors.red
+                                            : PlantisColors.primary,
+                                      ),
+                                ),
+                                Text(
+                                  progress.isCompleted
+                                      ? 'Seus dados estão prontos!'
+                                      : progress.errorMessage != null
+                                      ? 'Ocorreu um problema'
+                                      : 'Aguarde enquanto processamos...',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
                             ),
-                            Text(
-                              progress.isCompleted
-                                  ? 'Seus dados estão prontos!'
-                                  : progress.errorMessage != null
-                                  ? 'Ocorreu um problema'
-                                  : 'Aguarde enquanto processamos...',
-                              style: Theme.of(
-                                context,
-                              ).textTheme.bodyMedium?.copyWith(
-                                color:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
+
+                      const SizedBox(height: 24),
+                      if (progress.errorMessage != null)
+                        _buildErrorContent(context, progress.errorMessage!)
+                      else if (progress.isCompleted)
+                        _buildCompletedContent(context, widget.request)
+                      else
+                        _buildProgressContent(context, progress),
+
+                      const SizedBox(height: 24),
+                      _buildActionButtons(context, progress),
                     ],
-                  ),
-
-                  const SizedBox(height: 24),
-                  if (progress.errorMessage != null)
-                    _buildErrorContent(
-                      context,
-                      progress.errorMessage!,
-                    )
-                  else if (progress.isCompleted)
-                    _buildCompletedContent(context, widget.request)
-                  else
-                    _buildProgressContent(context, progress),
-
-                  const SizedBox(height: 24),
-                  _buildActionButtons(context, progress),
-                ],
-              );
+                  );
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(
-                  child: Text('Erro: $error'),
-                ),
+                error: (error, _) => Center(child: Text('Erro: $error')),
               );
             },
           ),
@@ -191,7 +186,11 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
             children: [
               Row(
                 children: [
-                  const Icon(Icons.task_alt, color: PlantisColors.primary, size: 20),
+                  const Icon(
+                    Icons.task_alt,
+                    color: PlantisColors.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -221,10 +220,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
     );
   }
 
-  Widget _buildCompletedContent(
-    BuildContext context,
-    ExportRequest request,
-  ) {
+  Widget _buildCompletedContent(BuildContext context, ExportRequest request) {
     return Column(
       children: [
         Container(
@@ -339,10 +335,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
     );
   }
 
-  Widget _buildErrorContent(
-    BuildContext context,
-    String errorMessage,
-  ) {
+  Widget _buildErrorContent(BuildContext context, String errorMessage) {
     return Column(
       children: [
         Container(
@@ -390,10 +383,7 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
     );
   }
 
-  Widget _buildActionButtons(
-    BuildContext context,
-    ExportProgress progress,
-  ) {
+  Widget _buildActionButtons(BuildContext context, ExportProgress progress) {
     if (progress.errorMessage != null) {
       return Row(
         children: [
@@ -434,9 +424,9 @@ class _ExportProgressDialogState extends ConsumerState<ExportProgressDialog>
           Expanded(
             child: ElevatedButton(
               onPressed: () async {
-                final success = await ref.read(dataExportNotifierProvider.notifier).downloadExport(
-                  widget.request.id,
-                );
+                final success = await ref
+                    .read(dataExportNotifierProvider.notifier)
+                    .downloadExport(widget.request.id);
                 if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(

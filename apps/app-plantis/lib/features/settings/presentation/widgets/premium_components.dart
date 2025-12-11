@@ -249,12 +249,13 @@ class _UpgradePromptState extends State<UpgradePrompt>
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutBack,
+          ),
+        );
 
     _animationController.forward();
   }
@@ -498,14 +499,13 @@ class _PlantThemedPremiumIndicatorState
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          gradient:
-              widget.isActive
-                  ? const LinearGradient(
-                    colors: [PlantisColors.sun, PlantisColors.sunLight],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                  : null,
+          gradient: widget.isActive
+              ? const LinearGradient(
+                  colors: [PlantisColors.sun, PlantisColors.sunLight],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
           color: widget.isActive ? null : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
@@ -517,42 +517,38 @@ class _PlantThemedPremiumIndicatorState
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedBuilder(
-              animation:
-                  widget.isActive
-                      ? _rotateAnimation
-                      : const AlwaysStoppedAnimation(0),
+              animation: widget.isActive
+                  ? _rotateAnimation
+                  : const AlwaysStoppedAnimation(0),
               builder: (context, child) {
                 return Transform.rotate(
                   angle: _rotateAnimation.value * 2 * 3.14159,
                   child: AnimatedBuilder(
-                    animation:
-                        widget.isActive
-                            ? _glowAnimation
-                            : const AlwaysStoppedAnimation(1),
+                    animation: widget.isActive
+                        ? _glowAnimation
+                        : const AlwaysStoppedAnimation(1),
                     builder: (context, child) {
                       return DecoratedBox(
-                        decoration:
-                            widget.isActive
-                                ? BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.white.withValues(
-                                        alpha: _glowAnimation.value * 0.8,
-                                      ),
-                                      blurRadius: 8,
-                                      spreadRadius: 2,
+                        decoration: widget.isActive
+                            ? BoxDecoration(
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white.withValues(
+                                      alpha: _glowAnimation.value * 0.8,
                                     ),
-                                  ],
-                                )
-                                : const BoxDecoration(),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              )
+                            : const BoxDecoration(),
                         child: Icon(
                           Icons.eco,
                           size: 16,
-                          color:
-                              widget.isActive
-                                  ? Colors.white
-                                  : Colors.grey.shade600,
+                          color: widget.isActive
+                              ? Colors.white
+                              : Colors.grey.shade600,
                         ),
                       );
                     },

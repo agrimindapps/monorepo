@@ -8,6 +8,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // Domain imports:
 import '../../domain/entities/game_state_entity.dart';
+import '../../domain/entities/high_score_entity.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/usecases/start_game_usecase.dart';
 import '../../domain/usecases/flap_bird_usecase.dart';
@@ -96,6 +97,23 @@ class FlappbirdGameNotifier extends _$FlappbirdGameNotifier {
       result.fold(
         (failure) {}, // Ignore failure
         (_) => _highScore = currentState.score,
+      );
+    }
+  }
+
+  /// Save high score from external source (Flame)
+  Future<void> saveScore(int score) async {
+    if (score > _highScore) {
+      final result = await _saveHighScoreUseCase(score: score);
+      result.fold(
+        (failure) {}, // Ignore failure
+        (_) {
+          _highScore = score;
+          // Update state if possible to reflect high score change in UI
+          if (state.value != null) {
+             state = AsyncValue.data(state.value!.copyWith(highScore: HighScoreEntity(score: _highScore)));
+          }
+        },
       );
     }
   }

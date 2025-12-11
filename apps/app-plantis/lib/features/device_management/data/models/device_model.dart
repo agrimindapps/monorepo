@@ -134,8 +134,7 @@ class DeviceModel extends DeviceEntity {
         lastActiveAt: now,
         isActive: true,
       );
-    }
-    else if (Platform.isIOS) {
+    } else if (Platform.isIOS) {
       final iosInfo = await deviceInfoPlugin.iosInfo;
 
       if (kDebugMode) {
@@ -157,8 +156,7 @@ class DeviceModel extends DeviceEntity {
         lastActiveAt: now,
         isActive: true,
       );
-    }
-    else {
+    } else {
       if (kDebugMode) {
         debugPrint(
           '🚫 DeviceModel: Plataforma ${Platform.operatingSystem} não permitida para registro',

@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
@@ -170,8 +169,9 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
     }
 
     final currentState = state.value ?? const PlantCommentsState();
-    final commentIndex =
-        currentState.comments.indexWhere((c) => c.id == commentId);
+    final commentIndex = currentState.comments.indexWhere(
+      (c) => c.id == commentId,
+    );
 
     if (commentIndex == -1) {
       state = AsyncValue.data(
@@ -219,8 +219,9 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
   /// Delete a comment
   Future<bool> deleteComment(String commentId) async {
     final currentState = state.value ?? const PlantCommentsState();
-    final commentIndex =
-        currentState.comments.indexWhere((c) => c.id == commentId);
+    final commentIndex = currentState.comments.indexWhere(
+      (c) => c.id == commentId,
+    );
 
     if (commentIndex == -1) {
       state = AsyncValue.data(
@@ -245,8 +246,9 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
       },
       (_) {
         final newState = state.value ?? const PlantCommentsState();
-        final updatedComments =
-            newState.comments.where((c) => c.id != commentId).toList();
+        final updatedComments = newState.comments
+            .where((c) => c.id != commentId)
+            .toList();
 
         state = AsyncValue.data(
           newState.copyWith(

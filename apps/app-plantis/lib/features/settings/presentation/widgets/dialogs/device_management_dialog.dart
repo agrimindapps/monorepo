@@ -28,9 +28,7 @@ class _DeviceManagementDialogState
     final effectiveMaxDevices = maxDevices == -1 ? 3 : maxDevices;
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
         child: Column(
@@ -53,11 +51,7 @@ class _DeviceManagementDialogState
               ),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.devices,
-                    color: Colors.white,
-                    size: 28,
-                  ),
+                  const Icon(Icons.devices, color: Colors.white, size: 28),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -79,7 +73,8 @@ class _DeviceManagementDialogState
                             ),
                           ),
                           loading: () => const SizedBox.shrink(),
-                          error: (Object error, StackTrace _) => const SizedBox.shrink(),
+                          error: (Object error, StackTrace _) =>
+                              const SizedBox.shrink(),
                         ),
                       ],
                     ),
@@ -95,7 +90,8 @@ class _DeviceManagementDialogState
             // Body
             Flexible(
               child: settingsState.when<Widget>(
-                data: (SettingsState state) => _buildDeviceList(context, state, effectiveMaxDevices),
+                data: (SettingsState state) =>
+                    _buildDeviceList(context, state, effectiveMaxDevices),
                 loading: () => const Center(
                   child: Padding(
                     padding: EdgeInsets.all(40),
@@ -138,7 +134,11 @@ class _DeviceManagementDialogState
     );
   }
 
-  Widget _buildDeviceList(BuildContext context, SettingsState state, int maxDevices) {
+  Widget _buildDeviceList(
+    BuildContext context,
+    SettingsState state,
+    int maxDevices,
+  ) {
     final currentDevice = state.currentDevice;
     final otherDevices = state.connectedDevices
         .where((DeviceEntity d) => d.uuid != currentDevice?.uuid)
@@ -153,10 +153,7 @@ class _DeviceManagementDialogState
           if (currentDevice != null) ...[
             _buildSectionHeader(context, 'Dispositivo Atual'),
             const SizedBox(height: 12),
-            DeviceListItem(
-              device: currentDevice,
-              isCurrent: true,
-            ),
+            DeviceListItem(device: currentDevice, isCurrent: true),
             const SizedBox(height: 24),
           ],
 
@@ -166,16 +163,15 @@ class _DeviceManagementDialogState
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _buildSectionHeader(context, 'Outros Dispositivos'),
-                if (otherDevices.where((DeviceEntity d) => d.isActive).length > 1)
+                if (otherDevices.where((DeviceEntity d) => d.isActive).length >
+                    1)
                   TextButton.icon(
                     onPressed: _isProcessing
                         ? null
                         : () => _revokeAllOthers(context),
                     icon: const Icon(Icons.delete_sweep, size: 18),
                     label: const Text('Revogar Todos'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.red,
-                    ),
+                    style: TextButton.styleFrom(foregroundColor: Colors.red),
                   ),
               ],
             ),
@@ -207,8 +203,8 @@ class _DeviceManagementDialogState
                     Text(
                       'Nenhum dispositivo conectado',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: Colors.grey.shade600,
-                          ),
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                   ],
                 ),
@@ -228,9 +224,9 @@ class _DeviceManagementDialogState
     return Text(
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: PlantisColors.primary,
-          ),
+        fontWeight: FontWeight.bold,
+        color: PlantisColors.primary,
+      ),
     );
   }
 
@@ -246,11 +242,7 @@ class _DeviceManagementDialogState
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.info_outline,
-            color: Colors.blue.shade700,
-            size: 20,
-          ),
+          Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -281,9 +273,7 @@ class _DeviceManagementDialogState
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Revogar'),
           ),
         ],
@@ -293,9 +283,9 @@ class _DeviceManagementDialogState
     if (confirmed == true && mounted) {
       setState(() => _isProcessing = true);
 
-      await ref.read(settingsNotifierProvider.notifier).revokeDevice(
-            device.uuid,
-          );
+      await ref
+          .read(settingsNotifierProvider.notifier)
+          .revokeDevice(device.uuid);
 
       if (mounted) {
         setState(() => _isProcessing = false);
@@ -312,9 +302,12 @@ class _DeviceManagementDialogState
 
   Future<void> _revokeAllOthers(BuildContext context) async {
     final settingsState = ref.read(settingsNotifierProvider).value;
-    final otherDevicesCount = settingsState?.connectedDevices
-            .where((DeviceEntity d) =>
-                d.uuid != settingsState.currentDevice?.uuid && d.isActive)
+    final otherDevicesCount =
+        settingsState?.connectedDevices
+            .where(
+              (DeviceEntity d) =>
+                  d.uuid != settingsState.currentDevice?.uuid && d.isActive,
+            )
             .length ??
         0;
 
@@ -333,9 +326,7 @@ class _DeviceManagementDialogState
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
             child: const Text('Revogar Todos'),
           ),
         ],

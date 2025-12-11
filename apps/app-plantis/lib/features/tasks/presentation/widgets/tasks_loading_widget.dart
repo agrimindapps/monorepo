@@ -133,10 +133,9 @@ class TasksLoadingWidget extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
-        borderRadius:
-            isCircle
-                ? BorderRadius.circular(width / 2)
-                : BorderRadius.circular(4),
+        borderRadius: isCircle
+            ? BorderRadius.circular(width / 2)
+            : BorderRadius.circular(4),
       ),
       child: _shimmerEffect(),
     );

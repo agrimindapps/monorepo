@@ -51,10 +51,11 @@ class TasksDriftRepository {
   // ==================== READ ====================
 
   Future<List<TaskModel>> getAllTasks() async {
-    final tasks = await (_db.select(_db.tasks)
-          ..where((t) => t.isDeleted.equals(false))
-          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
-        .get();
+    final tasks =
+        await (_db.select(_db.tasks)
+              ..where((t) => t.isDeleted.equals(false))
+              ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
+            .get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
@@ -62,19 +63,19 @@ class TasksDriftRepository {
   Future<TaskModel?> getTaskById(String firebaseId) async {
     final task = await (_db.select(
       _db.tasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     return task != null ? _taskDriftToModel(task) : null;
   }
 
   Future<List<TaskModel>> getPendingTasks() async {
-    final tasks = await (_db.select(_db.tasks)
-          ..where(
-            (t) => t.isDeleted.equals(false) & t.status.equals('pending'),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
-        .get();
+    final tasks =
+        await (_db.select(_db.tasks)
+              ..where(
+                (t) => t.isDeleted.equals(false) & t.status.equals('pending'),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
+            .get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
@@ -83,12 +84,14 @@ class TasksDriftRepository {
     final localPlantId = await _resolvePlantId(plantFirebaseId);
     if (localPlantId == null) return [];
 
-    final tasks = await (_db.select(_db.tasks)
-          ..where(
-            (t) => t.plantId.equals(localPlantId) & t.isDeleted.equals(false),
-          )
-          ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
-        .get();
+    final tasks =
+        await (_db.select(_db.tasks)
+              ..where(
+                (t) =>
+                    t.plantId.equals(localPlantId) & t.isDeleted.equals(false),
+              )
+              ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
+            .get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
@@ -110,8 +113,9 @@ class TasksDriftRepository {
       priority: Value(model.priority.key),
       dueDate: Value(model.dueDate),
       completedAt: Value(model.completedAt),
-      plantId:
-          localPlantId != null ? Value(localPlantId) : const Value.absent(),
+      plantId: localPlantId != null
+          ? Value(localPlantId)
+          : const Value.absent(),
       updatedAt: Value(DateTime.now()),
       isDirty: Value(model.isDirty),
       isDeleted: Value(model.isDeleted),
@@ -119,24 +123,23 @@ class TasksDriftRepository {
 
     final updated = await (_db.update(
       _db.tasks,
-    )..where((t) => t.id.equals(localId)))
-        .write(companion);
+    )..where((t) => t.id.equals(localId))).write(companion);
 
     return updated > 0;
   }
 
   Future<bool> completeTask(String firebaseId) async {
-    final updated = await (_db.update(
-      _db.tasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .write(
-      db.TasksCompanion(
-        status: const Value('completed'),
-        completedAt: Value(DateTime.now()),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.tasks,
+        )..where((t) => t.firebaseId.equals(firebaseId))).write(
+          db.TasksCompanion(
+            status: const Value('completed'),
+            completedAt: Value(DateTime.now()),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return updated > 0;
   }
@@ -144,16 +147,16 @@ class TasksDriftRepository {
   // ==================== DELETE ====================
 
   Future<bool> deleteTask(String firebaseId) async {
-    final updated = await (_db.update(
-      _db.tasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .write(
-      db.TasksCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.tasks,
+        )..where((t) => t.firebaseId.equals(firebaseId))).write(
+          db.TasksCompanion(
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return updated > 0;
   }
@@ -165,8 +168,7 @@ class TasksDriftRepository {
 
     return await (_db.update(
       _db.tasks,
-    )..where((t) => t.plantId.equals(localPlantId)))
-        .write(
+    )..where((t) => t.plantId.equals(localPlantId))).write(
       db.TasksCompanion(
         isDeleted: const Value(true),
         isDirty: const Value(true),
@@ -202,8 +204,7 @@ class TasksDriftRepository {
   Future<List<TaskModel>> getDirtyTasks() async {
     final tasks = await (_db.select(
       _db.tasks,
-    )..where((t) => t.isDirty.equals(true)))
-        .get();
+    )..where((t) => t.isDirty.equals(true))).get();
 
     return tasks.map(_taskDriftToModel).toList();
   }
@@ -211,8 +212,7 @@ class TasksDriftRepository {
   Future<void> markAsSynced(String firebaseId) async {
     await (_db.update(
       _db.tasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .write(
+    )..where((t) => t.firebaseId.equals(firebaseId))).write(
       db.TasksCompanion(
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
@@ -270,8 +270,7 @@ class TasksDriftRepository {
 
     final plant = await (_db.select(
       _db.plants,
-    )..where((p) => p.firebaseId.equals(plantFirebaseId)))
-        .getSingleOrNull();
+    )..where((p) => p.firebaseId.equals(plantFirebaseId))).getSingleOrNull();
 
     return plant?.id;
   }
@@ -279,8 +278,7 @@ class TasksDriftRepository {
   Future<int?> _getLocalIdByFirebaseId(String firebaseId) async {
     final task = await (_db.select(
       _db.tasks,
-    )..where((t) => t.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    )..where((t) => t.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     return task?.id;
   }

@@ -29,8 +29,9 @@ class TaskHistoryRepositoryImpl implements TaskHistoryRepository {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user =
-            await authService.currentUser.timeout(timeoutDuration).first;
+        final user = await authService.currentUser
+            .timeout(timeoutDuration)
+            .first;
 
         if (user != null && user.id.isNotEmpty) {
           return user.id;

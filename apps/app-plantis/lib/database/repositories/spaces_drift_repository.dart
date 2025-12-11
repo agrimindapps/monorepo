@@ -69,29 +69,29 @@ class SpacesDriftRepository {
 
   /// Retorna todos os espaços ativos (não deletados)
   Future<List<EspacoModel>> getAllSpaces() async {
-    final spaces = await (_db.select(_db.spaces)
-          ..where((s) => s.isDeleted.equals(false))
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.createdAt),
-          ]))
-        .get();
+    final spaces =
+        await (_db.select(_db.spaces)
+              ..where((s) => s.isDeleted.equals(false))
+              ..orderBy([(s) => OrderingTerm.desc(s.createdAt)]))
+            .get();
 
     return spaces.map(_spaceDriftToModel).toList();
   }
 
   /// Retorna espaço pelo firebaseId (String)
   Future<EspacoModel?> getSpaceById(String firebaseId) async {
-    final space = await (_db.select(_db.spaces)
-          ..where((s) => s.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final space = await (_db.select(
+      _db.spaces,
+    )..where((s) => s.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     return space != null ? _spaceDriftToModel(space) : null;
   }
 
   /// Retorna espaço pelo ID local (INTEGER)
   Future<EspacoModel?> getSpaceByLocalId(int id) async {
-    final space = await (_db.select(_db.spaces)..where((s) => s.id.equals(id)))
-        .getSingleOrNull();
+    final space = await (_db.select(
+      _db.spaces,
+    )..where((s) => s.id.equals(id))).getSingleOrNull();
 
     return space != null ? _spaceDriftToModel(space) : null;
   }
@@ -118,9 +118,9 @@ class SpacesDriftRepository {
       userId: Value(model.userId),
     );
 
-    final updated = await (_db.update(_db.spaces)
-          ..where((s) => s.id.equals(localId)))
-        .write(companion);
+    final updated = await (_db.update(
+      _db.spaces,
+    )..where((s) => s.id.equals(localId))).write(companion);
 
     return updated > 0;
   }
@@ -129,24 +129,25 @@ class SpacesDriftRepository {
 
   /// Soft delete - marca como deletado mas mantém no banco
   Future<bool> deleteSpace(String firebaseId) async {
-    final updated = await (_db.update(_db.spaces)
-          ..where((s) => s.firebaseId.equals(firebaseId)))
-        .write(
-      SpacesCompanion(
-        isDeleted: const Value(true),
-        isDirty: const Value(true),
-        updatedAt: Value(DateTime.now()),
-      ),
-    );
+    final updated =
+        await (_db.update(
+          _db.spaces,
+        )..where((s) => s.firebaseId.equals(firebaseId))).write(
+          SpacesCompanion(
+            isDeleted: const Value(true),
+            isDirty: const Value(true),
+            updatedAt: Value(DateTime.now()),
+          ),
+        );
 
     return updated > 0;
   }
 
   /// Hard delete - remove fisicamente do banco
   Future<bool> hardDeleteSpace(String firebaseId) async {
-    final deleted = await (_db.delete(_db.spaces)
-          ..where((s) => s.firebaseId.equals(firebaseId)))
-        .go();
+    final deleted = await (_db.delete(
+      _db.spaces,
+    )..where((s) => s.firebaseId.equals(firebaseId))).go();
 
     return deleted > 0;
   }
@@ -162,9 +163,7 @@ class SpacesDriftRepository {
   Stream<List<EspacoModel>> watchSpaces() {
     return (_db.select(_db.spaces)
           ..where((s) => s.isDeleted.equals(false))
-          ..orderBy([
-            (s) => OrderingTerm.desc(s.createdAt),
-          ]))
+          ..orderBy([(s) => OrderingTerm.desc(s.createdAt)]))
         .watch()
         .map((spaces) => spaces.map(_spaceDriftToModel).toList());
   }
@@ -181,18 +180,18 @@ class SpacesDriftRepository {
 
   /// Retorna espaços marcados como dirty (precisam sync)
   Future<List<EspacoModel>> getDirtySpaces() async {
-    final spaces = await (_db.select(_db.spaces)
-          ..where((s) => s.isDirty.equals(true)))
-        .get();
+    final spaces = await (_db.select(
+      _db.spaces,
+    )..where((s) => s.isDirty.equals(true))).get();
 
     return spaces.map(_spaceDriftToModel).toList();
   }
 
   /// Marca espaço como sincronizado
   Future<void> markAsSynced(String firebaseId) async {
-    await (_db.update(_db.spaces)
-          ..where((s) => s.firebaseId.equals(firebaseId)))
-        .write(
+    await (_db.update(
+      _db.spaces,
+    )..where((s) => s.firebaseId.equals(firebaseId))).write(
       SpacesCompanion(
         isDirty: const Value(false),
         lastSyncAt: Value(DateTime.now()),
@@ -223,9 +222,9 @@ class SpacesDriftRepository {
 
   /// Helper para obter ID local (INTEGER) a partir do firebaseId (String)
   Future<int?> _getLocalIdByFirebaseId(String firebaseId) async {
-    final space = await (_db.select(_db.spaces)
-          ..where((s) => s.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
+    final space = await (_db.select(
+      _db.spaces,
+    )..where((s) => s.firebaseId.equals(firebaseId))).getSingleOrNull();
 
     return space?.id;
   }

@@ -1,4 +1,9 @@
-import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState, EnhancedAnalyticsService;
+import 'package:core/core.dart'
+    show
+        ConsumerStatefulWidget,
+        ConsumerState,
+        EnhancedAnalyticsService,
+        GoRouterHelper;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,11 +16,11 @@ import '../../domain/services/account_service.dart';
 import '../../domain/services/profile_image_service.dart';
 import '../controllers/profile_controller.dart';
 import '../widgets/devices_section_widget.dart';
-import '../widgets/profile_account_info_section.dart';
 import '../widgets/profile_actions_section.dart';
+import '../widgets/profile_combined_info_section.dart';
 import '../widgets/profile_data_management_section.dart';
 import '../widgets/profile_header_widget.dart';
-import '../widgets/profile_personal_info_section.dart';
+import '../widgets/profile_premium_section.dart';
 import '../widgets/profile_settings_section.dart';
 import '../widgets/profile_sync_section.dart';
 
@@ -24,16 +29,15 @@ final accountServiceProvider = Provider<AccountService>((ref) {
   return AccountServiceImpl();
 });
 
-final profileImageServiceProvider = Provider<GasometerProfileImageService>((ref) {
+final profileImageServiceProvider = Provider<GasometerProfileImageService>((
+  ref,
+) {
   final analytics = ref.watch(analyticsRepositoryProvider);
   final crashlytics = ref.watch(crashlyticsRepositoryProvider);
-  
+
   return GasometerProfileImageService(
     GasometerAnalyticsService(
-      EnhancedAnalyticsService(
-        analytics: analytics,
-        crashlytics: crashlytics,
-      ),
+      EnhancedAnalyticsService(analytics: analytics, crashlytics: crashlytics),
     ),
   );
 });
@@ -117,17 +121,21 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   ) {
     return Column(
       children: [
-        ProfilePersonalInfoSection(
+        ProfileCombinedInfoSection(
           user: user,
           isAnonymous: isAnonymous,
-          isPremium: isPremium,
           profileController: profileController,
+          onLoginTap: isAnonymous
+              ? () {
+                  context.go('/login');
+                }
+              : null,
         ),
+        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        const ProfilePremiumSection(),
         if (!isAnonymous) ...[
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const DevicesSectionWidget(),
-          const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          ProfileAccountInfoSection(user: user, isPremium: isPremium),
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           const ProfileSyncSection(),
         ],

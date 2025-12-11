@@ -46,8 +46,8 @@ class SettingsRepository implements ISettingsRepository {
   Future<Either<Failure, NotificationSettingsEntity>>
   loadNotificationSettings() async {
     try {
-      final notificationSettings =
-          await _localDataSource.loadNotificationSettings();
+      final notificationSettings = await _localDataSource
+          .loadNotificationSettings();
       return Right(_mapNotificationToEntity(notificationSettings));
     } catch (e) {
       return Left(

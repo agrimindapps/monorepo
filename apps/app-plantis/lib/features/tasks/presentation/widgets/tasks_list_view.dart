@@ -73,14 +73,13 @@ class TaskListItem extends StatelessWidget {
                         width: 2,
                       ),
                     ),
-                    child:
-                        task.status == task_entity.TaskStatus.completed
-                            ? Icon(
-                              Icons.check,
-                              size: 16,
-                              color: _getPriorityColor(task.priority),
-                            )
-                            : null,
+                    child: task.status == task_entity.TaskStatus.completed
+                        ? Icon(
+                            Icons.check,
+                            size: 16,
+                            color: _getPriorityColor(task.priority),
+                          )
+                        : null,
                   ),
                 )
               else
@@ -104,14 +103,11 @@ class TaskListItem extends StatelessWidget {
                       style: theme.textTheme.titleMedium?.copyWith(
                         decoration:
                             task.status == task_entity.TaskStatus.completed
-                                ? TextDecoration.lineThrough
-                                : null,
-                        color:
-                            task.status == task_entity.TaskStatus.completed
-                                ? theme.colorScheme.onSurface.withValues(
-                                  alpha: 0.6,
-                                )
-                                : null,
+                            ? TextDecoration.lineThrough
+                            : null,
+                        color: task.status == task_entity.TaskStatus.completed
+                            ? theme.colorScheme.onSurface.withValues(alpha: 0.6)
+                            : null,
                       ),
                     ),
 
@@ -153,30 +149,28 @@ class TaskListItem extends StatelessWidget {
                                   ? Icons.today
                                   : Icons.schedule,
                               size: 16,
-                              color:
-                                  task.isOverdue
-                                      ? Colors.red
-                                      : task.isDueToday
-                                      ? Colors.orange
-                                      : theme.colorScheme.onSurface.withValues(
-                                        alpha: 0.6,
-                                      ),
+                              color: task.isOverdue
+                                  ? Colors.red
+                                  : task.isDueToday
+                                  ? Colors.orange
+                                  : theme.colorScheme.onSurface.withValues(
+                                      alpha: 0.6,
+                                    ),
                             ),
                             const SizedBox(width: 4),
                             Text(
                               _formatDate(task.dueDate),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    task.isOverdue
-                                        ? Colors.red
-                                        : task.isDueToday
-                                        ? Colors.orange
-                                        : theme.colorScheme.onSurface
-                                            .withValues(alpha: 0.7),
-                                fontWeight:
-                                    task.isOverdue || task.isDueToday
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
+                                color: task.isOverdue
+                                    ? Colors.red
+                                    : task.isDueToday
+                                    ? Colors.orange
+                                    : theme.colorScheme.onSurface.withValues(
+                                        alpha: 0.7,
+                                      ),
+                                fontWeight: task.isOverdue || task.isDueToday
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                               ),
                             ),
                           ],

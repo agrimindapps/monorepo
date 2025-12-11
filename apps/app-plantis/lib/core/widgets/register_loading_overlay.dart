@@ -187,23 +187,22 @@ class RegisterProgressLoadingOverlay extends StatelessWidget {
                           borderRadius: BorderRadius.circular(40),
                         ),
                         child: Center(
-                          child:
-                              progress != null
-                                  ? CircularProgressIndicator(
-                                    value: progress,
-                                    strokeWidth: 4,
-                                    valueColor:
-                                        const AlwaysStoppedAnimation<Color>(
-                                          PlantisColors.primary,
-                                        ),
-                                    backgroundColor: Colors.grey.shade300,
-                                  )
-                                  : const CircularProgressIndicator(
-                                    strokeWidth: 4,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      PlantisColors.primary,
-                                    ),
+                          child: progress != null
+                              ? CircularProgressIndicator(
+                                  value: progress,
+                                  strokeWidth: 4,
+                                  valueColor:
+                                      const AlwaysStoppedAnimation<Color>(
+                                        PlantisColors.primary,
+                                      ),
+                                  backgroundColor: Colors.grey.shade300,
+                                )
+                              : const CircularProgressIndicator(
+                                  strokeWidth: 4,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    PlantisColors.primary,
                                   ),
+                                ),
                         ),
                       ),
                       const SizedBox(height: 24),

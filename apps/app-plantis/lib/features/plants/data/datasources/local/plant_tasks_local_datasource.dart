@@ -149,7 +149,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final msg = e.toString();
       if (msg.contains('Plant not found locally')) {
         if (kDebugMode) {
-          print('⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} because plant is not cached yet');
+          print(
+            '⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} because plant is not cached yet',
+          );
         }
         return;
       }
@@ -179,7 +181,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           final msg = e.toString();
           if (msg.contains('Plant not found locally')) {
             if (kDebugMode) {
-              print('⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} in batch because plant is not cached yet');
+              print(
+                '⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} in batch because plant is not cached yet',
+              );
             }
             continue;
           }

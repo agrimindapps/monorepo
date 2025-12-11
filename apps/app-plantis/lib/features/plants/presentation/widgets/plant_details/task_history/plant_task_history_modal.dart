@@ -29,11 +29,8 @@ class PlantTaskHistoryModal extends StatefulWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder:
-          (context) => PlantTaskHistoryModal(
-            plant: plant,
-            completedTasks: completedTasks,
-          ),
+      builder: (context) =>
+          PlantTaskHistoryModal(plant: plant, completedTasks: completedTasks),
     );
   }
 
@@ -56,12 +53,10 @@ class _PlantTaskHistoryModalState extends State<PlantTaskHistoryModal>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
-    );
+    _slideAnimation = Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+        .animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+        );
     _slideController.forward();
   }
 

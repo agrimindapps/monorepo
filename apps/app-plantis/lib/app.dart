@@ -20,7 +20,7 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
   @override
   void initState() {
     super.initState();
-    
+
     // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
     if (kDebugMode) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -33,7 +33,7 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
   Widget build(BuildContext context) {
     // Inicializa o listener de sincronização
     ref.watch(syncCompletionListenerInitializerProvider);
-    
+
     // Inicializa o serviço de sincronização em tempo real
     ref.watch(realtimeSyncServiceProvider);
 
@@ -53,10 +53,7 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
-        supportedLocales: const [
-          Locale('pt', 'BR'),
-          Locale('en', 'US'),
-        ],
+        supportedLocales: const [Locale('pt', 'BR'), Locale('en', 'US')],
         locale: const Locale('pt', 'BR'),
       ),
     );
@@ -67,9 +64,9 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
   void _performTestAutoLogin() async {
     try {
       SecureLogger.info('🧪 [PLANTIS-TEST] Attempting auto-login...');
-      
+
       final auth = FirebaseAuth.instance;
-      
+
       // Se já está logado, não faz nada
       if (auth.currentUser != null) {
         SecureLogger.info(
@@ -77,15 +74,15 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
         );
         return;
       }
-      
+
       const testEmail = 'lucineiy@hotmail.com';
       const testPassword = 'QWEqwe@123';
-      
+
       final result = await auth.signInWithEmailAndPassword(
         email: testEmail,
         password: testPassword,
       );
-      
+
       if (result.user != null) {
         SecureLogger.info(
           '🧪 [PLANTIS-TEST] Auto-login successful! User: ${result.user!.email}',

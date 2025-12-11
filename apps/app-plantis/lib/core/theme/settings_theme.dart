@@ -8,38 +8,40 @@ class SettingsTheme {
 
   /// Light theme configuration for settings
   static ThemeData get lightTheme => ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: PlantisColors.primary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: PlantisColors.primary,
-      secondary: PlantisColors.secondary,
-      tertiary: PlantisColors.accent,
-      surface: Colors.white,
-      surfaceContainer: Colors.grey.shade50,
-      surfaceContainerHighest: Colors.grey.shade100,
-      onSurface: PlantisColors.textPrimary,
-      onSurfaceVariant: PlantisColors.textSecondary,
-    ),
+    colorScheme:
+        ColorScheme.fromSeed(
+          seedColor: PlantisColors.primary,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: PlantisColors.primary,
+          secondary: PlantisColors.secondary,
+          tertiary: PlantisColors.accent,
+          surface: Colors.white,
+          surfaceContainer: Colors.grey.shade50,
+          surfaceContainerHighest: Colors.grey.shade100,
+          onSurface: PlantisColors.textPrimary,
+          onSurfaceVariant: PlantisColors.textSecondary,
+        ),
     useMaterial3: true,
     fontFamily: 'SF Pro Display', // iOS-style font for clean settings UI
   );
 
   /// Dark theme configuration for settings
   static ThemeData get darkTheme => ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: PlantisColors.primary,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: PlantisColors.primaryLight,
-      secondary: PlantisColors.secondaryLight,
-      tertiary: PlantisColors.accentLight,
-      surface: const Color(0xFF1C1C1E),
-      surfaceContainer: const Color(0xFF2C2C2E),
-      surfaceContainerHighest: const Color(0xFF3A3A3C),
-      onSurface: Colors.white,
-      onSurfaceVariant: Colors.grey.shade400,
-    ),
+    colorScheme:
+        ColorScheme.fromSeed(
+          seedColor: PlantisColors.primary,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: PlantisColors.primaryLight,
+          secondary: PlantisColors.secondaryLight,
+          tertiary: PlantisColors.accentLight,
+          surface: const Color(0xFF1C1C1E),
+          surfaceContainer: const Color(0xFF2C2C2E),
+          surfaceContainerHighest: const Color(0xFF3A3A3C),
+          onSurface: Colors.white,
+          onSurfaceVariant: Colors.grey.shade400,
+        ),
     useMaterial3: true,
     fontFamily: 'SF Pro Display',
   );

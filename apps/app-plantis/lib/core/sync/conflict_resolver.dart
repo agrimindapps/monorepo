@@ -79,8 +79,9 @@ class ConflictResolver {
       name: local.name.isNotEmpty ? local.name : remote.name,
       species: local.species ?? remote.species,
       spaceId: local.spaceId ?? remote.spaceId,
-      imageUrls:
-          local.imageUrls.isNotEmpty ? local.imageUrls : remote.imageUrls,
+      imageUrls: local.imageUrls.isNotEmpty
+          ? local.imageUrls
+          : remote.imageUrls,
       notes: local.notes ?? remote.notes,
       plantingDate: local.plantingDate ?? remote.plantingDate,
       imageBase64: local.imageBase64 ?? remote.imageBase64,
@@ -104,14 +105,14 @@ class ConflictResolver {
           lastSyncAt: DateTime.now(),
         )
         .copyWithTaskData(
-          title:
-              localTask.title.isNotEmpty ? localTask.title : remoteTask.title,
+          title: localTask.title.isNotEmpty
+              ? localTask.title
+              : remoteTask.title,
           description: localTask.description ?? remoteTask.description,
           plantId: localTask.plantId, // plantId não muda em conflitos
-          status:
-              localTask.status.index > remoteTask.status.index
-                  ? localTask.status
-                  : remoteTask.status,
+          status: localTask.status.index > remoteTask.status.index
+              ? localTask.status
+              : remoteTask.status,
           completedAt: localTask.completedAt ?? remoteTask.completedAt,
           completionNotes:
               localTask.completionNotes ?? remoteTask.completionNotes,
@@ -161,7 +162,8 @@ class ConflictResolver {
     }
 
     // Determina qual era o modelo original escolhido comparando IDs e timestamps
-    final isLocalChosen = result.id == localPlant.id &&
+    final isLocalChosen =
+        result.id == localPlant.id &&
         result.name == localPlant.name &&
         result.updatedAt == localPlant.updatedAt;
 

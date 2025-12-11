@@ -227,10 +227,12 @@ class PlantTaskTaskAdapter {
     required Map<String, Plant> plantsById,
   }) {
     final convertedTasks = plantTasks.length;
-    final existingNonPlantTasks =
-        existingTasks.where((t) => !isTaskFromPlantTask(t)).length;
-    final existingPlantTasks =
-        existingTasks.where((t) => isTaskFromPlantTask(t)).length;
+    final existingNonPlantTasks = existingTasks
+        .where((t) => !isTaskFromPlantTask(t))
+        .length;
+    final existingPlantTasks = existingTasks
+        .where((t) => isTaskFromPlantTask(t))
+        .length;
     final conflicts = findConflictingTaskIds(
       plantTasks: plantTasks,
       existingTasks: existingTasks,

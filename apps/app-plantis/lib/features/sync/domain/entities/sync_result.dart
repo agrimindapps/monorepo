@@ -102,16 +102,15 @@ class PlantisSyncResult extends Equatable {
   int get conflictCount => itemsWithConflicts.length;
 
   /// Total items affected (processed + conflicts + errors)
-  int get totalItemsAffected =>
-      itemsProcessed + conflictCount + errorCount;
+  int get totalItemsAffected => itemsProcessed + conflictCount + errorCount;
 
   @override
   List<Object?> get props => [
-        timestamp,
-        itemsProcessed,
-        itemsWithConflicts,
-        errorCount,
-      ];
+    timestamp,
+    itemsProcessed,
+    itemsWithConflicts,
+    errorCount,
+  ];
 
   @override
   String toString() {

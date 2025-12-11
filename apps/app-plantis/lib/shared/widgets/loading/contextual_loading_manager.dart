@@ -118,10 +118,9 @@ class _ContextualLoadingListenerState extends State<ContextualLoadingListener> {
 
   @override
   Widget build(BuildContext context) {
-    final loadingState =
-        widget.context != null
-            ? ContextualLoadingManager.getLoadingState(widget.context!)
-            : null;
+    final loadingState = widget.context != null
+        ? ContextualLoadingManager.getLoadingState(widget.context!)
+        : null;
 
     if (widget.loadingBuilder != null && loadingState != null) {
       return widget.loadingBuilder!(context, loadingState);

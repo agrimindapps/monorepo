@@ -101,14 +101,24 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     final formNotifier = ref.read(plantFormStateNotifierProvider.notifier);
 
     debugPrint('📷 [PlantFormBasicInfo] _buildImageSection rebuild');
-    debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - isUploadingImages: ${formState.isUploadingImages}');
-    debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - imageUrls.length: ${formState.imageUrls.length}');
-    
+    debugPrint(
+      '📷 [PlantFormBasicInfo] _buildImageSection - isUploadingImages: ${formState.isUploadingImages}',
+    );
+    debugPrint(
+      '📷 [PlantFormBasicInfo] _buildImageSection - imageUrls.length: ${formState.imageUrls.length}',
+    );
+
     if (formState.imageUrls.isNotEmpty) {
       final firstImage = formState.imageUrls.first;
-      debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - Primeira imagem length: ${firstImage.length}');
-      debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - Primeira imagem prefixo: ${firstImage.substring(0, firstImage.length > 50 ? 50 : firstImage.length)}');
-      debugPrint('📷 [PlantFormBasicInfo] _buildImageSection - Renderizando _buildSingleImage');
+      debugPrint(
+        '📷 [PlantFormBasicInfo] _buildImageSection - Primeira imagem length: ${firstImage.length}',
+      );
+      debugPrint(
+        '📷 [PlantFormBasicInfo] _buildImageSection - Primeira imagem prefixo: ${firstImage.substring(0, firstImage.length > 50 ? 50 : firstImage.length)}',
+      );
+      debugPrint(
+        '📷 [PlantFormBasicInfo] _buildImageSection - Renderizando _buildSingleImage',
+      );
     }
 
     return Column(
@@ -262,7 +272,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     PlantFormStateNotifier formNotifier,
   ) {
     final isWebOrDesktop = MediaQuery.of(context).size.width > 600;
-    
+
     if (isWebOrDesktop) {
       _showImageOptionsDialog(context, formNotifier);
     } else {
@@ -381,7 +391,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: isDisabled
-                ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
+                ? theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  )
                 : theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
@@ -406,7 +418,9 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: isDisabled
-                      ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
+                      ? theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.5,
+                        )
                       : theme.colorScheme.primary,
                 ),
               ),
@@ -514,9 +528,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
         decoration: BoxDecoration(
           color: isDisabled
-              ? theme.colorScheme.surfaceContainerHighest.withValues(
-                  alpha: 0.3,
-                )
+              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
               : theme.colorScheme.primaryContainer.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
@@ -539,9 +551,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                 icon,
                 size: 32,
                 color: isDisabled
-                    ? theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.5,
-                      )
+                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
                     : theme.colorScheme.primary,
               ),
             const SizedBox(height: 12),
@@ -550,9 +560,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: isDisabled
-                    ? theme.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.5,
-                      )
+                    ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
                     : theme.colorScheme.primary,
               ),
             ),
@@ -1046,30 +1054,42 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
     required double width,
     required double height,
   }) {
-    debugPrint('📷 [_buildNetworkImageWithFallback] imageUrl length: ${imageUrl.length}');
-    debugPrint('📷 [_buildNetworkImageWithFallback] imageUrl starts with: ${imageUrl.substring(0, imageUrl.length > 50 ? 50 : imageUrl.length)}...');
-    
+    debugPrint(
+      '📷 [_buildNetworkImageWithFallback] imageUrl length: ${imageUrl.length}',
+    );
+    debugPrint(
+      '📷 [_buildNetworkImageWithFallback] imageUrl starts with: ${imageUrl.substring(0, imageUrl.length > 50 ? 50 : imageUrl.length)}...',
+    );
+
     // Suportar imagens base64 (data:image/...)
     if (imageUrl.startsWith('data:image/')) {
       try {
         // Extrair a parte base64 da string
         final parts = imageUrl.split(',');
         if (parts.length < 2) {
-          debugPrint('📷 [_buildNetworkImageWithFallback] ERRO: Formato base64 inválido - não contém virgula');
+          debugPrint(
+            '📷 [_buildNetworkImageWithFallback] ERRO: Formato base64 inválido - não contém virgula',
+          );
           throw Exception('Formato base64 inválido');
         }
         final base64String = parts.last;
-        debugPrint('📷 [_buildNetworkImageWithFallback] Base64 string length: ${base64String.length}');
-        
+        debugPrint(
+          '📷 [_buildNetworkImageWithFallback] Base64 string length: ${base64String.length}',
+        );
+
         // Verificar se é base64 válido
         if (base64String.isEmpty) {
-          debugPrint('📷 [_buildNetworkImageWithFallback] ERRO: Base64 string vazia');
+          debugPrint(
+            '📷 [_buildNetworkImageWithFallback] ERRO: Base64 string vazia',
+          );
           throw Exception('Base64 string vazia');
         }
-        
+
         final bytes = base64Decode(base64String);
-        debugPrint('📷 [_buildNetworkImageWithFallback] ✅ Decoded bytes length: ${bytes.length}');
-        
+        debugPrint(
+          '📷 [_buildNetworkImageWithFallback] ✅ Decoded bytes length: ${bytes.length}',
+        );
+
         return Image.memory(
           bytes,
           width: width,
@@ -1077,8 +1097,12 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
           fit: BoxFit.cover,
           gaplessPlayback: true, // Evita flash durante rebuild
           errorBuilder: (context, error, stackTrace) {
-            debugPrint('📷 [_buildNetworkImageWithFallback] Image.memory errorBuilder: $error');
-            debugPrint('📷 [_buildNetworkImageWithFallback] StackTrace: $stackTrace');
+            debugPrint(
+              '📷 [_buildNetworkImageWithFallback] Image.memory errorBuilder: $error',
+            );
+            debugPrint(
+              '📷 [_buildNetworkImageWithFallback] StackTrace: $stackTrace',
+            );
             return Container(
               width: width,
               height: height,
@@ -1146,7 +1170,7 @@ class _PlantFormBasicInfoState extends ConsumerState<PlantFormBasicInfo> {
                 strokeWidth: 2,
                 value: loadingProgress.expectedTotalBytes != null
                     ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
+                          loadingProgress.expectedTotalBytes!
                     : null,
               ),
             ),

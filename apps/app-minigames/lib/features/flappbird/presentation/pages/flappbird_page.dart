@@ -3,14 +3,13 @@ import 'package:flutter/material.dart';
 
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flame/game.dart';
 
 // Presentation imports:
 import '../providers/flappbird_notifier.dart';
-import '../widgets/bird_widget.dart';
-import '../widgets/pipe_widget.dart';
-import '../widgets/background_widget.dart';
 import '../widgets/score_display_widget.dart';
 import '../widgets/game_over_dialog.dart';
+import '../game/flappy_bird_game.dart';
 
 /// Main Flappy Bird game page
 class FlappbirdPage extends ConsumerStatefulWidget {
@@ -21,134 +20,76 @@ class FlappbirdPage extends ConsumerStatefulWidget {
 }
 
 class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
+  late FlappyBirdGame _game;
+  int _currentScore = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _game = FlappyBirdGame(
+      onScoreChanged: (score) {
+        setState(() {
+          _currentScore = score;
+        });
+      },
+      onGameOver: () {
+        final notifier = ref.read(flappbirdGameProvider.notifier);
+        notifier.saveScore(_game.score);
+        setState(() {}); // Rebuild to show game over overlay if needed
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final gameStateAsync = ref.watch(flappbirdGameProvider);
+    // Watch provider to get high score updates
+    ref.watch(flappbirdGameProvider);
+    final highScore = ref.read(flappbirdGameProvider.notifier).highScore;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF87CEEB), // Sky blue
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Update screen dimensions when layout changes
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref
-                .read(flappbirdGameProvider.notifier)
-                .updateScreenDimensions(
-                  constraints.maxWidth,
-                  constraints.maxHeight,
-                );
-          });
-
-          return gameStateAsync.when(
-            data: (gameState) {
-              return GestureDetector(
-                onTap: () {
-                  ref.read(flappbirdGameProvider.notifier).flap();
-                },
-                child: Stack(
-                  children: [
-                    // Background (clouds, etc.)
-                    const BackgroundWidget(),
-
-                    // Pipes
-                    ...gameState.pipes.map((pipe) {
-                      return PipeWidget(
-                        pipe: pipe,
-                        screenWidth: gameState.screenWidth,
-                        screenHeight: gameState.playAreaHeight,
-                      );
-                    }),
-
-                    // Bird
-                    BirdWidget(
-                      bird: gameState.bird,
-                      birdX: gameState.birdX,
-                      screenHeight: gameState.playAreaHeight,
-                    ),
-
-                    // Ground
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: gameState.groundHeight,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF8B4513), // Brown
-                          border: Border(
-                            top: BorderSide(
-                              color: Colors.brown.shade800,
-                              width: 5,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // Score display
-                    ScoreDisplayWidget(
-                      score: gameState.score,
-                      highScore: ref.read(flappbirdGameProvider.notifier).highScore,
-                    ),
-
-                    // Game over dialog
-                    if (gameState.isGameOver)
-                      GameOverDialog(
-                        score: gameState.score,
-                        highScore: ref.read(flappbirdGameProvider.notifier).highScore,
-                        onRestart: () {
-                          ref
-                              .read(flappbirdGameProvider.notifier)
-                              .restartGame();
-                        },
-                      ),
-
-                    // Start instruction
-                    if (gameState.status.isNotStarted)
-                      Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'Tap to Start',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
+      body: GameWidget(
+        game: _game,
+        overlayBuilderMap: {
+          'Score': (context, FlappyBirdGame game) {
+            return ScoreDisplayWidget(
+              score: _currentScore,
+              highScore: highScore,
+            );
+          },
+          'GameOver': (context, FlappyBirdGame game) {
+            if (!game.isGameOver) return const SizedBox.shrink();
+            return GameOverDialog(
+              score: _currentScore,
+              highScore: highScore,
+              onRestart: () {
+                game.restartGame();
+              },
+            );
+          },
+          'Start': (context, FlappyBirdGame game) {
+            if (game.isPlaying || game.isGameOver) return const SizedBox.shrink();
+            return Center(
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              );
-            },
-            loading: () => const Center(
-              child: CircularProgressIndicator(),
-            ),
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error: $error'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.invalidate(flappbirdGameProvider);
-                    },
-                    child: const Text('Retry'),
+                child: const Text(
+                  'Tap to Start',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ),
-            ),
-          );
+            );
+          },
         },
+        initialActiveOverlays: const ['Score', 'Start', 'GameOver'],
       ),
     );
   }
 }
+

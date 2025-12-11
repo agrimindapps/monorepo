@@ -72,8 +72,5 @@ class ResolveConflictParams {
   /// Strategy to use for resolving the conflict
   final PlantisConflictStrategy strategy;
 
-  const ResolveConflictParams({
-    required this.itemId,
-    required this.strategy,
-  });
+  const ResolveConflictParams({required this.itemId, required this.strategy});
 }

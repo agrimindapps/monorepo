@@ -34,8 +34,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         final timeoutDuration = Duration(seconds: 2 * attempt);
-        final user =
-            await authService.currentUser.timeout(timeoutDuration).first;
+        final user = await authService.currentUser
+            .timeout(timeoutDuration)
+            .first;
 
         if (user != null && user.id.isNotEmpty) {
           return user.id;
@@ -332,7 +333,9 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       // 2. Deletar Tasks locais via TasksLocalDataSource (sistema principal Drift)
       if (tasksLocalDataSource != null) {
         try {
-          final deletedCount = await tasksLocalDataSource!.deleteTasksByPlantId(plantId);
+          final deletedCount = await tasksLocalDataSource!.deleteTasksByPlantId(
+            plantId,
+          );
           if (kDebugMode) {
             print(
               '✅ PlantTasksRepository: $deletedCount Tasks locais (Drift) da planta $plantId deletadas',
@@ -353,16 +356,17 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return tasksResult.fold(
         (failure) {
           if (kDebugMode) {
-            print('⚠️ Erro ao buscar tasks do UnifiedSyncManager: ${failure.message}');
+            print(
+              '⚠️ Erro ao buscar tasks do UnifiedSyncManager: ${failure.message}',
+            );
           }
           // Não falhar se UnifiedSyncManager falhar, já deletamos as PlantTasks locais
           return const Right(null);
         },
         (allTasks) async {
-          final plantTasks =
-              allTasks
-                  .where((task) => task.plantId == plantId && !task.isDeleted)
-                  .toList();
+          final plantTasks = allTasks
+              .where((task) => task.plantId == plantId && !task.isDeleted)
+              .toList();
 
           if (kDebugMode) {
             print(
@@ -510,11 +514,10 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         return const Left(NetworkFailure('Sem conexão com a internet'));
       }
       var localTasks = await localDatasource.getPlantTasks();
-      final tasksToSync =
-          localTasks
-              .map((task) => PlantTaskModel.fromEntity(task))
-              .where((task) => task.isDirty)
-              .toList();
+      final tasksToSync = localTasks
+          .map((task) => PlantTaskModel.fromEntity(task))
+          .where((task) => task.isDirty)
+          .toList();
 
       if (tasksToSync.isNotEmpty) {
         if (kDebugMode) {
@@ -556,6 +559,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       );
     }
   }
+
   Future<void> _syncPlantTasksInBackground(String userId) async {
     try {
       final remoteTasks = await remoteDatasource.getPlantTasks(userId);

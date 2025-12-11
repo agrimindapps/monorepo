@@ -74,11 +74,10 @@ class _PlantsAppBarState extends State<PlantsAppBar> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      color:
-          isDark
-              ? const Color(0xFF1C1C1E)
-              : Colors
-                  .transparent, // Transparente para usar o fundo do BasePageScaffold
+      color: isDark
+          ? const Color(0xFF1C1C1E)
+          : Colors
+                .transparent, // Transparente para usar o fundo do BasePageScaffold
       padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 8),
       child: Column(
         children: [
@@ -88,27 +87,22 @@ class _PlantsAppBarState extends State<PlantsAppBar> {
                 child: Container(
                   height: 44,
                   decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? const Color(0xFF2C2C2E)
-                            : const Color(0xFFFFFFFF), // Branco puro
+                    color: isDark
+                        ? const Color(0xFF2C2C2E)
+                        : const Color(0xFFFFFFFF), // Branco puro
                     borderRadius: BorderRadius.circular(12),
-                    border:
-                        isDark
-                            ? Border.all(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                            )
-                            : Border.all(
-                              color: theme.colorScheme.outline.withValues(
-                                alpha: 0.3,
-                              ),
+                    border: isDark
+                        ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
+                        : Border.all(
+                            color: theme.colorScheme.outline.withValues(
+                              alpha: 0.3,
                             ),
+                          ),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            isDark
-                                ? Colors.black.withValues(alpha: 0.25)
-                                : Colors.black.withValues(alpha: 0.06),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.25)
+                            : Colors.black.withValues(alpha: 0.06),
                         blurRadius: isDark ? 6 : 8,
                         offset: const Offset(0, 2),
                         spreadRadius: isDark ? 0 : 1,
@@ -167,10 +161,9 @@ class _PlantsAppBarState extends State<PlantsAppBar> {
                   } else if (widget.viewMode == ViewMode.groupedBySpacesList) {
                     newMode = ViewMode.groupedBySpacesGrid;
                   } else {
-                    newMode =
-                        widget.viewMode == ViewMode.grid
-                            ? ViewMode.list
-                            : ViewMode.grid;
+                    newMode = widget.viewMode == ViewMode.grid
+                        ? ViewMode.list
+                        : ViewMode.grid;
                   }
 
                   widget.onViewModeChanged(newMode);
@@ -179,27 +172,22 @@ class _PlantsAppBarState extends State<PlantsAppBar> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color:
-                        isDark
-                            ? const Color(0xFF2C2C2E)
-                            : const Color(0xFFFFFFFF), // Branco puro
+                    color: isDark
+                        ? const Color(0xFF2C2C2E)
+                        : const Color(0xFFFFFFFF), // Branco puro
                     borderRadius: BorderRadius.circular(12),
-                    border:
-                        isDark
-                            ? Border.all(
-                              color: Colors.grey.withValues(alpha: 0.1),
-                            )
-                            : Border.all(
-                              color: theme.colorScheme.outline.withValues(
-                                alpha: 0.3,
-                              ),
+                    border: isDark
+                        ? Border.all(color: Colors.grey.withValues(alpha: 0.1))
+                        : Border.all(
+                            color: theme.colorScheme.outline.withValues(
+                              alpha: 0.3,
                             ),
+                          ),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            isDark
-                                ? Colors.black.withValues(alpha: 0.25)
-                                : Colors.black.withValues(alpha: 0.06),
+                        color: isDark
+                            ? Colors.black.withValues(alpha: 0.25)
+                            : Colors.black.withValues(alpha: 0.06),
                         blurRadius: isDark ? 6 : 8,
                         offset: const Offset(0, 2),
                         spreadRadius: isDark ? 0 : 1,

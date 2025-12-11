@@ -31,10 +31,9 @@ class LoadingOverlay extends StatelessWidget {
           Positioned.fill(
             child: ColoredBox(
               color: (overlayColor ?? Colors.black).withValues(alpha: opacity),
-              child:
-                  preventInteraction
-                      ? AbsorbPointer(child: _buildLoadingContent(context))
-                      : _buildLoadingContent(context),
+              child: preventInteraction
+                  ? AbsorbPointer(child: _buildLoadingContent(context))
+                  : _buildLoadingContent(context),
             ),
           ),
       ],

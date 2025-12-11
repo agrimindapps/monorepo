@@ -28,9 +28,8 @@ class ImageCompressionConfig {
 class ImageCompressionService {
   final ImageCompressionConfig config;
 
-  ImageCompressionService({
-    ImageCompressionConfig? config,
-  }) : config = config ?? const ImageCompressionConfig();
+  ImageCompressionService({ImageCompressionConfig? config})
+    : config = config ?? const ImageCompressionConfig();
 
   /// Comprime Base64 image string
   /// Retorna Base64 comprimido ou original se compressão falhar
@@ -139,8 +138,8 @@ class ImageCompressionService {
       final compressedSizeMB = compressedBytes.length / (1024 * 1024);
       final reductionPercent =
           ((originalBytes.length - compressedBytes.length) /
-                  originalBytes.length) *
-              100;
+              originalBytes.length) *
+          100;
 
       return {
         'originalSizeMB': originalSizeMB.toStringAsFixed(2),
@@ -150,9 +149,7 @@ class ImageCompressionService {
         'compressedSize': compressedBytes.length,
       };
     } catch (e) {
-      return {
-        'error': 'Erro ao calcular estatísticas: $e',
-      };
+      return {'error': 'Erro ao calcular estatísticas: $e'};
     }
   }
 }

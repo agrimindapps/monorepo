@@ -18,23 +18,17 @@ part 'legal_providers.g.dart';
 // ===================================================================
 
 @riverpod
-PrivacyPolicyDataSource privacyPolicyDataSource(
-  Ref ref,
-) {
+PrivacyPolicyDataSource privacyPolicyDataSource(Ref ref) {
   return PrivacyPolicyDataSource();
 }
 
 @riverpod
-TermsOfServiceDataSource termsOfServiceDataSource(
-  Ref ref,
-) {
+TermsOfServiceDataSource termsOfServiceDataSource(Ref ref) {
   return TermsOfServiceDataSource();
 }
 
 @riverpod
-AccountDeletionDataSource accountDeletionDataSource(
-  Ref ref,
-) {
+AccountDeletionDataSource accountDeletionDataSource(Ref ref) {
   return AccountDeletionDataSource();
 }
 
@@ -56,16 +50,12 @@ LegalRepository legalRepository(Ref ref) {
 // ===================================================================
 
 @riverpod
-GetLegalDocumentUseCase getLegalDocumentUseCase(
-  Ref ref,
-) {
+GetLegalDocumentUseCase getLegalDocumentUseCase(Ref ref) {
   return GetLegalDocumentUseCase(ref.watch(legalRepositoryProvider));
 }
 
 @riverpod
-GetAllLegalDocumentsUseCase getAllLegalDocumentsUseCase(
-  Ref ref,
-) {
+GetAllLegalDocumentsUseCase getAllLegalDocumentsUseCase(Ref ref) {
   return GetAllLegalDocumentsUseCase(ref.watch(legalRepositoryProvider));
 }
 
@@ -75,10 +65,7 @@ GetAllLegalDocumentsUseCase getAllLegalDocumentsUseCase(
 
 /// State for a legal document
 @riverpod
-Future<LegalDocument> legalDocument(
-  Ref ref,
-  DocumentType documentType,
-) async {
+Future<LegalDocument> legalDocument(Ref ref, DocumentType documentType) async {
   final useCase = ref.watch(getLegalDocumentUseCaseProvider);
   final result = await useCase(documentType);
 

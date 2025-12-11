@@ -12,10 +12,45 @@ import '../widgets/profile_image_picker_widget.dart';
 
 /// Controller responsável pela lógica de negócio do perfil
 class ProfileController {
-
   ProfileController(this._accountService, this._imageService);
   final AccountService _accountService;
   final GasometerProfileImageService _imageService;
+
+  /// Atualiza o nome do usuário
+  Future<void> updateName(
+    BuildContext context,
+    WidgetRef ref,
+    String name,
+  ) async {
+    try {
+      UiFeedbackService.showImageProcessingDialog(
+        context,
+      ); // Reusing dialog for now
+
+      final success = await _accountService.updateName(ref, name);
+
+      if (!context.mounted) return;
+      Navigator.of(context).pop(); // Remove loading dialog
+
+      if (success) {
+        UiFeedbackService.showSuccessSnackBar(
+          context,
+          'Nome atualizado com sucesso!',
+        );
+      } else {
+        UiFeedbackService.showErrorSnackBar(context, 'Erro ao atualizar nome');
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      if (Navigator.canPop(context)) {
+        Navigator.of(context).pop();
+      }
+      UiFeedbackService.showErrorSnackBar(
+        context,
+        'Erro inesperado ao atualizar nome',
+      );
+    }
+  }
 
   /// Processa uma nova imagem selecionada para avatar
   Future<void> processNewAvatarImage(

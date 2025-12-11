@@ -1,5 +1,6 @@
 import 'package:app_plantis/features/plants/domain/entities/plant.dart';
-import 'package:app_plantis/features/tasks/domain/entities/task.dart' as task_entity;
+import 'package:app_plantis/features/tasks/domain/entities/task.dart'
+    as task_entity;
 import 'package:core/core.dart' hide Task;
 
 /// Test fixtures for common entities used in tests
@@ -42,10 +43,7 @@ class TestFixtures {
   static List<Plant> createTestPlants({int count = 3}) {
     return List.generate(
       count,
-      (index) => createTestPlant(
-        id: 'plant-$index',
-        name: 'Test Plant $index',
-      ),
+      (index) => createTestPlant(id: 'plant-$index', name: 'Test Plant $index'),
     );
   }
 
@@ -69,7 +67,9 @@ class TestFixtures {
       dueDate: dueDate ?? DateTime.now().add(const Duration(days: 1)),
       plantId: plantId ?? 'plant-1',
       type: type ?? task_entity.TaskType.watering,
-      status: completed ? task_entity.TaskStatus.completed : (status ?? task_entity.TaskStatus.pending),
+      status: completed
+          ? task_entity.TaskStatus.completed
+          : (status ?? task_entity.TaskStatus.pending),
       priority: priority ?? task_entity.TaskPriority.medium,
       userId: userId,
       createdAt: DateTime.now(),
@@ -81,10 +81,7 @@ class TestFixtures {
   static List<task_entity.Task> createTestTasks({int count = 3}) {
     return List.generate(
       count,
-      (index) => createTestTask(
-        id: 'task-$index',
-        title: 'Task $index',
-      ),
+      (index) => createTestTask(id: 'task-$index', title: 'Task $index'),
     );
   }
 

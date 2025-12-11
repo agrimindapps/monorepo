@@ -4,12 +4,7 @@ import '../../domain/entities/settings_entity.dart';
 part 'settings_state.freezed.dart';
 
 /// View states for settings feature
-enum SettingsViewState {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+enum SettingsViewState { initial, loading, loaded, error }
 
 /// State imutável para gerenciamento de configurações
 ///
@@ -192,10 +187,10 @@ extension SettingsStateX on SettingsState {
 
   /// Reseta ao padrão
   SettingsState resetToDefaults() => SettingsStateX.initial().copyWith(
-        settings: SettingsEntity.defaults(),
-        appVersion: appVersion,
-        buildNumber: buildNumber,
-      );
+    settings: SettingsEntity.defaults(),
+    appVersion: appVersion,
+    buildNumber: buildNumber,
+  );
 
   /// Atualiza configurações
   SettingsState updateSettings(SettingsEntity newSettings) =>
@@ -204,13 +199,13 @@ extension SettingsStateX on SettingsState {
   /// Atualiza tema
   SettingsState updateTheme(ThemeSettingsEntity newTheme) {
     if (settings == null) return this;
-    return copyWith(
-      settings: settings!.copyWith(theme: newTheme),
-    );
+    return copyWith(settings: settings!.copyWith(theme: newTheme));
   }
 
   /// Atualiza notificações
-  SettingsState updateNotifications(NotificationSettingsEntity newNotifications) {
+  SettingsState updateNotifications(
+    NotificationSettingsEntity newNotifications,
+  ) {
     if (settings == null) return this;
     return copyWith(
       settings: settings!.copyWith(notifications: newNotifications),
@@ -220,24 +215,18 @@ extension SettingsStateX on SettingsState {
   /// Atualiza backup
   SettingsState updateBackup(BackupSettingsEntity newBackup) {
     if (settings == null) return this;
-    return copyWith(
-      settings: settings!.copyWith(backup: newBackup),
-    );
+    return copyWith(settings: settings!.copyWith(backup: newBackup));
   }
 
   /// Atualiza app settings
   SettingsState updateAppSettings(AppSettingsEntity newAppSettings) {
     if (settings == null) return this;
-    return copyWith(
-      settings: settings!.copyWith(app: newAppSettings),
-    );
+    return copyWith(settings: settings!.copyWith(app: newAppSettings));
   }
 
   /// Atualiza conta
   SettingsState updateAccount(AccountSettingsEntity newAccount) {
     if (settings == null) return this;
-    return copyWith(
-      settings: settings!.copyWith(account: newAccount),
-    );
+    return copyWith(settings: settings!.copyWith(account: newAccount));
   }
 }

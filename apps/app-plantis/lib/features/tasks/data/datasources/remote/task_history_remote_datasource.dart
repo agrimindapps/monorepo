@@ -44,11 +44,10 @@ class TaskHistoryRemoteDataSourceImpl implements TaskHistoryRemoteDataSource {
     String userId,
   ) async {
     try {
-      final querySnapshot =
-          await _getTaskHistoryCollection(userId)
-              .where('plantId', isEqualTo: plantId)
-              .orderBy('completedAt', descending: true)
-              .get();
+      final querySnapshot = await _getTaskHistoryCollection(userId)
+          .where('plantId', isEqualTo: plantId)
+          .orderBy('completedAt', descending: true)
+          .get();
 
       return querySnapshot.docs
           .map(
@@ -69,11 +68,10 @@ class TaskHistoryRemoteDataSourceImpl implements TaskHistoryRemoteDataSource {
     String userId,
   ) async {
     try {
-      final querySnapshot =
-          await _getTaskHistoryCollection(userId)
-              .where('taskId', isEqualTo: taskId)
-              .orderBy('completedAt', descending: true)
-              .get();
+      final querySnapshot = await _getTaskHistoryCollection(userId)
+          .where('taskId', isEqualTo: taskId)
+          .orderBy('completedAt', descending: true)
+          .get();
 
       return querySnapshot.docs
           .map(
@@ -91,10 +89,9 @@ class TaskHistoryRemoteDataSourceImpl implements TaskHistoryRemoteDataSource {
   @override
   Future<List<TaskHistoryModel>> getHistoryByUserId(String userId) async {
     try {
-      final querySnapshot =
-          await _getTaskHistoryCollection(
-            userId,
-          ).orderBy('completedAt', descending: true).get();
+      final querySnapshot = await _getTaskHistoryCollection(
+        userId,
+      ).orderBy('completedAt', descending: true).get();
 
       return querySnapshot.docs
           .map(
@@ -116,12 +113,11 @@ class TaskHistoryRemoteDataSourceImpl implements TaskHistoryRemoteDataSource {
     String userId,
   ) async {
     try {
-      final querySnapshot =
-          await _getTaskHistoryCollection(userId)
-              .where('completedAt', isGreaterThanOrEqualTo: startDate)
-              .where('completedAt', isLessThanOrEqualTo: endDate)
-              .orderBy('completedAt', descending: true)
-              .get();
+      final querySnapshot = await _getTaskHistoryCollection(userId)
+          .where('completedAt', isGreaterThanOrEqualTo: startDate)
+          .where('completedAt', isLessThanOrEqualTo: endDate)
+          .orderBy('completedAt', descending: true)
+          .get();
 
       return querySnapshot.docs
           .map(
@@ -185,10 +181,9 @@ class TaskHistoryRemoteDataSourceImpl implements TaskHistoryRemoteDataSource {
   @override
   Future<void> deleteHistoryByTaskId(String taskId, String userId) async {
     try {
-      final querySnapshot =
-          await _getTaskHistoryCollection(
-            userId,
-          ).where('taskId', isEqualTo: taskId).get();
+      final querySnapshot = await _getTaskHistoryCollection(
+        userId,
+      ).where('taskId', isEqualTo: taskId).get();
 
       final batch = _firestore.batch();
       for (final doc in querySnapshot.docs) {
@@ -203,10 +198,9 @@ class TaskHistoryRemoteDataSourceImpl implements TaskHistoryRemoteDataSource {
   @override
   Future<void> deleteHistoryByPlantId(String plantId, String userId) async {
     try {
-      final querySnapshot =
-          await _getTaskHistoryCollection(
-            userId,
-          ).where('plantId', isEqualTo: plantId).get();
+      final querySnapshot = await _getTaskHistoryCollection(
+        userId,
+      ).where('plantId', isEqualTo: plantId).get();
 
       final batch = _firestore.batch();
       for (final doc in querySnapshot.docs) {

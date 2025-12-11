@@ -27,17 +27,15 @@ class PlantDetailsInfo extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color:
-                theme.brightness == Brightness.dark
-                    ? const Color(0xFF2C2C2E)
-                    : theme.colorScheme.surface,
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF2C2C2E)
+                : theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color:
-                    theme.brightness == Brightness.dark
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.08),
+                color: theme.brightness == Brightness.dark
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : Colors.black.withValues(alpha: 0.08),
                 blurRadius: theme.brightness == Brightness.dark ? 8 : 12,
                 offset: const Offset(0, 4),
                 spreadRadius: theme.brightness == Brightness.dark ? 0 : 2,
@@ -146,10 +144,9 @@ class PlantDetailsInfo extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color:
-                      theme.brightness == Brightness.dark
-                          ? Colors.grey[400]
-                          : Colors.grey[600],
+                  color: theme.brightness == Brightness.dark
+                      ? Colors.grey[400]
+                      : Colors.grey[600],
                   fontWeight: FontWeight.w500,
                 ),
               ),

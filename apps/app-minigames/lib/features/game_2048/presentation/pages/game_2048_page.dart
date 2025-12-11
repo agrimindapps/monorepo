@@ -1,11 +1,12 @@
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/entities/enums.dart';
+import '../game/game_2048.dart';
 import '../providers/game_2048_notifier.dart';
 import '../widgets/game_controls_widget.dart';
 import '../widgets/game_over_dialog.dart';
-import '../widgets/grid_widget.dart';
 
 /// Main page for 2048 game
 class Game2048Page extends ConsumerStatefulWidget {
@@ -16,6 +17,8 @@ class Game2048Page extends ConsumerStatefulWidget {
 }
 
 class _Game2048PageState extends ConsumerState<Game2048Page> {
+  Game2048? _game;
+
   @override
   void initState() {
     super.initState();
@@ -25,10 +28,32 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
     });
   }
 
+  void _initGame(int gridSize) {
+    _game = Game2048(
+      gridSize: gridSize,
+      onScoreChanged: (score) {
+        // Add score to current score
+        final currentScore = ref.read(game2048Provider).score;
+        ref.read(game2048Provider.notifier).updateScore(currentScore + score);
+      },
+      onGameOver: () {
+        ref.read(game2048Provider.notifier).gameOver();
+      },
+      onWin: () {
+        ref.read(game2048Provider.notifier).win();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameState = ref.watch(game2048Provider);
     final notifier = ref.read(game2048Provider.notifier);
+
+    // Initialize or re-initialize game if board size changes
+    if (_game == null || _game!.gridSize != gameState.boardSize.size) {
+      _initGame(gameState.boardSize.size);
+    }
 
     // Show game over dialog when game ends
     if (gameState.status == GameStatus.won ||
@@ -52,6 +77,7 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
             tooltip: 'Tamanho do tabuleiro',
             onSelected: (size) {
               notifier.changeBoardSize(size);
+              // Game will be re-initialized in build
             },
             itemBuilder: (context) => BoardSize.values.map((size) {
               return PopupMenuItem(
@@ -98,33 +124,16 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
 
             const SizedBox(height: 24),
 
-            // Game grid with swipe detector
+            // Game grid with Flame
             Expanded(
               child: Center(
-                child: GestureDetector(
-                  onVerticalDragEnd: (details) {
-                    if (details.primaryVelocity! < -50) {
-                      // Swipe up
-                      notifier.move(Direction.up);
-                    } else if (details.primaryVelocity! > 50) {
-                      // Swipe down
-                      notifier.move(Direction.down);
-                    }
-                  },
-                  onHorizontalDragEnd: (details) {
-                    if (details.primaryVelocity! < -50) {
-                      // Swipe left
-                      notifier.move(Direction.left);
-                    } else if (details.primaryVelocity! > 50) {
-                      // Swipe right
-                      notifier.move(Direction.right);
-                    }
-                  },
-                  child: GridWidget(
-                    grid: gameState.grid,
-                    cellSize: _calculateCellSize(
-                      context,
-                      gameState.boardSize.size,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: GameWidget(
+                      game: _game!,
+                      key: ValueKey(gameState.boardSize), // Force rebuild on resize
                     ),
                   ),
                 ),
@@ -136,19 +145,6 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
         ),
       ),
     );
-  }
-
-  /// Calculates cell size based on screen width and grid size
-  double _calculateCellSize(BuildContext context, int gridSize) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final maxGridWidth = screenWidth * 0.95;
-    final spacing = 8.0;
-    final totalSpacing = spacing * (gridSize + 1);
-    final availableSpace = maxGridWidth - totalSpacing;
-    final cellSize = availableSpace / gridSize;
-
-    // Clamp between min and max sizes
-    return cellSize.clamp(50.0, 80.0);
   }
 
   /// Shows game over/win dialog
@@ -165,7 +161,10 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
         moves: gameState.moves,
         duration: gameState.gameDuration,
         isNewHighScore: notifier.isNewHighScore,
-        onRestart: () => notifier.restart(),
+        onRestart: () {
+          notifier.restart();
+          _game?.restart();
+        },
         onContinue: gameState.status == GameStatus.won
             ? () => notifier.continueAfterWin()
             : null,
@@ -193,6 +192,7 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
             onPressed: () {
               Navigator.pop(context);
               notifier.restart();
+              _game?.restart();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,

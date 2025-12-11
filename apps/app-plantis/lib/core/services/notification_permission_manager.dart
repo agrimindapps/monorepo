@@ -15,8 +15,8 @@ class NotificationPermissionManager implements IPermissionManager {
   @override
   Future<bool> requestNotificationPermissions() async {
     try {
-      final currentPermission =
-          await _notificationService.areNotificationsEnabled();
+      final currentPermission = await _notificationService
+          .areNotificationsEnabled();
       if (currentPermission) {
         debugPrint('✅ Notifications already enabled');
         return true;
@@ -41,8 +41,8 @@ class NotificationPermissionManager implements IPermissionManager {
   @override
   Future<NotificationPermissionStatus> getPermissionStatus() async {
     try {
-      final hasPermission =
-          await _notificationService.areNotificationsEnabled();
+      final hasPermission = await _notificationService
+          .areNotificationsEnabled();
       return hasPermission
           ? NotificationPermissionStatus.granted
           : NotificationPermissionStatus.denied;

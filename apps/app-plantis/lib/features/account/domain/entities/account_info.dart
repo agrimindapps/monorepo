@@ -24,15 +24,15 @@ class AccountInfo extends Equatable {
 
   @override
   List<Object?> get props => [
-        userId,
-        displayName,
-        email,
-        isAnonymous,
-        isPremium,
-        createdAt,
-        lastLoginAt,
-        avatarUrl,
-      ];
+    userId,
+    displayName,
+    email,
+    isAnonymous,
+    isPremium,
+    createdAt,
+    lastLoginAt,
+    avatarUrl,
+  ];
 
   AccountInfo copyWith({
     String? userId,

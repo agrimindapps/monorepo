@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
-
 class PromoCallToAction extends StatelessWidget {
   const PromoCallToAction({super.key});
 
@@ -54,7 +52,7 @@ class PromoCallToAction extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Content
           Center(
             child: ConstrainedBox(
@@ -67,11 +65,7 @@ class PromoCallToAction extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.eco,
-                      size: 48,
-                      color: Colors.white,
-                    ),
+                    child: const Icon(Icons.eco, size: 48, color: Colors.white),
                   ),
                   const SizedBox(height: 32),
                   Text(

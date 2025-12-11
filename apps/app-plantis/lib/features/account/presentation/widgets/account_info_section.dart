@@ -1,18 +1,142 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:core/core.dart' hide AuthState;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/auth_providers.dart' as local;
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/theme/plantis_colors.dart';
-import '../../../../shared/widgets/base_page_scaffold.dart';
 
-class AccountInfoSection extends ConsumerWidget {
+class AccountInfoSection extends ConsumerStatefulWidget {
   const AccountInfoSection({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AccountInfoSection> createState() => _AccountInfoSectionState();
+}
+
+class _AccountInfoSectionState extends ConsumerState<AccountInfoSection> {
+  Future<void> _handleImageSelection(bool hasCurrentImage) async {
+    final imageService = ref.read(localProfileImageServiceProvider);
+
+    await ProfileImagePickerWidget.show(
+      context: context,
+      hasCurrentImage: hasCurrentImage,
+      onImageSelected: (File file) async {
+        final result = await imageService.processImageToBase64(file);
+        result.fold(
+          (failure) {
+            if (mounted) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(failure.message)));
+            }
+          },
+          (base64String) async {
+            final updateResult = await ref
+                .read(local.authProvider.notifier)
+                .updateProfile(photoUrl: base64String);
+            if (mounted) {
+              updateResult.fold(
+                (failure) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Erro ao atualizar foto: ${failure.message}',
+                      ),
+                    ),
+                  );
+                },
+                (_) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Foto de perfil atualizada!')),
+                  );
+                },
+              );
+            }
+          },
+        );
+      },
+      onRemoveImage: () async {
+        final updateResult = await ref
+            .read(local.authProvider.notifier)
+            .updateProfile(photoUrl: null);
+        if (mounted) {
+          updateResult.fold(
+            (failure) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Erro ao remover foto: ${failure.message}'),
+                ),
+              );
+            },
+            (_) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Foto de perfil removida!')),
+              );
+            },
+          );
+        }
+      },
+    );
+  }
+
+  Future<void> _handleChangePassword() async {
+    final user = ref.read(local.authProvider).value?.currentUser;
+    if (user == null || user.email.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Alterar Senha'),
+        content: Text(
+          'Deseja enviar um email de redefinição de senha para ${user.email}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      final success = await ref
+          .read(local.authProvider.notifier)
+          .resetPassword(user.email);
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Email de redefinição enviado! Verifique sua caixa de entrada.',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erro ao enviar email de redefinição.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authStateAsync = ref.watch(local.authProvider);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return authStateAsync.when(
       data: (authState) {
@@ -27,123 +151,309 @@ class AccountInfoSection extends ConsumerWidget {
           user,
           isAnonymous,
         );
-        final email = DataSanitizationService.sanitizeEmail(user, isAnonymous);
+        final email = user.email;
+        final hasPhoto = user.photoUrl != null && user.photoUrl!.isNotEmpty;
 
-        return PlantisCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Avatar e informações básicas
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: PlantisColors.primary,
-                    child: Text(
-                      displayName.isNotEmpty
-                          ? displayName[0].toUpperCase()
-                          : '?',
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          email,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurface.withValues(
-                              alpha: 0.7,
+        return Container(
+          decoration: BoxDecoration(
+            color: isDark ? theme.colorScheme.surface : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                // Avatar e informações básicas
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: !isAnonymous
+                          ? () => _handleImageSelection(hasPhoto)
+                          : null,
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: !isAnonymous
+                                    ? PlantisColors.primary
+                                    : Colors.grey.shade400,
+                                width: 3,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: !isAnonymous
+                                      ? PlantisColors.primary.withValues(
+                                          alpha: 0.3,
+                                        )
+                                      : Colors.grey.withValues(alpha: 0.3),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: CircleAvatar(
+                              radius: 32,
+                              backgroundColor: !isAnonymous
+                                  ? PlantisColors.primary
+                                  : Colors.grey.shade400,
+                              backgroundImage: hasPhoto
+                                  ? (user.photoUrl!.startsWith('http')
+                                        ? NetworkImage(user.photoUrl!)
+                                        : MemoryImage(
+                                                base64Decode(user.photoUrl!),
+                                              )
+                                              as ImageProvider)
+                                  : null,
+                              child: !hasPhoto
+                                  ? Text(
+                                      displayName.isNotEmpty
+                                          ? displayName[0].toUpperCase()
+                                          : '?',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
-                        ),
-                      ],
+                          if (!isAnonymous)
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: PlantisColors.primary,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Status da conta
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: isAnonymous
-                      ? PlantisColors.warning.withValues(alpha: 0.1)
-                      : PlantisColors.success.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: isAnonymous
-                        ? PlantisColors.warning
-                        : PlantisColors.success,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isAnonymous ? Icons.warning : Icons.verified,
-                      size: 16,
-                      color: isAnonymous
-                          ? PlantisColors.warning
-                          : PlantisColors.success,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      isAnonymous ? 'Conta Temporária' : 'Conta Verificada',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isAnonymous
-                            ? PlantisColors.warning
-                            : PlantisColors.success,
-                        fontWeight: FontWeight.w500,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  displayName,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: theme.colorScheme.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (!isAnonymous)
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 18),
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Funcionalidade em desenvolvimento',
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  color: PlantisColors.primary,
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            email,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          if (!isAnonymous) ...[
+                            const SizedBox(height: 4),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: PlantisColors.success.withValues(
+                                  alpha: 0.1,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.check_circle,
+                                    size: 12,
+                                    color: PlantisColors.success,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Membro desde ${_formatDate(user.createdAt)}',
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: PlantisColors.success,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              if (user.isAnonymous) ...[
-                const SizedBox(height: 12),
-                Text(
-                  'Para acessar todos os recursos, faça login com sua conta Google.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                if (!isAnonymous) ...[
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 16),
+
+                  // Seção de Informações da Conta
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Informações da Conta',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: PlantisColors.primary,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
-                ),
+                  const SizedBox(height: 12),
+                  _buildInfoRow(
+                    context,
+                    'Último acesso',
+                    _formatDate(user.lastLoginAt),
+                  ),
+                  if (!isAnonymous && user.provider == AuthProvider.email) ...[
+                    const SizedBox(height: 8),
+                    _buildActionRow(
+                      context,
+                      'Senha',
+                      'Alterar',
+                      Icons.lock_reset,
+                      _handleChangePassword,
+                    ),
+                  ],
+                ],
               ],
-            ],
+            ),
           ),
         );
       },
-      loading: () =>
-          const PlantisCard(child: Center(child: CircularProgressIndicator())),
-      error: (error, stack) => PlantisCard(
-        child: Center(
-          child: Text(
-            'Erro ao carregar informações da conta',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Text(
+          'Erro ao carregar informações da conta',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.error,
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildActionRow(
+    BuildContext context,
+    String label,
+    String actionLabel,
+    IconData icon,
+    VoidCallback onTap,
+  ) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            child: Row(
+              children: [
+                Text(
+                  actionLabel,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: PlantisColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(icon, size: 16, color: PlantisColors.primary),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatDate(dynamic date) {
+    if (date == null) return 'N/A';
+    final DateTime dateTime = date is DateTime ? date : DateTime.now();
+    return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year}';
   }
 }

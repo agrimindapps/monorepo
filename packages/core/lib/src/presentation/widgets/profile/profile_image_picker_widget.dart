@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../../../core/theme/design_tokens.dart';
-
 /// Widget modal elegante para seleção de imagem de perfil
 /// Permite escolher entre câmera, galeria ou remover foto atual
 class ProfileImagePickerWidget extends StatelessWidget {
@@ -145,9 +143,7 @@ class ProfileImagePickerWidget extends StatelessWidget {
                   style: TextButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius: GasometerDesignTokens.borderRadius(
-                        GasometerDesignTokens.radiusButton,
-                      ),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   child: Text(
@@ -183,15 +179,13 @@ class ProfileImagePickerWidget extends StatelessWidget {
     final primaryColor =
         isDestructive
             ? Theme.of(context).colorScheme.error
-            : GasometerDesignTokens.colorPrimary;
+            : Theme.of(context).colorScheme.primary;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: GasometerDesignTokens.borderRadius(
-          GasometerDesignTokens.radiusButton,
-        ),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -204,9 +198,7 @@ class ProfileImagePickerWidget extends StatelessWidget {
                     : Theme.of(
                       context,
                     ).colorScheme.primary.withValues(alpha: 0.05),
-            borderRadius: GasometerDesignTokens.borderRadius(
-              GasometerDesignTokens.radiusButton,
-            ),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: primaryColor.withValues(alpha: 0.2),
               width: 1,
@@ -219,9 +211,7 @@ class ProfileImagePickerWidget extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   color: primaryColor.withValues(alpha: 0.1),
-                  borderRadius: GasometerDesignTokens.borderRadius(
-                    GasometerDesignTokens.radiusButton,
-                  ),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child:
                     isLoading
@@ -235,7 +225,7 @@ class ProfileImagePickerWidget extends StatelessWidget {
                         : Icon(
                           icon,
                           color: primaryColor,
-                          size: GasometerDesignTokens.iconSizeButton,
+                          size: 24,
                         ),
               ),
 

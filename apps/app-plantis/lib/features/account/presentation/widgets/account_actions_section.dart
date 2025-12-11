@@ -2,22 +2,11 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart' as local;
-import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../dialogs/account_deletion_dialog.dart';
 import '../providers/dialog_managers_providers.dart';
+import '../utils/widget_utils.dart';
 
 /// ✅ REFACTORED: AccountActionsSection - Follows SRP
-///
-/// ANTES: 460 linhas com:
-/// ❌ Dialog construction
-/// ❌ Dialog state management
-/// ❌ Business logic
-/// ❌ Service calls
-///
-/// DEPOIS: Widget apenas cuida de UI
-/// ✅ UI rendering
-/// ✅ Delegação de dialogs a managers
-/// ✅ Limpo e manutenível
 class AccountActionsSection extends ConsumerWidget {
   const AccountActionsSection({super.key});
 
@@ -29,22 +18,49 @@ class AccountActionsSection extends ConsumerWidget {
       data: (authState) => authState.isAnonymous,
       orElse: () => true,
     );
+    final isDark = theme.brightness == Brightness.dark;
 
     // Obter managers via Riverpod (DIP)
     final clearDataManager = ref.watch(clearDataDialogManagerProvider);
     final logoutManager = ref.watch(logoutDialogManagerProvider);
 
-    return PlantisCard(
-      child: Column(
-        children: [
-          // ✅ Limpar Dados - Delegado a manager
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        buildSectionHeader(context, 'Ações da Conta'),
+        const SizedBox(height: 16),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: isDark ? theme.colorScheme.surface : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              // ✅ Limpar Dados - Delegado a manager
           ListTile(
-            leading: Icon(Icons.delete_sweep, color: theme.colorScheme.error),
-            title: Text(
-              'Limpar Dados',
-              style: TextStyle(color: theme.colorScheme.error),
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.delete_sweep,
+                color: Colors.red,
+                size: 20,
+              ),
             ),
+            title: const Text('Limpar Dados'),
             subtitle: const Text('Limpar plantas e tarefas mantendo conta'),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () async {
               await clearDataManager.show(
                 context,
@@ -71,15 +87,18 @@ class AccountActionsSection extends ConsumerWidget {
 
           // ✅ Logout - Delegado a manager
           ListTile(
-            leading: Icon(
-              Icons.logout_outlined,
-              color: theme.colorScheme.error,
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.logout, color: Colors.red, size: 20),
             ),
-            title: Text(
-              'Sair da Conta',
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
+            title: const Text('Sair da Conta'),
             subtitle: const Text('Fazer logout da aplicação'),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () async {
               await logoutManager.show(
                 context,
@@ -99,15 +118,22 @@ class AccountActionsSection extends ConsumerWidget {
           // ✅ Excluir Conta - Delegado a dialog dedicado
           if (!isAnonymous) ...[
             ListTile(
-              leading: Icon(
-                Icons.delete_outline,
-                color: theme.colorScheme.error,
+              leading: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.delete_forever,
+                  color: Colors.red,
+                  size: 20,
+                ),
               ),
-              title: Text(
-                'Excluir Conta',
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
+              title: const Text('Excluir Conta'),
               subtitle: const Text('Remover conta permanentemente'),
+              trailing: const Icon(Icons.chevron_right),
               onTap: () {
                 authStateAsync.whenData((authState) {
                   showDialog<void>(
@@ -119,8 +145,10 @@ class AccountActionsSection extends ConsumerWidget {
               },
             ),
           ],
-        ],
-      ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

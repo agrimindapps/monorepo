@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../premium/presentation/providers/premium_notifier.dart';
-import '../../../premium/presentation/widgets/premium_status_card.dart';
 import '../../../premium/presentation/widgets/subscription_info_card.dart';
 
 /// Widget para exibir status de assinatura premium no perfil
@@ -38,10 +37,12 @@ class ProfilePremiumSection extends ConsumerWidget {
               );
             }
 
-            return InkWell(
-              onTap: () => context.push('/premium'),
-              borderRadius: BorderRadius.circular(16),
-              child: const PremiumStatusCard(),
+            return DecoratedBox(
+              decoration: _getCardDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _buildNoPremiumWidget(context),
+              ),
             );
           },
           loading: () => const Center(
@@ -51,13 +52,72 @@ class ProfilePremiumSection extends ConsumerWidget {
             ),
           ),
           error: (error, stack) {
-            // Fallback to basic card on error, or show nothing if critical
-            return InkWell(
-              onTap: () => context.push('/premium'),
-              borderRadius: BorderRadius.circular(16),
-              child: const PremiumStatusCard(),
+            return DecoratedBox(
+              decoration: _getCardDecoration(context),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: _buildNoPremiumWidget(context),
+              ),
             );
           },
+        ),
+      ],
+    );
+  }
+
+  /// Widget para quando não tem premium
+  Widget _buildNoPremiumWidget(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.workspace_premium_outlined,
+              color: Colors.grey.shade400,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Assinatura Gratuita',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ElevatedButton.icon(
+          onPressed: () {
+            context.push('/premium');
+          },
+          icon: const Icon(Icons.upgrade, size: 18),
+          label: const Text('Assinar Premium'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: GasometerDesignTokens.colorPrimary,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 40),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Helper: Decoração de card
+  BoxDecoration _getCardDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return BoxDecoration(
+      color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
         ),
       ],
     );

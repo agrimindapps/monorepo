@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'package:core/core.dart' hide AuthState;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../controllers/profile_controller.dart';
-import 'profile_image_picker_widget.dart';
 
 /// Widget combinado para exibir e editar informações do usuário e da conta
 /// Adaptado do app-receituagro para o app-gasometer
@@ -376,14 +374,14 @@ class _ProfileCombinedInfoSectionState
                   actionLabel,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: GasometerDesignTokens.colorSecondary,
+                    color: GasometerDesignTokens.colorPrimary,
                   ),
                 ),
                 const SizedBox(width: 4),
                 Icon(
                   icon,
                   size: 16,
-                  color: GasometerDesignTokens.colorSecondary,
+                  color: GasometerDesignTokens.colorPrimary,
                 ),
               ],
             ),

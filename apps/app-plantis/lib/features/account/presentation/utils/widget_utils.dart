@@ -19,7 +19,7 @@ String formatDate(dynamic date) {
 /// Utilitários para construção de widgets comuns
 Widget buildSectionHeader(BuildContext context, String title) {
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+    padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
     child: Text(
       title,
       style: Theme.of(context).textTheme.titleSmall?.copyWith(

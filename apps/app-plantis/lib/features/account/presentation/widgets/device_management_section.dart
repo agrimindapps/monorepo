@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/providers/device_management_providers.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../shared/widgets/base_page_scaffold.dart';
+import '../../../../core/theme/plantis_colors.dart';
 import '../utils/widget_utils.dart';
 
 /// Seção de gerenciamento de dispositivos na página de perfil
@@ -14,13 +14,26 @@ class DeviceManagementSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final deviceManagementAsync = ref.watch(deviceManagementNotifierProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildSectionHeader(context, 'Dispositivos Conectados'),
         const SizedBox(height: 16),
-        PlantisCard(
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: isDark ? theme.colorScheme.surface : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: deviceManagementAsync.when(
             data: (deviceState) => _buildDeviceContent(context, deviceState),
             loading: () => _buildLoadingState(),
@@ -70,7 +83,7 @@ class DeviceManagementSection extends ConsumerWidget {
         ),
         if (deviceState.hasDevices) ...[
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             child: Row(
               children: [
                 Expanded(
@@ -85,16 +98,14 @@ class DeviceManagementSection extends ConsumerWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: OutlinedButton.icon(
+                  child: OutlinedButton(
                     onPressed: deviceState.activeDeviceCount > 1
                         ? () => _showRevokeAllDialog(context)
                         : null,
-                    icon: const Icon(Icons.logout, size: 18),
-                    label: const Text('Revogar Outros'),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 12),
-                      foregroundColor: Colors.red,
                     ),
+                    child: const Text('Desconectar'),
                   ),
                 ),
               ],
@@ -160,7 +171,7 @@ class DeviceManagementSection extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Row(
           children: [
-            Icon(Icons.warning, color: Colors.orange),
+            Icon(Icons.warning, color: PlantisColors.warning),
             SizedBox(width: 8),
             Text('Revogar Todos os Outros Dispositivos?'),
           ],

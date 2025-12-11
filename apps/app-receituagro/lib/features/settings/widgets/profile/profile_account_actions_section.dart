@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Widget para ações da conta (logout, delete, clear data)
 /// Responsabilidade: Display e ações destrutivas da conta
@@ -10,7 +9,6 @@ class ProfileAccountActionsSection extends ConsumerWidget {
     required this.onLogout,
     required this.onDeleteAccount,
     required this.onClearData,
-    this.onChangePassword,
     super.key,
   });
 
@@ -18,13 +16,10 @@ class ProfileAccountActionsSection extends ConsumerWidget {
   final VoidCallback onLogout;
   final VoidCallback onDeleteAccount;
   final VoidCallback onClearData;
-  final VoidCallback? onChangePassword;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final user = authData?.currentUser;
-    final isEmailProvider = user?.provider == AuthProvider.email;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,26 +38,6 @@ class ProfileAccountActionsSection extends ConsumerWidget {
           decoration: _getCardDecoration(context),
           child: Column(
             children: [
-              if (isEmailProvider)
-                ListTile(
-                  leading: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.lock_reset,
-                      color: Colors.blue,
-                      size: 20,
-                    ),
-                  ),
-                  title: const Text('Alterar Senha'),
-                  subtitle: const Text('Enviar email de redefinição'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: onChangePassword,
-                ),
               ListTile(
                 leading: Container(
                   width: 40,
@@ -77,12 +52,27 @@ class ProfileAccountActionsSection extends ConsumerWidget {
                     size: 20,
                   ),
                 ),
-                title: const Text('Remover Dados Pessoais'),
+                title: const Text('Limpar Dados'),
                 subtitle: const Text(
-                  'Remove dados e sincroniza com outros dispositivos',
+                  'Limpar dados do aplicativo mantendo conta',
                 ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: onClearData,
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.logout, color: Colors.red, size: 20),
+                ),
+                title: const Text('Sair da Conta'),
+                subtitle: const Text('Fazer logout da aplicação'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: onLogout,
               ),
               ListTile(
                 leading: Container(
@@ -99,24 +89,9 @@ class ProfileAccountActionsSection extends ConsumerWidget {
                   ),
                 ),
                 title: const Text('Excluir Conta'),
-                subtitle: const Text('Remove permanentemente sua conta'),
+                subtitle: const Text('Remover conta permanentemente'),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: onDeleteAccount,
-              ),
-              ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.logout, color: Colors.red, size: 20),
-                ),
-                title: const Text('Sair da Conta'),
-                subtitle: const Text('Fazer logout desta conta'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: onLogout,
               ),
             ],
           ),

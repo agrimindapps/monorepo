@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/plantis_colors.dart';
 
 /// Widget responsável por exibir o header da página de perfil
 class ProfileHeader extends ConsumerWidget {
@@ -20,18 +21,18 @@ class ProfileHeader extends ConsumerWidget {
           end: Alignment.bottomRight,
           colors: isDark
               ? [
-                  const Color(0xFFE65100), // Darker Orange
-                  const Color(0xFFBF360C), // Even Darker Orange
+                  PlantisColors.primaryDark,
+                  const Color(0xFF065030), // Even Darker Green
                 ]
               : [
-                  const Color(0xFFFF9800), // Orange
-                  const Color(0xFFF57C00), // Dark Orange
+                  PlantisColors.primary,
+                  PlantisColors.primaryDark,
                 ],
         ),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.2),
+            color: PlantisColors.primary.withValues(alpha: 0.2),
             blurRadius: 9,
             offset: const Offset(0, 3),
             spreadRadius: 0,

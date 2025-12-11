@@ -4,14 +4,13 @@ import 'package:core/core.dart' show GoRouterHelper;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../features/data_management/domain/services/data_sanitization_service.dart';
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import 'profile_dialogs.dart';
 import 'profile_info_item.dart';
-import 'profile_section_card.dart';
-import 'profile_settings_item.dart';
 
 /// Widget para seção de ações da conta (logout, excluir)
 class ProfileActionsSection extends ConsumerWidget {
@@ -24,44 +23,114 @@ class ProfileActionsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ProfileSectionCard(
-      title: 'Ações da Conta',
-      icon: Icons.security,
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Card(
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(
-              GasometerDesignTokens.radiusDialog,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+          child: Text(
+            'Ações da Conta',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: GasometerDesignTokens.colorPrimary,
             ),
           ),
-          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        ),
+        DecoratedBox(
+          decoration: _getCardDecoration(context),
           child: Column(
             children: [
-              ProfileSettingsItem(
-                icon: Icons.logout,
-                title: 'Sair da Conta',
-                subtitle: isAnonymous ? 'Sair do modo anônimo' : 'Fazer logout',
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.delete_sweep,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                title: const Text('Limpar Dados'),
+                subtitle: const Text('Limpar veículos, abastecimentos e manutenções'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  _showClearDataDialog(context);
+                },
+              ),
+              ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.logout, color: Colors.red, size: 20),
+                ),
+                title: const Text('Sair da Conta'),
+                subtitle: const Text('Fazer logout da aplicação'),
+                trailing: const Icon(Icons.chevron_right),
                 onTap: () => _handleLogout(context, ref),
-                isFirst: true,
-                isLast: isAnonymous,
               ),
               if (!isAnonymous)
-                ProfileSettingsItem(
-                  icon: Icons.delete_forever,
-                  title: 'Excluir Conta',
-                  subtitle: 'Remover permanentemente sua conta',
+                ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.delete_forever,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                  ),
+                  title: const Text('Excluir Conta'),
+                  subtitle: const Text('Remover conta permanentemente'),
+                  trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     HapticFeedback.lightImpact();
                     _showAccountDeletionDialog(context);
                   },
-                  isLast: true,
-                  isDestructive: true,
                 ),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  /// Helper: Decoração de card
+  BoxDecoration _getCardDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return BoxDecoration(
+      color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showClearDataDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => const DataClearDialog(),
     );
   }
 

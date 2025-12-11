@@ -283,6 +283,37 @@ class AuthNotifier extends _$AuthNotifier {
   bool get isAnonymous =>
       state.value?.currentUser?.provider.name == 'anonymous';
 
+  Future<Either<Failure, void>> updateProfile({
+    String? displayName,
+    String? photoUrl,
+  }) async {
+    final currentState = state.value ?? const AuthState();
+    state = AsyncData(currentState.copyWith(isLoading: true));
+
+    final result = await _authRepository.updateProfile(
+      displayName: displayName,
+      photoUrl: photoUrl,
+    );
+
+    return result.fold(
+      (failure) {
+        final newState = state.value ?? const AuthState();
+        state = AsyncData(
+          newState.copyWith(errorMessage: failure.message, isLoading: false),
+        );
+        return Left(failure);
+      },
+      (user) {
+        final newState = state.value ?? const AuthState();
+        state = AsyncData(
+          newState.copyWith(currentUser: user, isLoading: false),
+        );
+        _authStateNotifier.updateUser(user);
+        return const Right(null);
+      },
+    );
+  }
+
   Future<void> login(String email, String password) async {
     final currentState = state.value ?? const AuthState();
     state = AsyncData(

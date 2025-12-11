@@ -1,20 +1,18 @@
 import 'dart:io';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../auth/presentation/notifiers/notifiers.dart';
 import '../../domain/services/account_service.dart';
-import '../../domain/services/profile_image_service.dart';
 import '../../domain/services/ui_feedback_service.dart';
-import '../widgets/profile_image_picker_widget.dart';
 
 /// Controller responsável pela lógica de negócio do perfil
 class ProfileController {
   ProfileController(this._accountService, this._imageService);
   final AccountService _accountService;
-  final GasometerProfileImageService _imageService;
+  final LocalProfileImageService _imageService;
 
   /// Atualiza o nome do usuário
   Future<void> updateName(
@@ -62,11 +60,11 @@ class ProfileController {
       UiFeedbackService.showImageProcessingDialog(context);
 
       final validationResult = _imageService.validateImageFile(imageFile);
-      if (validationResult.isFailure) {
+      if (validationResult.isLeft()) {
         Navigator.of(context).pop(); // Remove loading dialog
         UiFeedbackService.showErrorSnackBar(
           context,
-          validationResult.failure.message,
+          validationResult.fold((l) => l.message, (r) => ''),
         );
         return;
       }

@@ -22,7 +22,6 @@ import '../../features/maintenance/data/datasources/maintenance_local_datasource
 import '../../features/maintenance/data/sync/maintenance_drift_sync_adapter.dart';
 import '../../features/odometer/data/datasources/odometer_reading_local_datasource.dart';
 import '../../features/odometer/data/sync/odometer_drift_sync_adapter.dart';
-import '../../features/profile/domain/services/profile_image_service.dart';
 import '../../features/sync/domain/services/auto_sync_service.dart';
 import '../../features/sync/domain/services/gasometer_sync_orchestrator.dart';
 import '../../features/sync/domain/services/gasometer_sync_service.dart';
@@ -71,10 +70,6 @@ final enhancedAnalyticsServiceProvider = Provider<EnhancedAnalyticsService>((ref
 
 final gasometerAnalyticsServiceProvider = Provider<GasometerAnalyticsService>((ref) {
   return GasometerAnalyticsService(ref.watch(enhancedAnalyticsServiceProvider));
-});
-
-final gasometerProfileImageServiceProvider = Provider<GasometerProfileImageService>((ref) {
-  return GasometerProfileImageService(ref.watch(gasometerAnalyticsServiceProvider));
 });
 
 final imageSyncServiceProvider = Provider<ImageSyncService>((ref) {

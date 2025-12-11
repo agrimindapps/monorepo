@@ -77,7 +77,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         return Scaffold(
           body: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.all(8),
               child: ResponsiveContentWrapper(
                 child: Column(
                   children: [
@@ -147,8 +147,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                                       _handleDeleteAccount(context, ref),
                                   onClearData: () =>
                                       _handleClearData(context, ref),
-                                  onChangePassword: () =>
-                                      _handleChangePassword(context, ref),
                                 ),
                                 const SizedBox(height: 8),
                               ],

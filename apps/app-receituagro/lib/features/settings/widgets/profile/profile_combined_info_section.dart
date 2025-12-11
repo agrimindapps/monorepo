@@ -1,9 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:core/core.dart' hide AuthState;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/providers/auth_providers.dart';
 import '../../constants/settings_design_tokens.dart';
@@ -30,7 +29,6 @@ class ProfileCombinedInfoSection extends ConsumerStatefulWidget {
 
 class _ProfileCombinedInfoSectionState
     extends ConsumerState<ProfileCombinedInfoSection> {
-  final ImagePicker _picker = ImagePicker();
   bool _isEditing = false;
   late TextEditingController _nameController;
   String? _imageBase64;
@@ -58,34 +56,41 @@ class _ProfileCombinedInfoSectionState
   }
 
   Future<void> _pickImage() async {
-    try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
-        maxWidth: 512, // Redução de escala
-        maxHeight: 512,
-        imageQuality: 70, // Compressão
-      );
+    final imageService = ref.read(localProfileImageServiceProvider);
 
-      if (image != null) {
-        final bytes = await image.readAsBytes();
-        final base64String = base64Encode(bytes);
-        setState(() {
-          _imageBase64 = base64String;
-        });
-
-        // Se não estiver editando o nome, salva a imagem imediatamente
-        if (!_isEditing) {
-          widget.onEditProfile?.call(_nameController.text, _imageBase64);
-        }
-      }
-    } catch (e) {
-      debugPrint('Erro ao selecionar imagem: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao selecionar imagem: $e')),
+    await ProfileImagePickerWidget.show(
+      context: context,
+      hasCurrentImage: _imageBase64 != null ||
+          (widget.authData.currentUser?.photoUrl != null),
+      onImageSelected: (File file) async {
+        final result = await imageService.processImageToBase64(file);
+        result.fold(
+          (failure) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(failure.message)),
+              );
+            }
+          },
+          (base64String) {
+            setState(() {
+              _imageBase64 = base64String;
+            });
+            if (!_isEditing) {
+              widget.onEditProfile?.call(_nameController.text, _imageBase64);
+            }
+          },
         );
-      }
-    }
+      },
+      onRemoveImage: () {
+        setState(() {
+          _imageBase64 = null;
+        });
+        if (!_isEditing) {
+          widget.onEditProfile?.call(_nameController.text, null);
+        }
+      },
+    );
   }
 
   void _toggleEdit() {

@@ -1,54 +1,29 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:core/core.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image/image.dart' as img;
 
-import '../../../../core/error/failures.dart';
-import '../../../../core/services/analytics/gasometer_analytics_service.dart';
+import '../../domain/repositories/i_analytics_repository.dart';
+import '../../shared/utils/failure.dart';
 
-/// Alias para Result até encontrarmos o import correto
-class Result<T> {
-  const Result._(this._data, this._failure);
-
-  factory Result.success(T data) => Result._(data, null);
-  factory Result.failure(Failure failure) => Result._(null, failure);
-  final T? _data;
-  final Failure? _failure;
-
-  bool get isSuccess => _failure == null;
-  bool get isFailure => _failure != null;
-
-  T get data => _data!;
-  Failure get failure => _failure!;
-
-  void fold(void Function(Failure) onFailure, void Function(T) onSuccess) {
-    if (isFailure) {
-      onFailure(_failure!);
-    } else {
-      onSuccess(_data as T);
-    }
-  }
-}
-
-/// Serviço específico do Gasometer para manipulação de imagens de perfil
-/// Focado em operações locais com base64 encoding
-
-class GasometerProfileImageService {
-  GasometerProfileImageService(this._analytics);
-  final GasometerAnalyticsService _analytics;
+/// Serviço para manipulação local de imagens de perfil (Base64)
+/// Focado em operações locais com base64 encoding para sincronização via Drift
+class LocalProfileImageService {
+  LocalProfileImageService(this._analytics);
+  final IAnalyticsRepository _analytics;
 
   /// Processa imagem e converte para base64
-  Future<Result<String>> processImageToBase64(File imageFile) async {
+  Future<Either<Failure, String>> processImageToBase64(File imageFile) async {
     try {
       if (kDebugMode) {
         debugPrint(
-          '🖼️ GasometerProfileImageService: Processing image to base64',
+          '🖼️ LocalProfileImageService: Processing image to base64',
         );
       }
       if (!await imageFile.exists()) {
-        return Result.failure(
+        return Left(
           const ValidationFailure('Arquivo de imagem não encontrado'),
         );
       }
@@ -56,14 +31,16 @@ class GasometerProfileImageService {
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
       if (fileSizeInBytes > maxSizeInBytes) {
-        return Result.failure(
-          const ValidationFailure('Imagem muito grande. Máximo permitido: 5MB'),
+        return Left(
+          const ValidationFailure(
+            'Imagem muito grande. Máximo permitido: 5MB',
+          ),
         );
       }
       final imageBytes = await imageFile.readAsBytes();
       final image = img.decodeImage(imageBytes);
       if (image == null) {
-        return Result.failure(
+        return Left(
           const ValidationFailure('Formato de imagem não suportado'),
         );
       }
@@ -84,7 +61,8 @@ class GasometerProfileImageService {
       }
       final jpegBytes = img.encodeJpg(resizedImage, quality: 85);
       final base64String = base64Encode(jpegBytes);
-      await _analytics.logUserAction(
+      
+      await _analytics.logEvent(
         'profile_image_processed',
         parameters: {
           'original_size_kb': (fileSizeInBytes / 1024).round(),
@@ -101,21 +79,21 @@ class GasometerProfileImageService {
         );
       }
 
-      return Result.success(base64String);
+      return Right(base64String);
     } catch (e) {
       if (kDebugMode) {
         debugPrint(
-          '❌ GasometerProfileImageService: Error processing image: $e',
+          '❌ LocalProfileImageService: Error processing image: $e',
         );
       }
 
-      await _analytics.recordError(
-        e,
-        StackTrace.current,
-        reason: 'profile_image_processing_error',
+      await _analytics.logError(
+        error: e.toString(),
+        stackTrace: StackTrace.current.toString(),
+        additionalInfo: {'reason': 'profile_image_processing_error'},
       );
 
-      return Result.failure(
+      return Left(
         ServerFailure('Erro ao processar imagem: ${e.toString()}'),
       );
     }
@@ -123,12 +101,12 @@ class GasometerProfileImageService {
 
   /// Valida imagem antes do processamento
   /// Em web, pula validação de existência e tamanho síncronos (não suportados)
-  Result<void> validateImageFile(File imageFile) {
+  Either<Failure, void> validateImageFile(File imageFile) {
     try {
       // Em web, dart:io não é suportado, então apenas validamos a extensão
       if (!kIsWeb) {
         if (!imageFile.existsSync()) {
-          return Result.failure(
+          return Left(
             const ValidationFailure('Arquivo não encontrado'),
           );
         }
@@ -139,7 +117,7 @@ class GasometerProfileImageService {
 
       final bool hasValidExtension = validExtensions.any(extension.endsWith);
       if (!hasValidExtension) {
-        return Result.failure(
+        return Left(
           const ValidationFailure(
             'Formato não suportado. Use JPG, PNG ou WebP',
           ),
@@ -153,25 +131,31 @@ class GasometerProfileImageService {
           const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
           if (fileSizeInBytes > maxSizeInBytes) {
-            return Result.failure(
-              const ValidationFailure('Arquivo muito grande. Máximo: 5MB'),
+            return Left(
+              const ValidationFailure(
+                'Arquivo muito grande. Máximo: 5MB',
+              ),
             );
           }
 
           if (fileSizeInBytes == 0) {
-            return Result.failure(const ValidationFailure('Arquivo está vazio'));
+            return Left(const ValidationFailure('Arquivo está vazio'));
           }
         } catch (e) {
-          return Result.failure(
-            ValidationFailure('Erro ao validar tamanho: ${e.toString()}'),
+          return Left(
+            ValidationFailure(
+              'Erro ao validar tamanho: ${e.toString()}',
+            ),
           );
         }
       }
 
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
-      return Result.failure(
-        ValidationFailure('Erro ao validar arquivo: ${e.toString()}'),
+      return Left(
+        ValidationFailure(
+          'Erro ao validar arquivo: ${e.toString()}',
+        ),
       );
     }
   }
@@ -211,7 +195,7 @@ class GasometerProfileImageService {
   }
 
   /// Cria uma thumbnail da imagem
-  Future<Result<String>> createThumbnail(
+  Future<Either<Failure, String>> createThumbnail(
     String base64String, {
     int size = 64,
   }) async {
@@ -220,45 +204,21 @@ class GasometerProfileImageService {
       final image = img.decodeImage(bytes);
 
       if (image == null) {
-        return Result.failure(
-          const ValidationFailure('Não foi possível decodificar a imagem'),
+        return Left(
+          const ValidationFailure(
+            'Não foi possível decodificar a imagem',
+          ),
         );
       }
       final thumbnail = img.copyResizeCropSquare(image, size: size);
       final jpegBytes = img.encodeJpg(thumbnail, quality: 75);
       final thumbnailBase64 = base64Encode(jpegBytes);
 
-      return Result.success(thumbnailBase64);
+      return Right(thumbnailBase64);
     } catch (e) {
-      return Result.failure(
+      return Left(
         ServerFailure('Erro ao criar thumbnail: ${e.toString()}'),
       );
     }
-  }
-}
-
-/// Classe para representar resultado de processamento
-class ImageProcessingResult {
-  ImageProcessingResult({
-    required this.base64String,
-    required this.originalSizeKB,
-    required this.processedSizeKB,
-    required this.originalDimensions,
-    required this.processedDimensions,
-  });
-  final String base64String;
-  final int originalSizeKB;
-  final int processedSizeKB;
-  final String originalDimensions;
-  final String processedDimensions;
-
-  Map<String, dynamic> toMap() {
-    return {
-      'base64String': base64String,
-      'originalSizeKB': originalSizeKB,
-      'processedSizeKB': processedSizeKB,
-      'originalDimensions': originalDimensions,
-      'processedDimensions': processedDimensions,
-    };
   }
 }

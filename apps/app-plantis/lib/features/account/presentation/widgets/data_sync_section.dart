@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/providers/sync_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
-import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../utils/widget_utils.dart';
 
 class DataSyncSection extends ConsumerWidget {
@@ -17,25 +16,37 @@ class DataSyncSection extends ConsumerWidget {
     final syncState = ref.watch(syncProvider);
     final isSyncing = syncState.isSyncing;
     final lastSyncMessage = syncState.statusMessage;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         buildSectionHeader(context, 'Dados e Sincronização'),
         const SizedBox(height: 16),
-        PlantisCard(
+        DecoratedBox(
+          decoration: BoxDecoration(
+            color: isDark ? theme.colorScheme.surface : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: Column(
             children: [
               ListTile(
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    color: PlantisColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
                     isSyncing ? Icons.sync : Icons.cloud_done,
-                    color: PlantisColors.primary,
+                    color: PlantisColors.success,
                     size: 20,
                   ),
                 ),
@@ -71,12 +82,12 @@ class DataSyncSection extends ConsumerWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    color: PlantisColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.download,
-                    color: PlantisColors.primary,
+                    color: PlantisColors.success,
                     size: 20,
                   ),
                 ),
@@ -91,12 +102,12 @@ class DataSyncSection extends ConsumerWidget {
                 leading: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: PlantisColors.primary.withValues(alpha: 0.2),
+                    color: PlantisColors.success.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
                     Icons.table_view,
-                    color: PlantisColors.primary,
+                    color: PlantisColors.success,
                     size: 20,
                   ),
                 ),

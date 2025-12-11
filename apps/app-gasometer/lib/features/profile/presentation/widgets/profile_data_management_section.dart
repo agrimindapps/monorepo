@@ -3,8 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import 'profile_dialogs.dart';
-import 'profile_section_card.dart';
-import 'profile_settings_item.dart';
 
 /// Widget para seção de gerenciamento de dados
 class ProfileDataManagementSection extends StatelessWidget {
@@ -12,30 +10,62 @@ class ProfileDataManagementSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ProfileSectionCard(
-      title: 'Gerenciamento de Dados',
-      icon: Icons.cleaning_services,
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Card(
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: GasometerDesignTokens.borderRadius(
-              GasometerDesignTokens.radiusDialog,
+        Padding(
+          padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+          child: Text(
+            'Gerenciamento de Dados',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: GasometerDesignTokens.colorPrimary,
             ),
           ),
-          color: Theme.of(context).colorScheme.surfaceContainerHigh,
-          child: ProfileSettingsItem(
-            icon: Icons.delete_sweep,
-            title: 'Limpar Dados',
-            subtitle: 'Limpar veículos, abastecimentos e manutenções',
+        ),
+        DecoratedBox(
+          decoration: _getCardDecoration(context),
+          child: ListTile(
+            leading: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.delete_sweep,
+                color: Colors.red,
+                size: 20,
+              ),
+            ),
+            title: const Text('Limpar Dados'),
+            subtitle: const Text('Limpar veículos, abastecimentos e manutenções'),
+            trailing: const Icon(Icons.chevron_right),
             onTap: () {
               HapticFeedback.lightImpact();
               _showClearDataDialog(context);
             },
-            isFirst: true,
-            isLast: true,
-            isDestructive: true,
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Helper: Decoração de card
+  BoxDecoration _getCardDecoration(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return BoxDecoration(
+      color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
         ),
       ],
     );

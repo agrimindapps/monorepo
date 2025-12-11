@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import 'adaptive_main_navigation.dart';
 
@@ -6,11 +7,15 @@ import 'adaptive_main_navigation.dart';
 /// Maintains compatibility while providing responsive behavior
 class MainNavigation extends StatelessWidget {
   
-  const MainNavigation({super.key, required this.child});
-  final Widget child;
+  const MainNavigation({
+    super.key,
+    required this.navigationShell,
+  });
+
+  final StatefulNavigationShell navigationShell;
 
   @override
   Widget build(BuildContext context) {
-    return AdaptiveMainNavigation(child: child);
+    return AdaptiveMainNavigation(navigationShell: navigationShell);
   }
 }

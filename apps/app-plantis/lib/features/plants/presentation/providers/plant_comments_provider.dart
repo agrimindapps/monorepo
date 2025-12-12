@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/data/models/comentario_model.dart';
+import '../../../../core/providers/comments_providers.dart';
 import '../../domain/repositories/plant_comments_repository.dart';
 
 part 'plant_comments_provider.g.dart';
@@ -77,8 +78,7 @@ class PlantCommentsNotifier extends _$PlantCommentsNotifier {
 
   @override
   Future<PlantCommentsState> build() async {
-    // TODO: Initialize repository when plantCommentsRepositoryProvider is available
-    // _repository = ref.read(plantCommentsRepositoryProvider);
+    _repository = ref.read(plantCommentsRepositoryProvider);
     return const PlantCommentsState();
   }
 

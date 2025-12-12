@@ -1,8 +1,9 @@
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ValidationException;
 import 'package:drift/drift.dart';
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/tables/gasometer_tables.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
@@ -283,13 +284,13 @@ class VehicleDriftSyncAdapter
 
       // Validar campos obrigatórios
       if (entity.id.isEmpty) {
-        throw const ValidationFailure(
+        throw const ValidationException(
           'Vehicle ID missing from Firestore document',
         );
       }
 
       if (entity.brand.isEmpty || entity.model.isEmpty) {
-        throw const ValidationFailure(
+        throw const ValidationException(
           'Brand or model missing from Firestore document',
         );
       }
@@ -303,7 +304,7 @@ class VehicleDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      throw ParseFailure('Failed to parse vehicle from Firestore: $e');
+      throw ParseException('Failed to parse vehicle from Firestore: $e');
     }
   }
 

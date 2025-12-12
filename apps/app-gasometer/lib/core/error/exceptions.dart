@@ -1,63 +1,47 @@
-class ServerException implements Exception {
-  const ServerException(this.message);
+abstract class GasometerException implements Exception {
+  const GasometerException(this.message);
   final String message;
-  
+
   @override
-  String toString() => 'ServerException: $message';
+  String toString() => '$runtimeType: $message';
 }
 
-class CacheException implements Exception {
-  const CacheException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'CacheException: $message';
+class ServerException extends GasometerException {
+  const ServerException(super.message);
 }
 
-class NetworkException implements Exception {
-  const NetworkException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'NetworkException: $message';
+class CacheException extends GasometerException {
+  const CacheException(super.message);
 }
 
-class ValidationException implements Exception {
-  const ValidationException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'ValidationException: $message';
+class NetworkException extends GasometerException {
+  const NetworkException(super.message);
 }
 
-class AuthenticationException implements Exception {
-  const AuthenticationException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'AuthenticationException: $message';
+class ValidationException extends GasometerException {
+  const ValidationException(super.message);
 }
 
-class AuthorizationException implements Exception {
-  const AuthorizationException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'AuthorizationException: $message';
+class AuthenticationException extends GasometerException {
+  const AuthenticationException(super.message);
 }
 
-class VehicleNotFoundException implements Exception {
-  const VehicleNotFoundException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'VehicleNotFoundException: $message';
+class AuthorizationException extends GasometerException {
+  const AuthorizationException(super.message);
 }
 
-class SyncException implements Exception {
-  const SyncException(this.message);
-  final String message;
-  
-  @override
-  String toString() => 'SyncException: $message';
+class VehicleNotFoundException extends GasometerException {
+  const VehicleNotFoundException(super.message);
+}
+
+class NotFoundException extends GasometerException {
+  const NotFoundException(super.message);
+}
+
+class SyncException extends GasometerException {
+  const SyncException(super.message);
+}
+
+class ParseException extends GasometerException {
+  const ParseException(super.message);
 }

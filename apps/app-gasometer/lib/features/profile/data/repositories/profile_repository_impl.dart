@@ -1,5 +1,7 @@
 import 'package:dartz/dartz.dart';
+
 import '../../../../core/error/failures.dart';
+import '../../../auth/domain/repositories/auth_repository.dart';
 import '../../domain/entities/user_profile_entity.dart';
 import '../../domain/repositories/i_profile_repository.dart';
 import '../datasources/profile_local_datasource.dart';
@@ -7,13 +9,14 @@ import '../datasources/profile_remote_datasource.dart';
 import '../models/user_profile_model.dart';
 
 class ProfileRepositoryImpl implements IProfileRepository {
-
   ProfileRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.authRepository,
   });
   final IProfileRemoteDataSource remoteDataSource;
   final IProfileLocalDataSource localDataSource;
+  final AuthRepository authRepository;
 
   @override
   Future<Either<Failure, UserProfileEntity>> getProfile() async {
@@ -26,10 +29,18 @@ class ProfileRepositoryImpl implements IProfileRepository {
         // If cache fails, fetch from remote
       }
 
-      // TODO: Get userId from auth service
-      final profile = await remoteDataSource.getProfile('current_user_id');
-      await localDataSource.cacheProfile(profile);
-      return Right(profile);
+      final userResult = await authRepository.getCurrentUser();
+      return userResult.fold(
+        (failure) => Left(failure),
+        (user) async {
+          if (user == null) {
+            return const Left(AuthFailure('User not authenticated'));
+          }
+          final profile = await remoteDataSource.getProfile(user.id);
+          await localDataSource.cacheProfile(profile);
+          return Right(profile);
+        },
+      );
     } on ServerException {
       return const Left(ServerFailure('Failed to fetch profile'));
     } on CacheException {
@@ -58,8 +69,20 @@ class ProfileRepositoryImpl implements IProfileRepository {
   @override
   Future<Either<Failure, String>> uploadProfileImage(String imagePath) async {
     try {
-      // TODO: Implement image upload logic with Firebase Storage
-      return const Right('https://example.com/image.jpg');
+      final userResult = await authRepository.getCurrentUser();
+      return userResult.fold(
+        (failure) => Left(failure),
+        (user) async {
+          if (user == null) {
+            return const Left(AuthFailure('User not authenticated'));
+          }
+          final imageUrl = await remoteDataSource.uploadProfileImage(
+            user.id,
+            imagePath,
+          );
+          return Right(imageUrl);
+        },
+      );
     } catch (e) {
       return Left(
         ImageOperationFailure(
@@ -74,10 +97,18 @@ class ProfileRepositoryImpl implements IProfileRepository {
   @override
   Future<Either<Failure, Unit>> deleteAccount() async {
     try {
-      // TODO: Get userId from auth service
-      await remoteDataSource.deleteProfile('current_user_id');
-      await localDataSource.clearProfile();
-      return const Right(unit);
+      final userResult = await authRepository.getCurrentUser();
+      return userResult.fold(
+        (failure) => Left(failure),
+        (user) async {
+          if (user == null) {
+            return const Left(AuthFailure('User not authenticated'));
+          }
+          await remoteDataSource.deleteProfile(user.id);
+          await localDataSource.clearProfile();
+          return const Right(unit);
+        },
+      );
     } on ServerException {
       return const Left(ServerFailure('Failed to delete account'));
     } catch (e) {

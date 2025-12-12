@@ -1,5 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
+import 'plant_field_converter.dart';
+
 class Plant extends BaseSyncEntity {
   final String name;
   final String? species;
@@ -64,157 +66,56 @@ class Plant extends BaseSyncEntity {
         throw ArgumentError('PlantaModel cannot be null');
       }
 
-      final id = plantaModel.id;
-      if (id == null || id.toString().trim().isEmpty) {
-        throw ArgumentError('PlantaModel must have a valid ID');
-      }
-      String safeName = '';
-      try {
-        final nome = plantaModel.nome;
-        safeName = (nome is String && nome.trim().isNotEmpty) ? nome : '';
-      } catch (e) {}
+      // Validate and extract ID (required field)
+      final id = PlantFieldConverter.validateId(plantaModel.id);
 
-      String? safeSpecies;
-      try {
-        final especie = plantaModel.especie;
-        safeSpecies = (especie is String && especie.trim().isNotEmpty)
-            ? especie
-            : null;
-      } catch (e) {}
-
-      String? safeSpaceId;
-      try {
-        final espacoId = plantaModel.espacoId;
-        safeSpaceId = (espacoId is String && espacoId.trim().isNotEmpty)
-            ? espacoId
-            : null;
-      } catch (e) {}
-
-      String? safeImageBase64;
-      try {
-        final fotoBase64 = plantaModel.fotoBase64;
-        safeImageBase64 = (fotoBase64 is String && fotoBase64.trim().isNotEmpty)
-            ? fotoBase64
-            : null;
-      } catch (e) {}
-
-      List<String> safeImageUrls = [];
-      try {
-        final imagePaths = plantaModel.imagePaths;
-        if (imagePaths is List) {
-          safeImageUrls = imagePaths
-              .where(
-                (path) => path != null && path.toString().trim().isNotEmpty,
-              )
-              .map((path) => path.toString())
-              .toList();
-        }
-      } catch (e) {}
-
-      DateTime? safePlantingDate;
-      try {
-        final dataCadastro = plantaModel.dataCadastro;
-        safePlantingDate = (dataCadastro is DateTime) ? dataCadastro : null;
-      } catch (e) {}
-
-      String? safeNotes;
-      try {
-        final observacoes = plantaModel.observacoes;
-        safeNotes = (observacoes is String && observacoes.trim().isNotEmpty)
-            ? observacoes
-            : null;
-      } catch (e) {}
-
-      bool safeIsFavorited = false;
-      try {
-        final isFavorited = plantaModel.isFavorited;
-        safeIsFavorited = (isFavorited is bool) ? isFavorited : false;
-      } catch (e) {}
-
-      DateTime? safeCreatedAt;
-      try {
-        final createdAt = plantaModel.createdAt;
-        safeCreatedAt = (createdAt is DateTime) ? createdAt : null;
-      } catch (e) {}
-
-      DateTime? safeUpdatedAt;
-      try {
-        final updatedAt = plantaModel.updatedAt;
-        safeUpdatedAt = (updatedAt is DateTime) ? updatedAt : null;
-      } catch (e) {}
-
-      DateTime? safeLastSyncAt;
-      try {
-        final lastSyncAt = plantaModel.lastSyncAt;
-        safeLastSyncAt = (lastSyncAt is DateTime) ? lastSyncAt : null;
-      } catch (e) {}
-
-      bool safeIsDirty = false;
-      try {
-        final isDirty = plantaModel.isDirty;
-        safeIsDirty = (isDirty is bool) ? isDirty : false;
-      } catch (e) {}
-
-      bool safeIsDeleted = false;
-      try {
-        final isDeleted = plantaModel.isDeleted;
-        safeIsDeleted = (isDeleted is bool) ? isDeleted : false;
-      } catch (e) {}
-
-      int safeVersion = 1;
-      try {
-        final version = plantaModel.version;
-        safeVersion = (version is int && version > 0) ? version : 1;
-      } catch (e) {}
-
-      String? safeUserId;
-      try {
-        final userId = plantaModel.userId;
-        safeUserId = (userId is String && userId.trim().isNotEmpty)
-            ? userId
-            : null;
-      } catch (e) {}
-
-      String? safeModuleName;
-      try {
-        final moduleName = plantaModel.moduleName;
-        safeModuleName = (moduleName is String && moduleName.trim().isNotEmpty)
-            ? moduleName
-            : null;
-      } catch (e) {}
-
+      // Extract all fields using converter helpers
       return Plant(
-        id: id.toString(),
-        name: safeName,
-        species: safeSpecies,
-        spaceId: safeSpaceId,
-        imageBase64: safeImageBase64,
-        imageUrls: safeImageUrls,
-        plantingDate: safePlantingDate,
-        notes: safeNotes,
-        isFavorited: safeIsFavorited,
-        createdAt: safeCreatedAt,
-        updatedAt: safeUpdatedAt,
-        lastSyncAt: safeLastSyncAt,
-        isDirty: safeIsDirty,
-        isDeleted: safeIsDeleted,
-        version: safeVersion,
-        userId: safeUserId,
-        moduleName: safeModuleName,
+        id: id,
+        name: PlantFieldConverter.extractRequiredString(
+          plantaModel.nome,
+          defaultValue: '',
+        ),
+        species: PlantFieldConverter.extractOptionalString(plantaModel.especie),
+        spaceId: PlantFieldConverter.extractOptionalString(
+          plantaModel.espacoId,
+        ),
+        imageBase64: PlantFieldConverter.extractOptionalString(
+          plantaModel.fotoBase64,
+        ),
+        imageUrls: PlantFieldConverter.extractStringList(
+          plantaModel.imagePaths,
+        ),
+        plantingDate: PlantFieldConverter.extractOptionalDateTime(
+          plantaModel.dataCadastro,
+        ),
+        notes: PlantFieldConverter.extractOptionalString(
+          plantaModel.observacoes,
+        ),
+        isFavorited: PlantFieldConverter.extractBool(plantaModel.isFavorited),
+        createdAt: PlantFieldConverter.extractOptionalDateTime(
+          plantaModel.createdAt,
+        ),
+        updatedAt: PlantFieldConverter.extractOptionalDateTime(
+          plantaModel.updatedAt,
+        ),
+        lastSyncAt: PlantFieldConverter.extractOptionalDateTime(
+          plantaModel.lastSyncAt,
+        ),
+        isDirty: PlantFieldConverter.extractBool(plantaModel.isDirty),
+        isDeleted: PlantFieldConverter.extractBool(plantaModel.isDeleted),
+        version: PlantFieldConverter.extractPositiveInt(plantaModel.version),
+        userId: PlantFieldConverter.extractOptionalString(plantaModel.userId),
+        moduleName: PlantFieldConverter.extractOptionalString(
+          plantaModel.moduleName,
+        ),
       );
     } catch (e) {
       print('Error converting PlantaModel to Plant: $e');
-      String fallbackId;
-      try {
-        fallbackId =
-            plantaModel?.id?.toString() ??
-            DateTime.now().millisecondsSinceEpoch.toString();
-      } catch (_) {
-        fallbackId = DateTime.now().millisecondsSinceEpoch.toString();
-      }
 
+      // Create fallback plant with corrupted data marker
       return Plant(
-        id: fallbackId,
+        id: PlantFieldConverter.generateFallbackId(plantaModel?.id),
         name: 'Planta com dados corrompidos',
         species: null,
         spaceId: null,

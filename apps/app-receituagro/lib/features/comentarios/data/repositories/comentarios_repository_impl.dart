@@ -21,15 +21,11 @@ import '../services/comentarios_mapper.dart';
 /// This follows the pattern established in diagnosticos feature.
 ///
 /// Injectable as:
-/// - IComentariosRepository (deprecated, backward compatibility)
 /// - IComentariosReadRepository (via module)
 /// - IComentariosWriteRepository (via module)
 
 class ComentariosRepositoryImpl
-    implements
-        IComentariosRepository,
-        IComentariosReadRepository,
-        IComentariosWriteRepository {
+    implements IComentariosRepository {
   final ComentariosRepository _repository;
   final IComentariosMapper _mapper;
 

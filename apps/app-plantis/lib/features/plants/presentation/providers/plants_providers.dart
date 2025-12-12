@@ -6,6 +6,8 @@ import '../../../../core/services/task_generation_service.dart';
 import '../../../tasks/domain/usecases/generate_initial_tasks_usecase.dart';
 import '../../../tasks/presentation/providers/tasks_providers.dart';
 import '../../domain/services/plant_task_generator.dart';
+import '../../domain/services/plants_domain_orchestrator.dart';
+import '../../domain/services/plants_sort_service.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
 import '../../domain/usecases/delete_plant_usecase.dart';
 import '../../domain/usecases/get_plant_by_id_usecase.dart';
@@ -73,4 +75,17 @@ UpdatePlantUseCase updatePlantUseCase(Ref ref) {
 DeletePlantUseCase deletePlantUseCase(Ref ref) {
   final repository = ref.watch(plantsRepositoryProvider);
   return DeletePlantUseCase(repository);
+}
+
+// Orchestrator
+@riverpod
+PlantsDomainOrchestrator plantsDomainOrchestrator(Ref ref) {
+  return PlantsDomainOrchestrator(
+    getPlantsUseCase: ref.watch(getPlantsUseCaseProvider),
+    getPlantByIdUseCase: ref.watch(getPlantByIdUseCaseProvider),
+    addPlantUseCase: ref.watch(addPlantUseCaseProvider),
+    updatePlantUseCase: ref.watch(updatePlantUseCaseProvider),
+    deletePlantUseCase: ref.watch(deletePlantUseCaseProvider),
+    sortService: PlantsSortService(),
+  );
 }

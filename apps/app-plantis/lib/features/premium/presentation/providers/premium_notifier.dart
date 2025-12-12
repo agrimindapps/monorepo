@@ -5,6 +5,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
 import '../../../../database/repositories/subscription_local_repository.dart';
+import '../../domain/providers/premium_usecases_provider.dart';
+import '../../domain/providers/premium_validation_provider.dart';
+import '../../domain/services/premium_validation_service.dart';
+import '../../domain/usecases/get_current_subscription_usecase.dart';
+import '../../domain/usecases/load_available_products_usecase.dart';
+import '../../domain/usecases/purchase_product_usecase.dart';
+import '../../domain/usecases/restore_purchases_usecase.dart';
 
 part 'premium_notifier.g.dart';
 
@@ -83,18 +90,34 @@ class PremiumNotifier extends _$PremiumNotifier {
   late final IAnalyticsRepository _analytics;
   late final SubscriptionLocalRepository _localRepository;
   late final IAuthRepository _authRepository;
+  late final PremiumValidationService _validationService;
+
+  // UseCases
+  late final PurchaseProductUseCase _purchaseProductUseCase;
+  late final RestorePurchasesUseCase _restorePurchasesUseCase;
+  late final LoadAvailableProductsUseCase _loadAvailableProductsUseCase;
+  late final GetCurrentSubscriptionUseCase _getCurrentSubscriptionUseCase;
 
   @override
   Future<PremiumState> build() async {
-    _initializeRepositories();
-    return await _initialize();
-  }
-
-  void _initializeRepositories() {
+    // Inject repositories via Riverpod
     _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
     _localRepository = ref.watch(subscriptionLocalRepositoryProvider);
     _analytics = ref.watch(firebaseAnalyticsServiceProvider);
     _authRepository = ref.watch(authRepositoryProvider);
+    _validationService = ref.watch(premiumValidationServiceProvider);
+
+    // Inject UseCases
+    _purchaseProductUseCase = ref.watch(purchaseProductUseCaseProvider);
+    _restorePurchasesUseCase = ref.watch(restorePurchasesUseCaseProvider);
+    _loadAvailableProductsUseCase = ref.watch(
+      loadAvailableProductsUseCaseProvider,
+    );
+    _getCurrentSubscriptionUseCase = ref.watch(
+      getCurrentSubscriptionUseCaseProvider,
+    );
+
+    return await _initialize();
   }
 
   Future<PremiumState> _initialize() async {
@@ -148,8 +171,8 @@ class PremiumNotifier extends _$PremiumNotifier {
     );
 
     try {
-      final result = await _subscriptionRepository.getAvailableProducts(
-        productIds: productIds,
+      final result = await _loadAvailableProductsUseCase(
+        LoadAvailableProductsParams(productIds: productIds),
       );
 
       state = result.fold(
@@ -182,8 +205,8 @@ class PremiumNotifier extends _$PremiumNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      final result = await _subscriptionRepository.purchaseProduct(
-        productId: productId,
+      final result = await _purchaseProductUseCase(
+        PurchaseProductParams(productId: productId),
       );
 
       return result.fold(
@@ -211,13 +234,6 @@ class PremiumNotifier extends _$PremiumNotifier {
           // Save to local cache
           _localRepository.saveSubscription(subscription);
 
-          unawaited(
-            _analytics.logEvent(
-              'premium_purchased',
-              parameters: {'product_id': productId},
-            ),
-          );
-
           return true;
         },
       );
@@ -244,7 +260,7 @@ class PremiumNotifier extends _$PremiumNotifier {
     state = AsyncValue.data(currentState.copyWith(isLoading: true));
 
     try {
-      final result = await _subscriptionRepository.restorePurchases();
+      final result = await _restorePurchasesUseCase();
 
       return result.fold(
         (failure) {
@@ -259,26 +275,13 @@ class PremiumNotifier extends _$PremiumNotifier {
           );
           return false;
         },
-        (subscriptions) {
-          final active = subscriptions.where((s) => s.isActive).toList();
-          if (active.isNotEmpty) {
-            final subscription = active.first;
-            state = AsyncValue.data(
-              currentState.copyWith(
-                currentSubscription: subscription,
-                isLoading: false,
-                error: null,
-              ),
-            );
+        (hasSubscriptions) {
+          // Subscription will be automatically reloaded by the provider
+          state = AsyncValue.data(
+            currentState.copyWith(isLoading: false, error: null),
+          );
 
-            // Save to local cache
-            _localRepository.saveSubscription(subscription);
-          } else {
-            state = AsyncValue.data(
-              currentState.copyWith(isLoading: false, error: null),
-            );
-          }
-          return active.isNotEmpty;
+          return hasSubscriptions;
         },
       );
     } catch (e) {

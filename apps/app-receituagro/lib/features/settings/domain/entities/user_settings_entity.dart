@@ -110,7 +110,9 @@ class UserSettingsEntity {
         other.language == language &&
         other.isDevelopmentMode == isDevelopmentMode &&
         other.speechToTextEnabled == speechToTextEnabled &&
-        other.analyticsEnabled == analyticsEnabled;
+        other.analyticsEnabled == analyticsEnabled &&
+        other.lastUpdated == lastUpdated &&
+        other.createdAt == createdAt;
   }
 
   @override
@@ -124,11 +126,49 @@ class UserSettingsEntity {
       isDevelopmentMode,
       speechToTextEnabled,
       analyticsEnabled,
+      lastUpdated,
+      createdAt,
     );
   }
 
   @override
   String toString() {
     return 'UserSettingsEntity(userId: $userId, isDark: $isDarkTheme, lang: $language)';
+  }
+
+  /// Serialize to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'isDarkTheme': isDarkTheme,
+      'notificationsEnabled': notificationsEnabled,
+      'soundEnabled': soundEnabled,
+      'language': language,
+      'isDevelopmentMode': isDevelopmentMode,
+      'speechToTextEnabled': speechToTextEnabled,
+      'analyticsEnabled': analyticsEnabled,
+      'lastUpdated': lastUpdated.millisecondsSinceEpoch,
+      'createdAt': createdAt.millisecondsSinceEpoch,
+    };
+  }
+
+  /// Deserialize from JSON
+  factory UserSettingsEntity.fromJson(Map<String, dynamic> json) {
+    return UserSettingsEntity(
+      userId: json['userId'] as String? ?? '',
+      isDarkTheme: json['isDarkTheme'] as bool? ?? false,
+      notificationsEnabled: json['notificationsEnabled'] as bool? ?? true,
+      soundEnabled: json['soundEnabled'] as bool? ?? true,
+      language: json['language'] as String? ?? 'pt-BR',
+      isDevelopmentMode: json['isDevelopmentMode'] as bool? ?? false,
+      speechToTextEnabled: json['speechToTextEnabled'] as bool? ?? false,
+      analyticsEnabled: json['analyticsEnabled'] as bool? ?? true,
+      lastUpdated: DateTime.fromMillisecondsSinceEpoch(
+        json['lastUpdated'] as int? ?? DateTime.now().millisecondsSinceEpoch,
+      ),
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        json['createdAt'] as int? ?? DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
   }
 }

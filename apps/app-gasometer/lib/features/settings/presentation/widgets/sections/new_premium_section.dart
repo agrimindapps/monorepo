@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../../../core/theme/gasometer_colors.dart';
 import '../../../../premium/presentation/providers/premium_notifier.dart';
 import '../../../../premium/presentation/widgets/subscription_info_card.dart';
-import '../shared/section_header.dart';
 
 /// Premium Settings Section
 /// Allows users to view premium features and settings
@@ -19,8 +18,6 @@ class NewPremiumSection extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _buildErrorWidget(context, error.toString()),
       data: (state) {
-        final isPremium = state.isPremium;
-
         return _buildStatusCard(context, state);
       },
     );

@@ -59,6 +59,9 @@ class UpdateUserSettingsUseCase {
 
   /// Validate settings before saving
   void _validateSettings(UserSettingsEntity settings) {
+    if (settings.userId.isEmpty) {
+      throw InvalidUserIdException('User ID cannot be empty in settings');
+    }
     if (!settings.isValid) {
       throw InvalidSettingsException('Settings validation failed');
     }
@@ -182,37 +185,3 @@ class UpdateUserSettingsUseCase {
   }
 }
 
-/// Exception thrown when settings are not found
-class SettingsNotFoundException implements Exception {
-  final String message;
-  SettingsNotFoundException(this.message);
-
-  @override
-  String toString() => 'SettingsNotFoundException: $message';
-}
-
-/// Exception thrown when update is invalid
-class InvalidUpdateException implements Exception {
-  final String message;
-  InvalidUpdateException(this.message);
-
-  @override
-  String toString() => 'InvalidUpdateException: $message';
-}
-
-/// Exception thrown when language is not supported
-class UnsupportedLanguageException implements Exception {
-  final String message;
-  UnsupportedLanguageException(this.message);
-
-  @override
-  String toString() => 'UnsupportedLanguageException: $message';
-}
-/// Exception thrown when settings are invalid
-class InvalidSettingsException implements Exception {
-  final String message;
-  InvalidSettingsException(this.message);
-
-  @override
-  String toString() => 'InvalidSettingsException: $message';
-}

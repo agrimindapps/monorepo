@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 
+import '../repositories/auth_repository.dart';
 import '../../utils/auth_validators.dart';
 
 /// Use case para solicitar reset de senha via email
@@ -9,7 +10,7 @@ import '../../utils/auth_validators.dart';
 /// - Envio de email de reset
 /// - Tratamento de erros específicos
 class ResetPasswordUseCase {
-  final IAuthRepository _authRepository;
+  final AuthRepository _authRepository;
 
   ResetPasswordUseCase(this._authRepository);
 

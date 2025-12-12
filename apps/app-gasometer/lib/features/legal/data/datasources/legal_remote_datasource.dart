@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/legal_document_entity.dart';
 import '../models/legal_document_model.dart';
 
@@ -18,7 +19,7 @@ class LegalRemoteDataSource implements ILegalRemoteDataSource {
     final doc = await firestore.collection('legal_documents').doc(typeStr).get();
 
     if (!doc.exists) {
-      throw ServerException();
+      throw const ServerException('Document not found');
     }
 
     return LegalDocumentModel.fromJson(doc.data()!);
@@ -30,7 +31,7 @@ class LegalRemoteDataSource implements ILegalRemoteDataSource {
     final doc = await firestore.collection('legal_documents').doc(typeStr).get();
 
     if (!doc.exists) {
-      throw ServerException();
+      throw const ServerException('Version not found');
     }
 
     return doc.data()!['version'] as String;
@@ -49,5 +50,3 @@ class LegalRemoteDataSource implements ILegalRemoteDataSource {
     }
   }
 }
-
-class ServerException implements Exception {}

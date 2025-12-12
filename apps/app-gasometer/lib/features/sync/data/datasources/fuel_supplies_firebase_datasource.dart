@@ -12,8 +12,9 @@
 /// Collection structure: users/{userId}/fuel_supplies/{recordId}
 /// Ownership-based: All operations require userId for security
 library;
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide ValidationException, NetworkException;
 
+import '../../../../core/error/exceptions.dart';
 import '../../../fuel/domain/entities/fuel_record_entity.dart';
 import '../mappers/fuel_record_firebase_mapper.dart';
 abstract class FuelSuppliesFirebaseDataSource {
@@ -45,7 +46,7 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate user authentication
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
 
       // Convert FuelRecordEntity to Firestore JSON
@@ -57,15 +58,15 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
       return docRef.id;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error creating fuel record: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error creating fuel record: $e');
     }
   }
 
@@ -80,10 +81,10 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Fuel record Firebase ID cannot be empty');
+        throw const ValidationException('Fuel record Firebase ID cannot be empty');
       }
 
       // Fetch document from Firestore
@@ -91,7 +92,7 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
 
       // Check if document exists
       if (!doc.exists || doc.data() == null) {
-        throw NotFoundFailure('Fuel record not found with ID: $firebaseId');
+        throw NotFoundException('Fuel record not found with ID: $firebaseId');
       }
 
       // Convert Firestore JSON to FuelRecordEntity
@@ -100,21 +101,21 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
 
       // Check if record is soft-deleted
       if (record.isDeleted) {
-        throw NotFoundFailure('Fuel record was deleted: $firebaseId');
+        throw NotFoundException('Fuel record was deleted: $firebaseId');
       }
 
       return record;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching fuel record: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching fuel record: $e');
     }
   }
 
@@ -129,10 +130,10 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       if (record.id.isEmpty) {
-        throw const ValidationFailure('Fuel record ID cannot be empty');
+        throw const ValidationException('Fuel record ID cannot be empty');
       }
 
       // Convert FuelRecordEntity to Firestore JSON
@@ -144,17 +145,17 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
           .set(recordData, SetOptions(merge: true));
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'not-found') {
-        throw NotFoundFailure('Fuel record not found with ID: ${record.id}');
+        throw NotFoundException('Fuel record not found with ID: ${record.id}');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error updating fuel record: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error updating fuel record: $e');
     }
   }
 
@@ -173,10 +174,10 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Fuel record Firebase ID cannot be empty');
+        throw const ValidationException('Fuel record Firebase ID cannot be empty');
       }
 
       final docRef = _getFuelSuppliesCollection(userId).doc(firebaseId);
@@ -193,15 +194,15 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
       }
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error deleting fuel record: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error deleting fuel record: $e');
     }
   }
 
@@ -219,7 +220,7 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate user
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
 
       Query query = _getFuelSuppliesCollection(userId)
@@ -240,15 +241,15 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
       return FuelRecordFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching fuel records: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching fuel records: $e');
     }
   }
 
@@ -263,7 +264,7 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate user
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
 
       // Fetch all non-deleted fuel records
@@ -276,15 +277,15 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
       return FuelRecordFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching all fuel records: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching all fuel records: $e');
     }
   }
 
@@ -302,10 +303,10 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       if (vehicleId.isEmpty) {
-        throw const ValidationFailure('Vehicle ID cannot be empty');
+        throw const ValidationException('Vehicle ID cannot be empty');
       }
 
       // Fetch fuel records for vehicle
@@ -319,15 +320,15 @@ class FuelSuppliesFirebaseDataSourceImpl implements FuelSuppliesFirebaseDataSour
       return FuelRecordFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching fuel records by vehicle: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching fuel records by vehicle: $e');
     }
   }
 }

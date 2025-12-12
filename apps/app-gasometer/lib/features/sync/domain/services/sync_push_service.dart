@@ -155,7 +155,7 @@ class SyncPushService implements ISyncPushService {
   void _logSummary(List<ServicePushResult> results, Duration totalDuration) {
     final totalPushed = results.fold<int>(
       0,
-      (sum, result) => sum + result.recordsPushed,
+      (total, result) => total + result.recordsPushed,
     );
 
     developer.log(

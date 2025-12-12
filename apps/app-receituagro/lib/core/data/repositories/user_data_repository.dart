@@ -11,7 +11,6 @@ import '../../../features/comentarios/domain/repositories/i_comentarios_write_re
 import '../../../features/favoritos/data/favorito_defensivo_model.dart';
 import '../../../features/favoritos/domain/entities/favorito_entity.dart';
 import '../../../features/favoritos/domain/repositories/i_favoritos_repository.dart';
-import '../models/app_settings_model.dart';
 
 /// Repository para gerenciar dados específicos do usuário com sincronização
 ///
@@ -44,61 +43,12 @@ class UserDataRepository {
   /// Verifica se há um usuário logado
   bool get hasCurrentUser => currentUserId != null;
 
-  /// Obtém configurações do app para o usuário atual
-  /// DEPRECATED: Use Firebase or Drift for persistence
-  @Deprecated('Use Firebase or Drift repositories instead')
-  Future<Either<Exception, AppSettingsModel?>> getAppSettings() async {
-    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
-  }
-
-  /// Salva configurações do app para o usuário atual
-  /// DEPRECATED: Use Firebase or Drift for persistence
-  @Deprecated('Use Firebase or Drift repositories instead')
-  Future<Either<Exception, void>> saveAppSettings(
-    AppSettingsModel settings,
-  ) async {
-    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
-  }
-
-  /// Cria configurações padrão para o usuário atual
-  Future<Either<Exception, AppSettingsModel>> createDefaultAppSettings() async {
-    try {
-      final userId = currentUserId;
-      if (userId == null) {
-        return Left(Exception('No user logged in'));
-      }
-
-      final defaultSettings = AppSettingsModel(
-        userId: userId,
-        syncCreatedAt: DateTime.now(),
-        syncSynchronized: false,
-      );
-
-      final saveResult = await saveAppSettings(defaultSettings);
-      return saveResult.fold(
-        (error) => Left(error),
-        (_) => Right(defaultSettings),
-      );
-    } catch (e) {
-      return Left(Exception('Error creating default app settings: $e'));
-    }
-  }
-
-  /// Obtém dados de subscription para o usuário atual
-  /// DEPRECATED: Use Firebase or Drift for persistence
-  @Deprecated('Use Firebase or Drift repositories instead')
-  Future<Either<Exception, SubscriptionEntity?>> getSubscriptionData() async {
-    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
-  }
-
-  /// Salva dados de subscription para o usuário atual
-  /// DEPRECATED: Use Firebase or Drift for persistence
-  @Deprecated('Use Firebase or Drift repositories instead')
-  Future<Either<Exception, void>> saveSubscriptionData(
-    SubscriptionEntity subscription,
-  ) async {
-    return Left(Exception('Method deprecated. Use Firebase or Drift instead.'));
-  }
+  // ========================================================================
+  // DEPRECATED METHODS - Removed
+  // These methods have been replaced by dedicated Drift repositories:
+  // - App Settings → Use AppSettingsRepository (Drift-based)
+  // - Subscription Data → Use SubscriptionRepository (Drift + Firebase)
+  // ========================================================================
 
   // ========================================================================
   // FAVORITOS - Delegation to IFavoritosRepository
@@ -310,6 +260,9 @@ class UserDataRepository {
   // ========================================================================
 
   /// Obtém todos os itens não sincronizados do usuário
+  ///
+  /// Note: AppSettings and Subscription are now managed by dedicated repositories.
+  /// This method only returns unsynchronized favoritos and comentarios.
   Future<Either<Exception, Map<String, List<dynamic>>>>
   getUnsynchronizedData() async {
     try {
@@ -319,18 +272,10 @@ class UserDataRepository {
       }
 
       final unsynchronizedData = <String, List<dynamic>>{};
-      final settingsResult = await getAppSettings();
-      settingsResult.fold((error) => null, (settings) {
-        if (settings != null && !settings.syncSynchronized) {
-          unsynchronizedData['app_settings'] = [settings];
-        }
-      });
-      final subscriptionResult = await getSubscriptionData();
-      subscriptionResult.fold((error) => null, (subscription) {
-        if (subscription != null && subscription.isDirty) {
-          unsynchronizedData['subscription_data'] = [subscription];
-        }
-      });
+
+      // AppSettings and Subscription sync are handled by dedicated repositories
+      // Only track Favoritos and Comentarios here
+
       final favoritosResult = await getFavoritos();
       favoritosResult.fold((error) => null, (favoritos) {
         final unsyncedFavoritos = favoritos
@@ -358,8 +303,11 @@ class UserDataRepository {
 
   /// Marca item como sincronizado
   ///
-  /// Nota: Favoritos e Comentários gerenciam sua própria sincronização
-  /// via FavoritosSyncService e ComentariosSyncService
+  /// Note: All sync operations are now managed by dedicated services:
+  /// - AppSettings → AppSettingsRepository
+  /// - Subscription → SubscriptionRepository
+  /// - Favoritos → FavoritosSyncService
+  /// - Comentarios → ComentariosSyncService
   Future<Either<Exception, void>> markAsSynchronized({
     required String type,
     required String itemId,
@@ -372,33 +320,19 @@ class UserDataRepository {
 
       switch (type) {
         case 'app_settings':
-          final settingsResult = await getAppSettings();
-          return settingsResult.fold((error) => Left(error), (settings) async {
-            if (settings != null) {
-              final syncedSettings = settings.markAsSynchronized();
-              return await saveAppSettings(syncedSettings);
-            }
-            return Left(Exception('Settings not found'));
-          });
+          // AppSettings sync is managed by AppSettingsRepository
+          return const Right(null);
 
         case 'subscription_data':
-          final subscriptionResult = await getSubscriptionData();
-          return subscriptionResult.fold((error) => Left(error), (
-            subscription,
-          ) async {
-            if (subscription != null) {
-              final syncedSubscription = subscription.markAsSynced();
-              return await saveSubscriptionData(syncedSubscription);
-            }
-            return Left(Exception('Subscription not found'));
-          });
+          // Subscription sync is managed by SubscriptionRepository
+          return const Right(null);
 
         case 'favoritos':
-          // Favoritos sincronização é gerenciada por FavoritosSyncService
+          // Favoritos sync is managed by FavoritosSyncService
           return const Right(null);
 
         case 'comentarios':
-          // Comentarios sincronização é gerenciada por ComentariosSyncService
+          // Comentarios sync is managed by ComentariosSyncService
           return const Right(null);
 
         default:

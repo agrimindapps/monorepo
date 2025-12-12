@@ -6,6 +6,7 @@ import 'package:core/core.dart' hide Column;
 
 import '../services/premium_service.dart';
 import '../services/remote_config_service.dart';
+import 'core_providers.dart';
 
 part 'feature_flags_notifier.g.dart';
 
@@ -69,8 +70,9 @@ class FeatureFlagsNotifier extends _$FeatureFlagsNotifier {
 
   @override
   Future<FeatureFlagsState> build() async {
-    _remoteConfig = ReceitaAgroRemoteConfigService.instance;
-    _premiumService = ReceitaAgroPremiumService.instance;
+    // Use constructor injection via Riverpod providers
+    _remoteConfig = ref.watch(remoteConfigServiceProvider);
+    _premiumService = ref.watch(premiumServiceProvider);
 
     // Setup callback for premium status changes
     _premiumService.onStateChanged = _onPremiumStatusChanged;

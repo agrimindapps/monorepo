@@ -6,13 +6,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../domain/entities/plant.dart';
+import '../../domain/services/plants_cache_manager.dart';
 import '../../domain/services/plants_care_service.dart';
+import '../../domain/services/plants_domain_orchestrator.dart';
 import '../../domain/services/plants_filter_service.dart';
 import '../../domain/services/plants_sort_service.dart';
 import '../../domain/usecases/add_plant_usecase.dart';
-import '../../domain/usecases/delete_plant_usecase.dart';
-import '../../domain/usecases/get_plant_by_id_usecase.dart';
-import '../../domain/usecases/get_plants_usecase.dart';
 import '../../domain/usecases/search_plants_usecase.dart';
 import '../../domain/usecases/update_plant_usecase.dart';
 import 'plants_providers.dart';
@@ -29,35 +28,32 @@ part 'plants_notifier.g.dart';
 /// Now follows Single Responsibility Principle using Facade pattern
 ///
 /// Delegates to:
+/// - PlantsCacheManager: Cache & loading strategy
 /// - PlantsFilterService: Search & filtering
 /// - PlantsSortService: Sorting & views
 /// - PlantsCareService: Care analytics
 @riverpod
 class PlantsNotifier extends _$PlantsNotifier {
+  late final PlantsCacheManager _cacheManager;
   late final PlantsFilterService _filterService;
   late final PlantsSortService _sortService;
   late final PlantsCareService _careService;
+  late final PlantsDomainOrchestrator _orchestrator;
   late final SearchPlantsUseCase _searchPlantsUseCase;
-  late final GetPlantsUseCase _getPlantsUseCase;
-  late final GetPlantByIdUseCase _getPlantByIdUseCase;
-  late final AddPlantUseCase _addPlantUseCase;
-  late final UpdatePlantUseCase _updatePlantUseCase;
-  late final DeletePlantUseCase _deletePlantUseCase;
   late final AuthStateNotifier _authStateNotifier;
   StreamSubscription<UserEntity?>? _authSubscription;
   StreamSubscription<List<dynamic>>? _realtimeDataSubscription;
 
   @override
   PlantsState build() {
+    _cacheManager = PlantsCacheManager(
+      getPlantsUseCase: ref.read(getPlantsUseCaseProvider),
+    );
     _filterService = PlantsFilterService();
     _sortService = PlantsSortService();
     _careService = PlantsCareService();
+    _orchestrator = ref.read(plantsDomainOrchestratorProvider);
     _searchPlantsUseCase = ref.read(searchPlantsUseCaseProvider);
-    _getPlantsUseCase = ref.read(getPlantsUseCaseProvider);
-    _getPlantByIdUseCase = ref.read(getPlantByIdUseCaseProvider);
-    _addPlantUseCase = ref.read(addPlantUseCaseProvider);
-    _updatePlantUseCase = ref.read(updatePlantUseCaseProvider);
-    _deletePlantUseCase = ref.read(deletePlantUseCaseProvider);
     _authStateNotifier = AuthStateNotifier.instance;
     ref.onDispose(() {
       _authSubscription?.cancel();
@@ -126,13 +122,13 @@ class PlantsNotifier extends _$PlantsNotifier {
 
           final domainPlants = <Plant>[];
           for (final syncPlant in plants) {
-            final plant = _convertSyncPlantToDomain(syncPlant);
+            final plant = _orchestrator.convertSyncPlantToDomain(syncPlant);
             if (plant != null) {
               domainPlants.add(plant);
             }
           }
 
-          if (_hasDataChanged(domainPlants)) {
+          if (_orchestrator.hasDataChanged(state.plants, domainPlants)) {
             _updatePlantsData(domainPlants);
           }
         },
@@ -147,67 +143,6 @@ class PlantsNotifier extends _$PlantsNotifier {
         debugPrint('❌ PlantsNotifier: Erro ao configurar stream: $e');
       }
     }
-  }
-
-  /// Converte entidade de sync para entidade de domínio
-  Plant? _convertSyncPlantToDomain(dynamic syncPlant) {
-    try {
-      if (syncPlant == null) return null;
-
-      if (syncPlant is Plant) {
-        if (syncPlant.id.isEmpty) return null;
-        return syncPlant;
-      }
-
-      if (syncPlant is BaseSyncEntity) {
-        try {
-          final firebaseMap = syncPlant.toFirebaseMap();
-          if (!firebaseMap.containsKey('id') ||
-              !firebaseMap.containsKey('name')) {
-            return null;
-          }
-          return Plant.fromJson(firebaseMap);
-        } catch (e) {
-          return null;
-        }
-      }
-
-      if (syncPlant is Map<String, dynamic>) {
-        if (!syncPlant.containsKey('id') || !syncPlant.containsKey('name')) {
-          return null;
-        }
-        return Plant.fromJson(syncPlant);
-      }
-
-      return null;
-    } catch (e) {
-      return null;
-    }
-  }
-
-  /// Verifica se os dados realmente mudaram
-  bool _hasDataChanged(List<Plant> newPlants) {
-    final currentPlants = state.plants;
-
-    if (currentPlants.length != newPlants.length) {
-      return true;
-    }
-
-    for (int i = 0; i < currentPlants.length; i++) {
-      final currentPlant = currentPlants[i];
-      Plant? newPlant;
-      try {
-        newPlant = newPlants.firstWhere((p) => p.id == currentPlant.id);
-      } catch (e) {
-        return true;
-      }
-
-      if (currentPlant.updatedAt != newPlant.updatedAt) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   /// Wait for authentication initialization with timeout
@@ -235,66 +170,32 @@ class PlantsNotifier extends _$PlantsNotifier {
       return;
     }
 
-    await _loadLocalDataFirst();
-    _syncInBackground();
-  }
-
-  /// Loads local data immediately for instant UI response
-  Future<void> _loadLocalDataFirst() async {
-    try {
-      // Verificar se o provider ainda está montado
-      if (!ref.mounted) return;
-
-      final shouldShowLoading = state.plants.isEmpty;
-      if (shouldShowLoading) {
-        state = state.copyWith(isLoading: true);
-      }
-
-      state = state.copyWith(error: null);
-
-      final localResult = await _getPlantsUseCase.call(const NoParams());
-
-      // Verificar novamente após operação async
-      if (!ref.mounted) return;
-
-      localResult.fold(
-        (Failure failure) {
-          // Silent fail for local data
-        },
-        (List<Plant> plants) {
-          _updatePlantsData(plants);
-          state = state.copyWith(isLoading: false);
-        },
-      );
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('❌ PlantsNotifier: Erro ao carregar dados locais: $e');
-      }
+    final shouldShowLoading = state.plants.isEmpty;
+    if (shouldShowLoading) {
+      state = state.copyWith(isLoading: true);
     }
-  }
 
-  /// Syncs with remote data in background
-  void _syncInBackground() {
-    Future.delayed(const Duration(milliseconds: 100), () async {
-      // Verificar se o provider ainda está montado
-      if (!ref.mounted) return;
+    final result = await _cacheManager.loadLocalFirst();
 
-      final result = await _getPlantsUseCase.call(const NoParams());
+    if (!ref.mounted) return;
 
-      // Verificar novamente após operação async
-      if (!ref.mounted) return;
-
-      result.fold(
-        (Failure failure) {
-          if (state.plants.isEmpty) {
-            state = state.copyWith(error: failure.toString());
+    result.fold(
+      onSuccess: (plants) {
+        _updatePlantsData(plants);
+        state = state.copyWith(isLoading: false);
+        // Sync in background to ensure fresh data
+        _cacheManager.syncInBackground().then((freshPlants) {
+          if (freshPlants != null && ref.mounted) {
+            _updatePlantsData(freshPlants);
           }
-        },
-        (List<Plant> plants) {
-          _updatePlantsData(plants);
-        },
-      );
-    });
+        });
+      },
+      onFailure: (error) {
+        if (state.plants.isEmpty) {
+          state = state.copyWith(error: error, isLoading: false);
+        }
+      },
+    );
   }
 
   /// Updates plants data
@@ -309,18 +210,17 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<Plant?> getPlantById(String id) async {
-    final result = await _getPlantByIdUseCase.call(id);
+    final result = await _orchestrator.getPlantById(id);
 
-    return result.fold(
-      (Failure failure) {
-        state = state.copyWith(error: failure.toString());
-        return null;
-      },
-      (Plant plant) {
-        state = state.copyWith(selectedPlant: plant);
-        return plant;
-      },
-    );
+    if (result.isSuccess && result.plant != null) {
+      state = state.copyWith(selectedPlant: result.plant);
+      return result.plant;
+    } else if (result.error != null) {
+      state = state.copyWith(error: result.error);
+      return null;
+    }
+
+    return null;
   }
 
   Future<void> searchPlants(String query) async {
@@ -351,107 +251,93 @@ class PlantsNotifier extends _$PlantsNotifier {
   }
 
   Future<bool> addPlant(AddPlantParams params) async {
-    // Verificar se o provider ainda está montado
     if (!ref.mounted) return false;
 
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _addPlantUseCase.call(params);
-
-    // Verificar novamente após operação async
-    if (!ref.mounted) return false;
-
-    final success = result.fold(
-      (Failure failure) {
-        state = state.copyWith(error: failure.toString(), isLoading: false);
-        return false;
-      },
-      (Plant plant) {
-        final newPlants = [plant, ...state.plants];
-        state = state.copyWith(
-          plants: _applyFilters(newPlants),
-          isLoading: false,
-        );
-        return true;
-      },
+    final result = await _orchestrator.addPlant(
+      params,
+      state.plants,
+      state.sortBy,
     );
 
-    return success;
+    if (!ref.mounted) return false;
+
+    if (result.isSuccess && result.updatedPlants != null) {
+      state = state.copyWith(
+        plants: _applyFilters(result.updatedPlants!),
+        isLoading: false,
+      );
+      return true;
+    } else if (result.error != null) {
+      state = state.copyWith(error: result.error, isLoading: false);
+      return false;
+    }
+
+    return false;
   }
 
   Future<bool> updatePlant(UpdatePlantParams params) async {
-    // Verificar se o provider ainda está montado
     if (!ref.mounted) return false;
 
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _updatePlantUseCase.call(params);
-
-    // Verificar novamente após operação async
-    if (!ref.mounted) return false;
-
-    final success = result.fold(
-      (Failure failure) {
-        state = state.copyWith(error: failure.toString(), isLoading: false);
-        return false;
-      },
-      (Plant updatedPlant) {
-        final updatedPlants = state.plants.map((p) {
-          return p.id == updatedPlant.id ? updatedPlant : p;
-        }).toList();
-
-        final sorted = _sortService.sortPlants(updatedPlants, state.sortBy);
-
-        state = state.copyWith(
-          plants: _applyFilters(sorted),
-          selectedPlant: state.selectedPlant?.id == updatedPlant.id
-              ? updatedPlant
-              : state.selectedPlant,
-          isLoading: false,
-        );
-        return true;
-      },
+    final result = await _orchestrator.updatePlant(
+      params,
+      state.plants,
+      state.sortBy,
     );
 
-    return success;
+    if (!ref.mounted) return false;
+
+    if (result.isSuccess &&
+        result.plant != null &&
+        result.updatedPlants != null) {
+      state = state.copyWith(
+        plants: _applyFilters(result.updatedPlants!),
+        selectedPlant: state.selectedPlant?.id == result.plant!.id
+            ? result.plant
+            : state.selectedPlant,
+        isLoading: false,
+      );
+      return true;
+    } else if (result.error != null) {
+      state = state.copyWith(error: result.error, isLoading: false);
+      return false;
+    }
+
+    return false;
   }
 
   Future<bool> deletePlant(String id) async {
-    // Verificar se o provider ainda está montado
     if (!ref.mounted) return false;
 
     state = state.copyWith(isLoading: true, error: null);
 
-    final result = await _deletePlantUseCase.call(id);
-
-    // Verificar novamente após operação assíncrona
-    if (!ref.mounted) return false;
-
-    final success = result.fold(
-      (Failure failure) {
-        // Verificar antes de atualizar state
-        if (!ref.mounted) return false;
-
-        state = state.copyWith(error: failure.toString(), isLoading: false);
-        return false;
-      },
-      (_) {
-        // Verificar antes de atualizar state
-        if (!ref.mounted) return false;
-
-        state = state.copyWith(
-          plants: _applyFilters(state.plants.where((p) => p.id != id).toList()),
-          searchResults: state.searchResults.where((p) => p.id != id).toList(),
-          selectedPlant: state.selectedPlant?.id == id
-              ? null
-              : state.selectedPlant,
-          isLoading: false,
-        );
-        return true;
-      },
+    final result = await _orchestrator.deletePlant(
+      id,
+      state.plants,
+      state.searchResults,
     );
 
-    return success;
+    if (!ref.mounted) return false;
+
+    if (result.isSuccess && result.updatedPlants != null) {
+      state = state.copyWith(
+        plants: _applyFilters(result.updatedPlants!),
+        searchResults: result.updatedSearchResults ?? [],
+        selectedPlant: state.selectedPlant?.id == id
+            ? null
+            : state.selectedPlant,
+        isLoading: false,
+      );
+      return true;
+    } else if (result.error != null) {
+      state = state.copyWith(error: result.error, isLoading: false);
+      return false;
+    }
+
+    return false;
   }
 
   void setViewMode(ViewMode mode) {
@@ -521,8 +407,21 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   /// Refresh plants data
   Future<void> refreshPlants() async {
-    clearError();
-    await loadInitialData();
+    state = state.copyWith(isLoading: true, error: null);
+
+    final result = await _cacheManager.forceRefresh();
+
+    if (!ref.mounted) return;
+
+    result.fold(
+      onSuccess: (plants) {
+        _updatePlantsData(plants);
+        state = state.copyWith(isLoading: false);
+      },
+      onFailure: (error) {
+        state = state.copyWith(error: error, isLoading: false);
+      },
+    );
   }
 
   List<Plant> getPlantsNeedingWater() {

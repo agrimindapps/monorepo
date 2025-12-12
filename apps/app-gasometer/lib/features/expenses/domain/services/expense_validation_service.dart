@@ -1,16 +1,32 @@
-
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../../core/constants/expense_constants.dart';
 import '../entities/expense_entity.dart';
+import 'expense_analyzer.dart';
+import 'expense_form_validator.dart';
+import 'expense_validation_types.dart';
+
+export 'expense_analyzer.dart';
+export 'expense_form_validator.dart';
+export 'expense_validation_types.dart';
 
 /// Serviço avançado para validação contextual de registros de despesas
 ///
 /// Este serviço é stateless e pode ser injetado como dependency normal.
 /// Não utiliza singleton pattern pois não mantém estado interno.
-
+///
+/// Refatorado para delegar responsabilidades:
+/// - Validação de formulário -> ExpenseFormValidator
+/// - Análise de padrões -> ExpenseAnalyzer
+/// - Tipos de dados -> ExpenseValidationTypes
 class ExpenseValidationService {
   /// Cria uma nova instância do serviço de validação
-  const ExpenseValidationService();
+  const ExpenseValidationService({
+    this.formValidator = const ExpenseFormValidator(),
+    this.analyzer = const ExpenseAnalyzer(),
+  });
+
+  final ExpenseFormValidator formValidator;
+  final ExpenseAnalyzer analyzer;
 
   /// Valida consistência entre registros de despesas
   ValidationResult validateExpenseRecord(
@@ -210,364 +226,6 @@ class ExpenseValidationService {
     }
   }
 
-  /// Análise de padrões de despesas para um veículo
-  ExpensePatternAnalysis analyzeExpensePatterns(
-    List<ExpenseEntity> expenses,
-    VehicleEntity vehicle,
-  ) {
-    if (expenses.isEmpty) {
-      return ExpensePatternAnalysis.empty();
-    }
-
-    final sortedExpenses = List<ExpenseEntity>.from(expenses)
-      ..sort((a, b) => a.date.compareTo(b.date));
-    final totalAmount = sortedExpenses.fold<double>(
-      0,
-      (sum, e) => sum + e.amount,
-    );
-    final averageAmount = totalAmount / sortedExpenses.length;
-    final expensesByType = <ExpenseType, List<ExpenseEntity>>{};
-    for (final expense in sortedExpenses) {
-      expensesByType.putIfAbsent(expense.type, () => []).add(expense);
-    }
-    final expensesByTypeAmount = expensesByType.map(
-      (type, expenses) =>
-          MapEntry(type, expenses.fold<double>(0, (sum, e) => sum + e.amount)),
-    );
-    final anomalies = _detectExpenseAnomalies(sortedExpenses);
-    final trends = _calculateExpenseTrends(sortedExpenses);
-
-    return ExpensePatternAnalysis(
-      totalRecords: sortedExpenses.length,
-      totalAmount: totalAmount,
-      averageAmount: averageAmount,
-      expensesByType: expensesByTypeAmount,
-      anomalies: anomalies,
-      trends: trends,
-      lastExpense: sortedExpenses.last,
-      firstExpense: sortedExpenses.first,
-      period: sortedExpenses.last.date.difference(sortedExpenses.first.date),
-    );
-  }
-
-  /// Detecta anomalias nos registros de despesas
-  List<ExpenseAnomaly> _detectExpenseAnomalies(List<ExpenseEntity> expenses) {
-    final anomalies = <ExpenseAnomaly>[];
-    final typeAverages = <ExpenseType, double>{};
-    final typeGroups = <ExpenseType, List<ExpenseEntity>>{};
-
-    for (final expense in expenses) {
-      typeGroups.putIfAbsent(expense.type, () => []).add(expense);
-    }
-
-    typeGroups.forEach((type, expenses) {
-      typeAverages[type] =
-          expenses.fold<double>(0, (sum, e) => sum + e.amount) /
-          expenses.length;
-    });
-    for (final expense in expenses) {
-      final average = typeAverages[expense.type]!;
-      final deviation = (expense.amount - average).abs() / average;
-
-      if (deviation > 1.0) {
-        anomalies.add(
-          ExpenseAnomaly(
-            expenseId: expense.id,
-            type: AnomalyType.valueOutlier,
-            description:
-                'Valor muito ${expense.amount > average ? 'alto' : 'baixo'} '
-                'para ${expense.type.displayName} (${deviation.toStringAsFixed(1)}x da média)',
-            severity:
-                deviation > 2.0 ? AnomalySeverity.high : AnomalySeverity.medium,
-          ),
-        );
-      }
-    }
-    final recurringTypes = expenses.where((e) => e.type.isRecurring).toList();
-    final frequencyMap = <ExpenseType, List<ExpenseEntity>>{};
-
-    for (final expense in recurringTypes) {
-      frequencyMap.putIfAbsent(expense.type, () => []).add(expense);
-    }
-
-    frequencyMap.forEach((type, typeExpenses) {
-      if (typeExpenses.length < 2) return;
-
-      typeExpenses.sort((a, b) => a.date.compareTo(b.date));
-
-      for (int i = 1; i < typeExpenses.length; i++) {
-        final monthsDiff = _calculateMonthsDifference(
-          typeExpenses[i].date,
-          typeExpenses[i - 1].date,
-        );
-
-        if (monthsDiff < 6) {
-          anomalies.add(
-            ExpenseAnomaly(
-              expenseId: typeExpenses[i].id,
-              type: AnomalyType.frequencyAnomaly,
-              description:
-                  'Despesa recorrente registrada muito cedo ($monthsDiff meses)',
-              severity: AnomalySeverity.medium,
-            ),
-          );
-        }
-      }
-    });
-
-    return anomalies;
-  }
-
-  /// Calcula tendências de gastos
-  Map<String, dynamic> _calculateExpenseTrends(List<ExpenseEntity> expenses) {
-    if (expenses.length < 2) return {};
-    final monthlyTotals = <String, double>{};
-
-    for (final expense in expenses) {
-      final monthKey =
-          '${expense.date.year}-${expense.date.month.toString().padLeft(2, '0')}';
-      monthlyTotals[monthKey] = (monthlyTotals[monthKey] ?? 0) + expense.amount;
-    }
-
-    final months = monthlyTotals.keys.toList()..sort();
-    if (months.length < 2) return {};
-    final recentMonths =
-        months.length >= 6
-            ? months.sublist(months.length - 3)
-            : months.sublist((months.length / 2).ceil());
-    final olderMonths =
-        months.length >= 6
-            ? months.sublist(months.length - 6, months.length - 3)
-            : months.sublist(0, (months.length / 2).floor());
-
-    final recentAverage =
-        recentMonths.fold<double>(
-          0,
-          (sum, month) => sum + monthlyTotals[month]!,
-        ) /
-        recentMonths.length;
-    final olderAverage =
-        olderMonths.fold<double>(
-          0,
-          (sum, month) => sum + monthlyTotals[month]!,
-        ) /
-        olderMonths.length;
-
-    final trendPercentage =
-        olderAverage > 0
-            ? ((recentAverage - olderAverage) / olderAverage) * 100
-            : 0;
-
-    return {
-      'trend':
-          trendPercentage > 5
-              ? 'increasing'
-              : trendPercentage < -5
-              ? 'decreasing'
-              : 'stable',
-      'trendPercentage': trendPercentage,
-      'recentAverage': recentAverage,
-      'olderAverage': olderAverage,
-    };
-  }
-
-  /// Calcula diferença em meses entre duas datas
-  int _calculateMonthsDifference(DateTime date1, DateTime date2) {
-    final months = (date1.year - date2.year) * 12 + (date1.month - date2.month);
-    return months.abs();
-  }
-
-  /// Valida tipo de despesa
-  String? validateExpenseType(ExpenseType? value) {
-    if (value == null) {
-      return 'Tipo de despesa é obrigatório';
-    }
-    return null;
-  }
-
-  /// Valida descrição da despesa
-  String? validateDescription(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Descrição é obrigatória';
-    }
-
-    final trimmed = value.trim();
-
-    if (trimmed.length < 3) {
-      return 'Descrição muito curta (mínimo 3 caracteres)';
-    }
-
-    if (trimmed.length > 100) {
-      return 'Descrição muito longa (máximo 100 caracteres)';
-    }
-    if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)]+$').hasMatch(trimmed)) {
-      return 'Caracteres inválidos na descrição';
-    }
-
-    return null;
-  }
-
-  /// Valida valor da despesa
-  String? validateAmount(String? value, {ExpenseType? expenseType}) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Valor é obrigatório';
-    }
-
-    final cleanValue = value
-        .replaceAll(RegExp(r'\s'), '')
-        .replaceAll('.', '')
-        .replaceAll(',', '.');
-
-    final amount = double.tryParse(cleanValue);
-
-    if (amount == null) {
-      return 'Valor inválido';
-    }
-
-    if (amount <= 0) {
-      return 'Valor deve ser maior que zero';
-    }
-
-    if (amount > 999999.99) {
-      return 'Valor muito alto';
-    }
-    if (expenseType != null) {
-      final validationError = _validateAmountByType(amount, expenseType);
-      if (validationError != null) return validationError;
-    }
-
-    return null;
-  }
-
-  /// Valida odômetro com contexto do veículo
-  String? validateOdometer(
-    String? value, {
-    double? currentOdometer,
-    double? initialOdometer,
-    double? lastExpenseOdometer,
-  }) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Odômetro é obrigatório';
-    }
-
-    final cleanValue = value.replaceAll(',', '.');
-    final odometer = double.tryParse(cleanValue);
-
-    if (odometer == null) {
-      return 'Valor inválido';
-    }
-
-    if (odometer < 0) {
-      return 'Odômetro não pode ser negativo';
-    }
-
-    if (odometer > 9999999) {
-      return 'Valor muito alto';
-    }
-    if (initialOdometer != null && odometer < initialOdometer) {
-      return 'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)';
-    }
-    if (currentOdometer != null && odometer < currentOdometer - 1000) {
-      return 'Odômetro muito abaixo do atual';
-    }
-    if (lastExpenseOdometer != null) {
-      if (odometer < lastExpenseOdometer) {
-        return 'Odômetro menor que a última despesa';
-      }
-      if (odometer - lastExpenseOdometer > 5000) {
-        return 'Diferença muito grande desde a última despesa';
-      }
-    }
-
-    return null;
-  }
-
-  /// Valida data da despesa
-  String? validateDate(DateTime? date) {
-    if (date == null) {
-      return 'Data é obrigatória';
-    }
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final selectedDate = DateTime(date.year, date.month, date.day);
-
-    if (selectedDate.isAfter(today)) {
-      return 'Data não pode ser futura';
-    }
-    final tenYearsAgo = today.subtract(const Duration(days: 365 * 10));
-    if (selectedDate.isBefore(tenYearsAgo)) {
-      return 'Data muito antiga (máximo 10 anos)';
-    }
-
-    return null;
-  }
-
-  /// Valida localização (opcional)
-  String? validateLocation(String? value) {
-    if (value != null && value.trim().isNotEmpty) {
-      final trimmed = value.trim();
-
-      if (trimmed.length < 2) {
-        return 'Localização muito curta';
-      }
-
-      if (trimmed.length > 100) {
-        return 'Localização muito longa';
-      }
-      if (!RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\.\,\(\)\/]+$').hasMatch(trimmed)) {
-        return 'Caracteres inválidos na localização';
-      }
-    }
-    return null;
-  }
-
-  /// Valida observações (opcional)
-  String? validateNotes(String? value) {
-    if (value != null && value.trim().isNotEmpty) {
-      if (value.trim().length > 300) {
-        return 'Observação muito longa (máximo 300 caracteres)';
-      }
-    }
-    return null;
-  }
-
-  /// Validação contextual completa do formulário
-  Map<String, String> validateCompleteForm({
-    required ExpenseType? expenseType,
-    required String? description,
-    required String? amount,
-    required String? odometer,
-    required DateTime? date,
-    String? location,
-    String? notes,
-    VehicleEntity? vehicle,
-    double? lastExpenseOdometer,
-  }) {
-    final errors = <String, String>{};
-    final typeError = validateExpenseType(expenseType);
-    if (typeError != null) errors['expenseType'] = typeError;
-    final descriptionError = validateDescription(description);
-    if (descriptionError != null) errors['description'] = descriptionError;
-    final amountError = validateAmount(amount, expenseType: expenseType);
-    if (amountError != null) errors['amount'] = amountError;
-    final odometerError = validateOdometer(
-      odometer,
-      currentOdometer: vehicle?.currentOdometer,
-      lastExpenseOdometer: lastExpenseOdometer,
-    );
-    if (odometerError != null) errors['odometer'] = odometerError;
-    final dateError = validateDate(date);
-    if (dateError != null) errors['date'] = dateError;
-    final locationError = validateLocation(location);
-    if (locationError != null) errors['location'] = locationError;
-
-    final notesError = validateNotes(notes);
-    if (notesError != null) errors['notes'] = notesError;
-
-    return errors;
-  }
-
   /// Valida consistência de dados relacionados
   List<String> validateDataConsistency({
     required ExpenseType expenseType,
@@ -609,210 +267,69 @@ class ExpenseValidationService {
     return warnings;
   }
 
-  /// Sugere categoria baseada na descrição
-  ExpenseType suggestCategoryFromDescription(String description) {
-    final descLower = description.toLowerCase();
-
-    if (descLower.contains('seguro')) return ExpenseType.insurance;
-    if (descLower.contains('ipva')) return ExpenseType.ipva;
-    if (descLower.contains('estacion')) return ExpenseType.parking;
-    if (descLower.contains('lavag') || descLower.contains('lav car')) {
-      return ExpenseType.carWash;
-    }
-    if (descLower.contains('multa') || descLower.contains('infra')) {
-      return ExpenseType.fine;
-    }
-    if (descLower.contains('pedágio') || descLower.contains('pedagio')) {
-      return ExpenseType.toll;
-    }
-    if (descLower.contains('licen')) return ExpenseType.licensing;
-    if (descLower.contains('acess') || descLower.contains('equip')) {
-      return ExpenseType.accessories;
-    }
-    if (descLower.contains('document') || descLower.contains('papel')) {
-      return ExpenseType.documentation;
-    }
-
-    return ExpenseType.other;
+  /// Calcula diferença em meses entre duas datas
+  int _calculateMonthsDifference(DateTime date1, DateTime date2) {
+    final months = (date1.year - date2.year) * 12 + (date1.month - date2.month);
+    return months.abs();
   }
 
-  /// Validação específica por tipo de despesa (private method)
-  String? _validateAmountByType(double amount, ExpenseType expenseType) {
-    switch (expenseType) {
-      case ExpenseType.fuel:
-        if (amount > 500.0) {
-          return 'Valor alto para combustível (máximo esperado: R\$ 500)';
-        }
-        break;
+  // DELEGATED METHODS
 
-      case ExpenseType.maintenance:
-        if (amount > 2000.0) {
-          return 'Valor alto para manutenção (máximo esperado: R\$ 2000)';
-        }
-        break;
-
-      case ExpenseType.parking:
-        if (amount > 50.0) {
-          return 'Valor alto para estacionamento (máximo esperado: R\$ 50)';
-        }
-        break;
-
-      case ExpenseType.carWash:
-        if (amount > 100.0) {
-          return 'Valor alto para lavagem (máximo esperado: R\$ 100)';
-        }
-        break;
-
-      case ExpenseType.toll:
-        if (amount > 200.0) {
-          return 'Valor alto para pedágio (máximo esperado: R\$ 200)';
-        }
-        break;
-
-      case ExpenseType.fine:
-        if (amount > 2000.0) {
-          return 'Valor muito alto para multa';
-        }
-        break;
-
-      case ExpenseType.insurance:
-        if (amount < 100.0) {
-          return 'Valor baixo para seguro (mínimo esperado: R\$ 100)';
-        }
-        if (amount > 10000.0) {
-          return 'Valor muito alto para seguro';
-        }
-        break;
-
-      case ExpenseType.ipva:
-        if (amount < 50.0) {
-          return 'Valor baixo para IPVA (mínimo esperado: R\$ 50)';
-        }
-        if (amount > 15000.0) {
-          return 'Valor muito alto para IPVA';
-        }
-        break;
-
-      case ExpenseType.licensing:
-        if (amount > 500.0) {
-          return 'Valor alto para licenciamento (máximo esperado: R\$ 500)';
-        }
-        break;
-
-      case ExpenseType.accessories:
-        if (amount > 5000.0) {
-          return 'Valor muito alto para acessórios';
-        }
-        break;
-
-      case ExpenseType.documentation:
-        if (amount > ExpenseConstants.documentationMaxExpected) {
-          return 'Valor alto para documentação (máximo esperado: R\$ ${ExpenseConstants.documentationMaxExpected.toStringAsFixed(0)})';
-        }
-        break;
-
-      case ExpenseType.other:
-        break;
-    }
-
-    return null;
+  /// Análise de padrões de despesas para um veículo
+  ExpensePatternAnalysis analyzeExpensePatterns(
+    List<ExpenseEntity> expenses,
+    VehicleEntity vehicle,
+  ) {
+    return analyzer.analyzeExpensePatterns(expenses, vehicle);
   }
-}
 
-/// Resultado de validação de despesa
-class ValidationResult {
-  ValidationResult({
-    required this.isValid,
-    required this.errors,
-    required this.warnings,
-  });
-  final bool isValid;
-  final Map<String, String> errors;
-  final Map<String, String> warnings;
-
-  bool get hasWarnings => warnings.isNotEmpty;
-  bool get hasErrors => errors.isNotEmpty;
-}
-
-/// Análise de padrões de despesas
-class ExpensePatternAnalysis {
-  ExpensePatternAnalysis({
-    required this.totalRecords,
-    required this.totalAmount,
-    required this.averageAmount,
-    required this.expensesByType,
-    required this.anomalies,
-    required this.trends,
-    required this.lastExpense,
-    required this.firstExpense,
-    required this.period,
-  });
-
-  factory ExpensePatternAnalysis.empty() {
-    final now = DateTime.now();
-    final dummyExpense = ExpenseEntity(
-      id: '',
-      userId: '',
-      vehicleId: '',
-      type: ExpenseType.other,
-      description: '',
-      amount: 0,
-      date: now,
-      odometer: 0,
-      createdAt: now,
-      updatedAt: now,
-    );
-
-    return ExpensePatternAnalysis(
-      totalRecords: 0,
-      totalAmount: 0,
-      averageAmount: 0,
-      expensesByType: {},
-      anomalies: [],
-      trends: {},
-      lastExpense: dummyExpense,
-      firstExpense: dummyExpense,
-      period: Duration.zero,
+  /// Validação contextual completa do formulário
+  Map<String, String> validateCompleteForm({
+    required ExpenseType? expenseType,
+    required String? description,
+    required String? amount,
+    required String? odometer,
+    required DateTime? date,
+    String? location,
+    String? notes,
+    VehicleEntity? vehicle,
+    double? lastExpenseOdometer,
+  }) {
+    return formValidator.validateCompleteForm(
+      expenseType: expenseType,
+      description: description,
+      amount: amount,
+      odometer: odometer,
+      date: date,
+      location: location,
+      notes: notes,
+      vehicle: vehicle,
+      lastExpenseOdometer: lastExpenseOdometer,
     );
   }
-  final int totalRecords;
-  final double totalAmount;
-  final double averageAmount;
-  final Map<ExpenseType, double> expensesByType;
-  final List<ExpenseAnomaly> anomalies;
-  final Map<String, dynamic> trends;
-  final ExpenseEntity lastExpense;
-  final ExpenseEntity firstExpense;
-  final Duration period;
 
-  bool get hasAnomalies => anomalies.isNotEmpty;
-  String get totalAmountFormatted => 'R\$ ${totalAmount.toStringAsFixed(2)}';
-  String get averageAmountFormatted =>
-      'R\$ ${averageAmount.toStringAsFixed(2)}';
-  int get periodInDays => period.inDays;
-  double get monthlyAverage =>
-      periodInDays > 0 ? totalAmount / (periodInDays / 30.44) : 0;
+  // Helper methods delegated to formValidator for convenience
+  String? validateExpenseType(ExpenseType? value) =>
+      formValidator.validateExpenseType(value);
+  String? validateDescription(String? value) =>
+      formValidator.validateDescription(value);
+  String? validateAmount(String? value, {ExpenseType? expenseType}) =>
+      formValidator.validateAmount(value, expenseType: expenseType);
+  String? validateOdometer(
+    String? value, {
+    double? currentOdometer,
+    double? initialOdometer,
+    double? lastExpenseOdometer,
+  }) => formValidator.validateOdometer(
+    value,
+    currentOdometer: currentOdometer,
+    initialOdometer: initialOdometer,
+    lastExpenseOdometer: lastExpenseOdometer,
+  );
+  String? validateDate(DateTime? date) => formValidator.validateDate(date);
+  String? validateLocation(String? value) =>
+      formValidator.validateLocation(value);
+  String? validateNotes(String? value) => formValidator.validateNotes(value);
+  ExpenseType suggestCategoryFromDescription(String description) =>
+      formValidator.suggestCategoryFromDescription(description);
 }
-
-/// Anomalia detectada em despesas
-class ExpenseAnomaly {
-  ExpenseAnomaly({
-    required this.expenseId,
-    required this.type,
-    required this.description,
-    required this.severity,
-  });
-  final String expenseId;
-  final AnomalyType type;
-  final String description;
-  final AnomalySeverity severity;
-}
-
-enum AnomalyType {
-  valueOutlier,
-  frequencyAnomaly,
-  sequenceError,
-  duplicateExpense,
-}
-
-enum AnomalySeverity { low, medium, high, critical }

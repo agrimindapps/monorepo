@@ -4,18 +4,20 @@ import 'package:core/core.dart' hide Column, Consumer, FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/accessibility_tokens.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/enhanced_loading_states.dart';
+import '../managers/auth_animation_manager.dart';
+import '../managers/auth_dialog_manager.dart';
+import '../managers/auth_form_manager.dart';
+import '../managers/auth_page_controller.dart';
+import '../managers/credentials_persistence_manager.dart';
+import '../providers/auth_dialog_managers_providers.dart';
 import '../widgets/auth_background_widgets.dart';
 import '../widgets/auth_branding_widgets.dart';
 import '../widgets/auth_form_widgets.dart';
 import '../widgets/device_validation_overlay.dart';
 import '../widgets/forgot_password_dialog.dart';
-
-const String _kRememberedEmailKey = 'remembered_email';
-const String _kRememberMeKey = 'remember_me';
 
 class AuthLoadingState {
   final bool isLoading;
@@ -49,87 +51,50 @@ class AuthPage extends ConsumerStatefulWidget {
 class _AuthPageState extends ConsumerState<AuthPage>
     with TickerProviderStateMixin, LoadingStateMixin, AccessibilityFocusMixin {
   late TabController _tabController;
-  late AnimationController _animationController;
-  late AnimationController _backgroundController;
-  late Animation<double> _fadeInAnimation;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _backgroundAnimation;
-  late Animation<double> _logoAnimation;
-  final _loginFormKey = GlobalKey<FormState>();
-  final _loginEmailController = TextEditingController();
-  final _loginPasswordController = TextEditingController();
-  bool _obscureLoginPassword = true;
-  bool _rememberMe = false;
-  final _registerFormKey = GlobalKey<FormState>();
-  final _registerNameController = TextEditingController();
-  final _registerEmailController = TextEditingController();
-  final _registerPasswordController = TextEditingController();
-  final _registerConfirmPasswordController = TextEditingController();
-  bool _obscureRegisterPassword = true;
-  bool _obscureRegisterConfirmPassword = true;
-  FocusNode? _emailFocusNode;
-  FocusNode? _passwordFocusNode;
-  FocusNode? _loginButtonFocusNode;
-  FocusNode? _registerNameFocusNode;
-  FocusNode? _registerEmailFocusNode;
-  FocusNode? _registerPasswordFocusNode;
-  FocusNode? _registerConfirmPasswordFocusNode;
-  FocusNode? _registerButtonFocusNode;
+  late AuthAnimationManager _animationManager;
+  late AuthFormManager _formManager;
+  late AuthPageController _pageController;
+  late final AuthDialogManager _dialogManager;
+  late final CredentialsPersistenceManager _credentialsManager;
 
   @override
   void initState() {
     super.initState();
+
+    // Initialize managers and controllers
+    _dialogManager = AuthDialogManager();
+    _credentialsManager = ref.read(credentialsPersistenceManagerProvider);
+    _formManager = AuthFormManager();
+    _animationManager = AuthAnimationManager(vsync: this);
+    _pageController = AuthPageController(
+      ref: ref,
+      context: context,
+      loadingMixin: this,
+      credentialsManager: _credentialsManager,
+    );
+
     _tabController = TabController(
       length: 2,
       vsync: this,
       initialIndex: widget.initialTab,
     );
-    _emailFocusNode = getFocusNode('email');
-    _passwordFocusNode = getFocusNode('password');
-    _loginButtonFocusNode = getFocusNode('login_button');
-    _registerNameFocusNode = getFocusNode('register_name');
-    _registerEmailFocusNode = getFocusNode('register_email');
-    _registerPasswordFocusNode = getFocusNode('register_password');
-    _registerConfirmPasswordFocusNode = getFocusNode(
+
+    // Initialize accessibility focus nodes (using existing mixin method)
+    _formManager.emailFocusNode = getFocusNode('email');
+    _formManager.passwordFocusNode = getFocusNode('password');
+    _formManager.loginButtonFocusNode = getFocusNode('login_button');
+    _formManager.registerNameFocusNode = getFocusNode('register_name');
+    _formManager.registerEmailFocusNode = getFocusNode('register_email');
+    _formManager.registerPasswordFocusNode = getFocusNode('register_password');
+    _formManager.registerConfirmPasswordFocusNode = getFocusNode(
       'register_confirm_password',
     );
-    _registerButtonFocusNode = getFocusNode('register_button');
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    );
+    _formManager.registerButtonFocusNode = getFocusNode('register_button');
 
-    _backgroundController = AnimationController(
-      duration: const Duration(seconds: 15),
-      vsync: this,
-    )..repeat();
-
-    _fadeInAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
-      ),
-    );
-
-    _slideAnimation = Tween<double>(begin: 80.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.2, 0.8, curve: Curves.easeOutCubic),
-      ),
-    );
-
-    _backgroundAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _backgroundController, curve: Curves.linear),
-    );
-    _logoAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
-      ),
-    );
+    // Start animations and load remembered credentials
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        _animationController.forward();
+        _animationManager.startEntranceAnimation();
         _loadRememberedCredentials();
       }
     });
@@ -138,169 +103,52 @@ class _AuthPageState extends ConsumerState<AuthPage>
   @override
   void dispose() {
     _tabController.dispose();
-    _animationController.dispose();
-    _backgroundController.dispose();
-    _loginEmailController.dispose();
-    _loginPasswordController.dispose();
-    _registerNameController.dispose();
-    _registerEmailController.dispose();
-    _registerPasswordController.dispose();
-    _registerConfirmPasswordController.dispose();
+    _animationManager.dispose();
+    _formManager.dispose();
     super.dispose();
   }
 
-  /// Salva ou remove as credenciais lembradas baseado no estado do checkbox
-  Future<void> _saveRememberedCredentials() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    if (_rememberMe) {
-      await prefs.setString(_kRememberedEmailKey, _loginEmailController.text);
-      await prefs.setBool(_kRememberMeKey, true);
-    } else {
-      await prefs.remove(_kRememberedEmailKey);
-      await prefs.setBool(_kRememberMeKey, false);
-    }
-  }
-
-  /// Carrega email salvo e estado do "Lembrar-me" na inicialização
+  /// Carrega as credenciais salvas anteriormente
   Future<void> _loadRememberedCredentials() async {
-    final prefs = await SharedPreferences.getInstance();
+    final credentials = await _pageController.loadRememberedCredentials();
 
-    final rememberedEmail = prefs.getString(_kRememberedEmailKey);
-    final rememberMe = prefs.getBool(_kRememberMeKey) ?? false;
-
-    if (rememberedEmail != null && rememberMe) {
+    if (credentials.email != null) {
       setState(() {
-        _loginEmailController.text = rememberedEmail;
-        _rememberMe = true;
+        _formManager.setLoginCredentials(credentials.email!, '');
+        _formManager.rememberMe = credentials.rememberMe;
       });
     }
   }
 
-  Future<void> _submitAuthAction({
-    GlobalKey<FormState>? formKey,
-    required String loadingMessage,
-    required Future<void> Function() authFuture,
-  }) async {
-    if (formKey == null || formKey.currentState!.validate()) {
-      showLoading(message: loadingMessage);
-      try {
-        await authFuture();
-        if (!mounted) return;
-        hideLoading();
-        final authState = ref.read(authProvider);
-        if (authState.hasValue && authState.value!.isAuthenticated) {
-          GoRouter.of(context).go('/plants');
-        }
-      } catch (e) {
-        if (mounted) {
-          hideLoading();
-        }
-      }
-    }
+  /// Salva ou remove as credenciais lembradas
+  Future<void> _saveRememberedCredentials() async {
+    await _pageController.saveRememberedCredentials(
+      email: _formManager.loginEmail,
+      rememberMe: _formManager.rememberMe,
+    );
   }
 
   Future<void> _handleLogin() async {
     await _saveRememberedCredentials();
-    await _submitAuthAction(
-      formKey: _loginFormKey,
-      loadingMessage: 'Fazendo login...',
-      authFuture: () => ref
-          .read(authProvider.notifier)
-          .login(_loginEmailController.text, _loginPasswordController.text),
+    await _pageController.handleLogin(
+      formKey: _formManager.loginFormKey,
+      email: _formManager.loginEmail,
+      password: _formManager.loginPassword,
+      rememberMe: _formManager.rememberMe,
     );
   }
 
   Future<void> _handleRegister() async {
-    await _submitAuthAction(
-      formKey: _registerFormKey,
-      loadingMessage: 'Criando conta...',
-      authFuture: () => ref
-          .read(authProvider.notifier)
-          .register(
-            _registerEmailController.text,
-            _registerPasswordController.text,
-            _registerNameController.text,
-          ),
+    await _pageController.handleRegister(
+      formKey: _formManager.registerFormKey,
+      name: _formManager.registerData['name']!,
+      email: _formManager.registerData['email']!,
+      password: _formManager.registerData['password']!,
     );
   }
 
   Future<void> _handleAnonymousLogin() async {
-    await _submitAuthAction(
-      loadingMessage: 'Entrando anonimamente...',
-      authFuture: () => ref.read(authProvider.notifier).signInAnonymously(),
-    );
-  }
-
-  void _showSocialLoginDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Em Desenvolvimento'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.construction, size: 48, color: Colors.orange),
-            SizedBox(height: 16),
-            Text(
-              'O login social está em desenvolvimento e estará disponível em breve!',
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAnonymousLoginDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Anônimo'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Como funciona o login anônimo:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 8),
-            Text('• Você pode usar o app sem criar conta'),
-            Text('• Seus dados ficam apenas no dispositivo'),
-            Text(
-              '• Limitação: dados podem ser perdidos se o app for desinstalado',
-            ),
-            Text('• Sem backup na nuvem'),
-            Text('• Sem sincronização entre dispositivos'),
-            SizedBox(height: 16),
-            Text(
-              'Deseja prosseguir?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _handleAnonymousLogin();
-            },
-            child: const Text('Prosseguir'),
-          ),
-        ],
-      ),
-    );
+    await _pageController.handleAnonymousLogin();
   }
 
   /// Exibe o dialog com os Termos de Serviço
@@ -421,7 +269,7 @@ class _AuthPageState extends ConsumerState<AuthPage>
   /// Modern background with plant-themed gradient and animations
   Widget _buildModernBackground({required Widget child}) {
     return ModernBackground(
-      animation: _backgroundAnimation,
+      animation: _animationManager.backgroundAnimation,
       primaryColor: PlantisColors.primary,
       child: child,
     );
@@ -477,19 +325,19 @@ class _AuthPageState extends ConsumerState<AuthPage>
         Expanded(
           flex: 5,
           child: PlantBrandingSide(
-            logoAnimation: _logoAnimation,
-            backgroundAnimation: _backgroundAnimation,
+            logoAnimation: _animationManager.logoAnimation,
+            backgroundAnimation: _animationManager.backgroundAnimation,
           ),
         ),
         Expanded(
           flex: 4,
           child: FadeTransition(
-            opacity: _fadeInAnimation,
+            opacity: _animationManager.fadeInAnimation,
             child: AnimatedBuilder(
-              animation: _slideAnimation,
+              animation: _animationManager.slideAnimation,
               builder: (context, child) {
                 return Transform.translate(
-                  offset: Offset(0, _slideAnimation.value),
+                  offset: Offset(0, _animationManager.slideAnimation.value),
                   child: Padding(
                     padding: const EdgeInsets.all(40.0),
                     child: _buildAuthContent(),
@@ -514,17 +362,19 @@ class _AuthPageState extends ConsumerState<AuthPage>
         vertical: isKeyboardVisible ? 12.0 : 20.0,
       ),
       child: FadeTransition(
-        opacity: _fadeInAnimation,
+        opacity: _animationManager.fadeInAnimation,
         child: AnimatedBuilder(
-          animation: _slideAnimation,
+          animation: _animationManager.slideAnimation,
           builder: (context, child) {
             return Transform.translate(
-              offset: Offset(0, _slideAnimation.value),
+              offset: Offset(0, _animationManager.slideAnimation.value),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (!isKeyboardVisible) ...[
-                    MobileBranding(logoAnimation: _logoAnimation),
+                    MobileBranding(
+                      logoAnimation: _animationManager.logoAnimation,
+                    ),
                     const SizedBox(height: 16),
                   ] else ...[
                     const CompactBranding(),
@@ -660,22 +510,22 @@ class _AuthPageState extends ConsumerState<AuthPage>
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         LoginForm(
-          formKey: _loginFormKey,
-          emailController: _loginEmailController,
-          passwordController: _loginPasswordController,
-          obscurePassword: _obscureLoginPassword,
-          rememberMe: _rememberMe,
-          emailFocusNode: _emailFocusNode,
-          passwordFocusNode: _passwordFocusNode,
-          loginButtonFocusNode: _loginButtonFocusNode,
+          formKey: _formManager.loginFormKey,
+          emailController: _formManager.loginEmailController,
+          passwordController: _formManager.loginPasswordController,
+          obscurePassword: _formManager.obscureLoginPassword,
+          rememberMe: _formManager.rememberMe,
+          emailFocusNode: _formManager.emailFocusNode,
+          passwordFocusNode: _formManager.passwordFocusNode,
+          loginButtonFocusNode: _formManager.loginButtonFocusNode,
           onObscurePasswordChanged: (value) {
             setState(() {
-              _obscureLoginPassword = value;
+              _formManager.toggleLoginPasswordVisibility();
             });
           },
           onRememberMeChanged: (value) {
             setState(() {
-              _rememberMe = value;
+              _formManager.toggleRememberMe();
             });
             _saveRememberedCredentials();
           },
@@ -690,12 +540,21 @@ class _AuthPageState extends ConsumerState<AuthPage>
         ),
         const SizedBox(height: 16),
         SocialLoginSection(
-          onGoogleLogin: _showSocialLoginDialog,
-          onAppleLogin: _showSocialLoginDialog,
-          onMicrosoftLogin: _showSocialLoginDialog,
+          onGoogleLogin: () => _dialogManager.showSocialLoginDialog(context),
+          onAppleLogin: () => _dialogManager.showSocialLoginDialog(context),
+          onMicrosoftLogin: () => _dialogManager.showSocialLoginDialog(context),
         ),
         const SizedBox(height: 16),
-        AnonymousLoginSection(onAnonymousLogin: _showAnonymousLoginDialog),
+        AnonymousLoginSection(
+          onAnonymousLogin: () async {
+            final confirmed = await _dialogManager.showAnonymousLoginDialog(
+              context,
+            );
+            if (confirmed == true) {
+              await _handleAnonymousLogin();
+            }
+          },
+        ),
       ],
     );
   }
@@ -703,26 +562,26 @@ class _AuthPageState extends ConsumerState<AuthPage>
   /// Register form with enhanced fields
   Widget _buildRegisterTab() {
     return RegisterForm(
-      formKey: _registerFormKey,
-      nameController: _registerNameController,
-      emailController: _registerEmailController,
-      passwordController: _registerPasswordController,
-      confirmPasswordController: _registerConfirmPasswordController,
-      obscurePassword: _obscureRegisterPassword,
-      obscureConfirmPassword: _obscureRegisterConfirmPassword,
-      nameFocusNode: _registerNameFocusNode,
-      emailFocusNode: _registerEmailFocusNode,
-      passwordFocusNode: _registerPasswordFocusNode,
-      confirmPasswordFocusNode: _registerConfirmPasswordFocusNode,
-      registerButtonFocusNode: _registerButtonFocusNode,
+      formKey: _formManager.registerFormKey,
+      nameController: _formManager.registerNameController,
+      emailController: _formManager.registerEmailController,
+      passwordController: _formManager.registerPasswordController,
+      confirmPasswordController: _formManager.registerConfirmPasswordController,
+      obscurePassword: _formManager.obscureRegisterPassword,
+      obscureConfirmPassword: _formManager.obscureRegisterConfirmPassword,
+      nameFocusNode: _formManager.registerNameFocusNode,
+      emailFocusNode: _formManager.registerEmailFocusNode,
+      passwordFocusNode: _formManager.registerPasswordFocusNode,
+      confirmPasswordFocusNode: _formManager.registerConfirmPasswordFocusNode,
+      registerButtonFocusNode: _formManager.registerButtonFocusNode,
       onObscurePasswordChanged: (value) {
         setState(() {
-          _obscureRegisterPassword = value;
+          _formManager.toggleRegisterPasswordVisibility();
         });
       },
       onObscureConfirmPasswordChanged: (value) {
         setState(() {
-          _obscureRegisterConfirmPassword = value;
+          _formManager.toggleRegisterConfirmPasswordVisibility();
         });
       },
       onRegister: _handleRegister,

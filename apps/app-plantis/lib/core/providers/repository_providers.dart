@@ -7,6 +7,8 @@ import '../../database/providers/database_providers.dart';
 import '../../database/repositories/subscription_local_repository.dart';
 import '../../database/repositories/sync_queue_drift_repository.dart';
 import '../../database/sync/adapters/subscription_drift_sync_adapter.dart';
+import '../../features/auth/data/repositories/auth_repository_impl.dart';
+import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/domain/usecases/reset_password_usecase.dart';
 import '../../features/plants/data/datasources/local/plant_tasks_local_datasource.dart';
 import '../../features/plants/data/datasources/local/plants_local_datasource.dart';
@@ -65,6 +67,11 @@ ConnectivityService connectivityService(Ref ref) {
 @riverpod
 IAuthRepository authRepository(Ref ref) {
   return PlantisSecurityConfig.createEnhancedAuthService();
+}
+
+@riverpod
+AuthRepository featureAuthRepository(Ref ref) {
+  return AuthRepositoryImpl(ref.watch(authRepositoryProvider));
 }
 
 @riverpod
@@ -270,7 +277,7 @@ LogoutUseCase logoutUseCase(Ref ref) {
 
 @riverpod
 ResetPasswordUseCase resetPasswordUseCase(Ref ref) {
-  return ResetPasswordUseCase(ref.watch(authRepositoryProvider));
+  return ResetPasswordUseCase(ref.watch(featureAuthRepositoryProvider));
 }
 
 /// === SETTINGS ===

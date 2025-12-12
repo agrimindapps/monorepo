@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/premium_feature_card.dart';
@@ -180,7 +181,7 @@ class _ComentariosPageContentState
                 buttonText: 'Desbloquear Agora',
                 useRocketIcon: true,
                 onUpgradePressed: () {
-                  Navigator.pushNamed(context, '/subscription');
+                  context.pushNamed('/subscription');
                 },
               );
             }
@@ -220,7 +221,7 @@ class _ComentariosPageContentState
             buttonText: 'Desbloquear Agora',
             useRocketIcon: true,
             onUpgradePressed: () {
-              Navigator.pushNamed(context, '/subscription');
+              context.pushNamed('/subscription');
             },
           ),
         );

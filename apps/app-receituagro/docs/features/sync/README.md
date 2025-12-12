@@ -17,7 +17,8 @@ Feature de sincronização de dados entre local e cloud.
 ### Dados Sincronizados
 - Favoritos
 - Comentários
-- Preferências
+- Preferências (AppSettings)
+- Perfil de Usuário (Sync-only, sem persistência local no Drift)
 
 ---
 

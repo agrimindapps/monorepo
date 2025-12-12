@@ -15,7 +15,7 @@ import '../../domain/entities/vehicle_entity.dart';
 /// **Princípio SOLID:**
 /// - Single Responsibility: Apenas reconciliação de veículos
 /// - Dependency Injection via constructor
-/// - Error handling via Either<Failure, T>
+/// - Error handling via `Either<Failure, T>`
 /// - Interface Segregation: Implementa IIdReconciliationService
 ///
 /// **Contexto:**

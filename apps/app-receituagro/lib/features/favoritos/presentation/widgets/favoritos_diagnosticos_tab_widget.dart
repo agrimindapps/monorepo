@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../core/widgets/premium_feature_card.dart';
@@ -272,7 +273,7 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
       buttonText: 'Desbloquear Agora',
       useRocketIcon: true,
       onUpgradePressed: () {
-        Navigator.pushNamed(context, '/subscription');
+        context.pushNamed('/subscription');
       },
     );
   }
@@ -345,14 +346,13 @@ class FavoritosDiagnosticosTabWidget extends ConsumerWidget {
     BuildContext context,
     FavoritoDiagnosticoEntity diagnostico,
   ) {
-    Navigator.pushNamed(
-      context,
+    context.pushNamed(
       '/detalhe-diagnostico',
-      arguments: {
+      extra: {
         'diagnosticoId': diagnostico.id,
         'nomeDefensivo': diagnostico.displayName,
         'nomePraga': diagnostico.nomePraga,
-        'cultura': diagnostico.displayCultura,
+        'cultura': diagnostico.cultura,
       },
     );
   }

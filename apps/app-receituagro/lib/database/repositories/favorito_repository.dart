@@ -252,14 +252,19 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
     return rowsAffected > 0;
   }
 
-  /// @Deprecated("Deprecated - use alternative") Legacy method - remove favorito sem userId (busca qualquer user)
-  Future<bool> removeFavoritoLegacy(String tipo, String itemId) async {
-    final query = _db.delete(_db.favoritos)
-      ..where((tbl) => tbl.tipo.equals(tipo) & tbl.itemId.equals(itemId));
-
-    final rowsAffected = await query.go();
-    return rowsAffected > 0;
+  /// Remove todos os favoritos de um tipo (soft delete)
+  Future<void> clearFavoritosByTipo(String userId, String tipo) async {
+    await (_db.update(
+      _db.favoritos,
+    )..where((tbl) => tbl.userId.equals(userId) & tbl.tipo.equals(tipo))).write(
+      FavoritosCompanion(
+        isDeleted: const Value(true),
+        isDirty: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
+
 
   /// Busca registros que precisam ser sincronizados
   Future<List<FavoritoData>> findDirtyRecords() async {
@@ -298,21 +303,7 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
     return results.map((data) => fromData(data)).toList();
   }
 
-  // ============================================================================
-  // MÉTODOS DE COMPATIBILIDADE (Drift Migration)
-  // ============================================================================
-
-  /// @Deprecated("Deprecated - use alternative") Legacy method - busca favoritos por tipo
-  Future<List<FavoritoData>> getFavoritosByTipoAsync(String tipo) async {
-    final query = _db.select(_db.favoritos)
-      ..where((tbl) => tbl.tipo.equals(tipo) & tbl.isDeleted.equals(false))
-      ..orderBy([(tbl) => OrderingTerm.desc(tbl.createdAt)]);
-
-    final results = await query.get();
-    return results.map((data) => fromData(data)).toList();
-  }
-
-  /// @Deprecated("Deprecated - use alternative") Legacy method - adiciona favorito
+  /// Adiciona favorito
   @override
   Future<int> addFavorito(
     String userId,
@@ -329,45 +320,6 @@ class FavoritoRepository extends BaseDriftRepositoryImpl<FavoritoData, Favorito>
     );
 
     return await _db.into(_db.favoritos).insert(companion);
-  }
-
-  /// @Deprecated("Deprecated - use alternative") Legacy method - verifica se é favorito
-  Future<bool> isFavorito(String tipo, String itemId) async {
-    final query = _db.select(_db.favoritos)
-      ..where(
-        (tbl) =>
-            tbl.tipo.equals(tipo) &
-            tbl.itemId.equals(itemId) &
-            tbl.isDeleted.equals(false),
-      )
-      ..limit(1);
-
-    final result = await query.getSingleOrNull();
-    return result != null;
-  }
-
-  /// @Deprecated("Deprecated - use alternative") Legacy method - limpa favoritos por tipo
-  Future<void> clearFavoritosByTipo(String tipo) async {
-    await (_db.delete(
-      _db.favoritos,
-    )..where((tbl) => tbl.tipo.equals(tipo))).go();
-  }
-
-  /// @Deprecated("Deprecated - use alternative") Legacy method - estatísticas de favoritos
-  Future<Map<String, int>> getFavoritosStats() async {
-    // Busca todos os favoritos não deletados
-    final query = _db.select(_db.favoritos)
-      ..where((tbl) => tbl.isDeleted.equals(false));
-
-    final favoritos = await query.get();
-
-    // Conta por tipo
-    final stats = <String, int>{};
-    for (final fav in favoritos) {
-      stats[fav.tipo] = (stats[fav.tipo] ?? 0) + 1;
-    }
-
-    return stats;
   }
 }
 

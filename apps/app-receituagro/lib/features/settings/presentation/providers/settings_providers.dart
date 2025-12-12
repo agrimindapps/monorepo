@@ -1,6 +1,8 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/services/device_identity_service.dart';
+import '../../../../core/services/promotional_notification_manager.dart';
+import '../../../../core/services/receituagro_notification_service.dart';
 import '../../data/repositories/user_settings_repository_impl.dart';
 import '../../domain/repositories/i_user_settings_repository.dart';
 import '../../domain/usecases/get_user_settings_usecase.dart';
@@ -29,4 +31,14 @@ UpdateUserSettingsUseCase updateUserSettingsUseCase(Ref ref) {
 @riverpod
 DeviceIdentityService deviceIdentityService(Ref ref) {
   return DeviceIdentityService.instance;
+}
+
+@riverpod
+ReceitaAgroNotificationService receitaAgroNotificationService(Ref ref) {
+  return ReceitaAgroNotificationService();
+}
+
+@riverpod
+PromotionalNotificationManager promotionalNotificationManager(Ref ref) {
+  return PromotionalNotificationManager();
 }

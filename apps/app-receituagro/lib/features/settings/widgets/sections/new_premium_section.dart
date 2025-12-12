@@ -52,7 +52,7 @@ class NewPremiumSection extends ConsumerWidget {
         subscription: subscription,
         showDetailsButton: true,
         onDetailsPressed: () {
-          Navigator.pushNamed(context, '/subscription');
+          context.pushNamed('/subscription');
         },
       );
     }
@@ -81,7 +81,7 @@ class NewPremiumSection extends ConsumerWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => Navigator.pushNamed(context, '/subscription'),
+          onTap: () => context.pushNamed('/subscription'),
           borderRadius: BorderRadius.circular(12),
           child: Padding(
             padding: const EdgeInsets.all(20),

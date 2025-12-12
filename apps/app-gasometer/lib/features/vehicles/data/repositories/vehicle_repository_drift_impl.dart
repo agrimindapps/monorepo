@@ -4,6 +4,7 @@ import 'dart:developer' as developer;
 import 'package:core/core.dart';
 import 'package:drift/drift.dart' as drift;
 
+import '../../../../core/error/exceptions.dart';
 import '../../../../database/gasometer_database.dart';
 import '../../../../database/repositories/vehicle_repository.dart'
     as drift_repo;
@@ -33,7 +34,7 @@ class VehicleRepositoryDriftImpl implements VehicleRepository {
   String get _userId {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      throw const UnknownFailure('No authenticated user');
+      throw const AuthenticationException('No authenticated user');
     }
     return user.uid;
   }

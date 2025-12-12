@@ -24,21 +24,20 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
-import 'auth_state_notifier.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/login';
 
   // Cria um notifier para mudanças de autenticação
-  final authStateNotifier = AuthStateNotifier();
+  final authStateNotifier = ValueNotifier<bool>(false);
 
   // Observa mudanças no estado de autenticação
   ref.listen(authProvider, (previous, next) {
-    authStateNotifier.updateAuthState(next.isAuthenticated);
+    authStateNotifier.value = next.isAuthenticated;
   });
 
   // Inicializa com o estado atual
-  authStateNotifier.updateAuthState(ref.read(authProvider).isAuthenticated);
+  authStateNotifier.value = ref.read(authProvider).isAuthenticated;
 
   return GoRouter(
     initialLocation: initialRoute,
@@ -57,7 +56,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         '/account-deletion-policy',
       ];
 
-      final isAuthenticated = authStateNotifier.isAuthenticated;
+      final isAuthenticated = authStateNotifier.value;
       final currentLocation = state.matchedLocation;
 
       // Se está autenticado e está em rota de auth (login/promo), redireciona para home

@@ -216,6 +216,11 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
   /// Remove this method in production!
   void _performTestAutoLogin() async {
     try {
+      if (Firebase.apps.isEmpty) {
+        debugPrint('🧪 [RECEITUAGRO-TEST] Firebase not initialized, skipping auto-login');
+        return;
+      }
+
       debugPrint('🧪 [RECEITUAGRO-TEST] Attempting auto-login...');
       
       final auth = FirebaseAuth.instance;

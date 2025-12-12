@@ -411,10 +411,8 @@ class RealtimeSyncService {
           } else {
             final existing = await _tasksRepository.getPlantTaskById(docId);
             if (existing != null) {
-              final remoteUpdated =
-                  task.updatedAt ?? task.createdAt ?? DateTime.now();
-              final localUpdated =
-                  existing.updatedAt ?? existing.createdAt ?? DateTime.now();
+              final remoteUpdated = task.updatedAt ?? task.createdAt;
+              final localUpdated = existing.updatedAt ?? existing.createdAt;
 
               if (remoteUpdated.isAfter(localUpdated)) {
                 await _tasksRepository.updatePlantTask(task);

@@ -48,9 +48,8 @@ class NotificationsNotifier extends _$NotificationsNotifier {
     // All injected services are abstractions, allowing for polymorphism
     _getUserSettingsUseCase = ref.watch(getUserSettingsUseCaseProvider);
     _updateUserSettingsUseCase = ref.watch(updateUserSettingsUseCaseProvider);
-    // TODO: Implement notificationServiceProvider in core_providers.dart
-    // _notificationService = ref.watch(notificationServiceProvider);
-    _promotionalManager = PromotionalNotificationManager();
+    _notificationService = ref.watch(receitaAgroNotificationServiceProvider);
+    _promotionalManager = ref.watch(promotionalNotificationManagerProvider);
 
     // ✅ RESOURCE CLEANUP: Register disposal callback for notification cleanup
     // This ensures proper cleanup when notifier is disposed

@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/premium_providers.dart';
@@ -49,8 +50,10 @@ IComentariosRepository iComentariosRepository(Ref ref) {
 
 @riverpod
 ComentariosService comentariosService(Ref ref) {
+  final repo = ref.watch(iComentariosRepositoryProvider);
   return ComentariosService(
-    repository: ref.watch(iComentariosRepositoryProvider),
+    readRepository: repo,
+    writeRepository: repo,
     premiumService: ref.watch(premiumServiceProvider),
     mapper: ref.watch(comentariosMapperProvider),
   );

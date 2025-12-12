@@ -3,7 +3,7 @@ import 'package:core/core.dart' hide Column;
 import '../../../../core/providers/auth_state.dart' as local;
 import '../../domain/repositories/profile_repository.dart';
 
-/// Conversão de Result<T> para Either<Failure, T>
+/// Conversão de Result de T para Either de Failure, T
 // ignore: deprecated_member_use
 Either<Failure, T> _resultToEither<T>(Result<T> result) {
   if (result.isError) {
@@ -12,7 +12,7 @@ Either<Failure, T> _resultToEither<T>(Result<T> result) {
   return Right(result.data as T);
 }
 
-/// Conversão de Result<void> para Either<Failure, Unit>
+/// Conversão de Result de void para Either de Failure, Unit
 // ignore: deprecated_member_use
 Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
   if (result.isError) {
@@ -21,7 +21,7 @@ Either<Failure, Unit> _resultToEitherUnit(Result<void> result) {
   return const Right(unit);
 }
 
-/// Conversão async de Result<T> para Either<Failure, T>
+/// Conversão async de Result de T para Either de Failure, T
 Future<Either<Failure, T>> _resultToEitherAsync<T>(
   // ignore: deprecated_member_use
   Future<Result<T>> futureResult,
@@ -30,7 +30,7 @@ Future<Either<Failure, T>> _resultToEitherAsync<T>(
   return _resultToEither(result);
 }
 
-/// Conversão async de Result<void> para Either<Failure, Unit>
+/// Conversão async de Result de void para Either de Failure, Unit
 Future<Either<Failure, Unit>> _resultToEitherUnitAsync(
   // ignore: deprecated_member_use
   Future<Result<void>> futureResult,

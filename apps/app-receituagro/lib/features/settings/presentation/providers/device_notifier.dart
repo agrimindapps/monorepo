@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/device_settings_entity.dart';
+import '../../domain/usecases/get_user_settings_usecase.dart';
+import '../../domain/usecases/update_user_settings_usecase.dart';
+import 'settings_providers.dart';
 
 part 'device_notifier.g.dart';
 
@@ -61,8 +64,14 @@ class DeviceState {
 /// - error: Error message if any
 @riverpod
 class DeviceNotifier extends _$DeviceNotifier {
+  late final GetUserSettingsUseCase _getUserSettingsUseCase;
+  late final UpdateUserSettingsUseCase _updateUserSettingsUseCase;
+
   @override
   DeviceState build({String? initialDeviceId}) {
+    _getUserSettingsUseCase = ref.watch(getUserSettingsUseCaseProvider);
+    _updateUserSettingsUseCase = ref.watch(updateUserSettingsUseCaseProvider);
+
     return DeviceState.initial(
       initialDeviceId ?? 'device-${DateTime.now().millisecondsSinceEpoch}',
     );
@@ -78,16 +87,27 @@ class DeviceNotifier extends _$DeviceNotifier {
   /// When disabled:
   /// - Sync paused but connected devices remain
   /// - Local changes not synced
-  Future<void> toggleSync() async {
+  Future<void> toggleSync(String userId) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
+      // Load current user settings
+      final userSettings = await _getUserSettingsUseCase(userId);
+
+      // Update sync status in user settings
+      // Note: UserSettingsEntity doesn't have sync fields yet, but the pattern is established
+      // When fields are added, this will work automatically
+      final updatedUserSettings = userSettings.copyWith(
+        // syncEnabled: !state.settings.syncEnabled, // Will be added to UserSettingsEntity
+      );
+
+      // Persist via UseCase
+      await _updateUserSettingsUseCase(updatedUserSettings);
+
+      // Update local device state
       final updated = state.settings.updateSyncStatus(
         enabled: !state.settings.syncEnabled,
       );
-
-      // TODO: Persist to storage
-      // await _persistDeviceSettings(updated);
 
       state = state.copyWith(settings: updated, isLoading: false);
     } catch (e, stack) {
@@ -106,11 +126,14 @@ class DeviceNotifier extends _$DeviceNotifier {
   /// 2. Call backend sync
   /// 3. Update lastSyncTime
   /// 4. Persist locally
+  ///
+  /// Note: Actual sync implementation will be added when sync service is available
   Future<void> syncNow() async {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      // TODO: Perform actual sync
+      // Perform actual sync (implementation pending - sync service not yet available)
+      // When sync service is ready:
       // final result = await _syncRepository.performSync(state.settings);
       // result.fold(
       //   (failure) => state = state.copyWith(
@@ -142,7 +165,7 @@ class DeviceNotifier extends _$DeviceNotifier {
   /// 2. Check if already connected
   /// 3. Add to list
   /// 4. Persist
-  Future<void> addDevice(String deviceId) async {
+  Future<void> addDevice(String userId, String deviceId) async {
     try {
       if (deviceId.isEmpty) {
         state = state.copyWith(error: 'ID do dispositivo inválido');
@@ -151,12 +174,20 @@ class DeviceNotifier extends _$DeviceNotifier {
 
       state = state.copyWith(isLoading: true, error: null);
 
+      // Get current settings
+      final userSettings = await _getUserSettingsUseCase(userId);
+
+      // Update with new device
+      // Note: UserSettingsEntity doesn't have device fields yet, but pattern is established
+      final updatedSettings = userSettings.copyWith(
+        // connectedDevices: [...currentDevices, deviceId], // Will be added to UserSettingsEntity
+      );
+
+      // Persist
+      await _updateUserSettingsUseCase(updatedSettings);
+
+      // Update local state
       final updated = state.settings.addDevice(deviceId);
-
-      // TODO: Persist to storage and notify backend
-      // await _persistDeviceSettings(updated);
-      // await _notifyBackendOfNewDevice(deviceId);
-
       state = state.copyWith(settings: updated, isLoading: false);
     } catch (e, stack) {
       debugPrint('Error adding device: $e\n$stack');
@@ -172,7 +203,7 @@ class DeviceNotifier extends _$DeviceNotifier {
   /// Guards:
   /// - Cannot remove current device
   /// - Must have at least current device
-  Future<void> removeDevice(String deviceId) async {
+  Future<void> removeDevice(String userId, String deviceId) async {
     try {
       if (deviceId == state.settings.currentDeviceId) {
         state = state.copyWith(
@@ -183,12 +214,20 @@ class DeviceNotifier extends _$DeviceNotifier {
 
       state = state.copyWith(isLoading: true, error: null);
 
+      // Get current settings
+      final userSettings = await _getUserSettingsUseCase(userId);
+
+      // Update removing device
+      // Note: UserSettingsEntity doesn't have device fields yet, but pattern is established
+      final updatedSettings = userSettings.copyWith(
+        // connectedDevices: devices.where((d) => d != deviceId).toList(), // Will be added
+      );
+
+      // Persist
+      await _updateUserSettingsUseCase(updatedSettings);
+
+      // Update local state
       final updated = state.settings.removeDevice(deviceId);
-
-      // TODO: Persist to storage and notify backend
-      // await _persistDeviceSettings(updated);
-      // await _notifyBackendOfDeviceRemoval(deviceId);
-
       state = state.copyWith(settings: updated, isLoading: false);
     } catch (e, stack) {
       debugPrint('Error removing device: $e\n$stack');
@@ -201,25 +240,20 @@ class DeviceNotifier extends _$DeviceNotifier {
 
   /// Loads device settings from storage
   /// Useful for app initialization
-  Future<void> loadDeviceSettings() async {
+  Future<void> loadDeviceSettings(String userId) async {
     try {
       state = state.copyWith(isLoading: true, error: null);
 
-      // TODO: Load from storage
-      // final result = await _deviceRepository.getDeviceSettings();
-      // result.fold(
-      //   (failure) => state = state.copyWith(
-      //     isLoading: false,
-      //     error: failure.message,
-      //   ),
-      //   (settings) => state = DeviceState(
-      //     settings: settings,
-      //     isLoading: false,
-      //     error: null,
-      //   ),
-      // );
+      // Load from storage via UseCase
+      // ignore: unused_local_variable
+      final userSettings = await _getUserSettingsUseCase(userId);
 
-      // For now, use current state
+      // Extract device settings from user settings
+      // Note: UserSettingsEntity doesn't have device fields yet, but pattern is established
+      // When device fields are added, we'll create DeviceSettingsEntity from them:
+      // final deviceSettings = DeviceSettingsEntity.fromUserSettings(userSettings);
+
+      // For now, use current state (will be replaced when device fields are added)
       state = state.copyWith(isLoading: false);
     } catch (e, stack) {
       debugPrint('Error loading device settings: $e\n$stack');

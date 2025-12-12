@@ -24,6 +24,7 @@ void main() {
   late MockIPremiumService mockPremiumService;
 
   setUp(() {
+    registerFallbackValue(StackTrace.empty);
     mockAnalyticsRepository = MockIAnalyticsRepository();
     mockCrashlyticsRepository = MockICrashlyticsRepository();
     mockAppRatingRepository = MockIAppRatingRepository();

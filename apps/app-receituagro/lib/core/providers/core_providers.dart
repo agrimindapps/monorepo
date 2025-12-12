@@ -345,14 +345,11 @@ final premiumServiceProvider = Provider<ReceitaAgroPremiumService>((ref) {
   final subscriptionRepo = ref.watch(subscriptionRepositoryProvider);
   final localRepo = ref.watch(subscriptionLocalRepositoryProvider);
 
-  final service = ReceitaAgroPremiumService(
+  return ReceitaAgroPremiumService(
     analytics: analytics,
     cloudFunctions: cloudFunctions,
     remoteConfig: remoteConfig,
     subscriptionRepository: subscriptionRepo,
     localRepository: localRepo,
   );
-
-  ReceitaAgroPremiumService.setInstance(service);
-  return service;
 });

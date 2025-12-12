@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../features/data_management/domain/services/data_cleaner_service.dart';
 
@@ -318,19 +318,23 @@ class _ClearTypeSelector extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        RadioListTile<String>(
-          title: const Text('Limpeza completa'),
-          subtitle: const Text('Remove todos os dados locais'),
-          value: 'all',
+        RadioGroup<String>(
           groupValue: selectedType,
           onChanged: (value) => onChanged(value!),
-        ),
-        RadioListTile<String>(
-          title: const Text('Limpeza seletiva'),
-          subtitle: const Text('Escolha módulos específicos'),
-          value: 'selective',
-          groupValue: selectedType,
-          onChanged: (value) => onChanged(value!),
+          child: Column(
+            children: [
+              RadioListTile<String>(
+                title: const Text('Limpeza completa'),
+                subtitle: const Text('Remove todos os dados locais'),
+                value: 'all',
+              ),
+              RadioListTile<String>(
+                title: const Text('Limpeza seletiva'),
+                subtitle: const Text('Escolha módulos específicos'),
+                value: 'selective',
+              ),
+            ],
+          ),
         ),
       ],
     );

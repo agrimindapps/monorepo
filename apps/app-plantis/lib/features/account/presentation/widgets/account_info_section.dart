@@ -22,40 +22,41 @@ class _AccountInfoSectionState extends ConsumerState<AccountInfoSection> {
     await ProfileImagePickerWidget.show(
       context: context,
       hasCurrentImage: hasCurrentImage,
-      onImageSelected: (File file) async {
-        final result = await imageService.processImageToBase64(file);
-        result.fold(
-          (failure) {
-            if (mounted) {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(SnackBar(content: Text(failure.message)));
-            }
-          },
-          (base64String) async {
-            final updateResult = await ref
-                .read(local.authProvider.notifier)
-                .updateProfile(photoUrl: base64String);
-            if (mounted) {
-              updateResult.fold(
-                (failure) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Erro ao atualizar foto: ${failure.message}',
+      onImageSelected: (File file) {
+        imageService.processImageToBase64(file).then((result) {
+          result.fold(
+            (failure) {
+              if (mounted) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(failure.message)));
+              }
+            },
+            (base64String) async {
+              final updateResult = await ref
+                  .read(local.authProvider.notifier)
+                  .updateProfile(photoUrl: base64String);
+              if (mounted) {
+                updateResult.fold(
+                  (failure) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Erro ao atualizar foto: ${failure.message}',
+                        ),
                       ),
-                    ),
-                  );
-                },
-                (_) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Foto de perfil atualizada!')),
-                  );
-                },
-              );
-            }
-          },
-        );
+                    );
+                  },
+                  (_) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Foto de perfil atualizada!')),
+                    );
+                  },
+                );
+              }
+            },
+          );
+        });
       },
       onRemoveImage: () async {
         final updateResult = await ref

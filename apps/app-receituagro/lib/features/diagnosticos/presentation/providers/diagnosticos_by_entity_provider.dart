@@ -356,7 +356,7 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
       
       // Tenta como string (idDefensivo original)
       final defensivoRepo = ref.read(fitossanitariosRepositoryProvider);
-      final data = await defensivoRepo.getById(idDefensivo);
+      final data = await defensivoRepo.findByIdDefensivo(idDefensivo);
       if (data != null) {
         debugPrint('✅ [DiagByEntity] Defensivo encontrado por idDefensivo string: ${data.nome}');
         final nome = data.nome;

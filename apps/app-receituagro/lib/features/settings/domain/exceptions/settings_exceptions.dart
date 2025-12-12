@@ -30,3 +30,30 @@ class SettingsValidationException implements Exception {
   @override
   String toString() => 'SettingsValidationException: $message';
 }
+
+/// Exception thrown when update is invalid
+class InvalidUpdateException implements Exception {
+  final String message;
+  InvalidUpdateException(this.message);
+
+  @override
+  String toString() => 'InvalidUpdateException: $message';
+}
+
+/// Exception thrown when language is not supported
+class UnsupportedLanguageException implements Exception {
+  final String message;
+  UnsupportedLanguageException(this.message);
+
+  @override
+  String toString() => 'UnsupportedLanguageException: $message';
+}
+
+/// Exception thrown when settings are invalid
+class InvalidSettingsException implements Exception {
+  final String message;
+  InvalidSettingsException(this.message);
+
+  @override
+  String toString() => 'InvalidSettingsException: $message';
+}

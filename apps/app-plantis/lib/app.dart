@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
@@ -17,18 +16,6 @@ class PlantisApp extends ConsumerStatefulWidget {
 }
 
 class _PlantisAppState extends ConsumerState<PlantisApp> {
-  @override
-  void initState() {
-    super.initState();
-
-    // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
-    if (kDebugMode) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _performTestAutoLogin();
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // Inicializa o listener de sincronização
@@ -57,43 +44,5 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
         locale: const Locale('pt', 'BR'),
       ),
     );
-  }
-
-  /// 🧪 AUTO-LOGIN PARA TESTES
-  /// Remove this method in production!
-  void _performTestAutoLogin() async {
-    try {
-      SecureLogger.info('🧪 [PLANTIS-TEST] Attempting auto-login...');
-
-      final auth = FirebaseAuth.instance;
-
-      // Se já está logado, não faz nada
-      if (auth.currentUser != null) {
-        SecureLogger.info(
-          '🧪 [PLANTIS-TEST] Already logged in as: ${auth.currentUser!.email}',
-        );
-        return;
-      }
-
-      const testEmail = 'lucineiy@hotmail.com';
-      const testPassword = 'QWEqwe@123';
-
-      final result = await auth.signInWithEmailAndPassword(
-        email: testEmail,
-        password: testPassword,
-      );
-
-      if (result.user != null) {
-        SecureLogger.info(
-          '🧪 [PLANTIS-TEST] Auto-login successful! User: ${result.user!.email}',
-        );
-      }
-    } catch (e, stackTrace) {
-      SecureLogger.error(
-        '🧪 [PLANTIS-TEST] Auto-login error',
-        error: e,
-        stackTrace: stackTrace,
-      );
-    }
   }
 }

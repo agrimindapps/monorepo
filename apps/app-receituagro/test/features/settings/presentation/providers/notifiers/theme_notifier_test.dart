@@ -2,7 +2,7 @@ import 'package:app_receituagro/features/settings/domain/entities/user_settings_
 import 'package:app_receituagro/features/settings/domain/usecases/get_user_settings_usecase.dart';
 import 'package:app_receituagro/features/settings/domain/usecases/update_user_settings_usecase.dart';
 import 'package:app_receituagro/features/settings/presentation/providers/notifiers/theme_notifier.dart';
-import 'package:core/core.dart' hide themeProvider;
+import 'package:app_receituagro/features/settings/presentation/providers/settings_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -42,45 +42,90 @@ void main() {
       when(() => mockGetUserSettingsUseCase(userId))
           .thenAnswer((_) async => settings);
 
-      // Act & Assert - Direct testing without full container override
-      // (Riverpod providers are tested differently due to code generation)
-      expect(settings.isDarkTheme, settings.isDarkTheme);
-      expect(settings.language, isNotEmpty);
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+
+      // Act
+      await notifier.loadSettings(userId);
+
+      // Assert
+      final state = container.read(themeProvider);
+      expect(state.value, settings);
+      expect(state.value?.isDarkTheme, false);
+      expect(state.value?.language, isNotEmpty);
     });
 
     test('should initialize with null settings', () async {
       // Arrange
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
       // Act
-      final initial = container.read(themeProvider);
+      final state = container.read(themeProvider);
 
       // Assert
-      expect(initial, isNotNull);
+      expect(state.value, isNull);
     });
 
     test('should handle error when loading settings fails', () async {
-      // Arrange - Simulate a failure scenario
+      // Arrange
       const userId = 'user-123';
       final exception = Exception('Failed to load settings');
 
-      when(() => mockGetUserSettingsUseCase(userId))
-          .thenThrow(exception);
+      when(() => mockGetUserSettingsUseCase(userId)).thenAnswer((_) async => throw exception);
 
-      // Act & Assert - Error handling is validated through the notifier's state management
-      expect(exception, isA<Exception>());
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+
+      // Act
+      await notifier.loadSettings(userId);
+
+      // Assert
+      final state = container.read(themeProvider);
+      expect(state.hasError, true);
+      expect(state.error, exception);
     });
 
-    test('should return empty list when userId is empty', () async {
+    test('should not load settings when userId is empty', () async {
       // Arrange
       const userId = '';
-      final settings = UserSettingsEntity.createDefault(userId);
+      
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
-      when(() => mockGetUserSettingsUseCase(userId))
-          .thenAnswer((_) async => settings);
+      final notifier = container.read(themeProvider.notifier);
 
-      // Act & Assert
-      expect(userId.isEmpty, true);
+      // Act
+      await notifier.loadSettings(userId);
+
+      // Assert
+      verifyNever(() => mockGetUserSettingsUseCase(any()));
+      final state = container.read(themeProvider);
+      expect(state.value, isNull);
     });
   });
 
@@ -99,9 +144,24 @@ void main() {
       when(() => mockUpdateUserSettingsUseCase(any()))
           .thenAnswer((_) async => expectedSettings);
 
-      // Act & Assert - Verify the settings transformation
-      expect(expectedSettings.isDarkTheme, true);
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
+      // Act
+      await notifier.setDarkTheme(true);
+
+      // Assert
       verify(() => mockUpdateUserSettingsUseCase(any())).called(1);
+      final state = container.read(themeProvider);
+      expect(state.value?.isDarkTheme, true);
     });
 
     test('should toggle dark theme to false', () async {
@@ -117,17 +177,45 @@ void main() {
       when(() => mockUpdateUserSettingsUseCase(any()))
           .thenAnswer((_) async => expectedSettings);
 
-      // Act & Assert
-      expect(expectedSettings.isDarkTheme, false);
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
+      // Act
+      await notifier.setDarkTheme(false);
+
+      // Assert
       verify(() => mockUpdateUserSettingsUseCase(any())).called(1);
+      final state = container.read(themeProvider);
+      expect(state.value?.isDarkTheme, false);
     });
 
     test('should handle null settings scenario for dark theme', () async {
       // Arrange
-      UserSettingsEntity? nullSettings;
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
-      // Act & Assert - verifying nullable type behavior
-      expect(nullSettings, isNull);
+      final notifier = container.read(themeProvider.notifier);
+      // Not loading settings, so state is null
+
+      // Act
+      final result = await notifier.setDarkTheme(true);
+
+      // Assert
+      expect(result, false);
+      verifyNever(() => mockUpdateUserSettingsUseCase(any()));
     });
 
     test('should handle update error gracefully', () async {
@@ -139,11 +227,27 @@ void main() {
       when(() => mockGetUserSettingsUseCase(userId))
           .thenAnswer((_) async => initialSettings);
 
-      when(() => mockUpdateUserSettingsUseCase(any()))
-          .thenThrow(exception);
+      when(() => mockUpdateUserSettingsUseCase(any())).thenThrow(exception);
 
-      // Act & Assert
-      expect(exception, isA<Exception>());
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
+      // Act
+      final result = await notifier.setDarkTheme(true);
+
+      // Assert
+      expect(result, false);
+      final state = container.read(themeProvider);
+      expect(state.hasError, true);
+      expect(state.error, exception);
     });
 
     test('should preserve other settings when toggling dark theme', () async {
@@ -153,9 +257,29 @@ void main() {
           .copyWith(language: 'pt_BR', isDarkTheme: false);
       final expectedSettings = initialSettings.copyWith(isDarkTheme: true);
 
-      // Act & Assert
-      expect(expectedSettings.language, 'pt_BR');
-      expect(expectedSettings.isDarkTheme, true);
+      when(() => mockGetUserSettingsUseCase(userId))
+          .thenAnswer((_) async => initialSettings);
+      when(() => mockUpdateUserSettingsUseCase(any()))
+          .thenAnswer((_) async => expectedSettings);
+
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
+      // Act
+      await notifier.setDarkTheme(true);
+
+      // Assert
+      final state = container.read(themeProvider);
+      expect(state.value?.language, 'pt_BR');
+      expect(state.value?.isDarkTheme, true);
     });
   });
 
@@ -175,9 +299,24 @@ void main() {
       when(() => mockUpdateUserSettingsUseCase(any()))
           .thenAnswer((_) async => expectedSettings);
 
-      // Act & Assert
-      expect(expectedSettings.language, 'pt_BR');
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
+      // Act
+      await notifier.setLanguage('pt_BR');
+
+      // Assert
       verify(() => mockUpdateUserSettingsUseCase(any())).called(1);
+      final state = container.read(themeProvider);
+      expect(state.value?.language, 'pt_BR');
     });
 
     test('should update language to English', () async {
@@ -193,32 +332,43 @@ void main() {
       when(() => mockUpdateUserSettingsUseCase(any()))
           .thenAnswer((_) async => expectedSettings);
 
-      // Act & Assert
-      expect(expectedSettings.language, 'en_US');
-    });
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
-    test('should update language to Spanish', () async {
-      // Arrange
-      const userId = 'user-123';
-      final initialSettings = UserSettingsEntity.createDefault(userId);
-      final expectedSettings = initialSettings.copyWith(language: 'es_ES');
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
 
-      when(() => mockGetUserSettingsUseCase(userId))
-          .thenAnswer((_) async => initialSettings);
+      // Act
+      await notifier.setLanguage('en_US');
 
-      when(() => mockUpdateUserSettingsUseCase(any()))
-          .thenAnswer((_) async => expectedSettings);
-
-      // Act & Assert
-      expect(expectedSettings.language, 'es_ES');
+      // Assert
+      final state = container.read(themeProvider);
+      expect(state.value?.language, 'en_US');
     });
 
     test('should handle null settings scenario for language', () async {
       // Arrange
-      UserSettingsEntity? nullSettings;
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
-      // Act & Assert - verifying nullable type behavior
-      expect(nullSettings, isNull);
+      final notifier = container.read(themeProvider.notifier);
+
+      // Act
+      final result = await notifier.setLanguage('pt_BR');
+
+      // Assert
+      expect(result, false);
+      verifyNever(() => mockUpdateUserSettingsUseCase(any()));
     });
 
     test('should handle language update error', () async {
@@ -230,27 +380,31 @@ void main() {
       when(() => mockGetUserSettingsUseCase(userId))
           .thenAnswer((_) async => initialSettings);
 
-      when(() => mockUpdateUserSettingsUseCase(any()))
-          .thenThrow(exception);
+      when(() => mockUpdateUserSettingsUseCase(any())).thenThrow(exception);
 
-      // Act & Assert
-      expect(exception, isA<Exception>());
-    });
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
-    test('should preserve other settings when changing language', () async {
-      // Arrange
-      const userId = 'user-123';
-      final initialSettings = UserSettingsEntity.createDefault(userId)
-          .copyWith(isDarkTheme: true, language: 'en_US');
-      final expectedSettings = initialSettings.copyWith(language: 'pt_BR');
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
 
-      // Act & Assert
-      expect(expectedSettings.isDarkTheme, true);
-      expect(expectedSettings.language, 'pt_BR');
+      // Act
+      final result = await notifier.setLanguage('pt_BR');
+
+      // Assert
+      expect(result, false);
+      final state = container.read(themeProvider);
+      expect(state.hasError, true);
+      expect(state.error, exception);
     });
   });
 
-  // ===== GROUP 4: SETTINGS VALIDATION =====
+  // ===== GROUP 4: SETTINGS VALIDATION (Entity Tests) =====
 
   group('ThemeNotifier - Settings Validation', () {
     test('should validate theme settings structure', () async {
@@ -281,17 +435,6 @@ void main() {
       // Act & Assert
       expect(settings.isDarkTheme, isFalse);
     });
-
-    test('should maintain user ID consistency', () async {
-      // Arrange
-      const userId = 'user-123';
-      final initialSettings = UserSettingsEntity.createDefault(userId);
-      final updatedSettings = initialSettings.copyWith(isDarkTheme: true);
-
-      // Act & Assert
-      expect(updatedSettings.userId, userId);
-      expect(updatedSettings.userId, initialSettings.userId);
-    });
   });
 
   // ===== GROUP 5: PERFORMANCE & EDGE CASES =====
@@ -300,61 +443,39 @@ void main() {
     test('should handle rapid theme toggles', () async {
       // Arrange
       const userId = 'user-123';
-      var settings = UserSettingsEntity.createDefault(userId);
+      final initialSettings = UserSettingsEntity.createDefault(userId);
 
       when(() => mockGetUserSettingsUseCase(userId))
-          .thenAnswer((_) async => settings);
+          .thenAnswer((_) async => initialSettings);
 
       when(() => mockUpdateUserSettingsUseCase(any()))
-          .thenAnswer((invocation) {
-        settings = invocation.positionalArguments[0] as UserSettingsEntity;
-        return Future.value(settings);
+          .thenAnswer((invocation) async {
+        return invocation.positionalArguments[0] as UserSettingsEntity;
       });
 
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
+
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
       // Act - Simulate rapid toggles
-      settings = settings.copyWith(isDarkTheme: !settings.isDarkTheme);
-      settings = settings.copyWith(isDarkTheme: !settings.isDarkTheme);
-      settings = settings.copyWith(isDarkTheme: !settings.isDarkTheme);
+      await notifier.setDarkTheme(true);
+      await notifier.setDarkTheme(false);
+      await notifier.setDarkTheme(true);
 
       // Assert
-      expect(settings.isDarkTheme, true);
+      final state = container.read(themeProvider);
+      expect(state.value?.isDarkTheme, true);
+      verify(() => mockUpdateUserSettingsUseCase(any())).called(3);
     });
 
     test('should handle multiple language changes', () async {
-      // Arrange
-      const userId = 'user-123';
-      var settings = UserSettingsEntity.createDefault(userId);
-
-      when(() => mockGetUserSettingsUseCase(userId))
-          .thenAnswer((_) async => settings);
-
-      when(() => mockUpdateUserSettingsUseCase(any()))
-          .thenAnswer((invocation) {
-        settings = invocation.positionalArguments[0] as UserSettingsEntity;
-        return Future.value(settings);
-      });
-
-      // Act - Change language multiple times
-      settings = settings.copyWith(language: 'pt_BR');
-      settings = settings.copyWith(language: 'en_US');
-      settings = settings.copyWith(language: 'es_ES');
-
-      // Assert
-      expect(settings.language, 'es_ES');
-    });
-
-    test('should handle settings with special characters in language code',
-        () async {
-      // Arrange
-      const userId = 'user-123';
-      final initialSettings = UserSettingsEntity.createDefault(userId);
-      final expectedSettings = initialSettings.copyWith(language: 'pt_BR');
-
-      // Act & Assert
-      expect(expectedSettings.language, 'pt_BR');
-    });
-
-    test('should handle concurrent settings updates', () async {
       // Arrange
       const userId = 'user-123';
       final initialSettings = UserSettingsEntity.createDefault(userId);
@@ -363,14 +484,30 @@ void main() {
           .thenAnswer((_) async => initialSettings);
 
       when(() => mockUpdateUserSettingsUseCase(any()))
-          .thenAnswer((_) async => initialSettings.copyWith(isDarkTheme: true));
+          .thenAnswer((invocation) async {
+        return invocation.positionalArguments[0] as UserSettingsEntity;
+      });
 
-      // Act & Assert - Ensure no race conditions
-      final setting1 = initialSettings.copyWith(isDarkTheme: true);
-      final setting2 = initialSettings.copyWith(language: 'pt_BR');
+      final container = ProviderContainer(overrides: [
+        getUserSettingsUseCaseProvider
+            .overrideWithValue(mockGetUserSettingsUseCase),
+        updateUserSettingsUseCaseProvider
+            .overrideWithValue(mockUpdateUserSettingsUseCase),
+      ]);
+      addTearDown(container.dispose);
 
-      expect(setting1.isDarkTheme, true);
-      expect(setting2.language, 'pt_BR');
+      final notifier = container.read(themeProvider.notifier);
+      await notifier.loadSettings(userId);
+
+      // Act
+      await notifier.setLanguage('pt_BR');
+      await notifier.setLanguage('en_US');
+      await notifier.setLanguage('es_ES');
+
+      // Assert
+      final state = container.read(themeProvider);
+      expect(state.value?.language, 'es_ES');
+      verify(() => mockUpdateUserSettingsUseCase(any())).called(3);
     });
   });
 }

@@ -73,7 +73,7 @@ class _DiagnosticoDefensivoListItemWidgetState
         
         // Se não encontrou, tenta como string (idPraga original)
         if (praga == null) {
-          praga = await pragasRepository.getById(diag.idPraga);
+          praga = await pragasRepository.findByIdPraga(diag.idPraga);
         }
 
         if (mounted) {
@@ -97,7 +97,7 @@ class _DiagnosticoDefensivoListItemWidgetState
           
           // Se não encontrou, tenta como string (idPraga original)
           if (praga == null) {
-            praga = await pragasRepository.getById(idPraga);
+            praga = await pragasRepository.findByIdPraga(idPraga);
           }
 
           if (mounted) {

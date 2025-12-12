@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../../subscription/presentation/widgets/subscription_info_card.dart';
@@ -109,7 +110,7 @@ class ProfileSubscriptionSection extends ConsumerWidget {
         ElevatedButton.icon(
           onPressed: () {
             // Navegar para página de planos
-            Navigator.pushNamed(context, '/subscription');
+            context.pushNamed('/subscription');
           },
           icon: const Icon(Icons.upgrade, size: 18),
           label: const Text('Assinar Premium'),

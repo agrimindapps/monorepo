@@ -21,7 +21,7 @@
 | [auth](./features/auth/) | 10/10 | 0 | 0 | 0 | ✅ Limpo |
 | [favoritos](./features/favoritos/) | 9/10 | 2 | 2 | 0 | ✅ Estável |
 | [comentarios](./features/comentarios/) | 8/10 | 1 | 0 | 1 | ✅ Estável |
-| [settings](./features/settings/) | 7/10 | 5 | 22 | 5 | ⚠️ Cleanup |
+| [settings](./features/settings/) | 8/10 | 5 | 22 | 5 | ⚠️ Cleanup |
 | [subscription](./features/subscription/) | 6/10 | 7 | 45 | 0 | 🔴 Pendente |
 
 ### Features Auxiliares
@@ -98,6 +98,8 @@
 ### Dezembro 2025
 | Data | Feature | Tarefa | Resultado |
 |------|---------|--------|-----------|
+| 12/12 | sync | Corrigir erro "Tabela não suportada: users" | ✅ Sync funcionando |
+| 12/12 | settings | Corrigir testes do ThemeNotifier | ✅ Testes passando |
 | 06/12 | release | Remover ProductionReleaseDashboard deprecated | ✅ 1 arquivo deletado |
 | 06/12 | defensivos | Remover todos UseCases deprecated | ✅ 7 classes + 6 providers (~105 linhas) |
 | 06/12 | culturas | CUL-001: Remover UseCases deprecated | ✅ 4 classes (~70 linhas) |

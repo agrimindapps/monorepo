@@ -12,8 +12,12 @@
 /// Collection structure: users/{userId}/vehicles/{vehicleId}
 /// Ownership-based: All operations require userId for security
 library;
-import 'package:core/core.dart';
+import 'package:core/core.dart'
+    hide
+        ValidationException,
+        NetworkException;
 
+import '../../../../core/error/exceptions.dart';
 import '../../../vehicles/domain/entities/vehicle_entity.dart';
 import '../mappers/vehicle_firebase_mapper.dart';
 abstract class VehiclesFirebaseDataSource {
@@ -44,7 +48,7 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
     try {
       // Validate user authentication
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
 
       // Convert VehicleEntity to Firestore JSON
@@ -56,15 +60,15 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
       return docRef.id;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error creating vehicle: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error creating vehicle: $e');
     }
   }
 
@@ -79,10 +83,10 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Vehicle Firebase ID cannot be empty');
+        throw const ValidationException('Vehicle Firebase ID cannot be empty');
       }
 
       // Fetch document from Firestore
@@ -90,7 +94,7 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
 
       // Check if document exists
       if (!doc.exists || doc.data() == null) {
-        throw NotFoundFailure('Vehicle not found with ID: $firebaseId');
+        throw VehicleNotFoundException('Vehicle not found with ID: $firebaseId');
       }
 
       // Convert Firestore JSON to VehicleEntity
@@ -99,21 +103,21 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
 
       // Check if vehicle is soft-deleted
       if (vehicle.isDeleted) {
-        throw NotFoundFailure('Vehicle was deleted: $firebaseId');
+        throw VehicleNotFoundException('Vehicle was deleted: $firebaseId');
       }
 
       return vehicle;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching vehicle: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching vehicle: $e');
     }
   }
 
@@ -128,11 +132,11 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       final firebaseId = vehicle.firebaseId ?? vehicle.id;
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Vehicle Firebase ID cannot be empty');
+        throw const ValidationException('Vehicle Firebase ID cannot be empty');
       }
 
       // Convert VehicleEntity to Firestore JSON
@@ -144,17 +148,17 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
           .set(vehicleData, SetOptions(merge: true));
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'not-found') {
-        throw NotFoundFailure('Vehicle not found with ID: ${vehicle.firebaseId}');
+        throw VehicleNotFoundException('Vehicle not found with ID: ${vehicle.firebaseId}');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error updating vehicle: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error updating vehicle: $e');
     }
   }
 
@@ -173,10 +177,10 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Vehicle Firebase ID cannot be empty');
+        throw const ValidationException('Vehicle Firebase ID cannot be empty');
       }
 
       final docRef = _getVehiclesCollection(userId).doc(firebaseId);
@@ -193,15 +197,15 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
       }
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error deleting vehicle: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error deleting vehicle: $e');
     }
   }
 
@@ -219,7 +223,7 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
     try {
       // Validate user
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
 
       Query query = _getVehiclesCollection(userId)
@@ -240,15 +244,15 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
       return VehicleFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching vehicles: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching vehicles: $e');
     }
   }
 
@@ -263,7 +267,7 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
     try {
       // Validate user
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw const AuthenticationException('User ID cannot be empty');
       }
 
       // Fetch all non-deleted vehicles
@@ -276,15 +280,15 @@ class VehiclesFirebaseDataSourceImpl implements VehiclesFirebaseDataSource {
       return VehicleFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw const AuthenticationException('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure('Firebase network error - service unavailable');
+        throw const NetworkException('Firebase network error - service unavailable');
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw ServerException('Firebase error: ${e.message}');
       }
     } catch (e) {
-      if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching all vehicles: $e');
+      if (e is GasometerException) rethrow;
+      throw ServerException('Unexpected error fetching all vehicles: $e');
     }
   }
 }

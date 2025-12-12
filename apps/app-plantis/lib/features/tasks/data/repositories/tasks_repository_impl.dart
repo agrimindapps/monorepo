@@ -516,6 +516,17 @@ class TasksRepositoryImpl implements TasksRepository {
         return const Left(ServerFailure('Usuário não autenticado'));
       }
 
+      // Validação para tasks recorrentes
+      if (task.isRecurring && task.nextDueDate != null) {
+        if (task.nextDueDate!.isBefore(task.dueDate)) {
+          return const Left(
+            ServerFailure(
+              'Data da próxima tarefa não pode ser anterior à data de vencimento',
+            ),
+          );
+        }
+      }
+
       final taskModel = TaskModel.fromEntity(task);
 
       if (await networkInfo.isConnected) {
@@ -538,6 +549,17 @@ class TasksRepositoryImpl implements TasksRepository {
       final userId = await _currentUserId;
       if (userId == null) {
         return const Left(ServerFailure('Usuário não autenticado'));
+      }
+
+      // Validação para tasks recorrentes
+      if (task.isRecurring && task.nextDueDate != null) {
+        if (task.nextDueDate!.isBefore(task.dueDate)) {
+          return const Left(
+            ServerFailure(
+              'Data da próxima tarefa não pode ser anterior à data de vencimento',
+            ),
+          );
+        }
       }
 
       final taskModel = TaskModel.fromEntity(task);
@@ -598,9 +620,15 @@ class TasksRepositoryImpl implements TasksRepository {
         // Atualiza a tarefa atual como concluída
         final updateResult = await updateTask(completedTask);
 
-        // Se é uma tarefa recorrente, cria a próxima com a data informada
-        if (task.isRecurring && nextDueDate != null) {
-          await _createNextRecurringTaskWithDate(task, nextDueDate);
+        // Se é uma tarefa recorrente, cria a próxima automaticamente
+        if (task.isRecurring) {
+          if (nextDueDate != null) {
+            // Usa a data fornecida pelo usuário
+            await _createNextRecurringTaskWithDate(task, nextDueDate);
+          } else {
+            // Calcula automaticamente a próxima data baseado no intervalo
+            await createRecurringTask(completedTask);
+          }
         }
 
         return updateResult;
@@ -680,6 +708,15 @@ class TasksRepositoryImpl implements TasksRepository {
           completedTask.dueDate.add(
             Duration(days: completedTask.recurringIntervalDays!),
           );
+
+      // Validação: nextDueDate não pode ser anterior a dueDate
+      if (nextDueDate.isBefore(completedTask.dueDate)) {
+        return const Left(
+          ServerFailure(
+            'Data da próxima tarefa não pode ser anterior à data atual',
+          ),
+        );
+      }
 
       final newTask = Task(
         id: DateTime.now().millisecondsSinceEpoch.toString(),

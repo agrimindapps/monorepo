@@ -1,108 +1,46 @@
 import 'package:flutter/material.dart';
 
+import 'auth_validators.dart';
+
 /// Real-time validation helpers for form fields with enhanced security
+/// This class delegates to AuthValidators for consistent security standards
 class ValidationHelpers {
   /// Validates name field in real-time with enhanced security
+  /// Delegates to AuthValidators.validateName for consistency
   static String? validateName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Por favor, insira seu nome completo';
-    }
-
-    final trimmedName = value.trim();
-
-    if (trimmedName.length < 2) {
-      return 'Nome deve ter pelo menos 2 caracteres';
-    }
-    if (trimmedName.length > 100) {
-      return 'Nome não pode ter mais de 100 caracteres';
-    }
-    if (RegExp(r'[<>"\\\n\r\t]').hasMatch(trimmedName)) {
-      return 'Nome contém caracteres não permitidos';
-    }
-    if (!RegExp(r"^[a-zA-ZÀ-ÿ\s\-']+$").hasMatch(trimmedName)) {
-      return 'Nome deve conter apenas letras';
-    }
-
-    return null;
+    return AuthValidators.validateName(value ?? '');
   }
 
   /// Validates email field in real-time with enhanced security
-  /// Uses AuthValidators for consistent security standards
+  /// Delegates to AuthValidators for consistent security standards
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Por favor, insira seu email';
     }
 
-    final email = value.trim().toLowerCase();
-    if (!RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    ).hasMatch(email)) {
+    if (!AuthValidators.isValidEmail(value)) {
       return 'Por favor, insira um email válido';
-    }
-    if (email.split('@').length != 2) {
-      return 'Email contém formato inválido';
-    }
-    if (email.contains('..') ||
-        email.startsWith('.') ||
-        email.endsWith('.') ||
-        email.contains('@.') ||
-        email.contains('.@')) {
-      return 'Email contém caracteres não permitidos';
-    }
-    if (email.length > 320) {
-      return 'Email muito longo';
     }
 
     return null;
   }
 
   /// Validates password field in real-time with enhanced security requirements
-  /// Consistent with AuthValidators.validatePassword for security uniformity
+  /// Delegates to AuthValidators.validatePassword for security uniformity
   static String? validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, insira sua senha';
-    }
-    if (value.length < 8) {
-      return 'A senha deve ter pelo menos 8 caracteres';
-    }
-
-    if (value.length > 128) {
-      return 'Senha muito longa';
-    }
-    if (!RegExp(r'^(?=.*[A-Za-z])(?=.*\d)').hasMatch(value)) {
-      return 'A senha deve conter letras e números';
-    }
-    final commonWeakPatterns = [
-      r'12345',
-      r'abcde',
-      r'qwert',
-      r'password',
-      r'senha',
-    ];
-
-    for (final pattern in commonWeakPatterns) {
-      if (value.toLowerCase().contains(pattern)) {
-        return 'Senha muito simples. Evite sequências comuns';
-      }
-    }
-
-    return null;
+    return AuthValidators.validatePassword(value ?? '', isRegistration: true);
   }
 
   /// Validates password confirmation field in real-time
+  /// Delegates to AuthValidators.validatePasswordConfirmation
   static String? validatePasswordConfirmation(
     String? value,
     String? originalPassword,
   ) {
-    if (value == null || value.isEmpty) {
-      return 'Por favor, confirme sua senha';
-    }
-
-    if (value != originalPassword) {
-      return 'As senhas não coincidem';
-    }
-
-    return null;
+    return AuthValidators.validatePasswordConfirmation(
+      originalPassword ?? '',
+      value ?? '',
+    );
   }
 
   /// Validates phone number field in real-time (Brazilian format)

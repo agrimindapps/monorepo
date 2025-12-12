@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_providers.dart' as core_providers;
@@ -25,8 +26,10 @@ part 'defensivos_providers.g.dart';
 /// Bridge Provider for ComentariosService
 @riverpod
 ComentariosService comentariosService(Ref ref) {
+  final repo = ref.watch(iComentariosRepositoryProvider);
   return ComentariosService(
-    repository: ref.watch(iComentariosRepositoryProvider),
+    readRepository: repo,
+    writeRepository: repo,
     premiumService: ref.watch(premiumServiceProvider),
     mapper: ref.watch(comentariosMapperProvider),
   );

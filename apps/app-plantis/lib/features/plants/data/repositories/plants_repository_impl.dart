@@ -403,34 +403,59 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (kDebugMode) {
         print('🗑️ Deleting plant: $id');
       }
+
+      // Track failures but don't block plant deletion
+      final List<String> partialFailures = [];
+
+      // Delete tasks (cascading)
       if (kDebugMode) {
         print('🗑️ Deleting tasks for plant: $id');
       }
       final tasksResult = await taskRepository.deletePlantTasksByPlantId(id);
-      if (tasksResult.isLeft()) {
-        if (kDebugMode) {
-          print(
-            '⚠️ Failed to delete tasks for plant $id: ${tasksResult.fold((f) => f.message, (_) => '')}',
-          );
-        }
-      }
+      tasksResult.fold(
+        (failure) {
+          final errorMsg = 'Failed to delete tasks: ${failure.message}';
+          partialFailures.add(errorMsg);
+          if (kDebugMode) {
+            print('⚠️ $errorMsg');
+          }
+        },
+        (_) {
+          if (kDebugMode) {
+            print('✅ Tasks deleted successfully');
+          }
+        },
+      );
+
+      // Delete comments (cascading)
       if (kDebugMode) {
         print('🗑️ Deleting comments for plant: $id');
       }
       final commentsResult = await commentsRepository.deleteCommentsForPlant(
         id,
       );
-      if (commentsResult.isLeft()) {
-        if (kDebugMode) {
-          print(
-            '⚠️ Failed to delete comments for plant $id: ${commentsResult.fold((f) => f.message, (_) => '')}',
-          );
-        }
-      }
+      commentsResult.fold(
+        (failure) {
+          final errorMsg = 'Failed to delete comments: ${failure.message}';
+          partialFailures.add(errorMsg);
+          if (kDebugMode) {
+            print('⚠️ $errorMsg');
+          }
+        },
+        (_) {
+          if (kDebugMode) {
+            print('✅ Comments deleted successfully');
+          }
+        },
+      );
+
+      // Delete plant locally
       if (kDebugMode) {
         print('🗑️ Deleting plant locally: $id');
       }
       await localDatasource.deletePlant(id);
+
+      // Delete plant remotely if online
       if (await networkInfo.isConnected) {
         try {
           if (kDebugMode) {
@@ -438,9 +463,21 @@ class PlantsRepositoryImpl implements PlantsRepository {
           }
           await remoteDatasource.deletePlant(id, userId);
         } catch (e) {
+          final errorMsg = 'Remote deletion failed, will sync later: $e';
+          partialFailures.add(errorMsg);
           if (kDebugMode) {
-            print('⚠️ Remote deletion failed, will sync later: $e');
+            print('⚠️ $errorMsg');
           }
+        }
+      }
+
+      // Log partial failures but still return success
+      if (partialFailures.isNotEmpty && kDebugMode) {
+        print(
+          '⚠️ Plant deleted with ${partialFailures.length} partial failure(s):',
+        );
+        for (final failure in partialFailures) {
+          print('   - $failure');
         }
       }
 

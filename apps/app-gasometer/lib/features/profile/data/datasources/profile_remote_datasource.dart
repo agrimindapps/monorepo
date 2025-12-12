@@ -1,16 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+
+import 'package:core/core.dart';
 import '../models/user_profile_model.dart';
 
 abstract class IProfileRemoteDataSource {
   Future<UserProfileModel> getProfile(String userId);
   Future<UserProfileModel> updateProfile(UserProfileModel profile);
+  Future<String> uploadProfileImage(String userId, String imagePath);
   Future<void> deleteProfile(String userId);
 }
 
 class ProfileRemoteDataSource implements IProfileRemoteDataSource {
 
-  ProfileRemoteDataSource({required this.firestore});
+  ProfileRemoteDataSource({
+    required this.firestore,
+    required this.storageService,
+  });
   final FirebaseFirestore firestore;
+  final FirebaseStorageService storageService;
 
   @override
   Future<UserProfileModel> getProfile(String userId) async {
@@ -36,6 +43,19 @@ class ProfileRemoteDataSource implements IProfileRemoteDataSource {
   @override
   Future<void> deleteProfile(String userId) async {
     await firestore.collection('users').doc(userId).delete();
+  }
+
+  @override
+  Future<String> uploadProfileImage(String userId, String imagePath) async {
+    final result = await storageService.uploadFile(
+      file: File(imagePath),
+      path: 'users/$userId/profile_image.jpg',
+    );
+    
+    return result.fold(
+      (failure) => throw ServerException(),
+      (url) => url,
+    );
   }
 }
 

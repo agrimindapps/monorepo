@@ -18,7 +18,7 @@ import 'sync_push_service.dart';
 /// **Princípio SOLID:**
 /// - Single Responsibility: Orquestração apenas
 /// - Dependency Injection via constructor
-/// - Error handling via Either<Failure, T>
+/// - Error handling via `Either<Failure, T>`
 /// - Delegação para SyncPushService e SyncPullService
 ///
 /// **Fluxo de Sincronização:**
@@ -116,7 +116,7 @@ class GasometerSyncOrchestrator {
           // Report push phase completion
           // pushResults is a single SyncPhaseResult combining all adapters
           const int step = 1;
-          totalPushed = totalPushed + (pushResults.successCount ?? 0);
+          totalPushed = totalPushed + pushResults.successCount;
 
           _progressController.add(
             ServiceProgress(
@@ -125,17 +125,17 @@ class GasometerSyncOrchestrator {
               current: step,
               total: 10,
               currentItem: 'Push completado: '
-                  '${pushResults.successCount ?? 0} sucesso, '
-                  '${pushResults.failureCount ?? 0} falhas',
+                  '${pushResults.successCount} sucesso, '
+                  '${pushResults.failureCount} falhas',
             ),
           );
 
-          if ((pushResults.failureCount ?? 0) > 0) {
-            errors.addAll(pushResults.errors ?? []);
+          if (pushResults.failureCount > 0) {
+            errors.addAll(pushResults.errors);
           }
 
           developer.log(
-            '✅ Push phase completed: ${pushResults.successCount ?? 0} records pushed',
+            '✅ Push phase completed: ${pushResults.successCount} records pushed',
             name: 'GasometerOrchestrator',
           );
         },
@@ -161,7 +161,7 @@ class GasometerSyncOrchestrator {
           // Report pull phase completion
           // pullResults is a single SyncPhaseResult combining all adapters
           const int step = 6;
-          totalPulled = totalPulled + (pullResults.successCount ?? 0);
+          totalPulled = totalPulled + pullResults.successCount;
 
           _progressController.add(
             ServiceProgress(
@@ -170,13 +170,13 @@ class GasometerSyncOrchestrator {
               current: step,
               total: 10,
               currentItem: 'Pull completado: '
-                  '${pullResults.successCount ?? 0} sucesso, '
-                  '${pullResults.failureCount ?? 0} falhas',
+                  '${pullResults.successCount} sucesso, '
+                  '${pullResults.failureCount} falhas',
             ),
           );
 
-          if ((pullResults.failureCount ?? 0) > 0) {
-            errors.addAll(pullResults.errors ?? []);
+          if (pullResults.failureCount > 0) {
+            errors.addAll(pullResults.errors);
           }
 
           developer.log(

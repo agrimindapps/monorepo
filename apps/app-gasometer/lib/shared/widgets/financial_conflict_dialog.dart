@@ -233,21 +233,25 @@ class _FinancialConflictDialogState extends State<FinancialConflictDialog> {
         ),
         const SizedBox(height: 8),
 
-        ...FinancialConflictStrategy.values.map((strategy) {
-          final config = _getStrategyConfig(strategy);
-          return RadioListTile<FinancialConflictStrategy>(
-            value: strategy,
-            groupValue: _selectedStrategy,
-            onChanged: (value) {
-              setState(() {
-                _selectedStrategy = value!;
-              });
-            },
-            title: Text(config.title),
-            subtitle: Text(config.description),
-            dense: true,
-          );
-        }),
+        RadioGroup<FinancialConflictStrategy>(
+          groupValue: _selectedStrategy,
+          onChanged: (value) {
+            setState(() {
+              _selectedStrategy = value!;
+            });
+          },
+          child: Column(
+            children: FinancialConflictStrategy.values.map((strategy) {
+              final config = _getStrategyConfig(strategy);
+              return RadioListTile<FinancialConflictStrategy>(
+                value: strategy,
+                title: Text(config.title),
+                subtitle: Text(config.description),
+                dense: true,
+              );
+            }).toList(),
+          ),
+        ),
       ],
     );
   }

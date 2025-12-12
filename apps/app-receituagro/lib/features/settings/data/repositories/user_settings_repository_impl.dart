@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart' hide Column;
 
 import '../../domain/entities/user_settings_entity.dart';
@@ -134,38 +136,12 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
 
   /// Convert entity to map for storage
   Map<String, dynamic> _entityToMap(UserSettingsEntity entity) {
-    return {
-      'userId': entity.userId,
-      'isDarkTheme': entity.isDarkTheme,
-      'notificationsEnabled': entity.notificationsEnabled,
-      'soundEnabled': entity.soundEnabled,
-      'language': entity.language,
-      'isDevelopmentMode': entity.isDevelopmentMode,
-      'speechToTextEnabled': entity.speechToTextEnabled,
-      'analyticsEnabled': entity.analyticsEnabled,
-      'lastUpdated': entity.lastUpdated.millisecondsSinceEpoch,
-      'createdAt': entity.createdAt.millisecondsSinceEpoch,
-    };
+    return entity.toJson();
   }
 
   /// Convert map from storage to entity
   UserSettingsEntity _mapToEntity(Map<String, dynamic> map) {
-    return UserSettingsEntity(
-      userId: map['userId'] as String? ?? '',
-      isDarkTheme: map['isDarkTheme'] as bool? ?? false,
-      notificationsEnabled: map['notificationsEnabled'] as bool? ?? true,
-      soundEnabled: map['soundEnabled'] as bool? ?? true,
-      language: map['language'] as String? ?? 'pt-BR',
-      isDevelopmentMode: map['isDevelopmentMode'] as bool? ?? false,
-      speechToTextEnabled: map['speechToTextEnabled'] as bool? ?? false,
-      analyticsEnabled: map['analyticsEnabled'] as bool? ?? true,
-      lastUpdated: DateTime.fromMillisecondsSinceEpoch(
-        map['lastUpdated'] as int? ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-      createdAt: DateTime.fromMillisecondsSinceEpoch(
-        map['createdAt'] as int? ?? DateTime.now().millisecondsSinceEpoch,
-      ),
-    );
+    return UserSettingsEntity.fromJson(map);
   }
 
   /// Update a specific setting in entity
@@ -207,15 +183,22 @@ class UserSettingsRepositoryImpl implements IUserSettingsRepository {
     return true;
   }
 
-  /// Simple JSON string parser (in real app, use dart:convert)
+  /// Parse JSON string to Map
   Map<String, dynamic> _parseJsonString(String jsonString) {
-    final map = <String, dynamic>{};
-    return map;
+    try {
+      return jsonDecode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      throw RepositoryException('Failed to parse JSON: $e');
+    }
   }
 
-  /// Simple JSON string serializer (in real app, use dart:convert)
+  /// Serialize Map to JSON string
   String _mapToJsonString(Map<String, dynamic> map) {
-    return map.toString();
+    try {
+      return jsonEncode(map);
+    } catch (e) {
+      throw RepositoryException('Failed to encode JSON: $e');
+    }
   }
 
   /// Get current user ID (helper method)

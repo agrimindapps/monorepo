@@ -3,39 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../managers/auth_dialog_manager.dart';
 import '../providers/register_notifier.dart';
 
 class RegisterPage extends ConsumerWidget {
   const RegisterPage({super.key});
 
-  void _showSocialLoginDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Em Desenvolvimento'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.construction, size: 48, color: Colors.orange),
-            SizedBox(height: 16),
-            Text(
-              'O login social está em desenvolvimento e estará disponível em breve!',
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final dialogManager = AuthDialogManager();
     return Scaffold(
       backgroundColor: PlantisColors.primary,
       body: SafeArea(
@@ -183,13 +159,13 @@ class RegisterPage extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildSocialButton('G', 'Google', Colors.red, () {
-                        _showSocialLoginDialog(context);
+                        dialogManager.showSocialLoginDialog(context);
                       }),
                       _buildSocialButton('', 'Apple', Colors.black, () {
-                        _showSocialLoginDialog(context);
+                        dialogManager.showSocialLoginDialog(context);
                       }, icon: Icons.apple),
                       _buildSocialButton('', 'Microsoft', Colors.blue, () {
-                        _showSocialLoginDialog(context);
+                        dialogManager.showSocialLoginDialog(context);
                       }, icon: Icons.window),
                     ],
                   ),

@@ -36,6 +36,7 @@ dependencies:
   universal_html: ^2.3.0
   go_router: any
   url_launcher: ^6.3.2
+  shared_preferences: any
   dartz: ^0.10.1
 
 dev_dependencies:

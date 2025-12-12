@@ -20,12 +20,13 @@ import '../../core/constants/receituagro_environment_config.dart';
 import 'services/analytics_cache_service.dart';
 import 'services/analytics_metrics_calculation_service.dart';
 
-/// 🔄 DEPRECATED: Use ReceitaAgroAnalyticsEvent instead
-/// This enum is kept for backward compatibility only
-@Deprecated(
-  'Use ReceitaAgroAnalyticsEvent from analytics_service.dart instead. '
-  'This will be removed in v2.0.0',
-)
+/// Conversion funnel steps for analytics dashboard
+///
+/// This enum defines the specific steps in the user conversion funnel
+/// used for funnel analysis in the analytics dashboard.
+///
+/// Note: This is distinct from ReceitaAgroAnalyticsEvent which is used
+/// for general event tracking. This enum is specifically for funnel metrics.
 enum ConversionFunnelStep {
   appOpened('app_opened'),
   signupViewed('signup_viewed'),

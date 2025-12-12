@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/legal_document_entity.dart';
 import '../../domain/repositories/i_legal_repository.dart';

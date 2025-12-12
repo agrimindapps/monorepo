@@ -20,4 +20,6 @@
 ---
 
 ## ✅ Concluídas
-(nenhuma registrada)
+| ID | Tarefa | Data | Detalhes |
+|----|--------|------|----------|
+| SYN-FIX-001 | Corrigir erro "Tabela não suportada: users" | 2025-12-12 | Adicionado suporte no-op para tabela users no ReceituagroDriftStorageAdapter |

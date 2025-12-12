@@ -10,6 +10,7 @@ import '../../../../core/services/task_notification_service.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/services/task_filter_service.dart';
 import '../../domain/services/task_ownership_validator.dart';
+import '../../domain/services/tasks_cache_manager.dart';
 import '../../domain/usecases/add_task_usecase.dart';
 import '../../domain/usecases/complete_task_usecase.dart';
 import '../../domain/usecases/get_task_by_id_usecase.dart';
@@ -22,18 +23,20 @@ part 'tasks_notifier.g.dart';
 /// Root TasksNotifier - Orchestrates specialized notifiers (SRP)
 ///
 /// Responsibilities (Coordinator Pattern):
-/// - Load and sync tasks from repository
-/// - Coordinate between specialized notifiers
+/// - Coordinate between specialized services
 /// - Authentication state management
 /// - Notification service management
 /// - CRUD operations (Merged from TasksCrudNotifier to fix state split)
 ///
-/// Delegates to specialized notifiers:
+/// Delegates to specialized services:
+/// - TasksCacheManager: CACHE & LOADING STRATEGY
+/// - TaskFilterService: FILTERING & SEARCH
 /// - TasksQueryNotifier: LIST, SEARCH, FILTER
 /// - TasksScheduleNotifier: RECURRING, REMINDERS, SCHEDULING
 /// - TasksRecommendationNotifier: RECOMMENDATIONS, SUGGESTIONS
 @riverpod
 class TasksNotifier extends _$TasksNotifier {
+  late final TasksCacheManager _cacheManager;
   late final GetTasksUseCase _getTasksUseCase;
   late final AddTaskUseCase _addTaskUseCase;
   late final CompleteTaskUseCase _completeTaskUseCase;
@@ -47,6 +50,7 @@ class TasksNotifier extends _$TasksNotifier {
   @override
   Future<TasksState> build() async {
     _getTasksUseCase = ref.read(getTasksUseCaseProvider);
+    _cacheManager = TasksCacheManager(getTasksUseCase: _getTasksUseCase);
     _addTaskUseCase = ref.read(addTaskUseCaseProvider);
     _completeTaskUseCase = ref.read(completeTaskUseCaseProvider);
     _getTaskByIdUseCase = ref.read(getTaskByIdUseCaseProvider);
@@ -70,16 +74,10 @@ class TasksNotifier extends _$TasksNotifier {
     try {
       debugPrint('🔄 TasksNotifier: Loading initial tasks...');
 
-      final result = await _getTasksUseCase(const NoParams());
+      final result = await _cacheManager.loadLocalFirst();
 
       return result.fold(
-        (failure) {
-          debugPrint(
-            '❌ TasksNotifier: Failed to load initial tasks: ${failure.message}',
-          );
-          return TasksStateX.error(failure.userMessage);
-        },
-        (tasks) {
+        onSuccess: (tasks) {
           debugPrint('✅ TasksNotifier: Loaded ${tasks.length} tasks');
           _notificationService.checkOverdueTasks(tasks);
           _notificationService.rescheduleTaskNotifications(tasks);
@@ -94,12 +92,23 @@ class TasksNotifier extends _$TasksNotifier {
             [],
           );
 
+          // Start background sync
+          _cacheManager.syncInBackground().then((freshTasks) {
+            if (freshTasks != null) {
+              _updateTasksData(freshTasks);
+            }
+          });
+
           return TasksState(
             allTasks: tasks,
             filteredTasks: filteredTasks,
             currentFilter: TasksFilterType.today,
             isLoading: false,
           );
+        },
+        onFailure: (error) {
+          debugPrint('❌ TasksNotifier: Failed to load initial tasks: $error');
+          return TasksStateX.error(error);
         },
       );
     } catch (e) {
@@ -154,40 +163,27 @@ class TasksNotifier extends _$TasksNotifier {
     }
 
     try {
-      debugPrint('🔄 TasksNotifier: Calling _getTasksUseCase...');
-      final result = await _getTasksUseCase(const NoParams());
-      debugPrint('✅ TasksNotifier: _getTasksUseCase completed successfully');
+      debugPrint('🔄 TasksNotifier: Loading tasks with cache manager...');
+      final result = await _cacheManager.loadLocalFirst();
 
       result.fold(
-        (failure) {
-          _updateState(
-            (current) => current.copyWith(
-              isLoading: false,
-              errorMessage: failure.userMessage,
-            ),
-          );
-          throw Exception(failure.userMessage);
-        },
-        (tasks) {
-          final filteredTasks = _filterService.applyFilters(
-            tasks,
-            currentState.currentFilter,
-            currentState.searchQuery,
-            currentState.selectedPlantId,
-            currentState.selectedTaskTypes,
-            currentState.selectedPriorities,
-          );
+        onSuccess: (tasks) {
+          debugPrint('✅ TasksNotifier: Tasks loaded successfully');
+          _updateTasksData(tasks);
 
+          // Start background sync
+          _cacheManager.syncInBackground().then((freshTasks) {
+            if (freshTasks != null) {
+              _updateTasksData(freshTasks);
+            }
+          });
+        },
+        onFailure: (error) {
           _updateState(
-            (current) => current.copyWith(
-              allTasks: tasks,
-              filteredTasks: filteredTasks,
-              isLoading: false,
-              errorMessage: null,
-            ),
+            (current) =>
+                current.copyWith(isLoading: false, errorMessage: error),
           );
-          _notificationService.checkOverdueTasks(tasks);
-          _notificationService.rescheduleTaskNotifications(tasks);
+          throw Exception(error);
         },
       );
     } catch (e) {
@@ -200,6 +196,32 @@ class TasksNotifier extends _$TasksNotifier {
       );
       rethrow;
     }
+  }
+
+  /// Update tasks data with filtering and notifications
+  void _updateTasksData(List<task_entity.Task> tasks) {
+    final currentState = state.value ?? TasksStateX.initial();
+
+    final filteredTasks = _filterService.applyFilters(
+      tasks,
+      currentState.currentFilter,
+      currentState.searchQuery,
+      currentState.selectedPlantId,
+      currentState.selectedTaskTypes,
+      currentState.selectedPriorities,
+    );
+
+    _updateState(
+      (current) => current.copyWith(
+        allTasks: tasks,
+        filteredTasks: filteredTasks,
+        isLoading: false,
+        errorMessage: null,
+      ),
+    );
+
+    _notificationService.checkOverdueTasks(tasks);
+    _notificationService.rescheduleTaskNotifications(tasks);
   }
 
   /// Adds a new task with offline support

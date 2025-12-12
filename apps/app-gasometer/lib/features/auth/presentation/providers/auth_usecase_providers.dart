@@ -64,7 +64,7 @@ AuthLocalDataSource authLocalDataSource(Ref ref) {
 AuthRemoteDataSource authRemoteDataSource(Ref ref) {
   return AuthRemoteDataSourceImpl(
     FirebaseAuth.instance,
-    FirebaseAuthService(),
+    ref.watch(firebaseAuthServiceProvider),
     ref.watch(userConverterProvider),
     ref.watch(firestoreUserRepositoryProvider),
     ref.watch(firebaseErrorHandlerProvider),

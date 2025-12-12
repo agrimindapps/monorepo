@@ -47,11 +47,14 @@ class FavoritosService {
   // Getter lazy para repository (inicializado na primeira vez que é acessado)
   FavoritoRepository get repo => _repository;
 
+  String get _userId => FirebaseAuth.instance.currentUser?.uid ?? '';
+
   // ========== STORAGE/CRUD OPERATIONS ==========
 
   Future<List<String>> getFavoriteIds(String tipo) async {
     try {
-      final favoritos = await repo.getFavoritosByTipoAsync(tipo);
+      if (_userId.isEmpty) return [];
+      final favoritos = await repo.findByUserAndType(_userId, tipo);
       return favoritos.map((f) => f.itemId).toList();
     } catch (e) {
       throw FavoritosException('Erro ao buscar IDs favoritos: $e', tipo: tipo);
@@ -90,8 +93,7 @@ class FavoritosService {
       final itemDataString =
           '{"id":"$id","tipo":"$tipo","adicionadoEm":"${DateTime.now().toIso8601String()}"}';
 
-      final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-      if (userId.isEmpty) {
+      if (_userId.isEmpty) {
         developer.log(
           '🔖 [FAVORITOS] ❌ Usuário não autenticado ao adicionar favorito',
           name: 'FavoritosService',
@@ -101,12 +103,12 @@ class FavoritosService {
       }
 
       developer.log(
-        '🔖 [FAVORITOS] Inserindo no banco: userId=$userId, tipo=$tipo, id=$id',
+        '🔖 [FAVORITOS] Inserindo no banco: userId=$_userId, tipo=$tipo, id=$id',
         name: 'FavoritosService',
       );
 
       final insertedId = await repo.addFavorito(
-        userId,
+        _userId,
         tipo,
         id,
         itemDataString,
@@ -155,7 +157,8 @@ class FavoritosService {
         return false;
       }
 
-      final result = await repo.removeFavoritoLegacy(tipo, id);
+      if (_userId.isEmpty) return false;
+      final result = await repo.removeFavorito(_userId, tipo, id);
 
       if (result) {
         await _cache.clearForTipo(tipo);
@@ -180,7 +183,8 @@ class FavoritosService {
   Future<bool> isFavoriteId(String tipo, String id) async {
     try {
       if (!_validator.isValidTipo(tipo)) return false;
-      return await repo.isFavorito(tipo, id);
+      if (_userId.isEmpty) return false;
+      return await repo.isFavorited(_userId, tipo, id);
     } catch (e) {
       throw FavoritosException(
         'Erro ao verificar favorito: $e',
@@ -193,7 +197,8 @@ class FavoritosService {
   Future<void> clearFavorites(String tipo) async {
     try {
       if (!_validator.isValidTipo(tipo)) return;
-      await repo.clearFavoritosByTipo(tipo);
+      if (_userId.isEmpty) return;
+      await repo.clearFavoritosByTipo(_userId, tipo);
       await _cache.clearForTipo(tipo);
     } catch (e) {
       throw FavoritosException('Erro ao limpar favoritos: $e', tipo: tipo);
@@ -278,7 +283,8 @@ class FavoritosService {
 
   Future<FavoritosStats> getStats() async {
     try {
-      final stats = await repo.getFavoritosStats();
+      if (_userId.isEmpty) return FavoritosStats.empty();
+      final stats = await repo.countByType(_userId);
       return FavoritosStats(
         totalDefensivos: stats['defensivos'] ?? 0,
         totalPragas: stats['pragas'] ?? 0,

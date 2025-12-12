@@ -184,12 +184,17 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
     try {
       final updatedComment = comment.copyWith(dataAtualizacao: DateTime.now());
 
-      // For now, delete and re-insert (Drift repository doesn't have update)
-      // This maintains data integrity
-      // TODO: Add proper update method to CommentsDriftRepository
-
       if (kDebugMode) {
         print('📝 Updating comment: ${comment.id}');
+      }
+
+      // Update in local Drift database
+      final localUpdateSuccess = await _driftRepository.updateComment(
+        updatedComment,
+      );
+
+      if (!localUpdateSuccess) {
+        return Left(CacheFailure('Failed to update comment in local database'));
       }
 
       // Sync update to Firebase

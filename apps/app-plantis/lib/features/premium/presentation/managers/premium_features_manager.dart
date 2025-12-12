@@ -1,10 +1,17 @@
+import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../domain/providers/premium_validation_provider.dart';
+import '../../domain/services/premium_validation_service.dart';
 
 /// Manages premium feature access and limitations
 class PremiumFeaturesManager {
   final Ref ref;
+  late final PremiumValidationService _validationService;
 
-  PremiumFeaturesManager(this.ref);
+  PremiumFeaturesManager(this.ref) {
+    _validationService = ref.read(premiumValidationServiceProvider);
+  }
 
   /// Check if unlimited plants feature is available
   bool canCreateUnlimitedPlants(List<String> enabledFeatures) {
@@ -57,6 +64,7 @@ class PremiumFeaturesManager {
   }
 
   /// Get all available features for current subscription
+  /// @deprecated Use PremiumValidationService.getAvailableFeatures instead
   List<String> getAvailableFeatures(bool isPremium) {
     if (!isPremium) {
       return const []; // No premium features for free users
@@ -75,6 +83,7 @@ class PremiumFeaturesManager {
   }
 
   /// Check if user should upgrade
+  /// @deprecated Use PremiumValidationService.shouldDisplayUpgradePrompt instead
   bool shouldDisplayUpgradePrompt(bool isPremium) => !isPremium;
 
   /// Get upgrade message for specific feature

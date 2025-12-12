@@ -255,7 +255,6 @@ class FuelSupplyDriftSyncAdapter
   // CONVERSÕES: FIRESTORE MAP → DOMAIN ENTITY
   // ==========================================================================
 
-  @override
   Either<Failure, FuelRecordEntity> fromFirestoreMap(Map<String, dynamic> map) {
     try {
       // Usar método existente da entidade

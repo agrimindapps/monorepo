@@ -173,7 +173,7 @@ class SyncPullService implements ISyncPullService {
   void _logSummary(List<ServicePullSnapshot> results, Duration totalDuration) {
     final totalPulled = results.fold<int>(
       0,
-      (sum, result) => sum + result.recordsPulled,
+      (total, result) => total + result.recordsPulled,
     );
 
     developer.log(

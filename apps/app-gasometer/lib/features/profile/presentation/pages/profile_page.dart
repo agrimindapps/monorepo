@@ -50,6 +50,57 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     super.dispose();
   }
 
+  Future<void> _handleChangePassword() async {
+    final user = ref.read(currentUserProvider);
+    if (user == null || (user.email?.isEmpty ?? true)) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Alterar Senha'),
+        content: Text(
+          'Deseja enviar um email de redefinição de senha para ${user.email}?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Enviar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true && mounted) {
+      await ref.read(authProvider.notifier).sendPasswordReset(user.email!);
+      
+      // Check for error in state after operation
+      if (mounted) {
+        final authState = ref.read(authProvider);
+        if (authState.errorMessage != null) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Erro ao enviar email: ${authState.errorMessage}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Email de redefinição enviado! Verifique sua caixa de entrada.',
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProvider);
@@ -108,14 +159,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 }
               : null,
           onChangePassword: !isAnonymous
-              ? () {
-                  // TODO: Implement change password logic
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Funcionalidade em desenvolvimento'),
-                    ),
-                  );
-                }
+              ? _handleChangePassword
               : null,
         ),
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),

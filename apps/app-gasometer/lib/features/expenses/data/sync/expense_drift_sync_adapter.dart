@@ -212,7 +212,6 @@ class ExpenseDriftSyncAdapter
   // CONVERSÕES: FIRESTORE MAP → DOMAIN ENTITY
   // ==========================================================================
 
-  @override
   Either<Failure, ExpenseEntity> fromFirestoreMap(Map<String, dynamic> map) {
     try {
       // Usar método existente da entidade

@@ -69,7 +69,7 @@ class AccountLoginButtons extends ConsumerWidget {
   Future<void> _handleAnonymousLogin(
       BuildContext context, WidgetRef ref) async {
     await HapticFeedback.lightImpact();
-    await ref.read(authProvider.notifier).signInAnonymously();
+    await ref.read(authProvider.notifier).loginAnonymously();
     final currentAuthState = ref.read(authProvider);
     if (context.mounted) {
       final message =

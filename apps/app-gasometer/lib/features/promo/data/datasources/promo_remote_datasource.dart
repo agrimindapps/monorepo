@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/error/exceptions.dart';
 import '../models/promo_model.dart';
 
 abstract class IPromoRemoteDataSource {
@@ -32,11 +33,9 @@ class PromoRemoteDataSource implements IPromoRemoteDataSource {
     final doc = await firestore.collection('promos').doc(id).get();
 
     if (!doc.exists) {
-      throw ServerException();
+      throw const ServerException('Promo not found');
     }
 
     return PromoModel.fromJson(doc.data()!);
   }
 }
-
-class ServerException implements Exception {}

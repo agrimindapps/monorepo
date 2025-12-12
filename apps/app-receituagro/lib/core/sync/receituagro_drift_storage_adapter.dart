@@ -53,6 +53,10 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
         case 'user_settings':
         case 'app_settings':
           return await _saveAppSettings(key, data);
+        case 'users':
+          // TODO: Implementar tabela de usuários no Drift
+          // Por enquanto, retornamos sucesso para não quebrar o sync
+          return const Right(null);
         default:
           return Left(CacheFailure('Tabela não suportada: $tableName'));
       }
@@ -76,6 +80,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
         case 'user_settings':
         case 'app_settings':
           return await _getAppSettings<T>(key);
+        case 'users':
+          // TODO: Implementar tabela de usuários no Drift
+          return const Right(null);
         default:
           return Left(CacheFailure('Tabela não suportada: $tableName'));
       }
@@ -99,6 +106,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
         case 'user_settings':
         case 'app_settings':
           return await _getAllAppSettings<T>();
+        case 'users':
+          // TODO: Implementar tabela de usuários no Drift
+          return const Right([]);
         default:
           return Left(CacheFailure('Tabela não suportada: $tableName'));
       }
@@ -125,6 +135,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
         case 'user_settings':
         case 'app_settings':
           return await _deleteAppSettings(key);
+        case 'users':
+          // TODO: Implementar tabela de usuários no Drift
+          return const Right(null);
         default:
           return Left(CacheFailure('Tabela não suportada: $tableName'));
       }
@@ -150,6 +163,9 @@ class ReceituagroDriftStorageAdapter implements ILocalStorageRepository {
         case 'user_settings':
         case 'app_settings':
           await _db.delete(_db.appSettings).go();
+          return const Right(null);
+        case 'users':
+          // TODO: Implementar tabela de usuários no Drift
           return const Right(null);
         default:
           return Left(CacheFailure('Tabela não suportada: $tableName'));

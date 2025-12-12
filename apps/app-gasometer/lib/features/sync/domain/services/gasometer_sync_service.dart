@@ -169,13 +169,13 @@ class GasometerSyncService implements ISyncService {
         },
         (phaseResult) {
           // phaseResult is SyncPhaseResult combining all adapters
-          totalSynced = totalSynced + (phaseResult.successCount ?? 0);
-          totalFailed = totalFailed + (phaseResult.failureCount ?? 0);
-          if ((phaseResult.errors ?? []).isNotEmpty) {
-            errors.addAll(phaseResult.errors ?? []);
+          totalSynced = totalSynced + phaseResult.successCount;
+          totalFailed = totalFailed + phaseResult.failureCount;
+          if (phaseResult.errors.isNotEmpty) {
+            errors.addAll(phaseResult.errors);
           }
           developer.log(
-            '✅ Push completed: ${phaseResult.successCount ?? 0} records pushed',
+            '✅ Push completed: ${phaseResult.successCount} records pushed',
             name: 'GasometerSync',
           );
         },

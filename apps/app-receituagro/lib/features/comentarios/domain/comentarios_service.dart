@@ -8,20 +8,24 @@ import '../../../features/comentarios/data/comentario_model.dart';
 import '../constants/comentarios_design_tokens.dart';
 import '../data/services/comentarios_mapper.dart';
 import '../domain/entities/comentario_sync_entity.dart';
-import 'repositories/i_comentarios_repository.dart';
+import 'repositories/i_comentarios_read_repository.dart';
+import 'repositories/i_comentarios_write_repository.dart';
 
 /// Comentarios Service - Business Logic Layer
 /// Does not manage state (no ChangeNotifier/Riverpod), just business operations
 class ComentariosService {
-  final IComentariosRepository? _repository;
+  final IComentariosReadRepository? _readRepository;
+  final IComentariosWriteRepository? _writeRepository;
   final IPremiumService? _premiumService;
   final IComentariosMapper? _mapper;
 
   ComentariosService({
-    IComentariosRepository? repository,
+    IComentariosReadRepository? readRepository,
+    IComentariosWriteRepository? writeRepository,
     IPremiumService? premiumService,
     IComentariosMapper? mapper,
-  })  : _repository = repository,
+  })  : _readRepository = readRepository,
+        _writeRepository = writeRepository,
         _premiumService = premiumService,
         _mapper = mapper;
 
@@ -29,7 +33,7 @@ class ComentariosService {
     String? pkIdentificador,
   }) async {
     try {
-      final repository = _repository;
+      final repository = _readRepository;
       final mapper = _mapper;
       if (repository == null || mapper == null) return [];
 
@@ -53,7 +57,7 @@ class ComentariosService {
       level: 500,
     );
     try {
-      final repository = _repository;
+      final repository = _writeRepository;
       final mapper = _mapper;
       if (repository == null || mapper == null) return;
 
@@ -81,7 +85,7 @@ class ComentariosService {
       level: 500,
     );
     try {
-      final repository = _repository;
+      final repository = _writeRepository;
       final mapper = _mapper;
       if (repository == null || mapper == null) return;
 
@@ -106,7 +110,7 @@ class ComentariosService {
     developer.log('Deletando comentário - id=$id',
         name: 'ComentarioService', level: 500);
     try {
-      final repository = _repository;
+      final repository = _writeRepository;
       if (repository == null) return;
 
       developer.log('Removendo do repositório local',

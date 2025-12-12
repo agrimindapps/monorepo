@@ -332,6 +332,8 @@ final promotionalNotificationManagerProvider = Provider<PromotionalNotificationM
 final receitaAgroSyncServiceProvider = Provider<ReceitaAgroSyncService>((ref) {
   return ReceitaAgroSyncService(
     favoritosRepository: ref.watch(favoritosRepositorySimplifiedProvider),
+    subscriptionSyncAdapter: ref.watch(subscriptionSyncAdapterProvider),
+    authRepository: ref.watch(authRepositoryProvider),
   );
 });
 

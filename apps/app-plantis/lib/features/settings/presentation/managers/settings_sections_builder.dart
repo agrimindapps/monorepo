@@ -17,7 +17,6 @@ class SettingsSectionsBuilder {
     final photoUrl = user?.photoUrl?.toString() ?? '';
     final initials = (user?.initials as String?) ?? '...';
     final email = (user?.email as String?) ?? 'Carregando...';
-    const memberSince = 'Membro desde...';
 
     return PlantisCard(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -105,7 +104,8 @@ class SettingsSectionsBuilder {
                     Text(
                       user?.displayName?.toString() ?? 'Usuário',
                       style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -113,26 +113,8 @@ class SettingsSectionsBuilder {
                       email,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
+                        fontSize: 14,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          color: Colors.green.shade600,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          memberSince,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
                     ),
                   ],
                 ),

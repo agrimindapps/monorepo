@@ -13,22 +13,18 @@ class SettingsState {
   const SettingsState({
     this.globalErrorBoundaryEnabled = true,
     this.notificationsEnabled = true,
-    this.themeMode = ThemeMode.system,
   });
   final bool globalErrorBoundaryEnabled;
   final bool notificationsEnabled;
-  final ThemeMode themeMode;
 
   SettingsState copyWith({
     bool? globalErrorBoundaryEnabled,
     bool? notificationsEnabled,
-    ThemeMode? themeMode,
   }) {
     return SettingsState(
       globalErrorBoundaryEnabled:
           globalErrorBoundaryEnabled ?? this.globalErrorBoundaryEnabled,
       notificationsEnabled: notificationsEnabled ?? this.notificationsEnabled,
-      themeMode: themeMode ?? this.themeMode,
     );
   }
 
@@ -38,20 +34,17 @@ class SettingsState {
       other is SettingsState &&
           runtimeType == other.runtimeType &&
           globalErrorBoundaryEnabled == other.globalErrorBoundaryEnabled &&
-          notificationsEnabled == other.notificationsEnabled &&
-          themeMode == other.themeMode;
+          notificationsEnabled == other.notificationsEnabled;
 
   @override
   int get hashCode =>
       globalErrorBoundaryEnabled.hashCode ^
-      notificationsEnabled.hashCode ^
-      themeMode.hashCode;
+      notificationsEnabled.hashCode;
 
   @override
   String toString() =>
       'SettingsState(globalErrorBoundaryEnabled: $globalErrorBoundaryEnabled, '
-      'notificationsEnabled: $notificationsEnabled, '
-      'themeMode: $themeMode)';
+      'notificationsEnabled: $notificationsEnabled)';
 }
 
 /// Settings Notifier seguindo SOLID principles
@@ -77,14 +70,10 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
           _preferences.getBool('global_error_boundary_enabled') ?? true;
       final notificationsEnabled =
           _preferences.getBool('notifications_enabled') ?? true;
-      final themeIndex =
-          _preferences.getInt('theme_mode') ?? ThemeMode.system.index;
-      final themeMode = ThemeMode.values[themeIndex];
 
       return SettingsState(
         globalErrorBoundaryEnabled: globalErrorBoundaryEnabled,
         notificationsEnabled: notificationsEnabled,
-        themeMode: themeMode,
       );
     } catch (e, stackTrace) {
       debugPrint('Error loading settings: $e');
@@ -133,29 +122,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     });
   }
 
-  /// Change theme mode (synchronous to avoid dialog rebuild issues)
-  void changeTheme(ThemeMode newTheme) {
-    final currentState = state.value;
-    if (currentState == null) return;
-    if (currentState.themeMode == newTheme) return;
-
-    // Update state immediately without AsyncValue.loading()
-    // This prevents dialog from being destroyed during theme change
-    state = AsyncValue.data(
-      currentState.copyWith(
-        themeMode: newTheme,
-      ),
-    );
-
-    // Save to preferences in background without blocking UI
-    unawaited(
-      _preferences.setInt('theme_mode', newTheme.index).catchError((Object e) {
-        debugPrint('Error saving theme preference: $e');
-        return false;
-      }),
-    );
-  }
-
   /// Handle app rating with business logic
   Future<bool> handleAppRating(BuildContext context) async {
     try {
@@ -197,13 +163,6 @@ final settingsProvider =
     AsyncNotifierProvider<SettingsNotifier, SettingsState>(
   SettingsNotifier.new,
 );
-
-/// Provider para acessar o themeMode diretamente
-/// Útil para MaterialApp
-final themeModeProvider = Provider<ThemeMode>((ref) {
-  final settingsAsync = ref.watch(settingsProvider);
-  return settingsAsync.value?.themeMode ?? ThemeMode.system;
-});
 
 /// Provider para acessar notificações enabled
 final notificationsEnabledProvider = Provider<bool>((ref) {

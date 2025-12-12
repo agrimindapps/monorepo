@@ -6,6 +6,7 @@ import 'core/providers/realtime_sync_providers.dart';
 import 'core/providers/sync_completion_listener.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/plantis_theme.dart';
+import 'features/settings/presentation/providers/notifiers/plantis_theme_notifier.dart';
 import 'shared/widgets/desktop_keyboard_shortcuts.dart';
 
 class PlantisApp extends ConsumerStatefulWidget {
@@ -25,7 +26,7 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
     ref.watch(realtimeSyncServiceProvider);
 
     final router = AppRouter.router(ref);
-    const currentThemeMode = ThemeMode.system;
+    final currentThemeMode = ref.watch(plantisThemeProvider);
 
     return DesktopKeyboardShortcuts(
       child: MaterialApp.router(

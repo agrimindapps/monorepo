@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../constants/settings_design_tokens.dart';
 
@@ -16,7 +15,7 @@ class ProfileUserSection extends ConsumerWidget {
 
   final dynamic authData;
   final VoidCallback? onLoginTap;
-  final Function(String)? onEditProfile;
+  final void Function(String)? onEditProfile;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -124,27 +123,6 @@ class ProfileUserSection extends ConsumerWidget {
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    if (isAuthenticated && user?.createdAt != null) ...[
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            color: Colors.green.shade600,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _getMemberSince(user?.createdAt),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -162,7 +140,7 @@ class ProfileUserSection extends ConsumerWidget {
   void _showEditProfileDialog(BuildContext context, WidgetRef ref, dynamic user) {
     final nameController = TextEditingController(text: _getUserDisplayTitle(user));
     
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Editar Perfil'),
@@ -258,25 +236,6 @@ class ProfileUserSection extends ConsumerWidget {
     }
     
     return 'email@usuario.com';
-  }
-
-  /// Helper: Obter tempo de membro
-  String _getMemberSince(dynamic createdAt) {
-    if (createdAt == null) return 'Membro desde 10 dias';
-    final DateTime date = createdAt is DateTime ? createdAt : DateTime.now();
-
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays < 30) {
-      return 'Membro desde ${difference.inDays} dias';
-    } else if (difference.inDays < 365) {
-      final months = (difference.inDays / 30).floor();
-      return 'Membro desde $months ${months == 1 ? 'mês' : 'meses'}';
-    } else {
-      final years = (difference.inDays / 365).floor();
-      return 'Membro desde $years ${years == 1 ? 'ano' : 'anos'}';
-    }
   }
 
   /// Helper: Decoração de card

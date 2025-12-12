@@ -19,18 +19,20 @@ class SubscriptionInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final expirationDate = subscription.expirationDate;
     final purchaseDate = subscription.purchaseDate;
-
-    if (expirationDate == null) return const SizedBox.shrink();
+    final isLifetime = expirationDate == null;
 
     // Cálculos de tempo
     final now = DateTime.now();
-    final totalDuration = expirationDate.difference(purchaseDate ?? now).inDays;
-    final daysRemaining = expirationDate.difference(now).inDays;
+    final totalDuration = isLifetime
+        ? 0
+        : expirationDate.difference(purchaseDate ?? now).inDays;
+    final daysRemaining =
+        isLifetime ? 0 : expirationDate.difference(now).inDays;
 
     // Evita divisão por zero e garante range 0.0 - 1.0
-    final progress = totalDuration > 0
+    final progress = !isLifetime && totalDuration > 0
         ? ((totalDuration - daysRemaining) / totalDuration).clamp(0.0, 1.0)
-        : 0.0;
+        : 1.0;
 
     return Container(
       width: double.infinity,
@@ -137,45 +139,45 @@ class SubscriptionInfoCard extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Progress Bar
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          _formatDaysRemaining(daysRemaining),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
+                if (!isLifetime)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatDaysRemaining(daysRemaining),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${(progress * 100).toInt()}% usado',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 12,
+                          Text(
+                            '${(progress * 100).toInt()}% usado',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 12,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: progress,
-                        backgroundColor: Colors.black.withValues(alpha: 0.2),
-                        valueColor: const AlwaysStoppedAnimation<Color>(
-                          PlantisColors.secondaryLight,
-                        ),
-                        minHeight: 6,
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 24),
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: progress,
+                          backgroundColor: Colors.black.withValues(alpha: 0.2),
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            PlantisColors.secondaryLight,
+                          ),
+                          minHeight: 6,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
 
                 // Dates Row
                 Container(
@@ -193,7 +195,10 @@ class SubscriptionInfoCard extends StatelessWidget {
                         width: 1,
                         color: Colors.white.withValues(alpha: 0.2),
                       ),
-                      _buildDateColumn('Renova em', expirationDate),
+                      _buildDateColumn(
+                        isLifetime ? 'Validade' : 'Renova em',
+                        expirationDate,
+                      ),
                     ],
                   ),
                 ),
@@ -205,7 +210,7 @@ class SubscriptionInfoCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateColumn(String label, DateTime date) {
+  Widget _buildDateColumn(String label, DateTime? date) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -218,7 +223,7 @@ class SubscriptionInfoCard extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          _formatDate(date),
+          date != null ? _formatDate(date) : 'Vitalício',
           style: const TextStyle(
             color: Colors.white,
             fontSize: 14,

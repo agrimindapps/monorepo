@@ -4,6 +4,7 @@ import 'package:core/core.dart' hide Column, subscriptionRepositoryProvider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/repository_providers.dart';
+import '../../../../core/services/plantis_sync_service.dart';
 import '../../../../database/repositories/subscription_local_repository.dart';
 import '../../domain/providers/premium_usecases_provider.dart';
 import '../../domain/providers/premium_validation_provider.dart';
@@ -98,6 +99,8 @@ class PremiumNotifier extends _$PremiumNotifier {
   late final LoadAvailableProductsUseCase _loadAvailableProductsUseCase;
   late final GetCurrentSubscriptionUseCase _getCurrentSubscriptionUseCase;
 
+  late final PlantisSyncService _syncService;
+
   @override
   Future<PremiumState> build() async {
     // Inject repositories via Riverpod
@@ -106,6 +109,7 @@ class PremiumNotifier extends _$PremiumNotifier {
     _analytics = ref.watch(firebaseAnalyticsServiceProvider);
     _authRepository = ref.watch(authRepositoryProvider);
     _validationService = ref.watch(premiumValidationServiceProvider);
+    _syncService = ref.watch(plantisSyncServiceProvider);
 
     // Inject UseCases
     _purchaseProductUseCase = ref.watch(purchaseProductUseCaseProvider);
@@ -233,6 +237,9 @@ class PremiumNotifier extends _$PremiumNotifier {
 
           // Save to local cache
           _localRepository.saveSubscription(subscription);
+
+          // Trigger sync to Firebase
+          _syncService.sync();
 
           return true;
         },

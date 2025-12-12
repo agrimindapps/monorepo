@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/providers/auth_providers.dart';
 import '../../core/widgets/modern_header_widget.dart';
 import '../../core/widgets/responsive_content_wrapper.dart';
+import 'presentation/providers/theme_notifier.dart';
 import 'presentation/providers/user_settings_notifier.dart';
 import 'widgets/sections/auth_section.dart';
 import 'widgets/sections/feature_flags_section.dart';
@@ -115,8 +116,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         // NotificationsSection(),
         TtsSettingsSection(),
         FeatureFlagsSection(),
-        LegalSection(),
         SupportSection(),
+        // Legal Section
+        LegalSection(),
         SizedBox(height: 32),
       ],
     );
@@ -141,8 +143,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showThemeDialog(BuildContext context) {
-    final settingsState = ref.read(userSettingsProvider).value;
-    final isDark = settingsState?.isDarkTheme ?? false;
+    final currentThemeMode = ref.read(receituagroThemeProvider);
 
     showDialog<void>(
       context: context,
@@ -152,18 +153,25 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildThemeOption(
+              'Automático (Sistema)',
+              'Segue a configuração do sistema',
+              Icons.brightness_auto,
+              currentThemeMode == ThemeMode.system,
+              () => _changeTheme(ThemeMode.system),
+            ),
+            _buildThemeOption(
               'Claro',
               'Tema claro sempre ativo',
               Icons.brightness_high,
-              !isDark,
-              () => _changeTheme(false),
+              currentThemeMode == ThemeMode.light,
+              () => _changeTheme(ThemeMode.light),
             ),
             _buildThemeOption(
               'Escuro',
               'Tema escuro sempre ativo',
               Icons.brightness_2,
-              isDark,
-              () => _changeTheme(true),
+              currentThemeMode == ThemeMode.dark,
+              () => _changeTheme(ThemeMode.dark),
             ),
           ],
         ),
@@ -177,8 +185,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  void _changeTheme(bool isDark) {
-    ref.read(userSettingsProvider.notifier).setDarkTheme(isDark);
+  void _changeTheme(ThemeMode mode) {
+    ref.read(receituagroThemeProvider.notifier).setThemeMode(mode);
   }
 
   Widget _buildThemeOption(

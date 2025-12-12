@@ -38,6 +38,32 @@
 - [x] `flutter analyze` passed (with warnings)
 - [x] `flutter build apk --debug` successful
 
+### 4. UI/UX Standardization
+- [x] Alinhamento das páginas de configurações (Gasometer, Receituagro, Plantis).
+- [x] Remoção de padding horizontal no card premium (Gasometer, Receituagro).
+- [x] Padronização do item de perfil (fontes e remoção de "Membro desde").
+- [x] Padronização dos grupos "Políticas e Termos" e "Suporte".
+  - **Políticas e Termos**: Privacy Policy, Terms of Use, Account Deletion Policy.
+  - **Suporte**: Rate App, Send Feedback, Help Center (if available).
+  - Aligned icons and visual style (Icon in colored container).
+- [x] Ajustes específicos de layout:
+  - **App Plantis**: Removido item "Informações do App".
+  - **App Gasometer**: Movido "Suporte" para cima de "Políticas e Termos", removido item "Central de Ajuda".
+  - **App Receituagro**: Movido "Suporte" para cima de "Políticas e Termos".
+- [x] **Validação Visual**: Confirmado via screenshot que os layouts estão alinhados e corretos.
+- [x] **Rate App**: Standardized "Avaliar o App" to use native dialog/store integration directly (via `appRatingRepositoryProvider`) across all apps, removing custom pre-prompt dialogs for consistency.
+- [x] **Send Feedback**: Standardized "Enviar Feedback" to use consistent `FeedbackDialog` with `SettingsDesignTokens` (where available) and `analyticsRepositoryProvider` for logging feedback to Firebase Analytics.
+- [x] **Critical Fixes**:
+  - Fixed `settings_page.dart` in `app-gasometer` (missing imports, undefined providers).
+  - Fixed `settings_page.dart` in `app-plantis` (missing imports, undefined providers, fixed `plantisThemeNotifierProvider` -> `plantisThemeProvider`).
+- [x] **Standardize Theme Switching**:
+  - Fixed `app-gasometer` theme switching crash by decoupling theme state from settings state.
+  - Implemented `GasometerThemeNotifier` for dedicated theme management.
+  - Standardized `app-receituagro` to use `ReceituagroThemeNotifier` with 3 options (System, Light, Dark), matching `app-gasometer` and `app-plantis`.
+  - Updated `app-plantis` to use `PlantisThemeNotifier` (Riverpod generated) for consistency and better state management, replacing legacy `ThemeNotifier`.
+  - Verified all apps now use the same pattern for theme management (Notifier + SharedPreferences + 3-option Dialog).
+  - Fixed critical errors in `app-plantis` and `app-receituagro` related to theme providers and imports (post-standardization cleanup).
+
 ## ⏭️ Next Steps
 1. **Testing (Phase 3D)**:
    - Add tests for `ExpenseValidationService` (now easier with split classes).

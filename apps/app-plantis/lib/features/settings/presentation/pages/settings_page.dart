@@ -3,14 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/auth_providers.dart' as auth;
+import '../../../../core/providers/repository_providers.dart';
 import '../../../../core/providers/settings_providers.dart';
-import '../../../../core/providers/theme_providers.dart' as theme;
 import '../../../../core/theme/plantis_colors.dart';
 import '../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../shared/widgets/loading/loading_components.dart';
 import '../../../../shared/widgets/responsive_layout.dart';
 import '../managers/settings_dialog_manager.dart';
 import '../managers/settings_sections_builder.dart';
+import '../providers/notifiers/plantis_theme_notifier.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -45,7 +46,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                     actions: [
                       Consumer(
                         builder: (context, ref, _) {
-                          final themeMode = ref.watch(theme.themeModeProvider);
+                          final themeMode = ref.watch(plantisThemeProvider);
                           return Semantics(
                             label: 'Alterar tema',
                             hint:
@@ -103,7 +104,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
                         const SizedBox(height: 8),
                         _buildSupportSection(context, appTheme),
                         const SizedBox(height: 8),
-                        _buildAboutSection(context, appTheme),
+                        _buildLegalSection(context, appTheme),
                         const SizedBox(height: 8),
 
                         const SizedBox(height: 24),
@@ -181,19 +182,12 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     );
   }
 
-  Widget _buildAboutSection(BuildContext context, ThemeData theme) {
+  Widget _buildLegalSection(BuildContext context, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(context, 'Sobre o Plantis'),
+        _buildSectionHeader(context, 'Políticas e Termos'),
         _buildSettingsCard(context, [
-          _buildSettingsItem(
-            context,
-            icon: Icons.info,
-            title: 'Informações do App',
-            subtitle: 'Versão, suporte e feedback',
-            onTap: () => _showAboutDialog(context),
-          ),
           _buildSettingsItem(
             context,
             icon: Icons.privacy_tip,
@@ -207,6 +201,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
             title: 'Termos de Uso',
             subtitle: 'Termos e condições de uso',
             onTap: () => context.push('/terms-of-service'),
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.delete_forever,
+            title: 'Política de Exclusão de Conta',
+            subtitle: 'Como seus dados são removidos',
+            onTap: () => context.push('/account-deletion-policy'),
           ),
         ]),
       ],
@@ -375,19 +376,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
     );
   }
 
-  void _showRateAppDialog(BuildContext context) {
-    final dialogManager = SettingsDialogManager(context: context, ref: null);
-    dialogManager.showRateAppDialog();
+  Future<void> _showRateAppDialog(BuildContext context) async {
+    try {
+      final appRatingService = ref.read(appRatingRepositoryProvider);
+      final canShow = await appRatingService.canShowRatingDialog();
+
+      if (canShow) {
+        if (!context.mounted) return;
+        final success = await appRatingService.showRatingDialog(context: context);
+
+        if (context.mounted && !success) {
+          await appRatingService.openAppStore();
+        }
+      } else {
+        await appRatingService.openAppStore();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao abrir avaliação do app: $e'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 
   void _showFeedbackDialog() {
     final dialogManager = SettingsDialogManager(context: context, ref: null);
     dialogManager.showFeedbackDialog();
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    final dialogManager = SettingsDialogManager(context: context, ref: null);
-    dialogManager.showAboutDialog();
   }
 
   void _showThemeDialog(BuildContext context, WidgetRef ref) {

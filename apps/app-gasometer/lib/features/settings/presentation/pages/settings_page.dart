@@ -1,13 +1,12 @@
-import 'package:core/core.dart' show GoRouterHelper;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
-import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../providers/settings_notifier.dart';
+import '../providers/theme_notifier.dart';
 import '../widgets/profile/profile_user_section.dart';
-import '../widgets/sections/about_section.dart';
 import '../widgets/sections/legal_section.dart';
 import '../widgets/sections/new_premium_section.dart';
 import '../widgets/sections/notification_section.dart';
@@ -23,9 +22,9 @@ class SettingsPage extends ConsumerStatefulWidget {
 class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   Widget build(BuildContext context) {
-    ref.watch(vehiclesProvider);
+    // ref.watch(vehiclesProvider);
     ref.watch(settingsProvider);
-    ref.watch(themeModeProvider);
+    ref.watch(gasometerThemeProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -135,9 +134,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         children: [
           // Profile Section - Only on mobile
           if (isMobile) ...[
-            ProfileUserSection(
-              onLoginTap: () => context.push('/login'),
-            ),
+            ProfileUserSection(onLoginTap: () => context.push('/login')),
             const SizedBox(height: 16),
           ],
 
@@ -149,47 +146,23 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const NotificationSection(),
           const SizedBox(height: 16),
 
-          // Legal
-          const LegalSection(),
-          const SizedBox(height: 16),
-
           // Support
           SupportSection(
-            onHelpTap: () =>
-                _showSnackBar('Central de ajuda estará disponível em breve!'),
             onFeedbackTap: _showFeedbackDialog,
             onRateTap: _showRateAppDialog,
           ),
           const SizedBox(height: 16),
 
-          // About
-          AboutSection(onVersionTap: () => _showSnackBar('GasOMeter v1.0.0')),
-          
-          // Logout button if mobile (since it was in AccountSection)
-          if (isMobile) ...[
-             const SizedBox(height: 32),
-             SizedBox(
-               width: double.infinity,
-               child: OutlinedButton.icon(
-                 onPressed: _showLogoutDialog,
-                 icon: const Icon(Icons.logout),
-                 label: const Text('Sair da conta'),
-                 style: OutlinedButton.styleFrom(
-                   foregroundColor: Theme.of(context).colorScheme.error,
-                   side: BorderSide(color: Theme.of(context).colorScheme.error),
-                   padding: const EdgeInsets.symmetric(vertical: 12),
-                 ),
-               ),
-             ),
-             const SizedBox(height: 32),
-          ],
+          // Legal Section
+          const LegalSection(),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
   void _showThemeDialog(BuildContext context) {
-    final currentThemeMode = ref.read(themeModeProvider);
+    final currentThemeMode = ref.read(gasometerThemeProvider);
 
     showDialog<void>(
       context: context,
@@ -235,7 +208,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _changeTheme(ThemeMode mode) {
-    ref.read(settingsProvider.notifier).changeTheme(mode);
+    ref.read(gasometerThemeProvider.notifier).setThemeMode(mode);
   }
 
   Widget _buildThemeOption(
@@ -297,92 +270,36 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
-  void _showLogoutDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sair da conta'),
-        content: const Text('Tem certeza que deseja fazer logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showSnackBar('Logout realizado com sucesso');
-            },
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _showRateAppDialog() async {
-    final notifier = ref.read(settingsProvider.notifier);
-    final canShow = await notifier.canShowRating();
+    try {
+      final appRatingService = ref.read(appRatingRepositoryProvider);
+      final canShow = await appRatingService.canShowRatingDialog();
 
-    if (!canShow) {
-      _showSnackBar('Avaliação já foi feita recentemente');
-      return;
+      if (canShow) {
+        if (!mounted) return;
+        final success = await appRatingService.showRatingDialog(
+          context: context,
+        );
+
+        if (mounted && !success) {
+          // Se não mostrou o diálogo, abrir a loja diretamente
+          final storeOpened = await appRatingService.openAppStore();
+          if (!storeOpened && mounted) {
+            _showSnackBar('Não foi possível abrir a loja de aplicativos');
+          }
+        }
+      } else {
+        // Já avaliou ou não atingiu os critérios, abrir loja diretamente
+        final storeOpened = await appRatingService.openAppStore();
+        if (!storeOpened && mounted) {
+          _showSnackBar('Não foi possível abrir a loja de aplicativos');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('Erro ao abrir avaliação do app');
+      }
     }
-
-    if (!mounted) return;
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.star_rate, color: Colors.orange),
-            SizedBox(width: 8),
-            Text('Avaliar o App'),
-          ],
-        ),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Você está gostando do GasOMeter? Sua avaliação é muito importante!',
-            ),
-            SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-                Icon(Icons.star, color: Colors.orange, size: 32),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Talvez mais tarde'),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              final success = await notifier.handleAppRating(context);
-              if (mounted) {
-                _showSnackBar(
-                  success
-                      ? 'Obrigado pelo feedback!'
-                      : 'Não foi possível abrir a avaliação',
-                );
-              }
-            },
-            icon: const Icon(Icons.star),
-            label: const Text('Avaliar'),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showSnackBar(String message) {

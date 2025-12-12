@@ -1,7 +1,8 @@
-import 'package:core/core.dart' ;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
+import '../../constants/settings_design_tokens.dart';
 
 /// Dialog para envio de feedback do usuário para Firebase Analytics
 ///
@@ -296,11 +297,7 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Theme.of(context).colorScheme.error,
-        duration: const Duration(seconds: 3),
-      ),
+      SettingsDesignTokens.getErrorSnackbar(message),
     );
   }
 

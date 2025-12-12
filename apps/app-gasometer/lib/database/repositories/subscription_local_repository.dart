@@ -30,6 +30,7 @@ class SubscriptionLocalRepository {
       isActive: Value(subscription.isActive),
       updatedAt: Value(DateTime.now()),
       lastSyncAt: Value(DateTime.now()),
+      isDirty: const Value(true),
     );
 
     await _db.into(_db.userSubscriptions).insertOnConflictUpdate(companion);

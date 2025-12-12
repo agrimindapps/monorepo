@@ -1,9 +1,8 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/core_di_providers.dart';
-import '../../../../core/providers/theme_providers.dart' as theme_providers;
 import '../dialogs/feedback_dialog.dart';
+import '../providers/notifiers/plantis_theme_notifier.dart';
 
 /// Manager para construir e gerenciar diálogos de configurações
 /// Responsabilidade: Isolar lógica de construção e exibição de diálogos
@@ -12,121 +11,6 @@ class SettingsDialogManager {
   final WidgetRef? ref;
 
   SettingsDialogManager({required this.context, required this.ref});
-
-  /// Constrói e exibe diálogo de avaliação do app
-  void showRateAppDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFFFFFFF),
-        title: Row(
-          children: [
-            const Icon(Icons.star_rate, color: Color(0xFFFDB14E), size: 28),
-            const SizedBox(width: 12),
-            Text(
-              'Avaliar o App',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Está gostando do Plantis?',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'Sua avaliação nos ajuda a melhorar e alcançar mais pessoas que amam plantas como você!',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 16,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                5,
-                (index) => const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: Icon(Icons.star, color: Color(0xFFFDB14E), size: 32),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.favorite,
-                    color: Color(0xFFE91E63),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Obrigado por fazer parte da nossa comunidade!',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'Mais tarde',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ),
-          ElevatedButton.icon(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await _handleRateApp();
-            },
-            icon: const Icon(Icons.star, size: 18),
-            label: const Text('Avaliar'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFFDB14E),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   /// Constrói e exibe diálogo de feedback
   void showFeedbackDialog() {
@@ -266,12 +150,12 @@ class SettingsDialogManager {
     IconData icon,
   ) {
     final currentThemeMode =
-        ref?.watch(theme_providers.themeModeProvider) ?? ThemeMode.system;
+        ref?.watch(plantisThemeProvider) ?? ThemeMode.system;
     final isSelected = currentThemeMode == mode;
 
     return InkWell(
       onTap: () {
-        ref?.read(theme_providers.themeProvider.notifier).setThemeMode(mode);
+        ref?.read(plantisThemeProvider.notifier).setThemeMode(mode);
         Navigator.of(context).pop();
       },
       borderRadius: BorderRadius.circular(12),
@@ -350,34 +234,5 @@ class SettingsDialogManager {
     );
   }
 
-  /// Gerencia rating do app
-  Future<void> _handleRateApp() async {
-    try {
-      if (ref == null) {
-        throw Exception('WidgetRef is null');
-      }
-      final appRatingService = ref!.read(appRatingRepositoryProvider);
-      final success = await appRatingService.showRatingDialog(context: context);
 
-      if (!context.mounted) return;
-      if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Obrigado pelo feedback!'),
-            backgroundColor: Color(0xFF4CAF50),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Erro inesperado: $e'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
 }

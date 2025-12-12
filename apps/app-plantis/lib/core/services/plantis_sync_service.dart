@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
+import '../../../database/sync/adapters/subscription_drift_sync_adapter.dart';
 import '../../../features/plants/domain/repositories/plant_comments_repository.dart';
 import '../../../features/plants/domain/repositories/plant_tasks_repository.dart';
 import '../../../features/plants/domain/repositories/plants_repository.dart';
@@ -16,6 +17,9 @@ class PlantisSyncService implements ISyncService {
   // final PlantTasksRepository _plantTasksRepository;
   // final PlantCommentsRepository _plantCommentsRepository;
 
+  final SubscriptionDriftSyncAdapter _subscriptionSyncAdapter;
+  final IAuthRepository _authRepository;
+
   final _statusController = StreamController<SyncServiceStatus>.broadcast();
   final _progressController = StreamController<ServiceProgress>.broadcast();
 
@@ -28,7 +32,10 @@ class PlantisSyncService implements ISyncService {
     required SpacesRepository spacesRepository,
     required PlantTasksRepository plantTasksRepository,
     required PlantCommentsRepository plantCommentsRepository,
-  }); // TODO: Initialize fields when repositories are used in sync methods
+    required SubscriptionDriftSyncAdapter subscriptionSyncAdapter,
+    required IAuthRepository authRepository,
+  })  : _subscriptionSyncAdapter = subscriptionSyncAdapter,
+        _authRepository = authRepository; // TODO: Initialize fields when repositories are used in sync methods
 
   @override
   String get serviceId => 'plantis';
@@ -86,13 +93,30 @@ class PlantisSyncService implements ISyncService {
       int totalSynced = 0;
       int totalFailed = 0;
 
+      // Sync subscriptions
+      _progressController.add(
+        ServiceProgress(
+          serviceId: serviceId,
+          operation: 'syncing_subscriptions',
+          current: 0,
+          total: 5,
+          currentItem: 'Sincronizando assinaturas...',
+        ),
+      );
+
+      final subscriptionsResult = await _syncSubscriptions();
+      subscriptionsResult.fold(
+        (failure) => totalFailed++,
+        (count) => totalSynced += count,
+      );
+
       // Sync plants
       _progressController.add(
         ServiceProgress(
           serviceId: serviceId,
           operation: 'syncing_plants',
-          current: 0,
-          total: 4,
+          current: 1,
+          total: 5,
           currentItem: 'Sincronizando plantas...',
         ),
       );
@@ -108,8 +132,8 @@ class PlantisSyncService implements ISyncService {
         ServiceProgress(
           serviceId: serviceId,
           operation: 'syncing_spaces',
-          current: 1,
-          total: 4,
+          current: 2,
+          total: 5,
           currentItem: 'Sincronizando espaços...',
         ),
       );
@@ -125,8 +149,8 @@ class PlantisSyncService implements ISyncService {
         ServiceProgress(
           serviceId: serviceId,
           operation: 'syncing_tasks',
-          current: 2,
-          total: 4,
+          current: 3,
+          total: 5,
           currentItem: 'Sincronizando tarefas...',
         ),
       );
@@ -142,8 +166,8 @@ class PlantisSyncService implements ISyncService {
         ServiceProgress(
           serviceId: serviceId,
           operation: 'syncing_comments',
-          current: 3,
-          total: 4,
+          current: 4,
+          total: 5,
           currentItem: 'Sincronizando comentários...',
         ),
       );
@@ -158,8 +182,8 @@ class PlantisSyncService implements ISyncService {
         ServiceProgress(
           serviceId: serviceId,
           operation: 'completed',
-          current: 4,
-          total: 4,
+          current: 5,
+          total: 5,
           currentItem: 'Sincronização concluída',
         ),
       );
@@ -229,6 +253,37 @@ class PlantisSyncService implements ISyncService {
   }
 
   // Métodos auxiliares para sync de cada entidade
+  Future<Either<Failure, int>> _syncSubscriptions() async {
+    try {
+      final user = await _authRepository.currentUser.first;
+      if (user == null) return const Right(0);
+
+      int totalSynced = 0;
+
+      // 1. Push local changes
+      final pushResult = await _subscriptionSyncAdapter.pushDirtyRecords(user.id);
+      
+      if (pushResult.isLeft()) {
+        return Left((pushResult as Left<Failure, SyncPushResult>).value);
+      }
+      
+      totalSynced += (pushResult as Right<Failure, SyncPushResult>).value.recordsPushed;
+
+      // 2. Pull remote changes
+      final pullResult = await _subscriptionSyncAdapter.pullRemoteChanges(user.id);
+      
+      if (pullResult.isLeft()) {
+        return Left((pullResult as Left<Failure, SyncPullResult>).value);
+      }
+
+      totalSynced += (pullResult as Right<Failure, SyncPullResult>).value.recordsPulled;
+
+      return Right(totalSynced);
+    } catch (e) {
+      return Left(ServerFailure('Failed to sync subscriptions: $e'));
+    }
+  }
+
   Future<Either<Failure, int>> _syncPlants() async {
     try {
       // Implementar sync de plantas
@@ -290,12 +345,16 @@ class PlantisSyncServiceFactory {
     required SpacesRepository spacesRepository,
     required PlantTasksRepository plantTasksRepository,
     required PlantCommentsRepository plantCommentsRepository,
+    required SubscriptionDriftSyncAdapter subscriptionSyncAdapter,
+    required IAuthRepository authRepository,
   }) {
     return PlantisSyncService(
       plantsRepository: plantsRepository,
       spacesRepository: spacesRepository,
       plantTasksRepository: plantTasksRepository,
       plantCommentsRepository: plantCommentsRepository,
+      subscriptionSyncAdapter: subscriptionSyncAdapter,
+      authRepository: authRepository,
     );
   }
 }

@@ -7,13 +7,11 @@ import '../shared/section_header.dart';
 /// Seção de suporte - acesso a ajuda, feedback e avaliação
 class SupportSection extends StatelessWidget {
   const SupportSection({
-    this.onHelpTap,
     this.onFeedbackTap,
     this.onRateTap,
     super.key,
   });
 
-  final VoidCallback? onHelpTap;
   final VoidCallback? onFeedbackTap;
   final VoidCallback? onRateTap;
 
@@ -26,10 +24,10 @@ class SupportSection extends StatelessWidget {
           child: Column(
             children: [
               NewSettingsListTile(
-                leadingIcon: Icons.help_outline,
-                title: 'Central de Ajuda',
-                subtitle: 'Perguntas frequentes',
-                onTap: onHelpTap,
+                leadingIcon: Icons.star_rate,
+                title: 'Avaliar o App',
+                subtitle: 'Deixe sua avaliação',
+                onTap: onRateTap,
                 showDivider: true,
               ),
               NewSettingsListTile(
@@ -37,13 +35,6 @@ class SupportSection extends StatelessWidget {
                 title: 'Enviar Feedback',
                 subtitle: 'Ajude-nos a melhorar o app',
                 onTap: onFeedbackTap,
-                showDivider: true,
-              ),
-              NewSettingsListTile(
-                leadingIcon: Icons.star_rate,
-                title: 'Avaliar o App',
-                subtitle: 'Deixe sua avaliação',
-                onTap: onRateTap,
               ),
             ],
           ),

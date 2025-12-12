@@ -6,7 +6,8 @@ import 'package:flutter/services.dart';
 
 import 'core/init/app_initialization.dart';
 import 'core/navigation/app_router.dart' as app_router;
-import 'core/providers/theme_notifier.dart';
+import 'core/providers/dependency_providers.dart';
+import 'features/settings/presentation/providers/theme_notifier.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
 import 'core/utils/theme_preference_migration.dart';
@@ -32,8 +33,14 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await ThemePreferenceMigration.migratePreferences();
 
+  final sharedPreferences = await SharedPreferences.getInstance();
+
   // Create Riverpod container
-  _container = ProviderContainer();
+  _container = ProviderContainer(
+    overrides: [
+      receituagroSharedPreferencesProvider.overrideWithValue(sharedPreferences),
+    ],
+  );
 
   // Initialize Firebase services (Analytics, Crashlytics, Performance)
   await AppInitialization.initializeFirebaseServices(_container);
@@ -254,7 +261,7 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = ref.watch(themeProvider);
+    final themeMode = ref.watch(receituagroThemeProvider);
     final router = ref.watch(app_router.appRouterProvider);
 
     return MaterialApp.router(

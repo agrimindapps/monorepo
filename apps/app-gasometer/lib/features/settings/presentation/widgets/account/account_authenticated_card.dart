@@ -63,7 +63,7 @@ class AccountAuthenticatedCard extends StatelessWidget {
                       Text(
                         displayName,
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w600,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),

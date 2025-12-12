@@ -43,17 +43,6 @@ class SupportSection extends ConsumerWidget {
                 subtitle: 'Nos ajude a melhorar o app',
                 onTap: () => _showFeedback(context, ref),
               ),
-              Divider(
-                height: 1,
-                thickness: 0.5,
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              ),
-              SettingsListTile(
-                leadingIcon: Icons.info_outline,
-                title: 'Sobre o Aplicativo',
-                subtitle: 'Versão, suporte e informações',
-                onTap: () => _showAboutApp(context, ref),
-              ),
             ],
           ),
         ),
@@ -123,16 +112,5 @@ class SupportSection extends ConsumerWidget {
       context: context,
       builder: (context) => const FeedbackDialog(),
     );
-  }
-
-  void _showAboutApp(BuildContext context, WidgetRef ref) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sobre o app - Em desenvolvimento'),
-          backgroundColor: Colors.blue,
-        ),
-      );
-    }
   }
 }

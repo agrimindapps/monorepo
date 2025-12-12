@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/receituagro_colors.dart';
 import '../../../subscription/presentation/providers/subscription_notifier.dart';
 import '../../../subscription/presentation/widgets/subscription_info_card.dart';
-import '../shared/section_header.dart';
 
 /// Premium Settings Section
 /// Allows users to view premium features and settings
@@ -20,8 +19,6 @@ class NewPremiumSection extends ConsumerWidget {
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _buildErrorWidget(context, error.toString()),
       data: (subscriptionState) {
-        final isPremium = subscriptionState.hasActiveSubscription;
-
         return _buildStatusCard(context, subscriptionState);
       },
     );
@@ -58,8 +55,7 @@ class NewPremiumSection extends ConsumerWidget {
     }
 
     // Card gratuito com visual estilo Plantis (Banner)
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,

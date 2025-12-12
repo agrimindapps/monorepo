@@ -1,8 +1,10 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../../../core/providers/premium_notifier.dart';
+import '../../../../core/services/receita_agro_sync_service.dart';
 import '../../domain/usecases/get_available_products.dart';
 import '../../domain/usecases/get_current_subscription.dart';
 import '../../domain/usecases/get_user_premium_status.dart';
@@ -106,6 +108,8 @@ class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
   late final RefreshSubscriptionStatusUseCase _refreshSubscriptionStatusUseCase;
   late final ManageSubscriptionUseCase _manageSubscriptionUseCase;
 
+  late final ReceitaAgroSyncService _syncService;
+
   @override
   Future<SubscriptionState> build() async {
     _getUserPremiumStatusUseCase = ref.watch(getUserPremiumStatusUseCaseProvider);
@@ -115,6 +119,7 @@ class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
     _restorePurchasesUseCase = ref.watch(restorePurchasesUseCaseProvider);
     _refreshSubscriptionStatusUseCase = ref.watch(refreshSubscriptionStatusUseCaseProvider);
     _manageSubscriptionUseCase = ref.watch(manageSubscriptionUseCaseProvider);
+    _syncService = ref.watch(receitaAgroSyncServiceProvider);
     return _loadInitialData();
   }
 
@@ -256,6 +261,9 @@ class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
             ),
           );
           await loadSubscriptionData();
+
+          // Trigger sync to Firebase
+          await _syncService.sync();
 
           // Force PremiumNotifier to refresh
           try {

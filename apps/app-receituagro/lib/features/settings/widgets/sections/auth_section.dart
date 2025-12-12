@@ -190,10 +190,6 @@ class AuthSection extends ConsumerWidget {
   ) {
     final user = authState.currentUser!;
     final theme = Theme.of(context);
-    final createdDate = user.createdAt != null
-        ? _formatDate(user.createdAt!)
-        : 'Data não disponível';
-
     final userInitial = user.displayName.isNotEmpty
         ? user.displayName[0].toUpperCase()
         : (user.email.isNotEmpty ? user.email[0].toUpperCase() : '?');
@@ -283,6 +279,7 @@ class AuthSection extends ConsumerWidget {
                             style: theme.textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                               color: theme.colorScheme.onSurface,
+                              fontSize: 16,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -294,21 +291,12 @@ class AuthSection extends ConsumerWidget {
                               user.email,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.onSurfaceVariant,
+                                fontSize: 14,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
-
-                          const SizedBox(height: 4),
-                          Text(
-                            'Membro desde $createdDate',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontStyle: FontStyle.italic,
-                              fontSize: 11,
-                            ),
-                          ),
                         ],
                       ),
                     ),
@@ -350,9 +338,5 @@ class AuthSection extends ConsumerWidget {
         MaterialPageRoute<void>(builder: (context) => const ProfilePage()),
       );
     }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 }

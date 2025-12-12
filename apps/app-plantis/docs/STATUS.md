@@ -78,6 +78,7 @@
 |------|---------|--------|-----------|
 | 06/12 | docs | Análise de features para novas tarefas | ✅ 8 novas tarefas identificadas |
 | 06/12 | docs | Criar sistema de gestão por feature | ✅ Estrutura criada |
+| 12/12 | settings | Correção de erros críticos em SettingsPage | ✅ Fixed missing provider |
 
 ---
 

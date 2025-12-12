@@ -48,8 +48,7 @@ class NewPremiumSection extends ConsumerWidget {
     }
 
     // Card gratuito com visual estilo Plantis (Banner)
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,

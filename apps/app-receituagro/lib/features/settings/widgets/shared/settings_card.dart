@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../constants/settings_design_tokens.dart';
-
 /// Standardized card widget for settings sections
 /// Provides consistent styling across all settings components
 class SettingsCard extends StatelessWidget {

@@ -70,6 +70,11 @@ IAuthRepository authRepository(Ref ref) {
 }
 
 @riverpod
+IAppRatingRepository appRatingRepository(Ref ref) {
+  return AppRatingService();
+}
+
+@riverpod
 AuthRepository featureAuthRepository(Ref ref) {
   return AuthRepositoryImpl(ref.watch(authRepositoryProvider));
 }
@@ -254,6 +259,8 @@ PlantisSyncService plantisSyncService(Ref ref) {
     spacesRepository: ref.watch(spacesRepositoryProvider),
     plantTasksRepository: ref.watch(plantTasksRepositoryProvider),
     plantCommentsRepository: ref.watch(plantCommentsRepositoryProvider),
+    subscriptionSyncAdapter: ref.watch(subscriptionSyncAdapterProvider),
+    authRepository: ref.watch(authRepositoryProvider),
   );
 }
 

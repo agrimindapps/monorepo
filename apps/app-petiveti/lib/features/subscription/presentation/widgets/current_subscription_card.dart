@@ -9,7 +9,7 @@ import 'subscription_page_coordinator.dart';
 class CurrentSubscriptionCard extends ConsumerWidget {
   final UserSubscription subscription;
   final String userId;
-  final SubscriptionState state;
+  final bool state;
 
   const CurrentSubscriptionCard({
     super.key,

@@ -1,74 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/receituagro_colors.dart';
-import '../providers/subscription_notifier.dart';
+import '../../../../core/widgets/receituagro_loading_widget.dart';
 
-/// Widget responsável pelas ações relacionadas a pagamento e subscription
-///
-/// VERSÃO REFATORADA - UX/UI Melhorado:
-/// - Menu de ações contextual (Gerenciar, Histórico, Cancelar)
-/// - Botão principal destacado + ações secundárias
-/// - Dialog de confirmação para cancelamento
-///
-/// Funcionalidades:
-/// - Botão principal de compra
-/// - Menu de gerenciamento com múltiplas ações
-/// - Links de rodapé (Termos, Privacidade, Restaurar)
-/// - Configuração flexível via parâmetros
 class PaymentActionsWidget extends ConsumerWidget {
-  final bool showPurchaseButton;
-  final bool showSubscriptionManagement;
-  final bool showFooterLinks;
-
   const PaymentActionsWidget({
     super.key,
+    this.selectedPlanId,
+    this.isPremium = false,
+    this.isLoading = false,
+    this.onPurchase,
+    this.onRestore,
+    this.onManageSubscription,
+    this.onPrivacyPolicy,
+    this.onTermsOfService,
     this.showPurchaseButton = false,
-    this.showSubscriptionManagement = false,
     this.showFooterLinks = false,
+    this.showSubscriptionManagement = false,
   });
+
+  final String? selectedPlanId;
+  final bool isPremium;
+  final bool isLoading;
+  final VoidCallback? onPurchase;
+  final VoidCallback? onRestore;
+  final VoidCallback? onManageSubscription;
+  final VoidCallback? onPrivacyPolicy;
+  final VoidCallback? onTermsOfService;
+  final bool showPurchaseButton;
+  final bool showFooterLinks;
+  final bool showSubscriptionManagement;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
-
-    return subscriptionAsync.when(
-      data: (subscriptionState) {
-        if (showPurchaseButton) {
-          return _buildPurchaseButton(ref, subscriptionState.isLoading);
-        } else if (showSubscriptionManagement) {
-          return _buildManagementActions(context, ref, subscriptionState.isLoading);
-        } else if (showFooterLinks) {
-          return _buildFooterLinks(ref, subscriptionState.isLoading);
-        }
-
-        return const SizedBox.shrink();
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => const SizedBox.shrink(),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (showPurchaseButton && !isPremium) _buildPurchaseButton(),
+        if (!isPremium && !showPurchaseButton && onRestore != null)
+          _buildRestoreButton(),
+        if (showSubscriptionManagement && isPremium)
+          _buildManageSubscriptionButton(),
+        if (showFooterLinks) _buildFooterLinks(),
+      ],
     );
   }
 
-  /// Botão principal para compra do plano selecionado
-  Widget _buildPurchaseButton(WidgetRef ref, bool isLoading) {
+  Widget _buildPurchaseButton() {
     return Container(
-      width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20),
       child: ElevatedButton(
         onPressed: isLoading
             ? null
-            : () => ref
-                  .read(subscriptionManagementProvider.notifier)
-                  .purchaseSelectedPlan(),
+            : () {
+                if (selectedPlanId != null) {
+                  onPurchase?.call();
+                }
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF1B4332), // Dark green text
+          foregroundColor: ReceitaAgroColors.primary,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(16),
           ),
           elevation: 0,
-          shadowColor: Colors.transparent,
         ),
         child: isLoading
             ? const SizedBox(
@@ -76,104 +74,176 @@ class PaymentActionsWidget extends ConsumerWidget {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF1B4332)),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(ReceitaAgroColors.primary),
                 ),
               )
-            : const Text(
-                'Obter Acesso Completo',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.star, size: 20),
+                  const SizedBox(width: 8),
+                  Text(
+                    selectedPlanId != null
+                        ? 'Assinar Premium'
+                        : 'Selecione um Plano',
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
       ),
     );
   }
 
-  /// Botão de gerenciamento simplificado
-  Widget _buildManagementActions(BuildContext context, WidgetRef ref, bool isLoading) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
+  Widget _buildRestoreButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: TextButton(
         onPressed: isLoading
             ? null
-            : () => ref
-                  .read(subscriptionManagementProvider.notifier)
-                  .openManagementUrl(),
-        icon: const Icon(Icons.settings),
-        label: const Text('Gerenciar Assinatura'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: ReceitaAgroColors.primary,
-          foregroundColor: Colors.white,
+            : () {
+                onRestore?.call();
+              },
+        style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : Text(
+                'Restaurar Compras',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }
 
-  /// Links de rodapé (Termos, Privacidade, Restaurar)
-  Widget _buildFooterLinks(WidgetRef ref, bool isLoading) {
+  Widget _buildManageSubscriptionButton() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      child: ElevatedButton(
+        onPressed: isLoading
+            ? null
+            : () {
+                onManageSubscription?.call();
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withValues(alpha: 0.1),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          elevation: 0,
+        ),
+        child: isLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            : const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.settings, size: 20),
+                  SizedBox(width: 8),
+                  Text(
+                    'Gerenciar Assinatura',
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildFooterLinks() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
         children: [
-          Expanded(
-            child: _buildFooterLink(
-              'Termos de Uso',
-              () => ref
-                  .read(subscriptionManagementProvider.notifier)
-                  .openTermsOfUse(),
-              isLoading,
+          if (onRestore != null && !isPremium) ...[
+            _buildRestoreButton(),
+            const SizedBox(height: 20),
+          ],
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(vertical: 20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.white.withValues(alpha: 0.2),
+                  Colors.transparent,
+                ],
+              ),
             ),
           ),
-          _buildFooterDivider(),
-          Expanded(
-            child: _buildFooterLink(
-              'Política de Privacidade',
-              () => ref
-                  .read(subscriptionManagementProvider.notifier)
-                  .openPrivacyPolicy(),
-              isLoading,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildFooterLink('Política de Privacidade', onPrivacyPolicy),
+              Container(
+                width: 1,
+                height: 16,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+              _buildFooterLink('Termos de Uso', onTermsOfService),
+            ],
           ),
-          _buildFooterDivider(),
-          Expanded(
-            child: _buildFooterLink(
-              'Restaurar',
-              () => ref
-                  .read(subscriptionManagementProvider.notifier)
-                  .restorePurchases(),
-              isLoading,
-            ),
-          ),
+          const SizedBox(height: 16),
+          _buildAutoRenewalText(),
         ],
       ),
     );
   }
 
-  /// Link individual do rodapé
-  Widget _buildFooterLink(String text, VoidCallback onPressed, bool isLoading) {
-    return TextButton(
-      onPressed: isLoading ? null : onPressed,
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.7),
-          fontSize: 12,
+  Widget _buildFooterLink(String text, VoidCallback? onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 14,
+            decoration: TextDecoration.underline,
+            decorationColor: Colors.white.withValues(alpha: 0.6),
+          ),
         ),
       ),
     );
   }
 
-  /// Divisor entre links do rodapé
-  Widget _buildFooterDivider() {
+  Widget _buildAutoRenewalText() {
     return Text(
-      '•',
+      'A assinatura será renovada automaticamente. Você pode cancelar a qualquer momento nas configurações da loja.',
+      textAlign: TextAlign.center,
       style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.7),
-        fontSize: 14,
+        color: Colors.white.withValues(alpha: 0.5),
+        fontSize: 12,
+        height: 1.4,
       ),
     );
   }

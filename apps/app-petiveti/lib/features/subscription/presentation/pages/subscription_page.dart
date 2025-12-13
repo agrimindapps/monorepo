@@ -1,7 +1,6 @@
-import 'package:core/core.dart' hide Column, SubscriptionState, subscriptionProvider;
+import 'package:core/core.dart' hide Column, subscriptionProvider;
 import 'package:flutter/material.dart';
 
-import '../providers/subscription_providers.dart';
 import '../widgets/subscription_empty_state.dart';
 import '../widgets/subscription_feature_comparison.dart';
 import '../widgets/subscription_loading_overlay.dart';
@@ -259,7 +258,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   ///
   /// @param state Current subscription state from provider
   /// @returns List of widgets for current subscription section
-  List<Widget> _buildCurrentSubscriptionSection(SubscriptionState state) {
+  List<Widget> _buildCurrentSubscriptionSection(bool state) {
     if (state.isLoadingCurrentSubscription) {
       return [
         SubscriptionSkeletonLoaders.buildCurrentSubscriptionSkeleton(context),
@@ -313,7 +312,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   ///
   /// @param state Current subscription state with available plans
   /// @returns List of widgets for subscription plans section
-  List<Widget> _buildPlansSection(SubscriptionState state) {
+  List<Widget> _buildPlansSection(bool state) {
     if (state.isLoadingPlans) {
       return [SubscriptionSkeletonLoaders.buildPlanCardsSkeleton(context)];
     } else if (state.availablePlans.isNotEmpty) {

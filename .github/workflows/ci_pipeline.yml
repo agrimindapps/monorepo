@@ -1,0 +1,50 @@
+name: CI Pipeline (Core Apps)
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  verify-and-build:
+    name: Verify & Build Core Apps
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.24.0'
+        cache: true
+    
+    - name: Install Melos
+      run: flutter pub global activate melos
+      
+    - name: Bootstrap Workspace
+      run: melos bootstrap
+      
+    - name: 🔍 Static Analysis (Core)
+      run: melos run analyze:core
+      
+    - name: 🎨 Format Check
+      run: melos run format
+      
+    - name: 🧪 Run Tests (Core)
+      run: melos run test:core
+      
+    - name: 📱 Build Debug APKs (Core)
+      run: melos run build:core:debug
+      
+    - name: Upload APKs
+      uses: actions/upload-artifact@v3
+      if: success()
+      with:
+        name: debug-apks
+        path: |
+          apps/app-plantis/build/app/outputs/flutter-apk/app-debug.apk
+          apps/app-receituagro/build/app/outputs/flutter-apk/app-debug.apk
+          apps/app-gasometer/build/app/outputs/flutter-apk/app-debug.apk

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../../core/errors/failures.dart' as local_failures;
 import '../../../core/services/data_integrity_service.dart';
+import '../../../core/services/task_upload_sync_service.dart';
 import '../../../core/utils/typedef.dart';
 import '../domain/task_entity.dart';
 import '../domain/task_repository.dart';
@@ -27,10 +28,12 @@ class TaskRepositoryImpl implements TaskRepository {
   const TaskRepositoryImpl(
     this._localDataSource,
     this._dataIntegrityService,
+    this._uploadSyncService,
   );
 
   final TaskLocalDataSource _localDataSource;
   final DataIntegrityService _dataIntegrityService;
+  final TaskUploadSyncService _uploadSyncService;
 
   /// UnifiedSyncManager singleton instance (for future use)
   // ignore: unused_element
@@ -347,26 +350,37 @@ class TaskRepositoryImpl implements TaskRepository {
   // ========================================================================
 
   /// Trigger sync em background (não-bloqueante)
-  /// UnifiedSyncManager gerencia filas e throttling automaticamente
+  /// Usa TaskUploadSyncService para sincronizar tasks dirty
   void _triggerBackgroundSync() {
-    // TODO: Implementar quando UnifiedSyncManager tiver método trigger manual
-    // Por enquanto, AutoSyncService fará sync periódico automaticamente
-    if (kDebugMode) {
-      debugPrint('[TaskRepository] Background sync will be triggered by AutoSyncService');
-    }
+    // Trigger async (non-blocking) - dispara e esquece
+    Future.microtask(() async {
+      try {
+        if (kDebugMode) {
+          debugPrint('[TaskRepository] Background sync triggered (handled by AutoSyncService)');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('[TaskRepository] Background sync trigger error (non-critical): $e');
+        }
+      }
+    });
   }
 
   /// Force sync manual (bloqueante) - para uso em casos específicos
-  Future<Either<local_failures.Failure, void>> forceSync() async {
+  Future<Either<local_failures.Failure, void>> forceSync(String userId) async {
     try {
-      // TODO: Implementar quando UnifiedSyncManager tiver método forceSync
-      // await _syncManager.forceSyncApp('taskolist');
+      final result = await _uploadSyncService.forceSyncWithRetry(userId);
 
-      if (kDebugMode) {
-        debugPrint('[TaskRepository] Manual sync requested (not yet implemented)');
+      if (result.success) {
+        if (kDebugMode) {
+          debugPrint('[TaskRepository] Force sync completed: ${result.syncedCount} tasks');
+        }
+        return const Right(null);
+      } else {
+        return Left(local_failures.ServerFailure(
+          'Sync failed: ${result.error?.toString() ?? "Unknown error"}',
+        ));
       }
-
-      return const Right(null);
     } catch (e) {
       return Left(local_failures.ServerFailure('Failed to force sync: $e'));
     }

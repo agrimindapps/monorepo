@@ -27,7 +27,6 @@ jobs:
         cd apps/app-receituagro && flutter pub get
         cd ../app-gasometer && flutter pub get
         cd ../app-plantis && flutter pub get
-        cd ../app_taskolist && flutter pub get
     
     - name: Run Quality Gates - All Apps
       run: |

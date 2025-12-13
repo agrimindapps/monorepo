@@ -21,6 +21,7 @@ import 'tables/promo_content_table.dart';
 import 'tables/reminders_table.dart';
 import 'tables/vaccines_table.dart';
 import 'tables/weight_records_table.dart';
+import 'tables/user_subscriptions_table.dart';
 
 part 'petiveti_database.g.dart';
 
@@ -36,7 +37,7 @@ part 'petiveti_database.g.dart';
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
 ///
-/// **TABELAS (9 total):**
+/// **TABELAS (10 total):**
 /// 1. Animals - Cadastro de pets
 /// 2. Medications - Medicamentos e tratamentos
 /// 3. Vaccines - Vacinação
@@ -46,6 +47,7 @@ part 'petiveti_database.g.dart';
 /// 7. Reminders - Lembretes e notificações
 /// 8. CalculationHistory - Histórico de calculadoras
 /// 9. PromoContent - Conteúdo promocional
+/// 10. UserSubscriptions - Assinaturas premium (cache local)
 ///
 /// **SCHEMA VERSION:** 1 (inicial)
 /// ============================================================================
@@ -60,6 +62,7 @@ part 'petiveti_database.g.dart';
     Expenses,
     Reminders,
     CalculationHistory,
+    UserSubscriptions,
     PromoContent,
   ],
   daos: [
@@ -80,8 +83,10 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
   /// Versão do schema do banco de dados
   ///
   /// Incrementar quando houver mudanças estruturais nas tabelas
+  /// v1: Schema inicial
+  /// v2: Adicionados campos de sync (firebaseId, isDirty, lastSyncAt, version)
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Factory constructor para injeção de dependência via Riverpod
   ///
@@ -149,6 +154,7 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
   ///
   /// - onCreate: Cria todas as tabelas na primeira inicialização
   /// - beforeOpen: Habilita foreign keys (integridade referencial)
+  /// - onUpgrade: Migrations para mudanças de schema
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
@@ -159,11 +165,62 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // Future schema migrations will go here
-      // Example:
-      // if (from < 2) {
-      //   await m.addColumn(animals, animals.newColumn);
-      // }
+      // Migration v1 -> v2: Adicionar campos de sync
+      if (from < 2) {
+        // Animals
+        await m.addColumn(animals, animals.firebaseId);
+        await m.addColumn(animals, animals.lastSyncAt);
+        await m.addColumn(animals, animals.isDirty);
+        await m.addColumn(animals, animals.version);
+
+        // Medications
+        await m.addColumn(medications, medications.firebaseId);
+        await m.addColumn(medications, medications.lastSyncAt);
+        await m.addColumn(medications, medications.isDirty);
+        await m.addColumn(medications, medications.version);
+
+        // Vaccines
+        await m.addColumn(vaccines, vaccines.firebaseId);
+        await m.addColumn(vaccines, vaccines.lastSyncAtTimestamp);
+        await m.addColumn(vaccines, vaccines.isDirty);
+        await m.addColumn(vaccines, vaccines.version);
+
+        // Appointments
+        await m.addColumn(appointments, appointments.firebaseId);
+        await m.addColumn(appointments, appointments.lastSyncAt);
+        await m.addColumn(appointments, appointments.isDirty);
+        await m.addColumn(appointments, appointments.version);
+
+        // WeightRecords
+        await m.addColumn(weightRecords, weightRecords.firebaseId);
+        await m.addColumn(weightRecords, weightRecords.lastSyncAt);
+        await m.addColumn(weightRecords, weightRecords.isDirty);
+        await m.addColumn(weightRecords, weightRecords.version);
+
+        // Expenses
+        await m.addColumn(expenses, expenses.firebaseId);
+        await m.addColumn(expenses, expenses.lastSyncAt);
+        await m.addColumn(expenses, expenses.isDirty);
+        await m.addColumn(expenses, expenses.version);
+
+        // Reminders
+        await m.addColumn(reminders, reminders.firebaseId);
+        await m.addColumn(reminders, reminders.lastSyncAt);
+        await m.addColumn(reminders, reminders.isDirty);
+        await m.addColumn(reminders, reminders.version);
+
+        // CalculationHistory
+        await m.addColumn(calculationHistory, calculationHistory.firebaseId);
+        await m.addColumn(calculationHistory, calculationHistory.lastSyncAt);
+        await m.addColumn(calculationHistory, calculationHistory.isDirty);
+        await m.addColumn(calculationHistory, calculationHistory.version);
+
+        // PromoContent
+        await m.addColumn(promoContent, promoContent.firebaseId);
+        await m.addColumn(promoContent, promoContent.lastSyncAt);
+        await m.addColumn(promoContent, promoContent.isDirty);
+        await m.addColumn(promoContent, promoContent.version);
+      }
     },
   );
 }

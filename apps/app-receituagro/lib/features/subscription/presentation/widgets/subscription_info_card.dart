@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/theme/receituagro_colors.dart';
 
 /// Card de informações da assinatura para a tela de configurações
 ///
@@ -10,16 +11,14 @@ import 'package:flutter/material.dart';
 /// - Tempo restante
 /// - Barra de progresso visual
 class SubscriptionInfoCard extends StatelessWidget {
-  final SubscriptionEntity subscription;
-  final bool showDetailsButton;
-  final VoidCallback? onDetailsPressed;
-
   const SubscriptionInfoCard({
     super.key,
     required this.subscription,
-    this.showDetailsButton = false,
-    this.onDetailsPressed,
+    this.onManageTap,
   });
+
+  final SubscriptionEntity subscription;
+  final VoidCallback? onManageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +46,14 @@ class SubscriptionInfoCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Color(0xFF1B5E20), // Dark Green
-            Color(0xFF2E7D32), // Green
+            Color(0xFF66BB6A), // Light Green
+            ReceitaAgroColors.primary, // Green
           ],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withValues(alpha: 0.3),
+            color: ReceitaAgroColors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -124,7 +123,7 @@ class SubscriptionInfoCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.check_circle,
-                            color: Color(0xFF69F0AE),
+                            color: Colors.white,
                             size: 14,
                           ),
                           SizedBox(width: 6),
@@ -176,8 +175,8 @@ class SubscriptionInfoCard extends StatelessWidget {
                           value: progress,
                           backgroundColor: Colors.black.withValues(alpha: 0.2),
                           valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFF69F0AE),
-                          ), // Light Green Accent
+                            Colors.white,
+                          ),
                           minHeight: 6,
                         ),
                       ),
@@ -209,29 +208,26 @@ class SubscriptionInfoCard extends StatelessWidget {
                   ),
                 ),
 
-                // Details Button (opcional)
-                if (showDetailsButton) ...[
+                if (onManageTap != null) ...[
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: onDetailsPressed,
-                      icon: const Icon(
-                        Icons.info_outline,
-                        size: 18,
-                        color: Colors.white,
-                      ),
-                      label: const Text(
-                        'Ver detalhes da assinatura',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      style: OutlinedButton.styleFrom(
+                    child: ElevatedButton(
+                      onPressed: onManageTap,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: ReceitaAgroColors.primary,
+                        elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: BorderSide(
-                          color: Colors.white.withValues(alpha: 0.4),
-                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Gerenciar Assinatura',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -271,9 +267,15 @@ class SubscriptionInfoCard extends StatelessWidget {
 
   String _getPlanName(String productId) {
     final lower = productId.toLowerCase();
-    if (lower.contains('anual')) return 'Plano Anual';
-    if (lower.contains('semestral')) return 'Plano Semestral';
-    if (lower.contains('mensal')) return 'Plano Mensal';
+    if (lower.contains('anual') || lower.contains('year')) {
+      return 'Premium Anual';
+    }
+    if (lower.contains('semestral') || lower.contains('semester')) {
+      return 'Premium Semestral';
+    }
+    if (lower.contains('mensal') || lower.contains('month')) {
+      return 'Premium Mensal';
+    }
     return 'Premium';
   }
 

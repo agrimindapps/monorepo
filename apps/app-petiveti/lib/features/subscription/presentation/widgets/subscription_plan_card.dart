@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionState, Column;
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
@@ -9,7 +9,7 @@ import 'subscription_page_coordinator.dart';
 class SubscriptionPlanCard extends ConsumerWidget {
   final SubscriptionPlan plan;
   final String userId;
-  final SubscriptionState state;
+  final bool state;
 
   const SubscriptionPlanCard({
     super.key,

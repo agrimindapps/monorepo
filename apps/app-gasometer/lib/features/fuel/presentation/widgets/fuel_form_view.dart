@@ -7,7 +7,7 @@ import '../../../../core/widgets/datetime_field.dart';
 import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/form_section_widget.dart';
 import '../../../../core/widgets/money_form_field.dart';
-import '../../../../core/widgets/notes_form_field.dart';
+// import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
 import '../../../../core/widgets/receipt_section.dart';
 import '../../../../core/widgets/validated_dropdown_field.dart';
@@ -130,8 +130,8 @@ class FuelFormView extends ConsumerWidget {
           _buildTotalPriceField(context, ref),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildOdometerField(context, ref),
-          const SizedBox(height: GasometerDesignTokens.spacingMd),
-          _buildNotesField(context, ref),
+          // const SizedBox(height: GasometerDesignTokens.spacingMd),
+          // _buildNotesField(context, ref),
         ],
       ),
     );
@@ -265,18 +265,18 @@ class FuelFormView extends ConsumerWidget {
     );
   }
 
-  Widget _buildNotesField(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
-
-    return ObservationsField(
-      controller: notifier.notesController,
-      focusNode: notifier.notesFocusNode,
-      label: FuelConstants.notesLabel,
-      hint: FuelConstants.notesHint,
-      required: false,
-      onChanged: (value) {},
-    );
-  }
+  // Widget _buildNotesField(BuildContext context, WidgetRef ref) {
+  //   final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
+  //
+  //   return ObservationsField(
+  //     controller: notifier.notesController,
+  //     focusNode: notifier.notesFocusNode,
+  //     label: FuelConstants.notesLabel,
+  //     hint: FuelConstants.notesHint,
+  //     required: false,
+  //     onChanged: (value) {},
+  //   );
+  // }
 
   Widget _buildReceiptImageSection(BuildContext context, WidgetRef ref) {
     final state = ref.watch(fuelFormProvider(vehicleId));

@@ -2,6 +2,9 @@ import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/core_providers.dart';
+import '../../../core/services/task_upload_sync_service.dart';
+import '../data/task_firebase_datasource.dart';
+import '../data/task_firebase_datasource_impl.dart';
 import '../data/task_local_datasource.dart';
 import '../data/task_local_datasource_impl.dart';
 import '../data/task_repository_impl.dart';
@@ -28,12 +31,31 @@ TaskLocalDataSource taskLocalDataSource(Ref ref) {
   return TaskLocalDataSourceImpl(database);
 }
 
+/// Provider para TaskFirebaseDataSource
+@riverpod
+TaskFirebaseDataSource taskFirebaseDataSource(Ref ref) {
+  return TaskFirebaseDataSourceImpl();
+}
+
+/// Provider para TaskUploadSyncService
+@riverpod
+TaskUploadSyncService taskUploadSyncService(Ref ref) {
+  final localDataSource = ref.watch(taskLocalDataSourceProvider);
+  final firebaseDataSource = ref.watch(taskFirebaseDataSourceProvider);
+  return TaskUploadSyncService(localDataSource, firebaseDataSource);
+}
+
 /// Provider para TaskRepository
 @riverpod
 TaskRepository taskRepository(Ref ref) {
   final localDataSource = ref.watch(taskLocalDataSourceProvider);
   final dataIntegrityService = ref.watch(dataIntegrityServiceProvider);
-  return TaskRepositoryImpl(localDataSource, dataIntegrityService);
+  final uploadSyncService = ref.watch(taskUploadSyncServiceProvider);
+  return TaskRepositoryImpl(
+    localDataSource,
+    dataIntegrityService,
+    uploadSyncService,
+  );
 }
 
 // ============================================================================

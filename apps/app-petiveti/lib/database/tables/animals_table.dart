@@ -3,6 +3,13 @@ import 'package:drift/drift.dart';
 @DataClassName('Animal')
 class Animals extends Table {
   IntColumn get id => integer().autoIncrement()();
+
+  // Firebase reference
+  TextColumn get firebaseId => text().nullable()();
+
+  // User reference
+  TextColumn get userId => text()();
+
   TextColumn get name => text()();
   TextColumn get species => text()();
   TextColumn get breed => text().nullable()();
@@ -13,16 +20,18 @@ class Animals extends Table {
   TextColumn get color => text().nullable()();
   TextColumn get microchipNumber => text().nullable()();
   TextColumn get notes => text().nullable()();
-  
-  // User reference
-  TextColumn get userId => text()();
-  
+
   // Metadata
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
-  
+
+  // Sync fields
+  DateTimeColumn get lastSyncAt => dateTime().nullable()();
+  BoolColumn get isDirty => boolean().withDefault(const Constant(false))();
+  IntColumn get version => integer().withDefault(const Constant(1))();
+
   // Health fields
   BoolColumn get isCastrated => boolean().withDefault(const Constant(false))();
   TextColumn get allergies => text().nullable()(); // JSON string list

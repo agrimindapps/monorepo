@@ -2,26 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/receituagro_colors.dart';
-import '../providers/subscription_notifier.dart';
 
-/// Widget responsável pela exibição dos benefícios/recursos premium
-///
-/// VERSÃO REFATORADA - UX/UI Melhorado:
-/// - Versão colapsável para economizar espaço
-/// - Dois estilos: moderno (marketing) e colapsável (subscription ativa)
-///
-/// Funcionalidades:
-/// - Listar recursos premium disponíveis
-/// - Card colapsável para usuários ativos (economiza espaço)
-/// - Estilo moderno para conversão
-/// - Icons de check customizados
 class SubscriptionBenefitsWidget extends ConsumerStatefulWidget {
-  final bool showModernStyle;
-
   const SubscriptionBenefitsWidget({
     super.key,
     this.showModernStyle = false,
   });
+
+  final bool showModernStyle;
 
   @override
   ConsumerState<SubscriptionBenefitsWidget> createState() =>
@@ -32,17 +20,47 @@ class _SubscriptionBenefitsWidgetState
     extends ConsumerState<SubscriptionBenefitsWidget> {
   bool _isExpanded = true;
 
+  final List<Map<String, dynamic>> _features = [
+    {
+      'icon': Icons.description,
+      'title': 'Receituários Ilimitados',
+      'description': 'Emita quantos receituários agronômicos precisar',
+    },
+    {
+      'icon': Icons.offline_pin,
+      'title': 'Acesso Offline',
+      'description': 'Consulte e emita receitas mesmo sem internet',
+    },
+    {
+      'icon': Icons.cloud_sync,
+      'title': 'Backup em Nuvem',
+      'description': 'Seus dados seguros e sincronizados entre dispositivos',
+    },
+    {
+      'icon': Icons.picture_as_pdf,
+      'title': 'PDF Personalizado',
+      'description': 'Receitas com sua logo e assinatura digital',
+    },
+    {
+      'icon': Icons.library_books,
+      'title': 'Bula Completa',
+      'description': 'Acesso à base de dados atualizada de defensivos',
+    },
+    {
+      'icon': Icons.support_agent,
+      'title': 'Suporte Prioritário',
+      'description': 'Atendimento exclusivo via WhatsApp',
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final subscriptionNotifier = ref.read(subscriptionManagementProvider.notifier);
-
     return widget.showModernStyle
-        ? _buildModernFeaturesList(subscriptionNotifier)
-        : _buildCollapsibleCard(subscriptionNotifier);
+        ? _buildModernFeaturesList()
+        : _buildCardFeaturesList();
   }
 
-  /// Estilo moderno para marketing/conversão
-  Widget _buildModernFeaturesList(SubscriptionManagementNotifier notifier) {
+  Widget _buildModernFeaturesList() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -57,86 +75,54 @@ class _SubscriptionBenefitsWidgetState
             ),
           ),
           const SizedBox(height: 20),
-          ...notifier.modernPremiumFeatures.map(
-            (feature) => _buildModernFeatureItem(feature),
-          ),
+          ..._features.take(4).map(
+                (feature) => _buildModernFeatureItem(
+                  feature['icon'] as IconData,
+                  feature['title'] as String,
+                  feature['description'] as String,
+                ),
+              ),
         ],
       ),
     );
   }
 
-  /// Card colapsável para usuários ativos (NOVO - UX Melhorado)
-  Widget _buildCollapsibleCard(SubscriptionManagementNotifier notifier) {
+  Widget _buildCardFeaturesList() {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: () => setState(() => _isExpanded = !_isExpanded),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // Header sempre visível
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.workspace_premium,
-                        color: ReceitaAgroColors.primary,
-                        size: 20,
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        'Recursos Premium',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    _isExpanded
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.grey.shade600,
-                  ),
-                ],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Recursos Premium Ativados:',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
               ),
-
-              // Lista expandível
-              if (_isExpanded) ...[
-                const SizedBox(height: 16),
-                const Divider(),
-                const SizedBox(height: 8),
-                ...notifier.premiumFeatures.map(
-                  (feature) => _buildCardFeatureItem(feature),
-                ),
-              ] else ...[
-                const SizedBox(height: 8),
-                Text(
-                  'Toque para ver todos os recursos',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ],
-          ),
+            ),
+            const SizedBox(height: 16),
+            ..._features.map(
+              (feature) => _buildCardFeatureItem(
+                feature['icon'] as IconData,
+                feature['title'] as String,
+                feature['description'] as String,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Item de recurso para estilo moderno
-  Widget _buildModernFeatureItem(String feature) {
+  Widget _buildModernFeatureItem(
+    IconData icon,
+    String title,
+    String description,
+  ) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -145,20 +131,34 @@ class _SubscriptionBenefitsWidgetState
           Container(
             margin: const EdgeInsets.only(top: 2),
             child: const Icon(
-              Icons.check,
+              Icons.check_circle,
               color: Colors.white,
               size: 20,
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
-            child: Text(
-              feature,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                height: 1.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    fontSize: 14,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -166,25 +166,51 @@ class _SubscriptionBenefitsWidgetState
     );
   }
 
-  /// Item de recurso para estilo card colapsável
-  Widget _buildCardFeatureItem(String feature) {
+  Widget _buildCardFeatureItem(
+    IconData icon,
+    String title,
+    String description,
+  ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.check_circle,
-            color: ReceitaAgroColors.primary,
-            size: 18,
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: ReceitaAgroColors.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: ReceitaAgroColors.primary,
+              size: 16,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              feature,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

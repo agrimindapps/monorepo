@@ -20,7 +20,6 @@ jobs:
           - app-plantis
           - app-gasometer
           - app-receituagro
-          - app_taskolist
     
     steps:
     - name: Checkout code

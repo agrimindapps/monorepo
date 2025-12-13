@@ -34,8 +34,8 @@ jobs:
       run: |
         mkdir -p metrics_output
         
-        for app in apps/*/; do
-          app_name=$(basename "$app")
+        for app_name in app-plantis app-receituagro app-gasometer; do
+          app="apps/$app_name"
           echo "📊 Analyzing $app_name..."
           
           cd "$app"
@@ -60,8 +60,8 @@ jobs:
         total_lines=0
         total_functions=0
         
-        for app in apps/*/; do
-          app_name=$(basename "$app")
+        for app_name in app-plantis app-receituagro app-gasometer; do
+          app="apps/$app_name"
           echo "## $app_name" >> metrics_report.md
           echo "" >> metrics_report.md
           
@@ -80,7 +80,7 @@ jobs:
         
         echo "## Summary" >> metrics_report.md
         echo "" >> metrics_report.md
-        echo "- **Total Apps:** $(ls -d apps/*/ | wc -l)" >> metrics_report.md
+        echo "- **Total Apps:** 3" >> metrics_report.md
         echo "- **Total Dart Files:** $total_files" >> metrics_report.md
         echo "- **Total Lines of Code:** $total_lines" >> metrics_report.md
         echo "" >> metrics_report.md

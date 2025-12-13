@@ -23,6 +23,9 @@ dependencies:
   path_provider: any
   path: any
   
+  # Share functionality
+  share_plus: any
+  
   dartz: any
   cloud_firestore: any
   shared_preferences: any

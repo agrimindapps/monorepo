@@ -178,7 +178,14 @@ Future<TaskolistDataCleaner> taskolistDataCleaner(Ref ref) async {
 AutoSyncService autoSyncService(Ref ref) {
   final connectivityService = ref.watch(connectivityServiceProvider);
   final dataIntegrityService = ref.watch(dataIntegrityServiceProvider);
-  return AutoSyncService(connectivityService, dataIntegrityService);
+  final taskUploadSyncService = ref.watch(
+    taskUploadSyncServiceProvider,
+  ); // Import from task_providers
+  return AutoSyncService(
+    connectivityService,
+    dataIntegrityService,
+    taskUploadSyncService,
+  );
 }
 
 // ============================================================================

@@ -1,187 +1,164 @@
-import 'package:dartz/dartz.dart';
+import 'package:core/core.dart' hide SubscriptionRepository;
 
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/subscription_plan.dart';
-import '../../domain/entities/user_subscription.dart';
-import '../../domain/repositories/subscription_repository.dart';
-import '../datasources/subscription_local_datasource.dart';
-import '../datasources/subscription_remote_datasource.dart';
+import '../../../../core/auth/auth_service.dart';
+import '../../../../core/constants/product_ids.dart';
+import '../../../../core/constants/subscription_features.dart';
+import '../../../../database/repositories/subscription_local_repository.dart';
+import '../../domain/repositories/i_app_subscription_repository.dart';
 import '../services/subscription_error_handling_service.dart';
 
-class SubscriptionRepositoryImpl implements SubscriptionRepository {
-  final SubscriptionLocalDataSource localDataSource;
-  final SubscriptionRemoteDataSource remoteDataSource;
-  final SubscriptionErrorHandlingService errorHandlingService;
+/// Implementação do repositório de subscription específico do Petiveti
+/// Utiliza o core ISubscriptionRepository (RevenueCat) e adiciona funcionalidades específicas do app
+class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
+  SubscriptionRepositoryImpl(
+    this._coreRepository,
+    this._localStorageRepository,
+    this._errorService,
+    this._subscriptionLocalRepository,
+    this._authService,
+  );
 
-  SubscriptionRepositoryImpl({
-    required this.localDataSource,
-    required this.remoteDataSource,
-    required this.errorHandlingService,
-  });
+  final ISubscriptionRepository _coreRepository;
+  final ILocalStorageRepository _localStorageRepository;
+  final SubscriptionErrorHandlingService _errorService;
+  final SubscriptionLocalRepository _subscriptionLocalRepository;
+  final AuthService _authService;
+
+  static const String _cacheKey = 'petiveti_premium_status';
 
   @override
-  Future<Either<Failure, List<SubscriptionPlan>>> getAvailablePlans() async {
-    return errorHandlingService.executeOperation<List<SubscriptionPlan>>(
-      operation: () async {
-        final remotePlans = await remoteDataSource.getAvailablePlans();
-        await localDataSource.cachePlans(remotePlans);
-        return remotePlans;
-      },
-      fallback: () => localDataSource.getAvailablePlans(),
-      errorMessage: 'Erro inesperado ao buscar planos',
+  Future<Either<Failure, bool>> hasPetivetiSubscription() async {
+    return await _coreRepository.hasActiveSubscription();
+  }
+
+  @override
+  Future<Either<Failure, List<ProductInfo>>> getPetivetiProducts() async {
+    return await _coreRepository.getAvailableProducts(
+      productIds: [
+        PetivetiProducts.monthlyPremium,
+        PetivetiProducts.yearlyPremium,
+        PetivetiProducts.lifetime,
+      ],
     );
   }
 
   @override
-  Future<Either<Failure, UserSubscription?>> getCurrentSubscription(
-      String userId) async {
-    return errorHandlingService.executeOperation<UserSubscription?>(
-      operation: () async {
-        final remoteSubscription =
-            await remoteDataSource.getCurrentSubscription(userId);
-        if (remoteSubscription != null) {
-          await localDataSource.cacheSubscription(remoteSubscription);
-          return remoteSubscription;
-        }
-        final cachedSubscription =
-            await localDataSource.getCurrentSubscription(userId);
-        return cachedSubscription;
-      },
-      fallback: () => localDataSource.getCurrentSubscription(userId),
-      errorMessage: 'Erro inesperado ao buscar assinatura',
+  Future<Either<Failure, bool>> hasFeatureAccess(String featureKey) async {
+    // Free features sempre disponíveis
+    if (PetivetiFeatures.isFreeFeature(featureKey)) {
+      return const Right(true);
+    }
+
+    // Premium features requerem subscription
+    if (!PetivetiFeatures.isPremiumFeature(featureKey)) {
+      return const Right(false); // Feature desconhecida
+    }
+
+    final subscriptionResult = await hasPetivetiSubscription();
+
+    return subscriptionResult.fold(
+      (failure) => Left(failure),
+      (hasSubscription) => Right(hasSubscription),
     );
   }
 
   @override
-  Future<Either<Failure, UserSubscription>> subscribeToPlan(
-      String userId, String planId) async {
-    return errorHandlingService.executeOperation<UserSubscription>(
-      operation: () async {
-        final subscription =
-            await remoteDataSource.subscribeToPlan(userId, planId);
-        await localDataSource.cacheSubscription(subscription);
-        return subscription;
-      },
-      errorMessage: 'Erro inesperado ao processar assinatura',
-    );
+  Future<Either<Failure, bool>> hasActiveTrial() async {
+    try {
+      final subscription = await _coreRepository.getCurrentSubscription();
+      return subscription.fold(
+        (failure) => Left(failure),
+        (sub) => Right(sub?.isTrialActive ?? false),
+      );
+    } catch (e) {
+      return Left(
+        SubscriptionUnknownFailure('Erro ao verificar trial: ${e.toString()}'),
+      );
+    }
   }
 
   @override
-  Future<Either<Failure, void>> cancelSubscription(String userId) async {
-    return errorHandlingService.executeVoidOperation(
-      operation: () async {
-        final subscription =
-            await localDataSource.getCurrentSubscription(userId);
-        if (subscription == null) {
-          throw Exception('Assinatura não encontrada');
-        }
+  Future<Either<Failure, void>> cachePremiumStatus(bool isPremium) async {
+    try {
+      final data = {
+        'isPremium': isPremium,
+        'timestamp': DateTime.now().millisecondsSinceEpoch,
+      };
 
-        final cancelledSubscription = subscription.copyWith(
-          status: PlanStatus.cancelled,
-          cancelledAt: DateTime.now(),
-          updatedAt: DateTime.now(),
+      final result = await _localStorageRepository.save<Map<String, dynamic>>(
+        key: _cacheKey,
+        data: data,
+      );
+      return result.fold((failure) => Left(failure), (_) => const Right(null));
+    } catch (e) {
+      return Left(CacheFailure('Erro ao salvar cache: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool?>> getCachedPremiumStatus() async {
+    try {
+      // Layer 1: Try Drift database (Secure & Offline)
+      try {
+        final userResult = await _authService.getCurrentUser();
+        await userResult.fold(
+          (failure) async {
+            // Ignore auth errors, fall through to layer 2
+          },
+          (user) async {
+            if (user != null) {
+              final localSub = await _subscriptionLocalRepository
+                  .getActiveSubscription(user.id);
+              if (localSub != null) {
+                final now = DateTime.now();
+                if (localSub.expirationDate == null ||
+                    localSub.expirationDate!.isAfter(now)) {
+                  return const Right(true);
+                }
+              }
+            }
+          },
         );
+      } catch (e) {
+        // Ignore auth/drift errors and fall back to shared prefs
+      }
 
-        await localDataSource.cacheSubscription(cancelledSubscription);
-      },
-      errorMessage: 'Erro ao cancelar assinatura',
-    );
-  }
+      // Layer 2: Try SharedPreferences (fallback)
+      final result = await _localStorageRepository.get<Map<String, dynamic>>(
+        key: _cacheKey,
+      );
 
-  @override
-  Future<Either<Failure, void>> pauseSubscription(String userId) async {
-    return errorHandlingService.executeVoidOperation(
-      operation: () async {
-        final subscription =
-            await localDataSource.getCurrentSubscription(userId);
-        if (subscription == null) {
-          throw Exception('Assinatura não encontrada');
+      return result.fold((failure) => Left(failure), (data) {
+        if (data == null) {
+          return const Right(null);
         }
 
-        final pausedSubscription = subscription.copyWith(
-          status: PlanStatus.paused,
-          pausedAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+        final timestamp = data['timestamp'] as int?;
+        if (timestamp != null) {
+          final cacheTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+          final isExpired =
+              DateTime.now().difference(cacheTime) > const Duration(minutes: 5);
 
-        await localDataSource.cacheSubscription(pausedSubscription);
-      },
-      errorMessage: 'Erro ao pausar assinatura',
-    );
-  }
-
-  @override
-  Future<Either<Failure, void>> resumeSubscription(String userId) async {
-    return errorHandlingService.executeVoidOperation(
-      operation: () async {
-        final subscription =
-            await localDataSource.getCurrentSubscription(userId);
-        if (subscription == null) {
-          throw Exception('Assinatura não encontrada');
+          if (isExpired) {
+            clearCache();
+            return const Right(null);
+          }
         }
 
-        final resumedSubscription = subscription.copyWith(
-          status: PlanStatus.active,
-          pausedAt: null,
-          updatedAt: DateTime.now(),
-        );
-
-        await localDataSource.cacheSubscription(resumedSubscription);
-      },
-      errorMessage: 'Erro ao retomar assinatura',
-    );
+        return Right(data['isPremium'] as bool?);
+      });
+    } catch (e) {
+      return Left(CacheFailure('Erro ao ler cache: ${e.toString()}'));
+    }
   }
 
   @override
-  Future<Either<Failure, UserSubscription>> upgradePlan(
-      String userId, String newPlanId) async {
-    return errorHandlingService.executeOperation<UserSubscription>(
-      operation: () async {
-        final currentSubscription =
-            await localDataSource.getCurrentSubscription(userId);
-        if (currentSubscription == null) {
-          throw Exception('Assinatura atual não encontrada');
-        }
-
-        final plans = await localDataSource.getAvailablePlans();
-        final newPlan = plans.firstWhere((p) => p.id == newPlanId);
-
-        final upgradedSubscription = currentSubscription.copyWith(
-          planId: newPlanId,
-          plan: newPlan,
-          updatedAt: DateTime.now(),
-        );
-
-        await localDataSource.cacheSubscription(upgradedSubscription);
-        return upgradedSubscription;
-      },
-      errorMessage: 'Erro ao fazer upgrade',
-    );
-  }
-
-  @override
-  Future<Either<Failure, void>> restorePurchases(String userId) async {
-    return errorHandlingService.executeVoidOperation(
-      operation: () => Future<void>.delayed(const Duration(seconds: 1)),
-      errorMessage: 'Erro ao restaurar compras',
-    );
-  }
-
-  @override
-  Future<Either<Failure, bool>> validateReceipt(String receiptData) async {
-    return errorHandlingService.executeOperation<bool>(
-      operation: () async {
-        await Future<void>.delayed(const Duration(milliseconds: 500));
-        return true;
-      },
-      errorMessage: 'Erro ao validar recibo',
-    );
-  }
-
-  @override
-  Stream<Either<Failure, UserSubscription?>> watchSubscription(String userId) {
-    return Stream.periodic(const Duration(seconds: 5), (_) {
-      return getCurrentSubscription(userId);
-    }).asyncMap((future) => future);
+  Future<Either<Failure, void>> clearCache() async {
+    try {
+      final result = await _localStorageRepository.remove(key: _cacheKey);
+      return result.fold((failure) => Left(failure), (_) => const Right(null));
+    } catch (e) {
+      return Left(CacheFailure('Erro ao limpar cache: ${e.toString()}'));
+    }
   }
 }

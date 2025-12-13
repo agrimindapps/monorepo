@@ -1,186 +1,50 @@
+import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-
-import '../../../../core/providers/core_services_providers.dart';
-import '../../data/datasources/noop_subscription_repository.dart';
-import '../../data/datasources/subscription_local_datasource.dart';
-import '../../data/datasources/subscription_remote_datasource.dart';
-import '../../data/repositories/subscription_repository_impl.dart';
-import '../../data/services/subscription_error_handling_service.dart';
-import '../../domain/entities/subscription_plan.dart';
-import '../../domain/repositories/subscription_repository.dart';
-import '../../domain/services/subscription_validation_service.dart';
-import '../../domain/usecases/subscription_usecases.dart';
 
 part 'subscription_providers.g.dart';
 
 // ============================================================================
-// SERVICES
+// STATE PROVIDERS
 // ============================================================================
 
 @riverpod
-SubscriptionValidationService subscriptionValidationService(
-  Ref ref,
-) {
-  return SubscriptionValidationService();
+Future<bool> hasPremiumSubscription(Ref ref) async {
+  final coreRepo = ref.watch(subscriptionRepositoryProvider);
+  final result = await coreRepo.hasActiveSubscription();
+  return result.fold((_) => false, (hasPremium) => hasPremium);
 }
 
 @riverpod
-SubscriptionErrorHandlingService subscriptionErrorHandlingService(
-  Ref ref,
-) {
-  return SubscriptionErrorHandlingService();
-}
-
-// ============================================================================
-// DATA SOURCES
-// ============================================================================
-
-@riverpod
-SubscriptionLocalDataSource subscriptionLocalDataSource(
-  Ref ref,
-) {
-  return SubscriptionLocalDataSourceImpl();
+Future<SubscriptionInfo?> currentSubscription(Ref ref) async {
+  final coreRepo = ref.watch(subscriptionRepositoryProvider);
+  final result = await coreRepo.getCurrentSubscription();
+  return result.fold((_) => null, (subscription) => subscription);
 }
 
 @riverpod
-SubscriptionRemoteDataSource subscriptionRemoteDataSource(
-  Ref ref,
-) {
-  return SubscriptionRemoteDataSourceImpl(
-    firestore: ref.watch(firebaseFirestoreProvider),
-    // TODO: Remove circular dependency or use proper core ISubscriptionRepository
-    subscriptionRepository: const NoOpSubscriptionRepository(),
-  );
-}
-
-// ============================================================================
-// REPOSITORY
-// ============================================================================
-
-@riverpod
-SubscriptionRepository subscriptionRepository(Ref ref) {
-  return SubscriptionRepositoryImpl(
-    localDataSource: ref.watch(subscriptionLocalDataSourceProvider),
-    remoteDataSource: ref.watch(subscriptionRemoteDataSourceProvider),
-    errorHandlingService: ref.watch(subscriptionErrorHandlingServiceProvider),
-  );
-}
-
-// ============================================================================
-// USE CASES (Read)
-// ============================================================================
-
-@riverpod
-GetAvailablePlans getAvailablePlans(Ref ref) {
-  return GetAvailablePlans(ref.watch(subscriptionRepositoryProvider));
+Future<List<ProductInfo>> availablePlans(Ref ref) async {
+  final coreRepo = ref.watch(subscriptionRepositoryProvider);
+  final result = await coreRepo.getAvailableProducts(productIds: [
+    'petiveti_monthly_premium',
+    'petiveti_yearly_premium',
+    'petiveti_lifetime',
+  ]);
+  return result.fold((_) => [], (plans) => plans);
 }
 
 @riverpod
-GetCurrentSubscription getCurrentSubscription(
-  Ref ref,
-) {
-  return GetCurrentSubscription(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
-}
-
-// ============================================================================
-// USE CASES (Write)
-// ============================================================================
-
-@riverpod
-SubscribeToPlan subscribeToPlan(Ref ref) {
-  return SubscribeToPlan(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
+Future<bool> hasFeatureAccess(Ref ref, String featureKey) async {
+  final hasPremium = await ref.watch(hasPremiumSubscriptionProvider.future);
+  return hasPremium;
 }
 
 @riverpod
-CancelSubscription cancelSubscription(Ref ref) {
-  return CancelSubscription(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
+Future<bool> hasActiveTrial(Ref ref) async {
+  final subscription = await ref.watch(currentSubscriptionProvider.future);
+  return subscription?.isTrialActive ?? false;
 }
 
 @riverpod
-PauseSubscription pauseSubscription(Ref ref) {
-  return PauseSubscription(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
-}
-
-@riverpod
-ResumeSubscription resumeSubscription(Ref ref) {
-  return ResumeSubscription(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
-}
-
-@riverpod
-UpgradePlan upgradePlan(Ref ref) {
-  return UpgradePlan(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
-}
-
-@riverpod
-RestorePurchases restorePurchases(Ref ref) {
-  return RestorePurchases(
-    ref.watch(subscriptionRepositoryProvider),
-    ref.watch(subscriptionValidationServiceProvider),
-  );
-}
-
-// ============================================================================
-// NOTIFIER & STATE
-// ============================================================================
-
-class SubscriptionState {
-  final bool isLoadingCurrentSubscription;
-  final bool isLoadingPlans;
-  final SubscriptionPlan? currentSubscription;
-  final List<SubscriptionPlan> availablePlans;
-  final String? errorMessage;
-
-  const SubscriptionState({
-    this.isLoadingCurrentSubscription = false,
-    this.isLoadingPlans = false,
-    this.currentSubscription,
-    this.availablePlans = const [],
-    this.errorMessage,
-  });
-
-  bool get hasAnyLoading => isLoadingCurrentSubscription || isLoadingPlans;
-
-  SubscriptionState copyWith({
-    bool? isLoadingCurrentSubscription,
-    bool? isLoadingPlans,
-    SubscriptionPlan? currentSubscription,
-    List<SubscriptionPlan>? availablePlans,
-    String? errorMessage,
-    bool clearError = false,
-  }) {
-    return SubscriptionState(
-      isLoadingCurrentSubscription:
-          isLoadingCurrentSubscription ?? this.isLoadingCurrentSubscription,
-      isLoadingPlans: isLoadingPlans ?? this.isLoadingPlans,
-      currentSubscription: currentSubscription ?? this.currentSubscription,
-      availablePlans: availablePlans ?? this.availablePlans,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-    );
-  }
-}
-
-@riverpod
-class SubscriptionNotifier extends _$SubscriptionNotifier {
-  @override
-  SubscriptionState build() {
-    return const SubscriptionState();
-  }
+Future<bool> subscription(Ref ref) async {
+  return ref.watch(hasPremiumSubscriptionProvider.future);
 }

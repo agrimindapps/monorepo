@@ -1,1 +1,34 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"termos-tecnicos","appId":"1:660468746247:android:d6ecccbeb0590a494682a2","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"termos-tecnicos","appId":"1:660468746247:ios:ee0b82066d929d0f4682a2","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"termos-tecnicos","configurations":{"android":"1:660468746247:android:d6ecccbeb0590a494682a2","ios":"1:660468746247:ios:ee0b82066d929d0f4682a2","web":"1:660468746247:web:522876f2d42ef4904682a2"}}}}}}
+{
+  "firestore": {
+    "rules": "firebase_firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "termos-tecnicos",
+          "appId": "1:660468746247:android:d6ecccbeb0590a494682a2",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "termos-tecnicos",
+          "appId": "1:660468746247:ios:ee0b82066d929d0f4682a2",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "termos-tecnicos",
+          "configurations": {
+            "android": "1:660468746247:android:d6ecccbeb0590a494682a2",
+            "ios": "1:660468746247:ios:ee0b82066d929d0f4682a2",
+            "web": "1:660468746247:web:522876f2d42ef4904682a2"
+          }
+        }
+      }
+    }
+  }
+}

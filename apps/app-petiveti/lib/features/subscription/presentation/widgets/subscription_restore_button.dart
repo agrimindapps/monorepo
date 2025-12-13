@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionState;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../providers/subscription_providers.dart';
@@ -7,7 +7,7 @@ import 'subscription_page_coordinator.dart';
 /// Widget responsible for rendering the restore purchases button
 class SubscriptionRestoreButton extends ConsumerWidget {
   final String userId;
-  final SubscriptionState state;
+  final bool state;
 
   const SubscriptionRestoreButton({
     super.key,

@@ -188,8 +188,8 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
         _buildFinancialInfoSection(isReadOnly),
         const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
         _buildReceiptImageSection(isReadOnly),
-        const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-        _buildNextServiceDate(isReadOnly),
+        // const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+        // _buildNextServiceDate(isReadOnly),
       ],
     );
   }
@@ -280,24 +280,20 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       icon: Icons.description_outlined,
       child: Column(
         children: [
-          LocationField(
-            controller: notifier.workshopNameController,
-            // LocationField doesn't expose focusNode directly in the wrapper, need to check
-            // Wait, LocationField is a wrapper around NotesFormField which has focusNode.
-            // But LocationField constructor doesn't accept focusNode?
-            // Let's check LocationField again.
-            label: 'Oficina/Local',
-            hint: 'Nome da oficina ou local da manutenção',
-            required: true,
-            onChanged: (value) {},
-          ),
-          const SizedBox(height: GasometerDesignTokens.spacingMd),
+          // LocationField(
+          //   controller: notifier.workshopNameController,
+          //   label: 'Oficina/Local',
+          //   hint: 'Nome da oficina ou local da manutenção',
+          //   required: false,
+          //   onChanged: (value) {},
+          // ),
+          // const SizedBox(height: GasometerDesignTokens.spacingMd),
           DescriptionField(
             controller: notifier.descriptionController,
             focusNode: _focusNodes['description'],
             label: 'Descrição dos Serviços',
             hint: 'Descreva os serviços realizados, peças trocadas, etc.',
-            required: true,
+            required: false, // Changed to optional
             onChanged: (value) {},
           ),
         ],
@@ -351,52 +347,52 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
     );
   }
 
-  Widget _buildNextServiceDate(bool isReadOnly) {
-    final notifier = ref.read(maintenanceFormProvider.notifier);
-    final formState = ref.watch(maintenanceFormProvider);
-    final theme = Theme.of(context);
-
-    return FormSectionHeader(
-      title: 'Programação de Próxima Manutenção',
-      icon: Icons.schedule,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Defina quando será necessária a próxima manutenção (opcional)',
-            style: TextStyle(
-              fontSize: GasometerDesignTokens.fontSizeCaption,
-              color: theme.colorScheme.onSurfaceVariant,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-          const SizedBox(height: GasometerDesignTokens.spacingSm),
-          FutureDateTimeField(
-            value: formState.nextServiceDate,
-            onChanged: (newDate) => notifier.updateNextServiceDate(newDate),
-            label: 'Próxima Manutenção (Opcional)',
-            placeholder: 'Selecionar data',
-            suffixIcon: Icons.schedule,
-            helperText: 'Opcional - ajuda a acompanhar a manutenção preventiva',
-          ),
-          if (formState.nextServiceDate != null)
-            Padding(
-              padding: const EdgeInsets.only(
-                top: GasometerDesignTokens.spacingSm,
-              ),
-              child: TextButton.icon(
-                onPressed: () => notifier.updateNextServiceDate(null),
-                icon: const Icon(Icons.clear, size: 16),
-                label: const Text('Remover agendamento'),
-                style: TextButton.styleFrom(
-                  foregroundColor: GasometerDesignTokens.colorError,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildNextServiceDate(bool isReadOnly) {
+  //   final notifier = ref.read(maintenanceFormProvider.notifier);
+  //   final formState = ref.watch(maintenanceFormProvider);
+  //   final theme = Theme.of(context);
+  //
+  //   return FormSectionHeader(
+  //     title: 'Programação de Próxima Manutenção',
+  //     icon: Icons.schedule,
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Text(
+  //           'Defina quando será necessária a próxima manutenção (opcional)',
+  //           style: TextStyle(
+  //             fontSize: GasometerDesignTokens.fontSizeCaption,
+  //             color: theme.colorScheme.onSurfaceVariant,
+  //             fontStyle: FontStyle.italic,
+  //           ),
+  //         ),
+  //         const SizedBox(height: GasometerDesignTokens.spacingSm),
+  //         FutureDateTimeField(
+  //           value: formState.nextServiceDate,
+  //           onChanged: (newDate) => notifier.updateNextServiceDate(newDate),
+  //           label: 'Próxima Manutenção (Opcional)',
+  //           placeholder: 'Selecionar data',
+  //           suffixIcon: Icons.schedule,
+  //           helperText: 'Opcional - ajuda a acompanhar a manutenção preventiva',
+  //         ),
+  //         if (formState.nextServiceDate != null)
+  //           Padding(
+  //             padding: const EdgeInsets.only(
+  //               top: GasometerDesignTokens.spacingSm,
+  //             ),
+  //             child: TextButton.icon(
+  //               onPressed: () => notifier.updateNextServiceDate(null),
+  //               icon: const Icon(Icons.clear, size: 16),
+  //               label: const Text('Remover agendamento'),
+  //               style: TextButton.styleFrom(
+  //                 foregroundColor: GasometerDesignTokens.colorError,
+  //               ),
+  //             ),
+  //           ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {

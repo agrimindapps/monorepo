@@ -63,12 +63,18 @@ service cloud.firestore {
     // ============================================================
     // USER PROFILE RULES
     // ============================================================
-    match /users/{document=**} {
-      allow read: if isAuth() &&
-                     (request.path == /databases/$(database)/documents/users/$(userId()) ||
-                      request.path == /databases/$(database)/documents/users/$(userId())/**);
-      allow write: if isAuth() && request.resource.data.userId == userId();
-      allow create: if isAuth() && request.resource.data.userId == userId();
+    match /users/{uid} {
+      allow read, write: if isAuth() && request.auth.uid == uid;
+      
+      // User's personal tasks collection
+      match /tasks/{taskId} {
+        allow read, write: if isAuth() && request.auth.uid == uid;
+      }
+      
+      // User's other data
+      match /{document=**} {
+        allow read, write: if isAuth() && request.auth.uid == uid;
+      }
     }
 
     // ============================================================

@@ -1,1 +1,34 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"compendio-de-racas","appId":"1:160272216420:android:d6eea68c08fccd9eb20a71","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"compendio-de-racas","appId":"1:160272216420:ios:45e169d2d31c1d0eb20a71","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"compendio-de-racas","configurations":{"android":"1:160272216420:android:d6eea68c08fccd9eb20a71","ios":"1:160272216420:ios:45e169d2d31c1d0eb20a71","web":"1:160272216420:web:b7b7f3e318c94107b20a71"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "compendio-de-racas",
+          "appId": "1:160272216420:android:d6eea68c08fccd9eb20a71",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "compendio-de-racas",
+          "appId": "1:160272216420:ios:45e169d2d31c1d0eb20a71",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "compendio-de-racas",
+          "configurations": {
+            "android": "1:160272216420:android:d6eea68c08fccd9eb20a71",
+            "ios": "1:160272216420:ios:45e169d2d31c1d0eb20a71",
+            "web": "1:160272216420:web:b7b7f3e318c94107b20a71"
+          }
+        }
+      }
+    }
+  }
+}

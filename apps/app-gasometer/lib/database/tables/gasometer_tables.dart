@@ -157,10 +157,10 @@ class FuelSupplies extends Table {
 
   // ========== INFORMAÇÕES ADICIONAIS ==========
 
-  /// Nome do posto de gasolina
+  /// Nome do posto de gasolina (Opcional/Hidden in UI)
   TextColumn get gasStationName => text().nullable()();
 
-  /// Observações adicionais
+  /// Observações adicionais (Opcional/Hidden in UI)
   TextColumn get notes => text().nullable()();
 
   /// URL da foto do recibo (Firebase Storage)
@@ -225,7 +225,7 @@ class Maintenances extends Table {
   /// Odômetro no momento da manutenção
   IntColumn get odometro => integer()();
 
-  /// Odômetro para a próxima revisão (opcional)
+  /// Odômetro para a próxima revisão (opcional/Hidden in UI)
   IntColumn get proximaRevisao => integer().nullable()();
 
   /// Indica se a manutenção foi concluída
@@ -287,7 +287,7 @@ class Expenses extends Table {
   /// Data da despesa (timestamp)
   IntColumn get date => integer()();
 
-  /// Observações adicionais
+  /// Observações adicionais (Opcional/Hidden in UI)
   TextColumn get notes => text().nullable()();
 
   // ========== COMPROVANTES ==========
@@ -340,7 +340,7 @@ class OdometerReadings extends Table {
   /// Data da leitura (timestamp)
   IntColumn get date => integer()();
 
-  /// Observações
+  /// Observações (Opcional/Hidden in UI)
   TextColumn get notes => text().nullable()();
 }
 

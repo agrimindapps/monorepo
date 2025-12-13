@@ -241,8 +241,10 @@ class VehicleEntity extends BaseSyncEntity {
 
   static VehicleEntity fromFirebaseMap(Map<String, dynamic> map) {
     final baseFields = BaseSyncEntity.parseBaseFirebaseFields(map);
+    final id = baseFields['id'] as String;
     return VehicleEntity(
-      id: baseFields['id'] as String,
+      id: id,
+      firebaseId: id,
       name: map['name'] as String? ?? '',
       brand: map['brand'] as String? ?? '',
       model: map['model'] as String? ?? '',

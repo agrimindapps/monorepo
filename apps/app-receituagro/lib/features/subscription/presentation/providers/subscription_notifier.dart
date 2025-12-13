@@ -377,6 +377,11 @@ class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
   }
 
   /// Abre a URL de gerenciamento de subscription
+  Future<void> manageSubscription() async {
+    await openManagementUrl();
+  }
+
+  /// Abre a URL de gerenciamento de subscription
   Future<void> openManagementUrl() async {
     final currentState = state.value;
     if (currentState == null) return;

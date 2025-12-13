@@ -62,8 +62,10 @@ class _HomePageState extends ConsumerState<HomePage>
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadTasks();
-      _loadSampleDataIfEmpty();
+      if (mounted) {
+        _loadTasks();
+        _loadSampleDataIfEmpty();
+      }
     });
   }
 
@@ -79,18 +81,26 @@ class _HomePageState extends ConsumerState<HomePage>
   }
 
   Future<void> _loadSampleDataIfEmpty() async {
+    if (!mounted) return;
+    
     try {
       const tasksRequest = GetTasksRequest();
       final tasks = await ref.read<Future<List<TaskEntity>>>(getTasksFutureProvider(tasksRequest).future);
+      if (!mounted) return;
+      
       if (tasks.isEmpty) {
         final sampleTasks = SampleData.getSampleTasks();
         for (final task in sampleTasks) {
+          if (!mounted) return;
           await ref.read<TaskNotifier>(taskProvider.notifier).createTask(task);
         }
       }
     } catch (e) {
+      if (!mounted) return;
+      
       final sampleTasks = SampleData.getSampleTasks();
       for (final task in sampleTasks) {
+        if (!mounted) return;
         await ref.read<TaskNotifier>(taskProvider.notifier).createTask(task);
       }
     }

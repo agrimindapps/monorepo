@@ -120,6 +120,16 @@ service cloud.firestore {
       allow read, write: if isOwner(userId);
     }
 
+    // ===== ASSINATURAS (Coleção Raiz) =====
+    match /user_subscriptions/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ===== CACHE PREMIUM (Coleção Raiz) =====
+    match /premium_cache/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
     // ===== DESENVOLVIMENTO (Coleções temporárias) =====
     match /dev_vehicles/{vehicleId} {
       allow read, write: if isAuthenticated();

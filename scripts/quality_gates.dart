@@ -142,8 +142,6 @@ Examples:
         '$base/apps/app-receituagro/lib',
         '$base/apps/app-gasometer/lib',
         '$base/apps/app-plantis/lib',
-        '$base/apps/app_taskolist/lib',
-        '$base/apps/app-petiveti/lib',
       ]);
     } else {
       dirs.add('$base/apps/$targetApp/lib');

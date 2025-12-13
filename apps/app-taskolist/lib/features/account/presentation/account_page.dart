@@ -6,8 +6,11 @@ import '../../../core/theme/app_colors.dart';
 import '../../../shared/providers/auth_providers.dart';
 import '../../../shared/providers/subscription_providers.dart';
 import '../../../shared/widgets/delete_account_confirmation_dialog.dart';
-import '../../notifications/presentation/notification_settings_page.dart';
 import '../../premium/presentation/premium_page.dart';
+import 'widgets/account_info_section.dart';
+import 'widgets/data_sync_section.dart';
+import 'widgets/device_management_section.dart';
+import 'widgets/profile_header.dart';
 
 class AccountPage extends ConsumerStatefulWidget {
   const AccountPage({super.key});
@@ -60,15 +63,17 @@ class _AccountPageState extends ConsumerState<AccountPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildUserHeader(user),
+          ProfileHeader(user: user),
           const SizedBox(height: 24),
           _buildSubscriptionSection(subscriptionState),
           const SizedBox(height: 24),
+          const AccountInfoSection(),
+          const SizedBox(height: 24),
+          const DeviceManagementSection(),
+          const SizedBox(height: 24),
+          const DataSyncSection(),
+          const SizedBox(height: 24),
           _buildAccountSection(user),
-          const SizedBox(height: 24),
-          _buildAppSection(),
-          const SizedBox(height: 24),
-          _buildDataSection(),
           const SizedBox(height: 24),
           _buildAccountActions(user),
         ],
@@ -266,86 +271,12 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     );
   }
 
-  Widget _buildAppSection() {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.notifications),
-            title: const Text('Notificações'),
-            subtitle: const Text('Lembretes, alertas e configurações'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<dynamic>(
-                  builder: (context) => const NotificationSettingsPage(),
-                ),
-              );
-            },
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.palette),
-            title: const Text('Tema'),
-            subtitle: const Text('Aparência do aplicativo'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showThemeDialog(),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.language),
-            title: const Text('Idioma'),
-            subtitle: const Text('Português (Brasil)'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showLanguageDialog(),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildDataSection() {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: const Icon(Icons.backup),
-            title: const Text('Backup dos dados'),
-            subtitle: const Text('Salvar dados na nuvem'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showBackupDialog(),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.download),
-            title: const Text('Exportar dados'),
-            subtitle: const Text('Baixar suas tarefas'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showExportDialog(),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAccountActions(UserEntity user) {
     return Card(
       child: Column(
         children: [
-          ListTile(
-            leading: const Icon(Icons.help, color: AppColors.info),
-            title: const Text('Ajuda e suporte'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showHelpDialog(),
-          ),
-          const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip, color: AppColors.info),
-            title: const Text('Privacidade'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _showPrivacyDialog(),
-          ),
-          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.warning),
             title: const Text('Sair'),
@@ -610,117 +541,6 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     }
   }
 
-  void _showThemeDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Tema'),
-        content: const Text(
-          'Configurações de tema serão implementadas em breve',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  void _showLanguageDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Idioma'),
-        content: const Text(
-          'Suporte a múltiplos idiomas será implementado em breve',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
 
-  void _showBackupDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Backup'),
-        content: const Text(
-          'Sincronização com a nuvem será implementada em breve',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showExportDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Exportar dados'),
-        content: const Text('Exportação de dados será implementada em breve'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showHelpDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Ajuda'),
-        content: const Text(
-          'Task Manager - Gerenciador de Tarefas\n\n'
-          'Para suporte, entre em contato:\n'
-          '• Email: suporte@taskmanager.com\n'
-          '• Website: www.taskmanager.com',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPrivacyDialog() {
-    showDialog<dynamic>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Privacidade'),
-        content: const Text(
-          'Seus dados são tratados com segurança e privacidade.\n\n'
-          'Para mais informações, consulte nossa política de privacidade.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
 }

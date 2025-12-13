@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../features/account/presentation/pages/account_profile_page.dart';
 import '../../features/animals/presentation/pages/animals_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
 import '../../features/appointments/presentation/widgets/add_appointment_form.dart';
@@ -23,6 +24,9 @@ import '../../features/calculators/presentation/pages/medication_dosage_page.dar
 import '../../features/calculators/presentation/pages/pregnancy_page.dart';
 import '../../features/expenses/presentation/pages/expenses_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
+import '../../features/legal/presentation/pages/account_deletion_policy_page.dart';
+import '../../features/legal/presentation/pages/privacy_policy_page.dart';
+import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/medications/domain/entities/medication.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
 import '../../features/medications/presentation/widgets/add_medication_dialog.dart';
@@ -31,6 +35,7 @@ import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reminders/domain/entities/reminder.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
 import '../../features/reminders/presentation/widgets/add_reminder_dialog.dart';
+import '../../features/settings/presentation/pages/notifications_settings_page.dart';
 import '../../features/subscription/presentation/pages/subscription_page.dart'
     as local;
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
@@ -350,6 +355,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const ProfilePage(),
           ),
           GoRoute(
+            path: '/account-profile',
+            name: 'account-profile',
+            builder: (context, state) => const AccountProfilePage(),
+          ),
+          GoRoute(
             path: '/subscription',
             name: 'subscription',
             builder: (context, state) =>
@@ -379,6 +389,32 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+
+      // Legal pages
+      GoRoute(
+        path: '/privacy-policy',
+        name: 'privacy-policy',
+        builder: (context, state) => const PrivacyPolicyPage(),
+      ),
+
+      GoRoute(
+        path: '/terms-of-service',
+        name: 'terms-of-service',
+        builder: (context, state) => const TermsOfServicePage(),
+      ),
+
+      GoRoute(
+        path: '/account-deletion-policy',
+        name: 'account-deletion-policy',
+        builder: (context, state) => const AccountDeletionPolicyPage(),
+      ),
+
+      // Settings pages
+      GoRoute(
+        path: '/notifications-settings',
+        name: 'notifications-settings',
+        builder: (context, state) => const NotificationsSettingsPage(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(

@@ -90,7 +90,7 @@ class _PlantisSubscriptionPlansWidgetState
     return [
       const ProductInfo(
         productId: 'plantis_premium_monthly',
-        title: 'Plantis Premium Mensal',
+        title: 'Mensal',
         description: 'Plano mensal básico',
         price: 1.99,
         priceString: 'R\$ 1,99',
@@ -99,7 +99,7 @@ class _PlantisSubscriptionPlansWidgetState
       ),
       const ProductInfo(
         productId: 'plantis_premium_semester',
-        title: 'Plantis Premium Semestral',
+        title: 'Semestral',
         description: 'Plano semestral com desconto',
         price: 9.99,
         priceString: 'R\$ 9,99',
@@ -108,7 +108,7 @@ class _PlantisSubscriptionPlansWidgetState
       ),
       const ProductInfo(
         productId: 'plantis_premium_annual',
-        title: 'Plantis Premium Anual',
+        title: 'Anual',
         description: 'Plano anual - melhor valor',
         price: 17.99,
         priceString: 'R\$ 17,99',

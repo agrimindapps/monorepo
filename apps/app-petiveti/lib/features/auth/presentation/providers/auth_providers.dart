@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide SignInWithApple;
 
-import '../../../../core/providers/core_services_providers.dart' as core_providers;
+import '../../../../core/providers/core_services_providers.dart'
+    as core_providers;
 import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
@@ -16,7 +17,9 @@ part 'auth_providers.g.dart';
 
 @riverpod
 AuthLocalDataSource authLocalDataSource(Ref ref) {
-  return AuthLocalDataSourceImpl(sharedPreferences: ref.watch(sharedPreferencesProvider));
+  return AuthLocalDataSourceImpl(
+    sharedPreferences: ref.watch(sharedPreferencesProvider),
+  );
 }
 
 @riverpod
@@ -134,5 +137,12 @@ PetDataSyncService petDataSyncService(Ref ref) {
 EnhancedAccountDeletionService enhancedAccountDeletionService(Ref ref) {
   return EnhancedAccountDeletionService(
     authRepository: ref.watch(core_providers.externalAuthRepositoryProvider),
+  );
+}
+
+@riverpod
+LocalProfileImageService localProfileImageService(Ref ref) {
+  return LocalProfileImageService(
+    ref.watch(core_providers.analyticsRepositoryProvider),
   );
 }

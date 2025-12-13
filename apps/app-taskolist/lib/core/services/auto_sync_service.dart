@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import '../errors/failures.dart' as local_failures;
 import 'data_integrity_service.dart';
+import 'task_upload_sync_service.dart';
 
 /// Auto-Sync Service para app-taskolist
 ///
@@ -47,10 +48,12 @@ class AutoSyncService {
   AutoSyncService(
     this._connectivityService,
     this._dataIntegrityService,
+    this._uploadSyncService,
   );
 
   final ConnectivityService _connectivityService;
   final DataIntegrityService _dataIntegrityService;
+  final TaskUploadSyncService _uploadSyncService;
 
   /// UnifiedSyncManager singleton (for future use)
   // ignore: unused_element
@@ -64,6 +67,7 @@ class AutoSyncService {
   bool _isSyncing = false;
   StreamSubscription<bool>? _connectivitySubscription;
   Timer? _periodicSyncTimer;
+  String? _userId; // Current user ID for sync
 
   /// Estatísticas de sync
   DateTime? _lastSyncAt;
@@ -92,9 +96,11 @@ class AutoSyncService {
   /// Inicializa o AutoSyncService
   ///
   /// **Opções:**
+  /// - userId: ID do usuário para sync
   /// - syncInterval: Intervalo entre syncs periódicos (padrão: 5min)
   /// - enablePeriodicSync: Habilitar sync periódico (padrão: true)
   Future<Either<local_failures.Failure, void>> initialize({
+    required String userId,
     Duration syncInterval = const Duration(minutes: 5),
     bool enablePeriodicSync = true,
   }) async {
@@ -103,6 +109,7 @@ class AutoSyncService {
         return const Right(null);
       }
 
+      _userId = userId;
       _syncInterval = syncInterval;
       _periodicSyncEnabled = enablePeriodicSync;
 
@@ -135,6 +142,7 @@ class AutoSyncService {
 
       if (kDebugMode) {
         debugPrint('[AutoSync] ✅ Initialized');
+        debugPrint('[AutoSync]    - User: $userId');
         debugPrint('[AutoSync]    - Sync interval: ${_syncInterval.inMinutes}min');
         debugPrint('[AutoSync]    - Periodic sync: ${_periodicSyncEnabled ? 'enabled' : 'disabled'}');
       }
@@ -228,6 +236,13 @@ class AutoSyncService {
       return;
     }
 
+    if (_userId == null) {
+      if (kDebugMode) {
+        debugPrint('[AutoSync] ⚠️ No user ID set, skipping sync');
+      }
+      return;
+    }
+
     _isSyncing = true;
     _lastSyncAt = DateTime.now();
     _syncCount++;
@@ -237,21 +252,19 @@ class AutoSyncService {
     }
 
     try {
-      // TODO: Implementar quando UnifiedSyncManager tiver método trigger
-      // Por enquanto, apenas registramos o evento
-      // await _syncManager.forceSyncApp('taskolist');
+      // Upload dirty tasks to Firebase
+      final syncedCount = await _uploadSyncService.syncDirtyTasks(_userId!);
 
       if (kDebugMode) {
-        debugPrint('[AutoSync] ⚠️ Sync trigger registered (implementation pending)');
-        debugPrint('[AutoSync]    - Reason: $reason');
-        debugPrint('[AutoSync]    - UnifiedSyncManager will sync in background');
+        debugPrint('[AutoSync] ✅ Sync completed: $syncedCount tasks synced');
       }
 
-      // Simular sucesso por enquanto
       _lastSuccessfulSyncAt = DateTime.now();
 
       // Verificar integridade após sync
-      // await _verifyIntegrityAfterSync();
+      if (syncedCount > 0) {
+        await _verifyIntegrityAfterSync();
+      }
     } catch (e) {
       _syncFailures++;
       _lastError = e.toString();

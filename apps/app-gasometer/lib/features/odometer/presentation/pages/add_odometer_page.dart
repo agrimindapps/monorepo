@@ -9,7 +9,7 @@ import '../../../../core/widgets/datetime_field.dart';
 import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
 import '../../../../core/widgets/form_section_header.dart';
-import '../../../../core/widgets/notes_form_field.dart';
+// import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
@@ -224,7 +224,9 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
     return FormSectionHeader(
       title: 'Adicionais',
       icon: Icons.more_horiz,
-      child: Column(children: [_buildDescriptionField()]),
+      child: Column(children: [
+        // _buildDescriptionField()
+      ]),
     );
   }
 
@@ -290,18 +292,18 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
     );
   }
 
-  Widget _buildDescriptionField() {
-    final notifier = ref.read(odometerFormProvider.notifier);
-
-    return ObservationsField(
-      controller: notifier.descriptionController,
-      focusNode: _focusNodes['description'],
-      label: OdometerConstants.fieldLabels['descricao'],
-      hint: OdometerConstants.fieldHints['descricao'],
-      required: false,
-      onChanged: (value) {},
-    );
-  }
+  // Widget _buildDescriptionField() {
+  //   final notifier = ref.read(odometerFormProvider.notifier);
+  //
+  //   return ObservationsField(
+  //     controller: notifier.descriptionController,
+  //     focusNode: _focusNodes['description'],
+  //     label: OdometerConstants.fieldLabels['descricao'],
+  //     hint: OdometerConstants.fieldHints['descricao'],
+  //     required: false,
+  //     onChanged: (value) {},
+  //   );
+  // }
 
   /// Rate-limited submit method that implements debouncing and prevents rapid clicks
   void _submitFormWithRateLimit() {

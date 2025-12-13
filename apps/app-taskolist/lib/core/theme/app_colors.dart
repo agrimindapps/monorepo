@@ -29,6 +29,7 @@ class AppColors {
   static const Color warning = Color(0xFFFF9800);
   static const Color error = Color(0xFFF44336);
   static const Color info = Color(0xFF2196F3);
+  static const Color premium = Color(0xFFFFD700); // Gold color for premium
   static const Color starredYellow = Color(0xFFFFC107);
   static const Color starredBorder = Color(0xFFFFB300);
   static const Color overlay = Color(0x66000000);

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../shared/providers/auth_providers.dart';
 import '../../../shared/widgets/theme_toggle_switch.dart';
-import '../../account/presentation/account_page.dart';
 import '../../notifications/presentation/notification_settings_page.dart';
+import 'widgets/enhanced_settings_item.dart';
+import 'widgets/settings_card.dart';
+import 'widgets/settings_sections_builder.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -13,219 +15,216 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
-    final userDisplayName = authState.value?.displayName ?? 'Usuário';
+    final user = authState.value;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Configurações'), elevation: 0),
+      appBar: AppBar(
+        title: const Text('Configurações'),
+        elevation: 0,
+        centerTitle: true,
+      ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildUserHeader(context, userDisplayName),
-
+            // User Section (mantido do original)
+            SettingsSectionsBuilder.buildUserSection(context, user),
+            const SizedBox(height: 16),
+            
+            // Premium Card (mantido do original)
+            SettingsSectionsBuilder.buildPremiumSectionCard(context),
             const SizedBox(height: 24),
-            _buildSectionCard(
-              context,
-              title: 'Aparência',
+            
+            // GENERAL SETTINGS - Animated Card
+            SettingsCard(
+              title: 'Configurações Gerais',
+              subtitle: 'Tema, notificações e idioma',
+              icon: Icons.settings_outlined,
+              category: SettingsCardCategory.general,
+              initiallyExpanded: true,
               children: [
-                const ThemeToggleSwitch(),
+                // Theme Toggle
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryColor,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.palette_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Tema Escuro',
+                              style: TextStyle(fontWeight: FontWeight.w500),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Alternar aparência do app',
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const ThemeToggleSwitch(),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text(
-                  'Escolha o tema da interface do aplicativo',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-            _buildSectionCard(
-              context,
-              title: 'Conta',
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.account_circle),
-                  title: const Text('Minha Conta'),
-                  subtitle: Text(userDisplayName),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => _navigateToAccountPage(context),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.logout, color: AppColors.error),
-                  title: const Text(
-                    'Sair',
-                    style: TextStyle(color: AppColors.error),
-                  ),
-                  onTap: () => _showLogoutDialog(context, ref),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-            _buildSectionCard(
-              context,
-              title: 'Notificações',
-              children: [
-                ListTile(
-                  leading: const Icon(Icons.notifications_outlined),
-                  title: const Text('Configurações de Notificação'),
-                  subtitle: const Text('Lembretes, alertas e configurações'),
-                  trailing: const Icon(Icons.chevron_right),
+                EnhancedSettingsItem(
+                  icon: Icons.notifications_outlined,
+                  title: 'Notificações',
+                  subtitle: 'Lembretes e alertas',
+                  type: SettingsItemType.info,
                   onTap: () => _navigateToNotificationSettings(context),
                 ),
+                const SizedBox(height: 8),
+                EnhancedSettingsItem(
+                  icon: Icons.language,
+                  title: 'Idioma',
+                  subtitle: 'Português (Brasil)',
+                  type: SettingsItemType.normal,
+                  onTap: () => _showLanguageDialog(context),
+                  isLast: true,
+                ),
               ],
             ),
-
-            const SizedBox(height: 16),
-            _buildSectionCard(
-              context,
-              title: 'Dados',
+            
+            // DATA MANAGEMENT - Animated Card
+            SettingsCard(
+              title: 'Gerenciamento de Dados',
+              subtitle: 'Backup, exportação e limpeza',
+              icon: Icons.storage_outlined,
+              category: SettingsCardCategory.data,
               children: [
-                ListTile(
-                  leading: const Icon(Icons.download_outlined),
-                  title: const Text('Exportar dados'),
-                  subtitle: const Text('Exportar tarefas como arquivo'),
-                  trailing: const Icon(Icons.chevron_right),
+                EnhancedSettingsItem(
+                  icon: Icons.cloud_upload_outlined,
+                  title: 'Backup na Nuvem',
+                  subtitle: 'Sincronizar com Firebase',
+                  type: SettingsItemType.success,
+                  badge: 'NOVO',
+                  onTap: () => _showBackupDialog(context),
+                  isFirst: true,
+                ),
+                const SizedBox(height: 8),
+                EnhancedSettingsItem(
+                  icon: Icons.download_outlined,
+                  title: 'Exportar Dados',
+                  subtitle: 'JSON ou CSV',
+                  type: SettingsItemType.info,
                   onTap: () => _showExportDialog(context),
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.warning,
-                  ),
-                  title: const Text(
-                    'Limpar dados',
-                    style: TextStyle(color: AppColors.warning),
-                  ),
-                  subtitle: const Text('Remover todas as tarefas locais'),
+                const SizedBox(height: 8),
+                EnhancedSettingsItem(
+                  icon: Icons.delete_sweep,
+                  title: 'Limpar Dados Locais',
+                  subtitle: 'Remover todas as tarefas',
+                  type: SettingsItemType.danger,
                   onTap: () => _showClearDataDialog(context),
+                  isLast: true,
                 ),
               ],
             ),
-
-            const SizedBox(height: 16),
-            _buildSectionCard(
-              context,
-              title: 'Sobre',
+            
+            // SUPPORT - Animated Card
+            SettingsCard(
+              title: 'Suporte e Informações',
+              subtitle: 'Ajuda, avaliações e sobre',
+              icon: Icons.support_agent_outlined,
+              category: SettingsCardCategory.account,
               children: [
-                const ListTile(
-                  leading: Icon(Icons.info_outline),
-                  title: Text('Versão'),
-                  subtitle: Text('1.0.0'),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.help_outline),
-                  title: const Text('Ajuda'),
-                  trailing: const Icon(Icons.chevron_right),
+                EnhancedSettingsItem(
+                  icon: Icons.help_outline,
+                  title: 'Central de Ajuda',
+                  subtitle: 'Tutoriais e guias',
+                  type: SettingsItemType.info,
                   onTap: () => _showHelpDialog(context),
+                  isFirst: true,
                 ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.favorite_outline),
-                  title: const Text('Avaliar app'),
-                  trailing: const Icon(Icons.chevron_right),
+                const SizedBox(height: 8),
+                EnhancedSettingsItem(
+                  icon: Icons.star_outline,
+                  title: 'Avaliar na Store',
+                  subtitle: 'Sua opinião é importante',
+                  type: SettingsItemType.success,
                   onTap: () => _showRatingDialog(context),
                 ),
+                const SizedBox(height: 8),
+                EnhancedSettingsItem(
+                  icon: Icons.info_outline,
+                  title: 'Sobre o App',
+                  subtitle: 'Versão 1.0.0 • Build 1',
+                  type: SettingsItemType.normal,
+                  onTap: () => _showAboutDialog(context),
+                  isLast: true,
+                ),
+              ],
+            ),
+            
+            // ACCOUNT ACTIONS - Animated Card (Danger)
+            SettingsCard(
+              title: 'Ações da Conta',
+              subtitle: 'Logout e configurações críticas',
+              icon: Icons.account_circle_outlined,
+              category: SettingsCardCategory.privacy,
+              children: [
+                EnhancedSettingsItem(
+                  icon: Icons.logout,
+                  title: 'Sair da Conta',
+                  subtitle: 'Encerrar sessão atual',
+                  type: SettingsItemType.danger,
+                  onTap: () => _showLogoutDialog(context, ref),
+                  isLast: true,
+                ),
               ],
             ),
 
             const SizedBox(height: 32),
-            Text(
-              'Task Manager',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-                fontWeight: FontWeight.w500,
+            Center(
+              child: Column(
+                children: [
+                  Text(
+                    'Taskolist',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Feito com ❤️ por Agrimind',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Clean Architecture • Riverpod • Drift',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey[500],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Gerenciador de tarefas pessoal',
-              style: TextStyle(
-                fontSize: 10,
-                color: Theme.of(context).textTheme.bodySmall?.color,
-              ),
-            ),
-
-            const SizedBox(height: 32),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildUserHeader(BuildContext context, String userName) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primary,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onPrimary.withAlpha(51),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.person,
-              size: 40,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            userName,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onPrimary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Task Manager',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onPrimary.withAlpha(204),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionCard(
-    BuildContext context, {
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
-          ...children,
-          const SizedBox(height: 8),
-        ],
       ),
     );
   }
@@ -244,7 +243,7 @@ class SettingsPage extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              Navigator.pop(context); // Voltar para tela anterior
+              // Navigator.pop(context); // Não precisamos voltar mais uma vez pois estamos na raiz da tab ou similar
 
               try {
                 await ref.read(authProvider.notifier).signOut();
@@ -277,6 +276,42 @@ class SettingsPage extends ConsumerWidget {
         title: const Text('Exportar dados'),
         content: const Text(
           'Funcionalidade em desenvolvimento.\n\nEm breve você poderá exportar suas tarefas para arquivo JSON ou CSV.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBackupDialog(BuildContext context) {
+    showDialog<dynamic>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Backup'),
+        content: const Text(
+          'Sincronização com a nuvem será implementada em breve.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog<dynamic>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Idioma'),
+        content: const Text(
+          'Suporte a múltiplos idiomas será implementado em breve.',
         ),
         actions: [
           TextButton(
@@ -328,7 +363,7 @@ class SettingsPage extends ConsumerWidget {
       builder: (context) => AlertDialog(
         title: const Text('Ajuda'),
         content: const Text(
-          'Task Manager é um aplicativo para gerenciar suas tarefas pessoais.\n\n• Adicione tarefas rapidamente\n• Organize por prioridade\n• Marque como favoritas\n• Adicione comentários e anotações\n\nPara suporte, entre em contato conosco.',
+          'Taskolist é um aplicativo para gerenciar suas tarefas pessoais.\n\n• Adicione tarefas rapidamente\n• Organize por prioridade\n• Marque como favoritas\n• Adicione comentários e anotações\n\nPara suporte, entre em contato conosco.',
         ),
         actions: [
           TextButton(
@@ -348,19 +383,13 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  void _navigateToAccountPage(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<dynamic>(builder: (context) => const AccountPage()),
-    );
-  }
-
   void _showRatingDialog(BuildContext context) {
     showDialog<dynamic>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Avaliar app'),
         content: const Text(
-          'Gostou do Task Manager?\n\nSua avaliação nos ajuda a melhorar o aplicativo!',
+          'Gostou do Taskolist?\n\nSua avaliação nos ajuda a melhorar o aplicativo!',
         ),
         actions: [
           TextButton(
@@ -380,6 +409,68 @@ class SettingsPage extends ConsumerWidget {
               );
             },
             child: const Text('Avaliar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAboutDialog(BuildContext context) {
+    showDialog<dynamic>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.task_alt, color: AppColors.primaryColor),
+            SizedBox(width: 12),
+            Text('Sobre o Taskolist'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Taskolist',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryColor,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'Versão 1.0.0 (Build 1)',
+              style: TextStyle(color: Colors.grey),
+            ),
+            SizedBox(height: 16),
+            Divider(),
+            SizedBox(height: 16),
+            Text(
+              '🚀 Tecnologias:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text('• Flutter 3.9+'),
+            Text('• Clean Architecture'),
+            Text('• Riverpod (State Management)'),
+            Text('• Drift (Local Database)'),
+            Text('• Firebase (Backend)'),
+            SizedBox(height: 16),
+            Text(
+              '💚 Desenvolvido com ❤️ por Agrimind Soluções',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Fechar'),
           ),
         ],
       ),

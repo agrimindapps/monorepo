@@ -13,6 +13,9 @@ dependencies:
   # Core Package - Serviços compartilhados (Firebase, Riverpod, dartz, equatable, etc.)
   core:
     path: ../../packages/core
+  
+  # Explicitly listed packages (some are re-exported from core)
+  equatable: any
   connectivity_plus: any
   dartz: any
   cloud_firestore: any
@@ -25,6 +28,7 @@ dependencies:
   url_launcher: any
   firebase_core: any
   package_info_plus: any
+  permission_handler: any
 
   # Drift - SQLite Database (Web + Mobile support)
   drift: any

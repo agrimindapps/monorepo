@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/receituagro_colors.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/receituagro_loading_widget.dart';
 import '../providers/subscription_notifier.dart';
 import '../widgets/payment_actions_widget.dart';
 import '../widgets/subscription_benefits_widget.dart';
+import '../widgets/subscription_info_card.dart';
 import '../widgets/subscription_plans_widget.dart';
-import '../widgets/subscription_status_widget.dart';
 
 /// Página principal de subscription refatorada
 ///
@@ -31,6 +32,8 @@ class SubscriptionPage extends ConsumerStatefulWidget {
 }
 
 class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
+  String? _selectedPlanId;
+
   @override
   void initState() {
     super.initState();
@@ -73,9 +76,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFF052E16), // Very dark green (Premium)
-                  Color(0xFF14532D), // Dark green
-                  Color(0xFF1B4D3E), // Deep Teal/Green
+                  Color(0xFF1B5E20), // Green 900
+                  Color(0xFF2E7D32), // Green 800
+                  Color(0xFF388E3C), // Green 700
                 ],
               ),
             ),
@@ -97,8 +100,8 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                       child: state.isLoading
                           ? _buildLoadingView()
                           : state.hasActiveSubscription
-                              ? _buildActiveSubscriptionView()
-                              : _buildPlansView(),
+                              ? _buildActiveSubscriptionView(state)
+                              : _buildPlansView(state),
                     ),
                   ],
                 ),
@@ -129,36 +132,39 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   /// View para usuários com subscription ativa
-  Widget _buildActiveSubscriptionView() {
-    return const SingleChildScrollView(
+  Widget _buildActiveSubscriptionView(SubscriptionState state) {
+    return SingleChildScrollView(
       child: Column(
         children: [
-          SubscriptionStatusWidget(),
+          if (state.currentSubscription != null)
+            SubscriptionInfoCard(subscription: state.currentSubscription!),
 
-          SizedBox(height: 12),
-          SubscriptionBenefitsWidget(
+          const SizedBox(height: 12),
+          const SubscriptionBenefitsWidget(
             showModernStyle: false, // Estilo card para subscription ativa
           ),
 
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           PaymentActionsWidget(
             showSubscriptionManagement: true,
+            isLoading: state.isLoading,
+            onManageSubscription: () => _manageSubscription(),
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
   /// View para seleção de planos (usuário sem subscription)
-  Widget _buildPlansView() {
-    return const SingleChildScrollView(
-      padding: EdgeInsets.all(8.0),
+  Widget _buildPlansView(SubscriptionState state) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          SizedBox(height: 20),
-          Padding(
+          const SizedBox(height: 20),
+          const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               'Tenha acesso ilimitado\na todos os recursos',
@@ -172,28 +178,71 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             ),
           ),
 
-          SizedBox(height: 24),
-          SubscriptionPlansWidget(),
+          const SizedBox(height: 24),
+          SubscriptionPlansWidget(
+            availableProducts: state.availableProducts,
+            selectedPlanId: _selectedPlanId,
+            onPlanSelected: (planId) {
+              setState(() {
+                _selectedPlanId = planId;
+              });
+            },
+          ),
 
-          SizedBox(height: 24),
-          SubscriptionBenefitsWidget(
+          const SizedBox(height: 24),
+          const SubscriptionBenefitsWidget(
             showModernStyle: true, // Estilo moderno para marketing
           ),
 
-          SizedBox(height: 32),
+          const SizedBox(height: 32),
           PaymentActionsWidget(
+            selectedPlanId: _selectedPlanId,
             showPurchaseButton: true,
+            isLoading: state.isLoading,
+            onPurchase: () => _purchaseSelectedPlan(),
+            onRestore: () => _restorePurchases(),
+            onPrivacyPolicy: () => _openPrivacyPolicy(),
+            onTermsOfService: () => _openTermsOfService(),
           ),
 
-          SizedBox(height: 16),
+          const SizedBox(height: 16),
           PaymentActionsWidget(
             showFooterLinks: true,
+            isLoading: state.isLoading,
+            onRestore: () => _restorePurchases(),
+            onPrivacyPolicy: () => _openPrivacyPolicy(),
+            onTermsOfService: () => _openTermsOfService(),
           ),
 
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
         ],
       ),
     );
+  }
+
+  Future<void> _purchaseSelectedPlan() async {
+    if (_selectedPlanId == null) return;
+    await ref
+        .read(subscriptionManagementProvider.notifier)
+        .purchaseProduct(_selectedPlanId!);
+  }
+
+  Future<void> _restorePurchases() async {
+    await ref.read(subscriptionManagementProvider.notifier).restorePurchases();
+  }
+
+  Future<void> _manageSubscription() async {
+    await ref
+        .read(subscriptionManagementProvider.notifier)
+        .manageSubscription();
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    _showSnackBar(context, 'Abrindo política de privacidade...', Colors.blue);
+  }
+
+  Future<void> _openTermsOfService() async {
+    _showSnackBar(context, 'Abrindo termos de serviço...', Colors.blue);
   }
 
   /// Helper para mostrar snackbars

@@ -29,12 +29,14 @@ class PremiumNotifierState {
     this.isLoadingProducts = false,
     this.isProcessingPurchase = false,
     this.errorMessage,
+    this.successMessage,
   });
   final PremiumStatus premiumStatus;
   final List<core.ProductInfo> availableProducts;
   final bool isLoadingProducts;
   final bool isProcessingPurchase;
   final String? errorMessage;
+  final String? successMessage;
 
   PremiumNotifierState copyWith({
     PremiumStatus? premiumStatus,
@@ -42,7 +44,9 @@ class PremiumNotifierState {
     bool? isLoadingProducts,
     bool? isProcessingPurchase,
     String? errorMessage,
+    String? successMessage,
     bool clearError = false,
+    bool clearSuccess = false,
   }) {
     return PremiumNotifierState(
       premiumStatus: premiumStatus ?? this.premiumStatus,
@@ -50,9 +54,11 @@ class PremiumNotifierState {
       isLoadingProducts: isLoadingProducts ?? this.isLoadingProducts,
       isProcessingPurchase: isProcessingPurchase ?? this.isProcessingPurchase,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      successMessage: clearSuccess ? null : (successMessage ?? this.successMessage),
     );
   }
 
+  bool get isLoading => isLoadingProducts || isProcessingPurchase;
   bool get isPremium => premiumStatus.isPremium;
   bool get canPurchasePremium => !isPremium;
   DateTime? get expirationDate => premiumStatus.expirationDate;
@@ -80,7 +86,8 @@ class PremiumNotifierState {
           ) &&
           isLoadingProducts == other.isLoadingProducts &&
           isProcessingPurchase == other.isProcessingPurchase &&
-          errorMessage == other.errorMessage;
+          errorMessage == other.errorMessage &&
+          successMessage == other.successMessage;
 
   @override
   int get hashCode =>
@@ -88,7 +95,8 @@ class PremiumNotifierState {
       const ListEquality<core.ProductInfo>().hash(availableProducts) ^
       isLoadingProducts.hashCode ^
       isProcessingPurchase.hashCode ^
-      errorMessage.hashCode;
+      errorMessage.hashCode ^
+      successMessage.hashCode;
 
   @override
   String toString() =>
@@ -97,7 +105,8 @@ class PremiumNotifierState {
       'availableProducts: ${availableProducts.length}, '
       'isLoadingProducts: $isLoadingProducts, '
       'isProcessingPurchase: $isProcessingPurchase, '
-      'errorMessage: $errorMessage)';
+      'errorMessage: $errorMessage, '
+      'successMessage: $successMessage)';
 }
 
 /// Premium Notifier usando AsyncNotifier com manual stream subscription
@@ -252,8 +261,12 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
             state.value?.copyWith(
                   isProcessingPurchase: false,
                   clearError: true,
+                  successMessage: 'Compra realizada com sucesso!',
                 ) ??
-                const PremiumNotifierState(isProcessingPurchase: false),
+                const PremiumNotifierState(
+                  isProcessingPurchase: false,
+                  successMessage: 'Compra realizada com sucesso!',
+                ),
           );
           refreshPremiumStatus();
           return true;
@@ -308,8 +321,12 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
             state.value?.copyWith(
                   isProcessingPurchase: false,
                   clearError: true,
+                  successMessage: 'Compras restauradas com sucesso!',
                 ) ??
-                const PremiumNotifierState(isProcessingPurchase: false),
+                const PremiumNotifierState(
+                  isProcessingPurchase: false,
+                  successMessage: 'Compras restauradas com sucesso!',
+                ),
           );
           refreshPremiumStatus();
           return success;
@@ -456,6 +473,14 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     final currentState = state.value;
     if (currentState != null && currentState.errorMessage != null) {
       state = core.AsyncValue.data(currentState.copyWith(clearError: true));
+    }
+  }
+
+  /// Limpa mensagem de sucesso
+  void clearSuccess() {
+    final currentState = state.value;
+    if (currentState != null && currentState.successMessage != null) {
+      state = core.AsyncValue.data(currentState.copyWith(clearSuccess: true));
     }
   }
 

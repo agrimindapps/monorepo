@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../providers/subscription_providers.dart';
+import '../state/subscription_state.dart';
 
 /// Widget responsible for displaying loading overlay during subscription operations
 class SubscriptionLoadingOverlay extends StatelessWidget {

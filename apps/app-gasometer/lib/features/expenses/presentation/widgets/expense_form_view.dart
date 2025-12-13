@@ -95,32 +95,32 @@ class ExpenseFormView extends ConsumerWidget {
           ),
 
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          FormSectionHeader(
-            title: 'Detalhes Adicionais',
-            icon: Icons.location_on,
-            child: Column(
-              children: [
-                LocationField(
-                  controller: notifier.locationController,
-                  focusNode: focusNodes['location'],
-                  label: 'Local da Despesa',
-                  hint: ExpenseConstants.locationPlaceholder,
-                  required: false,
-                  onChanged: (value) {},
-                ),
-
-                const SizedBox(height: GasometerDesignTokens.spacingMd),
-                ObservationsField(
-                  controller: notifier.notesController,
-                  focusNode: focusNodes['notes'],
-                  label: 'Observações Adicionais',
-                  hint: ExpenseConstants.notesPlaceholder,
-                  required: false,
-                  onChanged: (value) {},
-                ),
-              ],
-            ),
-          ),
+          // FormSectionHeader(
+          //   title: 'Detalhes Adicionais',
+          //   icon: Icons.location_on,
+          //   child: Column(
+          //     children: [
+          //       LocationField(
+          //         controller: notifier.locationController,
+          //         focusNode: focusNodes['location'],
+          //         label: 'Local da Despesa',
+          //         hint: ExpenseConstants.locationPlaceholder,
+          //         required: false,
+          //         onChanged: (value) {},
+          //       ),
+          //
+          //       const SizedBox(height: GasometerDesignTokens.spacingMd),
+          //       ObservationsField(
+          //         controller: notifier.notesController,
+          //         focusNode: focusNodes['notes'],
+          //         label: 'Observações Adicionais',
+          //         hint: ExpenseConstants.notesPlaceholder,
+          //         required: false,
+          //         onChanged: (value) {},
+          //       ),
+          //     ],
+          //   ),
+          // ),
 
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
           OptionalReceiptSection(

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:core/core.dart' hide AuthState, FormState, Column;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -51,6 +52,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
     super.initState();
     _initializeAnimations();
     _setupListeners();
+    _autoFillCredentialsInDebugMode();
   }
 
   void _initializeAnimations() {
@@ -78,6 +80,21 @@ class _LoginPageState extends ConsumerState<LoginPage>
   }
 
   void _setupListeners() {}
+
+  /// Preenche automaticamente as credenciais em modo debug
+  /// para facilitar o desenvolvimento e testes
+  void _autoFillCredentialsInDebugMode() {
+    if (kDebugMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _emailController.text = 'lucineiy@hotmail.com';
+          _passwordController.text = 'QWEqwe@123';
+          // Auto-login após preencher os campos
+          _handleLogin();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {

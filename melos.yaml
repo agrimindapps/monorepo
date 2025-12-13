@@ -67,6 +67,40 @@ scripts:
     description: Lista dependências desatualizadas
     
   # =========================================================================
+  # 🎯 SCRIPTS CORE (Focados em Plantis, Receituagro, Gasometer)
+  # =========================================================================
+
+  analyze:core:
+    run: flutter analyze --fatal-infos
+    exec:
+      concurrency: 3
+    packageFilters:
+      scope:
+        - app-plantis
+        - app-receituagro
+        - app-gasometer
+
+  test:core:
+    run: flutter test --coverage
+    exec:
+      concurrency: 1
+    packageFilters:
+      scope:
+        - app-plantis
+        - app-receituagro
+        - app-gasometer
+        
+  build:core:debug:
+    run: flutter build apk --debug
+    exec:
+      concurrency: 1
+    packageFilters:
+      scope:
+        - app-plantis
+        - app-receituagro
+        - app-gasometer
+
+  # =========================================================================
   # 🔍 SCRIPTS DE ANÁLISE ESTÁTICA E QUALIDADE
   # =========================================================================
   

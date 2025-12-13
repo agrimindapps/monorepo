@@ -1,369 +1,360 @@
 import 'package:core/core.dart' show ProductInfo;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers/subscription_notifier.dart';
+import '../../../../core/theme/receituagro_colors.dart';
 
-/// Widget responsável pela exibição e seleção de planos de subscription
-///
-/// Funcionalidades:
-/// - Exibir opções de planos (Mensal, Anual, Semanal)
-/// - Seleção visual com estado
-/// - Badges para destacar melhor valor
-/// - Design visual consistente com tema da aplicação
-///
-/// Design:
-/// - Cards com seleção por radio button
-/// - Destaque visual para plano selecionado
-/// - Badge "MELHOR VALOR" para plano anual
-/// - Cores do gradiente da aplicação
-class SubscriptionPlansWidget extends ConsumerWidget {
+class SubscriptionPlansWidget extends StatefulWidget {
+  final List<ProductInfo> availableProducts;
+  final String? selectedPlanId;
+  final void Function(String) onPlanSelected;
+
   const SubscriptionPlansWidget({
     super.key,
+    required this.availableProducts,
+    this.selectedPlanId,
+    required this.onPlanSelected,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final subscriptionAsync = ref.watch(subscriptionManagementProvider);
+  State<SubscriptionPlansWidget> createState() =>
+      _SubscriptionPlansWidgetState();
+}
 
-    return subscriptionAsync.when(
-      data: (subscriptionState) {
-        final notifier = ref.read(subscriptionManagementProvider.notifier);
-        final products = subscriptionState.availableProducts;
+class _SubscriptionPlansWidgetState extends State<SubscriptionPlansWidget> {
+  String? _selectedPlanId;
 
-        debugPrint('🎨 [SubscriptionPlansWidget] Renderizando widget');
-        debugPrint('   - Produtos disponíveis: ${products.length}');
-        if (products.isNotEmpty) {
-          for (final product in products) {
-            debugPrint('   - ${product.productId}: ${product.priceString}');
-          }
-        }
+  @override
+  void initState() {
+    super.initState();
+    _selectedPlanId = widget.selectedPlanId;
+    if (_selectedPlanId == null && widget.availableProducts.isNotEmpty) {
+      final yearlyPlan = widget.availableProducts.firstWhere(
+        (product) =>
+            product.productId.toLowerCase().contains('year') ||
+            product.productId.toLowerCase().contains('annual'),
+        orElse: () => widget.availableProducts.first,
+      );
+      _selectedPlanId = yearlyPlan.productId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onPlanSelected(_selectedPlanId!);
+      });
+    }
+  }
 
-        // Se não há produtos, exibe mensagem
-        if (products.isEmpty) {
-          debugPrint('⚠️ [SubscriptionPlansWidget] Nenhum produto para exibir');
-          return Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              children: [
-                const Icon(
-                  Icons.cloud_off,
-                  color: Colors.white70,
-                  size: 48,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Carregando planos...',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 16,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
+  @override
+  void didUpdateWidget(SubscriptionPlansWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedPlanId != oldWidget.selectedPlanId) {
+      _selectedPlanId = widget.selectedPlanId;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final products = widget.availableProducts.isEmpty
+        ? _getMockProducts()
+        : widget.availableProducts;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: products.map((product) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _buildPlanOption(product),
           );
-        }
+        }).toList(),
+      ),
+    );
+  }
 
-        // Mapeia produtos por período
-        debugPrint('🗂️ [SubscriptionPlansWidget] Mapeando produtos por período...');
+  List<ProductInfo> _getMockProducts() {
+    return [
+      const ProductInfo(
+        productId: 'receituagro_premium_monthly',
+        title: 'Mensal',
+        description: 'Plano mensal básico',
+        price: 9.99,
+        priceString: 'R\$ 9,99',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'mensal',
+      ),
+      const ProductInfo(
+        productId: 'receituagro_premium_semester',
+        title: 'Semestral',
+        description: 'Plano semestral com desconto',
+        price: 49.99,
+        priceString: 'R\$ 49,99',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'semestral',
+      ),
+      const ProductInfo(
+        productId: 'receituagro_premium_annual',
+        title: 'Anual',
+        description: 'Plano anual - melhor valor',
+        price: 89.99,
+        priceString: 'R\$ 89,99',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'anual',
+      ),
+    ];
+  }
 
-        final monthlyProduct = products.firstWhere(
-          (p) => p.productId.contains('mensal'),
-          orElse: () {
-            debugPrint('⚠️ [SubscriptionPlansWidget] Produto mensal não encontrado, usando primeiro');
-            return products.first;
-          },
-        );
-        debugPrint('   ✓ Mensal: ${monthlyProduct.productId}');
+  Widget _buildPlanOption(ProductInfo product) {
+    final isSelected = _selectedPlanId == product.productId;
+    final isYearly = product.productId.toLowerCase().contains('year') ||
+        product.productId.toLowerCase().contains('annual');
+    final isMonthly = product.productId.toLowerCase().contains('month');
+    final isSemester = product.productId.toLowerCase().contains('semester');
+    final isWeekly = product.productId.toLowerCase().contains('week');
 
-        final semiannualProduct = products.firstWhere(
-          (p) => p.productId.contains('semestral'),
-          orElse: () {
-            debugPrint('⚠️ [SubscriptionPlansWidget] Produto semestral não encontrado, usando primeiro');
-            return products.first;
-          },
-        );
-        debugPrint('   ✓ Semestral: ${semiannualProduct.productId}');
+    String planTitle;
+    String planSubtitle = '';
+    String? badge;
 
-        final annualProduct = products.firstWhere(
-          (p) => p.productId.contains('anual'),
-          orElse: () {
-            debugPrint('⚠️ [SubscriptionPlansWidget] Produto anual não encontrado, usando último');
-            return products.last;
-          },
-        );
-        debugPrint('   ✓ Anual: ${annualProduct.productId}');
+    if (isYearly) {
+      planTitle = 'Anual';
+      planSubtitle = 'Economize 67%';
+      badge = 'MELHOR VALOR';
+    } else if (isSemester) {
+      planTitle = 'Semestral';
+      planSubtitle = 'Economize 17%';
+    } else if (isMonthly) {
+      planTitle = 'Mensal';
+      planSubtitle = 'Acesso básico';
+    } else if (isWeekly) {
+      planTitle = 'Semanal';
+    } else {
+      planTitle = product.title;
+    }
 
-        return Column(
+    return _buildPlanCard(
+      product: product,
+      title: planTitle,
+      subtitle: planSubtitle,
+      badge: badge,
+      isSelected: isSelected,
+    );
+  }
+
+  Widget _buildPlanCard({
+    required ProductInfo product,
+    required String title,
+    String subtitle = '',
+    String? badge,
+    required bool isSelected,
+  }) {
+    final isHero = badge != null;
+
+    final borderColor = isSelected
+        ? (isHero
+            ? const Color(0xFFFFD700)
+            : Colors.white.withValues(alpha: 0.6))
+        : Colors.white.withValues(alpha: 0.1);
+
+    final backgroundColor = isSelected
+        ? (isHero
+            ? const Color(0x33FFD700)
+            : ReceitaAgroColors.primary.withValues(
+                alpha: 0.15,
+              ))
+        : Colors.white.withValues(alpha: 0.05);
+
+    return Transform.scale(
+      scale: isSelected && isHero ? 1.02 : 1.0,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor, width: isSelected ? 2 : 1),
+          boxShadow: isSelected && isHero
+              ? [
+                  BoxShadow(
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.2),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  ),
+                ]
+              : null,
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
           children: [
-            // Plano Mensal
-            _buildPlanOption(
-              ref: ref,
-              notifier: notifier,
-              product: monthlyProduct,
-              planType: 'monthly',
-              isSelected: notifier.isPlanSelected('monthly'),
-            ),
-            const SizedBox(height: 16), // Increased spacing
-
-            // Plano Anual (com badge e destaque)
-            Transform.scale(
-              scale: 1.02, // Slight scale up for emphasis
-              child: _buildPlanOption(
-                ref: ref,
-                notifier: notifier,
-                product: annualProduct,
-                planType: 'yearly',
-                isSelected: notifier.isPlanSelected('yearly'),
-                badge: 'MELHOR VALOR',
-                isHero: true, // New parameter for hero styling
-                savings: 'Economize 40%', // Explicit savings
+            if (badge != null)
+              Positioned(
+                top: -10,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFD700),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    badge,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedPlanId = product.productId;
+                  });
+                  widget.onPlanSelected(product.productId);
+                },
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    children: [
+                      _buildRadioButton(isSelected, isHero),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                if (subtitle.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isHero
+                                          ? Colors.white.withValues(alpha: 0.15)
+                                          : ReceitaAgroColors.primary
+                                              .withValues(
+                                              alpha: 0.2,
+                                            ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      subtitle,
+                                      style: TextStyle(
+                                        color: isHero
+                                            ? const Color(0xFFFFD700)
+                                            : ReceitaAgroColors.primaryLight,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            _buildPlanPrice(product),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-
-            // Plano Semestral
-            _buildPlanOption(
-              ref: ref,
-              notifier: notifier,
-              product: semiannualProduct,
-              planType: 'semiannual',
-              isSelected: notifier.isPlanSelected('semiannual'),
-            ),
           ],
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text(
-            'Erro ao carregar planos: $error',
-            style: const TextStyle(color: Colors.white70),
-            textAlign: TextAlign.center,
-          ),
         ),
       ),
     );
   }
 
-  /// Constrói um card de opção de plano com produto real do RevenueCat
-  Widget _buildPlanOption({
-    required WidgetRef ref,
-    required SubscriptionManagementNotifier notifier,
-    required ProductInfo product,
-    required String planType,
-    required bool isSelected,
-    String? badge,
-    bool isHero = false,
-    String? savings,
-  }) {
-    // Extrai título do período
-    String title;
-    if (product.productId.contains('mensal2') || product.productId.contains('mensal')) {
-      title = 'Mensal';
-    } else if (product.productId.contains('semestral')) {
-      title = 'Semestral';
-    } else if (product.productId.contains('anual')) {
-      title = 'Anual';
-    } else {
-      title = product.title;
-    }
-
-    // Usa o preço real do produto
-    final price = product.priceString;
-    
-    // Cores dinâmicas baseadas na seleção e tipo
-    final borderColor = isSelected
-        ? (isHero ? const Color(0xFFFFD700) : Colors.white.withValues(alpha: 0.6)) // Gold for hero
-        : Colors.white.withValues(alpha: 0.1);
-        
-    final backgroundColor = isSelected
-        ? (isHero ? const Color(0x33FFD700) : const Color(0x26388E3C)) // Gold tint for hero
-        : Colors.white.withValues(alpha: 0.05);
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: borderColor,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: isSelected && isHero
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFFFFD700).withValues(alpha: 0.2),
-                      blurRadius: 12,
-                      spreadRadius: 2,
-                    )
-                  ]
-                : null,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => notifier.selectPlan(planType),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    _buildRadioButton(isSelected, isHero),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                title,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              if (savings != null)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    savings,
-                                    style: const TextStyle(
-                                      color: Color(0xFFFFD700), // Gold text
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          _buildPlanPrice(price),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        
-        // Badge flutuante para o plano Hero
-        if (badge != null)
-          Positioned(
-            top: -10,
-            right: 36,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFD700), // Gold background
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                badge,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  /// Constrói o radio button customizado
   Widget _buildRadioButton(bool isSelected, bool isHero) {
-    final activeColor = isHero ? const Color(0xFFFFD700) : Colors.white;
-    
+    final activeColor =
+        isHero ? const Color(0xFFFFD700) : ReceitaAgroColors.primary;
+
     return Container(
-      width: 22,
-      height: 22,
+      width: 24,
+      height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isSelected ? activeColor : Colors.white.withValues(alpha: 0.5),
-          width: isSelected ? 6 : 2,
+          color: isSelected ? activeColor : Colors.white.withValues(alpha: 0.4),
+          width: 2,
         ),
         color: Colors.transparent,
       ),
+      child: isSelected
+          ? Center(
+              child: Container(
+                width: 12,
+                height: 12,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: activeColor,
+                ),
+              ),
+            )
+          : null,
     );
   }
 
-  /// Constrói o título do plano com badge opcional (Legacy - mantido para compatibilidade se necessário)
-  Widget _buildPlanTitle(String title, String? badge) {
+  Widget _buildPlanPrice(ProductInfo product) {
+    final isYearly = product.productId.toLowerCase().contains('year') ||
+        product.productId.toLowerCase().contains('annual');
+    final isMonthly = product.productId.toLowerCase().contains('month');
+    final isSemester = product.productId.toLowerCase().contains('semester');
+    final isWeekly = product.productId.toLowerCase().contains('week');
+
+    String period;
+    if (isYearly) {
+      period = '/ano';
+    } else if (isSemester) {
+      period = '/sem';
+    } else if (isMonthly) {
+      period = '/mês';
+    } else if (isWeekly) {
+      period = '/semana';
+    } else {
+      period = '';
+    }
+
     return Row(
       children: [
         Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
+          product.priceString,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.9),
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        if (badge != null) ...[
-          const SizedBox(width: 12),
-          _buildBadge(badge),
-        ],
+        if (period.isNotEmpty)
+          Text(
+            period,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 14,
+            ),
+          ),
       ],
-    );
-  }
-
-  /// Constrói o badge destacado (Legacy)
-  Widget _buildBadge(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF66BB6A),  // Medium green badge
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  /// Constrói o preço do plano
-  Widget _buildPlanPrice(String price) {
-    return Text(
-      price,
-      style: TextStyle(
-        color: Colors.white.withValues(alpha: 0.7),
-        fontSize: 14,
-      ),
     );
   }
 }

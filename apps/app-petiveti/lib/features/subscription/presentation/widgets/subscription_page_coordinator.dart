@@ -2,7 +2,8 @@ import 'package:core/core.dart' hide SubscriptionState, subscriptionProvider;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
-import '../providers/subscription_providers.dart';
+import '../state/subscription_notifier.dart';
+import '../state/subscription_state.dart';
 
 /// Coordinator responsible for managing subscription page business logic
 /// and coordinating between different subscription components
@@ -22,8 +23,7 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     ref.listen<SubscriptionState>(subscriptionProvider, (previous, next) {
       if (next.errorMessage != null) {
         _showErrorMessage(context, next.errorMessage!);
-        // TODO: Add clearError method to SubscriptionNotifier
-        // ref.read(subscriptionProvider.notifier).clearError();
+        ref.read(subscriptionProvider.notifier).clearError();
       }
     });
 
@@ -43,85 +43,59 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
 
   /// Initialize subscription data loading
   static void initializeData(WidgetRef ref, String userId) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // TODO: Implement loadAvailablePlans and loadCurrentSubscription in SubscriptionNotifier
-      // ref.read(subscriptionProvider.notifier).loadAvailablePlans();
-      // ref.read(subscriptionProvider.notifier).loadCurrentSubscription(userId);
-    });
+    // Data is automatically loaded in the notifier's build method
   }
 
   /// Handle subscription to a plan
-  /// TODO: Implement subscribeToPlan in SubscriptionNotifier
   static Future<bool> subscribeToPlan(
     WidgetRef ref,
     BuildContext context,
     String userId,
     SubscriptionPlan plan,
   ) async {
-    // TODO: Uncomment when implemented
-    // final success = await ref.read(subscriptionProvider.notifier).subscribeToPlan(
-    //       userId,
-    //       plan.id,
-    //     );
-    // if (success && context.mounted) {
-    //   _showSuccessMessage(context, 'Assinatura do ${plan.title} ativada com sucesso!');
-    // }
-    // return success;
-    return false;
+    final success = await ref.read(subscriptionProvider.notifier).subscribeToPlan(plan.id);
+    if (success && context.mounted) {
+      _showSuccessMessage(context, 'Assinatura do ${plan.title} ativada com sucesso!');
+    }
+    return success;
   }
 
   /// Handle subscription cancellation
-  /// TODO: Implement cancelSubscription in SubscriptionNotifier
   static Future<bool> cancelSubscription(
     WidgetRef ref,
     BuildContext context,
     String userId,
   ) async {
-    // TODO: Uncomment when implemented
-    // final success = await ref.read(subscriptionProvider.notifier).cancelSubscription(userId);
-    // if (success && context.mounted) {
-    //   _showSuccessMessage(context, 'Assinatura cancelada com sucesso');
-    // }
-    // return success;
+    // TODO: Implement cancel logic in RevenueCat
     return false;
   }
 
-  /// Handle subscription resumption
-  /// TODO: Implement resumeSubscription in SubscriptionNotifier
-  static Future<bool> resumeSubscription(
-    WidgetRef ref,
-    BuildContext context,
-    String userId,
-  ) async {
-    // TODO: Uncomment when implemented
-    // final success = await ref.read(subscriptionProvider.notifier).resumeSubscription(userId);
-    // if (success && context.mounted) {
-    //   _showSuccessMessage(context, 'Assinatura retomada com sucesso');
-    // }
-    // return success;
-    return false;
-  }
-
-  /// Handle purchases restoration
-  /// TODO: Implement restorePurchases in SubscriptionNotifier
+  /// Handle subscription restoration
   static Future<bool> restorePurchases(
     WidgetRef ref,
     BuildContext context,
     String userId,
   ) async {
-    // TODO: Uncomment when implemented
-    // final success = await ref.read(subscriptionProvider.notifier).restorePurchases(userId);
-    // if (success && context.mounted) {
-    //   _showSuccessMessage(context, 'Compras restauradas com sucesso');
-    // }
-    // return success;
+    final success = await ref.read(subscriptionProvider.notifier).restorePurchases();
+    if (success && context.mounted) {
+      _showSuccessMessage(context, 'Compras restauradas com sucesso!');
+    }
+    return success;
+  }
+
+  /// Handle subscription resumption
+  static Future<bool> resumeSubscription(
+    WidgetRef ref,
+    BuildContext context,
+    String userId,
+  ) async {
+    // TODO: Implement resume logic
     return false;
   }
 
   /// Reload subscription plans
   static void reloadPlans(WidgetRef ref) {
-    // TODO: Implement loadAvailablePlans in SubscriptionNotifier
-    // ref.read(subscriptionProvider.notifier).loadAvailablePlans();
+    ref.read(subscriptionProvider.notifier).loadAvailablePlans();
   }
 
   // ignore: unused_element

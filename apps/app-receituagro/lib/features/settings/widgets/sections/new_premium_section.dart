@@ -47,8 +47,7 @@ class NewPremiumSection extends ConsumerWidget {
       // ✅ Usa o card bonito com gradiente verde
       return SubscriptionInfoCard(
         subscription: subscription,
-        showDetailsButton: true,
-        onDetailsPressed: () {
+        onManageTap: () {
           context.pushNamed('/subscription');
         },
       );

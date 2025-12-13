@@ -30,8 +30,8 @@ jobs:
         echo "" >> report.md
         
         # Verificar cada app
-        for app in apps/*/; do
-          app_name=$(basename "$app")
+        for app_name in app-plantis app-receituagro app-gasometer; do
+          app="apps/$app_name"
           echo "## $app_name" >> report.md
           echo "" >> report.md
           

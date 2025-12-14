@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/app_state_providers.dart';
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/appointment.dart';
 import '../providers/appointments_providers.dart';
 import '../widgets/appointment_card.dart';
@@ -86,79 +87,34 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
         );
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Consultas'),
-          actions: [
-            Semantics(
-              label: 'Atualizar lista de consultas',
-              hint: 'Toque para recarregar as consultas',
-              child: IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: _loadAppointments,
+        body: SafeArea(
+          child: Column(
+            children: [
+              PetivetiPageHeader(
+                icon: Icons.calendar_month,
+                title: 'Consultas',
+                subtitle: 'Agendamentos veterinários',
+                showBackButton: false,
+                actions: [
+                  _buildHeaderAction(
+                    icon: Icons.refresh,
+                    onTap: _loadAppointments,
+                    tooltip: 'Atualizar',
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            if (selectedAnimalId != null)
-              Semantics(
-                label: 'Animal selecionado para consultas',
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      Semantics(
-                        label: 'Avatar do animal selecionado',
-                        child: CircleAvatar(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          child: Text(
-                            'A', // Simplified - could get from animal data if needed
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Animal Selecionado', // Simplified - could get from animal data
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              'ID: $selectedAnimalId',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+              if (selectedAnimalId != null)
+                _buildSelectedAnimalBanner(selectedAnimalId),
+              Expanded(
+                child: _buildContent(
+                  context,
+                  appointmentState,
+                  appointments,
+                  selectedAnimalId,
                 ),
               ),
-            Expanded(
-              child: _buildContent(
-                context,
-                appointmentState,
-                appointments,
-                selectedAnimalId,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
         floatingActionButton: selectedAnimalId != null
             ? Semantics(
@@ -171,6 +127,77 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                 ),
               )
             : null,
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required IconData icon,
+    required VoidCallback onTap,
+    required String tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSelectedAnimalBanner(String selectedAnimalId) {
+    return Semantics(
+      label: 'Animal selecionado para consultas',
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Semantics(
+              label: 'Avatar do animal selecionado',
+              child: CircleAvatar(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: Text(
+                  'A',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Animal Selecionado',
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    'ID: $selectedAnimalId',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'app.dart';
 import 'core/providers/core_services_providers.dart';
+import 'core/providers/sync_service_providers.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -46,6 +47,9 @@ Future<void> main() async {
     }
 
     await _initializeFirebaseServices(container);
+
+    // Initialize sync service (non-blocking)
+    _initializeSyncService(container);
 
     runApp(
       UncontrolledProviderScope(
@@ -123,5 +127,25 @@ Future<void> _initializeFirebaseServices(ProviderContainer container) async {
         reason: 'Firebase services initialization failed',
       );
     } catch (_) {}
+  }
+}
+
+/// Initialize sync service (non-blocking)
+/// Called after Firebase is ready, initializes in background
+void _initializeSyncService(ProviderContainer container) {
+  try {
+    debugPrint('🔄 Initializing Sync Service...');
+    
+    // Initialize sync service asynchronously (non-blocking)
+    container
+        .read(syncServiceProvider.notifier)
+        .initialize(developmentMode: kDebugMode)
+        .then((_) {
+      debugPrint('✅ Sync Service initialized');
+    }).catchError((Object error) {
+      debugPrint('❌ Sync Service initialization error: $error');
+    });
+  } catch (e) {
+    debugPrint('❌ Error starting Sync Service initialization: $e');
   }
 }

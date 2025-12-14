@@ -1,9 +1,7 @@
-import 'package:core/core.dart' hide SubscriptionState, subscriptionProvider;
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
-import '../state/subscription_notifier.dart';
-import '../state/subscription_state.dart';
 
 /// Coordinator responsible for managing subscription page business logic
 /// and coordinating between different subscription components
@@ -21,9 +19,8 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(subscriptionProvider);
     ref.listen<SubscriptionState>(subscriptionProvider, (previous, next) {
-      if (next.errorMessage != null) {
-        _showErrorMessage(context, next.errorMessage!);
-        ref.read(subscriptionProvider.notifier).clearError();
+      if (next is SubscriptionError) {
+        _showErrorMessage(context, next.message);
       }
     });
 
@@ -53,11 +50,9 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     String userId,
     SubscriptionPlan plan,
   ) async {
-    final success = await ref.read(subscriptionProvider.notifier).subscribeToPlan(plan.id);
-    if (success && context.mounted) {
-      _showSuccessMessage(context, 'Assinatura do ${plan.title} ativada com sucesso!');
-    }
-    return success;
+    final actions = ref.read(purchaseActionsProvider);
+    // TODO: Adapt to use purchasePackage
+    return false;
   }
 
   /// Handle subscription cancellation
@@ -76,11 +71,12 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     BuildContext context,
     String userId,
   ) async {
-    final success = await ref.read(subscriptionProvider.notifier).restorePurchases();
-    if (success && context.mounted) {
+    final actions = ref.read(purchaseActionsProvider);
+    await actions.restorePurchases();
+    if (context.mounted) {
       _showSuccessMessage(context, 'Compras restauradas com sucesso!');
     }
-    return success;
+    return true;
   }
 
   /// Handle subscription resumption
@@ -95,10 +91,9 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
 
   /// Reload subscription plans
   static void reloadPlans(WidgetRef ref) {
-    ref.read(subscriptionProvider.notifier).loadAvailablePlans();
+    ref.read(subscriptionProvider.notifier).checkSubscriptionStatus();
   }
 
-  // ignore: unused_element
   static void _showSuccessMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

@@ -1,48 +1,43 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity for syncing CalculationHistory with Firestore
-class SyncCalculationHistoryEntity extends Equatable {
-  final int? id;
-  final String? firebaseId;
-  final String userId;
+class SyncCalculationHistoryEntity extends BaseSyncEntity {
   final String calculatorType;
   final String inputData;
   final String result;
   final DateTime date;
-  final bool isDeleted;
-  final DateTime? lastSyncAt;
-  final bool isDirty;
-  final int version;
+  final String? firebaseId;
 
   const SyncCalculationHistoryEntity({
-    this.id,
+    required super.id,
     this.firebaseId,
-    required this.userId,
+    required super.userId,
     required this.calculatorType,
     required this.inputData,
     required this.result,
     required this.date,
-    this.isDeleted = false,
-    this.lastSyncAt,
-    this.isDirty = false,
-    this.version = 1,
+    super.createdAt,
+    super.updatedAt,
+    super.isDeleted = false,
+    super.lastSyncAt,
+    super.isDirty = false,
+    super.version = 1,
+    super.moduleName,
   });
 
   @override
   List<Object?> get props => [
-    id,
-    firebaseId,
-    userId,
+    ...super.props,
     calculatorType,
     inputData,
     result,
     date,
-    isDeleted,
-    lastSyncAt,
-    isDirty,
-    version,
+    firebaseId,
   ];
+
+  @override
+  Map<String, dynamic> toFirebaseMap() => toFirestore();
 
   /// Convert to Firestore map
   Map<String, dynamic> toFirestore() {
@@ -65,8 +60,9 @@ class SyncCalculationHistoryEntity extends Equatable {
   ) {
     final data = snapshot.data()!;
     return SyncCalculationHistoryEntity(
+      id: data['localId'] as String? ?? snapshot.id,
       firebaseId: snapshot.id,
-      userId: data['userId'] as String,
+      userId: data['userId'] as String? ?? '',
       calculatorType: data['calculatorType'] as String,
       inputData: data['inputData'] as String,
       result: data['result'] as String,
@@ -80,18 +76,22 @@ class SyncCalculationHistoryEntity extends Equatable {
     );
   }
 
+  @override
   SyncCalculationHistoryEntity copyWith({
-    int? id,
+    String? id,
     String? firebaseId,
     String? userId,
     String? calculatorType,
     String? inputData,
     String? result,
     DateTime? date,
+    DateTime? createdAt,
+    DateTime? updatedAt,
     bool? isDeleted,
     DateTime? lastSyncAt,
     bool? isDirty,
     int? version,
+    String? moduleName,
   }) {
     return SyncCalculationHistoryEntity(
       id: id ?? this.id,
@@ -101,10 +101,34 @@ class SyncCalculationHistoryEntity extends Equatable {
       inputData: inputData ?? this.inputData,
       result: result ?? this.result,
       date: date ?? this.date,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
       isDeleted: isDeleted ?? this.isDeleted,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       isDirty: isDirty ?? this.isDirty,
       version: version ?? this.version,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
+
+  @override
+  SyncCalculationHistoryEntity markAsDirty() => copyWith(isDirty: true);
+
+  @override
+  SyncCalculationHistoryEntity markAsSynced({DateTime? syncTime}) => copyWith(
+    isDirty: false,
+    lastSyncAt: syncTime ?? DateTime.now(),
+  );
+
+  @override
+  SyncCalculationHistoryEntity markAsDeleted() => copyWith(isDeleted: true, isDirty: true);
+
+  @override
+  SyncCalculationHistoryEntity incrementVersion() => copyWith(version: version + 1);
+
+  @override
+  SyncCalculationHistoryEntity withUserId(String userId) => copyWith(userId: userId);
+
+  @override
+  SyncCalculationHistoryEntity withModule(String moduleName) => copyWith(moduleName: moduleName);
 }

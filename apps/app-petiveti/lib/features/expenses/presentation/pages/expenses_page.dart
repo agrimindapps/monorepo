@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../providers/expenses_provider.dart';
 import '../widgets/add_expense_dialog.dart';
 import '../widgets/expense_categories_tab.dart';
@@ -51,84 +52,50 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
     final expensesState = ref.watch(expensesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Controle de Despesas'),
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: [
-            Tab(
-              child: Semantics(
-                label: 'Aba todas as despesas',
-                hint: 'Toque para ver todas as despesas cadastradas',
-                button: true,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.list), Text('Todas')],
-                ),
-              ),
-            ),
-            Tab(
-              child: Semantics(
-                label: 'Aba despesas deste mês',
-                hint: 'Toque para ver as despesas do mês atual',
-                button: true,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.calendar_month), Text('Este Mês')],
-                ),
-              ),
-            ),
-            Tab(
-              child: Semantics(
-                label: 'Aba categorias de despesas',
-                hint: 'Toque para ver despesas organizadas por categoria',
-                button: true,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.category), Text('Categorias')],
-                ),
-              ),
-            ),
-            Tab(
-              child: Semantics(
-                label: 'Aba resumo de despesas',
-                hint: 'Toque para ver resumo e estatísticas das despesas',
-                button: true,
-                child: const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [Icon(Icons.analytics), Text('Resumo')],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: Semantics(
-        label: 'Conteúdo das abas de despesas',
-        child: TabBarView(
-          controller: _tabController,
+      body: SafeArea(
+        child: Column(
           children: [
-            ExpenseListTab(
-              state: expensesState,
-              expenses: expensesState.expenses,
-              emptyTitle: 'Nenhuma Despesa Cadastrada',
-              emptySubtitle: 'Comece adicionando sua primeira despesa.',
-              emptyIcon: Icons.receipt_long,
+            PetivetiPageHeader(
+              icon: Icons.receipt_long,
+              title: 'Controle de Despesas',
+              subtitle: 'Gerencie gastos com seus pets',
+              showBackButton: true,
+              actions: [
+                _buildHeaderAction(
+                  icon: Icons.add,
+                  onTap: () => _showAddExpenseDialog(context),
+                  tooltip: 'Adicionar Despesa',
+                ),
+              ],
             ),
-            ExpenseListTab(
-              state: expensesState,
-              expenses: expensesState.monthlyExpenses,
-              emptyTitle: 'Nenhuma Despesa Este Mês',
-              emptySubtitle:
-                  'Adicione despesas para visualizar o resumo mensal.',
-              emptyIcon: Icons.calendar_today,
+            _buildTabBar(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  ExpenseListTab(
+                    state: expensesState,
+                    expenses: expensesState.expenses,
+                    emptyTitle: 'Nenhuma Despesa Cadastrada',
+                    emptySubtitle: 'Comece adicionando sua primeira despesa.',
+                    emptyIcon: Icons.receipt_long,
+                  ),
+                  ExpenseListTab(
+                    state: expensesState,
+                    expenses: expensesState.monthlyExpenses,
+                    emptyTitle: 'Nenhuma Despesa Este Mês',
+                    emptySubtitle:
+                        'Adicione despesas para visualizar o resumo mensal.',
+                    emptyIcon: Icons.calendar_today,
+                  ),
+                  ExpenseCategoriesTab(
+                    state: expensesState,
+                    onCategoryTap: _showCategoryDetails,
+                  ),
+                  ExpenseSummaryTab(state: expensesState),
+                ],
+              ),
             ),
-            ExpenseCategoriesTab(
-              state: expensesState,
-              onCategoryTap: _showCategoryDetails,
-            ),
-            ExpenseSummaryTab(state: expensesState),
           ],
         ),
       ),
@@ -141,6 +108,50 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
           tooltip: 'Adicionar Despesa',
           child: const Icon(Icons.add),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required IconData icon,
+    required VoidCallback onTap,
+    required String tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        tabs: const [
+          Tab(icon: Icon(Icons.list), text: 'Todas'),
+          Tab(icon: Icon(Icons.calendar_month), text: 'Este Mês'),
+          Tab(icon: Icon(Icons.category), text: 'Categorias'),
+          Tab(icon: Icon(Icons.analytics), text: 'Resumo'),
+        ],
       ),
     );
   }

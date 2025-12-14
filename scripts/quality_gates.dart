@@ -2,10 +2,10 @@
 
 /// Quality Gates System for Flutter Monorepo
 /// Prevents regression in code quality and architecture compliance
-/// 
+///
 /// Usage:
 /// dart quality_gates.dart [options]
-/// 
+///
 /// Options:
 /// --app=<app_name>     Target specific app (app-receituagro, app-gasometer, etc.)
 /// --check=<type>       Specific check (file_size, architecture, performance, all)
@@ -26,16 +26,16 @@ class QualityGates {
   static const int maxBuildMethodLines = 50;
   static const int maxSetStateCalls = 10;
   static const double maxComplexityScore = 15.0;
-  
+
   final String targetApp;
   final String checkType;
   final bool fixMode;
   final bool ciMode;
   final String reportFormat;
-  
+
   List<QualityIssue> issues = [];
   Map<String, dynamic> metrics = {};
-  
+
   QualityGates({
     required this.targetApp,
     required this.checkType,
@@ -43,19 +43,19 @@ class QualityGates {
     this.ciMode = false,
     this.reportFormat = 'console',
   });
-  
+
   static Future<void> main(List<String> args) async {
     final gates = QualityGates.fromArgs(args);
     await gates.run();
   }
-  
+
   factory QualityGates.fromArgs(List<String> args) {
     String targetApp = 'all';
     String checkType = 'all';
     bool fixMode = false;
     bool ciMode = false;
     String reportFormat = 'console';
-    
+
     for (String arg in args) {
       if (arg.startsWith('--app=')) {
         targetApp = arg.substring(6);
@@ -72,7 +72,7 @@ class QualityGates {
         exit(0);
       }
     }
-    
+
     return QualityGates(
       targetApp: targetApp,
       checkType: checkType,
@@ -81,7 +81,7 @@ class QualityGates {
       reportFormat: reportFormat,
     );
   }
-  
+
   static void _printUsage() {
     print('''
 Quality Gates System v$version
@@ -102,28 +102,28 @@ Examples:
   dart quality_gates.dart --fix --report=html
 ''');
   }
-  
+
   Future<void> run() async {
     print('🚦 Quality Gates System v$version');
     print('Target: $targetApp | Check: $checkType | CI Mode: $ciMode');
     print('=' * 60);
-    
+
     final startTime = DateTime.now();
-    
+
     try {
       final dirs = _getTargetDirectories();
       for (String dir in dirs) {
         await _runChecksForApp(dir);
       }
       await _generateReport();
-      
+
       final duration = DateTime.now().difference(startTime);
       print('\n✅ Quality Gates completed in ${duration.inMilliseconds}ms');
       if (ciMode) {
-        final criticalCount = issues.where((i) => i.severity == Severity.critical).length;
+        final criticalCount =
+            issues.where((i) => i.severity == Severity.critical).length;
         exit(criticalCount > 0 ? 1 : 0);
       }
-      
     } catch (e, stackTrace) {
       print('❌ Quality Gates failed: $e');
       if (ciMode) {
@@ -132,11 +132,11 @@ Examples:
       }
     }
   }
-  
+
   List<String> _getTargetDirectories() {
     final base = Directory.current.path;
     final List<String> dirs = [];
-    
+
     if (targetApp == 'all') {
       dirs.addAll([
         '$base/apps/app-receituagro/lib',
@@ -146,39 +146,40 @@ Examples:
     } else {
       dirs.add('$base/apps/$targetApp/lib');
     }
-    
+
     return dirs.where((dir) => Directory(dir).existsSync()).toList();
   }
-  
+
   Future<void> _runChecksForApp(String libDir) async {
     final appName = libDir.split('/').reversed.elementAt(1);
     print('\n📁 Analyzing $appName...');
-    
+
     if (checkType == 'all' || checkType == 'file_size') {
       await _checkFileSizes(libDir, appName);
     }
-    
+
     if (checkType == 'all' || checkType == 'architecture') {
       await _checkArchitecture(libDir, appName);
     }
-    
+
     if (checkType == 'all' || checkType == 'performance') {
       await _checkPerformance(libDir, appName);
     }
-    
+
     if (checkType == 'all' || checkType == 'security') {
       await _checkSecurity(libDir, appName);
     }
   }
-  
+
   Future<void> _checkFileSizes(String libDir, String appName) async {
     print('  🔍 Checking file sizes...');
-    
-    await for (FileSystemEntity entity in Directory(libDir).list(recursive: true)) {
+
+    await for (FileSystemEntity entity
+        in Directory(libDir).list(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         final lines = await _countLines(entity);
         final relativePath = entity.path.replaceFirst(libDir, '');
-        
+
         if (lines > maxFileLines) {
           issues.add(QualityIssue(
             type: 'file_size',
@@ -203,7 +204,8 @@ Examples:
           issues.add(QualityIssue(
             type: 'file_size',
             severity: Severity.info,
-            message: 'Consider refactoring large file ($lines > $infoFileLines)',
+            message:
+                'Consider refactoring large file ($lines > $infoFileLines)',
             file: relativePath,
             app: appName,
             line: null,
@@ -213,52 +215,55 @@ Examples:
       }
     }
   }
-  
+
   Future<void> _checkArchitecture(String libDir, String appName) async {
     print('  🏗️  Checking architecture patterns...');
-    
-    await for (FileSystemEntity entity in Directory(libDir).list(recursive: true)) {
+
+    await for (FileSystemEntity entity
+        in Directory(libDir).list(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         final content = await entity.readAsString();
         final relativePath = entity.path.replaceFirst(libDir, '');
-        
+
         await _checkWidgetComplexity(content, relativePath, appName);
         await _checkProviderPatterns(content, relativePath, appName);
         await _checkCleanArchitecture(content, relativePath, appName);
       }
     }
   }
-  
+
   Future<void> _checkPerformance(String libDir, String appName) async {
     print('  ⚡ Checking performance patterns...');
-    
-    await for (FileSystemEntity entity in Directory(libDir).list(recursive: true)) {
+
+    await for (FileSystemEntity entity
+        in Directory(libDir).list(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         final content = await entity.readAsString();
         final relativePath = entity.path.replaceFirst(libDir, '');
-        
+
         await _checkSetStateUsage(content, relativePath, appName);
         await _checkMemoryLeaks(content, relativePath, appName);
         await _checkUnnecessaryRebuilds(content, relativePath, appName);
       }
     }
   }
-  
+
   Future<void> _checkSecurity(String libDir, String appName) async {
     print('  🔒 Checking security patterns...');
-    
-    await for (FileSystemEntity entity in Directory(libDir).list(recursive: true)) {
+
+    await for (FileSystemEntity entity
+        in Directory(libDir).list(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
         final content = await entity.readAsString();
         final relativePath = entity.path.replaceFirst(libDir, '');
-        
+
         await _checkHardcodedSecrets(content, relativePath, appName);
         await _checkInputValidation(content, relativePath, appName);
         await _checkDataExposure(content, relativePath, appName);
       }
     }
   }
-  
+
   Future<int> _countLines(File file) async {
     try {
       final lines = await file.readAsLines();
@@ -267,22 +272,25 @@ Examples:
       return 0;
     }
   }
-  
-  Future<void> _checkWidgetComplexity(String content, String file, String app) async {
-    final widgetMatches = RegExp(r'class\s+(\w+Widget?)\s+extends\s+\w+').allMatches(content);
-    
+
+  Future<void> _checkWidgetComplexity(
+      String content, String file, String app) async {
+    final widgetMatches =
+        RegExp(r'class\s+(\w+Widget?)\s+extends\s+\w+').allMatches(content);
+
     for (Match match in widgetMatches) {
       final widgetName = match.group(1)!;
       final widgetStart = match.start;
       final widgetEnd = _findWidgetEnd(content, widgetStart);
       final widgetContent = content.substring(widgetStart, widgetEnd);
       final lines = widgetContent.split('\n').length;
-      
+
       if (lines > maxWidgetLines) {
         issues.add(QualityIssue(
           type: 'widget_complexity',
           severity: lines > 200 ? Severity.critical : Severity.warning,
-          message: 'Widget $widgetName is too complex ($lines lines > $maxWidgetLines)',
+          message:
+              'Widget $widgetName is too complex ($lines lines > $maxWidgetLines)',
           file: file,
           app: app,
           line: _getLineNumber(content, widgetStart),
@@ -290,18 +298,20 @@ Examples:
         ));
       }
     }
-    final buildMatches = RegExp(r'Widget\s+build\s*\([^)]*\)\s*\{').allMatches(content);
+    final buildMatches =
+        RegExp(r'Widget\s+build\s*\([^)]*\)\s*\{').allMatches(content);
     for (Match match in buildMatches) {
       final buildStart = match.start;
       final buildEnd = _findMethodEnd(content, buildStart);
       final buildContent = content.substring(buildStart, buildEnd);
       final lines = buildContent.split('\n').length;
-      
+
       if (lines > maxBuildMethodLines) {
         issues.add(QualityIssue(
           type: 'build_complexity',
           severity: Severity.warning,
-          message: 'Build method too complex ($lines lines > $maxBuildMethodLines)',
+          message:
+              'Build method too complex ($lines lines > $maxBuildMethodLines)',
           file: file,
           app: app,
           line: _getLineNumber(content, buildStart),
@@ -310,8 +320,9 @@ Examples:
       }
     }
   }
-  
-  Future<void> _checkProviderPatterns(String content, String file, String app) async {
+
+  Future<void> _checkProviderPatterns(
+      String content, String file, String app) async {
     if (content.contains('ChangeNotifier') && !content.contains('dispose()')) {
       issues.add(QualityIssue(
         type: 'provider_pattern',
@@ -328,7 +339,8 @@ Examples:
       issues.add(QualityIssue(
         type: 'provider_pattern',
         severity: Severity.info,
-        message: 'High number of Consumer widgets ($consumerCount), consider optimization',
+        message:
+            'High number of Consumer widgets ($consumerCount), consider optimization',
         file: file,
         app: app,
         line: null,
@@ -336,23 +348,29 @@ Examples:
       ));
     }
   }
-  
-  Future<void> _checkCleanArchitecture(String content, String file, String app) async {
+
+  Future<void> _checkCleanArchitecture(
+      String content, String file, String app) async {
     final path = file.toLowerCase();
-    if (path.contains('/presentation/') && 
-        (content.contains('import') && content.contains('/data/') && !content.contains('/domain/'))) {
+    if (path.contains('/presentation/') &&
+        (content.contains('import') &&
+            content.contains('/data/') &&
+            !content.contains('/domain/'))) {
       issues.add(QualityIssue(
         type: 'clean_architecture',
         severity: Severity.critical,
-        message: 'Presentation layer directly importing data layer (violates Clean Architecture)',
+        message:
+            'Presentation layer directly importing data layer (violates Clean Architecture)',
         file: file,
         app: app,
         line: null,
         data: {},
       ));
     }
-    if (path.contains('/presentation/') && path.contains('_page.dart') && 
-        !content.contains('usecase') && !content.contains('UseCase')) {
+    if (path.contains('/presentation/') &&
+        path.contains('_page.dart') &&
+        !content.contains('usecase') &&
+        !content.contains('UseCase')) {
       issues.add(QualityIssue(
         type: 'clean_architecture',
         severity: Severity.warning,
@@ -364,15 +382,17 @@ Examples:
       ));
     }
   }
-  
-  Future<void> _checkSetStateUsage(String content, String file, String app) async {
+
+  Future<void> _checkSetStateUsage(
+      String content, String file, String app) async {
     final setStateCount = RegExp(r'setState\s*\(').allMatches(content).length;
-    
+
     if (setStateCount > maxSetStateCalls) {
       issues.add(QualityIssue(
         type: 'performance',
         severity: Severity.warning,
-        message: 'Excessive setState calls ($setStateCount > $maxSetStateCalls)',
+        message:
+            'Excessive setState calls ($setStateCount > $maxSetStateCalls)',
         file: file,
         app: app,
         line: null,
@@ -380,10 +400,11 @@ Examples:
       ));
     }
   }
-  
-  Future<void> _checkMemoryLeaks(String content, String file, String app) async {
-    if (content.contains('Controller') && 
-        content.contains('initState') && 
+
+  Future<void> _checkMemoryLeaks(
+      String content, String file, String app) async {
+    if (content.contains('Controller') &&
+        content.contains('initState') &&
         !content.contains('dispose')) {
       issues.add(QualityIssue(
         type: 'memory_leak',
@@ -395,7 +416,8 @@ Examples:
         data: {},
       ));
     }
-    if (content.contains('StreamSubscription') && !content.contains('cancel()')) {
+    if (content.contains('StreamSubscription') &&
+        !content.contains('cancel()')) {
       issues.add(QualityIssue(
         type: 'memory_leak',
         severity: Severity.critical,
@@ -407,8 +429,9 @@ Examples:
       ));
     }
   }
-  
-  Future<void> _checkUnnecessaryRebuilds(String content, String file, String app) async {
+
+  Future<void> _checkUnnecessaryRebuilds(
+      String content, String file, String app) async {
     final widgetMatches = RegExp(r'return\s+(\w+)\s*\(').allMatches(content);
     for (Match match in widgetMatches) {
       final widgetCall = match.group(0)!;
@@ -425,15 +448,17 @@ Examples:
       }
     }
   }
-  
-  Future<void> _checkHardcodedSecrets(String content, String file, String app) async {
+
+  Future<void> _checkHardcodedSecrets(
+      String content, String file, String app) async {
     final patterns = <String, RegExp>{
       'stripe_key': RegExp(r'[sp]k_(live|test)_[A-Za-z0-9]{20,}'),
       'google_api': RegExp(r'AIza[A-Za-z0-9_-]{35}'),
       'generic_hash': RegExp(r'[0-9a-f]{32}'),
-      'password_hardcoded': RegExp(r'password.*=.*[a-zA-Z0-9]{8,}', caseSensitive: false),
+      'password_hardcoded':
+          RegExp(r'password.*=.*[a-zA-Z0-9]{8,}', caseSensitive: false),
     };
-    
+
     for (String patternName in patterns.keys) {
       final pattern = patterns[patternName]!;
       final matches = pattern.allMatches(content);
@@ -447,14 +472,16 @@ Examples:
           line: _getLineNumber(content, match.start),
           data: {
             'pattern_type': patternName,
-            'match_preview': '${match.group(0)!.substring(0, min(20, match.group(0)!.length))}...'
+            'match_preview':
+                '${match.group(0)!.substring(0, min(20, match.group(0)!.length))}...'
           },
         ));
       }
     }
   }
-  
-  Future<void> _checkInputValidation(String content, String file, String app) async {
+
+  Future<void> _checkInputValidation(
+      String content, String file, String app) async {
     if (content.contains('TextField') && !content.contains('validator')) {
       issues.add(QualityIssue(
         type: 'input_validation',
@@ -467,14 +494,16 @@ Examples:
       ));
     }
   }
-  
-  Future<void> _checkDataExposure(String content, String file, String app) async {
+
+  Future<void> _checkDataExposure(
+      String content, String file, String app) async {
     if (content.contains('print(') && !file.contains('test/')) {
       final printCount = RegExp(r'print\s*\(').allMatches(content).length;
       issues.add(QualityIssue(
         type: 'data_exposure',
         severity: Severity.warning,
-        message: 'Print statements in production code ($printCount occurrences)',
+        message:
+            'Print statements in production code ($printCount occurrences)',
         file: file,
         app: app,
         line: null,
@@ -482,11 +511,11 @@ Examples:
       ));
     }
   }
-  
+
   int _findWidgetEnd(String content, int start) {
     int braceCount = 0;
     bool inBraces = false;
-    
+
     for (int i = start; i < content.length; i++) {
       if (content[i] == '{') {
         inBraces = true;
@@ -500,20 +529,20 @@ Examples:
     }
     return content.length;
   }
-  
+
   int _findMethodEnd(String content, int start) {
     return _findWidgetEnd(content, start);
   }
-  
+
   int _getLineNumber(String content, int position) {
     return content.substring(0, position).split('\n').length;
   }
-  
+
   bool _isStaticWidget(String widgetCall) {
     final staticWidgets = ['Text', 'Icon', 'Container', 'SizedBox', 'Padding'];
     return staticWidgets.any((widget) => widgetCall.contains(widget));
   }
-  
+
   Future<void> _generateReport() async {
     switch (reportFormat) {
       case 'json':
@@ -526,41 +555,42 @@ Examples:
         _generateConsoleReport();
     }
   }
-  
+
   void _generateConsoleReport() {
     print('\n📊 QUALITY GATES REPORT');
     print('=' * 60);
-    
+
     final grouped = _groupIssuesBySeverity();
-    
+
     for (Severity severity in Severity.values) {
       final severityIssues = grouped[severity] ?? [];
       if (severityIssues.isNotEmpty) {
         final icon = _getSeverityIcon(severity);
         final color = _getSeverityColor(severity);
-        print('\n$icon $color${severity.name.toUpperCase()}: ${severityIssues.length} issues');
-        
+        print(
+            '\n$icon $color${severity.name.toUpperCase()}: ${severityIssues.length} issues');
+
         for (QualityIssue issue in severityIssues.take(10)) {
           print('  • ${issue.app}${issue.file}: ${issue.message}');
         }
-        
+
         if (severityIssues.length > 10) {
           print('  ... and ${severityIssues.length - 10} more');
         }
       }
     }
-    
+
     print('\n📈 SUMMARY');
     print('Total issues: ${issues.length}');
     print('Critical: ${grouped[Severity.critical]?.length ?? 0}');
     print('Warning: ${grouped[Severity.warning]?.length ?? 0}');
     print('Info: ${grouped[Severity.info]?.length ?? 0}');
-    
+
     if (issues.isEmpty) {
       print('\n🎉 All quality gates passed!');
     }
   }
-  
+
   Future<void> _generateJsonReport() async {
     final report = {
       'timestamp': DateTime.now().toIso8601String(),
@@ -576,22 +606,23 @@ Examples:
       'issues': issues.map((i) => i.toJson()).toList(),
       'metrics': metrics,
     };
-    
+
     final file = File('quality_gates_report.json');
-    await file.writeAsString(const JsonEncoder.withIndent('  ').convert(report));
+    await file
+        .writeAsString(const JsonEncoder.withIndent('  ').convert(report));
     print('📄 JSON report generated: ${file.path}');
   }
-  
+
   Future<void> _generateHtmlReport() async {
     final html = _buildHtmlReport();
     final file = File('quality_gates_report.html');
     await file.writeAsString(html);
     print('📄 HTML report generated: ${file.path}');
   }
-  
+
   String _buildHtmlReport() {
     final grouped = _groupIssuesBySeverity();
-    
+
     return '''
 <!DOCTYPE html>
 <html>
@@ -649,16 +680,17 @@ Examples:
 </html>
 ''';
   }
-  
+
   String _buildIssuesHtml(Map<Severity, List<QualityIssue>> grouped) {
     StringBuffer html = StringBuffer();
-    
+
     for (Severity severity in Severity.values) {
       final severityIssues = grouped[severity] ?? [];
       if (severityIssues.isNotEmpty) {
         html.writeln('<div class="issues-section">');
-        html.writeln('<h2>${severity.name.toUpperCase()} (${severityIssues.length})</h2>');
-        
+        html.writeln(
+            '<h2>${severity.name.toUpperCase()} (${severityIssues.length})</h2>');
+
         for (QualityIssue issue in severityIssues) {
           html.writeln('<div class="issue-item ${severity.name}">');
           html.writeln('<div class="issue-header">${issue.message}</div>');
@@ -668,24 +700,24 @@ Examples:
           html.writeln('</div>');
           html.writeln('</div>');
         }
-        
+
         html.writeln('</div>');
       }
     }
-    
+
     return html.toString();
   }
-  
+
   Map<Severity, List<QualityIssue>> _groupIssuesBySeverity() {
     Map<Severity, List<QualityIssue>> grouped = {};
-    
+
     for (QualityIssue issue in issues) {
       grouped.putIfAbsent(issue.severity, () => []).add(issue);
     }
-    
+
     return grouped;
   }
-  
+
   String _getSeverityIcon(Severity severity) {
     switch (severity) {
       case Severity.critical:
@@ -696,7 +728,7 @@ Examples:
         return '🔵';
     }
   }
-  
+
   String _getSeverityColor(Severity severity) {
     switch (severity) {
       case Severity.critical:
@@ -719,7 +751,7 @@ class QualityIssue {
   final String app;
   final int? line;
   final Map<String, dynamic> data;
-  
+
   QualityIssue({
     required this.type,
     required this.severity,
@@ -729,17 +761,18 @@ class QualityIssue {
     this.line,
     required this.data,
   });
-  
+
   Map<String, dynamic> toJson() => {
-    'type': type,
-    'severity': severity.name,
-    'message': message,
-    'file': file,
-    'app': app,
-    'line': line,
-    'data': data,
-  };
+        'type': type,
+        'severity': severity.name,
+        'message': message,
+        'file': file,
+        'app': app,
+        'line': line,
+        'data': data,
+      };
 }
+
 Future<void> main(List<String> args) async {
   await QualityGates.main(args);
 }

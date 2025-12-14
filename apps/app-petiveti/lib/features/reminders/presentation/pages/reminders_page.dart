@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/reminders_constants.dart';
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/reminder.dart';
 import '../providers/reminders_providers.dart';
 import '../widgets/add_reminder_dialog.dart';
@@ -49,82 +50,53 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
     final state = ref.watch(remindersProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(RemindersConstants.pageTitle),
-        actions: [
-          Semantics(
-            label: RemindersConstants.refreshLabel,
-            hint: RemindersConstants.refreshHint,
-            child: IconButton(
-              icon: const Icon(RemindersIcons.refreshIcon),
-              onPressed: _loadReminders,
+      body: SafeArea(
+        child: Column(
+          children: [
+            PetivetiPageHeader(
+              icon: RemindersIcons.listIcon,
+              title: RemindersConstants.pageTitle,
+              subtitle: 'Gerencie seus lembretes',
+              showBackButton: false,
+              actions: [
+                _buildHeaderAction(
+                  icon: RemindersIcons.refreshIcon,
+                  onTap: _loadReminders,
+                  tooltip: RemindersConstants.refreshLabel,
+                ),
+              ],
             ),
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: [
-            Semantics(
-              label: RemindersSemantics.tabLabel(
-                RemindersConstants.todayTabText,
-                state.todayReminders.length,
-              ),
-              child: Tab(
-                text:
-                    '${RemindersConstants.todayTabText} (${state.todayReminders.length})',
-                icon: const Icon(RemindersIcons.todayIcon),
-              ),
-            ),
-            Semantics(
-              label: RemindersSemantics.tabLabel(
-                RemindersConstants.overdueTabText,
-                state.overdueReminders.length,
-              ),
-              child: Tab(
-                text:
-                    '${RemindersConstants.overdueTabText} (${state.overdueReminders.length})',
-                icon: const Icon(RemindersIcons.warningIcon),
-              ),
-            ),
-            Semantics(
-              label: RemindersSemantics.tabLabel(
-                RemindersConstants.allTabText,
-                state.reminders.length,
-              ),
-              child: Tab(
-                text:
-                    '${RemindersConstants.allTabText} (${state.reminders.length})',
-                icon: const Icon(RemindersIcons.listIcon),
-              ),
+            _buildTabBar(state),
+            Expanded(
+              child: state.isLoading
+                  ? Semantics(
+                      label: RemindersConstants.loadingLabel,
+                      child: const Center(child: CircularProgressIndicator()),
+                    )
+                  : TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _buildRemindersList(
+                          state.todayReminders,
+                          RemindersConstants.emptyTodayMessage,
+                          RemindersConstants.todayListLabel,
+                        ),
+                        _buildRemindersList(
+                          state.overdueReminders,
+                          RemindersConstants.emptyOverdueMessage,
+                          RemindersConstants.overdueListLabel,
+                        ),
+                        _buildRemindersList(
+                          state.reminders,
+                          RemindersConstants.emptyAllMessage,
+                          RemindersConstants.allListLabel,
+                        ),
+                      ],
+                    ),
             ),
           ],
         ),
       ),
-      body: state.isLoading
-          ? Semantics(
-              label: RemindersConstants.loadingLabel,
-              child: const Center(child: CircularProgressIndicator()),
-            )
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _buildRemindersList(
-                  state.todayReminders,
-                  RemindersConstants.emptyTodayMessage,
-                  RemindersConstants.todayListLabel,
-                ),
-                _buildRemindersList(
-                  state.overdueReminders,
-                  RemindersConstants.emptyOverdueMessage,
-                  RemindersConstants.overdueListLabel,
-                ),
-                _buildRemindersList(
-                  state.reminders,
-                  RemindersConstants.emptyAllMessage,
-                  RemindersConstants.allListLabel,
-                ),
-              ],
-            ),
       floatingActionButton: Semantics(
         label: RemindersConstants.addReminderLabel,
         hint: RemindersConstants.addReminderHint,
@@ -132,6 +104,57 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
           onPressed: () => _showAddReminderDialog(context),
           child: const Icon(RemindersIcons.addIcon),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required IconData icon,
+    required VoidCallback onTap,
+    required String tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar(RemindersState state) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        tabs: [
+          Tab(
+            text: '${RemindersConstants.todayTabText} (${state.todayReminders.length})',
+            icon: const Icon(RemindersIcons.todayIcon),
+          ),
+          Tab(
+            text: '${RemindersConstants.overdueTabText} (${state.overdueReminders.length})',
+            icon: const Icon(RemindersIcons.warningIcon),
+          ),
+          Tab(
+            text: '${RemindersConstants.allTabText} (${state.reminders.length})',
+            icon: const Icon(RemindersIcons.listIcon),
+          ),
+        ],
       ),
     );
   }

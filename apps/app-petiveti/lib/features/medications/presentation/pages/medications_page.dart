@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/medications_constants.dart';
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
 import '../widgets/add_medication_dialog.dart';
@@ -172,178 +173,58 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     final filteredMedications = ref.watch(filteredMedicationsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.animalId != null
-              ? MedicationsConstants.petMedicationsTitle
-              : MedicationsConstants.allMedicationsTitle,
-        ),
-        actions: [
-          Semantics(
-            label: 'Atualizar lista de medicamentos',
-            hint: 'Toque para recarregar a lista de medicamentos',
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _refreshMedications,
-            ),
-          ),
-          Semantics(
-            label: 'Adicionar novo medicamento',
-            hint: 'Toque para cadastrar um novo medicamento',
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () => _navigateToAddMedication(context),
-            ),
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: [
-            Tab(
-              child: Semantics(
-                label:
-                    'Aba todos os medicamentos, ${medicationsState.medications.length} itens',
-                hint: 'Toque para ver todos os medicamentos',
-                button: true,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.medication,
-                      size: MedicationsConstants.tabIconSize,
-                    ),
-                    const SizedBox(width: 8),
-                    Text('Todos (${medicationsState.medications.length})'),
-                  ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            PetivetiPageHeader(
+              icon: Icons.medication,
+              title: widget.animalId != null
+                  ? MedicationsConstants.petMedicationsTitle
+                  : MedicationsConstants.allMedicationsTitle,
+              subtitle: 'Controle de medicamentos',
+              showBackButton: true,
+              actions: [
+                _buildHeaderAction(
+                  icon: Icons.refresh,
+                  onTap: _refreshMedications,
+                  tooltip: 'Atualizar',
                 ),
-              ),
-            ),
-            Tab(
-              child: Semantics(
-                label:
-                    'Aba medicamentos ativos, ${medicationsState.activeMedications.length} itens',
-                hint: 'Toque para ver apenas os medicamentos ativos',
-                button: true,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.play_circle_filled,
-                      size: MedicationsConstants.tabIconSize,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Ativos (${medicationsState.activeMedications.length})',
-                    ),
-                  ],
+                _buildHeaderAction(
+                  icon: Icons.add,
+                  onTap: () => _navigateToAddMedication(context),
+                  tooltip: 'Adicionar',
                 ),
-              ),
+              ],
             ),
-            Tab(
-              child: Semantics(
-                label:
-                    'Aba medicamentos vencendo, ${medicationsState.expiringMedications.length} itens',
-                hint: 'Toque para ver medicamentos próximos ao vencimento',
-                button: true,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.warning,
-                      size: MedicationsConstants.tabIconSize,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Vencendo (${medicationsState.expiringMedications.length})',
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Tab(
-              child: Semantics(
-                label: 'Aba de estatísticas de medicamentos',
-                hint:
-                    'Toque para ver estatísticas e relatórios dos medicamentos',
-                button: true,
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.analytics,
-                      size: MedicationsConstants.tabIconSize,
-                    ),
-                    SizedBox(width: 8),
-                    Text('Estatísticas'),
-                  ],
-                ),
+            _buildTabBar(medicationsState),
+            _buildSearchAndFilters(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildMedicationsList(
+                    medications: filteredMedications,
+                    isLoading: medicationsState.isLoading,
+                    error: medicationsState.error,
+                  ),
+                  _buildMedicationsList(
+                    medications: medicationsState.activeMedications,
+                    isLoading: medicationsState.isLoading,
+                    error: medicationsState.error,
+                    emptyMessage: MedicationsConstants.noActiveMedications,
+                  ),
+                  _buildMedicationsList(
+                    medications: medicationsState.expiringMedications,
+                    isLoading: medicationsState.isLoading,
+                    error: medicationsState.error,
+                    emptyMessage: MedicationsConstants.noExpiringMedications,
+                  ),
+                  const MedicationStats(),
+                ],
               ),
             ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(
-              MedicationsConstants.pageContentPadding,
-            ),
-            child: Column(
-              children: [
-                Semantics(
-                  label: 'Campo de busca de medicamentos',
-                  hint: 'Digite o nome do medicamento que você está procurando',
-                  textField: true,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: const InputDecoration(
-                      hintText: MedicationsConstants.searchHintText,
-                      prefixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      ref
-                          .read(medicationSearchQueryProvider.notifier)
-                          .set(value);
-                    },
-                  ),
-                ),
-                const SizedBox(
-                  height: MedicationsConstants.searchFiltersSpacing,
-                ),
-                const MedicationFilters(),
-              ],
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildMedicationsList(
-                  medications: filteredMedications,
-                  isLoading: medicationsState.isLoading,
-                  error: medicationsState.error,
-                ),
-                _buildMedicationsList(
-                  medications: medicationsState.activeMedications,
-                  isLoading: medicationsState.isLoading,
-                  error: medicationsState.error,
-                  emptyMessage: MedicationsConstants.noActiveMedications,
-                ),
-                _buildMedicationsList(
-                  medications: medicationsState.expiringMedications,
-                  isLoading: medicationsState.isLoading,
-                  error: medicationsState.error,
-                  emptyMessage: MedicationsConstants.noExpiringMedications,
-                ),
-                const MedicationStats(),
-              ],
-            ),
-          ),
-        ],
       ),
       floatingActionButton: Semantics(
         label: 'Adicionar novo medicamento',
@@ -354,6 +235,114 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
           tooltip: MedicationsConstants.addMedicationTooltip,
           child: const Icon(Icons.add),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required IconData icon,
+    required VoidCallback onTap,
+    required String tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabBar(MedicationsState medicationsState) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        tabs: [
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.medication, size: MedicationsConstants.tabIconSize),
+                const SizedBox(width: 8),
+                Text('Todos (${medicationsState.medications.length})'),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.play_circle_filled, size: MedicationsConstants.tabIconSize),
+                const SizedBox(width: 8),
+                Text('Ativos (${medicationsState.activeMedications.length})'),
+              ],
+            ),
+          ),
+          Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.warning, size: MedicationsConstants.tabIconSize),
+                const SizedBox(width: 8),
+                Text('Vencendo (${medicationsState.expiringMedications.length})'),
+              ],
+            ),
+          ),
+          const Tab(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.analytics, size: MedicationsConstants.tabIconSize),
+                SizedBox(width: 8),
+                Text('Estatísticas'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchAndFilters() {
+    return Padding(
+      padding: const EdgeInsets.all(MedicationsConstants.pageContentPadding),
+      child: Column(
+        children: [
+          Semantics(
+            label: 'Campo de busca de medicamentos',
+            hint: 'Digite o nome do medicamento que você está procurando',
+            textField: true,
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: MedicationsConstants.searchHintText,
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                ref.read(medicationSearchQueryProvider.notifier).set(value);
+              },
+            ),
+          ),
+          const SizedBox(height: MedicationsConstants.searchFiltersSpacing),
+          const MedicationFilters(),
+        ],
       ),
     );
   }

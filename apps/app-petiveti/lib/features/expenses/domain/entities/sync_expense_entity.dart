@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as fs;
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity para sincronização de Expenses com Firebase
-class ExpenseEntity extends Equatable {
-  final String? id; // Local ID
+class ExpenseEntity extends BaseSyncEntity {
   final String? firebaseId;
-  final String userId;
   final int animalId;
   final String title;
   final String description;
@@ -23,20 +21,10 @@ class ExpenseEntity extends Equatable {
   final bool isRecurring;
   final String? recurrenceType;
 
-  // Metadata
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-  final bool isDeleted;
-
-  // Sync fields
-  final DateTime? lastSyncAt;
-  final bool isDirty;
-  final int version;
-
   const ExpenseEntity({
-    this.id,
+    required super.id,
     this.firebaseId,
-    required this.userId,
+    required super.userId,
     required this.animalId,
     required this.title,
     required this.description,
@@ -53,19 +41,19 @@ class ExpenseEntity extends Equatable {
     this.isPaid = true,
     this.isRecurring = false,
     this.recurrenceType,
-    required this.createdAt,
-    this.updatedAt,
-    this.isDeleted = false,
-    this.lastSyncAt,
-    this.isDirty = false,
-    this.version = 1,
+    super.createdAt,
+    super.updatedAt,
+    super.isDeleted = false,
+    super.lastSyncAt,
+    super.isDirty = false,
+    super.version = 1,
+    super.moduleName,
   });
 
   @override
   List<Object?> get props => [
-    id,
+    ...super.props,
     firebaseId,
-    userId,
     animalId,
     title,
     description,
@@ -82,13 +70,90 @@ class ExpenseEntity extends Equatable {
     isPaid,
     isRecurring,
     recurrenceType,
-    createdAt,
-    updatedAt,
-    isDeleted,
-    lastSyncAt,
-    isDirty,
-    version,
   ];
+
+  @override
+  ExpenseEntity copyWith({
+    String? id,
+    String? firebaseId,
+    String? userId,
+    int? animalId,
+    String? title,
+    String? description,
+    double? amount,
+    String? category,
+    String? paymentMethod,
+    DateTime? expenseDate,
+    String? veterinaryClinic,
+    String? veterinarianName,
+    String? invoiceNumber,
+    String? notes,
+    String? veterinarian,
+    String? receiptNumber,
+    bool? isPaid,
+    bool? isRecurring,
+    String? recurrenceType,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    bool? isDeleted,
+    DateTime? lastSyncAt,
+    bool? isDirty,
+    int? version,
+    String? moduleName,
+  }) {
+    return ExpenseEntity(
+      id: id ?? this.id,
+      firebaseId: firebaseId ?? this.firebaseId,
+      userId: userId ?? this.userId,
+      animalId: animalId ?? this.animalId,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      amount: amount ?? this.amount,
+      category: category ?? this.category,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
+      expenseDate: expenseDate ?? this.expenseDate,
+      veterinaryClinic: veterinaryClinic ?? this.veterinaryClinic,
+      veterinarianName: veterinarianName ?? this.veterinarianName,
+      invoiceNumber: invoiceNumber ?? this.invoiceNumber,
+      notes: notes ?? this.notes,
+      veterinarian: veterinarian ?? this.veterinarian,
+      receiptNumber: receiptNumber ?? this.receiptNumber,
+      isPaid: isPaid ?? this.isPaid,
+      isRecurring: isRecurring ?? this.isRecurring,
+      recurrenceType: recurrenceType ?? this.recurrenceType,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDeleted: isDeleted ?? this.isDeleted,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+      isDirty: isDirty ?? this.isDirty,
+      version: version ?? this.version,
+      moduleName: moduleName ?? this.moduleName,
+    );
+  }
+
+  @override
+  ExpenseEntity markAsDirty() => copyWith(isDirty: true);
+
+  @override
+  ExpenseEntity markAsSynced({DateTime? syncTime}) => copyWith(
+    isDirty: false,
+    lastSyncAt: syncTime ?? DateTime.now(),
+  );
+
+  @override
+  ExpenseEntity markAsDeleted() => copyWith(isDeleted: true, isDirty: true);
+
+  @override
+  ExpenseEntity incrementVersion() => copyWith(version: version + 1);
+
+  @override
+  ExpenseEntity withUserId(String userId) => copyWith(userId: userId);
+
+  @override
+  ExpenseEntity withModule(String moduleName) => copyWith(moduleName: moduleName);
+
+  @override
+  Map<String, dynamic> toFirebaseMap() => toFirestore();
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -109,7 +174,7 @@ class ExpenseEntity extends Equatable {
       'isPaid': isPaid,
       'isRecurring': isRecurring,
       'recurrenceType': recurrenceType,
-      'createdAt': fs.Timestamp.fromDate(createdAt),
+      'createdAt': createdAt != null ? fs.Timestamp.fromDate(createdAt!) : fs.Timestamp.now(),
       'updatedAt': updatedAt != null ? fs.Timestamp.fromDate(updatedAt!) : null,
       'isDeleted': isDeleted,
       'lastSyncAt': fs.Timestamp.now(),
@@ -122,9 +187,9 @@ class ExpenseEntity extends Equatable {
     String documentId,
   ) {
     return ExpenseEntity(
-      id: null,
+      id: data['localId'] as String? ?? documentId,
       firebaseId: documentId,
-      userId: data['userId'] as String,
+      userId: data['userId'] as String? ?? '',
       animalId: data['animalId'] as int,
       title: data['title'] as String,
       description: data['description'] as String,
@@ -141,7 +206,7 @@ class ExpenseEntity extends Equatable {
       isPaid: data['isPaid'] as bool? ?? true,
       isRecurring: data['isRecurring'] as bool? ?? false,
       recurrenceType: data['recurrenceType'] as String?,
-      createdAt: (data['createdAt'] as fs.Timestamp).toDate(),
+      createdAt: (data['createdAt'] as fs.Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as fs.Timestamp?)?.toDate(),
       isDeleted: data['isDeleted'] as bool? ?? false,
       lastSyncAt: (data['lastSyncAt'] as fs.Timestamp?)?.toDate(),

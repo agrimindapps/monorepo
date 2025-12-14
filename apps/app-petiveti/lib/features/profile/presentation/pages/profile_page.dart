@@ -1,31 +1,52 @@
 import 'package:core/core.dart' hide User, AuthState, AuthStatus, Column;
 import 'package:flutter/material.dart';
 
-import '../../../../shared/constants/profile_constants.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
-import '../providers/profile_providers.dart';
+import '../widgets/account_actions_section.dart';
+import '../widgets/account_info_section.dart';
+import '../widgets/profile_header.dart';
+import '../widgets/profile_subscription_section.dart';
 import '../widgets/profile_state_handlers.dart';
 
 /// Profile page widget for displaying user information and settings
 ///
+/// Padronizado com app-plantis para consistência visual
+/// 
 /// **SOLID Principles:**
 /// - **Single Responsibility**: Only handles UI rendering
 /// - **Dependency Inversion**: Depends on ProfileActionsService abstraction
 /// - **Open/Closed**: Business logic extracted to service
-class ProfilePage extends ConsumerWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends ConsumerState<ProfilePage> {
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final isAnonymous = authState.status != AuthStatus.authenticated;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Perfil'), centerTitle: true),
-      body: _buildBody(context, ref, authState),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header com gradiente
+            ProfileHeader(isAnonymous: isAnonymous),
+            
+            // Conteúdo scrollável
+            Expanded(
+              child: _buildBody(context, authState),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildBody(BuildContext context, WidgetRef ref, AuthState authState) {
+  Widget _buildBody(BuildContext context, AuthState authState) {
     if (authState.status == AuthStatus.loading) {
       return ProfileStateHandlers.buildLoadingState(context);
     }
@@ -33,7 +54,7 @@ class ProfilePage extends ConsumerWidget {
       return ProfileStateHandlers.buildErrorState(
         context: context,
         error: authState.error,
-        onRetry: () => _retryLoadProfile(ref),
+        onRetry: () => ref.invalidate(authProvider),
       );
     }
     if (authState.status == AuthStatus.unauthenticated ||
@@ -43,109 +64,33 @@ class ProfilePage extends ConsumerWidget {
         onSignIn: () => context.push('/login'),
       );
     }
-    
-    final actionsService = ref.read(profileActionsServiceProvider);
-    
-    return Semantics(
-      label: 'Página de perfil do usuário',
-      hint: 'Visualize e gerencie suas informações de perfil e configurações',
-      child: SingleChildScrollView(
-        padding: ProfileConstants.pageContentPadding,
-        child: Column(
-          children: [
-            ProfileStateHandlers.buildProfileHeader(context, authState.user!),
-            const SizedBox(height: ProfileConstants.headerTopSpacing),
-            _buildMenuSection(context, ProfileConstants.financialSectionTitle, [
-              _buildMenuItem(
-                context,
-                ProfileConstants.expensesMenuTitle,
-                ProfileIcons.expensesIcon,
-                () => context.push(ProfileConstants.expensesRoute),
-              ),
-              _buildMenuItem(
-                context,
-                ProfileConstants.subscriptionMenuTitle,
-                ProfileIcons.subscriptionIcon,
-                () => context.push(ProfileConstants.subscriptionRoute),
-              ),
-            ]),
+
+    final isAnonymous = authState.status != AuthStatus.authenticated;
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Seção de informações da conta
+          const AccountInfoSection(),
+
+          const SizedBox(height: 24),
+
+          // Seção de assinatura (apenas para usuários logados)
+          if (!isAnonymous) ...[
+            const ProfileSubscriptionSection(),
             const SizedBox(height: 24),
-            _buildMenuSection(context, ProfileConstants.settingsSectionTitle, [
-              _buildMenuItem(
-                context,
-                'Notificações',
-                Icons.notifications,
-                () => actionsService.showNotificationsSettings(context),
-              ),
-              _buildMenuItem(
-                context,
-                'Tema',
-                Icons.palette,
-                () => actionsService.showThemeSettings(context),
-              ),
-              _buildMenuItem(
-                context,
-                'Idioma',
-                Icons.language,
-                () => actionsService.showLanguageSettings(context),
-              ),
-              _buildMenuItem(
-                context,
-                'Backup e Sincronização',
-                Icons.cloud_sync,
-                () => actionsService.showBackupSettings(context),
-              ),
-            ]),
-            const SizedBox(height: 24),
-            _buildMenuSection(context, ProfileConstants.supportSectionTitle, [
-              _buildMenuItem(
-                context,
-                'Central de Ajuda',
-                Icons.help,
-                () => actionsService.showHelp(context),
-              ),
-              _buildMenuItem(
-                context,
-                'Contatar Suporte',
-                Icons.support_agent,
-                () => actionsService.contactSupport(context),
-              ),
-              _buildMenuItem(
-                context,
-                'Sobre o App',
-                Icons.info,
-                () => actionsService.showAbout(context),
-              ),
-            ]),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: Semantics(
-                label: 'Sair da conta do usuário',
-                hint: 'Faz logout e retorna para a tela de login',
-                child: OutlinedButton.icon(
-                  onPressed: () => _showLogoutDialog(context, ref),
-                  icon: Icon(
-                    Icons.logout,
-                    color: Theme.of(context).colorScheme.error,
-                  ),
-                  label: Text(
-                    'Sair da Conta',
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Semantics(
+          ],
+
+          // Seção de ações da conta
+          const AccountActionsSection(),
+
+          const SizedBox(height: 24),
+
+          // Versão do app
+          Center(
+            child: Semantics(
               label: 'Informações da versão do aplicativo',
               child: FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
@@ -156,83 +101,17 @@ class ProfilePage extends ConsumerWidget {
                   return Text(
                     version,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   );
                 },
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// **Retry Profile Loading**
-  ///
-  /// Attempts to reload the user profile data when an error occurs.
-  void _retryLoadProfile(WidgetRef ref) {
-    ref.invalidate(authProvider);
-  }
-
-  Widget _buildMenuSection(
-    BuildContext context,
-    String title,
-    List<Widget> items,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 8),
-          child: Semantics(
-            label: 'Cabeçalho da seção $title',
-            header: true,
-            child: Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
           ),
-        ),
-        Semantics(
-          label: 'Lista de opções da seção $title',
-          child: Card(child: Column(children: items)),
-        ),
-      ],
-    );
-  }
 
-  Widget _buildMenuItem(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
-    return Semantics(
-      label: 'Menu $title',
-      hint: 'Toque para acessar $title',
-      button: true,
-      child: ListTile(
-        leading: Semantics(label: 'Ícone de $title', child: Icon(icon)),
-        title: Text(title),
-        trailing: Semantics(
-          label: 'Indicador de navegação',
-          child: const Icon(Icons.chevron_right),
-        ),
-        onTap: onTap,
+          const SizedBox(height: 100),
+        ],
       ),
-    );
-  }
-
-  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
-    ref.read(profileActionsServiceProvider).showLogoutDialog(
-      context: context,
-      onConfirm: () {
-        ref.read(authProvider.notifier).signOut();
-        context.go('/login');
-      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/weight.dart';
 import '../providers/weights_provider.dart';
@@ -37,134 +38,160 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     final animalsState = ref.watch(animalsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Controle de Peso'),
-        actions: [
-          if (animalsState.animals.isNotEmpty)
-            PopupMenuButton<String?>(
-              icon: Icon(
-                _selectedAnimalId != null
-                    ? Icons.filter_alt
-                    : Icons.filter_alt_outlined,
-                color: _selectedAnimalId != null
-                    ? theme.colorScheme.primary
-                    : null,
-              ),
-              onSelected: (animalId) {
-                setState(() {
-                  _selectedAnimalId = animalId;
-                });
-
-                if (animalId != null) {
-                  ref
-                      .read(weightsProvider.notifier)
-                      .loadWeightsByAnimal(animalId);
-                } else {
-                  ref.read(weightsProvider.notifier).loadWeights();
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem<String?>(
-                  value: null,
-                  child: Row(
-                    children: [
-                      Icon(Icons.pets),
-                      SizedBox(width: 8),
-                      Text('Todos os animais'),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                ...animalsState.animals.map(
-                  (animal) => PopupMenuItem<String>(
-                    value: animal.id,
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 12,
-                          backgroundColor: theme.colorScheme.primary.withAlpha(
-                            51,
-                          ),
-                          child: Text(
-                            animal.name.substring(0, 1).toUpperCase(),
-                            style: TextStyle(
-                              color: theme.colorScheme.primary,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(animal.name)),
-                        if (_selectedAnimalId == animal.id)
-                          Icon(
-                            Icons.check,
-                            color: theme.colorScheme.primary,
-                            size: 18,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            PetivetiPageHeader(
+              icon: Icons.monitor_weight,
+              title: 'Controle de Peso',
+              subtitle: 'Acompanhe o peso dos pets',
+              showBackButton: true,
+              actions: [
+                if (animalsState.animals.isNotEmpty)
+                  _buildAnimalFilterPopup(theme, animalsState),
+                _buildMoreOptionsPopup(weightsState),
               ],
             ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (action) {
-              switch (action) {
-                case 'sort':
-                  _showSortMenu(context, weightsState);
-                  break;
-                case 'charts':
-                  _navigateToCharts(context);
-                  break;
-                case 'goals':
-                  _navigateToGoals(context);
-                  break;
-                case 'correlation':
-                  _navigateToCorrelation(context);
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'sort',
-                child: ListTile(
-                  leading: Icon(Icons.sort),
-                  title: Text('Ordenar'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'charts',
-                child: ListTile(
-                  leading: Icon(Icons.show_chart),
-                  title: Text('Gráficos Avançados'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'goals',
-                child: ListTile(
-                  leading: Icon(Icons.track_changes),
-                  title: Text('Metas de Peso'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'correlation',
-                child: ListTile(
-                  leading: Icon(Icons.fitness_center),
-                  title: Text('Correlação BCS'),
-                ),
-              ),
-            ],
-          ),
-        ],
+            Expanded(child: _buildBody(context, weightsState, animalsState)),
+          ],
+        ),
       ),
-      body: _buildBody(context, weightsState, animalsState),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddWeight(context),
         tooltip: 'Adicionar Registro de Peso',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  Widget _buildAnimalFilterPopup(ThemeData theme, AnimalsState animalsState) {
+    return PopupMenuButton<String?>(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Icon(
+          _selectedAnimalId != null
+              ? Icons.filter_alt
+              : Icons.filter_alt_outlined,
+          color: Colors.white,
+          size: 20,
+        ),
+      ),
+      onSelected: (animalId) {
+        setState(() {
+          _selectedAnimalId = animalId;
+        });
+
+        if (animalId != null) {
+          ref.read(weightsProvider.notifier).loadWeightsByAnimal(animalId);
+        } else {
+          ref.read(weightsProvider.notifier).loadWeights();
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem<String?>(
+          value: null,
+          child: Row(
+            children: [
+              Icon(Icons.pets),
+              SizedBox(width: 8),
+              Text('Todos os animais'),
+            ],
+          ),
+        ),
+        const PopupMenuDivider(),
+        ...animalsState.animals.map(
+          (animal) => PopupMenuItem<String>(
+            value: animal.id,
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: theme.colorScheme.primary.withAlpha(51),
+                  child: Text(
+                    animal.name.substring(0, 1).toUpperCase(),
+                    style: TextStyle(
+                      color: theme.colorScheme.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(animal.name)),
+                if (_selectedAnimalId == animal.id)
+                  Icon(
+                    Icons.check,
+                    color: theme.colorScheme.primary,
+                    size: 18,
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMoreOptionsPopup(WeightsState weightsState) {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
+      ),
+      onSelected: (action) {
+        switch (action) {
+          case 'sort':
+            _showSortMenu(context, weightsState);
+            break;
+          case 'charts':
+            _navigateToCharts(context);
+            break;
+          case 'goals':
+            _navigateToGoals(context);
+            break;
+          case 'correlation':
+            _navigateToCorrelation(context);
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'sort',
+          child: ListTile(
+            leading: Icon(Icons.sort),
+            title: Text('Ordenar'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'charts',
+          child: ListTile(
+            leading: Icon(Icons.show_chart),
+            title: Text('Gráficos Avançados'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'goals',
+          child: ListTile(
+            leading: Icon(Icons.track_changes),
+            title: Text('Metas de Peso'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'correlation',
+          child: ListTile(
+            leading: Icon(Icons.fitness_center),
+            title: Text('Correlação BCS'),
+          ),
+        ),
+      ],
     );
   }
 

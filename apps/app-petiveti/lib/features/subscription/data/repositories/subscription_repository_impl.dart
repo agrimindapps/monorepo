@@ -21,8 +21,8 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
   final ISubscriptionRepository _coreRepository;
   final ILocalStorageRepository _localStorageRepository;
   final SubscriptionErrorHandlingService _errorService;
-  final SubscriptionLocalRepository _subscriptionLocalRepository;
-  final AuthService _authService;
+  final SubscriptionLocalRepository? _subscriptionLocalRepository;
+  final AuthService? _authService;
 
   static const String _cacheKey = 'petiveti_premium_status';
 
@@ -99,28 +99,30 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
   Future<Either<Failure, bool?>> getCachedPremiumStatus() async {
     try {
       // Layer 1: Try Drift database (Secure & Offline)
-      try {
-        final userResult = await _authService.getCurrentUser();
-        await userResult.fold(
-          (failure) async {
-            // Ignore auth errors, fall through to layer 2
-          },
-          (user) async {
-            if (user != null) {
-              final localSub = await _subscriptionLocalRepository
-                  .getActiveSubscription(user.id);
-              if (localSub != null) {
-                final now = DateTime.now();
-                if (localSub.expirationDate == null ||
-                    localSub.expirationDate!.isAfter(now)) {
-                  return const Right(true);
+      if (_authService != null && _subscriptionLocalRepository != null) {
+        try {
+          final userResult = await _authService!.getCurrentUser();
+          await userResult.fold(
+            (failure) async {
+              // Ignore auth errors, fall through to layer 2
+            },
+            (user) async {
+              if (user != null) {
+                final localSub = await _subscriptionLocalRepository!
+                    .getActiveSubscription(user.id);
+                if (localSub != null) {
+                  final now = DateTime.now();
+                  if (localSub.expirationDate == null ||
+                      localSub.expirationDate!.isAfter(now)) {
+                    return const Right(true);
+                  }
                 }
               }
-            }
-          },
-        );
-      } catch (e) {
-        // Ignore auth/drift errors and fall back to shared prefs
+            },
+          );
+        } catch (e) {
+          // Ignore auth/drift errors and fall back to shared prefs
+        }
       }
 
       // Layer 2: Try SharedPreferences (fallback)

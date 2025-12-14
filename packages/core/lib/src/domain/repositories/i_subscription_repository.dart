@@ -73,6 +73,10 @@ abstract class ISubscriptionRepository {
   /// Para o app GasOMeter
   Future<Either<Failure, bool>> hasGasometerSubscription();
   Future<Either<Failure, List<ProductInfo>>> getGasometerProducts();
+
+  /// Para o app Petiveti
+  Future<Either<Failure, bool>> hasPetivetiSubscription();
+  Future<Either<Failure, List<ProductInfo>>> getPetivetiProducts();
 }
 
 /// Informações de um produto disponível para compra

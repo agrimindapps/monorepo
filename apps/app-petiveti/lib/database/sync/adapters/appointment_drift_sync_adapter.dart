@@ -7,7 +7,7 @@ import '../../tables/appointments_table.dart';
 
 /// Adapter de sincronização para Appointments
 class AppointmentDriftSyncAdapter
-    extends DriftSyncAdapterBase<dynamic, Appointment> {
+    extends DriftSyncAdapterBase<AppointmentEntity, Appointment> {
   AppointmentDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -89,39 +89,37 @@ class AppointmentDriftSyncAdapter
   }
 
   @override
-  Insertable<Appointment> entityToCompanion(dynamic entity) {
-    final appointmentEntity = entity as AppointmentEntity;
+  Insertable<Appointment> entityToCompanion(AppointmentEntity entity) {
     return AppointmentsCompanion(
-      id: appointmentEntity.id != null && appointmentEntity.id!.isNotEmpty
-          ? Value(int.parse(appointmentEntity.id!))
+      id: entity.id.isNotEmpty
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(appointmentEntity.firebaseId),
-      userId: Value(appointmentEntity.userId),
-      animalId: Value(appointmentEntity.animalId),
-      title: Value(appointmentEntity.title),
-      description: Value(appointmentEntity.description),
-      appointmentDateTime: Value(appointmentEntity.appointmentDateTime),
-      veterinarian: Value(appointmentEntity.veterinarian),
-      location: Value(appointmentEntity.location),
-      notes: Value(appointmentEntity.notes),
-      status: Value(appointmentEntity.status),
-      createdAt: Value(appointmentEntity.createdAt),
-      updatedAt: Value(appointmentEntity.updatedAt),
-      isDeleted: Value(appointmentEntity.isDeleted),
-      lastSyncAt: Value(appointmentEntity.lastSyncAt),
-      isDirty: Value(appointmentEntity.isDirty),
-      version: Value(appointmentEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      animalId: Value(entity.animalId),
+      title: Value(entity.title),
+      description: Value(entity.description),
+      appointmentDateTime: Value(entity.appointmentDateTime),
+      veterinarian: Value(entity.veterinarian),
+      location: Value(entity.location),
+      notes: Value(entity.notes),
+      status: Value(entity.status),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      updatedAt: Value(entity.updatedAt),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final appointmentEntity = entity as AppointmentEntity;
-    return appointmentEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(AppointmentEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    return AppointmentEntity.fromFirestore(data, data['id'] as String);
+  AppointmentEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    return AppointmentEntity.fromFirestore(data, data['id'] as String? ?? '');
   }
 }

@@ -431,6 +431,20 @@ class RevenueCatService implements ISubscriptionRepository, IDisposableService {
     ]);
   }
 
+  @override
+  Future<Either<Failure, bool>> hasPetivetiSubscription() async {
+    return _hasAppSubscription('petiveti');
+  }
+
+  @override
+  Future<Either<Failure, List<ProductInfo>>> getPetivetiProducts() async {
+    return getAvailableProducts(productIds: [
+      'petiveti_premium_monthly',   // Plano mensal - R$ 9,90/mês
+      'petiveti_premium_yearly',    // Plano anual - R$ 99,90/ano
+      'petiveti_lifetime',          // Compra única vitalícia - R$ 299,90
+    ]);
+  }
+
   /// Verifica se tem assinatura ativa para um app específico
   Future<Either<Failure, bool>> _hasAppSubscription(String appName) async {
     try {

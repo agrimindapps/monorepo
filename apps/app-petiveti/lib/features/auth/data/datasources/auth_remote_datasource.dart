@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:core/core.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../../core/error/exceptions.dart';
 import '../../domain/entities/user.dart' as domain;
@@ -26,12 +27,12 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final firebase_auth.FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
-  final GoogleSignIn googleSignIn;
+  final GoogleSignIn? googleSignIn;
 
   AuthRemoteDataSourceImpl({
     required this.firebaseAuth,
     required this.firestore,
-    required this.googleSignIn,
+    this.googleSignIn,
   });
 
   @override
@@ -82,8 +83,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> signInWithGoogle() async {
+    // Na web ou se GoogleSignIn não está configurado
+    if (kIsWeb || googleSignIn == null) {
+      throw const ServerException(
+        message: 'Login com Google não disponível na versão web. Use email/senha.',
+      );
+    }
+    
     try {
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn!.signIn();
       
       if (googleUser == null) {
         throw const ServerException(message: 'Login com Google cancelado pelo usuário');
@@ -186,11 +194,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([
+      final futures = <Future<void>>[
         firebaseAuth.signOut(),
-        googleSignIn.signOut(),
-        FacebookAuth.instance.logOut(),
-      ]);
+      ];
+      
+      // Google e Facebook signOut apenas em mobile e se disponível
+      if (!kIsWeb && googleSignIn != null) {
+        futures.add(googleSignIn!.signOut());
+        futures.add(FacebookAuth.instance.logOut());
+      }
+      
+      await Future.wait(futures);
     } catch (e) {
       throw ServerException(message: 'Erro ao fazer logout: $e');
     }

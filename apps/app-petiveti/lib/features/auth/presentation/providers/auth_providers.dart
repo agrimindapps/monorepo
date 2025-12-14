@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide SignInWithApple;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../../../core/providers/core_services_providers.dart'
     as core_providers;
@@ -27,7 +28,8 @@ AuthRemoteDataSource authRemoteDataSource(Ref ref) {
   return AuthRemoteDataSourceImpl(
     firebaseAuth: ref.watch(core_providers.firebaseAuthProvider),
     firestore: ref.watch(core_providers.firebaseFirestoreProvider),
-    googleSignIn: ref.watch(core_providers.googleSignInProvider),
+    // GoogleSignIn apenas em mobile
+    googleSignIn: kIsWeb ? null : ref.watch(core_providers.googleSignInProvider),
   );
 }
 

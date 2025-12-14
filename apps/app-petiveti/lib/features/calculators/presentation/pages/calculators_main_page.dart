@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/calculator.dart';
 
 import '../providers/calculators_providers.dart';
@@ -20,15 +21,24 @@ class CalculatorsMainPage extends ConsumerWidget {
     final calculatorsAsync = ref.watch(calculatorsProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadoras Veterinárias'),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      ),
-      body: calculatorsAsync.when(
-        data: (calculators) => _CalculatorsGrid(calculators: calculators),
-        loading: () => const _LoadingState(),
-        error: (error, stack) => _ErrorState(error: error),
+      body: SafeArea(
+        child: Column(
+          children: [
+            const PetivetiPageHeader(
+              icon: Icons.calculate,
+              title: 'Calculadoras',
+              subtitle: 'Ferramentas veterinárias',
+              showBackButton: false,
+            ),
+            Expanded(
+              child: calculatorsAsync.when(
+                data: (calculators) => _CalculatorsGrid(calculators: calculators),
+                loading: () => const _LoadingState(),
+                error: (error, stack) => _ErrorState(error: error),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

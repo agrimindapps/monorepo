@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../repositories/subscription_local_repository.dart';
 import '../sync/adapters/animal_drift_sync_adapter.dart';
 import '../sync/adapters/medication_drift_sync_adapter.dart';
 import '../sync/adapters/vaccine_drift_sync_adapter.dart';
@@ -130,4 +131,12 @@ PetivetiDatabase petivetiDatabase(Ref ref) {
   ref.keepAlive();
 
   return db;
+}
+
+/// Provider do SubscriptionLocalRepository
+/// Cache local de assinaturas com Drift
+@riverpod
+SubscriptionLocalRepository subscriptionLocalRepository(Ref ref) {
+  final db = ref.watch(petivetiDatabaseProvider);
+  return SubscriptionLocalRepository(db);
 }

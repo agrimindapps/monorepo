@@ -52,6 +52,27 @@ class AuthState {
       status == AuthStatus.authenticated && user != null;
   bool get isLoading => status == AuthStatus.loading;
   bool get hasError => status == AuthStatus.error && error != null;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AuthState &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          user?.id == other.user?.id &&
+          error == other.error &&
+          isAnonymous == other.isAnonymous;
+
+  @override
+  int get hashCode =>
+      status.hashCode ^
+      (user?.id.hashCode ?? 0) ^
+      (error?.hashCode ?? 0) ^
+      isAnonymous.hashCode;
+
+  @override
+  String toString() =>
+      'AuthState(status: $status, user: ${user?.id}, isAuth: $isAuthenticated, isAnon: $isAnonymous)';
 }
 
 @riverpod
@@ -96,18 +117,30 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> _checkAuthState() async {
     final result = await _getCurrentUser(const local.NoParams());
+    
+    // Verificar se o provider ainda está montado
+    if (!ref.mounted) return;
+    
     result.fold(
-      (failure) => state = state.copyWith(
-        status: AuthStatus.unauthenticated,
-        error: failure.message,
-      ),
+      (failure) {
+        if (!ref.mounted) return;
+        state = state.copyWith(
+          status: AuthStatus.unauthenticated,
+          error: failure.message,
+        );
+      },
       (user) async {
+        if (!ref.mounted) return;
+        
         final isAnonymous = user?.isAnonymous ?? false;
         if (user == null && await shouldUseAnonymousMode()) {
+          if (!ref.mounted) return;
           await signInAnonymously();
           return;
         }
 
+        if (!ref.mounted) return;
+        
         state = state.copyWith(
           status: user != null
               ? AuthStatus.authenticated
@@ -117,7 +150,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
 
         // Iniciar realtime sync se autenticado
-        if (user != null) {
+        if (user != null && ref.mounted) {
           unawaited(ref.read(realtimeSyncProvider.notifier).startListening(user.id));
         }
       },
@@ -384,8 +417,10 @@ class AuthNotifier extends _$AuthNotifier {
         error: failure.message,
       ),
       (_) {
-        // Parar realtime sync
-        ref.read(realtimeSyncProvider.notifier).stopListening();
+        // Parar realtime sync (se provider ainda montado)
+        if (ref.mounted) {
+          ref.read(realtimeSyncProvider.notifier).stopListening();
+        }
 
         state = state.copyWith(
           status: AuthStatus.unauthenticated,

@@ -6,7 +6,7 @@ import '../../petiveti_database.dart';
 import '../../tables/reminders_table.dart';
 
 /// Adapter de sincronização para Reminders
-class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Reminder> {
+class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<ReminderEntity, Reminder> {
   ReminderDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -86,37 +86,35 @@ class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Reminder> {
   }
 
   @override
-  Insertable<Reminder> entityToCompanion(dynamic entity) {
-    final reminderEntity = entity as ReminderEntity;
+  Insertable<Reminder> entityToCompanion(ReminderEntity entity) {
     return RemindersCompanion(
-      id: reminderEntity.id != null && reminderEntity.id!.isNotEmpty
-          ? Value(int.parse(reminderEntity.id!))
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(reminderEntity.firebaseId),
-      userId: Value(reminderEntity.userId),
-      animalId: Value(reminderEntity.animalId),
-      title: Value(reminderEntity.title),
-      description: Value(reminderEntity.description),
-      reminderDateTime: Value(reminderEntity.reminderDateTime),
-      frequency: Value(reminderEntity.frequency),
-      isCompleted: Value(reminderEntity.isCompleted),
-      notificationEnabled: Value(reminderEntity.notificationEnabled),
-      createdAt: Value(reminderEntity.createdAt),
-      isDeleted: Value(reminderEntity.isDeleted),
-      lastSyncAt: Value(reminderEntity.lastSyncAt),
-      isDirty: Value(reminderEntity.isDirty),
-      version: Value(reminderEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      animalId: Value(entity.animalId),
+      title: Value(entity.title),
+      description: Value(entity.description),
+      reminderDateTime: Value(entity.reminderDateTime),
+      frequency: Value(entity.frequency),
+      isCompleted: Value(entity.isCompleted),
+      notificationEnabled: Value(entity.notificationEnabled),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final reminderEntity = entity as ReminderEntity;
-    return reminderEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(ReminderEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    return ReminderEntity.fromFirestore(data, data['id'] as String);
+  ReminderEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    return ReminderEntity.fromFirestore(data, data['id'] as String? ?? '');
   }
 }

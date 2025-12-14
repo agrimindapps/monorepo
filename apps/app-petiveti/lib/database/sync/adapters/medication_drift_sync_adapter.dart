@@ -7,7 +7,7 @@ import '../../tables/medications_table.dart';
 
 /// Adapter de sincronização para Medications
 class MedicationDriftSyncAdapter
-    extends DriftSyncAdapterBase<dynamic, Medication> {
+    extends DriftSyncAdapterBase<MedicationEntity, Medication> {
   MedicationDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -89,39 +89,37 @@ class MedicationDriftSyncAdapter
   }
 
   @override
-  Insertable<Medication> entityToCompanion(dynamic entity) {
-    final medicationEntity = entity as MedicationEntity;
+  Insertable<Medication> entityToCompanion(MedicationEntity entity) {
     return MedicationsCompanion(
-      id: medicationEntity.id != null && medicationEntity.id!.isNotEmpty
-          ? Value(int.parse(medicationEntity.id!))
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(medicationEntity.firebaseId),
-      userId: Value(medicationEntity.userId),
-      animalId: Value(medicationEntity.animalId),
-      name: Value(medicationEntity.name),
-      dosage: Value(medicationEntity.dosage),
-      frequency: Value(medicationEntity.frequency),
-      startDate: Value(medicationEntity.startDate),
-      endDate: Value(medicationEntity.endDate),
-      notes: Value(medicationEntity.notes),
-      veterinarian: Value(medicationEntity.veterinarian),
-      createdAt: Value(medicationEntity.createdAt),
-      updatedAt: Value(medicationEntity.updatedAt),
-      isDeleted: Value(medicationEntity.isDeleted),
-      lastSyncAt: Value(medicationEntity.lastSyncAt),
-      isDirty: Value(medicationEntity.isDirty),
-      version: Value(medicationEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      animalId: Value(entity.animalId),
+      name: Value(entity.name),
+      dosage: Value(entity.dosage),
+      frequency: Value(entity.frequency),
+      startDate: Value(entity.startDate),
+      endDate: Value(entity.endDate),
+      notes: Value(entity.notes),
+      veterinarian: Value(entity.veterinarian),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      updatedAt: Value(entity.updatedAt),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final medicationEntity = entity as MedicationEntity;
-    return medicationEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(MedicationEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    return MedicationEntity.fromFirestore(data, data['id'] as String);
+  MedicationEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    return MedicationEntity.fromFirestore(data, data['id'] as String? ?? '');
   }
 }

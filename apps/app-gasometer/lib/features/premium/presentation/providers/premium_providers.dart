@@ -110,6 +110,14 @@ class StubSubscriptionRepository implements core.ISubscriptionRepository {
   @override
   Future<Either<core.Failure, List<core.ProductInfo>>>
   getGasometerProducts() async => const Right([]);
+
+  @override
+  Future<Either<core.Failure, bool>> hasPetivetiSubscription() async =>
+      const Right(false);
+
+  @override
+  Future<Either<core.Failure, List<core.ProductInfo>>>
+  getPetivetiProducts() async => const Right([]);
 }
 
 final subscriptionRepositoryProvider = Provider<core.ISubscriptionRepository>((

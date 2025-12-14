@@ -7,8 +7,7 @@ import '../../petiveti_database.dart';
 import '../../tables/animals_table.dart';
 
 /// Adapter de sincronização para Animals
-/// Usa dynamic para burlar type constraint do DriftSyncAdapterBase
-class AnimalDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Animal> {
+class AnimalDriftSyncAdapter extends DriftSyncAdapterBase<AnimalEntity, Animal> {
   AnimalDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -97,79 +96,79 @@ class AnimalDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Animal> {
   }
 
   @override
-  Insertable<Animal> entityToCompanion(dynamic entity) {
-    final animalEntity = entity as AnimalEntity;
+  Insertable<Animal> entityToCompanion(AnimalEntity entity) {
     return AnimalsCompanion(
-      id: animalEntity.id != null && animalEntity.id!.isNotEmpty
-          ? Value(int.parse(animalEntity.id!))
+      id: entity.id.isNotEmpty
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(animalEntity.firebaseId),
-      userId: Value(animalEntity.userId),
-      name: Value(animalEntity.name),
-      species: Value(animalEntity.species),
-      breed: Value(animalEntity.breed),
-      birthDate: Value(animalEntity.birthDate),
-      gender: Value(animalEntity.gender),
-      weight: Value(animalEntity.weight),
-      photo: Value(animalEntity.photo),
-      color: Value(animalEntity.color),
-      microchipNumber: Value(animalEntity.microchipNumber),
-      notes: Value(animalEntity.notes),
-      isActive: Value(animalEntity.isActive),
-      createdAt: Value(animalEntity.createdAt),
-      updatedAt: Value(animalEntity.updatedAt),
-      isDeleted: Value(animalEntity.isDeleted),
-      isCastrated: Value(animalEntity.isCastrated),
-      allergies: Value(animalEntity.allergies),
-      bloodType: Value(animalEntity.bloodType),
-      preferredVeterinarian: Value(animalEntity.preferredVeterinarian),
-      insuranceInfo: Value(animalEntity.insuranceInfo),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      name: Value(entity.name),
+      species: Value(entity.species),
+      breed: Value(entity.breed),
+      birthDate: Value(entity.birthDate),
+      gender: Value(entity.gender),
+      weight: Value(entity.weight),
+      photo: Value(entity.photo),
+      color: Value(entity.color),
+      microchipNumber: Value(entity.microchipNumber),
+      notes: Value(entity.notes),
+      isActive: Value(entity.isActive),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      updatedAt: Value(entity.updatedAt),
+      isDeleted: Value(entity.isDeleted),
+      isCastrated: Value(entity.isCastrated),
+      allergies: Value(entity.allergies),
+      bloodType: Value(entity.bloodType),
+      preferredVeterinarian: Value(entity.preferredVeterinarian),
+      insuranceInfo: Value(entity.insuranceInfo),
       // Sync fields
-      lastSyncAt: Value(animalEntity.lastSyncAt),
-      isDirty: Value(animalEntity.isDirty),
-      version: Value(animalEntity.version),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final animalEntity = entity as AnimalEntity;
+  Map<String, dynamic> toFirestoreMap(AnimalEntity entity) {
     return {
-      'userId': animalEntity.userId,
-      'name': animalEntity.name,
-      'species': animalEntity.species,
-      'breed': animalEntity.breed,
-      'birthDate': animalEntity.birthDate != null
-          ? fs.Timestamp.fromDate(animalEntity.birthDate!)
+      'userId': entity.userId,
+      'name': entity.name,
+      'species': entity.species,
+      'breed': entity.breed,
+      'birthDate': entity.birthDate != null
+          ? fs.Timestamp.fromDate(entity.birthDate!)
           : null,
-      'gender': animalEntity.gender,
-      'weight': animalEntity.weight,
-      'photo': animalEntity.photo,
-      'color': animalEntity.color,
-      'microchipNumber': animalEntity.microchipNumber,
-      'notes': animalEntity.notes,
-      'isActive': animalEntity.isActive,
-      'createdAt': fs.Timestamp.fromDate(animalEntity.createdAt),
-      'updatedAt': animalEntity.updatedAt != null
-          ? fs.Timestamp.fromDate(animalEntity.updatedAt!)
+      'gender': entity.gender,
+      'weight': entity.weight,
+      'photo': entity.photo,
+      'color': entity.color,
+      'microchipNumber': entity.microchipNumber,
+      'notes': entity.notes,
+      'isActive': entity.isActive,
+      'createdAt': entity.createdAt != null 
+          ? fs.Timestamp.fromDate(entity.createdAt!) 
+          : fs.Timestamp.now(),
+      'updatedAt': entity.updatedAt != null
+          ? fs.Timestamp.fromDate(entity.updatedAt!)
           : null,
-      'isDeleted': animalEntity.isDeleted,
-      'isCastrated': animalEntity.isCastrated,
-      'allergies': animalEntity.allergies,
-      'bloodType': animalEntity.bloodType,
-      'preferredVeterinarian': animalEntity.preferredVeterinarian,
-      'insuranceInfo': animalEntity.insuranceInfo,
+      'isDeleted': entity.isDeleted,
+      'isCastrated': entity.isCastrated,
+      'allergies': entity.allergies,
+      'bloodType': entity.bloodType,
+      'preferredVeterinarian': entity.preferredVeterinarian,
+      'insuranceInfo': entity.insuranceInfo,
       'lastSyncAt': fs.Timestamp.now(),
-      'version': animalEntity.version,
+      'version': entity.version,
     };
   }
 
   @override
   AnimalEntity fromFirestoreDoc(Map<String, dynamic> data) {
     return AnimalEntity(
-      id: null, // Will be set by local DB
+      id: data['localId'] as String? ?? data['id'] as String? ?? '',
       firebaseId: data['id'] as String?,
-      userId: data['userId'] as String,
+      userId: data['userId'] as String? ?? '',
       name: data['name'] as String,
       species: data['species'] as String,
       breed: data['breed'] as String? ?? '',
@@ -181,7 +180,7 @@ class AnimalDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Animal> {
       microchipNumber: data['microchipNumber'] as String?,
       notes: data['notes'] as String?,
       isActive: data['isActive'] as bool? ?? true,
-      createdAt: (data['createdAt'] as fs.Timestamp).toDate(),
+      createdAt: (data['createdAt'] as fs.Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as fs.Timestamp?)?.toDate(),
       isDeleted: data['isDeleted'] as bool? ?? false,
       isCastrated: data['isCastrated'] as bool? ?? false,

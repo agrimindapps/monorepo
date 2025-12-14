@@ -1,12 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as fs;
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity para sincronização de Animals com Firebase
 /// Contém todos os campos necessários para Drift + Firebase sync
-class AnimalEntity extends Equatable {
-  final String? id; // Local ID
-  final String? firebaseId;
-  final String userId;
+class AnimalEntity extends BaseSyncEntity {
   final String name;
   final String species;
   final String? breed;
@@ -17,12 +14,10 @@ class AnimalEntity extends Equatable {
   final String? color;
   final String? microchipNumber;
   final String? notes;
-
-  // Metadata
   final bool isActive;
-  final DateTime createdAt;
-  final DateTime? updatedAt;
-  final bool isDeleted;
+
+  // Firebase ID (diferente do ID local Drift)
+  final String? firebaseId;
 
   // Health fields
   final bool isCastrated;
@@ -31,15 +26,10 @@ class AnimalEntity extends Equatable {
   final String? preferredVeterinarian;
   final String? insuranceInfo;
 
-  // Sync fields
-  final DateTime? lastSyncAt;
-  final bool isDirty;
-  final int version;
-
   const AnimalEntity({
-    this.id,
+    required super.id,
     this.firebaseId,
-    required this.userId,
+    required super.userId,
     required this.name,
     required this.species,
     this.breed,
@@ -51,24 +41,23 @@ class AnimalEntity extends Equatable {
     this.microchipNumber,
     this.notes,
     this.isActive = true,
-    required this.createdAt,
-    this.updatedAt,
-    this.isDeleted = false,
+    super.createdAt,
+    super.updatedAt,
+    super.isDeleted = false,
     this.isCastrated = false,
     this.allergies,
     this.bloodType,
     this.preferredVeterinarian,
     this.insuranceInfo,
-    this.lastSyncAt,
-    this.isDirty = false,
-    this.version = 1,
+    super.lastSyncAt,
+    super.isDirty = false,
+    super.version = 1,
+    super.moduleName,
   });
 
   @override
   List<Object?> get props => [
-    id,
-    firebaseId,
-    userId,
+    ...super.props,
     name,
     species,
     breed,
@@ -80,19 +69,15 @@ class AnimalEntity extends Equatable {
     microchipNumber,
     notes,
     isActive,
-    createdAt,
-    updatedAt,
-    isDeleted,
+    firebaseId,
     isCastrated,
     allergies,
     bloodType,
     preferredVeterinarian,
     insuranceInfo,
-    lastSyncAt,
-    isDirty,
-    version,
   ];
 
+  @override
   AnimalEntity copyWith({
     String? id,
     String? firebaseId,
@@ -119,6 +104,7 @@ class AnimalEntity extends Equatable {
     DateTime? lastSyncAt,
     bool? isDirty,
     int? version,
+    String? moduleName,
   }) {
     return AnimalEntity(
       id: id ?? this.id,
@@ -141,14 +127,38 @@ class AnimalEntity extends Equatable {
       isCastrated: isCastrated ?? this.isCastrated,
       allergies: allergies ?? this.allergies,
       bloodType: bloodType ?? this.bloodType,
-      preferredVeterinarian:
-          preferredVeterinarian ?? this.preferredVeterinarian,
+      preferredVeterinarian: preferredVeterinarian ?? this.preferredVeterinarian,
       insuranceInfo: insuranceInfo ?? this.insuranceInfo,
       lastSyncAt: lastSyncAt ?? this.lastSyncAt,
       isDirty: isDirty ?? this.isDirty,
       version: version ?? this.version,
+      moduleName: moduleName ?? this.moduleName,
     );
   }
+
+  @override
+  AnimalEntity markAsDirty() => copyWith(isDirty: true);
+
+  @override
+  AnimalEntity markAsSynced({DateTime? syncTime}) => copyWith(
+    isDirty: false,
+    lastSyncAt: syncTime ?? DateTime.now(),
+  );
+
+  @override
+  AnimalEntity markAsDeleted() => copyWith(isDeleted: true, isDirty: true);
+
+  @override
+  AnimalEntity incrementVersion() => copyWith(version: version + 1);
+
+  @override
+  AnimalEntity withUserId(String userId) => copyWith(userId: userId);
+
+  @override
+  AnimalEntity withModule(String moduleName) => copyWith(moduleName: moduleName);
+
+  @override
+  Map<String, dynamic> toFirebaseMap() => toFirestore();
 
   /// Converte para Map (Firebase)
   Map<String, dynamic> toFirestore() {
@@ -165,7 +175,7 @@ class AnimalEntity extends Equatable {
       'microchipNumber': microchipNumber,
       'notes': notes,
       'isActive': isActive,
-      'createdAt': fs.Timestamp.fromDate(createdAt),
+      'createdAt': createdAt != null ? fs.Timestamp.fromDate(createdAt!) : fs.Timestamp.now(),
       'updatedAt': updatedAt != null ? fs.Timestamp.fromDate(updatedAt!) : null,
       'isDeleted': isDeleted,
       'isCastrated': isCastrated,
@@ -184,9 +194,9 @@ class AnimalEntity extends Equatable {
     String documentId,
   ) {
     return AnimalEntity(
-      id: null,
+      id: data['localId'] as String? ?? documentId,
       firebaseId: documentId,
-      userId: data['userId'] as String,
+      userId: data['userId'] as String? ?? '',
       name: data['name'] as String,
       species: data['species'] as String,
       breed: data['breed'] as String?,
@@ -198,7 +208,7 @@ class AnimalEntity extends Equatable {
       microchipNumber: data['microchipNumber'] as String?,
       notes: data['notes'] as String?,
       isActive: data['isActive'] as bool? ?? true,
-      createdAt: (data['createdAt'] as fs.Timestamp).toDate(),
+      createdAt: (data['createdAt'] as fs.Timestamp?)?.toDate(),
       updatedAt: (data['updatedAt'] as fs.Timestamp?)?.toDate(),
       isDeleted: data['isDeleted'] as bool? ?? false,
       isCastrated: data['isCastrated'] as bool? ?? false,

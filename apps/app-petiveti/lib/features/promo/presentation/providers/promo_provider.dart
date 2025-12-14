@@ -36,17 +36,23 @@ class PromoNotifier extends _$PromoNotifier {
 
     final result = await _getPromoContent(const local.NoParams());
     
-    result.fold(
-      (failure) => state = state.copyWith(
-        isLoading: false,
-        error: failure.message,
-      ),
-      (promoContent) => state = state.copyWith(
-        isLoading: false,
-        promoContent: promoContent,
-        error: null,
-      ),
-    );
+    // Verifica se o provider ainda está montado após a operação assíncrona
+    try {
+      result.fold(
+        (failure) => state = state.copyWith(
+          isLoading: false,
+          error: failure.message,
+        ),
+        (promoContent) => state = state.copyWith(
+          isLoading: false,
+          promoContent: promoContent,
+          error: null,
+        ),
+      );
+    } catch (e) {
+      // Provider foi disposed durante a operação assíncrona
+      return;
+    }
   }
 
   /// Submete pré-cadastro

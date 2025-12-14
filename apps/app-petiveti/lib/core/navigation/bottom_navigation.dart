@@ -5,7 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'bottom_navigation.g.dart';
 
 /// Enum para as tabs da navegação principal
-enum MainTab { home, animals, calculators, reminders, profile }
+enum MainTab { home, animals, calculators, reminders, settings }
 
 /// Provider para gerenciar o estado da tab atual
 @riverpod
@@ -17,203 +17,108 @@ class CurrentTab extends _$CurrentTab {
 }
 
 /// Widget de navegação inferior principal do app
-class MainBottomNavigation extends ConsumerWidget {
+/// Usa o NavigationBar do Material 3 para consistência visual
+class MainBottomNavigation extends ConsumerStatefulWidget {
   final Widget child;
-  final String currentLocation;
 
-  const MainBottomNavigation({
-    super.key,
-    required this.child,
-    required this.currentLocation,
-  });
+  const MainBottomNavigation({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Stack(
-      children: [
-        child, // This will be the individual page with its own Scaffold
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, -2),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: MainTab.values.map((tab) {
-                    final isSelected = _isTabSelected(tab, currentLocation);
-
-                    return Expanded(
-                      child: _NavBarItem(
-                        tab: tab,
-                        isSelected: isSelected,
-                        onTap: () {
-                          ref.read(currentTabProvider.notifier).set(tab);
-                          _navigateToTab(context, tab);
-                        },
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  bool _isTabSelected(MainTab tab, String location) {
-    switch (tab) {
-      case MainTab.home:
-        return location == '/';
-      case MainTab.animals:
-        return location.startsWith('/animals');
-      case MainTab.calculators:
-        return location.startsWith('/calculators');
-      case MainTab.reminders:
-        return location.startsWith('/reminders');
-      case MainTab.profile:
-        return location.startsWith('/profile') ||
-            location.startsWith('/expenses') ||
-            location.startsWith('/subscription');
-    }
-  }
-
-  void _navigateToTab(BuildContext context, MainTab tab) {
-    switch (tab) {
-      case MainTab.home:
-        context.go('/');
-        break;
-      case MainTab.animals:
-        context.go('/animals');
-        break;
-      case MainTab.calculators:
-        context.go('/calculators');
-        break;
-      case MainTab.reminders:
-        context.go('/reminders');
-        break;
-      case MainTab.profile:
-        context.go('/profile');
-        break;
-    }
-  }
+  ConsumerState<MainBottomNavigation> createState() =>
+      _MainBottomNavigationState();
 }
 
-/// Item individual da barra de navegação
-class _NavBarItem extends StatelessWidget {
-  final MainTab tab;
-  final bool isSelected;
-  final VoidCallback onTap;
+class _MainBottomNavigationState extends ConsumerState<MainBottomNavigation> {
+  int _getCurrentIndex(BuildContext context) {
+    try {
+      final location = GoRouterState.of(context).uri.path;
 
-  const _NavBarItem({
-    required this.tab,
-    required this.isSelected,
-    required this.onTap,
-  });
+      if (location == '/') return 0;
+      if (location.startsWith('/animals')) return 1;
+      if (location.startsWith('/calculators')) return 2;
+      if (location.startsWith('/reminders')) return 3;
+      if (location.startsWith('/settings') ||
+          location.startsWith('/profile') ||
+          location.startsWith('/expenses') ||
+          location.startsWith('/subscription') ||
+          location.startsWith('/notifications-settings')) {
+        return 4;
+      }
+
+      return 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  void _onTabTapped(int index) {
+    if (!mounted) return;
+
+    try {
+      final tab = MainTab.values[index];
+      ref.read(currentTabProvider.notifier).set(tab);
+
+      switch (index) {
+        case 0:
+          context.go('/');
+          break;
+        case 1:
+          context.go('/animals');
+          break;
+        case 2:
+          context.go('/calculators');
+          break;
+        case 3:
+          context.go('/reminders');
+          break;
+        case 4:
+          context.go('/settings');
+          break;
+      }
+    } catch (e) {
+      debugPrint('Erro na navegação: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final tabInfo = _getTabInfo(tab);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? colorScheme.primary.withValues(alpha: 0.1)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                child: Icon(
-                  (isSelected ? tabInfo['selectedIcon'] : tabInfo['icon'])
-                          as IconData? ??
-                      Icons.home,
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 4),
-              AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: theme.textTheme.labelSmall!.copyWith(
-                  color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  fontSize: 10,
-                ),
-                child: Text(tabInfo['label'] as String? ?? ''),
-              ),
-            ],
-          ),
+    return Column(
+      children: [
+        Expanded(child: widget.child),
+        NavigationBar(
+          selectedIndex: _getCurrentIndex(context),
+          onDestinationSelected: _onTabTapped,
+          height: 65,
+          destinations: const [
+            NavigationDestination(
+              selectedIcon: Icon(Icons.home),
+              icon: Icon(Icons.home_outlined),
+              label: 'Início',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.pets),
+              icon: Icon(Icons.pets_outlined),
+              label: 'Pets',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.calculate),
+              icon: Icon(Icons.calculate_outlined),
+              label: 'Cálculos',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.notifications),
+              icon: Icon(Icons.notifications_outlined),
+              label: 'Lembretes',
+            ),
+            NavigationDestination(
+              selectedIcon: Icon(Icons.settings),
+              icon: Icon(Icons.settings_outlined),
+              label: 'Config',
+            ),
+          ],
         ),
-      ),
+      ],
     );
-  }
-
-  Map<String, dynamic> _getTabInfo(MainTab tab) {
-    switch (tab) {
-      case MainTab.home:
-        return {
-          'label': 'Início',
-          'icon': Icons.home_outlined,
-          'selectedIcon': Icons.home,
-        };
-      case MainTab.animals:
-        return {
-          'label': 'Pets',
-          'icon': Icons.pets_outlined,
-          'selectedIcon': Icons.pets,
-        };
-      case MainTab.calculators:
-        return {
-          'label': 'Cálculos',
-          'icon': Icons.calculate_outlined,
-          'selectedIcon': Icons.calculate,
-        };
-      case MainTab.reminders:
-        return {
-          'label': 'Lembretes',
-          'icon': Icons.notifications_outlined,
-          'selectedIcon': Icons.notifications,
-        };
-      case MainTab.profile:
-        return {
-          'label': 'Perfil',
-          'icon': Icons.person_outline,
-          'selectedIcon': Icons.person,
-        };
-    }
   }
 }
 
@@ -236,10 +141,7 @@ class BottomNavShell extends ConsumerWidget {
       return child;
     }
 
-    return MainBottomNavigation(
-      currentLocation: state.uri.toString(),
-      child: child,
-    );
+    return MainBottomNavigation(child: child);
   }
 }
 

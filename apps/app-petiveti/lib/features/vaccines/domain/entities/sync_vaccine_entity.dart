@@ -1,11 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as fs;
-import 'package:equatable/equatable.dart';
+import 'package:core/core.dart';
 
 /// Entity para sincronização de Vaccines com Firebase
-class VaccineEntity extends Equatable {
-  final String? id; // Local ID
+class VaccineEntity extends BaseSyncEntity {
   final String? firebaseId;
-  final String userId;
   final int animalId;
   final String name;
   final String veterinarian;
@@ -19,21 +17,14 @@ class VaccineEntity extends Equatable {
   final bool isCompleted;
   final int? reminderDateTimestamp;
   final int status;
-
-  // Metadata
   final int createdAtTimestamp;
   final int? updatedAtTimestamp;
-  final bool isDeleted;
-
-  // Sync fields
   final int? lastSyncAtTimestamp;
-  final bool isDirty;
-  final int version;
 
   const VaccineEntity({
-    this.id,
+    required super.id,
     this.firebaseId,
-    required this.userId,
+    required super.userId,
     required this.animalId,
     required this.name,
     required this.veterinarian,
@@ -49,17 +40,20 @@ class VaccineEntity extends Equatable {
     this.status = 0,
     required this.createdAtTimestamp,
     this.updatedAtTimestamp,
-    this.isDeleted = false,
+    super.isDeleted = false,
     this.lastSyncAtTimestamp,
-    this.isDirty = false,
-    this.version = 1,
+    super.isDirty = false,
+    super.version = 1,
+    super.moduleName,
+    super.createdAt,
+    super.updatedAt,
+    super.lastSyncAt,
   });
 
   @override
   List<Object?> get props => [
-    id,
+    ...super.props,
     firebaseId,
-    userId,
     animalId,
     name,
     veterinarian,
@@ -75,11 +69,92 @@ class VaccineEntity extends Equatable {
     status,
     createdAtTimestamp,
     updatedAtTimestamp,
-    isDeleted,
     lastSyncAtTimestamp,
-    isDirty,
-    version,
   ];
+
+  @override
+  VaccineEntity copyWith({
+    String? id,
+    String? firebaseId,
+    String? userId,
+    int? animalId,
+    String? name,
+    String? veterinarian,
+    int? dateTimestamp,
+    int? nextDueDateTimestamp,
+    String? batch,
+    String? manufacturer,
+    String? dosage,
+    String? notes,
+    bool? isRequired,
+    bool? isCompleted,
+    int? reminderDateTimestamp,
+    int? status,
+    int? createdAtTimestamp,
+    int? updatedAtTimestamp,
+    bool? isDeleted,
+    int? lastSyncAtTimestamp,
+    bool? isDirty,
+    int? version,
+    String? moduleName,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? lastSyncAt,
+  }) {
+    return VaccineEntity(
+      id: id ?? this.id,
+      firebaseId: firebaseId ?? this.firebaseId,
+      userId: userId ?? this.userId,
+      animalId: animalId ?? this.animalId,
+      name: name ?? this.name,
+      veterinarian: veterinarian ?? this.veterinarian,
+      dateTimestamp: dateTimestamp ?? this.dateTimestamp,
+      nextDueDateTimestamp: nextDueDateTimestamp ?? this.nextDueDateTimestamp,
+      batch: batch ?? this.batch,
+      manufacturer: manufacturer ?? this.manufacturer,
+      dosage: dosage ?? this.dosage,
+      notes: notes ?? this.notes,
+      isRequired: isRequired ?? this.isRequired,
+      isCompleted: isCompleted ?? this.isCompleted,
+      reminderDateTimestamp: reminderDateTimestamp ?? this.reminderDateTimestamp,
+      status: status ?? this.status,
+      createdAtTimestamp: createdAtTimestamp ?? this.createdAtTimestamp,
+      updatedAtTimestamp: updatedAtTimestamp ?? this.updatedAtTimestamp,
+      isDeleted: isDeleted ?? this.isDeleted,
+      lastSyncAtTimestamp: lastSyncAtTimestamp ?? this.lastSyncAtTimestamp,
+      isDirty: isDirty ?? this.isDirty,
+      version: version ?? this.version,
+      moduleName: moduleName ?? this.moduleName,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      lastSyncAt: lastSyncAt ?? this.lastSyncAt,
+    );
+  }
+
+  @override
+  VaccineEntity markAsDirty() => copyWith(isDirty: true);
+
+  @override
+  VaccineEntity markAsSynced({DateTime? syncTime}) => copyWith(
+    isDirty: false,
+    lastSyncAt: syncTime ?? DateTime.now(),
+    lastSyncAtTimestamp: (syncTime ?? DateTime.now()).millisecondsSinceEpoch,
+  );
+
+  @override
+  VaccineEntity markAsDeleted() => copyWith(isDeleted: true, isDirty: true);
+
+  @override
+  VaccineEntity incrementVersion() => copyWith(version: version + 1);
+
+  @override
+  VaccineEntity withUserId(String userId) => copyWith(userId: userId);
+
+  @override
+  VaccineEntity withModule(String moduleName) => copyWith(moduleName: moduleName);
+
+  @override
+  Map<String, dynamic> toFirebaseMap() => toFirestore();
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -110,9 +185,9 @@ class VaccineEntity extends Equatable {
     String documentId,
   ) {
     return VaccineEntity(
-      id: null,
+      id: data['localId'] as String? ?? documentId,
       firebaseId: documentId,
-      userId: data['userId'] as String,
+      userId: data['userId'] as String? ?? '',
       animalId: data['animalId'] as int,
       name: data['name'] as String,
       veterinarian: data['veterinarian'] as String,

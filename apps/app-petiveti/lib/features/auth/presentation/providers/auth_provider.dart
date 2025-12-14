@@ -48,6 +48,27 @@ class AuthState {
   bool get isAuthenticated => status == AuthStatus.authenticated && user != null;
   bool get isLoading => status == AuthStatus.loading;
   bool get hasError => status == AuthStatus.error && error != null;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AuthState &&
+          runtimeType == other.runtimeType &&
+          status == other.status &&
+          user?.id == other.user?.id &&
+          error == other.error &&
+          isAnonymous == other.isAnonymous;
+
+  @override
+  int get hashCode =>
+      status.hashCode ^
+      (user?.id.hashCode ?? 0) ^
+      (error?.hashCode ?? 0) ^
+      isAnonymous.hashCode;
+
+  @override
+  String toString() =>
+      'AuthState(status: $status, user: ${user?.id}, isAuth: $isAuthenticated, isAnon: $isAnonymous)';
 }
 
 @Riverpod(keepAlive: true)

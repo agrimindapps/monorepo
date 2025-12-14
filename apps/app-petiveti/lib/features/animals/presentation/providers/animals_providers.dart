@@ -202,11 +202,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        final updatedAnimals = [animal, ...state.animals];
-        state = state.copyWith(
-          animals: updatedAnimals,
-          error: null,
-        );
+        // Recarregar do banco para obter o ID correto gerado pelo Drift
+        loadAnimals();
       },
     );
   }
@@ -219,14 +216,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        final updatedAnimals = state.animals.map((a) {
-          return a.id == animal.id ? animal : a;
-        }).toList();
-
-        state = state.copyWith(
-          animals: updatedAnimals,
-          error: null,
-        );
+        // Recarregar do banco para garantir consistência
+        loadAnimals();
       },
     );
   }
@@ -239,11 +230,8 @@ class AnimalsNotifier extends _$AnimalsNotifier {
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
-        final updatedAnimals = state.animals.where((a) => a.id != id).toList();
-        state = state.copyWith(
-          animals: updatedAnimals,
-          error: null,
-        );
+        // Recarregar do banco para garantir consistência
+        loadAnimals();
       },
     );
   }

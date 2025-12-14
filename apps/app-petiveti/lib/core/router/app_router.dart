@@ -6,7 +6,7 @@ import '../../features/account/presentation/pages/account_profile_page.dart';
 import '../../features/animals/presentation/pages/animals_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
 import '../../features/appointments/presentation/widgets/add_appointment_form.dart';
-import '../../features/auth/presentation/notifiers/auth_notifier.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/register_page.dart';
 import '../../features/auth/presentation/pages/splash_page.dart';
@@ -31,13 +31,14 @@ import '../../features/medications/domain/entities/medication.dart';
 import '../../features/medications/presentation/pages/medications_page.dart';
 import '../../features/medications/presentation/widgets/add_medication_dialog.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
+import '../../features/promo/presentation/pages/account_deletion_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reminders/domain/entities/reminder.dart';
 import '../../features/reminders/presentation/pages/reminders_page.dart';
 import '../../features/reminders/presentation/widgets/add_reminder_dialog.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
-import '../../features/subscription/presentation/pages/subscription_page.dart'
-    as local;
+import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/subscription/presentation/pages/premium_subscription_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
 import '../navigation/bottom_navigation.dart';
@@ -45,33 +46,63 @@ import '../navigation/bottom_navigation.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/splash';
 
+  // Cria um notifier para mudanças de autenticação
+  final authStateNotifier = ValueNotifier<bool>(false);
+
+  // Observa mudanças no estado de autenticação
+  ref.listen(authProvider, (previous, next) {
+    debugPrint('🔄 AuthState changed: ${previous?.isAuthenticated} -> ${next.isAuthenticated}');
+    authStateNotifier.value = next.isAuthenticated;
+  });
+
+  // Inicializa com o estado atual (com try-catch para evitar erros na inicialização)
+  try {
+    authStateNotifier.value = ref.read(authProvider).isAuthenticated;
+  } catch (_) {
+    // Provider ainda não inicializado
+  }
+
   return GoRouter(
     initialLocation: initialRoute,
     debugLogDiagnostics: true,
+    refreshListenable: authStateNotifier,
     redirect: (context, state) {
       final isOnSplash = state.matchedLocation == '/splash';
 
       if (isOnSplash) {
         return null; // Permitir acesso à splash sempre
       }
-      try {
-        final authState = ref.read(authProvider);
-        final isAuthenticated = authState.isAuthenticated;
-        final isOnAuthPage =
-            state.matchedLocation.startsWith('/login') ||
-            state.matchedLocation.startsWith('/register');
-        final isOnPromo = state.matchedLocation == '/promo';
-        if (isAuthenticated && (isOnPromo || isOnAuthPage)) {
-          return '/';
-        }
-        if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
-          return '/promo';
-        }
-
-        return null; // No redirect needed
-      } catch (e) {
-        return '/splash';
+      
+      // Rotas públicas que não precisam de autenticação
+      const publicRoutes = [
+        '/login',
+        '/register',
+        '/promo',
+        '/privacy-policy',
+        '/terms-of-service',
+        '/account-deletion-policy',
+        '/account-deletion',
+      ];
+      
+      final isAuthenticated = authStateNotifier.value;
+      final currentLocation = state.matchedLocation;
+      final isOnPublicRoute = publicRoutes.any((route) => currentLocation.startsWith(route));
+      
+      debugPrint('🔀 Redirect check: location=$currentLocation, isAuth=$isAuthenticated, isPublic=$isOnPublicRoute');
+      
+      // Se autenticado e está em página pública (login/promo), redireciona para home
+      if (isAuthenticated && isOnPublicRoute) {
+        debugPrint('➡️ Redirecting to / (home)');
+        return '/';
       }
+      
+      // Se não autenticado e não está em página pública, redireciona para promo
+      if (!isAuthenticated && !isOnPublicRoute) {
+        debugPrint('➡️ Redirecting to /promo');
+        return '/promo';
+      }
+
+      return null; // No redirect needed
     },
     routes: [
       ShellRoute(
@@ -362,8 +393,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/subscription',
             name: 'subscription',
-            builder: (context, state) =>
-                const local.SubscriptionPage(userId: 'temp_user_id'),
+            builder: (context, state) => const PremiumSubscriptionPage(),
+          ),
+          // Settings pages - dentro do ShellRoute para mostrar bottom nav
+          GoRoute(
+            path: '/settings',
+            name: 'settings',
+            builder: (context, state) => const SettingsPage(),
+          ),
+          GoRoute(
+            path: '/notifications-settings',
+            name: 'notifications-settings',
+            builder: (context, state) => const NotificationsSettingsPage(),
           ),
         ],
       ),
@@ -410,12 +451,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AccountDeletionPolicyPage(),
       ),
 
-      // Settings pages
+      // Página de exclusão de conta (funcional)
       GoRoute(
-        path: '/notifications-settings',
-        name: 'notifications-settings',
-        builder: (context, state) => const NotificationsSettingsPage(),
+        path: '/account-deletion',
+        name: 'account-deletion',
+        builder: (context, state) => const AccountDeletionPage(),
       ),
+
+
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(

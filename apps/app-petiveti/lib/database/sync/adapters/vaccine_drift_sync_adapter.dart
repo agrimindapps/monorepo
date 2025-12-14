@@ -6,7 +6,7 @@ import '../../petiveti_database.dart';
 import '../../tables/vaccines_table.dart';
 
 /// Adapter de sincronização para Vaccines
-class VaccineDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Vaccine> {
+class VaccineDriftSyncAdapter extends DriftSyncAdapterBase<VaccineEntity, Vaccine> {
   VaccineDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -91,44 +91,42 @@ class VaccineDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Vaccine> {
   }
 
   @override
-  Insertable<Vaccine> entityToCompanion(dynamic entity) {
-    final vaccineEntity = entity as VaccineEntity;
+  Insertable<Vaccine> entityToCompanion(VaccineEntity entity) {
     return VaccinesCompanion(
-      id: vaccineEntity.id != null && vaccineEntity.id!.isNotEmpty
-          ? Value(int.parse(vaccineEntity.id!))
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(vaccineEntity.firebaseId),
-      userId: Value(vaccineEntity.userId),
-      animalId: Value(vaccineEntity.animalId),
-      name: Value(vaccineEntity.name),
-      veterinarian: Value(vaccineEntity.veterinarian),
-      dateTimestamp: Value(vaccineEntity.dateTimestamp),
-      nextDueDateTimestamp: Value(vaccineEntity.nextDueDateTimestamp),
-      batch: Value(vaccineEntity.batch),
-      manufacturer: Value(vaccineEntity.manufacturer),
-      dosage: Value(vaccineEntity.dosage),
-      notes: Value(vaccineEntity.notes),
-      isRequired: Value(vaccineEntity.isRequired),
-      isCompleted: Value(vaccineEntity.isCompleted),
-      reminderDateTimestamp: Value(vaccineEntity.reminderDateTimestamp),
-      status: Value(vaccineEntity.status),
-      createdAtTimestamp: Value(vaccineEntity.createdAtTimestamp),
-      updatedAtTimestamp: Value(vaccineEntity.updatedAtTimestamp),
-      isDeleted: Value(vaccineEntity.isDeleted),
-      lastSyncAtTimestamp: Value(vaccineEntity.lastSyncAtTimestamp),
-      isDirty: Value(vaccineEntity.isDirty),
-      version: Value(vaccineEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      animalId: Value(entity.animalId),
+      name: Value(entity.name),
+      veterinarian: Value(entity.veterinarian),
+      dateTimestamp: Value(entity.dateTimestamp),
+      nextDueDateTimestamp: Value(entity.nextDueDateTimestamp),
+      batch: Value(entity.batch),
+      manufacturer: Value(entity.manufacturer),
+      dosage: Value(entity.dosage),
+      notes: Value(entity.notes),
+      isRequired: Value(entity.isRequired),
+      isCompleted: Value(entity.isCompleted),
+      reminderDateTimestamp: Value(entity.reminderDateTimestamp),
+      status: Value(entity.status),
+      createdAtTimestamp: Value(entity.createdAtTimestamp),
+      updatedAtTimestamp: Value(entity.updatedAtTimestamp),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAtTimestamp: Value(entity.lastSyncAtTimestamp),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final vaccineEntity = entity as VaccineEntity;
-    return vaccineEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(VaccineEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    return VaccineEntity.fromFirestore(data, data['id'] as String);
+  VaccineEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    return VaccineEntity.fromFirestore(data, data['id'] as String? ?? '');
   }
 }

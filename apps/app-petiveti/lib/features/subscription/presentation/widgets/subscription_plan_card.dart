@@ -1,15 +1,15 @@
-import 'package:core/core.dart' hide Column;
+import 'package:core/core.dart' hide Column, SubscriptionState, SubscriptionInfo, subscriptionProvider;
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
-import '../providers/subscription_providers.dart';
-import 'subscription_page_coordinator.dart';
+import '../state/subscription_notifier.dart';
+import '../state/subscription_state.dart';
 
 /// Widget responsible for displaying subscription plan information and actions
 class SubscriptionPlanCard extends ConsumerWidget {
   final SubscriptionPlan plan;
   final String userId;
-  final bool state;
+  final SubscriptionState state;
 
   const SubscriptionPlanCard({
     super.key,
@@ -20,8 +20,8 @@ class SubscriptionPlanCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // TODO: Fix - currentSubscription is SubscriptionPlan, not UserSubscription, doesn't have planId
-    final isCurrentPlan = state.currentSubscription?.id == plan.id;
+    final subscriptionInfo = state.currentSubscription;
+    final isCurrentPlan = subscriptionInfo?.productId == plan.productId;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -211,20 +211,30 @@ class SubscriptionPlanCard extends ConsumerWidget {
     WidgetRef ref,
     bool isCurrentPlan,
   ) {
-    // TODO: Add isPurchasing method to SubscriptionState when implemented
-    final isButtonDisabled = isCurrentPlan;
+    final isButtonDisabled = isCurrentPlan || state.isProcessingPurchase;
 
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: isButtonDisabled
             ? null
-            : () => SubscriptionPageCoordinator.subscribeToPlan(
-                ref,
-                context,
-                userId,
-                plan,
-              ),
+            : () async {
+                final result = await ref
+                    .read(subscriptionProvider.notifier)
+                    .purchaseProduct(plan.productId);
+                if (!context.mounted) return;
+                result.fold(
+                  (error) => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(error),
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  (subscription) => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Assinatura realizada com sucesso!')),
+                  ),
+                );
+              },
         style: ElevatedButton.styleFrom(
           backgroundColor: plan.isPopular
               ? Theme.of(context).colorScheme.primary

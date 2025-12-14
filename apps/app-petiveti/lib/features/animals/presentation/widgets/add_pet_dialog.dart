@@ -89,20 +89,18 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   @override
   Widget build(BuildContext context) {
     return PetFormDialog(
-      title: 'Gerenciar Pets',
+      title: _isEditing ? 'Editar Pet' : 'Cadastrar Novo Pet',
       subtitle: 'Adicione e gerencie informações dos seus pets',
       headerIcon: Icons.pets,
       isLoading: _isLoading,
       confirmButtonText: _isEditing ? 'Salvar Alterações' : 'Cadastrar Pet',
       onCancel: () => Navigator.of(context).pop(),
-      onConfirm: null, // Substituído pelo botão na seção
+      onConfirm: _submitForm,
       content: Form(
         key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildFormTitle(),
-            const SizedBox(height: 24),
             _buildBasicInfoSection(),
             const SizedBox(height: 20),
             _buildPhysicalInfoSection(),
@@ -112,22 +110,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             _buildCareSection(),
             const SizedBox(height: 20),
             _buildAdditionalInfoSection(),
-            const SizedBox(height: 20),
-            _buildSubmitSection(),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFormTitle() {
-    return Center(
-      child: Text(
-        _isEditing ? 'Editar Pet' : 'Cadastrar Novo Pet',
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.onSurface,
         ),
       ),
     );
@@ -162,7 +145,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           children: [
             Expanded(
               child: DropdownButtonFormField<AnimalSpecies>(
-                initialValue: _selectedSpecies,
+                value: _selectedSpecies,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Espécie *',
                   border: OutlineInputBorder(),
@@ -171,7 +155,10 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                 items: AnimalSpecies.values.map((species) {
                   return DropdownMenuItem(
                     value: species,
-                    child: Text(species.displayName),
+                    child: Text(
+                      species.displayName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -186,7 +173,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<AnimalGender>(
-                initialValue: _selectedGender,
+                value: _selectedGender,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Gênero *',
                   border: OutlineInputBorder(),
@@ -195,7 +183,10 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                 items: AnimalGender.values.map((gender) {
                   return DropdownMenuItem(
                     value: gender,
-                    child: Text(gender.displayName),
+                    child: Text(
+                      gender.displayName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -409,14 +400,21 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
-                initialValue: _selectedBloodType,
+                value: _selectedBloodType,
+                isExpanded: true,
                 decoration: const InputDecoration(
                   labelText: 'Tipo Sanguíneo',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.bloodtype),
                 ),
                 items: bloodTypeOptions.map((type) {
-                  return DropdownMenuItem(value: type, child: Text(type));
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(
+                      type,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
                 }).toList(),
                 onChanged: (value) {
                   setState(() {
@@ -613,21 +611,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
     );
   }
 
-  Widget _buildSubmitSection() {
-    return _isEditing
-        ? PetiVetiFormComponents.submitUpdate(
-            onSubmit: _submitForm,
-            onCancel: () => Navigator.of(context).pop(),
-            isLoading: _isLoading,
-          )
-        : PetiVetiFormComponents.submitCreate(
-            onSubmit: _submitForm,
-            onCancel: () => Navigator.of(context).pop(),
-            isLoading: _isLoading,
-            itemName: 'Pet',
-          );
-  }
-
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -641,12 +624,14 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       final weightText = _weightController.text.trim().replaceAll(',', '.');
       final weight = weightText.isEmpty ? null : double.parse(weightText);
       final now = DateTime.now();
+      
+      // Get current user ID from Firebase Auth
+      final user = FirebaseAuth.instance.currentUser;
+      final userId = user?.uid ?? 'default-user';
 
       final animal = Animal(
-        id:
-            widget.animal?.id ??
-            DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: 'temp_user_id',
+        id: widget.animal?.id ?? '0', // Use '0' for new animals, Drift will generate the real ID
+        userId: userId,
         name: _nameController.text.trim(),
         species: _selectedSpecies,
         breed: _breedController.text.trim().isEmpty

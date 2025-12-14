@@ -6,7 +6,7 @@ import '../../petiveti_database.dart';
 import '../../tables/expenses_table.dart';
 
 /// Adapter de sincronização para Expenses
-class ExpenseDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Expense> {
+class ExpenseDriftSyncAdapter extends DriftSyncAdapterBase<ExpenseEntity, Expense> {
   ExpenseDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -94,47 +94,45 @@ class ExpenseDriftSyncAdapter extends DriftSyncAdapterBase<dynamic, Expense> {
   }
 
   @override
-  Insertable<Expense> entityToCompanion(dynamic entity) {
-    final expenseEntity = entity as ExpenseEntity;
+  Insertable<Expense> entityToCompanion(ExpenseEntity entity) {
     return ExpensesCompanion(
-      id: expenseEntity.id != null && expenseEntity.id!.isNotEmpty
-          ? Value(int.parse(expenseEntity.id!))
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(expenseEntity.firebaseId),
-      userId: Value(expenseEntity.userId),
-      animalId: Value(expenseEntity.animalId),
-      title: Value(expenseEntity.title),
-      description: Value(expenseEntity.description),
-      amount: Value(expenseEntity.amount),
-      category: Value(expenseEntity.category),
-      paymentMethod: Value(expenseEntity.paymentMethod),
-      expenseDate: Value(expenseEntity.expenseDate),
-      veterinaryClinic: Value(expenseEntity.veterinaryClinic),
-      veterinarianName: Value(expenseEntity.veterinarianName),
-      invoiceNumber: Value(expenseEntity.invoiceNumber),
-      notes: Value(expenseEntity.notes),
-      veterinarian: Value(expenseEntity.veterinarian),
-      receiptNumber: Value(expenseEntity.receiptNumber),
-      isPaid: Value(expenseEntity.isPaid),
-      isRecurring: Value(expenseEntity.isRecurring),
-      recurrenceType: Value(expenseEntity.recurrenceType),
-      createdAt: Value(expenseEntity.createdAt),
-      updatedAt: Value(expenseEntity.updatedAt),
-      isDeleted: Value(expenseEntity.isDeleted),
-      lastSyncAt: Value(expenseEntity.lastSyncAt),
-      isDirty: Value(expenseEntity.isDirty),
-      version: Value(expenseEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      animalId: Value(entity.animalId),
+      title: Value(entity.title),
+      description: Value(entity.description),
+      amount: Value(entity.amount),
+      category: Value(entity.category),
+      paymentMethod: Value(entity.paymentMethod),
+      expenseDate: Value(entity.expenseDate),
+      veterinaryClinic: Value(entity.veterinaryClinic),
+      veterinarianName: Value(entity.veterinarianName),
+      invoiceNumber: Value(entity.invoiceNumber),
+      notes: Value(entity.notes),
+      veterinarian: Value(entity.veterinarian),
+      receiptNumber: Value(entity.receiptNumber),
+      isPaid: Value(entity.isPaid),
+      isRecurring: Value(entity.isRecurring),
+      recurrenceType: Value(entity.recurrenceType),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      updatedAt: Value(entity.updatedAt),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final expenseEntity = entity as ExpenseEntity;
-    return expenseEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(ExpenseEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    return ExpenseEntity.fromFirestore(data, data['id'] as String);
+  ExpenseEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    return ExpenseEntity.fromFirestore(data, data['id'] as String? ?? '');
   }
 }

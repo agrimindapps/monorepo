@@ -60,10 +60,19 @@ FirebaseAuth firebaseAuth(Ref ref) {
 
 @riverpod
 GoogleSignIn googleSignIn(Ref ref) {
+  // Na web sem clientId configurado, retorna uma instância "vazia"
+  // O login social só funcionará em mobile ou se clientId for configurado
   if (kIsWeb) {
-    return GoogleSignIn(clientId: '');
+    // Retorna GoogleSignIn sem clientId - vai falhar silenciosamente
+    // quando tentar signIn(), mas não vai crashar na inicialização
+    return GoogleSignIn(
+      scopes: ['email'],
+      // Não definir clientId faz com que o login falhe graciosamente
+    );
   }
-  return GoogleSignIn();
+  return GoogleSignIn(
+    scopes: ['email', 'profile'],
+  );
 }
 
 

@@ -205,6 +205,50 @@ class MockSubscriptionService implements ISubscriptionRepository {
     return getAvailableProducts(productIds: []);
   }
 
+  @override
+  Future<Either<Failure, bool>> hasPetivetiSubscription() async {
+    return hasActiveSubscription();
+  }
+
+  @override
+  Future<Either<Failure, List<ProductInfo>>> getPetivetiProducts() async {
+    return Right(_getMockPetivetiProducts());
+  }
+
+  List<ProductInfo> _getMockPetivetiProducts() {
+    return [
+      const ProductInfo(
+        productId: 'petiveti_premium_monthly',
+        title: 'Petiveti Premium Mensal',
+        description: 'Animais ilimitados, sync na nuvem, sem anúncios',
+        price: 9.90,
+        priceString: 'R\$ 9,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1M',
+        freeTrialPeriod: 'P7D',
+      ),
+      const ProductInfo(
+        productId: 'petiveti_premium_yearly',
+        title: 'Petiveti Premium Anual',
+        description: 'Economize 17% com o plano anual',
+        price: 99.90,
+        priceString: 'R\$ 99,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1Y',
+        freeTrialPeriod: 'P7D',
+      ),
+      const ProductInfo(
+        productId: 'petiveti_lifetime',
+        title: 'Petiveti Vitalício',
+        description: 'Acesso premium para sempre',
+        price: 299.90,
+        priceString: 'R\$ 299,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: null, // One-time purchase
+      ),
+    ];
+  }
+
   List<ProductInfo> _getMockProducts() {
     return [
       // ReceitaAgro Products

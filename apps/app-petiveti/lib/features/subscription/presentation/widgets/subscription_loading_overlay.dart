@@ -1,6 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-
-import '../state/subscription_state.dart';
 
 /// Widget responsible for displaying loading overlay during subscription operations
 class SubscriptionLoadingOverlay extends StatelessWidget {
@@ -13,8 +12,7 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shouldShowOverlay = _shouldShowOverlay;
-    if (!shouldShowOverlay) {
+    if (state is! SubscriptionLoading) {
       return const SizedBox.shrink();
     }
 
@@ -43,9 +41,4 @@ class SubscriptionLoadingOverlay extends StatelessWidget {
       ),
     );
   }
-
-  bool get _shouldShowOverlay =>
-      state.hasAnyLoading &&
-      !state.isLoadingPlans &&
-      !state.isLoadingCurrentSubscription;
 }

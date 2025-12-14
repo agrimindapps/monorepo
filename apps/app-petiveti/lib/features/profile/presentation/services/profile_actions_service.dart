@@ -1,4 +1,6 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../shared/widgets/dialogs/app_dialogs.dart';
 
@@ -20,29 +22,32 @@ class ProfileActionsService {
     AppDialogs.showComingSoon(context, title);
   }
 
-  /// Shows notifications settings screen
+  /// Navigates to notifications settings page
   void showNotificationsSettings(BuildContext context) {
-    showComingSoonDialog(context, 'Configurações de Notificação');
+    context.push('/notifications-settings');
   }
 
-  /// Shows theme settings screen
+  /// Navigates to settings page (theme and other preferences)
   void showThemeSettings(BuildContext context) {
-    showComingSoonDialog(context, 'Configurações de Tema');
+    context.push('/settings');
   }
 
-  /// Shows language settings screen
+  /// Navigates to settings page (language settings)
   void showLanguageSettings(BuildContext context) {
-    showComingSoonDialog(context, 'Configurações de Idioma');
+    context.push('/settings');
   }
 
-  /// Shows backup and sync settings screen
+  /// Navigates to settings page (sync settings)
   void showBackupSettings(BuildContext context) {
-    showComingSoonDialog(context, 'Backup e Sincronização');
+    context.push('/settings');
   }
 
-  /// Shows help center
-  void showHelp(BuildContext context) {
-    showComingSoonDialog(context, 'Central de Ajuda');
+  /// Opens help center URL
+  Future<void> showHelp(BuildContext context) async {
+    final Uri url = Uri.parse('https://petiveti.com/ajuda');
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
   }
 
   /// Shows contact support dialog

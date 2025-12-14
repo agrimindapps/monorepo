@@ -7,9 +7,8 @@ import '../../petiveti_database.dart';
 import '../../tables/calculation_history_table.dart';
 
 /// Adapter de sincronização para Calculation History
-/// FIXME: Entity precisa estender BaseSyncEntity
 class CalculationHistoryDriftSyncAdapter
-    extends DriftSyncAdapterBase<dynamic, CalculationHistoryEntry> {
+    extends DriftSyncAdapterBase<SyncCalculationHistoryEntity, CalculationHistoryEntry> {
   CalculationHistoryDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -26,7 +25,7 @@ class CalculationHistoryDriftSyncAdapter
       localDb.calculationHistory;
 
   @override
-  Future<Either<Failure, List<dynamic>>> getDirtyRecords(String userId) async {
+  Future<Either<Failure, List<SyncCalculationHistoryEntity>>> getDirtyRecords(String userId) async {
     try {
       final query = localDb.select(localDb.calculationHistory)
         ..where((tbl) => tbl.userId.equals(userId) & tbl.isDirty.equals(true));
@@ -71,7 +70,7 @@ class CalculationHistoryDriftSyncAdapter
   @override
   SyncCalculationHistoryEntity driftToEntity(CalculationHistoryEntry row) {
     return SyncCalculationHistoryEntity(
-      id: row.id,
+      id: row.id.toString(),
       firebaseId: row.firebaseId,
       userId: row.userId,
       calculatorType: row.calculatorType,
@@ -86,38 +85,35 @@ class CalculationHistoryDriftSyncAdapter
   }
 
   @override
-  Insertable<CalculationHistoryEntry> entityToCompanion(dynamic entity) {
-    final historyEntity = entity as SyncCalculationHistoryEntity;
+  Insertable<CalculationHistoryEntry> entityToCompanion(SyncCalculationHistoryEntity entity) {
     return CalculationHistoryCompanion(
-      id: historyEntity.id != null
-          ? Value(historyEntity.id!)
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(historyEntity.firebaseId),
-      userId: Value(historyEntity.userId),
-      calculatorType: Value(historyEntity.calculatorType),
-      inputData: Value(historyEntity.inputData),
-      result: Value(historyEntity.result),
-      date: Value(historyEntity.date),
-      isDeleted: Value(historyEntity.isDeleted),
-      lastSyncAt: Value(historyEntity.lastSyncAt),
-      isDirty: Value(historyEntity.isDirty),
-      version: Value(historyEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      calculatorType: Value(entity.calculatorType),
+      inputData: Value(entity.inputData),
+      result: Value(entity.result),
+      date: Value(entity.date),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final historyEntity = entity as SyncCalculationHistoryEntity;
-    return historyEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(SyncCalculationHistoryEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    // Note: fromFirestore expects DocumentSnapshot, but we receive Map
-    // This adapter may need entity refactoring
+  SyncCalculationHistoryEntity fromFirestoreDoc(Map<String, dynamic> data) {
     return SyncCalculationHistoryEntity(
+      id: data['localId'] as String? ?? data['id'] as String? ?? '',
       firebaseId: data['id'] as String?,
-      userId: data['userId'] as String,
+      userId: data['userId'] as String? ?? '',
       calculatorType: data['calculatorType'] as String,
       inputData: data['inputData'] as String,
       result: data['result'] as String,

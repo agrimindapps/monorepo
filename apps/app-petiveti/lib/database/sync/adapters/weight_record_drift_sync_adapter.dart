@@ -7,7 +7,7 @@ import '../../tables/weight_records_table.dart';
 
 /// Adapter de sincronização para Weight Records
 class WeightRecordDriftSyncAdapter
-    extends DriftSyncAdapterBase<dynamic, WeightRecord> {
+    extends DriftSyncAdapterBase<WeightRecordEntity, WeightRecord> {
   WeightRecordDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -85,35 +85,33 @@ class WeightRecordDriftSyncAdapter
   }
 
   @override
-  Insertable<WeightRecord> entityToCompanion(dynamic entity) {
-    final weightEntity = entity as WeightRecordEntity;
+  Insertable<WeightRecord> entityToCompanion(WeightRecordEntity entity) {
     return WeightRecordsCompanion(
-      id: weightEntity.id != null && weightEntity.id!.isNotEmpty
-          ? Value(int.parse(weightEntity.id!))
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(weightEntity.firebaseId),
-      userId: Value(weightEntity.userId),
-      animalId: Value(weightEntity.animalId),
-      weight: Value(weightEntity.weight),
-      unit: Value(weightEntity.unit),
-      date: Value(weightEntity.date),
-      notes: Value(weightEntity.notes),
-      createdAt: Value(weightEntity.createdAt),
-      isDeleted: Value(weightEntity.isDeleted),
-      lastSyncAt: Value(weightEntity.lastSyncAt),
-      isDirty: Value(weightEntity.isDirty),
-      version: Value(weightEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      userId: Value(entity.userId ?? ''),
+      animalId: Value(entity.animalId),
+      weight: Value(entity.weight),
+      unit: Value(entity.unit),
+      date: Value(entity.date),
+      notes: Value(entity.notes),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final weightEntity = entity as WeightRecordEntity;
-    return weightEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(WeightRecordEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    return WeightRecordEntity.fromFirestore(data, data['id'] as String);
+  WeightRecordEntity fromFirestoreDoc(Map<String, dynamic> data) {
+    return WeightRecordEntity.fromFirestore(data, data['id'] as String? ?? '');
   }
 }

@@ -60,6 +60,12 @@ class NoOpSubscriptionRepository implements ISubscriptionRepository {
   Future<Either<Failure, bool>> hasReceitaAgroSubscription() async => right(false);
 
   @override
+  Future<Either<Failure, bool>> hasPetivetiSubscription() async => right(false);
+
+  @override
+  Future<Either<Failure, List<ProductInfo>>> getPetivetiProducts() async => right([]);
+
+  @override
   Future<Either<Failure, bool>> isEligibleForTrial({
     required String productId,
   }) async => right(false);

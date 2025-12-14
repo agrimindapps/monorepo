@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';
 import '../widgets/add_vaccine_dialog.dart';
@@ -48,103 +49,153 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
     final vaccinesState = ref.watch(vaccinesProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Vacinas'),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _showCalendarView ? Icons.list : Icons.calendar_view_month,
-            ),
-            onPressed: () {
-              setState(() {
-                _showCalendarView = !_showCalendarView;
-              });
-            },
-            tooltip: _showCalendarView ? 'Ver Lista' : 'Ver Calendário',
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () => _showSearchDialog(context),
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
-            onSelected: (action) {
-              switch (action) {
-                case 'filter':
-                  _showFilterMenu(context);
-                  break;
-                case 'history':
-                  _navigateToHistory(context);
-                  break;
-                case 'reminders':
-                  _navigateToReminders(context);
-                  break;
-                case 'schedule':
-                  _navigateToAdvancedScheduling(context);
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'filter',
-                child: ListTile(
-                  leading: Icon(Icons.filter_list),
-                  title: Text('Filtros'),
+      body: SafeArea(
+        child: Column(
+          children: [
+            PetivetiPageHeader(
+              icon: Icons.vaccines,
+              title: 'Vacinas',
+              subtitle: 'Controle de vacinação dos pets',
+              showBackButton: true,
+              actions: [
+                _buildHeaderAction(
+                  icon: _showCalendarView ? Icons.list : Icons.calendar_view_month,
+                  onTap: () => setState(() => _showCalendarView = !_showCalendarView),
+                  tooltip: _showCalendarView ? 'Ver Lista' : 'Ver Calendário',
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'history',
-                child: ListTile(
-                  leading: Icon(Icons.history),
-                  title: Text('Histórico Completo'),
+                _buildHeaderAction(
+                  icon: Icons.search,
+                  onTap: () => _showSearchDialog(context),
+                  tooltip: 'Buscar',
                 ),
-              ),
-              const PopupMenuItem(
-                value: 'reminders',
-                child: ListTile(
-                  leading: Icon(Icons.notifications),
-                  title: Text('Gerenciar Lembretes'),
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'schedule',
-                child: ListTile(
-                  leading: Icon(Icons.schedule_send),
-                  title: Text('Agendamento Avançado'),
-                ),
-              ),
-            ],
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabs: [
-            const Tab(icon: Icon(Icons.dashboard), text: 'Painel'),
-            Tab(
-              icon: const Icon(Icons.list),
-              text: 'Todas (${vaccinesState.totalVaccines})',
+                _buildHeaderPopupMenu(),
+              ],
             ),
-            Tab(
-              icon: const Icon(Icons.warning),
-              text: 'Vencidas (${vaccinesState.overdueCount})',
-            ),
-            Tab(
-              icon: const Icon(Icons.schedule),
-              text: 'Pendentes (${vaccinesState.pendingCount})',
-            ),
-            Tab(
-              icon: const Icon(Icons.check_circle),
-              text: 'Concluídas (${vaccinesState.completedCount})',
-            ),
+            _buildTabBar(vaccinesState),
+            Expanded(child: _buildBody(context, vaccinesState)),
           ],
         ),
       ),
-      body: _buildBody(context, vaccinesState),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToAddVaccine(context),
         tooltip: 'Adicionar Vacina',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildHeaderAction({
+    required IconData icon,
+    required VoidCallback onTap,
+    required String tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(9),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(9),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeaderPopupMenu() {
+    return PopupMenuButton<String>(
+      icon: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
+      ),
+      onSelected: (action) {
+        switch (action) {
+          case 'filter':
+            _showFilterMenu(context);
+            break;
+          case 'history':
+            _navigateToHistory(context);
+            break;
+          case 'reminders':
+            _navigateToReminders(context);
+            break;
+          case 'schedule':
+            _navigateToAdvancedScheduling(context);
+            break;
+        }
+      },
+      itemBuilder: (context) => [
+        const PopupMenuItem(
+          value: 'filter',
+          child: ListTile(
+            leading: Icon(Icons.filter_list),
+            title: Text('Filtros'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'history',
+          child: ListTile(
+            leading: Icon(Icons.history),
+            title: Text('Histórico Completo'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'reminders',
+          child: ListTile(
+            leading: Icon(Icons.notifications),
+            title: Text('Gerenciar Lembretes'),
+          ),
+        ),
+        const PopupMenuItem(
+          value: 'schedule',
+          child: ListTile(
+            leading: Icon(Icons.schedule_send),
+            title: Text('Agendamento Avançado'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabBar(VaccinesState vaccinesState) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        isScrollable: true,
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        tabs: [
+          const Tab(icon: Icon(Icons.dashboard), text: 'Painel'),
+          Tab(
+            icon: const Icon(Icons.list),
+            text: 'Todas (${vaccinesState.totalVaccines})',
+          ),
+          Tab(
+            icon: const Icon(Icons.warning),
+            text: 'Vencidas (${vaccinesState.overdueCount})',
+          ),
+          Tab(
+            icon: const Icon(Icons.schedule),
+            text: 'Pendentes (${vaccinesState.pendingCount})',
+          ),
+          Tab(
+            icon: const Icon(Icons.check_circle),
+            text: 'Concluídas (${vaccinesState.completedCount})',
+          ),
+        ],
       ),
     );
   }

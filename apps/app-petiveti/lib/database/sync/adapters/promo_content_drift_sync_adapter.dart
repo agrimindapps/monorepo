@@ -7,9 +7,8 @@ import '../../petiveti_database.dart';
 import '../../tables/promo_content_table.dart';
 
 /// Adapter de sincronização para Promo Content
-/// FIXME: Entity precisa estender BaseSyncEntity
 class PromoContentDriftSyncAdapter
-    extends DriftSyncAdapterBase<dynamic, PromoContentEntry> {
+    extends DriftSyncAdapterBase<SyncPromoContentEntity, PromoContentEntry> {
   PromoContentDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -25,7 +24,7 @@ class PromoContentDriftSyncAdapter
   TableInfo<PromoContent, PromoContentEntry> get table => localDb.promoContent;
 
   @override
-  Future<Either<Failure, List<dynamic>>> getDirtyRecords(String userId) async {
+  Future<Either<Failure, List<SyncPromoContentEntity>>> getDirtyRecords(String userId) async {
     try {
       // Promo content não é por usuário
       final query = localDb.select(localDb.promoContent)
@@ -69,7 +68,7 @@ class PromoContentDriftSyncAdapter
   @override
   SyncPromoContentEntity driftToEntity(PromoContentEntry row) {
     return SyncPromoContentEntity(
-      id: row.id,
+      id: row.id.toString(),
       firebaseId: row.firebaseId,
       title: row.title,
       content: row.content,
@@ -86,38 +85,35 @@ class PromoContentDriftSyncAdapter
   }
 
   @override
-  Insertable<PromoContentEntry> entityToCompanion(dynamic entity) {
-    final promoEntity = entity as SyncPromoContentEntity;
+  Insertable<PromoContentEntry> entityToCompanion(SyncPromoContentEntity entity) {
     return PromoContentCompanion(
-      id: promoEntity.id != null
-          ? Value(promoEntity.id!)
+      id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
+          ? Value(int.parse(entity.id))
           : const Value.absent(),
-      firebaseId: Value(promoEntity.firebaseId),
-      title: Value(promoEntity.title),
-      content: Value(promoEntity.content),
-      imageUrl: Value(promoEntity.imageUrl),
-      actionUrl: Value(promoEntity.actionUrl),
-      expiryDate: Value(promoEntity.expiryDate),
-      isActive: Value(promoEntity.isActive),
-      createdAt: Value(promoEntity.createdAt),
-      isDeleted: Value(promoEntity.isDeleted),
-      lastSyncAt: Value(promoEntity.lastSyncAt),
-      isDirty: Value(promoEntity.isDirty),
-      version: Value(promoEntity.version),
+      firebaseId: Value(entity.firebaseId),
+      title: Value(entity.title),
+      content: Value(entity.content),
+      imageUrl: Value(entity.imageUrl),
+      actionUrl: Value(entity.actionUrl),
+      expiryDate: Value(entity.expiryDate),
+      isActive: Value(entity.isActive),
+      createdAt: Value(entity.createdAt ?? DateTime.now()),
+      isDeleted: Value(entity.isDeleted),
+      lastSyncAt: Value(entity.lastSyncAt),
+      isDirty: Value(entity.isDirty),
+      version: Value(entity.version),
     );
   }
 
   @override
-  Map<String, dynamic> toFirestoreMap(dynamic entity) {
-    final promoEntity = entity as SyncPromoContentEntity;
-    return promoEntity.toFirestore();
+  Map<String, dynamic> toFirestoreMap(SyncPromoContentEntity entity) {
+    return entity.toFirestore();
   }
 
   @override
-  dynamic fromFirestoreDoc(Map<String, dynamic> data) {
-    // Note: fromFirestore expects DocumentSnapshot, but we receive Map
-    // This adapter may need entity refactoring
+  SyncPromoContentEntity fromFirestoreDoc(Map<String, dynamic> data) {
     return SyncPromoContentEntity(
+      id: data['localId'] as String? ?? data['id'] as String? ?? '',
       firebaseId: data['id'] as String?,
       title: data['title'] as String,
       content: data['content'] as String,
@@ -127,7 +123,7 @@ class PromoContentDriftSyncAdapter
           ? (data['expiryDate'] as Timestamp).toDate()
           : null,
       isActive: data['isActive'] as bool? ?? true,
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate(),
       isDeleted: data['isDeleted'] as bool? ?? false,
       lastSyncAt: data['lastSyncAt'] != null
           ? (data['lastSyncAt'] as Timestamp).toDate()

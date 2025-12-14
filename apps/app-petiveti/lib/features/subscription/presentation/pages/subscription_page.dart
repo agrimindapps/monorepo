@@ -1,10 +1,11 @@
-import 'package:core/core.dart' hide Column, subscriptionProvider;
+import 'package:core/core.dart' hide Column, SubscriptionState, SubscriptionInfo, subscriptionProvider;
 import 'package:flutter/material.dart';
 
+import '../../domain/entities/subscription_plan.dart';
+import '../state/subscription_notifier.dart';
+import '../state/subscription_state.dart';
 import '../widgets/subscription_empty_state.dart';
 import '../widgets/subscription_feature_comparison.dart';
-import '../widgets/subscription_loading_overlay.dart';
-import '../widgets/subscription_page_coordinator.dart';
 import '../widgets/subscription_page_header.dart';
 import '../widgets/subscription_plan_card.dart';
 import '../widgets/subscription_restore_button.dart';
@@ -178,23 +179,30 @@ class SubscriptionPage extends ConsumerStatefulWidget {
 /// **Subscription Page State Management**
 ///
 /// Manages the subscription page lifecycle, data loading, and user interactions.
-/// Coordinates with the SubscriptionPageCoordinator for complex business logic.
+/// Uses the local SubscriptionNotifier for state management.
 class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   @override
-  void initState() {
-    super.initState();
-    // Ensure we call coordinator initialization after widget is mounted
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      SubscriptionPageCoordinator.initializeData(ref, widget.userId);
+  Widget build(BuildContext context) {
+    final state = ref.watch(subscriptionProvider);
+
+    // Listen for errors
+    ref.listen<SubscriptionState>(subscriptionProvider, (previous, next) {
+      if (next.hasError && next.errorMessage != previous?.errorMessage) {
+        _showErrorMessage(context, next.errorMessage!);
+      }
     });
+
+    return _buildScaffold(state);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SubscriptionPageCoordinator(
-      userId: widget.userId,
-      bodyBuilder: (state) => _buildScaffold(state),
+  void _showErrorMessage(BuildContext context, String error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error),
+        backgroundColor: Theme.of(context).colorScheme.error,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+      ),
     );
   }
 
@@ -203,22 +211,34 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     body: Stack(
       children: [
         _buildBody(state),
-        SubscriptionLoadingOverlay(state: state),
+        if (state.isLoading) _buildLoadingOverlay(),
       ],
+    ),
+  );
+
+  Widget _buildLoadingOverlay() => Container(
+    color: Colors.black26,
+    child: const Center(
+      child: CircularProgressIndicator(),
     ),
   );
 
   PreferredSizeWidget _buildAppBar(SubscriptionState state) => AppBar(
     title: const Text('Assinaturas'),
     actions: [
-      if (state.currentSubscription != null)
+      if (state.isPremium)
         IconButton(
           icon: const Icon(Icons.restore),
-          onPressed: () => SubscriptionPageCoordinator.restorePurchases(
-            ref,
-            context,
-            widget.userId,
-          ),
+          onPressed: () async {
+            final result = await ref.read(subscriptionProvider.notifier).restorePurchases();
+            if (!mounted) return;
+            result.fold(
+              (error) => _showErrorMessage(context, error),
+              (_) => ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Compras restauradas com sucesso!')),
+              ),
+            );
+          },
           tooltip: 'Restaurar Compras',
         ),
     ],
@@ -258,33 +278,57 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   ///
   /// @param state Current subscription state from provider
   /// @returns List of widgets for current subscription section
-  List<Widget> _buildCurrentSubscriptionSection(bool state) {
+  List<Widget> _buildCurrentSubscriptionSection(SubscriptionState state) {
     if (state.isLoadingCurrentSubscription) {
       return [
         SubscriptionSkeletonLoaders.buildCurrentSubscriptionSkeleton(context),
         const SizedBox(height: 24),
       ];
-    } else if (state.currentSubscription != null) {
-      // TODO: Fix type mismatch - state has SubscriptionPlan but CurrentSubscriptionCard needs UserSubscription
-      // return [
-      //   CurrentSubscriptionCard(
-      //     subscription: state.currentSubscription!,
-      //     userId: widget.userId,
-      //     state: state,
-      //   ),
-      //   const SizedBox(height: 24),
-      // ];
+    } else if (state.isPremium && state.currentSubscription != null) {
+      final subscription = state.currentSubscription!;
       return [
-        const Card(
+        Card(
           child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('Current subscription info here (TODO: fix type mismatch)'),
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.verified, color: Colors.green),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'Assinatura Premium Ativa',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text('Produto: ${subscription.productId}'),
+                if (subscription.expirationDate != null)
+                  Text(
+                    'Expira em: ${_formatDate(subscription.expirationDate!)}',
+                  ),
+                if (subscription.isTrialPeriod)
+                  const Text(
+                    '🎁 Período de avaliação',
+                    style: TextStyle(color: Colors.orange),
+                  ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 24),
       ];
     }
     return [];
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
   }
 
   /// **Build Available Plans Section**
@@ -312,23 +356,56 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   ///
   /// @param state Current subscription state with available plans
   /// @returns List of widgets for subscription plans section
-  List<Widget> _buildPlansSection(bool state) {
+  List<Widget> _buildPlansSection(SubscriptionState state) {
     if (state.isLoadingPlans) {
       return [SubscriptionSkeletonLoaders.buildPlanCardsSkeleton(context)];
     } else if (state.availablePlans.isNotEmpty) {
       return state.availablePlans
-          .where((p) => !p.isFree)
           .map(
-            (plan) => SubscriptionPlanCard(
-              plan: plan,
+            (product) => SubscriptionPlanCard(
+              plan: _productInfoToPlan(product),
               userId: widget.userId,
               state: state,
             ),
           )
           .toList();
-    } else if (!state.hasAnyLoading) {
+    } else if (!state.isLoadingPlans) {
       return [const SubscriptionEmptyState()];
     }
     return [];
+  }
+
+  SubscriptionPlan _productInfoToPlan(ProductInfo product) {
+    return SubscriptionPlan(
+      id: product.productId,
+      productId: product.productId,
+      title: product.title,
+      description: product.description,
+      price: product.price,
+      currency: product.currencyCode,
+      type: _getPlanType(product.productId),
+      features: _getFeaturesForProduct(product.productId),
+      isPopular: product.productId.contains('yearly') || product.productId.contains('annual'),
+      trialDays: product.hasFreeTrial ? 7 : null,
+    );
+  }
+
+  PlanType _getPlanType(String productId) {
+    final id = productId.toLowerCase();
+    if (id.contains('monthly') || id.contains('mensal')) return PlanType.monthly;
+    if (id.contains('yearly') || id.contains('annual') || id.contains('anual')) return PlanType.yearly;
+    if (id.contains('lifetime') || id.contains('vitalicio')) return PlanType.lifetime;
+    return PlanType.monthly;
+  }
+
+  List<String> _getFeaturesForProduct(String productId) {
+    return [
+      'Animais ilimitados',
+      'Sincronização na nuvem',
+      'Relatórios avançados',
+      'Lembretes de medicamentos',
+      'Exportação de dados',
+      'Sem anúncios',
+    ];
   }
 }

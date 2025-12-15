@@ -59,7 +59,6 @@ extension FuelFormNotifierInitialization on FuelFormNotifier {
         state = state.copyWith(
           formModel: state.formModel.copyWith(
             vehicle: vehicle,
-            odometer: vehicle.currentOdometer,
             fuelType: vehicle.supportedFuels.isNotEmpty
                 ? vehicle.supportedFuels.first
                 : FuelType.gasoline,

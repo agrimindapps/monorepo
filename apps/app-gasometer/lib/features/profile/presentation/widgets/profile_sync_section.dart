@@ -33,12 +33,12 @@ class ProfileSyncSection extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: GasometerDesignTokens.colorSuccess.withValues(alpha: 0.1),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.cloud_done,
-                    color: GasometerDesignTokens.colorSuccess,
+                    color: Theme.of(context).primaryColor,
                     size: 20,
                   ),
                 ),
@@ -55,12 +55,12 @@ class ProfileSyncSection extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: GasometerDesignTokens.colorSuccess.withValues(alpha: 0.1),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.data_object,
-                    color: GasometerDesignTokens.colorSuccess,
+                    color: Theme.of(context).primaryColor,
                     size: 20,
                   ),
                 ),
@@ -76,12 +76,12 @@ class ProfileSyncSection extends ConsumerWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: GasometerDesignTokens.colorSuccess.withValues(alpha: 0.1),
+                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.table_chart,
-                    color: GasometerDesignTokens.colorSuccess,
+                    color: Theme.of(context).primaryColor,
                     size: 20,
                   ),
                 ),

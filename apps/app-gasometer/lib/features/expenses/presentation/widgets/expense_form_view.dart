@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
@@ -8,6 +9,7 @@ import '../../../../core/widgets/form_section_widget.dart';
 import '../../../../core/widgets/money_form_field.dart';
 import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
+import '../../../../core/widgets/readonly_field.dart';
 import '../../../../core/widgets/receipt_section.dart';
 import '../../core/constants/expense_constants.dart';
 import '../../domain/entities/expense_entity.dart';
@@ -39,28 +41,49 @@ class ExpenseFormView extends ConsumerWidget {
             icon: Icons.shopping_cart,
             child: Column(
               children: [
-                ExpenseTypeSelector(
-                  selectedType: state.expenseType,
-                  onTypeSelected: notifier.updateExpenseType,
-                  error: state.getFieldError('expenseType'),
-                ),
+                if (isReadOnly)
+                  ReadOnlyField(
+                    label: 'Tipo de Despesa',
+                    value: state.expenseType.displayName,
+                    icon: Icons.category,
+                  )
+                else
+                  ExpenseTypeSelector(
+                    selectedType: state.expenseType,
+                    onTypeSelected: notifier.updateExpenseType,
+                    error: state.getFieldError('expenseType'),
+                  ),
 
                 const SizedBox(height: GasometerDesignTokens.spacingMd),
-                DescriptionField(
-                  controller: notifier.descriptionController,
-                  focusNode: focusNodes['description'],
-                  label: 'Descrição da Despesa',
-                  hint: ExpenseConstants.descriptionPlaceholder,
-                  required: true,
-                  onChanged: (value) {},
-                ),
+                if (isReadOnly)
+                  ReadOnlyField(
+                    label: 'Descrição da Despesa',
+                    value: state.description.isEmpty ? 'Sem descrição' : state.description,
+                    icon: Icons.description,
+                  )
+                else
+                  DescriptionField(
+                    controller: notifier.descriptionController,
+                    focusNode: focusNodes['description'],
+                    label: 'Descrição da Despesa',
+                    hint: ExpenseConstants.descriptionPlaceholder,
+                    required: true,
+                    onChanged: (value) {},
+                  ),
 
                 const SizedBox(height: GasometerDesignTokens.spacingMd),
-                DateTimeField(
-                  value: state.date ?? DateTime.now(),
-                  onChanged: (newDate) => notifier.updateDate(newDate),
-                  label: 'Data e Hora',
-                ),
+                if (isReadOnly)
+                  ReadOnlyField(
+                    label: 'Data e Hora',
+                    value: DateFormat('dd/MM/yyyy HH:mm').format(state.date ?? DateTime.now()),
+                    icon: Icons.calendar_today,
+                  )
+                else
+                  DateTimeField(
+                    value: state.date ?? DateTime.now(),
+                    onChanged: (newDate) => notifier.updateDate(newDate),
+                    label: 'Data e Hora',
+                  ),
               ],
             ),
           ),
@@ -73,21 +96,37 @@ class ExpenseFormView extends ConsumerWidget {
               children: [
                 FormFieldRow.standard(
                   children: [
-                    AmountFormField(
-                      controller: notifier.amountController,
-                      focusNode: focusNodes['amount'],
-                      label: 'Valor Total',
-                      required: true,
-                      onChanged: (value) {},
-                    ),
-                    OdometerField(
-                      controller: notifier.odometerController,
-                      focusNode: focusNodes['odometer'],
-                      label: 'Quilometragem Atual',
-                      hint: ExpenseConstants.odometerPlaceholder,
-                      currentOdometer: state.vehicle?.currentOdometer,
-                      onChanged: (value) {},
-                    ),
+                    if (isReadOnly)
+                      ReadOnlyField(
+                        label: 'Valor Total',
+                        value: 'R\$ ${state.amount.toStringAsFixed(2)}',
+                        icon: Icons.attach_money,
+                      )
+                    else
+                      AmountFormField(
+                        controller: notifier.amountController,
+                        focusNode: focusNodes['amount'],
+                        label: 'Valor Total',
+                        required: true,
+                        onChanged: (value) {},
+                      ),
+                    if (isReadOnly)
+                      ReadOnlyField(
+                        label: 'Quilometragem Atual',
+                        value: state.odometer > 0 
+                            ? '${NumberFormat('#,##0.00', 'pt_BR').format(state.odometer)} km'
+                            : 'Não informado',
+                        icon: Icons.speed,
+                      )
+                    else
+                      OdometerField(
+                        controller: notifier.odometerController,
+                        focusNode: focusNodes['odometer'],
+                        label: 'Quilometragem Atual',
+                        hint: ExpenseConstants.odometerPlaceholder,
+                        currentOdometer: state.vehicle?.currentOdometer,
+                        onChanged: (value) {},
+                      ),
                   ],
                 ),
               ],

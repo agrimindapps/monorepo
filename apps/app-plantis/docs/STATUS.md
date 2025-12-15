@@ -1,6 +1,6 @@
 # 📊 Dashboard - app-plantis
 
-**Atualizado**: 2025-12-06
+**Atualizado**: 2025-12-15
 **Status**: 🌱 Gold Standard (10/10)
 
 ---
@@ -36,7 +36,7 @@
 ## 🔥 Em Andamento
 
 | Feature | ID | Tarefa | Progresso |
-|---------|-----|--------|-----------|
+|---------|-----|--------|-----------||
 | - | - | Nenhuma tarefa em andamento | - |
 
 ---
@@ -45,14 +45,10 @@
 
 | Prioridade | Feature | ID | Tarefa |
 |------------|---------|-----|--------|
-| 🟡 Média | core | PLT-001 | Migrar BackgroundSyncService para Riverpod |
-| 🟡 Média | core | PLT-002 | Migrar FeedbackSystem para Riverpod |
-| 🟡 Média | core | PLT-003 | Migrar ProgressTracker para Riverpod |
-| 🟡 Média | shared | PLT-005 | Refatorar UnifiedFeedbackSystem (30+ TODOs) |
+
+| 🟡 Média | shared | PLT-005 | Refatorar UnifiedFeedbackSystem (God Class 614L) |
 | 🟡 Média | home | PLT-HOME-001 | Implementar Firebase Remote Config |
-| 🟡 Média | premium | PLT-PREMIUM-001 | Injetar repositories via Riverpod |
-| 🟡 Média | account | PLT-ACCOUNT-001 | Verificar status premium via RevenueCat |
-| 🟢 Baixa | - | PLT-008 | Corrigir 5 warnings do analyzer |
+|  Baixa | - | PLT-008 | Corrigir 5 warnings do analyzer |
 
 ---
 
@@ -65,8 +61,8 @@
 | **Health Score** | 10/10 |
 | **Erros de análise** | 0 |
 | **Warnings** | 5 |
-| **@riverpod providers** | 333 ✅ |
-| **ChangeNotifiers** | 3 (legacy) |
+| **@riverpod providers** | 336 ✅ (+3) |
+| **ChangeNotifiers** | 0 ✅ (legacy removidos) |
 | **TODOs pendentes** | 71 |
 
 ---
@@ -75,8 +71,11 @@
 
 ### Dezembro 2025
 | Data | Feature | Tarefa | Resultado |
-|------|---------|--------|-----------|
-| 06/12 | docs | Análise de features para novas tarefas | ✅ 8 novas tarefas identificadas |
+| 15/12 | core | PLT-006: Implementar DI propriamente | ✅ Removido SolidDIFactory (203 linhas) |
+| 15/12 | core | PLT-007: Implementar performance monitoring | ✅ PerformanceService integrado |
+| 15/12 | account | PLT-ACCOUNT-001: Verificar status premium via RevenueCat | ✅ Integrado PremiumRepository |
+| 15/12 | tests | Implementação de testes (PLT-PLANTS-005, PLT-TASKS-002, PLT-PREMIUM-004, PLT-AUTH-007) | ✅ 70+ testes criados em 4 módulos |
+|------|---------|--------|-----------|| 15/12 | core | Migração Riverpod (PLT-001, 002, 003) | ✅ 3 serviços migrados (Background, Feedback, Progress) || 06/12 | docs | Análise de features para novas tarefas | ✅ 8 novas tarefas identificadas |
 | 06/12 | docs | Criar sistema de gestão por feature | ✅ Estrutura criada |
 | 12/12 | settings | Correção de erros críticos em SettingsPage | ✅ Fixed missing provider |
 

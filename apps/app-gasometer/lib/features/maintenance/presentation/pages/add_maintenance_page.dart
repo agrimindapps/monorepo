@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/interfaces/validation_result.dart';
 import '../../../../core/theme/design_tokens.dart';
@@ -12,6 +13,7 @@ import '../../../../core/widgets/form_section_header.dart';
 import '../../../../core/widgets/money_form_field.dart';
 import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
+import '../../../../core/widgets/readonly_field.dart';
 import '../../../../core/widgets/receipt_section.dart';
 import '../../../../core/widgets/validated_dropdown_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
@@ -204,70 +206,91 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       icon: Icons.build_circle,
       child: Column(
         children: [
-          ValidatedFormField(
-            controller: notifier.titleController,
-            focusNode: _focusNodes['title'],
-            label: 'Tipo de Manutenção',
-            hint: 'Ex: Troca de óleo, Revisão completa...',
-            required: true,
-            validationType: ValidationType.length,
-            minLength: 3,
-            maxLengthValidation: 100,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(
-                RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'),
-              ),
-            ],
-            decoration: formState.fieldErrors['title'] != null
-                ? InputDecoration(errorText: formState.fieldErrors['title'])
-                : null,
-            onValidationChanged: (result) =>
-                _validationResults['type'] = result,
-          ),
+          if (isReadOnly)
+            ReadOnlyField(
+              label: 'Tipo de Manutenção',
+              value: formState.title.isEmpty ? 'Sem título' : formState.title,
+              icon: Icons.build,
+            )
+          else
+            ValidatedFormField(
+              controller: notifier.titleController,
+              focusNode: _focusNodes['title'],
+              label: 'Tipo de Manutenção',
+              hint: 'Ex: Troca de óleo, Revisão completa...',
+              required: true,
+              validationType: ValidationType.length,
+              minLength: 3,
+              maxLengthValidation: 100,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(
+                  RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-\.,\(\)]'),
+                ),
+              ],
+              decoration: formState.fieldErrors['title'] != null
+                  ? InputDecoration(errorText: formState.fieldErrors['title'])
+                  : null,
+              onValidationChanged: (result) =>
+                  _validationResults['type'] = result,
+            ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          ValidatedDropdownField<MaintenanceType>(
-            label: 'Categoria',
-            value: formState.type,
-            prefixIcon: Icons.category,
-            items: MaintenanceType.values
-                .map(
-                  (type) => ValidatedDropdownItem<MaintenanceType>(
-                    value: type,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          type.displayName,
-                          style: TextStyle(
-                            fontWeight: GasometerDesignTokens.fontWeightMedium,
-                            color: theme.colorScheme.onSurface,
+          if (isReadOnly)
+            ReadOnlyField(
+              label: 'Categoria',
+              value: formState.type.displayName,
+              icon: Icons.category,
+            )
+          else
+            ValidatedDropdownField<MaintenanceType>(
+              label: 'Categoria',
+              value: formState.type,
+              prefixIcon: Icons.category,
+              items: MaintenanceType.values
+                  .map(
+                    (type) => ValidatedDropdownItem<MaintenanceType>(
+                      value: type,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            type.displayName,
+                            style: TextStyle(
+                              fontWeight: GasometerDesignTokens.fontWeightMedium,
+                              color: theme.colorScheme.onSurface,
+                            ),
                           ),
-                        ),
-                        Text(
-                          type.description,
-                          style: TextStyle(
-                            fontSize: GasometerDesignTokens.fontSizeCaption,
-                            color: theme.colorScheme.onSurfaceVariant,
+                          Text(
+                            type.description,
+                            style: TextStyle(
+                              fontSize: GasometerDesignTokens.fontSizeCaption,
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                )
-                .toList(),
-            onChanged: (value) => notifier.updateType(value!),
-            required: true,
-            hint: 'Selecione a categoria da manutenção',
-          ),
+                  )
+                  .toList(),
+              onChanged: (value) => notifier.updateType(value!),
+              required: true,
+              hint: 'Selecione a categoria da manutenção',
+            ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          CustomRangeDateTimeField(
-            value: formState.serviceDate ?? DateTime.now(),
-            onChanged: (newDate) => notifier.updateServiceDate(newDate),
-            label: 'Data e Hora do Serviço',
-            firstDate: DateTime(2000),
-            lastDate: DateTime.now().add(const Duration(days: 1)),
-          ),
+          if (isReadOnly)
+            ReadOnlyField(
+              label: 'Data e Hora do Serviço',
+              value: DateFormat('dd/MM/yyyy HH:mm').format(formState.serviceDate ?? DateTime.now()),
+              icon: Icons.calendar_today,
+            )
+          else
+            CustomRangeDateTimeField(
+              value: formState.serviceDate ?? DateTime.now(),
+              onChanged: (newDate) => notifier.updateServiceDate(newDate),
+              label: 'Data e Hora do Serviço',
+              firstDate: DateTime(2000),
+              lastDate: DateTime.now().add(const Duration(days: 1)),
+            ),
         ],
       ),
     );
@@ -275,27 +298,28 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
 
   Widget _buildServiceDetailsSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
+    final formState = ref.watch(maintenanceFormProvider);
+    
     return FormSectionHeader(
       title: 'Detalhes do Serviço',
       icon: Icons.description_outlined,
       child: Column(
         children: [
-          // LocationField(
-          //   controller: notifier.workshopNameController,
-          //   label: 'Oficina/Local',
-          //   hint: 'Nome da oficina ou local da manutenção',
-          //   required: false,
-          //   onChanged: (value) {},
-          // ),
-          // const SizedBox(height: GasometerDesignTokens.spacingMd),
-          DescriptionField(
-            controller: notifier.descriptionController,
-            focusNode: _focusNodes['description'],
-            label: 'Descrição dos Serviços',
-            hint: 'Descreva os serviços realizados, peças trocadas, etc.',
-            required: false, // Changed to optional
-            onChanged: (value) {},
-          ),
+          if (isReadOnly)
+            ReadOnlyField(
+              label: 'Descrição dos Serviços',
+              value: formState.description.isEmpty ? 'Sem descrição' : formState.description,
+              icon: Icons.description,
+            )
+          else
+            DescriptionField(
+              controller: notifier.descriptionController,
+              focusNode: _focusNodes['description'],
+              label: 'Descrição dos Serviços',
+              hint: 'Descreva os serviços realizados, peças trocadas, etc.',
+              required: false,
+              onChanged: (value) {},
+            ),
         ],
       ),
     );
@@ -304,28 +328,45 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   Widget _buildFinancialInfoSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final formState = ref.watch(maintenanceFormProvider);
+    
     return FormSectionHeader(
       title: 'Informações Financeiras e Técnicas',
       icon: Icons.monetization_on_outlined,
       child: Column(
         children: [
-          CostFormField(
-            controller: notifier.costController,
-            focusNode: _focusNodes['cost'],
-            label: 'Custo Total',
-            required: true,
-            onChanged: (value) {},
-          ),
+          if (isReadOnly)
+            ReadOnlyField(
+              label: 'Custo Total',
+              value: 'R\$ ${formState.cost.toStringAsFixed(2)}',
+              icon: Icons.attach_money,
+            )
+          else
+            CostFormField(
+              controller: notifier.costController,
+              focusNode: _focusNodes['cost'],
+              label: 'Custo Total',
+              required: true,
+              onChanged: (value) {},
+            ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          OdometerField(
-            controller: notifier.odometerController,
-            focusNode: _focusNodes['odometer'],
-            label: 'Quilometragem Atual',
-            hint: '0,0',
-            currentOdometer: formState.vehicle?.currentOdometer,
-            onChanged: (value) =>
-                _validationResults['odometer'] = ValidationResult.success(),
-          ),
+          if (isReadOnly)
+            ReadOnlyField(
+              label: 'Quilometragem Atual',
+              value: formState.odometer > 0
+                  ? '${NumberFormat('#,##0.00', 'pt_BR').format(formState.odometer)} km'
+                  : 'Não informado',
+              icon: Icons.speed,
+            )
+          else
+            OdometerField(
+              controller: notifier.odometerController,
+              focusNode: _focusNodes['odometer'],
+              label: 'Quilometragem Atual',
+              hint: '0,0',
+              currentOdometer: formState.vehicle?.currentOdometer,
+              onChanged: (value) =>
+                  _validationResults['odometer'] = ValidationResult.success(),
+            ),
         ],
       ),
     );

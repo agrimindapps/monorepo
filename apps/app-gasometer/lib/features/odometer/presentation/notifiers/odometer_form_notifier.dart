@@ -102,7 +102,6 @@ class OdometerFormNotifier extends _$OdometerFormNotifier {
                 userId: userId,
               ).copyWith(
                 vehicle: vehicle,
-                odometerValue: vehicle.currentOdometer,
                 isLoading: false,
               );
 

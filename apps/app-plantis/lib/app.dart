@@ -18,6 +18,22 @@ class PlantisApp extends ConsumerStatefulWidget {
 
 class _PlantisAppState extends ConsumerState<PlantisApp> {
   @override
+  void initState() {
+    super.initState();
+
+    // Mark first frame rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final performance = PerformanceService();
+      performance.markFirstFrame();
+
+      // Mark app as interactive after a short delay
+      Future.delayed(const Duration(milliseconds: 500), () {
+        performance.markAppInteractive();
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Inicializa o listener de sincronização
     ref.watch(syncCompletionListenerInitializerProvider);

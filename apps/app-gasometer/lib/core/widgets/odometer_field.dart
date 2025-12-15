@@ -141,15 +141,15 @@ class OdometerField extends StatelessWidget {
   }
 
   String _buildDefaultHint() {
-    if (lastReading != null) {
-      return 'Última: ${_formatNumber(lastReading!)} km';
-    }
-    return 'Ex: 45.234';
+    return 'Ex: 45234,50';
   }
 
   String? _buildHelperText() {
     if (lastReading != null) {
       return 'Última leitura registrada: ${_formatNumber(lastReading!)} km';
+    }
+    if (currentOdometer != null && currentOdometer! > 0) {
+      return 'Quilometragem atual do veículo: ${_formatNumber(currentOdometer!)} km';
     }
     return null;
   }

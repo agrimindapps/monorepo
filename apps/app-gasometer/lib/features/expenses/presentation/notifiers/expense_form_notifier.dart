@@ -104,7 +104,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
         (failure) async => state = state.copyWith(isLoading: false, errorMessage: () => failure.message),
         (vehicle) async {
           state = ExpenseFormState.initial(vehicleId: vehicleId, userId: userId)
-              .copyWith(vehicle: vehicle, odometer: vehicle.currentOdometer, isLoading: false);
+              .copyWith(vehicle: vehicle, isLoading: false);
           _controllerManager.updateFromState(state);
         },
       );

@@ -15,12 +15,16 @@ class PremiumPage extends ConsumerStatefulWidget {
 
 class _PremiumPageState extends ConsumerState<PremiumPage> {
   String? _selectedPlanId;
+  bool _hasLoadedProducts = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(premiumProvider.notifier).loadAvailableProducts();
+      if (!_hasLoadedProducts) {
+        _hasLoadedProducts = true;
+        ref.read(premiumProvider.notifier).loadAvailableProducts();
+      }
     });
   }
 

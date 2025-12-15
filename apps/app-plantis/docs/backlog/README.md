@@ -1,6 +1,6 @@
 # 📋 Backlog Global - app-plantis
 
-**Atualizado**: 2025-12-06
+**Atualizado**: 2025-12-15
 
 ---
 
@@ -14,12 +14,9 @@
 
 | ID | Tarefa | Estimativa | Localização |
 |----|--------|------------|-------------|
-| PLT-001 | Migrar BackgroundSyncService para Riverpod | P | `lib/core/services/background_sync_service.dart` |
-| PLT-002 | Migrar FeedbackSystem para Riverpod | P | `lib/shared/widgets/feedback/feedback_system.dart` |
-| PLT-003 | Migrar ProgressTracker para Riverpod | P | `lib/shared/widgets/feedback/progress_tracker.dart` |
-| PLT-005 | Refatorar UnifiedFeedbackSystem (30+ TODOs) | M | `lib/shared/widgets/feedback/unified_feedback_system.dart` |
-| PLT-006 | Implementar DI propriamente | P | `lib/core/di/solid_di_factory.dart` |
-| PLT-007 | Implementar performance monitoring | P | `lib/core/providers/core_di_providers.dart` |
+
+| PLT-005 | Refatorar UnifiedFeedbackSystem (God Class) | M | `lib/shared/widgets/feedback/unified_feedback_system.dart` |
+
 
 ---
 
@@ -29,6 +26,10 @@
 |----|--------|------------|----------|
 | PLT-004 | Resolver 71 TODOs | G | Análise e limpeza |
 | PLT-008 | Corrigir 5 warnings do analyzer | P | Ver seção Analyzer |
+| PLT-SYNC-002 | Completar estatísticas de conflitos | P | `lib/core/services/conflict_history_drift_service.dart` |
+| PLT-SYNC-003 | Refatorar ConflictHistoryRepository | M | `lib/database/repositories/conflict_history_drift_repository.dart` |
+| PLT-SYNC-004 | Implementar stream reativo de conflitos | P | `lib/core/services/conflict_history_drift_service.dart` |
+| PLT-SETTINGS-001 | Remover código morto de device loading | P | `lib/features/settings/presentation/providers/settings_notifier.dart` |
 
 ---
 
@@ -48,8 +49,16 @@
 
 ### Dezembro 2025
 | Data | Tarefa | Resultado |
-|------|--------|-----------|
-| 06/12 | Criar sistema de gestão por feature | ✅ 12 features documentadas |
+| 15/12 | PLT-006: Implementar DI propriamente | ✅ Removido SolidDIFactory legacy (203 linhas) - todo DI via Riverpod |
+| 15/12 | PLT-007: Implementar performance monitoring | ✅ PerformanceService integrado + startup tracking |
+| 15/12 | PLT-ACCOUNT-001: Verificar status premium via RevenueCat | ✅ Integrado em AccountRepository |
+| 15/12 | PLT-PLANTS-005: Implementar testes para plants | ✅ 23 testes (UseCases + Notifier) |
+| 15/12 | PLT-TASKS-002: Implementar testes para tasks | ✅ 19 testes (Complete, Delete, Get) |
+| 15/12 | PLT-PREMIUM-004: Implementar testes para premium | ✅ 60+ testes (Subscription, Purchase, Trial) |
+| 15/12 | PLT-AUTH-007: Implementar testes para auth | ✅ 70+ testes (Sign In/Up, Reset, Google) |
+|------|--------|-----------|| 15/12 | PLT-001: Migrar BackgroundSyncService | ✅ Serviço puro + Riverpod Notifier |
+| 15/12 | PLT-002: Migrar FeedbackSystem | ✅ FeedbackNotifier com estado reativo |
+| 15/12 | PLT-003: Migrar ProgressTracker | ✅ ProgressTrackerNotifier + providers || 06/12 | Criar sistema de gestão por feature | ✅ 12 features documentadas |
 | 06/12 | Análise de features para novas tarefas | ✅ 8 novas tarefas identificadas |
 
 ---

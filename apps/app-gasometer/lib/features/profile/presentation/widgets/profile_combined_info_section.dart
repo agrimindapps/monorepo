@@ -31,18 +31,13 @@ class ProfileCombinedInfoSection extends ConsumerStatefulWidget {
 
 class _ProfileCombinedInfoSectionState
     extends ConsumerState<ProfileCombinedInfoSection> {
-  bool _isEditing = false;
-  late TextEditingController _nameController;
-
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: _getUserDisplayName());
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
     super.dispose();
   }
 
@@ -99,20 +94,44 @@ class _ProfileCombinedInfoSectionState
     );
   }
 
-  void _toggleEdit() {
-    setState(() {
-      _isEditing = !_isEditing;
-      if (!_isEditing) {
-        // Save changes
-        if (_nameController.text != _getUserDisplayName()) {
-          widget.profileController.updateName(
-            context,
-            ref,
-            _nameController.text,
-          );
-        }
+  Future<void> _showEditNameDialog() async {
+    final nameController = TextEditingController(text: _getUserDisplayName());
+    
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Nome'),
+        content: TextField(
+          controller: nameController,
+          decoration: const InputDecoration(
+            labelText: 'Nome',
+            hintText: 'Digite seu nome',
+            counterText: '',
+          ),
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          maxLength: 80,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, nameController.text),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+
+    nameController.dispose();
+
+    if (result != null && result.isNotEmpty && result != _getUserDisplayName()) {
+      if (mounted) {
+        widget.profileController.updateName(context, ref, result);
       }
-    });
+    }
   }
 
   @override
@@ -120,11 +139,6 @@ class _ProfileCombinedInfoSectionState
     final theme = Theme.of(context);
     final isAuthenticated = !widget.isAnonymous;
     final userDisplayName = _getUserDisplayName();
-
-    // Update controller if user changes externally and not editing
-    if (!_isEditing && _nameController.text != userDisplayName) {
-      _nameController.text = userDisplayName;
-    }
 
     return Container(
       decoration: _getCardDecoration(context),
@@ -212,46 +226,33 @@ class _ProfileCombinedInfoSectionState
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (_isEditing)
-                        TextField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            labelText: 'Nome',
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(vertical: 8),
-                          ),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      else
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                userDisplayName.isNotEmpty
-                                    ? userDisplayName
-                                    : (isAuthenticated
-                                          ? 'Usuário sem nome'
-                                          : 'Visitante'),
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              userDisplayName.isNotEmpty
+                                  ? userDisplayName
+                                  : (isAuthenticated
+                                        ? 'Usuário sem nome'
+                                        : 'Visitante'),
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: theme.colorScheme.onSurface,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            if (isAuthenticated)
-                              IconButton(
-                                icon: const Icon(Icons.edit, size: 18),
-                                onPressed: _toggleEdit,
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                                color: GasometerDesignTokens.colorPrimary,
-                              ),
-                          ],
-                        ),
+                          ),
+                          if (isAuthenticated)
+                            IconButton(
+                              icon: const Icon(Icons.edit, size: 18),
+                              onPressed: _showEditNameDialog,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              color: GasometerDesignTokens.colorPrimary,
+                            ),
+                        ],
+                      ),
                       const SizedBox(height: 4),
                       Text(
                         _getUserEmail(),
@@ -298,12 +299,6 @@ class _ProfileCombinedInfoSectionState
                     ],
                   ),
                 ),
-                if (_isEditing)
-                  IconButton(
-                    icon: const Icon(Icons.check),
-                    onPressed: _toggleEdit,
-                    color: GasometerDesignTokens.colorSuccess,
-                  ),
               ],
             ),
 

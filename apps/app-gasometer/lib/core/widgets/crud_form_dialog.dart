@@ -194,17 +194,7 @@ class CrudFormDialog extends StatelessWidget {
                   ],
                 ),
               ),
-              // Botões do header
-              if (mode == CrudDialogMode.view && onModeChange != null) ...[
-                IconButton(
-                  onPressed: () => onModeChange!(CrudDialogMode.edit),
-                  icon: const Icon(Icons.edit_outlined, size: 20),
-                  tooltip: 'Editar',
-                  style: IconButton.styleFrom(
-                    foregroundColor: colorScheme.primary,
-                  ),
-                ),
-              ],
+              // Botão de fechar
               if (showCloseButton)
                 IconButton(
                   onPressed: onCancel ?? () => Navigator.of(context).pop(),
@@ -252,20 +242,12 @@ class CrudFormDialog extends StatelessWidget {
       );
     }
 
-    return Row(
-      children: [
-        _buildModeBadge(context),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            subtitle,
-            style: TextStyle(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-              fontSize: 13,
-            ),
-          ),
-        ),
-      ],
+    return Text(
+      subtitle,
+      style: TextStyle(
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+        fontSize: 13,
+      ),
     );
   }
 
@@ -461,24 +443,6 @@ class CrudFormDialog extends StatelessWidget {
 
     return Row(
       children: [
-        // Botão excluir (se disponível)
-        if (showDeleteButton && onDelete != null) ...[
-          IconButton(
-            onPressed: onDelete,
-            icon: Icon(
-              Icons.delete_outline,
-              color: theme.colorScheme.error,
-            ),
-            tooltip: 'Excluir',
-            style: IconButton.styleFrom(
-              side: BorderSide(color: theme.colorScheme.error.withValues(alpha: 0.3)),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-        ],
         // Cancelar (volta para view se veio de view, ou fecha)
         Expanded(
           child: OutlinedButton(

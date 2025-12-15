@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
@@ -338,10 +339,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             ? 'Nenhum registro encontrado com os filtros aplicados.'
             : 'Adicione seu primeiro abastecimento para começar a acompanhar seus gastos com combustível.',
         icon: Icons.local_gas_station_outlined,
-        actionLabel: fuelState.hasActiveFilters ? 'Limpar filtros' : null,
-        onAction: fuelState.hasActiveFilters
-            ? () => ref.read(fuelRiverpodProvider.notifier).clearAllFilters()
-            : null,
       );
     }
 
@@ -380,9 +377,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
 
   Widget _buildFuelRecordCard(FuelRecordEntity record) {
     final date = record.date;
-    final formattedDate = '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
+    final day = date.day.toString().padLeft(2, '0');
+    final weekday = DateFormat('EEE', 'pt_BR').format(date).toLowerCase();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -390,68 +386,162 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         onTap: () => _openFuelDetail(record),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    formattedDate,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                // Date Section
+                SizedBox(
+                  width: 50,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        day,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                              height: 1.0,
+                            ),
+                      ),
+                      Text(
+                        weekday,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Vertical Divider
+                VerticalDivider(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  thickness: 1,
+                  width: 24,
+                ),
+
+                // Info Section
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Row 1: Liters & Price/L
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.local_gas_station, 
+                            size: 14, 
+                            color: Theme.of(context).colorScheme.onSurfaceVariant
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${record.liters.toStringAsFixed(1)} L',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '•',
+                            style: TextStyle(color: Theme.of(context).disabledColor),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 4),
+                      
+                      // Row 2: Odometer
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.speed, 
+                            size: 14, 
+                            color: Theme.of(context).colorScheme.onSurfaceVariant
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${record.odometer.toStringAsFixed(0)} km',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          if (record.fullTank) ...[
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.check_circle, 
+                              size: 14, 
+                              color: Theme.of(context).primaryColor
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      // Row 3: Stats (Distance & Consumption)
+                      if (record.distanceTraveled != null && record.distanceTraveled! > 0) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.route, 
+                              size: 14, 
+                              color: Theme.of(context).colorScheme.secondary
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '+${record.distanceTraveled!.toStringAsFixed(0)} km',
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Theme.of(context).colorScheme.secondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (record.consumption != null && record.consumption! > 0) ...[
+                              const SizedBox(width: 8),
+                              Text(
+                                '•',
+                                style: TextStyle(color: Theme.of(context).disabledColor),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.eco, 
+                                size: 14, 
+                                color: Colors.green
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '${record.consumption!.toStringAsFixed(1)} km/l',
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
+                      ],
+                    ],
                   ),
-                  Text(
-                    'R\$ ${record.totalPrice.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.local_gas_station,
-                    size: 16,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${record.liters.toStringAsFixed(1)} L',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.attach_money,
-                    size: 16,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  if (record.fullTank) ...[
-                    const SizedBox(width: 16),
-                    Icon(
-                      Icons.check_circle,
-                      size: 16,
-                      color: Theme.of(context).primaryColor,
-                    ),
-                    const SizedBox(width: 4),
+                ),
+
+                // Price Section (Right)
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
                     Text(
-                      'Tanque cheio',
-                      style: Theme.of(context).textTheme.bodySmall,
+                      'R\$ ${record.totalPrice.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
                     ),
                   ],
-                ],
-              ),
-            ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -79,7 +79,7 @@ class FuelFormatterService {
   /// InputFormatter para preços (até 3 casas decimais)
   TextInputFormatter get priceFormatter => _PriceFormatter();
 
-  /// InputFormatter para odômetro (até 1 casa decimal)
+  /// InputFormatter para odômetro (até 2 casas decimais)
   TextInputFormatter get odometerFormatter => _OdometerFormatter();
 
   void _addToCache(String key, String value) {
@@ -136,7 +136,7 @@ class _PriceFormatter extends TextInputFormatter {
   }
 }
 
-/// Formatter para odômetro (até 1 casa decimal)
+/// Formatter para odômetro (até 2 casas decimais)
 class _OdometerFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -144,7 +144,7 @@ class _OdometerFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     final text = newValue.text;
-    if (!RegExp(r'^\d{0,6}[,.]?\d{0,1}$').hasMatch(text)) {
+    if (!RegExp(r'^\d{0,7}[,.]?\d{0,2}$').hasMatch(text)) {
       return oldValue;
     }
     final formattedText = text.replaceAll('.', ',');

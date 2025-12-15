@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
@@ -300,9 +301,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
   Widget _buildMaintenanceCard(MaintenanceEntity record) {
     final date = record.serviceDate;
-    final formattedDate = '${date.day.toString().padLeft(2, '0')}/'
-        '${date.month.toString().padLeft(2, '0')}/'
-        '${date.year}';
+    final day = date.day.toString().padLeft(2, '0');
+    final weekday = DateFormat('EEE', 'pt_BR').format(date).toLowerCase();
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -310,98 +310,144 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         onTap: () => _openMaintenanceDetail(record),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      record.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                // Date Section
+                SizedBox(
+                  width: 50,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        day,
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).primaryColor,
+                              height: 1.0,
+                            ),
+                      ),
+                      Text(
+                        weekday,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Vertical Divider
+                VerticalDivider(
+                  color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  thickness: 1,
+                  width: 24,
+                ),
+
+                // Info Section
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // Row 1: Title
+                      Text(
+                        record.title,
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      
+                      const SizedBox(height: 4),
+                      
+                      // Row 2: Badges (Type & Status)
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Color(record.type.colorValue).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: Color(record.type.colorValue).withValues(alpha: 0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              record.type.displayName,
+                              style: TextStyle(
+                                color: Color(record.type.colorValue),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  Text(
-                    'R\$ ${record.cost.toStringAsFixed(2)}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w600,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Color(record.status.colorValue).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: Color(record.status.colorValue).withValues(alpha: 0.3),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              record.status.displayName,
+                              style: TextStyle(
+                                color: Color(record.status.colorValue),
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 4),
+                      
+                      // Row 3: Odometer
+                      if (record.odometer > 0)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.speed, 
+                              size: 14, 
+                              color: Theme.of(context).colorScheme.onSurfaceVariant
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${record.odometer.toStringAsFixed(0)} km',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
                         ),
+                    ],
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 16,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    formattedDate,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                  const SizedBox(width: 16),
-                  Icon(
-                    Icons.speed,
-                    size: 16,
-                    color: Theme.of(context).textTheme.bodySmall?.color,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${record.odometer.toStringAsFixed(0)} km',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: Color(record.type.colorValue).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
+                ),
+
+                // Price Section (Right)
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'R\$ ${record.cost.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).primaryColor,
+                          ),
                     ),
-                    child: Text(
-                      record.type.displayName,
-                      style: TextStyle(
-                        color: Color(record.type.colorValue),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                    decoration: BoxDecoration(
-                      color:
-                          Color(record.status.colorValue).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      record.status.displayName,
-                      style: TextStyle(
-                        color: Color(record.status.colorValue),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

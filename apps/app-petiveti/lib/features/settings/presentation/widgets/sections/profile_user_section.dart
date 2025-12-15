@@ -9,10 +9,7 @@ import '../shared/section_header.dart';
 
 /// Seção de perfil do usuário - exibe informações do usuário logado
 class ProfileUserSection extends ConsumerWidget {
-  const ProfileUserSection({
-    this.onLoginTap,
-    super.key,
-  });
+  const ProfileUserSection({this.onLoginTap, super.key});
 
   final VoidCallback? onLoginTap;
 
@@ -20,7 +17,8 @@ class ProfileUserSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final local.User? user = authState.user;
-    final isLoggedIn = authState.status == AuthStatus.authenticated && user != null;
+    final isLoggedIn =
+        authState.status == AuthStatus.authenticated && user != null;
 
     return Column(
       children: [
@@ -40,20 +38,20 @@ class ProfileUserSection extends ConsumerWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isLoggedIn
-                              ? user.displayName
-                              : 'Fazer Login',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          isLoggedIn ? user.displayName : 'Fazer Login',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           isLoggedIn
                               ? user.email
                               : 'Entre para sincronizar seus dados',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                         ),
                       ],
@@ -82,7 +80,9 @@ class ProfileUserSection extends ConsumerWidget {
 
     return CircleAvatar(
       radius: 24,
-      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.primary.withValues(alpha: 0.1),
       child: Icon(
         isLoggedIn ? Icons.person : Icons.login,
         color: Theme.of(context).colorScheme.primary,

@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
@@ -291,46 +292,113 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
             },
             child: Card(
               margin: const EdgeInsets.only(bottom: 12),
-              child: ListTile(
+              child: InkWell(
                 onTap: () => _openOdometerDetail(reading),
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: const Icon(Icons.speed, color: Colors.white),
-                ),
-                title: Text(
-                  '${formatter.format(reading.value)} km',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        // Date Section
+                        SizedBox(
+                          width: 50,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                reading.registrationDate.day.toString().padLeft(2, '0'),
+                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).primaryColor,
+                                      height: 1.0,
+                                    ),
+                              ),
+                              Text(
+                                DateFormat('EEE', 'pt_BR').format(reading.registrationDate).toLowerCase(),
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      fontWeight: FontWeight.w500,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Vertical Divider
+                        VerticalDivider(
+                          color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                          thickness: 1,
+                          width: 24,
+                        ),
+
+                        // Info Section
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // Row 1: Odometer Value
+                              Text(
+                                '${formatter.format(reading.value)} km',
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                              
+                              const SizedBox(height: 4),
+                              
+                              // Row 2: Description (if any)
+                              if (reading.description.isNotEmpty)
+                                Text(
+                                  reading.description,
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                )
+                              else
+                                Text(
+                                  'Registro de odômetro',
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+
+                        // Type Badge (Right)
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                reading.type.displayName,
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(dateFormatter.format(reading.registrationDate)),
-                    if (reading.description.isNotEmpty)
-                      Text(
-                        reading.description,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                  ],
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      reading.type.displayName,
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.chevron_right,
-                      color: Theme.of(context).hintColor,
-                    ),
-                  ],
                 ),
               ),
             ),

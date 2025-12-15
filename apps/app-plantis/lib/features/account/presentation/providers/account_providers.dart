@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/providers/repository_providers.dart';
 import '../../../../database/providers/database_providers.dart';
+import '../../../premium/domain/providers/premium_usecases_provider.dart';
 import '../../data/datasources/account_local_datasource.dart';
 import '../../data/datasources/account_remote_datasource.dart';
 import '../../data/repositories/account_repository_impl.dart';
@@ -74,12 +75,14 @@ AccountRepository accountRepository(Ref ref) {
   final enhancedDeletionService = ref.watch(
     enhancedAccountDeletionServiceProvider,
   );
+  final premiumRepository = ref.watch(premiumRepositoryProvider);
 
   return AccountRepositoryImpl(
     remoteDataSource: remoteDataSource,
     localDataSource: localDataSource,
     firebaseAuth: firebaseAuth,
     enhancedDeletionService: enhancedDeletionService,
+    premiumRepository: premiumRepository,
   );
 }
 

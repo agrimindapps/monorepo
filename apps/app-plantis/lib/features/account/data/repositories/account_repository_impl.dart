@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart' as fb;
 
 import '../../domain/entities/account_info.dart';
 import '../../domain/repositories/account_repository.dart';
+import '../../../premium/domain/repositories/premium_repository.dart';
 import '../datasources/account_local_datasource.dart';
 import '../datasources/account_remote_datasource.dart';
 
@@ -16,12 +17,14 @@ class AccountRepositoryImpl implements AccountRepository {
   final AccountLocalDataSource localDataSource;
   final fb.FirebaseAuth firebaseAuth;
   final EnhancedAccountDeletionService enhancedDeletionService;
+  final PremiumRepository premiumRepository;
 
   const AccountRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.firebaseAuth,
     required this.enhancedDeletionService,
+    required this.premiumRepository,
   });
 
   @override
@@ -33,8 +36,12 @@ class AccountRepositoryImpl implements AccountRepository {
         return const Left(AuthFailure('Usuário não autenticado'));
       }
 
-      // TODO: Verificar status premium através do RevenueCat
-      const isPremium = false;
+      // Verifica status premium através do PremiumRepository (RevenueCat)
+      final premiumResult = await premiumRepository.hasActivePremium();
+      final isPremium = premiumResult.fold(
+        (failure) => false, // Em caso de erro, assume free
+        (hasActivePremium) => hasActivePremium,
+      );
 
       final accountInfo = AccountInfo(
         userId: userEntity.id,
@@ -154,8 +161,12 @@ class AccountRepositoryImpl implements AccountRepository {
         return null;
       }
 
-      // TODO: Verificar status premium através do RevenueCat
-      const isPremium = false;
+      // Verifica status premium através do PremiumRepository (RevenueCat)
+      final premiumResult = await premiumRepository.hasActivePremium();
+      final isPremium = premiumResult.fold(
+        (failure) => false, // Em caso de erro, assume free
+        (hasActivePremium) => hasActivePremium,
+      );
 
       return AccountInfo(
         userId: user.uid,

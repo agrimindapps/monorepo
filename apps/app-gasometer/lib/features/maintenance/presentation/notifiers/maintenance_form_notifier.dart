@@ -136,7 +136,6 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
                 userId: userId,
               ).copyWith(
                 vehicle: vehicle,
-                odometer: vehicle.currentOdometer,
                 isLoading: false,
                 isInitialized: true,
               );

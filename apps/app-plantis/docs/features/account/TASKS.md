@@ -1,7 +1,7 @@
 # 👤 Account - Tarefas
 
 **Feature**: account
-**Atualizado**: 2025-12-06
+**Atualizado**: 2025-12-15
 
 ---
 
@@ -9,13 +9,16 @@
 
 | ID | Prioridade | Tarefa | Arquivo |
 |----|------------|--------|---------|
-| PLT-ACCOUNT-001 | 🟡 Média | Verificar status premium via RevenueCat (2 locais) | `data/repositories/account_repository_impl.dart` |
+
+(nenhuma tarefa pendente)
 
 ---
 
 ## ✅ Concluídas
 
-(histórico será registrado aqui)
+| Data | ID | Tarefa | Resultado |
+|------|-----|--------|----------|
+| 15/12 | PLT-ACCOUNT-001 | Verificar status premium via RevenueCat (2 locais) | ✅ Integrado PremiumRepository |
 
 ---
 

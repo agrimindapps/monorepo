@@ -22,6 +22,10 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Initialize Performance Monitoring early
+  final performance = PerformanceService();
+  await performance.markAppStarted();
+
   // Skip orientation lock on web
   if (!kIsWeb) {
     await SystemChrome.setPreferredOrientations([

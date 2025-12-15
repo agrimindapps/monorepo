@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/centralized_loading_widget.dart';
@@ -9,6 +10,7 @@ import '../../../../core/widgets/form_section_widget.dart';
 import '../../../../core/widgets/money_form_field.dart';
 // import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
+import '../../../../core/widgets/readonly_field.dart';
 import '../../../../core/widgets/receipt_section.dart';
 import '../../../../core/widgets/validated_dropdown_field.dart';
 import '../../../../core/widgets/validated_form_field.dart';
@@ -102,11 +104,18 @@ class FuelFormView extends ConsumerWidget {
         children: [
           _buildFuelTypeDropdown(context, ref),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
-          DateTimeField(
-            value: state.formModel.date,
-            onChanged: (newDate) => notifier.updateDate(newDate),
-            label: FuelConstants.dateLabel,
-          ),
+          if (isReadOnly)
+            ReadOnlyField(
+              label: FuelConstants.dateLabel,
+              value: DateFormat('dd/MM/yyyy HH:mm').format(state.formModel.date),
+              icon: Icons.calendar_today,
+            )
+          else
+            DateTimeField(
+              value: state.formModel.date,
+              onChanged: (newDate) => notifier.updateDate(newDate),
+              label: FuelConstants.dateLabel,
+            ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           _buildFullTankSwitch(context, ref),
         ],
@@ -143,6 +152,14 @@ class FuelFormView extends ConsumerWidget {
     final vehicle = state.formModel.vehicle!;
     final supportedFuels = vehicle.supportedFuels;
 
+    if (isReadOnly) {
+      return ReadOnlyField(
+        label: FuelConstants.fuelTypeLabel,
+        value: state.formModel.fuelType.displayName,
+        icon: Icons.local_gas_station,
+      );
+    }
+
     // Se o veículo suporta apenas 1 combustível, bloquear o campo
     final hasOnlyOneFuel = supportedFuels.length == 1;
 
@@ -174,6 +191,14 @@ class FuelFormView extends ConsumerWidget {
     final state = ref.watch(fuelFormProvider(vehicleId));
     final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
 
+    if (isReadOnly) {
+      return ReadOnlyField(
+        label: FuelConstants.fullTankLabel,
+        value: state.formModel.fullTank ? 'Sim' : 'Não',
+        icon: Icons.propane_tank,
+      );
+    }
+
     return ValidatedSwitchField(
       value: state.formModel.fullTank,
       label: FuelConstants.fullTankLabel,
@@ -190,6 +215,14 @@ class FuelFormView extends ConsumerWidget {
     final theme = Theme.of(context);
     final state = ref.watch(fuelFormProvider(vehicleId));
     final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
+
+    if (isReadOnly) {
+      return ReadOnlyField(
+        label: 'Litros',
+        value: '${state.formModel.liters.toStringAsFixed(2)} L',
+        icon: Icons.local_gas_station,
+      );
+    }
 
     return ValidatedFormField(
       controller: notifier.litersController,
@@ -211,7 +244,16 @@ class FuelFormView extends ConsumerWidget {
   }
 
   Widget _buildPricePerLiterField(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(fuelFormProvider(vehicleId));
     final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
+
+    if (isReadOnly) {
+      return ReadOnlyField(
+        label: FuelConstants.pricePerLiterLabel,
+        value: 'R\$ ${state.formModel.pricePerLiter.toStringAsFixed(3)}',
+        icon: Icons.attach_money,
+      );
+    }
 
     return PriceFormField(
       controller: notifier.pricePerLiterController,
@@ -253,6 +295,15 @@ class FuelFormView extends ConsumerWidget {
     final state = ref.watch(fuelFormProvider(vehicleId));
     final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
     final vehicle = state.formModel.vehicle;
+
+    if (isReadOnly) {
+      final formatter = NumberFormat('#,##0.00', 'pt_BR');
+      return ReadOnlyField(
+        label: FuelConstants.odometerLabel,
+        value: '${formatter.format(state.formModel.odometer)} km',
+        icon: Icons.speed,
+      );
+    }
 
     return OdometerField(
       controller: notifier.odometerController,

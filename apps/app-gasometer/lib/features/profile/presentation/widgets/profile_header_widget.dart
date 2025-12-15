@@ -9,29 +9,15 @@ class ProfileHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Container(
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [
-                  const Color(0xFFE65100), // Darker Orange
-                  const Color(0xFFBF360C), // Even Darker Orange
-                ]
-              : [
-                  const Color(0xFFFF9800), // Orange
-                  const Color(0xFFF57C00), // Dark Orange
-                ],
-        ),
+        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: Colors.orange.withValues(alpha: 0.2),
+            color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
             blurRadius: 9,
             offset: const Offset(0, 3),
             spreadRadius: 0,

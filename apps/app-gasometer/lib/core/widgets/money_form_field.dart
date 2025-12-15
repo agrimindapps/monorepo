@@ -319,7 +319,6 @@ class PriceFormField extends StatelessWidget {
       customLabel: label,
       required: required,
       onChanged: onChanged,
-      showHelperText: true,
     );
   }
 }

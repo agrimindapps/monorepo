@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../../core/theme/design_tokens.dart';
 import '../../../../../core/widgets/form_section_header.dart';
+import '../../../../../core/widgets/readonly_field.dart';
 import '../../../../../core/widgets/validated_form_field.dart';
 
 /// Basic vehicle information section (Brand, Model, Year, Color)
@@ -21,6 +22,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
     required this.yearFocusNode,
     required this.colorFocusNode,
     this.onYearChanged,
+    this.isReadOnly = false,
     super.key,
   });
 
@@ -37,6 +39,7 @@ class VehicleBasicInfoSection extends StatelessWidget {
   final FocusNode yearFocusNode;
   final FocusNode colorFocusNode;
   final ValueChanged<int?>? onYearChanged;
+  final bool isReadOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -47,40 +50,52 @@ class VehicleBasicInfoSection extends StatelessWidget {
         children: [
           Container(
             key: brandFieldKey,
-            child: ValidatedFormField(
-              controller: brandController,
-              focusNode: brandFocusNode,
-              label: 'Marca',
-              hint: 'Ex: Ford, Volkswagen, etc.',
-              required: true,
-              validationType: ValidationType.length,
-              minLength: 2,
-              maxLengthValidation: 50,
-              validateOnChange: false,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]')),
-              ],
-            ),
+            child: isReadOnly
+                ? ReadOnlyField(
+                    label: 'Marca',
+                    value: brandController.text.isEmpty ? 'Não informado' : brandController.text,
+                    icon: Icons.directions_car,
+                  )
+                : ValidatedFormField(
+                    controller: brandController,
+                    focusNode: brandFocusNode,
+                    label: 'Marca',
+                    hint: 'Ex: Ford, Volkswagen, etc.',
+                    required: true,
+                    validationType: ValidationType.length,
+                    minLength: 2,
+                    maxLengthValidation: 50,
+                    validateOnChange: false,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-ZÀ-ÿ\s\-]')),
+                    ],
+                  ),
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           Container(
             key: modelFieldKey,
-            child: ValidatedFormField(
-              controller: modelController,
-              focusNode: modelFocusNode,
-              label: 'Modelo',
-              hint: 'Ex: Gol, Fiesta, etc.',
-              required: true,
-              validationType: ValidationType.length,
-              minLength: 2,
-              maxLengthValidation: 50,
-              validateOnChange: false,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(
-                  RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'),
-                ),
-              ],
-            ),
+            child: isReadOnly
+                ? ReadOnlyField(
+                    label: 'Modelo',
+                    value: modelController.text.isEmpty ? 'Não informado' : modelController.text,
+                    icon: Icons.car_rental,
+                  )
+                : ValidatedFormField(
+                    controller: modelController,
+                    focusNode: modelFocusNode,
+                    label: 'Modelo',
+                    hint: 'Ex: Gol, Fiesta, etc.',
+                    required: true,
+                    validationType: ValidationType.length,
+                    minLength: 2,
+                    maxLengthValidation: 50,
+                    validateOnChange: false,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'[a-zA-ZÀ-ÿ0-9\s\-]'),
+                      ),
+                    ],
+                  ),
           ),
           const SizedBox(height: GasometerDesignTokens.spacingMd),
           Row(
@@ -88,29 +103,41 @@ class VehicleBasicInfoSection extends StatelessWidget {
               Expanded(
                 child: Container(
                   key: yearFieldKey,
-                  child: _buildYearDropdown(context),
+                  child: isReadOnly
+                      ? ReadOnlyField(
+                          label: 'Ano',
+                          value: yearController.text.isEmpty ? 'Não informado' : yearController.text,
+                          icon: Icons.calendar_today,
+                        )
+                      : _buildYearDropdown(context),
                 ),
               ),
               const SizedBox(width: GasometerDesignTokens.spacingMd),
               Expanded(
                 child: Container(
                   key: colorFieldKey,
-                  child: ValidatedFormField(
-                    controller: colorController,
-                    focusNode: colorFocusNode,
-                    label: 'Cor',
-                    hint: 'Ex: Branco, Preto, etc.',
-                    required: true,
-                    validationType: ValidationType.length,
-                    minLength: 3,
-                    maxLengthValidation: 30,
-                    validateOnChange: false,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'[a-zA-ZÀ-ÿ\s\-]'),
-                      ),
-                    ],
-                  ),
+                  child: isReadOnly
+                      ? ReadOnlyField(
+                          label: 'Cor',
+                          value: colorController.text.isEmpty ? 'Não informado' : colorController.text,
+                          icon: Icons.palette,
+                        )
+                      : ValidatedFormField(
+                          controller: colorController,
+                          focusNode: colorFocusNode,
+                          label: 'Cor',
+                          hint: 'Ex: Branco, Preto, etc.',
+                          required: true,
+                          validationType: ValidationType.length,
+                          minLength: 3,
+                          maxLengthValidation: 30,
+                          validateOnChange: false,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-ZÀ-ÿ\s\-]'),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ],

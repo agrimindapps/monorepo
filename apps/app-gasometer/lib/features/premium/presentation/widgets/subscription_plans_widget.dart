@@ -55,10 +55,17 @@ class _SubscriptionPlansWidgetState extends State<SubscriptionPlansWidget> {
         ? _getMockProducts()
         : widget.availableProducts;
 
+    // Remove duplicates based on productId
+    final uniqueProducts = <String, ProductInfo>{};
+    for (final product in products) {
+      uniqueProducts[product.productId] = product;
+    }
+    final productsList = uniqueProducts.values.toList();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        children: products.map((product) {
+        children: productsList.map((product) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: _buildPlanOption(product),

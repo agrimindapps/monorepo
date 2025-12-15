@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/plants/presentation/providers/plants_providers.dart';
@@ -18,7 +16,6 @@ BackgroundSyncService backgroundSyncService(Ref ref) {
     getTasksUseCase: ref.watch(getTasksUseCaseProvider),
     syncSettingsUseCase: ref.watch(syncSettingsUseCaseProvider),
     // syncUserProfileUseCase: ref.watch(syncUserProfileUseCaseProvider), // Not implemented yet
-    // authStateNotifier: AuthStateNotifier.instance, // Or ref.watch(authStateNotifierProvider) if available
   );
 }
 
@@ -57,53 +54,12 @@ class BackgroundSyncState {
 }
 
 /// Riverpod notifier for managing background synchronization state
+/// Now manages state directly without relying on service streams
 @riverpod
 class BackgroundSync extends _$BackgroundSync {
-  StreamSubscription<String>? _messageSubscription;
-  StreamSubscription<bool>? _progressSubscription;
-  StreamSubscription<BackgroundSyncStatus>? _statusSubscription;
-
   @override
   BackgroundSyncState build() {
-    final service = ref.watch(backgroundSyncServiceProvider);
-
-    // Setup listeners on first build
-    _listenToSyncUpdates();
-
-    // Cleanup on dispose
-    ref.onDispose(() {
-      _messageSubscription?.cancel();
-      _progressSubscription?.cancel();
-      _statusSubscription?.cancel();
-    });
-
-    return BackgroundSyncState(
-      isSyncInProgress: service.isSyncInProgress,
-      hasPerformedInitialSync: service.hasPerformedInitialSync,
-      currentSyncMessage: service.currentSyncMessage,
-      syncStatus: service.syncStatus,
-      operationStatus: service.getOperationStatus(),
-    );
-  }
-
-  /// Listen to sync service updates and propagate to state
-  void _listenToSyncUpdates() {
-    final service = ref.read(backgroundSyncServiceProvider);
-
-    _messageSubscription = service.syncMessageStream.listen((message) {
-      state = state.copyWith(currentSyncMessage: message);
-    });
-
-    _progressSubscription = service.syncProgressStream.listen((inProgress) {
-      state = state.copyWith(isSyncInProgress: inProgress);
-    });
-
-    _statusSubscription = service.syncStatusStream.listen((status) {
-      state = state.copyWith(
-        syncStatus: status,
-        operationStatus: service.getOperationStatus(),
-      );
-    });
+    return const BackgroundSyncState();
   }
 
   /// Starts background sync for authenticated user
@@ -111,39 +67,55 @@ class BackgroundSync extends _$BackgroundSync {
     required String userId,
     bool isInitialSync = false,
   }) async {
+    // Check if sync is already in progress
+    if (state.isSyncInProgress) {
+      return;
+    }
+
+    // Check if initial sync already performed
+    if (!isInitialSync && state.hasPerformedInitialSync) {
+      return;
+    }
+
+    // Update state to syncing
+    state = state.copyWith(
+      isSyncInProgress: true,
+      syncStatus: BackgroundSyncStatus.syncing,
+      currentSyncMessage: 'Iniciando sincronização...',
+    );
+
     final service = ref.read(backgroundSyncServiceProvider);
-    await service.startBackgroundSync(
+    final result = await service.startBackgroundSync(
       userId: userId,
       isInitialSync: isInitialSync,
     );
 
-    // Update state after sync starts
+    // Update state with result
     state = state.copyWith(
-      isSyncInProgress: service.isSyncInProgress,
-      hasPerformedInitialSync: service.hasPerformedInitialSync,
+      isSyncInProgress: false,
+      hasPerformedInitialSync: isInitialSync
+          ? true
+          : state.hasPerformedInitialSync,
+      syncStatus: result.status,
+      currentSyncMessage: result.message,
+      operationStatus: result.operationStatus,
     );
   }
 
   /// Cancels ongoing sync
   void cancelSync() {
-    final service = ref.read(backgroundSyncServiceProvider);
-    service.cancelSync();
-
-    state = state.copyWith(
-      isSyncInProgress: service.isSyncInProgress,
-      syncStatus: service.syncStatus,
-    );
+    if (state.isSyncInProgress) {
+      state = state.copyWith(
+        isSyncInProgress: false,
+        syncStatus: BackgroundSyncStatus.cancelled,
+        currentSyncMessage: 'Sincronização cancelada',
+      );
+    }
   }
 
   /// Retries failed sync
   Future<void> retrySync(String userId) async {
-    final service = ref.read(backgroundSyncServiceProvider);
-    await service.retrySync(userId);
-
-    state = state.copyWith(
-      isSyncInProgress: service.isSyncInProgress,
-      syncStatus: service.syncStatus,
-    );
+    await startBackgroundSync(userId: userId, isInitialSync: false);
   }
 
   /// Syncs specific data type
@@ -151,21 +123,33 @@ class BackgroundSync extends _$BackgroundSync {
     required String userId,
     required String dataType,
   }) async {
-    final service = ref.read(backgroundSyncServiceProvider);
-    await service.syncSpecificData(userId: userId, dataType: dataType);
+    if (state.isSyncInProgress) {
+      return;
+    }
 
     state = state.copyWith(
-      isSyncInProgress: service.isSyncInProgress,
-      operationStatus: service.getOperationStatus(),
+      isSyncInProgress: true,
+      syncStatus: BackgroundSyncStatus.syncing,
+      currentSyncMessage: 'Sincronizando $dataType...',
+    );
+
+    final service = ref.read(backgroundSyncServiceProvider);
+    final result = await service.syncSpecificData(
+      userId: userId,
+      dataType: dataType,
+    );
+
+    state = state.copyWith(
+      isSyncInProgress: false,
+      syncStatus: result.status,
+      currentSyncMessage: result.message,
+      operationStatus: {...state.operationStatus, ...result.operationStatus},
     );
   }
 
   /// Resets sync state (useful for logout)
   void resetSyncState() {
-    final service = ref.read(backgroundSyncServiceProvider);
-    service.resetSyncState();
-
-    state = const BackgroundSyncState(); // Reset to initial state
+    state = const BackgroundSyncState();
   }
 }
 
@@ -242,29 +226,4 @@ String syncIndicatorColor(Ref ref) {
     case BackgroundSyncStatus.idle:
       return 'grey';
   }
-}
-
-// =============================================================================
-// STREAM PROVIDERS (for direct stream access)
-// =============================================================================
-
-/// Stream provider for sync status changes
-@riverpod
-Stream<BackgroundSyncStatus> syncStatusStream(Ref ref) {
-  final service = ref.watch(backgroundSyncServiceProvider);
-  return service.syncStatusStream;
-}
-
-/// Stream provider for sync messages
-@riverpod
-Stream<String> syncMessageStream(Ref ref) {
-  final service = ref.watch(backgroundSyncServiceProvider);
-  return service.syncMessageStream;
-}
-
-/// Stream provider for sync progress
-@riverpod
-Stream<bool> syncProgressStream(Ref ref) {
-  final service = ref.watch(backgroundSyncServiceProvider);
-  return service.syncProgressStream;
 }

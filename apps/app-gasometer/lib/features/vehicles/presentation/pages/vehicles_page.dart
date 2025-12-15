@@ -158,22 +158,11 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
   }
 
   Widget _buildEmptyState(BuildContext context, WidgetRef ref) {
-    return EnhancedEmptyState(
+    return const EnhancedEmptyState(
       title: 'Nenhum veículo cadastrado',
       description:
           'Adicione seu primeiro veículo para começar a controlar seus gastos e manutenções.',
       icon: Icons.directions_car_outlined,
-      actionLabel: 'Adicionar veículo',
-      onAction: () {
-        showDialog<bool>(
-          context: context,
-          builder: (context) => const AddVehiclePage(),
-        ).then((result) {
-          if (result == true) {
-            ref.read(vehiclesProvider.notifier).refresh();
-          }
-        });
-      },
     );
   }
 
@@ -196,24 +185,22 @@ class _OptimizedVehiclesContent extends ConsumerWidget {
         final crossAxisCount = _calculateCrossAxisCount(constraints.maxWidth);
         return Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
-          child: StaggeredGrid.count(
+          child: MasonryGridView.count(
             crossAxisCount: crossAxisCount,
             mainAxisSpacing: 16.0,
             crossAxisSpacing: 16.0,
-            children: vehicles.map((vehicle) {
-              return StaggeredGridTile.count(
-                crossAxisCellCount: 1,
-                mainAxisCellCount: 1,
-                child: VehicleCard(
-                  vehicle: vehicle,
-                  onTap: () => _openVehicleDialog(context, ref, vehicle, DialogMode.view),
-                  onEdit: () => _openVehicleDialog(context, ref, vehicle, DialogMode.edit),
-                  onDelete: () => ref.read(vehiclesProvider.notifier).removeOptimistic(vehicle),
-                  onRestore: () => ref.read(vehiclesProvider.notifier).restoreVehicle(vehicle.id),
-                  enableSwipeToDelete: true,
-                ),
+            itemCount: vehicles.length,
+            itemBuilder: (context, index) {
+              final vehicle = vehicles[index];
+              return VehicleCard(
+                vehicle: vehicle,
+                onTap: () => _openVehicleDialog(context, ref, vehicle, DialogMode.view),
+                onEdit: () => _openVehicleDialog(context, ref, vehicle, DialogMode.edit),
+                onDelete: () => ref.read(vehiclesProvider.notifier).removeOptimistic(vehicle),
+                onRestore: () => ref.read(vehiclesProvider.notifier).restoreVehicle(vehicle.id),
+                enableSwipeToDelete: true,
               );
-            }).toList(),
+            },
           ),
         );
       },

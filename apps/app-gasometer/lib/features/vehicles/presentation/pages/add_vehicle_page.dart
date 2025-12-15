@@ -52,10 +52,21 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
     return widget.vehicle != null ? DialogMode.view : DialogMode.create;
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _currentMode = _initialMode;
+    
+    // Inicializa o form notifier após o primeiro frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _initializeFormNotifier();
+    });
+  }
+
   void _initializeFormNotifier() {
     if (_isInitialized) return;
 
-    _currentMode = _initialMode;
     final notifier = ref.read(vehicleFormProvider.notifier);
 
     if (widget.vehicle != null) {
@@ -212,7 +223,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
         !authState.isInitialized) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
-    _initializeFormNotifier();
 
     final isViewMode = _currentMode.isView;
     final isEditable = _currentMode.isEditable;
@@ -232,69 +242,65 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
       },
       onConfirm: isViewMode ? _switchToEditMode : _submitForm,
       errorMessage: formErrorMessage,
-      content: IgnorePointer(
-        ignoring: !isEditable,
-        child: Opacity(
-          opacity: isViewMode ? 0.8 : 1.0,
-          child: Form(
-            key: notifier.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                VehicleBasicInfoSection(
-                  brandController: notifier.brandController,
-                  modelController: notifier.modelController,
-                  yearController: notifier.yearController,
-                  colorController: notifier.colorController,
-                  brandFieldKey: _fieldKeys['marca']!,
-                  modelFieldKey: _fieldKeys['modelo']!,
-                  yearFieldKey: _fieldKeys['ano']!,
-                  colorFieldKey: _fieldKeys['cor']!,
-                  brandFocusNode: _focusNodes['marca']!,
-                  modelFocusNode: _focusNodes['modelo']!,
-                  yearFocusNode: _focusNodes['ano']!,
-                  colorFocusNode: _focusNodes['cor']!,
-                  onYearChanged: isEditable ? (value) {
-                    notifier.yearController.text = value?.toString() ?? '';
-                    notifier.markAsChanged();
-                  } : null,
-                ),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                const VehiclePhotoSection(),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                Container(
-                  key: _fieldKeys['combustivel'],
-                  child: const VehicleTechnicalSection(),
-                ),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                VehicleDocumentationSection(
-                  odometerController: notifier.odometerController,
-                  plateController: notifier.plateController,
-                  chassisController: notifier.chassisController,
-                  renavamController: notifier.renavamController,
-                  odometerFieldKey: _fieldKeys['odometro']!,
-                  plateFieldKey: _fieldKeys['placa']!,
-                  chassisFieldKey: _fieldKeys['chassi']!,
-                  renavamFieldKey: _fieldKeys['renavam']!,
-                  odometerFocusNode: _focusNodes['odometro']!,
-                  plateFocusNode: _focusNodes['placa']!,
-                  chassisFocusNode: _focusNodes['chassi']!,
-                  renavamFocusNode: _focusNodes['renavam']!,
-                  onOdometerChanged: isEditable ? (_) => setState(() {}) : null,
-                  onPlateChanged: isEditable ? (_) => setState(() {}) : null,
-                  onChassisChanged: isEditable ? (_) => setState(() {}) : null,
-                  onRenavamChanged: isEditable ? (_) => setState(() {}) : null,
-                ),
-                const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-                VehicleAdditionalInfoSection(
-                  observationsController: _observacoesController,
-                  observationsFieldKey: _fieldKeys['observacoes']!,
-                  observationsFocusNode: _focusNodes['observacoes']!,
-                  onObservationsChanged: isEditable ? (_) => setState(() {}) : null,
-                ),
-              ],
+      content: Form(
+        key: notifier.formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            VehicleBasicInfoSection(
+              brandController: notifier.brandController,
+              modelController: notifier.modelController,
+              yearController: notifier.yearController,
+              colorController: notifier.colorController,
+              brandFieldKey: _fieldKeys['marca']!,
+              modelFieldKey: _fieldKeys['modelo']!,
+              yearFieldKey: _fieldKeys['ano']!,
+              colorFieldKey: _fieldKeys['cor']!,
+              brandFocusNode: _focusNodes['marca']!,
+              modelFocusNode: _focusNodes['modelo']!,
+              yearFocusNode: _focusNodes['ano']!,
+              colorFocusNode: _focusNodes['cor']!,
+              onYearChanged: isEditable ? (value) {
+                notifier.yearController.text = value?.toString() ?? '';
+                notifier.markAsChanged();
+              } : null,
+              isReadOnly: isViewMode,
             ),
-          ),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            const VehiclePhotoSection(),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            Container(
+              key: _fieldKeys['combustivel'],
+              child: const VehicleTechnicalSection(),
+            ),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            VehicleDocumentationSection(
+              odometerController: notifier.odometerController,
+              plateController: notifier.plateController,
+              chassisController: notifier.chassisController,
+              renavamController: notifier.renavamController,
+              odometerFieldKey: _fieldKeys['odometro']!,
+              plateFieldKey: _fieldKeys['placa']!,
+              chassisFieldKey: _fieldKeys['chassi']!,
+              renavamFieldKey: _fieldKeys['renavam']!,
+              odometerFocusNode: _focusNodes['odometro']!,
+              plateFocusNode: _focusNodes['placa']!,
+              chassisFocusNode: _focusNodes['chassi']!,
+              renavamFocusNode: _focusNodes['renavam']!,
+              onOdometerChanged: isEditable ? (_) => setState(() {}) : null,
+              onPlateChanged: isEditable ? (_) => setState(() {}) : null,
+              onChassisChanged: isEditable ? (_) => setState(() {}) : null,
+              onRenavamChanged: isEditable ? (_) => setState(() {}) : null,
+              isReadOnly: isViewMode,
+            ),
+            const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
+            VehicleAdditionalInfoSection(
+              observationsController: _observacoesController,
+              observationsFieldKey: _fieldKeys['observacoes']!,
+              observationsFocusNode: _focusNodes['observacoes']!,
+              onObservationsChanged: isEditable ? (_) => setState(() {}) : null,
+            ),
+          ],
         ),
       ),
     );

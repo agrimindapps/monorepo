@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/medications_constants.dart';
+import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
@@ -78,11 +79,9 @@ class MedicationsPage extends ConsumerStatefulWidget {
 /// - Implements proper lifecycle management and cleanup
 class _MedicationsPageState extends ConsumerState<MedicationsPage>
     with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  /// Controls the tab navigation between Active, Expired, All, and Stats views
   late TabController _tabController;
-
-  /// Handles search input for real-time medication filtering
   final TextEditingController _searchController = TextEditingController();
+  String? _selectedAnimalId;
 
   @override
   void initState() {
@@ -182,7 +181,6 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                   ? MedicationsConstants.petMedicationsTitle
                   : MedicationsConstants.allMedicationsTitle,
               subtitle: 'Controle de medicamentos',
-              showBackButton: true,
               actions: [
                 _buildHeaderAction(
                   icon: Icons.refresh,
@@ -196,6 +194,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                 ),
               ],
             ),
+            if (widget.animalId == null) _buildAnimalSelector(),
             _buildTabBar(medicationsState),
             _buildSearchAndFilters(),
             Expanded(
@@ -257,6 +256,26 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
           ),
           child: Icon(icon, color: Colors.white, size: 20),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAnimalSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: EnhancedAnimalSelector(
+        selectedAnimalId: _selectedAnimalId,
+        onAnimalChanged: (animalId) {
+          setState(() {
+            _selectedAnimalId = animalId;
+          });
+          if (animalId != null) {
+            ref.read(medicationsProvider.notifier).filterByAnimal(animalId);
+          } else {
+            ref.read(medicationsProvider.notifier).clearAnimalFilter();
+          }
+        },
+        hintText: 'Selecione um pet',
       ),
     );
   }

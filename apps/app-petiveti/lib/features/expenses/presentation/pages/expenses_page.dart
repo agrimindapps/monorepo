@@ -59,7 +59,6 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage>
               icon: Icons.receipt_long,
               title: 'Controle de Despesas',
               subtitle: 'Gerencie gastos com seus pets',
-              showBackButton: true,
               actions: [
                 _buildHeaderAction(
                   icon: Icons.add,

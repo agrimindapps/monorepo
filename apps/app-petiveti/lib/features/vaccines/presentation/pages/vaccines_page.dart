@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';
@@ -24,6 +25,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
   bool _showCalendarView = false;
+  String? _selectedAnimalId;
 
   @override
   void initState() {
@@ -56,7 +58,6 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
               icon: Icons.vaccines,
               title: 'Vacinas',
               subtitle: 'Controle de vacinação dos pets',
-              showBackButton: true,
               actions: [
                 _buildHeaderAction(
                   icon: _showCalendarView ? Icons.list : Icons.calendar_view_month,
@@ -71,6 +72,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
                 _buildHeaderPopupMenu(),
               ],
             ),
+            _buildAnimalSelector(),
             _buildTabBar(vaccinesState),
             Expanded(child: _buildBody(context, vaccinesState)),
           ],
@@ -528,6 +530,26 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
       context,
       MaterialPageRoute<void>(
         builder: (context) => const VaccineReminderManagement(),
+      ),
+    );
+  }
+
+  Widget _buildAnimalSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: EnhancedAnimalSelector(
+        selectedAnimalId: _selectedAnimalId,
+        onAnimalChanged: (animalId) {
+          setState(() {
+            _selectedAnimalId = animalId;
+          });
+          if (animalId != null) {
+            ref.read(vaccinesProvider.notifier).filterByAnimal(animalId);
+          } else {
+            ref.read(vaccinesProvider.notifier).clearAnimalFilter();
+          }
+        },
+        hintText: 'Selecione um pet',
       ),
     );
   }

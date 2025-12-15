@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/weight.dart';
@@ -33,7 +34,6 @@ class _WeightPageState extends ConsumerState<WeightPage> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final weightsState = ref.watch(weightsProvider);
     final animalsState = ref.watch(animalsProvider);
 
@@ -45,13 +45,11 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               icon: Icons.monitor_weight,
               title: 'Controle de Peso',
               subtitle: 'Acompanhe o peso dos pets',
-              showBackButton: true,
               actions: [
-                if (animalsState.animals.isNotEmpty)
-                  _buildAnimalFilterPopup(theme, animalsState),
                 _buildMoreOptionsPopup(weightsState),
               ],
             ),
+            _buildAnimalSelector(),
             Expanded(child: _buildBody(context, weightsState, animalsState)),
           ],
         ),
@@ -64,75 +62,23 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     );
   }
 
-  Widget _buildAnimalFilterPopup(ThemeData theme, AnimalsState animalsState) {
-    return PopupMenuButton<String?>(
-      icon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(9),
-        ),
-        child: Icon(
-          _selectedAnimalId != null
-              ? Icons.filter_alt
-              : Icons.filter_alt_outlined,
-          color: Colors.white,
-          size: 20,
-        ),
+  Widget _buildAnimalSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: EnhancedAnimalSelector(
+        selectedAnimalId: _selectedAnimalId,
+        onAnimalChanged: (animalId) {
+          setState(() {
+            _selectedAnimalId = animalId;
+          });
+          if (animalId != null) {
+            ref.read(weightsProvider.notifier).loadWeightsByAnimal(animalId);
+          } else {
+            ref.read(weightsProvider.notifier).loadWeights();
+          }
+        },
+        hintText: 'Selecione um pet',
       ),
-      onSelected: (animalId) {
-        setState(() {
-          _selectedAnimalId = animalId;
-        });
-
-        if (animalId != null) {
-          ref.read(weightsProvider.notifier).loadWeightsByAnimal(animalId);
-        } else {
-          ref.read(weightsProvider.notifier).loadWeights();
-        }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem<String?>(
-          value: null,
-          child: Row(
-            children: [
-              Icon(Icons.pets),
-              SizedBox(width: 8),
-              Text('Todos os animais'),
-            ],
-          ),
-        ),
-        const PopupMenuDivider(),
-        ...animalsState.animals.map(
-          (animal) => PopupMenuItem<String>(
-            value: animal.id,
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 12,
-                  backgroundColor: theme.colorScheme.primary.withAlpha(51),
-                  child: Text(
-                    animal.name.substring(0, 1).toUpperCase(),
-                    style: TextStyle(
-                      color: theme.colorScheme.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(child: Text(animal.name)),
-                if (_selectedAnimalId == animal.id)
-                  Icon(
-                    Icons.check,
-                    color: theme.colorScheme.primary,
-                    size: 18,
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ],
     );
   }
 

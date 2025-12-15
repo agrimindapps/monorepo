@@ -349,6 +349,14 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
   int getExpiringMedicationsCount() {
     return state.expiringMedications.length;
   }
+
+  void filterByAnimal(String animalId) {
+    loadMedicationsByAnimalId(animalId);
+  }
+
+  void clearAnimalFilter() {
+    loadMedications();
+  }
 }
 
 // Derived providers

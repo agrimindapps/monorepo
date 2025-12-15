@@ -430,6 +430,14 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   void clearSearch() {
     state = state.copyWith(searchQuery: '');
   }
+
+  void filterByAnimal(String animalId) {
+    loadVaccinesByAnimal(animalId);
+  }
+
+  void clearAnimalFilter() {
+    loadVaccines();
+  }
 }
 
 // Derived providers

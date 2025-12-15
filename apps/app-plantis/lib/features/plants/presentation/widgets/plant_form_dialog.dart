@@ -440,7 +440,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
 
         // Atualizar lista em background (sem await para não bloquear)
         try {
-          ref.read(plantsNotifierProvider.notifier).refreshPlants();
+          await ref.read(plantsNotifierProvider.notifier).refreshPlants();
         } catch (_) {
           // Ignora erro de atualização da lista
         }
@@ -448,7 +448,7 @@ class _PlantFormDialogState extends ConsumerState<PlantFormDialog>
         // Recarregar detalhes se editando
         if (plantId != null) {
           try {
-            ref
+            await ref
                 .read(plantDetailsNotifierProvider.notifier)
                 .reloadPlant(plantId);
           } catch (_) {

@@ -35,7 +35,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   Future<List<PlantTaskModel>> getPlantTasks(String userId) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔄 PlantTasksRemoteDataSource: Buscando plant tasks do Firebase para user $userId',
         );
       }
@@ -50,7 +50,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       }).toList();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: ${tasks.length} plant tasks encontradas no Firebase',
         );
       }
@@ -58,7 +58,9 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       return tasks;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRemoteDataSource: Erro ao buscar plant tasks: $e');
+        debugPrint(
+          '❌ PlantTasksRemoteDataSource: Erro ao buscar plant tasks: $e',
+        );
       }
       throw Exception('Erro ao buscar tarefas remotamente: $e');
     }
@@ -71,7 +73,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   ) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔄 PlantTasksRemoteDataSource: Buscando plant tasks para planta $plantId',
         );
       }
@@ -88,7 +90,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       }).toList();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: ${tasks.length} plant tasks encontradas para planta $plantId',
         );
       }
@@ -96,7 +98,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       return tasks;
     } catch (e) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '❌ PlantTasksRemoteDataSource: Erro ao buscar plant tasks por plantId: $e',
         );
       }
@@ -121,7 +123,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       return task.isDeleted ? null : task;
     } catch (e) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '❌ PlantTasksRemoteDataSource: Erro ao buscar plant task por ID: $e',
         );
       }
@@ -136,7 +138,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   ) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantTasksRemoteDataSource: Salvando plant task ${task.id} no Firebase',
         );
       }
@@ -156,7 +158,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       );
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: Plant task salva com ID ${docRef.id}',
         );
       }
@@ -164,7 +166,9 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       return savedTask;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRemoteDataSource: Erro ao salvar plant task: $e');
+        debugPrint(
+          '❌ PlantTasksRemoteDataSource: Erro ao salvar plant task: $e',
+        );
       }
       throw Exception('Erro ao salvar tarefa remotamente: $e');
     }
@@ -177,7 +181,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   ) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantTasksRemoteDataSource: Salvando ${tasks.length} plant tasks em lote no Firebase',
         );
       }
@@ -208,7 +212,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       await batch.commit();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: ${tasks.length} plant tasks salvas em lote',
         );
       }
@@ -216,7 +220,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       return savedTasks;
     } catch (e) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '❌ PlantTasksRemoteDataSource: Erro ao salvar plant tasks em lote: $e',
         );
       }
@@ -231,7 +235,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   ) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔄 PlantTasksRemoteDataSource: Atualizando plant task ${task.id} no Firebase',
         );
       }
@@ -251,13 +255,17 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       );
 
       if (kDebugMode) {
-        print('✅ PlantTasksRemoteDataSource: Plant task ${task.id} atualizada');
+        debugPrint(
+          '✅ PlantTasksRemoteDataSource: Plant task ${task.id} atualizada',
+        );
       }
 
       return updatedTask;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRemoteDataSource: Erro ao atualizar plant task: $e');
+        debugPrint(
+          '❌ PlantTasksRemoteDataSource: Erro ao atualizar plant task: $e',
+        );
       }
       throw Exception('Erro ao atualizar tarefa remotamente: $e');
     }
@@ -267,7 +275,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   Future<void> deletePlantTask(String id, String userId) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🗑️ PlantTasksRemoteDataSource: Deletando plant task $id do Firebase',
         );
       }
@@ -277,13 +285,17 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       });
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: Plant task $id marcada como deletada',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRemoteDataSource: Erro ao deletar plant task: $e');
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantTasksRemoteDataSource: Erro ao deletar plant task: $e',
+          );
+        }
       }
       throw Exception('Erro ao deletar tarefa remotamente: $e');
     }
@@ -293,7 +305,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   Future<void> deletePlantTasksByPlantId(String plantId, String userId) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🗑️ PlantTasksRemoteDataSource: Deletando todas as plant tasks da planta $plantId',
         );
       }
@@ -314,15 +326,17 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       await batch.commit();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: ${querySnapshot.docs.length} plant tasks da planta $plantId deletadas',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
-          '❌ PlantTasksRemoteDataSource: Erro ao deletar plant tasks por plantId: $e',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantTasksRemoteDataSource: Erro ao deletar plant tasks por plantId: $e',
+          );
+        }
       }
       throw Exception('Erro ao deletar tarefas da planta remotamente: $e');
     }
@@ -332,7 +346,7 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
   Future<void> syncPlantTasks(List<PlantTaskModel> tasks, String userId) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔄 PlantTasksRemoteDataSource: Sincronizando ${tasks.length} plant tasks',
         );
       }
@@ -357,15 +371,17 @@ class PlantTasksRemoteDatasourceImpl implements PlantTasksRemoteDatasource {
       await batch.commit();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRemoteDataSource: Plant tasks sincronizadas com sucesso',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
-          '❌ PlantTasksRemoteDataSource: Erro ao sincronizar plant tasks: $e',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantTasksRemoteDataSource: Erro ao sincronizar plant tasks: $e',
+          );
+        }
       }
       throw Exception('Erro ao sincronizar tarefas: $e');
     }

@@ -30,9 +30,11 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
       );
 
       if (kDebugMode && newCareTypes.isNotEmpty) {
-        print(
-          '🌱 UpdatePlantUseCase - Novos cuidados detectados: $newCareTypes',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '🌱 UpdatePlantUseCase - Novos cuidados detectados: $newCareTypes',
+          );
+        }
       }
 
       final updatedPlant = existingPlant.copyWith(
@@ -55,7 +57,7 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
         // Gerar tarefas para os novos cuidados habilitados
         if (newCareTypes.isNotEmpty && savedPlant.config != null) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '🌱 UpdatePlantUseCase - Gerando tarefas para novos cuidados',
             );
           }
@@ -129,7 +131,7 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
   ) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🌱 _generateTasksForNewCareTypes - plant: ${plant.name}, careTypes: $careTypes',
         );
       }
@@ -175,14 +177,14 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
       );
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🌱 _generateTasksForNewCareTypes - filteredConfig.activeCareTypes: ${filteredConfig.activeCareTypes}',
         );
       }
 
       if (filteredConfig.activeCareTypes.isEmpty) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '⚠️ _generateTasksForNewCareTypes - Nenhum cuidado ativo na config filtrada',
           );
         }
@@ -201,14 +203,14 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
       tasksResult.fold(
         (failure) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ _generateTasksForNewCareTypes - Falha ao gerar Tasks: ${failure.message}',
             );
           }
         },
         (generatedTasks) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ _generateTasksForNewCareTypes - ${generatedTasks.length} Tasks geradas',
             );
           }
@@ -216,8 +218,8 @@ class UpdatePlantUseCase implements UseCase<Plant, UpdatePlantParams> {
       );
     } catch (e, stack) {
       if (kDebugMode) {
-        print('❌ _generateTasksForNewCareTypes - Erro: $e');
-        print('Stack: $stack');
+        debugPrint('❌ _generateTasksForNewCareTypes - Erro: $e');
+        debugPrint('Stack: $stack');
       }
     }
   }

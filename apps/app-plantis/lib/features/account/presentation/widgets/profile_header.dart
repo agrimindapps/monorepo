@@ -4,14 +4,13 @@ import '../../../../core/theme/plantis_colors.dart';
 
 /// Widget responsável por exibir o header da página de perfil
 class ProfileHeader extends ConsumerWidget {
-
   const ProfileHeader({super.key, required this.isAnonymous});
   final bool isAnonymous;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -24,10 +23,7 @@ class ProfileHeader extends ConsumerWidget {
                   PlantisColors.primaryDark,
                   const Color(0xFF065030), // Even Darker Green
                 ]
-              : [
-                  PlantisColors.primary,
-                  PlantisColors.primaryDark,
-                ],
+              : [PlantisColors.primary, PlantisColors.primaryDark],
         ),
         borderRadius: BorderRadius.circular(15),
         boxShadow: [

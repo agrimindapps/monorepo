@@ -150,7 +150,7 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
         await writeBatch.commit();
 
         if (kDebugMode) {
-          print('✅ Batch sync: ${batch.length} plants committed');
+          debugPrint('✅ Batch sync: ${batch.length} plants committed');
         }
       }
     } on FirebaseException catch (e) {

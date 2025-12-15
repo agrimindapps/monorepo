@@ -54,9 +54,11 @@ class PlantImagesDriftRepository {
     );
 
     final id = await _db.into(_db.plantImages).insert(companion);
-    print(
-      '📷 [PlantImagesDriftRepository] Imagem salva: id=$id, plantId=$plantId, size=${imageBytes.length} bytes',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '📷 [PlantImagesDriftRepository] Imagem salva: id=$id, plantId=$plantId, size=${imageBytes.length} bytes',
+      );
+    }
     return id;
   }
 
@@ -169,9 +171,11 @@ class PlantImagesDriftRepository {
       _db.plantImages,
     )..where((i) => i.id.equals(imageId))).write(companion);
 
-    print(
-      '📷 [PlantImagesDriftRepository] Upload status atualizado: id=$imageId, status=$status',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '📷 [PlantImagesDriftRepository] Upload status atualizado: id=$imageId, status=$status',
+      );
+    }
   }
 
   // =========================================================================
@@ -190,9 +194,11 @@ class PlantImagesDriftRepository {
       ),
     );
 
-    print(
-      '📷 [PlantImagesDriftRepository] Imagem marcada como deletada: id=$imageId',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '📷 [PlantImagesDriftRepository] Imagem marcada como deletada: id=$imageId',
+      );
+    }
   }
 
   /// Remove permanentemente uma imagem
@@ -200,9 +206,11 @@ class PlantImagesDriftRepository {
     await (_db.delete(
       _db.plantImages,
     )..where((i) => i.id.equals(imageId))).go();
-    print(
-      '📷 [PlantImagesDriftRepository] Imagem removida permanentemente: id=$imageId',
-    );
+    if (kDebugMode) {
+      debugPrint(
+        '📷 [PlantImagesDriftRepository] Imagem removida permanentemente: id=$imageId',
+      );
+    }
   }
 
   /// Remove todas as imagens de uma planta

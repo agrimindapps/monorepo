@@ -194,7 +194,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
         _showErrorSnackBar('Erro inesperado ao salvar: $e');
       }
       if (kDebugMode) {
-        print('❌ PlantFormPage._savePlant() - Erro: $e');
+        debugPrint('❌ PlantFormPage._savePlant() - Erro: $e');
       }
     }
   }
@@ -206,7 +206,7 @@ class _PlantFormPageState extends ConsumerState<PlantFormPage>
       ref.read(riverpod_plants.plantsNotifierProvider.notifier).refreshPlants(),
     );
     if (kDebugMode) {
-      print('✅ PlantFormPage: Plant list refresh triggered.');
+      debugPrint('✅ PlantFormPage: Plant list refresh triggered.');
     }
 
     final message = widget.plantId != null

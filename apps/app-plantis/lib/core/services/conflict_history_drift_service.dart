@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../database/repositories/conflict_history_drift_repository.dart';
 import '../data/models/conflict_history_model.dart';
+import '../data/models/conflict_stats.dart';
 
 /// Service para gerenciar histórico de conflitos usando Drift
 ///
@@ -27,8 +28,8 @@ class ConflictHistoryDriftService {
     required String tableName,
     required String recordId,
     required String conflictType,
-    int? localVersion,
-    int? remoteVersion,
+    required int localVersion,
+    required int remoteVersion,
     String? resolution,
     Map<String, dynamic>? localData,
     Map<String, dynamic>? remoteData,
@@ -38,6 +39,8 @@ class ConflictHistoryDriftService {
     final conflict = ConflictHistoryModel.create(
       modelType: tableName,
       modelId: recordId,
+      localVersion: localVersion,
+      remoteVersion: remoteVersion,
       resolutionStrategy: resolution ?? 'unresolved',
       localData: localData ?? {},
       remoteData: remoteData ?? {},
@@ -79,16 +82,23 @@ class ConflictHistoryDriftService {
   }
 
   /// Obter estatísticas de conflitos
-  Future<Map<String, dynamic>> getStats() async {
+  Future<ConflictStats> getStats() async {
     final unresolved = await _repository.getUnresolvedCount();
+    final resolved = await _repository.getResolvedCount();
+    final byModel = await _repository.getConflictCountByType();
 
-    return {
-      'unresolved': unresolved,
-      'resolved': 0, // TODO: Calculate when method available
-      'total': unresolved,
-      'byModel': <String, int>{}, // TODO: Implement when method available
-      'resolutionRate': '0.0', // TODO: Calculate when resolved count available
-    };
+    final total = unresolved + resolved;
+    final resolutionRate = total > 0
+        ? ((resolved / total) * 100).toStringAsFixed(1)
+        : '0.0';
+
+    return ConflictStats(
+      unresolved: unresolved,
+      resolved: resolved,
+      total: total,
+      byModel: byModel,
+      resolutionRate: resolutionRate,
+    );
   }
 
   /// Obter conflitos agrupados por tipo
@@ -134,13 +144,20 @@ class ConflictHistoryDriftService {
   }
 
   /// Stream de conflitos não resolvidos (para UI observar mudanças)
-  /// TODO: Implement watchUnresolvedConflicts in repository
   Stream<List<ConflictHistoryModel>> watchUnresolvedConflicts() {
-    // Temporary workaround: return periodic stream
-    return Stream.periodic(
-      const Duration(seconds: 5),
-      (_) => getUnresolved(),
-    ).asyncMap((future) => future);
+    return _repository.watchUnresolvedConflicts();
+  }
+
+  /// Stream de todos os conflitos (para UI observar mudanças)
+  ///
+  /// [modelType] - Filtrar por tipo de modelo específico (opcional)
+  Stream<List<ConflictHistoryModel>> watchAllConflicts({String? modelType}) {
+    return _repository.watchAllConflicts(modelType: modelType);
+  }
+
+  /// Stream de estatísticas de conflitos (atualizado reativamente)
+  Stream<Map<String, int>> watchConflictStats() {
+    return _repository.watchConflictStats();
   }
 
   /// Limpar todos os conflitos (útil para testes)

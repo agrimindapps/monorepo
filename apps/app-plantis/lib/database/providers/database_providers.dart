@@ -42,7 +42,9 @@ final plantisDatabaseProvider = Provider<PlantisDatabase>((ref) {
 
   // Cleanup quando o provider for disposed
   ref.onDispose(() {
-    print('🗑️ PlantisDatabase provider disposed');
+    if (kDebugMode) {
+      debugPrint('🗑️ PlantisDatabase provider disposed');
+    }
     db.close();
   });
 

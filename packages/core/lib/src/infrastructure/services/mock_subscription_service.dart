@@ -88,8 +88,26 @@ class MockSubscriptionService implements ISubscriptionRepository {
     required List<String> productIds,
   }) async {
     await Future.delayed(const Duration(milliseconds: 800));
-    return Right(_getMockProducts());
+    // Return all products if no filter specified (backward compatibility)
+    if (productIds.isEmpty) {
+      return Right([
+        ..._getMockGasometerProducts(),
+        ..._getMockPlantisProducts(),
+        ..._getMockReceitaAgroProducts(),
+        ..._getMockPetivetiProducts(),
+      ]);
+    }
+    // Filter by product IDs
+    final allProducts = [
+      ..._getMockGasometerProducts(),
+      ..._getMockPlantisProducts(),
+      ..._getMockReceitaAgroProducts(),
+      ..._getMockPetivetiProducts(),
+    ];
+    final filtered = allProducts.where((p) => productIds.contains(p.productId)).toList();
+    return Right(filtered);
   }
+
 
   @override
   Future<Either<Failure, SubscriptionEntity>> purchaseProduct({
@@ -192,17 +210,17 @@ class MockSubscriptionService implements ISubscriptionRepository {
 
   @override
   Future<Either<Failure, List<ProductInfo>>> getPlantisProducts() async {
-    return getAvailableProducts(productIds: []);
+    return Right(_getMockPlantisProducts());
   }
 
   @override
   Future<Either<Failure, List<ProductInfo>>> getReceitaAgroProducts() async {
-    return getAvailableProducts(productIds: []);
+    return Right(_getMockReceitaAgroProducts());
   }
 
   @override
   Future<Either<Failure, List<ProductInfo>>> getGasometerProducts() async {
-    return getAvailableProducts(productIds: []);
+    return Right(_getMockGasometerProducts());
   }
 
   @override
@@ -213,6 +231,96 @@ class MockSubscriptionService implements ISubscriptionRepository {
   @override
   Future<Either<Failure, List<ProductInfo>>> getPetivetiProducts() async {
     return Right(_getMockPetivetiProducts());
+  }
+
+  List<ProductInfo> _getMockGasometerProducts() {
+    return [
+      const ProductInfo(
+        productId: 'gasometer_premium_monthly',
+        title: 'Mensal',
+        description: 'Acesso básico',
+        price: 19.90,
+        priceString: 'R\$ 19,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1M',
+      ),
+      const ProductInfo(
+        productId: 'gasometer_premium_annual',
+        title: 'Anual',
+        description: 'Economize 67%',
+        price: 99.90,
+        priceString: 'R\$ 99,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1Y',
+        freeTrialPeriod: 'P7D',
+      ),
+      const ProductInfo(
+        productId: 'gasometer_premium_semiannual',
+        title: 'Semestral',
+        description: 'Acesso completo por 6 meses',
+        price: 59.90,
+        priceString: 'R\$ 59,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P6M',
+      ),
+    ];
+  }
+
+  List<ProductInfo> _getMockPlantisProducts() {
+    return [
+      const ProductInfo(
+        productId: 'plantis_premium_monthly',
+        title: 'Plantis Premium Mensal',
+        description: 'Acesso completo por 1 mês',
+        price: 9.90,
+        priceString: 'R\$ 9,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1M',
+      ),
+      const ProductInfo(
+        productId: 'plantis_premium_annual',
+        title: 'Plantis Premium Anual',
+        description: 'Acesso completo por 1 ano',
+        price: 89.90,
+        priceString: 'R\$ 89,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1Y',
+        freeTrialPeriod: 'P7D',
+      ),
+    ];
+  }
+
+  List<ProductInfo> _getMockReceitaAgroProducts() {
+    return [
+      const ProductInfo(
+        productId: 'receituagro_premium_monthly',
+        title: 'Premium Mensal',
+        description: 'Acesso completo por 1 mês',
+        price: 19.90,
+        priceString: 'R\$ 19,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1M',
+      ),
+      const ProductInfo(
+        productId: 'receituagro_premium_semiannual',
+        title: 'Premium Semestral',
+        description: 'Acesso completo por 6 meses',
+        price: 99.90,
+        priceString: 'R\$ 99,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P6M',
+      ),
+      const ProductInfo(
+        productId: 'receituagro_premium_annual',
+        title: 'Premium Anual',
+        description: 'Acesso completo por 1 ano',
+        price: 179.90,
+        priceString: 'R\$ 179,90',
+        currencyCode: 'BRL',
+        subscriptionPeriod: 'P1Y',
+        freeTrialPeriod: 'P7D',
+      ),
+    ];
   }
 
   List<ProductInfo> _getMockPetivetiProducts() {
@@ -245,80 +353,6 @@ class MockSubscriptionService implements ISubscriptionRepository {
         priceString: 'R\$ 299,90',
         currencyCode: 'BRL',
         subscriptionPeriod: null, // One-time purchase
-      ),
-    ];
-  }
-
-  List<ProductInfo> _getMockProducts() {
-    return [
-      // ReceitaAgro Products
-      const ProductInfo(
-        productId: 'receituagro_premium_monthly',
-        title: 'Premium Mensal (Mock)',
-        description: 'Acesso completo por 1 mês',
-        price: 19.90,
-        priceString: 'R\$ 19,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P1M',
-      ),
-      const ProductInfo(
-        productId: 'receituagro_premium_semiannual',
-        title: 'Premium Semestral (Mock)',
-        description: 'Acesso completo por 6 meses',
-        price: 99.90,
-        priceString: 'R\$ 99,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P6M',
-      ),
-      const ProductInfo(
-        productId: 'receituagro_premium_annual',
-        title: 'Premium Anual (Mock)',
-        description: 'Acesso completo por 1 ano',
-        price: 179.90,
-        priceString: 'R\$ 179,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P1Y',
-        freeTrialPeriod: 'P7D',
-      ),
-      // Plantis Products
-      const ProductInfo(
-        productId: 'plantis_premium_monthly',
-        title: 'Plantis Premium Mensal (Mock)',
-        description: 'Acesso completo por 1 mês',
-        price: 9.90,
-        priceString: 'R\$ 9,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P1M',
-      ),
-      const ProductInfo(
-        productId: 'plantis_premium_annual',
-        title: 'Plantis Premium Anual (Mock)',
-        description: 'Acesso completo por 1 ano',
-        price: 89.90,
-        priceString: 'R\$ 89,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P1Y',
-        freeTrialPeriod: 'P7D',
-      ),
-      // Gasometer Products
-      const ProductInfo(
-        productId: 'gasometer_premium_monthly',
-        title: 'Gasometer Premium Mensal (Mock)',
-        description: 'Acesso completo por 1 mês',
-        price: 4.90,
-        priceString: 'R\$ 4,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P1M',
-      ),
-      const ProductInfo(
-        productId: 'gasometer_premium_annual',
-        title: 'Gasometer Premium Anual (Mock)',
-        description: 'Acesso completo por 1 ano',
-        price: 49.90,
-        priceString: 'R\$ 49,90',
-        currencyCode: 'BRL',
-        subscriptionPeriod: 'P1Y',
-        freeTrialPeriod: 'P7D',
       ),
     ];
   }

@@ -175,12 +175,12 @@ class PlantTaskTaskAdapter {
     final result = mergedTasks.values.toList();
 
     if (kDebugMode) {
-      print('🔄 PlantTaskTaskAdapter: Merge completed');
-      print('   - ${plantTasks.length} PlantTasks convertidas');
-      print(
+      debugPrint('🔄 PlantTaskTaskAdapter: Merge completed');
+      debugPrint('   - ${plantTasks.length} PlantTasks convertidas');
+      debugPrint(
         '   - ${existingTasks.where((t) => !isTaskFromPlantTask(t)).length} Tasks não-PlantTask mantidas',
       );
-      print('   - ${result.length} Tasks totais no resultado');
+      debugPrint('   - ${result.length} Tasks totais no resultado');
     }
 
     return result;

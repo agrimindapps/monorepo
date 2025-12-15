@@ -7,8 +7,7 @@ import '../plantis_database.dart' as db;
 
 /// Repository Drift para ConflictHistory (auditoria de conflitos de sync)
 ///
-/// TODO: This repository needs significant refactoring to align ConflictHistoryModel
-/// with the ConflictHistory table schema. Temporarily simplified for migration.
+/// Responsável por persistir e consultar histórico de conflitos de sincronização.
 class ConflictHistoryDriftRepository {
   final db.PlantisDatabase _db;
 
@@ -19,14 +18,14 @@ class ConflictHistoryDriftRepository {
       firebaseId: Value(model.id),
       modelType: model.modelType,
       modelId: model.modelId,
-      localVersion: 1, // ConflictHistoryModel doesn't store versions
-      remoteVersion: 1,
+      localVersion: model.localVersion,
+      remoteVersion: model.remoteVersion,
       resolutionStrategy: model.resolutionStrategy,
       localData: jsonEncode(model.localData),
       remoteData: jsonEncode(model.remoteData),
       resolvedData: jsonEncode(model.resolvedData),
-      occurredAt: model.createdAtMs ?? DateTime.now().millisecondsSinceEpoch,
-      resolvedAt: Value(model.updatedAtMs),
+      occurredAt: model.occurredAt,
+      resolvedAt: Value(model.resolvedAt),
       autoResolved: Value(model.autoResolved),
       createdAt: Value(model.createdAt ?? DateTime.now()),
       updatedAt: Value(model.updatedAt ?? DateTime.now()),
@@ -63,6 +62,10 @@ class ConflictHistoryDriftRepository {
       id: conflict.firebaseId ?? conflict.id.toString(),
       modelType: conflict.modelType,
       modelId: conflict.modelId,
+      localVersion: conflict.localVersion,
+      remoteVersion: conflict.remoteVersion,
+      occurredAt: conflict.occurredAt,
+      resolvedAt: conflict.resolvedAt,
       resolutionStrategy: conflict.resolutionStrategy,
       localData: jsonDecode(conflict.localData) as Map<String, dynamic>,
       remoteData: jsonDecode(conflict.remoteData) as Map<String, dynamic>,
@@ -122,8 +125,76 @@ class ConflictHistoryDriftRepository {
     return query.map((row) => row.read(count)!).getSingle();
   }
 
+  /// Contagem de conflitos resolvidos
+  Future<int> getResolvedCount() async {
+    final count = _db.conflictHistory.id.count();
+    final query = _db.selectOnly(_db.conflictHistory)
+      ..addColumns([count])
+      ..where(_db.conflictHistory.resolvedAt.isNotNull());
+
+    return query.map((row) => row.read(count)!).getSingle();
+  }
+
+  /// Contagem de conflitos agrupados por tipo de modelo
+  Future<Map<String, int>> getConflictCountByType() async {
+    final modelType = _db.conflictHistory.modelType;
+    final count = _db.conflictHistory.id.count();
+
+    final query = _db.selectOnly(_db.conflictHistory)
+      ..addColumns([modelType, count])
+      ..groupBy([modelType]);
+
+    final results = await query.get();
+    final Map<String, int> countsByType = {};
+
+    for (final row in results) {
+      final type = row.read(modelType)!;
+      final typeCount = row.read(count)!;
+      countsByType[type] = typeCount;
+    }
+
+    return countsByType;
+  }
+
   /// Limpar todos os conflitos (útil para testes)
   Future<void> deleteAll() async {
     await _db.delete(_db.conflictHistory).go();
+  }
+
+  /// Stream de conflitos não resolvidos (para UI observar mudanças reativas)
+  Stream<List<ConflictHistoryModel>> watchUnresolvedConflicts() {
+    return (_db.select(_db.conflictHistory)
+          ..where((c) => c.resolvedAt.isNull())
+          ..orderBy([(c) => OrderingTerm.desc(c.occurredAt)]))
+        .watch()
+        .map((conflicts) => conflicts.map(_conflictDriftToModel).toList());
+  }
+
+  /// Stream de todos os conflitos (para UI observar mudanças reativas)
+  Stream<List<ConflictHistoryModel>> watchAllConflicts({String? modelType}) {
+    final query = _db.select(_db.conflictHistory);
+
+    if (modelType != null) {
+      query.where((c) => c.modelType.equals(modelType));
+    }
+
+    query.orderBy([(c) => OrderingTerm.desc(c.occurredAt)]);
+
+    return query.watch().map(
+      (conflicts) => conflicts.map(_conflictDriftToModel).toList(),
+    );
+  }
+
+  /// Stream de estatísticas de conflitos (atualizado reativamente)
+  Stream<Map<String, int>> watchConflictStats() {
+    return _db.select(_db.conflictHistory).watch().asyncMap((_) async {
+      final unresolved = await getUnresolvedCount();
+      final resolved = await getResolvedCount();
+      return {
+        'unresolved': unresolved,
+        'resolved': resolved,
+        'total': unresolved + resolved,
+      };
+    });
   }
 }

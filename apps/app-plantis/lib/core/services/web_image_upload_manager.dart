@@ -50,7 +50,9 @@ class WebImageUploadManager {
           base64Data,
           compressedBase64,
         );
-        print('[ImageCompression] Stats: $stats');
+        if (kDebugMode) {
+          debugPrint('[ImageCompression] Stats: $stats');
+        }
       }
 
       // 4. Salva em cache local
@@ -62,11 +64,11 @@ class WebImageUploadManager {
         mimeType: mimeType,
       );
 
-      cacheResult.fold(
-        (failure) =>
-            print('[WebImageUploadManager] Falha ao cachear: $failure'),
-        (_) => null,
-      );
+      cacheResult.fold((failure) {
+        if (kDebugMode) {
+          debugPrint('[WebImageUploadManager] Falha ao cachear: $failure');
+        }
+      }, (_) => null);
 
       // 5. Tenta fazer upload
       final uploadResult = await _tryUploadWithFallback(
@@ -122,15 +124,18 @@ class WebImageUploadManager {
             mimeType: image.mimeType ?? 'image/jpeg',
           );
 
-          uploadResult.fold((_) => null, (downloadUrl) async {
-            results[image.id] = downloadUrl;
+          await uploadResult.fold(
+            (_) async => null,
+            (downloadUrl) async {
+              results[image.id] = downloadUrl;
 
-            // Marca como sincronizado
-            await _cacheService.markAsSynced(
-              image.id,
-              downloadUrl: downloadUrl,
-            );
-          });
+              // Marca como sincronizado
+              await _cacheService.markAsSynced(
+                image.id,
+                downloadUrl: downloadUrl,
+              );
+            },
+          );
         }
 
         return Right(results);

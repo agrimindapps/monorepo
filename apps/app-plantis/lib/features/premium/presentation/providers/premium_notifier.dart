@@ -7,9 +7,6 @@ import '../../../../core/providers/repository_providers.dart';
 import '../../../../core/services/plantis_sync_service.dart';
 import '../../../../database/repositories/subscription_local_repository.dart';
 import '../../domain/providers/premium_usecases_provider.dart';
-import '../../domain/providers/premium_validation_provider.dart';
-import '../../domain/services/premium_validation_service.dart';
-import '../../domain/usecases/get_current_subscription_usecase.dart';
 import '../../domain/usecases/load_available_products_usecase.dart';
 import '../../domain/usecases/purchase_product_usecase.dart';
 import '../../domain/usecases/restore_purchases_usecase.dart';
@@ -88,16 +85,13 @@ class PremiumState {
 @riverpod
 class PremiumNotifier extends _$PremiumNotifier {
   late final ISubscriptionRepository _subscriptionRepository;
-  late final IAnalyticsRepository _analytics;
   late final SubscriptionLocalRepository _localRepository;
   late final IAuthRepository _authRepository;
-  late final PremiumValidationService _validationService;
 
   // UseCases
   late final PurchaseProductUseCase _purchaseProductUseCase;
   late final RestorePurchasesUseCase _restorePurchasesUseCase;
   late final LoadAvailableProductsUseCase _loadAvailableProductsUseCase;
-  late final GetCurrentSubscriptionUseCase _getCurrentSubscriptionUseCase;
 
   late final PlantisSyncService _syncService;
 
@@ -106,9 +100,7 @@ class PremiumNotifier extends _$PremiumNotifier {
     // Inject repositories via Riverpod
     _subscriptionRepository = ref.watch(subscriptionRepositoryProvider);
     _localRepository = ref.watch(subscriptionLocalRepositoryProvider);
-    _analytics = ref.watch(firebaseAnalyticsServiceProvider);
     _authRepository = ref.watch(authRepositoryProvider);
-    _validationService = ref.watch(premiumValidationServiceProvider);
     _syncService = ref.watch(plantisSyncServiceProvider);
 
     // Inject UseCases
@@ -116,9 +108,6 @@ class PremiumNotifier extends _$PremiumNotifier {
     _restorePurchasesUseCase = ref.watch(restorePurchasesUseCaseProvider);
     _loadAvailableProductsUseCase = ref.watch(
       loadAvailableProductsUseCaseProvider,
-    );
-    _getCurrentSubscriptionUseCase = ref.watch(
-      getCurrentSubscriptionUseCaseProvider,
     );
 
     return await _initialize();

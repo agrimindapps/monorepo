@@ -1,17 +1,11 @@
 import 'package:core/core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/providers/premium_validation_provider.dart';
-import '../../domain/services/premium_validation_service.dart';
-
 /// Manages premium feature access and limitations
 class PremiumFeaturesManager {
   final Ref ref;
-  late final PremiumValidationService _validationService;
 
-  PremiumFeaturesManager(this.ref) {
-    _validationService = ref.read(premiumValidationServiceProvider);
-  }
+  PremiumFeaturesManager(this.ref);
 
   /// Check if unlimited plants feature is available
   bool canCreateUnlimitedPlants(List<String> enabledFeatures) {

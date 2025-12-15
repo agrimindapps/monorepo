@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../shared/widgets/feedback/confirmation_system.dart';
+import '../../shared/widgets/feedback/core/feedback_orchestrator.dart';
+import '../../shared/widgets/feedback/core/operation_executor_service.dart';
 import '../../shared/widgets/feedback/feedback_system.dart';
 import '../../shared/widgets/feedback/haptic_service.dart';
 import '../../shared/widgets/feedback/toast_service.dart';
@@ -207,4 +209,20 @@ bool hasFeedbackActive(Ref ref) {
 int activeFeedbackCount(Ref ref) {
   final state = ref.watch(feedbackProvider);
   return state.activeFeedbackCount;
+}
+
+// ============================================================================
+// NEW ARCHITECTURE - SOLID REFACTORING
+// ============================================================================
+
+/// Provider para OperationExecutorService
+@Riverpod(keepAlive: true)
+OperationExecutorService operationExecutorService(Ref ref) {
+  return OperationExecutorService(ref);
+}
+
+/// Provider para FeedbackOrchestrator
+@Riverpod(keepAlive: true)
+FeedbackOrchestrator feedbackOrchestrator(Ref ref) {
+  return FeedbackOrchestrator(ref);
 }

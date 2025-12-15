@@ -95,7 +95,7 @@ class SpacesNotifier extends _$SpacesNotifier {
 
     ref.onDispose(() {
       if (kDebugMode) {
-        print('🧹 SpacesNotifier disposed');
+        debugPrint('🧹 SpacesNotifier disposed');
       }
     });
 
@@ -111,17 +111,20 @@ class SpacesNotifier extends _$SpacesNotifier {
   Future<SpacesState> _loadSpacesOperation() async {
     final result = await _getSpacesUseCase.call(const NoParams());
 
-    return result.fold((failure) => throw _getErrorMessage(failure), (spaces) {
-      final sortedSpaces = List<Space>.from(spaces);
-      sortedSpaces.sort(
-        (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
-          a.createdAt ?? DateTime.now(),
-        ),
-      );
+    return result.fold(
+      (failure) => throw Exception(_getErrorMessage(failure)),
+      (spaces) {
+        final sortedSpaces = List<Space>.from(spaces);
+        sortedSpaces.sort(
+          (a, b) => (b.createdAt ?? DateTime.now()).compareTo(
+            a.createdAt ?? DateTime.now(),
+          ),
+        );
 
-      final currentState = state.value ?? SpacesState.initial();
-      return currentState.copyWith(allSpaces: sortedSpaces, clearError: true);
-    });
+        final currentState = state.value ?? SpacesState.initial();
+        return currentState.copyWith(allSpaces: sortedSpaces, clearError: true);
+      },
+    );
   }
 
   /// Get space by ID
@@ -153,15 +156,18 @@ class SpacesNotifier extends _$SpacesNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _addSpaceUseCase.call(params);
 
-      return result.fold((failure) => throw _getErrorMessage(failure), (space) {
-        final currentState = state.value ?? SpacesState.initial();
-        final updatedSpaces = [space, ...currentState.allSpaces];
+      return result.fold(
+        (failure) => throw Exception(_getErrorMessage(failure)),
+        (space) {
+          final currentState = state.value ?? SpacesState.initial();
+          final updatedSpaces = [space, ...currentState.allSpaces];
 
-        return currentState.copyWith(
-          allSpaces: updatedSpaces,
-          clearError: true,
-        );
-      });
+          return currentState.copyWith(
+            allSpaces: updatedSpaces,
+            clearError: true,
+          );
+        },
+      );
     });
 
     return !state.hasError;
@@ -174,24 +180,25 @@ class SpacesNotifier extends _$SpacesNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _updateSpaceUseCase.call(params);
 
-      return result.fold((failure) => throw _getErrorMessage(failure), (
-        updatedSpace,
-      ) {
-        final currentState = state.value ?? SpacesState.initial();
-        final updatedSpaces = currentState.allSpaces.map((space) {
-          return space.id == updatedSpace.id ? updatedSpace : space;
-        }).toList();
-        final newSelectedSpace =
-            currentState.selectedSpace?.id == updatedSpace.id
-            ? updatedSpace
-            : currentState.selectedSpace;
+      return result.fold(
+        (failure) => throw Exception(_getErrorMessage(failure)),
+        (updatedSpace) {
+          final currentState = state.value ?? SpacesState.initial();
+          final updatedSpaces = currentState.allSpaces.map((space) {
+            return space.id == updatedSpace.id ? updatedSpace : space;
+          }).toList();
+          final newSelectedSpace =
+              currentState.selectedSpace?.id == updatedSpace.id
+              ? updatedSpace
+              : currentState.selectedSpace;
 
-        return currentState.copyWith(
-          allSpaces: updatedSpaces,
-          selectedSpace: newSelectedSpace,
-          clearError: true,
-        );
-      });
+          return currentState.copyWith(
+            allSpaces: updatedSpaces,
+            selectedSpace: newSelectedSpace,
+            clearError: true,
+          );
+        },
+      );
     });
 
     return !state.hasError;
@@ -204,19 +211,22 @@ class SpacesNotifier extends _$SpacesNotifier {
     state = await AsyncValue.guard(() async {
       final result = await _deleteSpaceUseCase.call(id);
 
-      return result.fold((failure) => throw _getErrorMessage(failure), (_) {
-        final currentState = state.value ?? SpacesState.initial();
-        final updatedSpaces = currentState.allSpaces
-            .where((space) => space.id != id)
-            .toList();
-        final shouldClearSelected = currentState.selectedSpace?.id == id;
+      return result.fold(
+        (failure) => throw Exception(_getErrorMessage(failure)),
+        (_) {
+          final currentState = state.value ?? SpacesState.initial();
+          final updatedSpaces = currentState.allSpaces
+              .where((space) => space.id != id)
+              .toList();
+          final shouldClearSelected = currentState.selectedSpace?.id == id;
 
-        return currentState.copyWith(
-          allSpaces: updatedSpaces,
-          clearSelectedSpace: shouldClearSelected,
-          clearError: true,
-        );
-      });
+          return currentState.copyWith(
+            allSpaces: updatedSpaces,
+            clearSelectedSpace: shouldClearSelected,
+            clearError: true,
+          );
+        },
+      );
     });
 
     return !state.hasError;

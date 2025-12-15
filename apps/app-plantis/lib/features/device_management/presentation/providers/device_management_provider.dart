@@ -124,7 +124,7 @@ class DeviceManagementNotifier extends _$DeviceManagementNotifier {
       _userSubscription = _authStateNotifier.userStream.listen(_onUserChanged);
 
       if (_authStateNotifier.isAuthenticated) {
-        _initializeDeviceManagement();
+        await _initializeDeviceManagement();
       }
     } catch (e) {
       state = state.copyWith(errorMessage: 'Erro ao carregar dependências: $e');

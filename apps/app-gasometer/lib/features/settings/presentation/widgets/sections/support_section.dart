@@ -9,11 +9,13 @@ class SupportSection extends StatelessWidget {
   const SupportSection({
     this.onFeedbackTap,
     this.onRateTap,
+    this.onWebAccessTap,
     super.key,
   });
 
   final VoidCallback? onFeedbackTap;
   final VoidCallback? onRateTap;
+  final VoidCallback? onWebAccessTap;
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,16 @@ class SupportSection extends StatelessWidget {
         NewSettingsCard(
           child: Column(
             children: [
+              // Mostrar apenas se não for web
+              if (onWebAccessTap != null) ...[
+                NewSettingsListTile(
+                  leadingIcon: Icons.language,
+                  title: 'Acessar versão Web',
+                  subtitle: 'gasometer.agrimind.com.br',
+                  onTap: onWebAccessTap,
+                  showDivider: true,
+                ),
+              ],
               NewSettingsListTile(
                 leadingIcon: Icons.star_rate,
                 title: 'Avaliar o App',

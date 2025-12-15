@@ -57,7 +57,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
         return null;
       } catch (e) {
         if (kDebugMode) {
-          print('Auth attempt $attempt/$maxRetries failed: $e');
+          debugPrint('Auth attempt $attempt/$maxRetries failed: $e');
         }
         if (attempt >= maxRetries) {
           return null;
@@ -80,7 +80,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       var localPlants = await localDatasource.getPlants();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '📱 PlantsRepository.getPlants - Loaded ${localPlants.length} plants from local datasource',
         );
       }
@@ -94,12 +94,12 @@ class PlantsRepositoryImpl implements PlantsRepository {
       return Right(localPlants);
     } on CacheFailure catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepository: Cache failure: ${e.message}');
+        debugPrint('❌ PlantsRepository: Cache failure: ${e.message}');
       }
       return Left(e);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepository: Unexpected error: $e');
+        debugPrint('❌ PlantsRepository: Unexpected error: $e');
       }
       return Left(
         UnknownFailure('Erro inesperado ao buscar plantas: ${e.toString()}'),
@@ -111,25 +111,27 @@ class PlantsRepositoryImpl implements PlantsRepository {
   Future<Either<Failure, Plant>> getPlantById(String id) async {
     try {
       if (kDebugMode) {
-        print('📥 PlantsRepositoryImpl.getPlantById - id: $id');
+        debugPrint('📥 PlantsRepositoryImpl.getPlantById - id: $id');
       }
 
       final userId = await _currentUserId;
       if (userId == null) {
         if (kDebugMode) {
-          print('❌ PlantsRepositoryImpl.getPlantById - User not authenticated');
+          debugPrint(
+            '❌ PlantsRepositoryImpl.getPlantById - User not authenticated',
+          );
         }
         return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (kDebugMode) {
-        print('👤 PlantsRepositoryImpl.getPlantById - userId: $userId');
+        debugPrint('👤 PlantsRepositoryImpl.getPlantById - userId: $userId');
       }
 
       final localPlant = await localDatasource.getPlantById(id);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantsRepositoryImpl.getPlantById - localPlant: ${localPlant != null ? localPlant.name : 'null'}',
         );
       }
@@ -149,14 +151,14 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       if (resolved != null) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '✅ PlantsRepositoryImpl.getPlantById - Returning plant: ${resolved.name}',
           );
         }
         return Right(resolved);
       } else {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '❌ PlantsRepositoryImpl.getPlantById - Plant not found in local datasource',
           );
         }
@@ -164,13 +166,13 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
     } on CacheFailure catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepositoryImpl.getPlantById - CacheFailure: $e');
+        debugPrint('❌ PlantsRepositoryImpl.getPlantById - CacheFailure: $e');
       }
       return Left(e);
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('💥 PlantsRepositoryImpl.getPlantById - Exception: $e');
-        print('Stack trace: $stackTrace');
+        debugPrint('💥 PlantsRepositoryImpl.getPlantById - Exception: $e');
+        debugPrint('Stack trace: $stackTrace');
       }
       return Left(
         UnknownFailure('Erro inesperado ao buscar planta: ${e.toString()}'),
@@ -182,41 +184,47 @@ class PlantsRepositoryImpl implements PlantsRepository {
   Future<Either<Failure, Plant>> addPlant(Plant plant) async {
     try {
       if (kDebugMode) {
-        print('🌱 PlantsRepositoryImpl.addPlant() - Iniciando');
-        print('🌱 PlantsRepositoryImpl.addPlant() - plant.id: ${plant.id}');
-        print('🌱 PlantsRepositoryImpl.addPlant() - plant.name: ${plant.name}');
+        debugPrint('🌱 PlantsRepositoryImpl.addPlant() - Iniciando');
+        debugPrint(
+          '🌱 PlantsRepositoryImpl.addPlant() - plant.id: ${plant.id}',
+        );
+        debugPrint(
+          '🌱 PlantsRepositoryImpl.addPlant() - plant.name: ${plant.name}',
+        );
       }
 
       final userId = await _currentUserId;
       if (userId == null) {
         if (kDebugMode) {
-          print('❌ PlantsRepositoryImpl.addPlant() - Usuário não autenticado');
+          debugPrint(
+            '❌ PlantsRepositoryImpl.addPlant() - Usuário não autenticado',
+          );
         }
         return const Left(ServerFailure('Usuário não autenticado'));
       }
 
       if (kDebugMode) {
-        print('🌱 PlantsRepositoryImpl.addPlant() - userId: $userId');
+        debugPrint('🌱 PlantsRepositoryImpl.addPlant() - userId: $userId');
       }
 
       final plantModel = PlantModel.fromEntity(plant);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🌱 PlantsRepositoryImpl.addPlant() - Salvando localmente primeiro',
         );
       }
       await localDatasource.addPlant(plantModel);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantsRepositoryImpl.addPlant() - Salvo localmente com sucesso',
         );
       }
 
       if (await networkInfo.isConnected) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '🌱 PlantsRepositoryImpl.addPlant() - Conectado, tentando salvar remotamente',
           );
         }
@@ -227,20 +235,20 @@ class PlantsRepositoryImpl implements PlantsRepository {
           );
 
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ PlantsRepositoryImpl.addPlant() - Salvo remotamente com sucesso',
             );
-            print(
+            debugPrint(
               '🌱 PlantsRepositoryImpl.addPlant() - remotePlant.id: ${remotePlant.id}',
             );
           }
           if (plantModel.id != remotePlant.id) {
             if (kDebugMode) {
-              print(
+              debugPrint(
                 '🌱 PlantsRepositoryImpl.addPlant() - IDs diferentes, iniciando transição segura',
               );
-              print('   - ID local: ${plantModel.id}');
-              print('   - ID remoto: ${remotePlant.id}');
+              debugPrint('   - ID local: ${plantModel.id}');
+              debugPrint('   - ID remoto: ${remotePlant.id}');
             }
 
             try {
@@ -248,24 +256,28 @@ class PlantsRepositoryImpl implements PlantsRepository {
               await localDatasource.addPlant(remotePlant);
 
               if (kDebugMode) {
-                print('✅ Versão remota INSERIDA localmente');
+                debugPrint('✅ Versão remota INSERIDA localmente');
               }
               try {
                 await localDatasource.hardDeletePlant(plantModel.id);
                 if (kDebugMode) {
-                  print('✅ Registro local antigo removido');
+                  debugPrint('✅ Registro local antigo removido');
                 }
               } catch (deleteError) {
                 if (kDebugMode) {
-                  print(
-                    '⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError',
-                  );
-                  print('   Mas versão remota foi salva com sucesso');
+                  if (kDebugMode) {
+                    debugPrint(
+                      '⚠️ Falha ao deletar ID local ${plantModel.id}: $deleteError',
+                    );
+                  }
+                  if (kDebugMode) {
+                    debugPrint('   Mas versão remota foi salva com sucesso');
+                  }
                 }
               }
             } catch (updateError) {
               if (kDebugMode) {
-                print('❌ Falha ao inserir versão remota: $updateError');
+                debugPrint('❌ Falha ao inserir versão remota: $updateError');
               }
               throw CacheFailure(
                 'Falha ao atualizar planta localmente: ${updateError.toString()}',
@@ -275,7 +287,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
             await localDatasource.updatePlant(remotePlant);
 
             if (kDebugMode) {
-              print(
+              debugPrint(
                 '✅ PlantsRepositoryImpl.addPlant() - Local atualizado com dados remotos',
               );
             }
@@ -284,10 +296,10 @@ class PlantsRepositoryImpl implements PlantsRepository {
           return Right(remotePlant);
         } catch (e) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ PlantsRepositoryImpl.addPlant() - Falha ao salvar remotamente: $e',
             );
-            print(
+            debugPrint(
               '🌱 PlantsRepositoryImpl.addPlant() - Retornando versão local',
             );
           }
@@ -295,7 +307,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
         }
       } else {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '🌱 PlantsRepositoryImpl.addPlant() - Offline, retornando versão local',
           );
         }
@@ -303,12 +315,14 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
     } on CacheFailure catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepositoryImpl.addPlant() - CacheFailure: ${e.message}');
+        debugPrint(
+          '❌ PlantsRepositoryImpl.addPlant() - CacheFailure: ${e.message}',
+        );
       }
       return Left(e);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepositoryImpl.addPlant() - Erro inesperado: $e');
+        debugPrint('❌ PlantsRepositoryImpl.addPlant() - Erro inesperado: $e');
       }
       return Left(
         UnknownFailure('Erro inesperado ao adicionar planta: ${e.toString()}'),
@@ -325,19 +339,19 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       if (kDebugMode) {
-        print('🔄 PlantsRepositoryImpl.updatePlant() - Iniciando');
-        print('   plant.id: ${plant.id}');
-        print('   plant.name: ${plant.name}');
-        print('   plant.spaceId: ${plant.spaceId}');
-        print('   plant.config: ${plant.config}');
+        debugPrint('🔄 PlantsRepositoryImpl.updatePlant() - Iniciando');
+        debugPrint('   plant.id: ${plant.id}');
+        debugPrint('   plant.name: ${plant.name}');
+        debugPrint('   plant.spaceId: ${plant.spaceId}');
+        debugPrint('   plant.config: ${plant.config}');
         if (plant.config != null) {
-          print(
+          debugPrint(
             '   config.wateringIntervalDays: ${plant.config!.wateringIntervalDays}',
           );
-          print(
+          debugPrint(
             '   config.fertilizingIntervalDays: ${plant.config!.fertilizingIntervalDays}',
           );
-          print(
+          debugPrint(
             '   config.pruningIntervalDays: ${plant.config!.pruningIntervalDays}',
           );
         }
@@ -346,15 +360,15 @@ class PlantsRepositoryImpl implements PlantsRepository {
       final plantModel = PlantModel.fromEntity(plant);
 
       if (kDebugMode) {
-        print('🔄 PlantsRepositoryImpl.updatePlant() - PlantModel criado');
-        print('   plantModel.spaceId: ${plantModel.spaceId}');
-        print('   plantModel.config: ${plantModel.config}');
+        debugPrint('🔄 PlantsRepositoryImpl.updatePlant() - PlantModel criado');
+        debugPrint('   plantModel.spaceId: ${plantModel.spaceId}');
+        debugPrint('   plantModel.config: ${plantModel.config}');
       }
 
       await localDatasource.updatePlant(plantModel);
 
       if (kDebugMode) {
-        print('✅ PlantsRepositoryImpl.updatePlant() - Salvo localmente');
+        debugPrint('✅ PlantsRepositoryImpl.updatePlant() - Salvo localmente');
       }
 
       if (await networkInfo.isConnected) {
@@ -366,14 +380,18 @@ class PlantsRepositoryImpl implements PlantsRepository {
           await localDatasource.updatePlant(remotePlant);
 
           if (kDebugMode) {
-            print('✅ PlantsRepositoryImpl.updatePlant() - Salvo remotamente');
-            print('   remotePlant.spaceId: ${remotePlant.spaceId}');
+            debugPrint(
+              '✅ PlantsRepositoryImpl.updatePlant() - Salvo remotamente',
+            );
+            debugPrint('   remotePlant.spaceId: ${remotePlant.spaceId}');
           }
 
           return Right(remotePlant);
         } catch (e) {
           if (kDebugMode) {
-            print('⚠️ PlantsRepositoryImpl.updatePlant() - Erro remoto: $e');
+            debugPrint(
+              '⚠️ PlantsRepositoryImpl.updatePlant() - Erro remoto: $e',
+            );
           }
           return Right(plantModel);
         }
@@ -384,7 +402,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       return Left(e);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsRepositoryImpl.updatePlant() - Erro: $e');
+        debugPrint('❌ PlantsRepositoryImpl.updatePlant() - Erro: $e');
       }
       return Left(
         UnknownFailure('Erro inesperado ao atualizar planta: ${e.toString()}'),
@@ -401,7 +419,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
       }
 
       if (kDebugMode) {
-        print('🗑️ Deleting plant: $id');
+        debugPrint('🗑️ Deleting plant: $id');
       }
 
       // Track failures but don't block plant deletion
@@ -409,7 +427,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
 
       // Delete tasks (cascading)
       if (kDebugMode) {
-        print('🗑️ Deleting tasks for plant: $id');
+        debugPrint('🗑️ Deleting tasks for plant: $id');
       }
       final tasksResult = await taskRepository.deletePlantTasksByPlantId(id);
       tasksResult.fold(
@@ -417,19 +435,19 @@ class PlantsRepositoryImpl implements PlantsRepository {
           final errorMsg = 'Failed to delete tasks: ${failure.message}';
           partialFailures.add(errorMsg);
           if (kDebugMode) {
-            print('⚠️ $errorMsg');
+            debugPrint('⚠️ $errorMsg');
           }
         },
         (_) {
           if (kDebugMode) {
-            print('✅ Tasks deleted successfully');
+            debugPrint('✅ Tasks deleted successfully');
           }
         },
       );
 
       // Delete comments (cascading)
       if (kDebugMode) {
-        print('🗑️ Deleting comments for plant: $id');
+        debugPrint('🗑️ Deleting comments for plant: $id');
       }
       final commentsResult = await commentsRepository.deleteCommentsForPlant(
         id,
@@ -439,19 +457,19 @@ class PlantsRepositoryImpl implements PlantsRepository {
           final errorMsg = 'Failed to delete comments: ${failure.message}';
           partialFailures.add(errorMsg);
           if (kDebugMode) {
-            print('⚠️ $errorMsg');
+            debugPrint('⚠️ $errorMsg');
           }
         },
         (_) {
           if (kDebugMode) {
-            print('✅ Comments deleted successfully');
+            debugPrint('✅ Comments deleted successfully');
           }
         },
       );
 
       // Delete plant locally
       if (kDebugMode) {
-        print('🗑️ Deleting plant locally: $id');
+        debugPrint('🗑️ Deleting plant locally: $id');
       }
       await localDatasource.deletePlant(id);
 
@@ -459,30 +477,34 @@ class PlantsRepositoryImpl implements PlantsRepository {
       if (await networkInfo.isConnected) {
         try {
           if (kDebugMode) {
-            print('🗑️ Deleting plant remotely: $id');
+            debugPrint('🗑️ Deleting plant remotely: $id');
           }
           await remoteDatasource.deletePlant(id, userId);
         } catch (e) {
           final errorMsg = 'Remote deletion failed, will sync later: $e';
           partialFailures.add(errorMsg);
           if (kDebugMode) {
-            print('⚠️ $errorMsg');
+            debugPrint('⚠️ $errorMsg');
           }
         }
       }
 
       // Log partial failures but still return success
       if (partialFailures.isNotEmpty && kDebugMode) {
-        print(
-          '⚠️ Plant deleted with ${partialFailures.length} partial failure(s):',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '⚠️ Plant deleted with ${partialFailures.length} partial failure(s):',
+          );
+        }
         for (final failure in partialFailures) {
-          print('   - $failure');
+          if (kDebugMode) {
+            debugPrint('   - $failure');
+          }
         }
       }
 
       if (kDebugMode) {
-        print('✅ Plant deleted successfully: $id');
+        debugPrint('✅ Plant deleted successfully: $id');
       }
 
       return const Right(null);

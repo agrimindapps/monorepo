@@ -13,7 +13,9 @@ class EmailCheckerManager {
 
       return exists;
     } catch (e) {
-      print('Error checking email: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking email: $e');
+      }
       return false;
     }
   }

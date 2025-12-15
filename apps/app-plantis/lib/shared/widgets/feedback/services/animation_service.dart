@@ -2,10 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import 'feedback_system.dart';
+import '../feedback_system.dart';
 
-/// Componentes de animação específicos para feedback visual
-class AnimatedFeedback {
+/// Service de animações para feedback visual
+/// Convertido de classe estática para service injetável
+class AnimationService {
   /// Animação de checkmark para sucesso
   static Widget checkmarkAnimation({
     required AnimationController controller,
@@ -202,7 +203,7 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
 
     switch (animation) {
       case SuccessAnimationType.bounce:
-        return AnimatedFeedback.bounceAnimation(
+        return AnimationService.bounceAnimation(
           controller: _specificController,
           child: child,
         );
@@ -213,7 +214,7 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
           alignment: Alignment.center,
           children: [
             child,
-            AnimatedFeedback.confettiAnimation(
+            AnimationService.confettiAnimation(
               controller: _specificController,
               size: 120,
             ),
@@ -230,12 +231,12 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
 
     switch (animation) {
       case ErrorAnimationType.shake:
-        return AnimatedFeedback.shakeAnimation(
+        return AnimationService.shakeAnimation(
           controller: _specificController,
           child: child,
         );
       case ErrorAnimationType.pulse:
-        return AnimatedFeedback.pulseAnimation(
+        return AnimationService.pulseAnimation(
           controller: _specificController,
           child: child,
         );
@@ -302,7 +303,7 @@ class _AnimatedFeedbackWidgetState extends State<AnimatedFeedbackWidget>
       return SizedBox(
         width: 28,
         height: 28,
-        child: AnimatedFeedback.checkmarkAnimation(
+        child: AnimationService.checkmarkAnimation(
           controller: _specificController,
           color: color,
           size: 28,

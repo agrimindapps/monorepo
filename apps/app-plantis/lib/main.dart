@@ -52,14 +52,22 @@ void main() async {
   }
 
   // Initialize SyncQueue before other sync services
-  print('🔧 [MAIN] Inicializando SyncQueue...');
+  if (kDebugMode) {
+    debugPrint('🔧 [MAIN] Inicializando SyncQueue...');
+  }
   // SyncQueue initialization moved to providers
-  print('✅ [MAIN] SyncQueue inicializado');
+  if (kDebugMode) {
+    debugPrint('✅ [MAIN] SyncQueue inicializado');
+  }
 
   // Initialize SyncOperations after SyncQueue
-  print('🔧 [MAIN] Inicializando SyncOperations...');
+  if (kDebugMode) {
+    debugPrint('🔧 [MAIN] Inicializando SyncOperations...');
+  }
   // SyncOperations initialization moved to providers
-  print('✅ [MAIN] SyncOperations inicializado');
+  if (kDebugMode) {
+    debugPrint('✅ [MAIN] SyncOperations inicializado');
+  }
 
   // Initialize UnifiedSyncManager with Plantis configuration (only if Firebase is available)
   if (firebaseInitialized) {
@@ -93,7 +101,7 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
 
   if (EnvironmentConfig.enableAnalytics) {
-    runZonedGuarded<Future<void>>(
+    await runZonedGuarded<Future<void>>(
       () async {
         // await _performanceRepository.markFirstFrame();
         runApp(

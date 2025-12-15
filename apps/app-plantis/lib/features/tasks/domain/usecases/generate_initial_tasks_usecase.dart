@@ -29,25 +29,25 @@ class GenerateInitialTasksUseCase
   ) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔧 GenerateInitialTasksUseCase.call() - Iniciando geração de tarefas',
         );
-        print('🔧 plantaId: ${params.plantaId}');
-        print('🔧 activeCareTypes: ${params.config.activeCareTypes}');
-        print('🔧 plantingDate: ${params.plantingDate}');
-        print('🔧 userId: ${params.userId}');
+        debugPrint('🔧 plantaId: ${params.plantaId}');
+        debugPrint('🔧 activeCareTypes: ${params.config.activeCareTypes}');
+        debugPrint('🔧 plantingDate: ${params.plantingDate}');
+        debugPrint('🔧 userId: ${params.userId}');
       }
       final validationResult = _validateParams(params);
       if (validationResult != null) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '❌ GenerateInitialTasksUseCase.call() - Validação falhou: ${validationResult.message}',
           );
         }
         return Left(validationResult);
       }
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔧 GenerateInitialTasksUseCase.call() - Chamando taskGenerationService.generateInitialTasks',
         );
       }
@@ -65,7 +65,7 @@ class GenerateInitialTasksUseCase
           (_) => throw Exception(),
         );
         if (kDebugMode) {
-          print(
+          debugPrint(
             '❌ GenerateInitialTasksUseCase.call() - TaskGenerationService falhou: ${failure.message}',
           );
         }
@@ -78,19 +78,23 @@ class GenerateInitialTasksUseCase
       );
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔧 GenerateInitialTasksUseCase.call() - ${taskEntities.length} entidades de tarefa geradas',
         );
         for (int i = 0; i < taskEntities.length; i++) {
           final entity = taskEntities[i];
-          print('🔧 Tarefa ${i + 1}: ${entity.title} (${entity.type.key})');
+          debugPrint(
+            '🔧 Tarefa ${i + 1}: ${entity.title} (${entity.type.key})',
+          );
         }
       }
 
       if (kDebugMode) {
-        print(
-          '🔧 GenerateInitialTasksUseCase.call() - Salvando ${taskEntities.length} tarefas',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '🔧 GenerateInitialTasksUseCase.call() - Salvando ${taskEntities.length} tarefas',
+          );
+        }
       }
       final saveResults = await Future.wait(
         taskEntities.map((task) => tasksRepository.addTask(task)),
@@ -102,10 +106,12 @@ class GenerateInitialTasksUseCase
           (_) => throw Exception(),
         );
         if (kDebugMode) {
-          print(
+          debugPrint(
             '❌ GenerateInitialTasksUseCase.call() - Falha ao salvar tarefas: ${firstFailure.message}',
           );
-          print('❌ Total de falhas: ${failures.length}/${saveResults.length}');
+          debugPrint(
+            '❌ Total de falhas: ${failures.length}/${saveResults.length}',
+          );
         }
         return Left(firstFailure);
       }
@@ -115,7 +121,7 @@ class GenerateInitialTasksUseCase
           .toList();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ GenerateInitialTasksUseCase.call() - ${savedTasks.length} tarefas salvas com sucesso',
         );
       }

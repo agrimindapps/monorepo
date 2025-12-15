@@ -298,15 +298,16 @@ class Settings extends _$Settings {
     try {
       final result = await _repository.resetToDefaults();
 
-      result.fold((Failure failure) => throw Exception(failure.message), (
-        void _,
-      ) async {
-        final newSettings = SettingsEntity.defaults();
-        state = state
-            .copyWith(settings: newSettings, isLoading: false)
-            .withSuccess('Configurações resetadas com sucesso');
-        _syncWithServices();
-      });
+      await result.fold(
+        (Failure failure) async => throw Exception(failure.message),
+        (void _) async {
+          final newSettings = SettingsEntity.defaults();
+          state = state
+              .copyWith(settings: newSettings, isLoading: false)
+              .withSuccess('Configurações resetadas com sucesso');
+          await _syncWithServices();
+        },
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false).withError('Erro inesperado: $e');
     }

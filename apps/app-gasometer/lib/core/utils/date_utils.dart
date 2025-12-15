@@ -55,6 +55,7 @@ class DateUtils {
   }
 
   /// Generates a list of months between the oldest and newest date in the list.
+  /// Returns months in descending order (most recent first).
   /// If the list is empty, returns a list containing only the current month.
   List<DateTime> generateMonthRange(List<DateTime> dates) {
     if (dates.isEmpty) {
@@ -75,15 +76,16 @@ class DateUtils {
     maxDate = DateTime(maxDate.year, maxDate.month);
 
     final months = <DateTime>[];
-    var current = minDate;
+    var current = maxDate; // Começar do mais recente
 
-    while (current.isBefore(maxDate) || current.isAtSameMomentAs(maxDate)) {
+    // Iterar do mais recente para o mais antigo
+    while (current.isAfter(minDate) || current.isAtSameMomentAs(minDate)) {
       months.add(current);
-      // Move to next month
-      if (current.month == 12) {
-        current = DateTime(current.year + 1, 1);
+      // Move to previous month
+      if (current.month == 1) {
+        current = DateTime(current.year - 1, 12);
       } else {
-        current = DateTime(current.year, current.month + 1);
+        current = DateTime(current.year, current.month - 1);
       }
     }
 

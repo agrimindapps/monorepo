@@ -130,13 +130,6 @@ class DeviceValidationInterceptor {
     }
   }
 
-  /// Notifica que o dispositivo é inválido
-  void _notifyDeviceInvalid() {
-    if (kDebugMode) {
-      debugPrint('⚠️ DeviceInterceptor: Device invalid - security concern');
-    }
-  }
-
   /// Força validação manual
   Future<DeviceValidationResult?> forceValidation() async {
     if (_isValidating) {

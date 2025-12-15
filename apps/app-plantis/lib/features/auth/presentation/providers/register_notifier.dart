@@ -215,7 +215,9 @@ class RegisterNotifier extends _$RegisterNotifier {
       return exists;
     } catch (e) {
       _setError('Erro ao verificar email. Tente novamente.');
-      print('Erro verificação email: ${e.toString()}');
+      if (kDebugMode) {
+        debugPrint('Erro verificação email: ${e.toString()}');
+      }
       return false;
     }
   }

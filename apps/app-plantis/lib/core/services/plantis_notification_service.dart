@@ -35,7 +35,7 @@ class PlantisNotificationService {
       return _isInitialized;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao inicializar PlantisNotificationService: $e');
+        debugPrint('Erro ao inicializar PlantisNotificationService: $e');
       }
       return false;
     }
@@ -71,7 +71,7 @@ class PlantisNotificationService {
   /// Inicializa todas as notificações (compatibilidade)
   Future<void> initializeAllNotifications() async {
     if (kDebugMode) {
-      print(
+      debugPrint(
         'PlantisNotificationService: initializeAllNotifications - usando agendamento sob demanda',
       );
     }
@@ -80,7 +80,7 @@ class PlantisNotificationService {
   /// Verifica e notifica tarefas atrasadas (compatibilidade)
   Future<void> checkAndNotifyOverdueTasks() async {
     if (kDebugMode) {
-      print(
+      debugPrint(
         'PlantisNotificationService: checkAndNotifyOverdueTasks - delegado para TaskNotificationService',
       );
     }
@@ -111,7 +111,7 @@ class PlantisNotificationService {
       await _notificationService.cancelNotification(id);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao cancelar notificação de tarefa: $e');
+        debugPrint('Erro ao cancelar notificação de tarefa: $e');
       }
     }
   }
@@ -151,7 +151,7 @@ class PlantisNotificationService {
   /// Agenda cuidados diários para todas as plantas (compatibilidade)
   Future<void> scheduleDailyCareForAllPlants() async {
     if (kDebugMode) {
-      print(
+      debugPrint(
         'PlantisNotificationService: scheduleDailyCareForAllPlants - usando agendamento individual por planta',
       );
     }
@@ -195,7 +195,7 @@ class PlantisNotificationService {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao agendar notificação direta: $e');
+        debugPrint('Erro ao agendar notificação direta: $e');
       }
       return false;
     }
@@ -207,7 +207,7 @@ class PlantisNotificationService {
       return await _notificationService.cancelNotification(notificationId);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao cancelar notificação: $e');
+        debugPrint('Erro ao cancelar notificação: $e');
       }
       return false;
     }
@@ -265,7 +265,7 @@ class PlantisNotificationService {
       return await _notificationService.scheduleNotification(notification);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao agendar notificação de cuidado: $e');
+        debugPrint('Erro ao agendar notificação de cuidado: $e');
       }
       return false;
     }
@@ -295,7 +295,7 @@ class PlantisNotificationService {
       return await _notificationService.showNotification(notification);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao mostrar notificação: $e');
+        debugPrint('Erro ao mostrar notificação: $e');
       }
       return false;
     }
@@ -310,7 +310,7 @@ class PlantisNotificationService {
       return await _notificationService.cancelNotification(id);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao cancelar notificação: $e');
+        debugPrint('Erro ao cancelar notificação: $e');
       }
       return false;
     }
@@ -342,7 +342,7 @@ class PlantisNotificationService {
       return allCancelled;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao cancelar notificações da planta: $e');
+        debugPrint('Erro ao cancelar notificações da planta: $e');
       }
       return false;
     }
@@ -381,7 +381,7 @@ class PlantisNotificationService {
       }).toList();
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao buscar notificações da planta: $e');
+        debugPrint('Erro ao buscar notificações da planta: $e');
       }
       return [];
     }
@@ -399,7 +399,7 @@ class PlantisNotificationService {
       return await _notificationService.isNotificationScheduled(id);
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao verificar notificação agendada: $e');
+        debugPrint('Erro ao verificar notificação agendada: $e');
       }
       return false;
     }
@@ -408,14 +408,16 @@ class PlantisNotificationService {
   /// Callback quando notificação é tocada
   void _onNotificationTapped(String? payload) {
     if (payload != null && kDebugMode) {
-      print('Notificação tocada: $payload');
+      if (kDebugMode) {
+        debugPrint('Notificação tocada: $payload');
+      }
     }
   }
 
   /// Callback quando ação de notificação é executada
   void _onNotificationAction(String actionId, String? payload) {
     if (kDebugMode) {
-      print('Ação de notificação: $actionId, payload: $payload');
+      debugPrint('Ação de notificação: $actionId, payload: $payload');
     }
 
     switch (actionId) {
@@ -431,14 +433,14 @@ class PlantisNotificationService {
   /// Marca tarefa como concluída
   void _handleMarkDoneAction(String? payload) {
     if (kDebugMode) {
-      print('Marcando tarefa como concluída: $payload');
+      debugPrint('Marcando tarefa como concluída: $payload');
     }
   }
 
   /// Adia notificação por 1 hora
   void _handleSnoozeAction(String? payload) {
     if (kDebugMode) {
-      print('Adiando notificação: $payload');
+      debugPrint('Adiando notificação: $payload');
     }
   }
 

@@ -74,14 +74,20 @@ class PlantTaskValidationService {
     );
 
     if (kDebugMode && (!result.isValid || result.warnings.isNotEmpty)) {
-      print(
-        '⚠️ PlantTaskValidation: Problemas encontrados na tarefa ${task.id}:',
-      );
+      if (kDebugMode) {
+        debugPrint(
+          '⚠️ PlantTaskValidation: Problemas encontrados na tarefa ${task.id}:',
+        );
+      }
       for (final error in errors) {
-        print('   ERROR: $error');
+        if (kDebugMode) {
+          debugPrint('   ERROR: $error');
+        }
       }
       for (final warning in warnings) {
-        print('   WARNING: $warning');
+        if (kDebugMode) {
+          debugPrint('   WARNING: $warning');
+        }
       }
     }
 
@@ -148,14 +154,16 @@ class PlantTaskValidationService {
     );
 
     if (kDebugMode) {
-      print('📊 PlantTaskBatchValidation: Resultado da validação em lote:');
-      print('   - Total: ${batchResult.totalTasks}');
-      print('   - Válidas: ${batchResult.validTasks}');
-      print('   - Inválidas: ${batchResult.invalidTasks}');
-      print('   - Com avisos: ${batchResult.tasksWithWarnings}');
-      print('   - IDs duplicados: ${batchResult.duplicateIds.length}');
-      print('   - Tarefas órfãs: ${batchResult.orphanTasks.length}');
-      print(
+      debugPrint(
+        '📊 PlantTaskBatchValidation: Resultado da validação em lote:',
+      );
+      debugPrint('   - Total: ${batchResult.totalTasks}');
+      debugPrint('   - Válidas: ${batchResult.validTasks}');
+      debugPrint('   - Inválidas: ${batchResult.invalidTasks}');
+      debugPrint('   - Com avisos: ${batchResult.tasksWithWarnings}');
+      debugPrint('   - IDs duplicados: ${batchResult.duplicateIds.length}');
+      debugPrint('   - Tarefas órfãs: ${batchResult.orphanTasks.length}');
+      debugPrint(
         '   - Intervalos inconsistentes: ${batchResult.inconsistentIntervals.length}',
       );
     }
@@ -301,14 +309,16 @@ class PlantTaskValidationService {
     );
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🏥 PlantTaskHealthReport: Health score: ${report.healthScore}/100',
       );
-      print('   - ${report.totalTasks} tasks, ${report.totalPlants} plantas');
-      print(
+      debugPrint(
+        '   - ${report.totalTasks} tasks, ${report.totalPlants} plantas',
+      );
+      debugPrint(
         '   - Válidas: ${report.validationResult.validTasks}/${report.totalTasks}',
       );
-      print(
+      debugPrint(
         '   - Hoje: ${report.temporalStatistics['today']}, Próximas: ${report.temporalStatistics['upcoming']}',
       );
     }

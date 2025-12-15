@@ -8,9 +8,9 @@ class FailureMessageMapper {
   /// Map a Failure to a user-friendly message
   static String map(Failure failure) {
     if (kDebugMode) {
-      print('FailureMessageMapper - Mapping failure:');
-      print('- Type: ${failure.runtimeType}');
-      print('- Message: ${failure.message}');
+      debugPrint('FailureMessageMapper - Mapping failure:');
+      debugPrint('- Type: ${failure.runtimeType}');
+      debugPrint('- Message: ${failure.message}');
     }
 
     switch (failure.runtimeType) {

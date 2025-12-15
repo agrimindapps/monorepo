@@ -154,7 +154,6 @@ class SettingsNotifier extends _$SettingsNotifier {
     try {
       await _loadSettings();
       await _syncWithServices();
-      await _loadDeviceInfo();
 
       final currentState = state.value ?? SettingsState.initial();
       return currentState.copyWith(isInitialized: true);
@@ -552,7 +551,6 @@ class SettingsNotifier extends _$SettingsNotifier {
   Future<void> refresh() async {
     await _loadSettings();
     await _syncWithServices();
-    await _loadDeviceInfo();
   }
 
   /// Limpa mensagens de erro/sucesso
@@ -563,50 +561,6 @@ class SettingsNotifier extends _$SettingsNotifier {
         clearSuccess: true,
       ),
     );
-  }
-
-  // ============================================================================
-  // DEVICE MANAGEMENT METHODS
-  // ============================================================================
-
-  /// Carrega informações de dispositivos do usuário
-  /// Nota: Implementação futura quando o userId puder ser obtido do auth state
-  Future<void> _loadDeviceInfo() async {
-    try {
-      // TODO: Implementar carregamento de dispositivos
-      // Requer obter userId do auth state/provider
-      if (kDebugMode) {
-        debugPrint('ℹ️ Settings: Device loading não implementado ainda');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        debugPrint('⚠️ Settings: Erro ao carregar dispositivos - $e');
-      }
-    }
-  }
-
-  /// Revoga um dispositivo específico
-  /// Nota: Implementação futura quando o userId puder ser obtido do auth state
-  Future<void> revokeDevice(String deviceUuid) async {
-    if (kDebugMode) {
-      debugPrint(
-        'ℹ️ Settings: Device revoke não implementado ainda - $deviceUuid',
-      );
-    }
-  }
-
-  /// Revoga todos os outros dispositivos exceto o atual
-  /// Nota: Implementação futura
-  Future<void> revokeAllOtherDevices() async {
-    if (kDebugMode) {
-      debugPrint('ℹ️ Settings: Revoke all devices não implementado ainda');
-    }
-  }
-
-  /// Recarrega lista de dispositivos
-  /// Nota: Implementação futura
-  Future<void> refreshDevices() async {
-    await _loadDeviceInfo();
   }
 }
 

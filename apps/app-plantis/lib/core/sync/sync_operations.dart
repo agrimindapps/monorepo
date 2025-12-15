@@ -46,17 +46,17 @@ class SyncOperations {
           await _processSyncItem(item);
         } catch (e) {
           if (kDebugMode) {
-            print('Error syncing item ${item.id}: $e');
+            debugPrint('Error syncing item ${item.id}: $e');
           }
           if (item.retryCount < 3) {
             await _syncQueue.incrementRetryCount(item.id);
           }
         }
       }
-      _syncQueue.clearSyncedItems();
+      await _syncQueue.clearSyncedItems();
     } catch (e) {
       if (kDebugMode) {
-        print('Error processing offline queue: $e');
+        debugPrint('Error processing offline queue: $e');
       }
     } finally {
       _isProcessingSync = false;

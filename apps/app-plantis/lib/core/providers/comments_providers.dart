@@ -67,7 +67,7 @@ class CommentsNotifier extends _$CommentsNotifier {
 
     ref.onDispose(() {
       if (kDebugMode) {
-        print('🧹 CommentsNotifier disposed');
+        debugPrint('🧹 CommentsNotifier disposed');
       }
     });
 
@@ -95,7 +95,7 @@ class CommentsNotifier extends _$CommentsNotifier {
     result.fold(
       (failure) {
         if (kDebugMode) {
-          print('❌ Error loading comments: ${failure.message}');
+          debugPrint('❌ Error loading comments: ${failure.message}');
         }
         state = AsyncData(
           CommentsState(
@@ -108,7 +108,7 @@ class CommentsNotifier extends _$CommentsNotifier {
       },
       (comments) {
         if (kDebugMode) {
-          print('✅ Loaded ${comments.length} comments for plant $plantId');
+          debugPrint('✅ Loaded ${comments.length} comments for plant $plantId');
         }
         state = AsyncData(
           CommentsState(
@@ -141,7 +141,7 @@ class CommentsNotifier extends _$CommentsNotifier {
     return result.fold(
       (failure) {
         if (kDebugMode) {
-          print('❌ Error adding comment: ${failure.message}');
+          debugPrint('❌ Error adding comment: ${failure.message}');
         }
         state = AsyncData(
           currentState.copyWith(
@@ -153,7 +153,7 @@ class CommentsNotifier extends _$CommentsNotifier {
       },
       (comment) {
         if (kDebugMode) {
-          print('✅ Added comment: ${comment.id}');
+          debugPrint('✅ Added comment: ${comment.id}');
         }
         final updatedComments = [comment, ...currentState.comments];
         state = AsyncData(
@@ -203,7 +203,7 @@ class CommentsNotifier extends _$CommentsNotifier {
     return result.fold(
       (failure) {
         if (kDebugMode) {
-          print('❌ Error updating comment: ${failure.message}');
+          debugPrint('❌ Error updating comment: ${failure.message}');
         }
         state = AsyncData(
           currentState.copyWith(
@@ -215,7 +215,7 @@ class CommentsNotifier extends _$CommentsNotifier {
       },
       (comment) {
         if (kDebugMode) {
-          print('✅ Updated comment: ${comment.id}');
+          debugPrint('✅ Updated comment: ${comment.id}');
         }
         final updatedComments = List<ComentarioModel>.from(
           currentState.comments,
@@ -254,7 +254,7 @@ class CommentsNotifier extends _$CommentsNotifier {
     return result.fold(
       (failure) {
         if (kDebugMode) {
-          print('❌ Error deleting comment: ${failure.message}');
+          debugPrint('❌ Error deleting comment: ${failure.message}');
         }
         state = AsyncData(
           currentState.copyWith(
@@ -266,7 +266,7 @@ class CommentsNotifier extends _$CommentsNotifier {
       },
       (_) {
         if (kDebugMode) {
-          print('✅ Deleted comment: $commentId');
+          debugPrint('✅ Deleted comment: $commentId');
         }
         final updatedComments = List<ComentarioModel>.from(
           currentState.comments,

@@ -25,7 +25,7 @@ class PlantSyncServiceImpl implements PlantSyncService {
           ? 'Connection restored sync'
           : 'Background sync';
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantSyncService: $syncType completed - ${remotePlants.length} plants',
         );
       }
@@ -35,11 +35,13 @@ class PlantSyncServiceImpl implements PlantSyncService {
       }
 
       if (kDebugMode) {
-        print('✅ PlantSyncService: All plants synced to local datasource');
+        debugPrint('✅ PlantSyncService: All plants synced to local datasource');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ PlantSyncService: Background sync failed: $e');
+        if (kDebugMode) {
+          debugPrint('⚠️ PlantSyncService: Background sync failed: $e');
+        }
       }
     }
   }
@@ -54,11 +56,13 @@ class PlantSyncServiceImpl implements PlantSyncService {
       await localDatasource.updatePlant(remotePlant);
 
       if (kDebugMode) {
-        print('✅ PlantSyncService: Plant $plantId synced');
+        debugPrint('✅ PlantSyncService: Plant $plantId synced');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ PlantSyncService: Failed to sync plant $plantId: $e');
+        if (kDebugMode) {
+          debugPrint('⚠️ PlantSyncService: Failed to sync plant $plantId: $e');
+        }
       }
     }
   }

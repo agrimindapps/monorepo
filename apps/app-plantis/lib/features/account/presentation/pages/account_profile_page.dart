@@ -51,7 +51,7 @@ class _AccountProfilePageState extends ConsumerState<AccountProfilePage>
                             const AccountInfoSection(),
 
                             const SizedBox(height: 24),
-                            
+
                             if (!isAnonymous) ...[
                               const ProfileSubscriptionSection(),
                               const SizedBox(height: 24),

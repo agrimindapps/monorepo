@@ -11,7 +11,9 @@ import '../../../features/plants/domain/repositories/spaces_repository.dart';
 /// Implementação do serviço de sincronização para o Plantis
 /// Implementa ISyncService para integrar com o sistema de sync do core
 class PlantisSyncService implements ISyncService {
-  // TODO: Remove if confirmed unused - repositories not currently used in sync methods
+  /// Repositories reserved for future implementation of entity-specific sync methods
+  /// Currently only subscriptions sync is implemented via _subscriptionSyncAdapter
+  /// These will be used when _syncPlants, _syncSpaces, _syncTasks, and _syncComments are implemented
   // final PlantsRepository _plantsRepository;
   // final SpacesRepository _spacesRepository;
   // final PlantTasksRepository _plantTasksRepository;
@@ -34,8 +36,10 @@ class PlantisSyncService implements ISyncService {
     required PlantCommentsRepository plantCommentsRepository,
     required SubscriptionDriftSyncAdapter subscriptionSyncAdapter,
     required IAuthRepository authRepository,
-  })  : _subscriptionSyncAdapter = subscriptionSyncAdapter,
-        _authRepository = authRepository; // TODO: Initialize fields when repositories are used in sync methods
+  }) : _subscriptionSyncAdapter = subscriptionSyncAdapter,
+       _authRepository = authRepository;
+       // Note: Repository parameters are kept for future implementation
+       // They will be assigned to fields when sync methods are fully implemented
 
   @override
   String get serviceId => 'plantis';
@@ -72,7 +76,7 @@ class PlantisSyncService implements ISyncService {
       _isInitialized = true;
 
       if (kDebugMode) {
-        print('✅ PlantisSyncService initialized');
+        debugPrint('✅ PlantisSyncService initialized');
       }
 
       return const Right(null);
@@ -261,22 +265,28 @@ class PlantisSyncService implements ISyncService {
       int totalSynced = 0;
 
       // 1. Push local changes
-      final pushResult = await _subscriptionSyncAdapter.pushDirtyRecords(user.id);
-      
+      final pushResult = await _subscriptionSyncAdapter.pushDirtyRecords(
+        user.id,
+      );
+
       if (pushResult.isLeft()) {
         return Left((pushResult as Left<Failure, SyncPushResult>).value);
       }
-      
-      totalSynced += (pushResult as Right<Failure, SyncPushResult>).value.recordsPushed;
+
+      totalSynced +=
+          (pushResult as Right<Failure, SyncPushResult>).value.recordsPushed;
 
       // 2. Pull remote changes
-      final pullResult = await _subscriptionSyncAdapter.pullRemoteChanges(user.id);
-      
+      final pullResult = await _subscriptionSyncAdapter.pullRemoteChanges(
+        user.id,
+      );
+
       if (pullResult.isLeft()) {
         return Left((pullResult as Left<Failure, SyncPullResult>).value);
       }
 
-      totalSynced += (pullResult as Right<Failure, SyncPullResult>).value.recordsPulled;
+      totalSynced +=
+          (pullResult as Right<Failure, SyncPullResult>).value.recordsPulled;
 
       return Right(totalSynced);
     } catch (e) {

@@ -54,7 +54,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
   Future<void> loadTasksForPlant(String plantId) async {
     if (_repository == null) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '⚠️ PlantTaskProvider: Repository não disponível para carregar tasks',
         );
       }
@@ -65,7 +65,9 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
     try {
       if (kDebugMode) {
-        print('📥 PlantTaskProvider: Carregando tasks para planta $plantId');
+        debugPrint(
+          '📥 PlantTaskProvider: Carregando tasks para planta $plantId',
+        );
       }
 
       final result = await _repository!.getPlantTasksByPlantId(plantId);
@@ -76,7 +78,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
             isLoading: false,
           );
           if (kDebugMode) {
-            print(
+            debugPrint(
               '❌ PlantTaskProvider: Erro ao carregar tasks: ${failure.message}',
             );
           }
@@ -88,7 +90,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           updatedTasks[plantId] = tasks;
           state = state.copyWith(plantTasks: updatedTasks, isLoading: false);
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ PlantTaskProvider: ${tasks.length} tasks carregadas para planta $plantId',
             );
           }
@@ -100,7 +102,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         isLoading: false,
       );
       if (kDebugMode) {
-        print('❌ PlantTaskProvider: Erro inesperado: $e');
+        debugPrint('❌ PlantTaskProvider: Erro inesperado: $e');
       }
     }
   }
@@ -145,14 +147,16 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
     try {
       if (kDebugMode) {
-        print('🌱 PlantTaskProvider: Gerando tasks para planta ${plant.id}');
+        debugPrint(
+          '🌱 PlantTaskProvider: Gerando tasks para planta ${plant.id}',
+        );
       }
 
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
 
       if (_repository != null && tasks.isNotEmpty) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '💾 PlantTaskProvider: Persistindo ${tasks.length} tasks geradas',
           );
         }
@@ -165,7 +169,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
               isLoading: false,
             );
             if (kDebugMode) {
-              print(
+              debugPrint(
                 '❌ PlantTaskProvider: Erro ao persistir tasks: ${failure.message}',
               );
             }
@@ -177,7 +181,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
             updatedTasks[plant.id] = savedTasks;
             state = state.copyWith(plantTasks: updatedTasks, isLoading: false);
             if (kDebugMode) {
-              print(
+              debugPrint(
                 '✅ PlantTaskProvider: ${savedTasks.length} tasks persistidas com sucesso',
               );
             }
@@ -190,7 +194,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         updatedTasks[plant.id] = tasks;
         state = state.copyWith(plantTasks: updatedTasks, isLoading: false);
         if (kDebugMode) {
-          print(
+          debugPrint(
             '⚠️ PlantTaskProvider: Repository não disponível, tasks mantidas em memória',
           );
         }
@@ -203,7 +207,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         isLoading: false,
       );
       if (kDebugMode) {
-        print('❌ PlantTaskProvider: Erro ao gerar tasks: $e');
+        debugPrint('❌ PlantTaskProvider: Erro ao gerar tasks: $e');
       }
     }
   }
@@ -257,7 +261,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         errorMessage: 'Erro ao alterar status da tarefa: $e',
       );
       if (kDebugMode) {
-        print('❌ PlantTaskProvider: Erro ao alterar status: $e');
+        debugPrint('❌ PlantTaskProvider: Erro ao alterar status: $e');
       }
     }
   }
@@ -340,11 +344,11 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       await _updateTaskStatuses(plantId);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTaskProvider: Tarefa $taskId concluída em ${completionDate.day}/${completionDate.month}/${completionDate.year}',
         );
         if (nextDueDate != null) {
-          print(
+          debugPrint(
             '   📅 Próxima tarefa agendada para ${nextDueDate.day}/${nextDueDate.month}/${nextDueDate.year}',
           );
         }
@@ -352,7 +356,9 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
     } catch (e) {
       state = state.copyWith(errorMessage: 'Erro ao completar tarefa: $e');
       if (kDebugMode) {
-        print('❌ PlantTaskProvider: Erro ao completar tarefa com data: $e');
+        debugPrint(
+          '❌ PlantTaskProvider: Erro ao completar tarefa com data: $e',
+        );
       }
     }
   }
@@ -428,7 +434,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       if (_repository != null) {
         await _repository!.deletePlantTasksByPlantId(plantId);
         if (kDebugMode) {
-          print(
+          debugPrint(
             '✅ PlantTaskProvider: Tasks da planta $plantId removidas da persistência',
           );
         }
@@ -442,7 +448,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         errorMessage: 'Erro ao remover tarefas da planta: $e',
       );
       if (kDebugMode) {
-        print('❌ PlantTaskProvider: Erro ao remover tasks da planta: $e');
+        debugPrint('❌ PlantTaskProvider: Erro ao remover tasks da planta: $e');
       }
     }
   }
@@ -457,13 +463,15 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
       if (_repository != null) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '🗑️ PlantTaskProvider: Deletando tarefas antigas da planta ${plant.id} antes de regenerar',
           );
         }
         await _repository!.deletePlantTasksByPlantId(plant.id);
         if (kDebugMode) {
-          print('✅ PlantTaskProvider: Tarefas antigas deletadas (soft delete)');
+          debugPrint(
+            '✅ PlantTaskProvider: Tarefas antigas deletadas (soft delete)',
+          );
         }
       }
 
@@ -474,7 +482,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       await generateTasksForPlant(plant);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTaskProvider: Tarefas regeneradas para planta ${plant.id}',
         );
       }
@@ -484,7 +492,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
         isLoading: false,
       );
       if (kDebugMode) {
-        print('❌ PlantTaskProvider: Erro ao atualizar tarefas: $e');
+        debugPrint('❌ PlantTaskProvider: Erro ao atualizar tarefas: $e');
       }
     }
   }

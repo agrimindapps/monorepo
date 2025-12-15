@@ -40,7 +40,7 @@ import '../loading/contextual_loading_manager.dart';
 import 'feedback_system.dart';
 import 'unified_feedback_system.dart';
 export '../loading/contextual_loading_manager.dart';
-export 'animated_feedback.dart';
+export 'services/animation_service.dart';
 export 'confirmation_system.dart';
 export 'feedback_system.dart';
 export 'haptic_service.dart';

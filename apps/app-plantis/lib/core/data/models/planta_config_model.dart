@@ -368,19 +368,41 @@ class PlantaConfigModel extends BaseSyncModel {
     int intervaloReplantarDias = 365; // default
 
     try {
-      print('🔍 PlantaConfigModel.fromPlantConfig - Converting PlantConfig:');
-      print('   wateringIntervalDays: ${plantConfig.wateringIntervalDays}');
-      print(
-        '   fertilizingIntervalDays: ${plantConfig.fertilizingIntervalDays}',
-      );
-      print('   pruningIntervalDays: ${plantConfig.pruningIntervalDays}');
-      print(
-        '   sunlightCheckIntervalDays: ${plantConfig.sunlightCheckIntervalDays}',
-      );
-      print(
-        '   pestInspectionIntervalDays: ${plantConfig.pestInspectionIntervalDays}',
-      );
-      print('   replantingIntervalDays: ${plantConfig.replantingIntervalDays}');
+      if (kDebugMode) {
+        debugPrint(
+          '🔍 PlantaConfigModel.fromPlantConfig - Converting PlantConfig:',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   wateringIntervalDays: ${plantConfig.wateringIntervalDays}',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   fertilizingIntervalDays: ${plantConfig.fertilizingIntervalDays}',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   pruningIntervalDays: ${plantConfig.pruningIntervalDays}',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   sunlightCheckIntervalDays: ${plantConfig.sunlightCheckIntervalDays}',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   pestInspectionIntervalDays: ${plantConfig.pestInspectionIntervalDays}',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   replantingIntervalDays: ${plantConfig.replantingIntervalDays}',
+        );
+      }
 
       final enableWateringCare = plantConfig.enableWateringCare;
       if (enableWateringCare is bool) {
@@ -431,19 +453,39 @@ class PlantaConfigModel extends BaseSyncModel {
         intervaloReplantarDias = replantingInterval;
       }
 
-      print('🔍 PlantaConfigModel.fromPlantConfig - After conversion:');
-      print('   aguaAtiva: $aguaAtiva ($intervaloRegaDias dias)');
-      print('   aduboAtivo: $aduboAtivo ($intervaloAdubacaoDias dias)');
-      print('   podaAtiva: $podaAtiva ($intervaloPodaDias dias)');
-      print('   banhoSolAtivo: $banhoSolAtivo ($intervaloBanhoSolDias dias)');
-      print(
-        '   inspecaoPragasAtiva: $inspecaoPragasAtiva ($intervaloInspecaoPragasDias dias)',
-      );
-      print(
-        '   replantarAtivo: $replantarAtivo ($intervaloReplantarDias dias)',
-      );
+      if (kDebugMode) {
+        debugPrint('🔍 PlantaConfigModel.fromPlantConfig - After conversion:');
+      }
+      if (kDebugMode) {
+        debugPrint('   aguaAtiva: $aguaAtiva ($intervaloRegaDias dias)');
+      }
+      if (kDebugMode) {
+        debugPrint('   aduboAtivo: $aduboAtivo ($intervaloAdubacaoDias dias)');
+      }
+      if (kDebugMode) {
+        debugPrint('   podaAtiva: $podaAtiva ($intervaloPodaDias dias)');
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   banhoSolAtivo: $banhoSolAtivo ($intervaloBanhoSolDias dias)',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   inspecaoPragasAtiva: $inspecaoPragasAtiva ($intervaloInspecaoPragasDias dias)',
+        );
+      }
+      if (kDebugMode) {
+        debugPrint(
+          '   replantarAtivo: $replantarAtivo ($intervaloReplantarDias dias)',
+        );
+      }
     } catch (e) {
-      print('Warning: Error converting PlantConfig to PlantaConfigModel: $e');
+      if (kDebugMode) {
+        debugPrint(
+          'Warning: Error converting PlantConfig to PlantaConfigModel: $e',
+        );
+      }
     }
 
     return PlantaConfigModel.create(

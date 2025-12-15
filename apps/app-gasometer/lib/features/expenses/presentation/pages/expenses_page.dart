@@ -24,6 +24,7 @@ class ExpensesPage extends ConsumerStatefulWidget {
 
 class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   String? _selectedVehicleId;
+  bool _showMonthlyStats = false; // Toggle para mostrar/ocultar estatísticas
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +135,22 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                 ],
               ),
             ),
+            // Botão de toggle para estatísticas mensais
+            IconButton(
+              icon: Icon(
+                _showMonthlyStats ? Icons.analytics : Icons.analytics_outlined,
+                color: Colors.white,
+                size: 24,
+              ),
+              tooltip: _showMonthlyStats 
+                ? 'Ocultar estatísticas' 
+                : 'Mostrar estatísticas',
+              onPressed: () {
+                setState(() {
+                  _showMonthlyStats = !_showMonthlyStats;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -167,6 +184,25 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     final months = _getMonths(vehicleRecords);
     final selectedMonth = state.filtersConfig.selectedMonth;
 
+    // Se não há mês selecionado e há meses disponíveis, seleciona o mês atual (ou o mais recente)
+    if (selectedMonth == null && months.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final now = DateTime.now();
+        final currentMonth = DateTime(now.year, now.month);
+        
+        // Verifica se o mês atual existe nos dados
+        final hasCurrentMonth = months.any((m) => 
+          m.year == currentMonth.year && m.month == currentMonth.month);
+        
+        if (hasCurrentMonth) {
+          ref.read(expensesProvider.notifier).selectMonth(currentMonth);
+        } else {
+          // Se não tem dados do mês atual, seleciona o mais recente
+          ref.read(expensesProvider.notifier).selectMonth(months.first);
+        }
+      });
+    }
+
     return Container(
       height: 50,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -186,9 +222,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
           return GestureDetector(
             onTap: () {
-              if (isSelected) {
-                ref.read(expensesProvider.notifier).clearMonthFilter();
-              } else {
+              // Sempre permite selecionar, nunca desmarca
+              if (!isSelected) {
                 ref.read(expensesProvider.notifier).selectMonth(month);
               }
             },
@@ -265,7 +300,16 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       );
     }
 
-    return _buildExpenseList(records);
+    // Layout com estatísticas fixas + lista scrollable
+    return Column(
+      children: [
+        if (_showMonthlyStats)
+          _buildMonthlyStatsPanel(records),
+        Expanded(
+          child: _buildExpenseList(records),
+        ),
+      ],
+    );
   }
 
   Widget _buildExpenseList(List<ExpenseEntity> records) {
@@ -513,5 +557,171 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     final dates = records.map((e) => e.date).toList();
     final dateUtils = local_date_utils.DateUtils();
     return dateUtils.generateMonthRange(dates);
+  }
+
+  /// Painel de estatísticas mensais fixo - Despesas
+  Widget _buildMonthlyStatsPanel(List<ExpenseEntity> records) {
+    if (records.isEmpty) return const SizedBox.shrink();
+
+    // Cálculos
+    final totalSpent = records.fold<double>(0.0, (sum, r) => sum + r.amount);
+    
+    final amounts = records.map((r) => r.amount).toList();
+    amounts.sort();
+    
+    final avgExpense = totalSpent / records.length;
+    final maxExpense = amounts.isNotEmpty ? amounts.last : 0.0;
+    final minExpense = amounts.isNotEmpty ? amounts.first : 0.0;
+
+    final currencyFormat = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    );
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            Theme.of(context).primaryColor.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.analytics,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Estatísticas do Mês',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Grid 2x2 com as estatísticas
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.attach_money,
+                  label: 'Total Gasto',
+                  value: currencyFormat.format(totalSpent),
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.show_chart,
+                  label: 'Média por Despesa',
+                  value: currencyFormat.format(avgExpense),
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.arrow_upward,
+                  label: 'Maior Despesa',
+                  value: currencyFormat.format(maxExpense),
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.arrow_downward,
+                  label: 'Menor Despesa',
+                  value: currencyFormat.format(minExpense),
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card individual de estatística
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 }

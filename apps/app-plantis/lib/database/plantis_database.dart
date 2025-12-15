@@ -101,41 +101,59 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (Migrator m) async {
-      print('📦 Creating Plantis Database schema v$schemaVersion...');
+      if (kDebugMode) {
+        debugPrint('📦 Creating Plantis Database schema v$schemaVersion...');
+      }
 
       // Cria todas as tabelas definidas em @DriftDatabase
       await m.createAll();
 
-      print('✅ Plantis Database schema created successfully!');
+      if (kDebugMode) {
+        debugPrint('✅ Plantis Database schema created successfully!');
+      }
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      print('🔄 Migrating Plantis Database from v$from to v$to...');
+      if (kDebugMode) {
+        debugPrint('🔄 Migrating Plantis Database from v$from to v$to...');
+      }
 
       if (from < 2) {
         // Migração v1 -> v2: Adiciona tabela PlantImages
-        print('📦 Adding PlantImages table...');
+        if (kDebugMode) {
+          debugPrint('📦 Adding PlantImages table...');
+        }
         await m.createTable(plantImages);
       }
 
       if (from < 3) {
         // Migração v2 -> v3: Adiciona tabela UserSubscriptions
-        print('📦 Adding UserSubscriptions table...');
+        if (kDebugMode) {
+          debugPrint('📦 Adding UserSubscriptions table...');
+        }
         await m.createTable(userSubscriptions);
       }
 
-      print('✅ Migration completed successfully!');
+      if (kDebugMode) {
+        debugPrint('✅ Migration completed successfully!');
+      }
     },
     beforeOpen: (details) async {
       // CRÍTICO: Habilita foreign keys no SQLite
       await customStatement('PRAGMA foreign_keys = ON');
 
       if (details.wasCreated) {
-        print('🎉 Plantis Database criado com sucesso!');
-        print(
-          '📊 Tabelas: Spaces, Plants, PlantConfigs, PlantTasks, Tasks, Comments, ConflictHistory, PlantImages, PlantsSyncQueue',
-        );
+        if (kDebugMode) {
+          debugPrint('🎉 Plantis Database criado com sucesso!');
+        }
+        if (kDebugMode) {
+          debugPrint(
+            '📊 Tabelas: Spaces, Plants, PlantConfigs, PlantTasks, Tasks, Comments, ConflictHistory, PlantImages, PlantsSyncQueue',
+          );
+        }
       } else {
-        print('🔄 Plantis Database aberto (versão $schemaVersion)');
+        if (kDebugMode) {
+          debugPrint('🔄 Plantis Database aberto (versão $schemaVersion)');
+        }
       }
     },
   );

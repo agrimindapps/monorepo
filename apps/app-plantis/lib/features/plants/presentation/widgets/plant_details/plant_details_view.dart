@@ -84,7 +84,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   void _initializeController() {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔧 PlantDetailsView._initializeController - plantId: ${widget.plantId}',
         );
       }
@@ -94,7 +94,9 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       final provider = PlantDetailsProvider(notifier, state);
 
       if (kDebugMode) {
-        print('✅ PlantDetailsView._initializeController - Providers loaded');
+        debugPrint(
+          '✅ PlantDetailsView._initializeController - Providers loaded',
+        );
       }
 
       _controller = PlantDetailsController(
@@ -112,20 +114,26 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       );
 
       if (kDebugMode) {
-        print('✅ PlantDetailsView._initializeController - Controller created');
+        debugPrint(
+          '✅ PlantDetailsView._initializeController - Controller created',
+        );
       }
 
       _controller!.loadPlant(widget.plantId);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantDetailsView._initializeController - Initialization complete',
         );
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('💥 PlantDetailsView._initializeController - Error: $e');
-        print('Stack trace: $stackTrace');
+        if (kDebugMode) {
+          debugPrint('💥 PlantDetailsView._initializeController - Error: $e');
+        }
+        if (kDebugMode) {
+          debugPrint('Stack trace: $stackTrace');
+        }
       }
       debugPrint('Error initializing PlantDetailsView: $e');
     }
@@ -145,7 +153,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       await notifier.reloadPlant(plantId);
       if (kDebugMode) {
         final state = ref.read(plantDetailsNotifierProvider);
-        print(
+        debugPrint(
           '✅ PlantDetailsView - Plant reloaded after edit: ${state.plant?.name}',
         );
       }
@@ -228,13 +236,17 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       try {
         ref.read(plantsNotifierProvider.notifier).refreshPlants();
         if (kDebugMode) {
-          print(
+          debugPrint(
             '✅ _syncPlantDeletion: Refresh requested for plantId: $plantId',
           );
         }
       } catch (e) {
         if (kDebugMode) {
-          print('❌ _syncPlantDeletion: Failed to refresh plants list: $e');
+          if (kDebugMode) {
+            debugPrint(
+              '❌ _syncPlantDeletion: Failed to refresh plants list: $e',
+            );
+          }
         }
       }
     });
@@ -248,11 +260,17 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       try {
         ref.read(plantsNotifierProvider.notifier).refreshPlants();
         if (kDebugMode) {
-          print('✅ _notifyListScreenUpdate: Plants list refresh requested.');
+          debugPrint(
+            '✅ _notifyListScreenUpdate: Plants list refresh requested.',
+          );
         }
       } catch (e) {
         if (kDebugMode) {
-          print('❌ _notifyListScreenUpdate: Failed to refresh plants list: $e');
+          if (kDebugMode) {
+            debugPrint(
+              '❌ _notifyListScreenUpdate: Failed to refresh plants list: $e',
+            );
+          }
         }
       }
     });

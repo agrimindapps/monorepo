@@ -1,4 +1,5 @@
 import '../data/models/conflict_history_model.dart';
+import '../data/models/conflict_stats.dart';
 import 'conflict_history_drift_service.dart';
 
 /// ADAPTER PATTERN - Mantém interface antiga mas delega para Drift
@@ -18,6 +19,8 @@ class ConflictHistoryService {
       tableName: conflictHistory.modelType,
       recordId: conflictHistory.modelId,
       conflictType: 'sync_conflict',
+      localVersion: conflictHistory.localVersion,
+      remoteVersion: conflictHistory.remoteVersion,
       resolution: conflictHistory.resolutionStrategy,
       localData: conflictHistory.localData,
       remoteData: conflictHistory.remoteData,
@@ -55,7 +58,7 @@ class ConflictHistoryService {
   /// Conta o número total de conflitos registrados
   Future<int> countConflicts() async {
     final stats = await _driftService.getStats();
-    return stats['total'] as int;
+    return stats.total;
   }
 
   /// Obtém os últimos N conflitos registrados
@@ -71,7 +74,7 @@ class ConflictHistoryService {
   }
 
   /// Obter estatísticas de conflitos
-  Future<Map<String, dynamic>> getConflictStats() async {
+  Future<ConflictStats> getConflictStats() async {
     return await _driftService.getStats();
   }
 

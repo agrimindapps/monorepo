@@ -331,11 +331,11 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
     if (kDebugMode) {
-      print('🔍 Tentando adicionar comentário:');
-      print('   Plant ID: ${widget.plant.id}');
-      print('   Plant Name: ${widget.plant.displayName}');
-      print('   Content Length: ${text.length}');
-      print(
+      debugPrint('🔍 Tentando adicionar comentário:');
+      debugPrint('   Plant ID: ${widget.plant.id}');
+      debugPrint('   Plant Name: ${widget.plant.displayName}');
+      debugPrint('   Content Length: ${text.length}');
+      debugPrint(
         '   Content: ${text.substring(0, text.length > 50 ? 50 : text.length)}...',
       );
     }
@@ -346,7 +346,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
           .addComment(widget.plant.id, text);
 
       if (kDebugMode) {
-        print('   Result: ${success ? "✅ Sucesso" : "❌ Falhou"}');
+        debugPrint('   Result: ${success ? "✅ Sucesso" : "❌ Falhou"}');
       }
 
       if (success) {
@@ -368,7 +368,7 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
               'Erro desconhecido ao adicionar comentário';
 
           if (kDebugMode) {
-            print('   Error Message: $errorMsg');
+            debugPrint('   Error Message: $errorMsg');
           }
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -382,8 +382,8 @@ class _PlantNotesSectionState extends ConsumerState<PlantNotesSection> {
       }
     } catch (e, stack) {
       if (kDebugMode) {
-        print('❌ Exception ao adicionar comentário: $e');
-        print('   Stack: $stack');
+        debugPrint('❌ Exception ao adicionar comentário: $e');
+        debugPrint('   Stack: $stack');
       }
 
       if (mounted) {

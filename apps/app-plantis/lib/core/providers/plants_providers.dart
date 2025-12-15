@@ -507,7 +507,7 @@ class PlantsNotifier extends _$PlantsNotifier {
           },
           onError: (dynamic error) {
             if (kDebugMode) {
-              print('PlantsProvider stream error: $error');
+              debugPrint('PlantsProvider stream error: $error');
             }
           },
         );
@@ -518,7 +518,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('PlantsProvider stream initialization error: $e');
+        debugPrint('PlantsProvider stream initialization error: $e');
       }
       Future.delayed(const Duration(milliseconds: 500), () {
         loadInitialData();
@@ -542,7 +542,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       return null;
     } catch (e) {
       if (kDebugMode) {
-        print('Error converting plant: $e');
+        debugPrint('Error converting plant: $e');
       }
       return null;
     }
@@ -605,7 +605,7 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   Future<void> loadPlants() async {
     if (kDebugMode) {
-      print(
+      debugPrint(
         '📋 PlantsProvider.loadPlants() - Iniciando carregamento offline-first',
       );
     }
@@ -623,7 +623,7 @@ class PlantsNotifier extends _$PlantsNotifier {
   Future<void> _loadData() async {
     try {
       if (kDebugMode) {
-        print('📦 PlantsProvider: Carregando dados...');
+        debugPrint('📦 PlantsProvider: Carregando dados...');
       }
 
       final currentState = state.value ?? const PlantsState();
@@ -636,7 +636,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       result.fold(
         (failure) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ PlantsProvider: Falha ao carregar dados: ${_getErrorMessage(failure)}',
             );
           }
@@ -651,7 +651,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         },
         (plants) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ PlantsProvider: Dados carregados: ${plants.length} plantas',
             );
           }
@@ -660,7 +660,7 @@ class PlantsNotifier extends _$PlantsNotifier {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsProvider: Erro ao carregar dados: $e');
+        debugPrint('❌ PlantsProvider: Erro ao carregar dados: $e');
       }
       final currentState = state.value ?? const PlantsState();
       state = AsyncData(
@@ -679,11 +679,11 @@ class PlantsNotifier extends _$PlantsNotifier {
     final sortedPlants = _sortPlants(plants, currentState.sortBy);
 
     if (kDebugMode) {
-      print('🔄 PlantsProvider._updatePlantsData:');
-      print('  - Input plants: ${plants.length}');
-      print('  - Sorted plants: ${sortedPlants.length}');
-      print('  - Current filterBySpace: ${currentState.filterBySpace}');
-      print('  - Current searchQuery: "${currentState.searchQuery}"');
+      debugPrint('🔄 PlantsProvider._updatePlantsData:');
+      debugPrint('  - Input plants: ${plants.length}');
+      debugPrint('  - Sorted plants: ${sortedPlants.length}');
+      debugPrint('  - Current filterBySpace: ${currentState.filterBySpace}');
+      debugPrint('  - Current searchQuery: "${currentState.searchQuery}"');
     }
 
     state = AsyncData(
@@ -695,12 +695,12 @@ class PlantsNotifier extends _$PlantsNotifier {
     );
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '✅ PlantsProvider: UI atualizada com ${sortedPlants.length} plantas',
       );
       // filteredPlants will be computed automatically via getter
       for (final plant in plants) {
-        print('   - ${plant.name} (${plant.id})');
+        debugPrint('   - ${plant.name} (${plant.id})');
       }
     }
   }
@@ -914,9 +914,9 @@ class PlantsNotifier extends _$PlantsNotifier {
     final currentState = state.value ?? const PlantsState();
     if (currentState.searchQuery.isNotEmpty || currentState.isSearching) {
       if (kDebugMode) {
-        print('🧹 PlantsProvider.clearSearch():');
-        print('  - Clearing searchQuery: "${currentState.searchQuery}"');
-        print('  - Current allPlants: ${currentState.allPlants.length}');
+        debugPrint('🧹 PlantsProvider.clearSearch():');
+        debugPrint('  - Clearing searchQuery: "${currentState.searchQuery}"');
+        debugPrint('  - Current allPlants: ${currentState.allPlants.length}');
       }
 
       // If there are no local plants but we have searchResults (user searched
@@ -943,7 +943,7 @@ class PlantsNotifier extends _$PlantsNotifier {
         );
 
         if (kDebugMode) {
-          print('✅ PlantsProvider.clearSearch() - searchQuery cleared');
+          debugPrint('✅ PlantsProvider.clearSearch() - searchQuery cleared');
         }
       }
     }
@@ -980,9 +980,9 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   Future<void> refreshPlants() async {
     if (kDebugMode) {
-      print('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
+      debugPrint('🔄 PlantsProvider.refreshPlants() - Iniciando refresh');
       final currentState = state.value ?? const PlantsState();
-      print(
+      debugPrint(
         '🔄 PlantsProvider.refreshPlants() - Plantas antes: ${currentState.allPlants.length}',
       );
     }
@@ -991,9 +991,9 @@ class PlantsNotifier extends _$PlantsNotifier {
     await loadInitialData();
 
     if (kDebugMode) {
-      print('✅ PlantsProvider.refreshPlants() - Refresh completo');
+      debugPrint('✅ PlantsProvider.refreshPlants() - Refresh completo');
       final currentState = state.value ?? const PlantsState();
-      print(
+      debugPrint(
         '🔄 PlantsProvider.refreshPlants() - Plantas depois: ${currentState.allPlants.length}',
       );
     }
@@ -1038,10 +1038,10 @@ class PlantsNotifier extends _$PlantsNotifier {
 
   String _getErrorMessage(Failure failure) {
     if (kDebugMode) {
-      print('PlantsProvider Error Details:');
-      print('- Type: ${failure.runtimeType}');
-      print('- Message: ${failure.message}');
-      print('- Stack trace: ${StackTrace.current}');
+      debugPrint('PlantsProvider Error Details:');
+      debugPrint('- Type: ${failure.runtimeType}');
+      debugPrint('- Message: ${failure.message}');
+      debugPrint('- Stack trace: ${StackTrace.current}');
     }
 
     switch (failure.runtimeType) {

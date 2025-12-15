@@ -211,12 +211,12 @@ class PlantsDriftRepository {
     final localSpaceId = await _resolveSpaceId(model.spaceId);
 
     if (kDebugMode) {
-      print('🔄 PlantsDriftRepository.updatePlant() - localId: $localId');
-      print('   model.id: ${model.id}');
-      print(
+      debugPrint('🔄 PlantsDriftRepository.updatePlant() - localId: $localId');
+      debugPrint('   model.id: ${model.id}');
+      debugPrint(
         '   model.spaceId: ${model.spaceId} -> localSpaceId: $localSpaceId',
       );
-      print('   model.config: ${model.config}');
+      debugPrint('   model.config: ${model.config}');
     }
 
     final companion = db.PlantsCompanion(
@@ -260,11 +260,13 @@ class PlantsDriftRepository {
       );
 
       if (kDebugMode) {
-        print('🔧 PlantsDriftRepository._saveOrUpdateConfig()');
-        print('   plantFirebaseId: $plantFirebaseId');
-        print('   aguaAtiva: ${plantaConfigModel.aguaAtiva}');
-        print('   intervaloRegaDias: ${plantaConfigModel.intervaloRegaDias}');
-        print('   aduboAtivo: ${plantaConfigModel.aduboAtivo}');
+        debugPrint('🔧 PlantsDriftRepository._saveOrUpdateConfig()');
+        debugPrint('   plantFirebaseId: $plantFirebaseId');
+        debugPrint('   aguaAtiva: ${plantaConfigModel.aguaAtiva}');
+        debugPrint(
+          '   intervaloRegaDias: ${plantaConfigModel.intervaloRegaDias}',
+        );
+        debugPrint('   aduboAtivo: ${plantaConfigModel.aduboAtivo}');
       }
 
       // Verificar se já existe config para esta planta
@@ -276,7 +278,7 @@ class PlantsDriftRepository {
         // Atualizar config existente
         final updated = await _configsRepo.updateConfig(plantaConfigModel);
         if (kDebugMode) {
-          print(
+          debugPrint(
             '✅ PlantsDriftRepository._saveOrUpdateConfig() - Config atualizado: $updated',
           );
         }
@@ -284,14 +286,18 @@ class PlantsDriftRepository {
         // Inserir novo config
         final id = await _configsRepo.insertConfig(plantaConfigModel);
         if (kDebugMode) {
-          print(
+          debugPrint(
             '✅ PlantsDriftRepository._saveOrUpdateConfig() - Config inserido com id: $id',
           );
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantsDriftRepository._saveOrUpdateConfig() - Erro: $e');
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantsDriftRepository._saveOrUpdateConfig() - Erro: $e',
+          );
+        }
       }
       // Não propagar erro - config é secondary
     }

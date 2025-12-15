@@ -104,17 +104,18 @@ class FuelValidatorService {
     if (initialOdometer != null && odometer < initialOdometer) {
       return 'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)';
     }
-    if (currentOdometer != null && odometer < currentOdometer - 1000) {
-      return 'Odômetro muito abaixo do atual';
-    }
-    if (lastRecordOdometer != null) {
-      if (odometer < lastRecordOdometer) {
-        return 'Odômetro menor que o último registro';
-      }
-      if (odometer - lastRecordOdometer > 2000) {
-        return 'Diferença muito grande desde o último registro';
-      }
-    }
+    // REMOVIDO: Validação que impedia odômetro menor que o atual
+    // Agora permite lançamentos retroativos
+    
+    // Validação removida para permitir registros retroativos:
+    // if (lastRecordOdometer != null) {
+    //   if (odometer < lastRecordOdometer) {
+    //     return 'Odômetro menor que o último registro';
+    //   }
+    //   if (odometer - lastRecordOdometer > 2000) {
+    //     return 'Diferença muito grande desde o último registro';
+    //   }
+    // }
 
     return null;
   }

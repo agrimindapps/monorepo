@@ -22,7 +22,7 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
       final enhanced = networkInfo.asEnhanced;
       if (enhanced == null) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             'ℹ️ PlantsConnectivityService: Basic NetworkInfo - real-time monitoring unavailable',
           );
         }
@@ -33,7 +33,7 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
         _onConnectivityChanged,
         onError: (Object error) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ PlantsConnectivityService: Connectivity monitoring error: $error',
             );
           }
@@ -43,15 +43,17 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
       _isMonitoring = true;
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantsConnectivityService: Real-time connectivity monitoring started',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
-          '❌ PlantsConnectivityService: Failed to start connectivity monitoring: $e',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantsConnectivityService: Failed to start connectivity monitoring: $e',
+          );
+        }
       }
     }
   }
@@ -65,14 +67,18 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
         _isMonitoring = false;
 
         if (kDebugMode) {
-          print('✅ PlantsConnectivityService: Connectivity monitoring stopped');
+          debugPrint(
+            '✅ PlantsConnectivityService: Connectivity monitoring stopped',
+          );
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
-          '❌ PlantsConnectivityService: Error stopping connectivity monitoring: $e',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantsConnectivityService: Error stopping connectivity monitoring: $e',
+          );
+        }
       }
     }
   }
@@ -113,7 +119,7 @@ class PlantsConnectivityServiceImpl implements PlantsConnectivityService {
 
   void _onConnectivityChanged(bool isConnected) {
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔄 PlantsConnectivityService: Connectivity changed - ${isConnected ? 'Online' : 'Offline'}',
       );
     }

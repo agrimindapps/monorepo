@@ -3,6 +3,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../expenses/domain/entities/expense_entity.dart';
+import '../../../expenses/presentation/notifiers/expenses_notifier.dart';
+import '../../../expenses/presentation/state/expenses_state.dart';
+import '../../../fuel/domain/entities/fuel_record_entity.dart';
+import '../../../fuel/presentation/providers/fuel_riverpod_notifier.dart';
+import '../../../maintenance/domain/entities/maintenance_entity.dart';
+import '../../../maintenance/presentation/notifiers/maintenances_notifier.dart';
+import '../../../maintenance/presentation/notifiers/maintenances_state.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
@@ -18,6 +26,9 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
   @override
   Widget build(BuildContext context) {
     final vehiclesAsync = ref.watch(vehiclesProvider);
+    final fuelStateAsync = ref.watch(fuelRiverpodProvider);
+    final expensesState = ref.watch(expensesProvider);
+    final maintenancesState = ref.watch(maintenancesProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -30,9 +41,31 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             // Sempre mostrar conteúdo, independentemente de ter veículos ou não
             Expanded(
               child: vehiclesAsync.when(
-                data: (_) => _buildContent(context),
+                data: (_) {
+                  return fuelStateAsync.when(
+                    data: (fuelState) => _buildContent(
+                      context,
+                      fuelState,
+                      expensesState,
+                      maintenancesState,
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (_, __) => _buildContent(
+                      context,
+                      null,
+                      expensesState,
+                      maintenancesState,
+                    ),
+                  );
+                },
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (_, __) => _buildContent(context),
+                error: (_, __) => _buildContent(
+                  context,
+                  null,
+                  expensesState,
+                  maintenancesState,
+                ),
               ),
             ),
           ],
@@ -127,17 +160,86 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     );
   }
 
-  Widget _buildContent(BuildContext context) {
-    return _buildStatisticsContent();
+  Widget _buildContent(
+    BuildContext context,
+    FuelState? fuelState,
+    ExpensesState expensesState,
+    MaintenancesState maintenancesState,
+  ) {
+    return _buildStatisticsContent(fuelState, expensesState, maintenancesState);
   }
 
-  Widget _buildStatisticsContent() {
+  Widget _buildStatisticsContent(
+    FuelState? fuelState,
+    ExpensesState expensesState,
+    MaintenancesState maintenancesState,
+  ) {
+    // Filtrar dados pelo veículo selecionado
+    final fuelRecords = fuelState?.fuelRecords
+            .where((r) =>
+                _selectedVehicleId == null || r.vehicleId == _selectedVehicleId)
+            .toList() ??
+        [];
+
+    final expenses = expensesState.expenses
+        .where((ExpenseEntity e) =>
+            _selectedVehicleId == null || e.vehicleId == _selectedVehicleId)
+        .toList();
+
+    final maintenances = maintenancesState.maintenances
+        .where((MaintenanceEntity m) =>
+            _selectedVehicleId == null || m.vehicleId == _selectedVehicleId)
+        .toList();
+
+    // Calcular totais
+    final fuelCost = fuelRecords.fold<double>(0.0, (double total, FuelRecordEntity r) => total + r.totalPrice);
+    final expensesCost = expenses.fold<double>(0.0, (double total, ExpenseEntity e) => total + e.amount);
+    final maintenanceCost =
+        maintenances.fold<double>(0.0, (double total, MaintenanceEntity m) => total + m.cost);
+
+    final totalCost = fuelCost + expensesCost + maintenanceCost;
+
+    // Calcular Km rodados (baseado nos abastecimentos)
+    double kmTraveled = 0;
+    if (fuelRecords.isNotEmpty) {
+      // Ordenar por odômetro
+      final sortedRecords = List.of(fuelRecords)
+        ..sort((a, b) => a.odometer.compareTo(b.odometer));
+      
+      if (sortedRecords.length > 1) {
+        kmTraveled = sortedRecords.last.odometer - sortedRecords.first.odometer;
+      } else {
+         // Se tiver apenas 1 registro, tenta usar distanceTraveled se disponível
+         kmTraveled = sortedRecords.first.distanceTraveled ?? 0;
+      }
+    }
+
+    // Calcular consumo médio
+    double totalConsumption = 0;
+    int consumptionCount = 0;
+    for (final record in fuelRecords) {
+      if (record.consumption != null && record.consumption! > 0) {
+        totalConsumption += record.consumption!;
+        consumptionCount++;
+      }
+    }
+    final averageConsumption =
+        consumptionCount > 0 ? totalConsumption / consumptionCount : 0.0;
+
+    final currencyFormat = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
+    final numberFormat = NumberFormat.decimalPattern('pt_BR');
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStatisticsSection(),
+          _buildStatisticsSection(
+            totalCost: currencyFormat.format(totalCost),
+            kmTraveled: '${numberFormat.format(kmTraveled)} km',
+            fuelCount: fuelRecords.length.toString(),
+            avgConsumption: '${numberFormat.format(averageConsumption)} km/l',
+          ),
           const SizedBox(height: 24),
           _buildChartsSection(),
         ],
@@ -145,7 +247,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     );
   }
 
-  Widget _buildStatisticsSection() {
+  Widget _buildStatisticsSection({
+    required String totalCost,
+    required String kmTraveled,
+    required String fuelCount,
+    required String avgConsumption,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -161,7 +268,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             Expanded(
               child: _buildStatCard(
                 title: 'Gasto Total',
-                value: 'R\$ 0,00',
+                value: totalCost,
                 icon: Icons.attach_money,
                 color: Colors.green,
               ),
@@ -170,7 +277,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             Expanded(
               child: _buildStatCard(
                 title: 'Km Rodados',
-                value: '0 km',
+                value: kmTraveled,
                 icon: Icons.speed,
                 color: Colors.blue,
               ),
@@ -183,7 +290,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             Expanded(
               child: _buildStatCard(
                 title: 'Abastecimentos',
-                value: '0',
+                value: fuelCount,
                 icon: Icons.local_gas_station,
                 color: Colors.orange,
               ),
@@ -192,7 +299,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             Expanded(
               child: _buildStatCard(
                 title: 'Consumo Médio',
-                value: '0,0 km/l',
+                value: avgConsumption,
                 icon: Icons.trending_up,
                 color: Colors.purple,
               ),

@@ -24,6 +24,7 @@ class MaintenancePage extends ConsumerStatefulWidget {
 
 class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   String? _selectedVehicleId;
+  bool _showMonthlyStats = false; // Toggle para mostrar/ocultar estatísticas
 
   @override
   Widget build(BuildContext context) {
@@ -130,6 +131,22 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                 ],
               ),
             ),
+            // Botão de toggle para estatísticas mensais
+            IconButton(
+              icon: Icon(
+                _showMonthlyStats ? Icons.analytics : Icons.analytics_outlined,
+                color: Colors.white,
+                size: 24,
+              ),
+              tooltip: _showMonthlyStats 
+                ? 'Ocultar estatísticas' 
+                : 'Mostrar estatísticas',
+              onPressed: () {
+                setState(() {
+                  _showMonthlyStats = !_showMonthlyStats;
+                });
+              },
+            ),
           ],
         ),
       ),
@@ -164,6 +181,25 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     final months = _getMonths(vehicleRecords);
     final selectedMonth = state.selectedMonth;
 
+    // Se não há mês selecionado e há meses disponíveis, seleciona o mês atual (ou o mais recente)
+    if (selectedMonth == null && months.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final now = DateTime.now();
+        final currentMonth = DateTime(now.year, now.month);
+        
+        // Verifica se o mês atual existe nos dados
+        final hasCurrentMonth = months.any((m) => 
+          m.year == currentMonth.year && m.month == currentMonth.month);
+        
+        if (hasCurrentMonth) {
+          ref.read(maintenancesProvider.notifier).selectMonth(currentMonth);
+        } else {
+          // Se não tem dados do mês atual, seleciona o mais recente
+          ref.read(maintenancesProvider.notifier).selectMonth(months.first);
+        }
+      });
+    }
+
     return Container(
       height: 50,
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -183,11 +219,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
           return GestureDetector(
             onTap: () {
-              if (isSelected) {
-                ref
-                    .read(maintenancesProvider.notifier)
-                    .clearMonthFilter();
-              } else {
+              // Sempre permite selecionar, nunca desmarca
+              if (!isSelected) {
                 ref
                     .read(maintenancesProvider.notifier)
                     .selectMonth(month);
@@ -262,7 +295,16 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       );
     }
 
-    return _buildMaintenanceList(records);
+    // Layout com estatísticas fixas + lista scrollable
+    return Column(
+      children: [
+        if (_showMonthlyStats)
+          _buildMonthlyStatsPanel(records),
+        Expanded(
+          child: _buildMaintenanceList(records),
+        ),
+      ],
+    );
   }
 
   Widget _buildMaintenanceList(List<MaintenanceEntity> records) {
@@ -518,5 +560,171 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     final dates = records.map((e) => e.serviceDate).toList();
     final dateUtils = local_date_utils.DateUtils();
     return dateUtils.generateMonthRange(dates);
+  }
+
+  /// Painel de estatísticas mensais fixo - Manutenções
+  Widget _buildMonthlyStatsPanel(List<MaintenanceEntity> records) {
+    if (records.isEmpty) return const SizedBox.shrink();
+
+    // Cálculos
+    final totalSpent = records.fold<double>(0.0, (sum, r) => sum + r.cost);
+    
+    final costs = records.map((r) => r.cost).toList();
+    costs.sort();
+    
+    final avgCost = totalSpent / records.length;
+    final maxCost = costs.isNotEmpty ? costs.last : 0.0;
+    final totalServices = records.length;
+
+    final currencyFormat = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    );
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor.withValues(alpha: 0.1),
+            Theme.of(context).primaryColor.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.analytics,
+                color: Theme.of(context).primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Estatísticas do Mês',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Grid 2x2 com as estatísticas
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.attach_money,
+                  label: 'Total Gasto',
+                  value: currencyFormat.format(totalSpent),
+                  color: Colors.red,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.show_chart,
+                  label: 'Média/Manutenção',
+                  value: currencyFormat.format(avgCost),
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.arrow_upward,
+                  label: 'Maior Custo',
+                  value: currencyFormat.format(maxCost),
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.build_circle,
+                  label: 'Total Serviços',
+                  value: totalServices.toString(),
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Card individual de estatística
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 }

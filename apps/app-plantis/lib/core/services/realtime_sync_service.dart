@@ -54,7 +54,7 @@ class RealtimeSyncService {
   Future<void> startListening() async {
     if (_isListening) {
       if (kDebugMode) {
-        print('[RealtimeSync] Already listening, skipping...');
+        debugPrint('[RealtimeSync] Already listening, skipping...');
       }
       return;
     }
@@ -64,7 +64,9 @@ class RealtimeSyncService {
       final user = await _authRepository.currentUser.first;
       if (user == null) {
         if (kDebugMode) {
-          print('[RealtimeSync] No user logged in, cannot start listeners');
+          debugPrint(
+            '[RealtimeSync] No user logged in, cannot start listeners',
+          );
         }
         return;
       }
@@ -73,7 +75,7 @@ class RealtimeSyncService {
       _isListening = true;
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '[RealtimeSync] Starting realtime listeners for user: $_currentUserId',
         );
       }
@@ -85,11 +87,13 @@ class RealtimeSyncService {
       _startSpacesListener();
 
       if (kDebugMode) {
-        print('[RealtimeSync] All listeners started successfully');
+        debugPrint('[RealtimeSync] All listeners started successfully');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('[RealtimeSync] Error starting listeners: $e');
+        if (kDebugMode) {
+          debugPrint('[RealtimeSync] Error starting listeners: $e');
+        }
       }
       _isListening = false;
     }
@@ -98,7 +102,7 @@ class RealtimeSyncService {
   /// Para todos os listeners
   Future<void> stopListening() async {
     if (kDebugMode) {
-      print('[RealtimeSync] Stopping all listeners...');
+      debugPrint('[RealtimeSync] Stopping all listeners...');
     }
 
     for (final subscription in _subscriptions.values) {
@@ -109,7 +113,7 @@ class RealtimeSyncService {
     _currentUserId = null;
 
     if (kDebugMode) {
-      print('[RealtimeSync] All listeners stopped');
+      debugPrint('[RealtimeSync] All listeners stopped');
     }
   }
 
@@ -132,14 +136,14 @@ class RealtimeSyncService {
           },
           onError: (Object e) {
             if (kDebugMode) {
-              print('[RealtimeSync] Plants listener error: $e');
+              debugPrint('[RealtimeSync] Plants listener error: $e');
             }
           },
         );
 
     _subscriptions['plants'] = subscription;
     if (kDebugMode) {
-      print('[RealtimeSync] Plants listener started');
+      debugPrint('[RealtimeSync] Plants listener started');
     }
   }
 
@@ -159,14 +163,14 @@ class RealtimeSyncService {
           },
           onError: (Object e) {
             if (kDebugMode) {
-              print('[RealtimeSync] Comments listener error: $e');
+              debugPrint('[RealtimeSync] Comments listener error: $e');
             }
           },
         );
 
     _subscriptions['comments'] = subscription;
     if (kDebugMode) {
-      print('[RealtimeSync] Comments listener started');
+      debugPrint('[RealtimeSync] Comments listener started');
     }
   }
 
@@ -186,14 +190,14 @@ class RealtimeSyncService {
           },
           onError: (Object e) {
             if (kDebugMode) {
-              print('[RealtimeSync] Tasks listener error: $e');
+              debugPrint('[RealtimeSync] Tasks listener error: $e');
             }
           },
         );
 
     _subscriptions['tasks'] = subscription;
     if (kDebugMode) {
-      print('[RealtimeSync] Tasks listener started');
+      debugPrint('[RealtimeSync] Tasks listener started');
     }
   }
 
@@ -213,14 +217,14 @@ class RealtimeSyncService {
           },
           onError: (Object e) {
             if (kDebugMode) {
-              print('[RealtimeSync] Spaces listener error: $e');
+              debugPrint('[RealtimeSync] Spaces listener error: $e');
             }
           },
         );
 
     _subscriptions['spaces'] = subscription;
     if (kDebugMode) {
-      print('[RealtimeSync] Spaces listener started');
+      debugPrint('[RealtimeSync] Spaces listener started');
     }
   }
 
@@ -294,11 +298,13 @@ class RealtimeSyncService {
       }
 
       if (kDebugMode) {
-        print('[RealtimeSync] Plant ${change.type.name}: $docId');
+        debugPrint('[RealtimeSync] Plant ${change.type.name}: $docId');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('[RealtimeSync] Error handling plant change: $e');
+        if (kDebugMode) {
+          debugPrint('[RealtimeSync] Error handling plant change: $e');
+        }
       }
     }
   }
@@ -375,11 +381,13 @@ class RealtimeSyncService {
       }
 
       if (kDebugMode) {
-        print('[RealtimeSync] Comment ${change.type.name}: $docId');
+        debugPrint('[RealtimeSync] Comment ${change.type.name}: $docId');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('[RealtimeSync] Error handling comment change: $e');
+        if (kDebugMode) {
+          debugPrint('[RealtimeSync] Error handling comment change: $e');
+        }
       }
     }
   }
@@ -454,11 +462,13 @@ class RealtimeSyncService {
       }
 
       if (kDebugMode) {
-        print('[RealtimeSync] Task ${change.type.name}: $docId');
+        debugPrint('[RealtimeSync] Task ${change.type.name}: $docId');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('[RealtimeSync] Error handling task change: $e');
+        if (kDebugMode) {
+          debugPrint('[RealtimeSync] Error handling task change: $e');
+        }
       }
     }
   }
@@ -539,11 +549,13 @@ class RealtimeSyncService {
       }
 
       if (kDebugMode) {
-        print('[RealtimeSync] Space ${change.type.name}: $docId');
+        debugPrint('[RealtimeSync] Space ${change.type.name}: $docId');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('[RealtimeSync] Error handling space change: $e');
+        if (kDebugMode) {
+          debugPrint('[RealtimeSync] Error handling space change: $e');
+        }
       }
     }
   }

@@ -32,57 +32,122 @@ class ImagePickerService {
   }) async {
     final texts = customTexts ?? ImagePickerTexts.defaultTexts();
 
-    return showModalBottomSheet<void>(
+    return showDialog<void>(
       context: context,
-      isDismissible: isDismissible,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
+      barrierDismissible: isDismissible,
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (title != null) ...[
-                  Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                ListTile(
-                  leading: const Icon(Icons.camera_alt),
-                  title: Text(texts.cameraTitle),
-                  subtitle: Text(texts.cameraSubtitle),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onCameraSelected();
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.photo_library),
-                  title: Text(texts.galleryTitle),
-                  subtitle: Text(texts.gallerySubtitle),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onGallerySelected();
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.cancel),
-                  title: Text(texts.cancelTitle),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onCancelled?.call();
-                  },
-                ),
-              ],
-            ),
+        final theme = Theme.of(context);
+        return AlertDialog(
+          title: Text(
+            title ?? 'Selecionar imagem',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildOption(
+                context,
+                icon: Icons.camera_alt,
+                title: texts.cameraTitle,
+                subtitle: texts.cameraSubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  onCameraSelected();
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildOption(
+                context,
+                icon: Icons.photo_library,
+                title: texts.galleryTitle,
+                subtitle: texts.gallerySubtitle,
+                onTap: () {
+                  Navigator.pop(context);
+                  onGallerySelected();
+                },
+              ),
+              const SizedBox(height: 24),
+            ],
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: const EdgeInsets.only(bottom: 16),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onCancelled?.call();
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                foregroundColor: theme.colorScheme.error,
+              ),
+              child: Text(texts.cancelTitle),
+            ),
+          ],
         );
       },
+    );
+  }
+
+  static Widget _buildOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          border: Border.all(color: theme.dividerColor.withOpacity(0.5)),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: theme.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: theme.primaryColor,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -126,37 +191,18 @@ class ImagePickerService {
     required VoidCallback onCameraSelected,
     required VoidCallback onGallerySelected,
   }) async {
-    return showModalBottomSheet<void>(
-      context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text('Câmera'),
-                onTap: () {
-                  Navigator.pop(context);
-                  onCameraSelected();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Galeria'),
-                onTap: () {
-                  Navigator.pop(context);
-                  onGallerySelected();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.cancel),
-                title: const Text('Cancelar'),
-                onTap: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        );
-      },
+    return showSelectionModal(
+      context,
+      onCameraSelected: onCameraSelected,
+      onGallerySelected: onGallerySelected,
+      title: 'Selecionar imagem',
+      customTexts: const ImagePickerTexts(
+        cameraTitle: 'Câmera',
+        cameraSubtitle: 'Tirar nova foto',
+        galleryTitle: 'Galeria',
+        gallerySubtitle: 'Escolher da galeria',
+        cancelTitle: 'Cancelar',
+      ),
     );
   }
 }

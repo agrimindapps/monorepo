@@ -144,7 +144,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       if (msg.contains('Plant not found locally')) {
         // Skip caching task until its plant is available locally
         if (kDebugMode) {
-          print(
+          debugPrint(
             '⚠️ TasksLocalDataSource: Skipping task ${task.id} - ${task.title} because plant is not cached yet',
           );
         }
@@ -188,11 +188,13 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
   Future<int> deleteTasksByPlantId(String plantId) async {
     try {
       if (kDebugMode) {
-        print('🗑️ TasksLocalDataSource: Deletando tarefas da planta $plantId');
+        debugPrint(
+          '🗑️ TasksLocalDataSource: Deletando tarefas da planta $plantId',
+        );
       }
       final count = await _driftRepo.deleteTasksByPlantId(plantId);
       if (kDebugMode) {
-        print('✅ TasksLocalDataSource: $count tarefas deletadas');
+        debugPrint('✅ TasksLocalDataSource: $count tarefas deletadas');
       }
       return count;
     } catch (e) {

@@ -92,13 +92,15 @@ class OdometerValidator {
             'Valor máximo excedido (${OdometerFormatter.formatOdometerWithUnit(maxOdometer)})',
       );
     }
-    if (odometerValue < vehicle.currentOdometer) {
-      return OdometerValidationResult(
-        isValid: false,
-        errorMessage:
-            'O valor não pode ser menor que a quilometragem atual do veículo (${OdometerFormatter.formatOdometerWithUnit(vehicle.currentOdometer)})',
-      );
-    }
+    // REMOVIDO: Validação que bloqueava lançamentos retroativos
+    // Agora permite registrar odômetro menor que o atual
+    // if (odometerValue < vehicle.currentOdometer) {
+    //   return OdometerValidationResult(
+    //     isValid: false,
+    //     errorMessage:
+    //         'O valor não pode ser menor que a quilometragem atual do veículo...',
+    //   );
+    // }
 
     return const OdometerValidationResult(isValid: true);
   }

@@ -260,7 +260,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
       );
 
       await _saveExportRequest(request);
-      _processExportRequest(request);
+      await _processExportRequest(request);
 
       return Right(request);
     } on StorageException catch (e) {

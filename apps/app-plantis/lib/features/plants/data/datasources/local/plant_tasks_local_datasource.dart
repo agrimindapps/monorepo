@@ -50,7 +50,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
         final now = DateTime.now();
         if (now.difference(_cacheTimestamp!).compareTo(_cacheValidity) < 0) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '🔄 PlantTasksLocalDatasource: Retornando ${_cachedTasks!.length} tasks do cache',
             );
           }
@@ -63,7 +63,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final tasks = taskModels.map((model) => model.toEntity()).toList();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '📥 PlantTasksLocalDatasource: Carregando ${tasks.length} tasks do Drift',
         );
       }
@@ -73,7 +73,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _cacheTimestamp = DateTime.now();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksLocalDatasource: ${tasks.length} tasks carregadas com sucesso',
         );
       }
@@ -81,7 +81,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       return tasks;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao buscar tasks: $e');
+        debugPrint('❌ PlantTasksLocalDatasource: Erro ao buscar tasks: $e');
       }
       throw CacheFailure(
         'Erro ao buscar tarefas do cache local: ${e.toString()}',
@@ -96,7 +96,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final tasks = taskModels.map((model) => model.toEntity()).toList();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '📥 PlantTasksLocalDatasource: ${tasks.length} tasks encontradas para planta $plantId',
         );
       }
@@ -104,7 +104,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       return tasks;
     } catch (e) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '❌ PlantTasksLocalDatasource: Erro ao buscar tasks por plantId: $e',
         );
       }
@@ -121,7 +121,9 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       return taskModel?.toEntity();
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao buscar task por ID: $e');
+        debugPrint(
+          '❌ PlantTasksLocalDatasource: Erro ao buscar task por ID: $e',
+        );
       }
       throw CacheFailure(
         'Erro ao buscar tarefa do cache local: ${e.toString()}',
@@ -133,7 +135,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> addPlantTask(PlantTask task) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantTasksLocalDatasource: Salvando task ${task.id} - ${task.title}',
         );
       }
@@ -143,20 +145,22 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: Task ${task.id} salva com sucesso');
+        debugPrint(
+          '✅ PlantTasksLocalDatasource: Task ${task.id} salva com sucesso',
+        );
       }
     } catch (e) {
       final msg = e.toString();
       if (msg.contains('Plant not found locally')) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} because plant is not cached yet',
           );
         }
         return;
       }
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao salvar task: $e');
+        debugPrint('❌ PlantTasksLocalDatasource: Erro ao salvar task: $e');
       }
       throw CacheFailure(
         'Erro ao salvar tarefa no cache local: ${e.toString()}',
@@ -168,7 +172,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> addPlantTasks(List<PlantTask> tasks) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantTasksLocalDatasource: Salvando ${tasks.length} tasks em lote',
         );
       }
@@ -181,7 +185,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           final msg = e.toString();
           if (msg.contains('Plant not found locally')) {
             if (kDebugMode) {
-              print(
+              debugPrint(
                 '⚠️ PlantTasksLocalDatasource: Skipping task ${task.id} in batch because plant is not cached yet',
               );
             }
@@ -193,13 +197,17 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksLocalDatasource: ${tasks.length} tasks salvas em lote com sucesso',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao salvar tasks em lote: $e');
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantTasksLocalDatasource: Erro ao salvar tasks em lote: $e',
+          );
+        }
       }
       throw CacheFailure(
         'Erro ao salvar tarefas em lote no cache local: ${e.toString()}',
@@ -215,13 +223,15 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksLocalDatasource: Task ${task.id} atualizada com sucesso',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao atualizar task: $e');
+        if (kDebugMode) {
+          debugPrint('❌ PlantTasksLocalDatasource: Erro ao atualizar task: $e');
+        }
       }
       throw CacheFailure(
         'Erro ao atualizar tarefa no cache local: ${e.toString()}',
@@ -236,11 +246,15 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: Task $id marcada como deletada');
+        debugPrint(
+          '✅ PlantTasksLocalDatasource: Task $id marcada como deletada',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao deletar task: $e');
+        if (kDebugMode) {
+          debugPrint('❌ PlantTasksLocalDatasource: Erro ao deletar task: $e');
+        }
       }
       throw CacheFailure(
         'Erro ao deletar tarefa do cache local: ${e.toString()}',
@@ -252,7 +266,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
   Future<void> deletePlantTasksByPlantId(String plantId) async {
     try {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🗑️ PlantTasksLocalDatasource: Deletando todas as tasks da planta $plantId',
         );
       }
@@ -261,15 +275,17 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksLocalDatasource: $deleted tasks da planta $plantId deletadas',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
-          '❌ PlantTasksLocalDatasource: Erro ao deletar tasks por plantId: $e',
-        );
+        if (kDebugMode) {
+          debugPrint(
+            '❌ PlantTasksLocalDatasource: Erro ao deletar tasks por plantId: $e',
+          );
+        }
       }
       throw CacheFailure(
         'Erro ao deletar tarefas por planta do cache local: ${e.toString()}',
@@ -336,11 +352,13 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       _invalidateCache();
 
       if (kDebugMode) {
-        print('✅ PlantTasksLocalDatasource: Cache limpo com sucesso');
+        debugPrint('✅ PlantTasksLocalDatasource: Cache limpo com sucesso');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksLocalDatasource: Erro ao limpar cache: $e');
+        if (kDebugMode) {
+          debugPrint('❌ PlantTasksLocalDatasource: Erro ao limpar cache: $e');
+        }
       }
       throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
     }

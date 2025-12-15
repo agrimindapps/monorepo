@@ -17,12 +17,12 @@ class HapticService {
       _isInitialized = true;
 
       if (kDebugMode) {
-        print('HapticService: Inicializado com sucesso');
+        debugPrint('HapticService: Inicializado com sucesso');
       }
     } catch (e) {
       _isEnabled = false;
       if (kDebugMode) {
-        print('HapticService: Haptic feedback não disponível - $e');
+        debugPrint('HapticService: Haptic feedback não disponível - $e');
       }
     }
   }
@@ -44,7 +44,7 @@ class HapticService {
       await HapticFeedback.lightImpact();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticService.light: Erro - $e');
+        debugPrint('HapticService.light: Erro - $e');
       }
     }
   }
@@ -58,7 +58,7 @@ class HapticService {
       await HapticFeedback.mediumImpact();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticService.medium: Erro - $e');
+        debugPrint('HapticService.medium: Erro - $e');
       }
     }
   }
@@ -72,7 +72,7 @@ class HapticService {
       await HapticFeedback.heavyImpact();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticService.heavy: Erro - $e');
+        debugPrint('HapticService.heavy: Erro - $e');
       }
     }
   }
@@ -86,7 +86,7 @@ class HapticService {
       await HapticFeedback.selectionClick();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticService.selection: Erro - $e');
+        debugPrint('HapticService.selection: Erro - $e');
       }
     }
   }
@@ -100,7 +100,7 @@ class HapticService {
       await HapticFeedback.vibrate();
     } catch (e) {
       if (kDebugMode) {
-        print('HapticService.vibrate: Erro - $e');
+        debugPrint('HapticService.vibrate: Erro - $e');
       }
     }
   }

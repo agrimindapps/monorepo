@@ -233,6 +233,4 @@ class SettingsDialogManager {
       ),
     );
   }
-
-
 }

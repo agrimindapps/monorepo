@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'animated_feedback.dart';
+import 'services/animation_service.dart';
 import 'haptic_service.dart';
 
 /// Serviço de confirmação com feedback visual e háptico
@@ -405,7 +405,7 @@ class _DestructiveConfirmationDialogState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return AnimatedFeedback.shakeAnimation(
+    return AnimationService.shakeAnimation(
       controller: _shakeController,
       child: AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),

@@ -28,7 +28,7 @@ RealtimeSyncService realtimeSyncService(Ref ref) {
   // Escuta eventos e atualiza providers relevantes
   service.changesStream.listen((event) {
     if (kDebugMode) {
-      print('[RealtimeSync] Event received: $event');
+      debugPrint('[RealtimeSync] Event received: $event');
     }
 
     // Invalida providers baseado na coleção que mudou

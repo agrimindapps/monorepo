@@ -49,7 +49,9 @@ class _AccountInfoSectionState extends ConsumerState<AccountInfoSection> {
                   },
                   (_) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Foto de perfil atualizada!')),
+                      const SnackBar(
+                        content: Text('Foto de perfil atualizada!'),
+                      ),
                     );
                   },
                 );

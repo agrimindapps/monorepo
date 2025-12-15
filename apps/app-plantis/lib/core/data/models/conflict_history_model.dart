@@ -13,6 +13,18 @@ class ConflictHistoryModel extends BaseSyncModel {
 
   final String modelId;
 
+  /// Versão local do registro no momento do conflito
+  final int localVersion;
+
+  /// Versão remota do registro no momento do conflito
+  final int remoteVersion;
+
+  /// Timestamp quando o conflito ocorreu (milliseconds)
+  final int occurredAt;
+
+  /// Timestamp quando o conflito foi resolvido (milliseconds), null se não resolvido
+  final int? resolvedAt;
+
   final String resolutionStrategy;
 
   final Map<String, dynamic> localData;
@@ -29,6 +41,10 @@ class ConflictHistoryModel extends BaseSyncModel {
     this.updatedAtMs,
     required this.modelType,
     required this.modelId,
+    required this.localVersion,
+    required this.remoteVersion,
+    required this.occurredAt,
+    this.resolvedAt,
     required this.resolutionStrategy,
     required this.localData,
     required this.remoteData,
@@ -53,6 +69,8 @@ class ConflictHistoryModel extends BaseSyncModel {
     String? id,
     required String modelType,
     required String modelId,
+    required int localVersion,
+    required int remoteVersion,
     required String resolutionStrategy,
     required Map<String, dynamic> localData,
     required Map<String, dynamic> remoteData,
@@ -61,12 +79,18 @@ class ConflictHistoryModel extends BaseSyncModel {
     String? userId,
   }) {
     final now = DateTime.now();
+    final nowMs = now.millisecondsSinceEpoch;
+
     return ConflictHistoryModel(
-      id: id ?? now.millisecondsSinceEpoch.toString(),
-      createdAtMs: now.millisecondsSinceEpoch,
-      updatedAtMs: now.millisecondsSinceEpoch,
+      id: id ?? nowMs.toString(),
+      createdAtMs: nowMs,
+      updatedAtMs: nowMs,
       modelType: modelType,
       modelId: modelId,
+      localVersion: localVersion,
+      remoteVersion: remoteVersion,
+      occurredAt: nowMs,
+      resolvedAt: null, // Null até ser resolvido
       resolutionStrategy: resolutionStrategy,
       localData: localData,
       remoteData: remoteData,
@@ -81,6 +105,10 @@ class ConflictHistoryModel extends BaseSyncModel {
     'id': id,
     'modelType': modelType,
     'modelId': modelId,
+    'localVersion': localVersion,
+    'remoteVersion': remoteVersion,
+    'occurredAt': occurredAt,
+    'resolvedAt': resolvedAt,
     'resolutionStrategy': resolutionStrategy,
     'localData': localData,
     'remoteData': remoteData,
@@ -97,6 +125,10 @@ class ConflictHistoryModel extends BaseSyncModel {
       ...firebaseTimestampFields,
       'model_type': modelType,
       'model_id': modelId,
+      'local_version': localVersion,
+      'remote_version': remoteVersion,
+      'occurred_at': occurredAt,
+      'resolved_at': resolvedAt,
       'resolution_strategy': resolutionStrategy,
       'local_data': localData,
       'remote_data': remoteData,
@@ -118,6 +150,10 @@ class ConflictHistoryModel extends BaseSyncModel {
     String? moduleName,
     String? modelType,
     String? modelId,
+    int? localVersion,
+    int? remoteVersion,
+    int? occurredAt,
+    int? resolvedAt,
     String? resolutionStrategy,
     Map<String, dynamic>? localData,
     Map<String, dynamic>? remoteData,
@@ -130,6 +166,10 @@ class ConflictHistoryModel extends BaseSyncModel {
       updatedAtMs: (updatedAt ?? this.updatedAt)?.millisecondsSinceEpoch,
       modelType: modelType ?? this.modelType,
       modelId: modelId ?? this.modelId,
+      localVersion: localVersion ?? this.localVersion,
+      remoteVersion: remoteVersion ?? this.remoteVersion,
+      occurredAt: occurredAt ?? this.occurredAt,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
       resolutionStrategy: resolutionStrategy ?? this.resolutionStrategy,
       localData: localData ?? this.localData,
       remoteData: remoteData ?? this.remoteData,

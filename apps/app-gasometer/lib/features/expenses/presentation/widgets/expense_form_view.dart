@@ -94,41 +94,38 @@ class ExpenseFormView extends ConsumerWidget {
             icon: Icons.monetization_on,
             child: Column(
               children: [
-                FormFieldRow.standard(
-                  children: [
-                    if (isReadOnly)
-                      ReadOnlyField(
-                        label: 'Valor Total',
-                        value: 'R\$ ${state.amount.toStringAsFixed(2)}',
-                        icon: Icons.attach_money,
-                      )
-                    else
-                      AmountFormField(
-                        controller: notifier.amountController,
-                        focusNode: focusNodes['amount'],
-                        label: 'Valor Total',
-                        required: true,
-                        onChanged: (value) {},
-                      ),
-                    if (isReadOnly)
-                      ReadOnlyField(
-                        label: 'Quilometragem Atual',
-                        value: state.odometer > 0 
-                            ? '${NumberFormat('#,##0.00', 'pt_BR').format(state.odometer)} km'
-                            : 'Não informado',
-                        icon: Icons.speed,
-                      )
-                    else
-                      OdometerField(
-                        controller: notifier.odometerController,
-                        focusNode: focusNodes['odometer'],
-                        label: 'Quilometragem Atual',
-                        hint: ExpenseConstants.odometerPlaceholder,
-                        currentOdometer: state.vehicle?.currentOdometer,
-                        onChanged: (value) {},
-                      ),
-                  ],
-                ),
+                if (isReadOnly)
+                  ReadOnlyField(
+                    label: 'Valor Total',
+                    value: 'R\$ ${state.amount.toStringAsFixed(2)}',
+                    icon: Icons.attach_money,
+                  )
+                else
+                  AmountFormField(
+                    controller: notifier.amountController,
+                    focusNode: focusNodes['amount'],
+                    label: 'Valor Total',
+                    required: true,
+                    onChanged: (value) {},
+                  ),
+                const SizedBox(height: GasometerDesignTokens.spacingMd),
+                if (isReadOnly)
+                  ReadOnlyField(
+                    label: 'Quilometragem Atual',
+                    value: state.odometer > 0 
+                        ? '${NumberFormat('#,##0.00', 'pt_BR').format(state.odometer)} km'
+                        : 'Não informado',
+                    icon: Icons.speed,
+                  )
+                else
+                  OdometerField(
+                    controller: notifier.odometerController,
+                    focusNode: focusNodes['odometer'],
+                    label: 'Quilometragem Atual',
+                    hint: ExpenseConstants.odometerPlaceholder,
+                    currentOdometer: state.vehicle?.currentOdometer,
+                    onChanged: (value) {},
+                  ),
               ],
             ),
           ),

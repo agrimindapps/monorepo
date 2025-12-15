@@ -148,6 +148,21 @@ class GasometerTheme {
         borderSide: const BorderSide(color: Color(0xFFF44336), width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      hintStyle: TextStyle(
+        color: Colors.grey.shade500,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
+      labelStyle: const TextStyle(
+        color: Color(0xFF616161),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      floatingLabelStyle: const TextStyle(
+        color: GasometerColors.primary,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
     ),
   );
   
@@ -292,9 +307,21 @@ class GasometerTheme {
         borderSide: const BorderSide(color: Color(0xFFF44336), width: 2),
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      // Ensure text color is white in dark mode
-      labelStyle: const TextStyle(color: Color(0xFFE2E3E3)),
-      hintStyle: TextStyle(color: Colors.grey.shade600),
+      hintStyle: TextStyle(
+        color: Colors.grey.shade600,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+      ),
+      labelStyle: const TextStyle(
+        color: Color(0xFFB0B0B0),
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+      ),
+      floatingLabelStyle: const TextStyle(
+        color: GasometerColors.primaryLight,
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+      ),
     ),
   );
   

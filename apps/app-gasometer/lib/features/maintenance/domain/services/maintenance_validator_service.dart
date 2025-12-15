@@ -123,17 +123,19 @@ class MaintenanceValidatorService {
     if (initialOdometer != null && odometer < initialOdometer) {
       return 'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)';
     }
-    if (currentOdometer != null && odometer < currentOdometer - 5000) {
-      return 'Odômetro muito abaixo do atual';
-    }
-    if (lastMaintenanceOdometer != null) {
-      if (odometer < lastMaintenanceOdometer) {
-        return 'Odômetro menor que a última manutenção';
-      }
-      if (odometer - lastMaintenanceOdometer > 50000) {
-        return 'Diferença muito grande desde a última manutenção';
-      }
-    }
+    // REMOVIDO: Validação que bloqueava odômetro muito abaixo do atual
+    // Agora permite lançamentos retroativos
+    
+    // REMOVIDO: Validação que bloqueava odômetro menor que última manutenção
+    // Agora permite registros fora de ordem cronológica
+    // if (lastMaintenanceOdometer != null) {
+    //   if (odometer < lastMaintenanceOdometer) {
+    //     return 'Odômetro menor que a última manutenção';
+    //   }
+    //   if (odometer - lastMaintenanceOdometer > 50000) {
+    //     return 'Diferença muito grande desde a última manutenção';
+    //   }
+    // }
 
     return null;
   }

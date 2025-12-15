@@ -58,7 +58,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
   Future<void> loadTasksForPlant(String plantId) async {
     if (_repository == null) {
       if (kDebugMode) {
-        print('⚠️ PlantTaskNotifier: Repository not available');
+        debugPrint('⚠️ PlantTaskNotifier: Repository not available');
       }
       return;
     }
@@ -68,7 +68,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
     try {
       if (kDebugMode) {
-        print('📥 PlantTaskNotifier: Loading tasks for plant $plantId');
+        debugPrint('📥 PlantTaskNotifier: Loading tasks for plant $plantId');
       }
 
       final result = await _repository.getPlantTasksByPlantId(plantId);
@@ -93,7 +93,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           );
 
           if (kDebugMode) {
-            print('✅ PlantTaskNotifier: ${tasks.length} tasks loaded');
+            debugPrint('✅ PlantTaskNotifier: ${tasks.length} tasks loaded');
           }
         },
       );
@@ -148,7 +148,9 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
 
     try {
       if (kDebugMode) {
-        print('🌱 PlantTaskNotifier: Generating tasks for plant ${plant.id}');
+        debugPrint(
+          '🌱 PlantTaskNotifier: Generating tasks for plant ${plant.id}',
+        );
       }
 
       final tasks = _taskGenerationService.generateTasksForPlant(plant);
@@ -187,7 +189,7 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
           currentState.copyWith(plantTasks: updatedTasks, isLoading: false),
         );
 
-        _updateTaskStatuses(plant.id);
+        await _updateTaskStatuses(plant.id);
       }
     } catch (e) {
       state = AsyncValue.data(
@@ -311,7 +313,9 @@ class PlantTaskNotifier extends _$PlantTaskNotifier {
       await _updateTaskStatuses(plantId);
 
       if (kDebugMode) {
-        print('✅ PlantTaskNotifier: Task $taskId completed on $completionDate');
+        debugPrint(
+          '✅ PlantTaskNotifier: Task $taskId completed on $completionDate',
+        );
       }
     } catch (e) {
       final currentState = state.value ?? const PlantTaskState();

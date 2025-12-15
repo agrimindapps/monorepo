@@ -383,7 +383,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage>
 
       if (canShow) {
         if (!context.mounted) return;
-        final success = await appRatingService.showRatingDialog(context: context);
+        final success = await appRatingService.showRatingDialog(
+          context: context,
+        );
 
         if (context.mounted && !success) {
           await appRatingService.openAppStore();

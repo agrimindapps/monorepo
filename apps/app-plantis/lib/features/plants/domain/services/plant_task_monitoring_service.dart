@@ -33,14 +33,14 @@ class PlantTaskMonitoringService {
       _recordEvent(PlantTaskEvent.systemCheck());
 
       if (kDebugMode) {
-        print('🔍 PlantTaskMonitoring: Verificação periódica executada');
+        debugPrint('🔍 PlantTaskMonitoring: Verificação periódica executada');
       }
     });
 
     _recordEvent(PlantTaskEvent.monitoringStarted());
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔍 PlantTaskMonitoring: Monitoramento iniciado com intervalo de ${interval.inMinutes} minutos',
       );
     }
@@ -54,7 +54,7 @@ class PlantTaskMonitoringService {
     _recordEvent(PlantTaskEvent.monitoringStopped());
 
     if (kDebugMode) {
-      print('🔍 PlantTaskMonitoring: Monitoramento parado');
+      debugPrint('🔍 PlantTaskMonitoring: Monitoramento parado');
     }
   }
 
@@ -67,7 +67,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔍 PlantTaskMonitoring: Monitoramento ${enabled ? 'habilitado' : 'desabilitado'}',
       );
     }
@@ -93,7 +93,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '📝 PlantTaskMonitoring: Task criada - ${task.title} (${task.type.displayName})',
       );
     }
@@ -122,7 +122,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print('✅ PlantTaskMonitoring: Task completada - ${task.title}');
+      debugPrint('✅ PlantTaskMonitoring: Task completada - ${task.title}');
     }
   }
 
@@ -141,7 +141,7 @@ class PlantTaskMonitoringService {
     _recordAlert(PlantTaskAlert.operationError(operation, error));
 
     if (kDebugMode) {
-      print('❌ PlantTaskMonitoring: Erro em $operation - $error');
+      debugPrint('❌ PlantTaskMonitoring: Erro em $operation - $error');
     }
   }
 
@@ -169,7 +169,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔄 PlantTaskMonitoring: Sync $syncType - ${success ? 'sucesso' : 'falha'} ($itemCount items)',
       );
     }
@@ -198,7 +198,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '✅ PlantTaskMonitoring: Validação em lote - ${validation.validTasks}/${validation.totalTasks} válidas',
       );
     }
@@ -217,7 +217,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🏥 PlantTaskMonitoring: Health score - ${report.healthScore.toStringAsFixed(1)}/100',
       );
     }
@@ -229,7 +229,7 @@ class PlantTaskMonitoringService {
     Map<String, Plant> plantsById,
   ) {
     if (kDebugMode) {
-      print('🔍 PlantTaskMonitoring: Executando diagnóstico completo');
+      debugPrint('🔍 PlantTaskMonitoring: Executando diagnóstico completo');
     }
 
     final validation = PlantTaskValidationService.validatePlantTasks(
@@ -261,7 +261,7 @@ class PlantTaskMonitoringService {
     _recordEvent(PlantTaskEvent.diagnosticCompleted(diagnostic));
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔍 PlantTaskMonitoring: Diagnóstico concluído - Sistema ${diagnostic.isHealthy ? 'saudável' : 'com problemas'}',
       );
     }
@@ -296,7 +296,7 @@ class PlantTaskMonitoringService {
     }
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🧹 PlantTaskMonitoring: Eventos antigos limpos (${_events.length} eventos, ${_alerts.length} alertas)',
       );
     }
@@ -311,7 +311,7 @@ class PlantTaskMonitoringService {
     _recordEvent(PlantTaskEvent.metricsReset());
 
     if (kDebugMode) {
-      print('🔄 PlantTaskMonitoring: Métricas resetadas');
+      debugPrint('🔄 PlantTaskMonitoring: Métricas resetadas');
     }
   }
 
@@ -347,7 +347,7 @@ class PlantTaskMonitoringService {
     _recordEvent(PlantTaskEvent.serviceDisposed());
 
     if (kDebugMode) {
-      print('🔍 PlantTaskMonitoring: Serviço finalizado');
+      debugPrint('🔍 PlantTaskMonitoring: Serviço finalizado');
     }
   }
 }

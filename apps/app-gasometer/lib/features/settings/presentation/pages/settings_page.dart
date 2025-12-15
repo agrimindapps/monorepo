@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
@@ -150,6 +151,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           SupportSection(
             onFeedbackTap: _showFeedbackDialog,
             onRateTap: _showRateAppDialog,
+            onWebAccessTap: kIsWeb ? null : _openWebVersion,
           ),
           const SizedBox(height: 16),
 
@@ -316,5 +318,27 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       context: context,
       builder: (context) => const FeedbackDialog(),
     );
+  }
+
+  Future<void> _openWebVersion() async {
+    const url = 'https://gasometer.agrimind.com.br';
+    
+    try {
+      final uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+      } else {
+        if (mounted) {
+          _showSnackBar('Não foi possível abrir o navegador');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('Erro ao abrir a versão web');
+      }
+    }
   }
 }

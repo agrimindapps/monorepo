@@ -43,7 +43,9 @@ class TaskHistoryRepositoryImpl implements TaskHistoryRepository {
 
         return null;
       } catch (e) {
-        print('Auth attempt $attempt/$maxRetries failed: $e');
+        if (kDebugMode) {
+          debugPrint('Auth attempt $attempt/$maxRetries failed: $e');
+        }
       }
     }
     return null;

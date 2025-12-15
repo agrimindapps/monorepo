@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../features/image/domain/services/image_picker_service.dart';
 import '../error/unified_error_handler.dart';
 
 /// ✅ UX ENHANCEMENT: Enhanced image picker with progress, retry, and better feedback
@@ -436,70 +437,11 @@ class _EnhancedImagePickerState extends State<EnhancedImagePicker>
   }
 
   void _showImageSourceOptions() {
-    showModalBottomSheet<void>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder:
-          (context) => SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Selecionar imagem',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildSourceOption(
-                    icon: Icons.camera_alt,
-                    title: 'Câmera',
-                    subtitle: 'Tirar uma nova foto',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickImage(ImageSource.camera);
-                    },
-                  ),
-                  _buildSourceOption(
-                    icon: Icons.photo_library,
-                    title: 'Galeria',
-                    subtitle: 'Escolher da galeria',
-                    onTap: () {
-                      Navigator.pop(context);
-                      _pickImage(ImageSource.gallery);
-                    },
-                  ),
-                  const SizedBox(height: 8),
-                ],
-              ),
-            ),
-          ),
-    );
-  }
-
-  Widget _buildSourceOption({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required VoidCallback onTap,
-  }) {
-    return ListTile(
-      leading: CircleAvatar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-        child: Icon(
-          icon,
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-        ),
-      ),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      onTap: onTap,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+    ImagePickerService.showSelectionModal(
+      context,
+      onCameraSelected: () => _pickImage(ImageSource.camera),
+      onGallerySelected: () => _pickImage(ImageSource.gallery),
+      title: 'Selecionar imagem',
     );
   }
 

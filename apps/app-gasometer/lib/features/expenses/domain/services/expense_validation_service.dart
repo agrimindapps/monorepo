@@ -64,10 +64,8 @@ class ExpenseValidationService {
     if (!vehicle.isActive) {
       errors['vehicle'] = 'Veículo está inativo';
     }
-    if (record.odometer < vehicle.currentOdometer - 1000) {
-      errors['odometer'] =
-          'Odômetro muito abaixo do atual do veículo (${vehicle.currentOdometer.toStringAsFixed(0)} km)';
-    }
+    // REMOVIDO: Validação que bloqueava odômetro menor que o atual
+    // Agora permite lançamentos retroativos
   }
 
   /// Valida sequência lógica do odômetro
@@ -83,11 +81,19 @@ class ExpenseValidationService {
       ..sort((a, b) => b.date.compareTo(a.date));
 
     final lastExpense = sortedExpenses.first;
+    
+    // ALTERADO: Agora apenas avisa, não bloqueia lançamentos retroativos
     if (record.odometer < lastExpense.odometer) {
-      errors['odometer'] =
-          'Odômetro menor que a última despesa (${lastExpense.odometer.toStringAsFixed(0)} km)';
+      warnings['odometer'] =
+          'Lançamento retroativo: Odômetro menor que a última despesa (${lastExpense.odometer.toStringAsFixed(0)} km). Este registro não atualizará a quilometragem do veículo.';
+    }
+    
+    if (record.odometer < vehicle.currentOdometer) {
+      warnings['odometer'] =
+          'Lançamento retroativo: Odômetro abaixo do atual (${vehicle.currentOdometer.toStringAsFixed(0)} km). Este registro não atualizará a quilometragem do veículo.';
       return;
     }
+    
     final difference = record.odometer - lastExpense.odometer;
     final daysDifference =
         record.date.difference(lastExpense.date).inDays.abs();

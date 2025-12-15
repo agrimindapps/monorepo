@@ -26,8 +26,9 @@ class SubscriptionInfoCard extends StatelessWidget {
     final totalDuration = isLifetime
         ? 0
         : expirationDate.difference(purchaseDate ?? now).inDays;
-    final daysRemaining =
-        isLifetime ? 0 : expirationDate.difference(now).inDays;
+    final daysRemaining = isLifetime
+        ? 0
+        : expirationDate.difference(now).inDays;
 
     // Evita divisão por zero e garante range 0.0 - 1.0
     final progress = !isLifetime && totalDuration > 0

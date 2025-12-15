@@ -111,7 +111,9 @@ class Plant extends BaseSyncEntity {
         ),
       );
     } catch (e) {
-      print('Error converting PlantaModel to Plant: $e');
+      if (kDebugMode) {
+        debugPrint('Error converting PlantaModel to Plant: $e');
+      }
 
       // Create fallback plant with corrupted data marker
       return Plant(

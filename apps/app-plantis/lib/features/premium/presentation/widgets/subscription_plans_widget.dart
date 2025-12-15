@@ -339,35 +339,6 @@ class _PlantisSubscriptionPlansWidgetState
     );
   }
 
-  /// Constrói o título do plano (Legacy - não usado no novo layout vertical)
-  Widget _buildPlanTitle(String title, String subtitle) {
-    return Column(
-      children: [
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        if (subtitle.isNotEmpty) ...[
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: PlantisColors.primary.withValues(alpha: 0.9),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
   /// Constrói o preço do plano
   Widget _buildPlanPrice(ProductInfo product) {
     final isYearly =

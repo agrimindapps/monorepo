@@ -89,12 +89,14 @@ class OdometerValidationService {
     String? currentOdometerId,
   }) async {
     
+    // ALTERADO: Agora apenas avisa sobre lançamentos retroativos, não bloqueia
     if (vehicle.currentOdometer - odometerValue > maxAllowedRollbackKm) {
       return OdometerContextValidationResult(
-        isValid: false,
-        errorMessage: 'O valor está muito abaixo da quilometragem atual do veículo. '
-            'Máximo de ${maxAllowedRollbackKm.toInt()} km de diferença permitido para correções.',
+        isValid: true, // Permite mas avisa
+        errorMessage: 'Lançamento retroativo: O valor está ${(vehicle.currentOdometer - odometerValue).toInt()} km abaixo da quilometragem atual. '
+            'Este registro não atualizará a quilometragem do veículo.',
         errorType: ValidationErrorType.significantRollback,
+        isWarning: true, // Apenas aviso
       );
     }
     

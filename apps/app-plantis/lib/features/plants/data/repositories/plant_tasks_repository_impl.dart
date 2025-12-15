@@ -49,7 +49,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         return null;
       } catch (e) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             'PlantTasksRepository: Auth attempt $attempt/$maxRetries failed: $e',
           );
         }
@@ -81,7 +81,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRepository: Retornando ${localTasks.length} plant tasks do cache local',
         );
       }
@@ -89,12 +89,12 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Right(localTasks);
     } on CacheFailure catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRepository: Cache failure: ${e.message}');
+        debugPrint('❌ PlantTasksRepository: Cache failure: ${e.message}');
       }
       return Left(e);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRepository: Unexpected error: $e');
+        debugPrint('❌ PlantTasksRepository: Unexpected error: $e');
       }
       return Left(
         UnknownFailure(
@@ -120,7 +120,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRepository: Retornando ${localTasks.length} tasks para planta $plantId',
         );
       }
@@ -169,7 +169,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantTasksRepository: Adicionando task ${task.id} - ${task.title}',
         );
       }
@@ -186,7 +186,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           await localDatasource.updatePlantTask(remoteTask.toEntity());
 
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ PlantTasksRepository: Task ${task.id} salva remotamente com ID ${remoteTask.id}',
             );
           }
@@ -194,7 +194,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           return Right(remoteTask.toEntity());
         } catch (e) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ PlantTasksRepository: Falha ao salvar remotamente, será sincronizada depois: $e',
             );
           }
@@ -202,7 +202,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         }
       } else {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '📴 PlantTasksRepository: Offline, task salva apenas localmente',
           );
         }
@@ -210,12 +210,12 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
     } on CacheFailure catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRepository: CacheFailure: ${e.message}');
+        debugPrint('❌ PlantTasksRepository: CacheFailure: ${e.message}');
       }
       return Left(e);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRepository: Erro inesperado: $e');
+        debugPrint('❌ PlantTasksRepository: Erro inesperado: $e');
       }
       return Left(
         UnknownFailure('Erro inesperado ao adicionar tarefa: ${e.toString()}'),
@@ -234,14 +234,14 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '💾 PlantTasksRepository: Adicionando ${tasks.length} tasks em lote',
         );
       }
       await localDatasource.addPlantTasks(tasks);
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRepository: ${tasks.length} tasks adicionadas em lote com sucesso',
         );
       }
@@ -249,12 +249,12 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return Right(tasks);
     } on CacheFailure catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRepository: CacheFailure: ${e.message}');
+        debugPrint('❌ PlantTasksRepository: CacheFailure: ${e.message}');
       }
       return Left(e);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ PlantTasksRepository: Erro inesperado: $e');
+        debugPrint('❌ PlantTasksRepository: Erro inesperado: $e');
       }
       return Left(
         UnknownFailure('Erro inesperado ao adicionar tarefas: ${e.toString()}'),
@@ -311,7 +311,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🗑️ PlantTasksRepository: Deletando todas as tasks da planta $plantId',
         );
       }
@@ -320,13 +320,15 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       try {
         await localDatasource.deletePlantTasksByPlantId(plantId);
         if (kDebugMode) {
-          print(
+          debugPrint(
             '✅ PlantTasksRepository: PlantTasks locais da planta $plantId deletadas',
           );
         }
       } catch (e) {
         if (kDebugMode) {
-          print('⚠️ Erro ao deletar PlantTasks locais: $e');
+          if (kDebugMode) {
+            debugPrint('⚠️ Erro ao deletar PlantTasks locais: $e');
+          }
         }
       }
 
@@ -337,13 +339,15 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
             plantId,
           );
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ PlantTasksRepository: $deletedCount Tasks locais (Drift) da planta $plantId deletadas',
             );
           }
         } catch (e) {
           if (kDebugMode) {
-            print('⚠️ Erro ao deletar Tasks locais (Drift): $e');
+            if (kDebugMode) {
+              debugPrint('⚠️ Erro ao deletar Tasks locais (Drift): $e');
+            }
           }
         }
       }
@@ -356,7 +360,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       return tasksResult.fold(
         (failure) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ Erro ao buscar tasks do UnifiedSyncManager: ${failure.message}',
             );
           }
@@ -369,7 +373,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
               .toList();
 
           if (kDebugMode) {
-            print(
+            debugPrint(
               '🗑️ Encontradas ${plantTasks.length} tasks (UnifiedSyncManager) para deletar da planta $plantId',
             );
           }
@@ -381,15 +385,17 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
             if (deleteResult.isLeft()) {
               if (kDebugMode) {
-                print('⚠️ Erro ao deletar task ${task.id}');
+                debugPrint('⚠️ Erro ao deletar task ${task.id}');
               }
             }
           }
 
           if (kDebugMode) {
-            print(
-              '✅ PlantTasksRepository: ${plantTasks.length} tasks da planta $plantId deletadas com sucesso',
-            );
+            if (kDebugMode) {
+              debugPrint(
+                '✅ PlantTasksRepository: ${plantTasks.length} tasks da planta $plantId deletadas com sucesso',
+              );
+            }
           }
 
           return const Right(null);
@@ -521,7 +527,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
 
       if (tasksToSync.isNotEmpty) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '🔄 PlantTasksRepository: Sincronizando ${tasksToSync.length} plant tasks',
           );
         }
@@ -534,15 +540,17 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
           }
 
           if (kDebugMode) {
-            print(
+            debugPrint(
               '✅ PlantTasksRepository: ${tasksToSync.length} plant tasks sincronizadas',
             );
           }
         } catch (e) {
           if (kDebugMode) {
-            print(
-              '❌ PlantTasksRepository: Erro ao sincronizar plant tasks: $e',
-            );
+            if (kDebugMode) {
+              debugPrint(
+                '❌ PlantTasksRepository: Erro ao sincronizar plant tasks: $e',
+              );
+            }
           }
           return Left(
             ServerFailure('Erro ao sincronizar mudanças: ${e.toString()}'),
@@ -564,7 +572,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
     try {
       final remoteTasks = await remoteDatasource.getPlantTasks(userId);
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRepository: Background sync completed - ${remoteTasks.length} plant tasks',
         );
       }
@@ -573,7 +581,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ PlantTasksRepository: Background sync failed: $e');
+        debugPrint('⚠️ PlantTasksRepository: Background sync failed: $e');
       }
     }
   }
@@ -588,7 +596,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
         userId,
       );
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ PlantTasksRepository: Background sync for plant $plantId completed - ${remoteTasks.length} tasks',
         );
       }
@@ -597,7 +605,7 @@ class PlantTasksRepositoryImpl implements PlantTasksRepository {
       }
     } catch (e) {
       if (kDebugMode) {
-        print(
+        debugPrint(
           '⚠️ PlantTasksRepository: Background sync for plant $plantId failed: $e',
         );
       }

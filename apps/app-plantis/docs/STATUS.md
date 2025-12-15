@@ -19,15 +19,15 @@
 |---------|--------|---------|--------|
 | [auth](./features/auth/) | 9/10 | 0 | ✅ Estável |
 | [premium](./features/premium/) | 9/10 | 1 | ✅ Estável |
-| [settings](./features/settings/) | 8/10 | 1 | ✅ Estável |
-| [account](./features/account/) | 8/10 | 1 | ✅ Estável |
+| [settings](./features/settings/) | 8/10 | 0 | ✅ Estável |
+| [account](./features/account/) | 8/10 | 0 | ✅ Estável |
 
 ### Infraestrutura
 | Feature | Health | Backlog | Status |
 |---------|--------|---------|--------|
-| [sync](./features/sync/) | 8/10 | 1 | ✅ Estável |
+| [sync](./features/sync/) | 9/10 | 0 | ✅ Estável |
 | [data_export](./features/data_export/) | 7/10 | 0 | ✅ Estável |
-| [device_management](./features/device_management/) | 8/10 | 1 | ✅ Estável |
+| [device_management](./features/device_management/) | 8/10 | 0 | ✅ Estável |
 | [license](./features/license/) | 8/10 | 0 | ✅ Estável |
 | [legal](./features/legal/) | 8/10 | 0 | ✅ Estável |
 
@@ -36,8 +36,8 @@
 ## 🔥 Em Andamento
 
 | Feature | ID | Tarefa | Progresso |
-|---------|-----|--------|-----------||
-| - | - | Nenhuma tarefa em andamento | - |
+|---------|-----|--------|-----------|
+| core | PLT-QUALITY-001 | Remover prints em produção | 🆕 Novo |
 
 ---
 
@@ -45,25 +45,29 @@
 
 | Prioridade | Feature | ID | Tarefa |
 |------------|---------|-----|--------|
-
-| 🟡 Média | shared | PLT-005 | Refatorar UnifiedFeedbackSystem (God Class 614L) |
+| 🔴 Alta | core | PLT-QUALITY-001 | Remover 516 prints sem proteção |
+| 🔴 Alta | core | PLT-QUALITY-002 | Corrigir 124 only_throw_errors |
 | 🟡 Média | home | PLT-HOME-001 | Implementar Firebase Remote Config |
-|  Baixa | - | PLT-008 | Corrigir 5 warnings do analyzer |
+| 🟡 Média | core | PLT-QUALITY-003 | Refatorar 55 classes estáticas |
+| 🟡 Média | core | PLT-REFACTOR-001 | Refatorar 15 God Classes (>700L) |
 
 ---
 
 ## 📈 Métricas do Projeto
 
-| Métrica | Valor |
-|---------|-------|
-| **Features** | 12 |
-| **Arquivos .dart** | 609 (407 em features) |
-| **Health Score** | 10/10 |
-| **Erros de análise** | 0 |
-| **Warnings** | 5 |
-| **@riverpod providers** | 336 ✅ (+3) |
-| **ChangeNotifiers** | 0 ✅ (legacy removidos) |
-| **TODOs pendentes** | 71 |
+| Métrica | Valor | Status |
+|---------|-------|--------|
+| **Features** | 12 | ✅ |
+| **Arquivos .dart** | 609 | - |
+| **Health Score** | 10/10 | ✅ |
+| **Erros de análise** | 0 | ✅ |
+| **Issues (info)** | 307 | ⚠️ |
+| **@riverpod providers** | 336 | ✅ |
+| **ChangeNotifiers** | 0 | ✅ |
+| **TODOs pendentes** | 7 | ✅ (↓64) |
+| **Prints sem proteção** | 516 | 🔴 |
+| **Throws incorretos** | 124 | 🔴 |
+| **God Classes** | 15 | ⚠️ |
 
 ---
 

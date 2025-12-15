@@ -52,7 +52,7 @@ class TasksRepositoryImpl implements TasksRepository {
         return null;
       } catch (e) {
         if (kDebugMode) {
-          print('Auth attempt $attempt/$maxRetries failed: $e');
+          debugPrint('Auth attempt $attempt/$maxRetries failed: $e');
         }
         if (attempt >= maxRetries) {
           return null;
@@ -120,7 +120,7 @@ class TasksRepositoryImpl implements TasksRepository {
           return Right(filteredRemoteTasks.cast<Task>());
         } catch (e) {
           if (kDebugMode) {
-            print('❌ TasksRepository: Remote fetch failed: $e');
+            debugPrint('❌ TasksRepository: Remote fetch failed: $e');
           }
           return Left(
             ServerFailure('Falha ao sincronizar tarefas: ${e.toString()}'),
@@ -164,7 +164,9 @@ class TasksRepositoryImpl implements TasksRepository {
           break;
         case SyncStrategy.disabled:
           if (kDebugMode) {
-            print('🚫 TasksRepository: Sync skipped due to poor connection');
+            debugPrint(
+              '🚫 TasksRepository: Sync skipped due to poor connection',
+            );
           }
           return;
       }
@@ -203,7 +205,7 @@ class TasksRepositoryImpl implements TasksRepository {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('⚠️ TasksRepository: Error determining sync strategy: $e');
+        debugPrint('⚠️ TasksRepository: Error determining sync strategy: $e');
       }
       return SyncStrategy.conservative; // Safe fallback
     }
@@ -218,13 +220,15 @@ class TasksRepositoryImpl implements TasksRepository {
       stopwatch.stop();
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ TasksRepository: Aggressive sync completed in ${stopwatch.elapsedMilliseconds}ms',
         );
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ TasksRepository: Aggressive sync failed: $e');
+        if (kDebugMode) {
+          debugPrint('❌ TasksRepository: Aggressive sync failed: $e');
+        }
       }
     }
   }
@@ -238,11 +242,13 @@ class TasksRepositoryImpl implements TasksRepository {
       await localDataSource.cacheTasks(remoteTasks);
 
       if (kDebugMode) {
-        print('✅ TasksRepository: Conservative sync completed');
+        debugPrint('✅ TasksRepository: Conservative sync completed');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ TasksRepository: Conservative sync failed: $e');
+        if (kDebugMode) {
+          debugPrint('❌ TasksRepository: Conservative sync failed: $e');
+        }
       }
     }
   }
@@ -251,11 +257,13 @@ class TasksRepositoryImpl implements TasksRepository {
   void _performMinimalSync(String userId) async {
     try {
       if (kDebugMode) {
-        print('⏸️ TasksRepository: Minimal sync - skipping for better UX');
+        debugPrint('⏸️ TasksRepository: Minimal sync - skipping for better UX');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ TasksRepository: Minimal sync failed: $e');
+        if (kDebugMode) {
+          debugPrint('❌ TasksRepository: Minimal sync failed: $e');
+        }
       }
     }
   }
@@ -267,12 +275,12 @@ class TasksRepositoryImpl implements TasksRepository {
         .then((remoteTasks) {
           localDataSource.cacheTasks(remoteTasks);
           if (kDebugMode) {
-            print('✅ TasksRepository: Basic sync completed');
+            debugPrint('✅ TasksRepository: Basic sync completed');
           }
         })
         .catchError((Object e) {
           if (kDebugMode) {
-            print('❌ TasksRepository: Basic sync failed: $e');
+            debugPrint('❌ TasksRepository: Basic sync failed: $e');
           }
         });
   }

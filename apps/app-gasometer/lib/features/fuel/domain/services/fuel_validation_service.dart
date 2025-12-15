@@ -60,18 +60,23 @@ class FuelValidationService {
     Map<String, String> errors,
     Map<String, String> warnings,
   ) {
+    // ALTERADO: Agora apenas avisa se odômetro está muito abaixo, não bloqueia
     if (record.odometer < vehicle.currentOdometer - 100) {
-      errors['odometer'] =
-          'Odômetro muito abaixo do atual (${vehicle.currentOdometer.toStringAsFixed(0)} km)';
+      warnings['odometer'] =
+          'Lançamento retroativo: Odômetro abaixo do atual (${vehicle.currentOdometer.toStringAsFixed(0)} km). Este registro não atualizará a quilometragem do veículo.';
     }
-    if (previousRecord != null) {
-      if (record.odometer < previousRecord.odometer) {
-        errors['odometer'] =
-            'Odômetro menor que o registro anterior (${previousRecord.odometer.toStringAsFixed(0)} km)';
-      }
+    
+    // REMOVIDO: Validação que bloqueava odômetro menor que anterior
+    // Agora permite lançamentos fora de ordem cronológica
+    // if (previousRecord != null) {
+    //   if (record.odometer < previousRecord.odometer) {
+    //     errors['odometer'] =
+    //         'Odômetro menor que o registro anterior (${previousRecord.odometer.toStringAsFixed(0)} km)';
+    //   }
 
-      final difference = record.odometer - previousRecord.odometer;
-      final daysDifference = record.date.difference(previousRecord.date).inDays;
+    if (previousRecord != null) {
+      final difference = (record.odometer - previousRecord.odometer).abs();
+      final daysDifference = record.date.difference(previousRecord.date).inDays.abs();
       if (difference > FuelConstants.maxOdometerDifference) {
         warnings['odometer'] =
             'Diferença muito grande desde último registro: ${difference.toStringAsFixed(0)} km';

@@ -403,7 +403,7 @@ class PlantInfoSection extends ConsumerWidget {
 
                       // Atualiza o provider de detalhes para refletir as mudanças
                       if (success) {
-                        ref
+                        await ref
                             .read(plantDetailsNotifierProvider.notifier)
                             .loadPlant(plant.id);
                         scaffoldMessenger.showSnackBar(

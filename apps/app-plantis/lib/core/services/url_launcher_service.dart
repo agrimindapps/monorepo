@@ -83,14 +83,14 @@ class UrlLauncherService {
           );
         } catch (fallbackError) {
           if (kDebugMode) {
-            print('URL Launch fallback failed: $fallbackError');
+            debugPrint('URL Launch fallback failed: $fallbackError');
           }
           return false;
         }
       }
 
       if (kDebugMode) {
-        print('URL Launch failed: $e');
+        debugPrint('URL Launch failed: $e');
       }
       return false;
     }
@@ -184,7 +184,7 @@ class UrlLauncherService {
     String? exception,
   }) {
     if (kDebugMode) {
-      print(
+      debugPrint(
         'URL Launch Event: '
         'url=$url, '
         'source=$source, '

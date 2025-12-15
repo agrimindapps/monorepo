@@ -117,9 +117,9 @@ class PremiumRepositoryImpl implements PremiumRepository {
       );
 
       // Save to local cache on success
-      result.fold(
-        (failure) => null,
-        (subscription) => _localRepository.saveSubscription(subscription),
+      await result.fold(
+        (failure) async => null,
+        (subscription) async => await _localRepository.saveSubscription(subscription),
       );
 
       return result;
@@ -176,12 +176,15 @@ class PremiumRepositoryImpl implements PremiumRepository {
       final result = await getPremiumStatus();
 
       // Update local cache
-      result.fold((failure) => null, (status) async {
-        if (status.subscription != null) {
-          await _localRepository.saveSubscription(status.subscription!);
-        }
-        _updateStatus(status);
-      });
+      await result.fold(
+        (failure) async => null,
+        (status) async {
+          if (status.subscription != null) {
+            await _localRepository.saveSubscription(status.subscription!);
+          }
+          await _updateStatus(status);
+        },
+      );
 
       return result;
     } catch (e) {

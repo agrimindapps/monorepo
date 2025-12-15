@@ -4,25 +4,59 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/providers/feedback_providers.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'confirmation_system.dart';
+import 'core/feedback_orchestrator.dart';
+import 'core/operation_config.dart';
 import 'feedback_system.dart';
+import 'helpers/auth_feedback_helpers.dart';
+import 'helpers/plant_feedback_helpers.dart';
+import 'helpers/sync_feedback_helpers.dart';
+import 'helpers/task_feedback_helpers.dart';
 import 'progress_tracker.dart';
 
-/// Sistema unificado de feedback que integra todos os componentes
-/// Trabalha em conjunto com ContextualLoadingManager para experiência completa
+/// Sistema unificado de feedback - Facade Pattern
+///
+/// DEPRECATION NOTICE:
+/// Esta classe mantém compatibilidade backward mas delega para FeedbackOrchestrator.
+/// Use FeedbackOrchestrator diretamente via Riverpod para novos códigos.
+///
+/// Refatorado de God Class (614L) para Facade + Services modulares
 class UnifiedFeedbackSystem {
   static bool _isInitialized = false;
+  static FeedbackOrchestrator? _orchestrator;
 
-  /// Inicializa todos os sistemas de feedback
-  static Future<void> initialize() async {
+  /// Inicializa o sistema de feedback
+  static Future<void> initialize({ProviderContainer? container}) async {
     if (_isInitialized) return;
-
     _isInitialized = true;
+  }
+
+  /// Obtém orchestrator do context
+  static FeedbackOrchestrator _getOrchestrator(
+    BuildContext? context,
+    ProviderContainer? container,
+  ) {
+    if (_orchestrator != null) return _orchestrator!;
+
+    final providerContainer =
+        container ??
+        (context != null ? ProviderScope.containerOf(context) : null);
+
+    if (providerContainer == null) {
+      throw StateError(
+        'No ProviderContainer available for UnifiedFeedbackSystem',
+      );
+    }
+
+    return providerContainer.read(feedbackOrchestratorProvider);
   }
 
   /// Verifica se foi inicializado
   static bool get isInitialized => _isInitialized;
 
-  /// Executa operação async com feedback visual completo
+  // ==================== DEPRECATED METHODS ====================
+  // Mantidos por compatibilidade - Delegar para FeedbackOrchestrator
+
+  @Deprecated('Use FeedbackOrchestrator.executeOperation()')
   static Future<T> executeWithFeedback<T>({
     required BuildContext context,
     required String operationKey,
@@ -36,67 +70,25 @@ class UnifiedFeedbackSystem {
     bool showToast = true,
     Duration? timeout,
     ProviderContainer? container,
-  }) async {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final hapticService = providerContainer.read(hapticServiceProvider);
-    final toastService = providerContainer.read(toastServiceProvider);
-    final feedbackService = providerContainer.read(feedbackServiceProvider);
-
-    ContextualLoadingManager.startLoading(
-      operationKey,
-      message: loadingMessage,
-      type: loadingType,
-      timeout: timeout,
+  }) {
+    return _getOrchestrator(context, container).executeOperation<T>(
+      context: context,
+      operationKey: operationKey,
+      operation: operation,
+      config: OperationConfig(
+        loadingMessage: loadingMessage,
+        successMessage: successMessage,
+        errorMessage: errorMessage,
+        loadingType: loadingType,
+        successAnimation: successAnimation,
+        includeHaptic: includeHaptic,
+        showToast: showToast,
+        timeout: timeout,
+      ),
     );
-
-    if (includeHaptic) {
-      await hapticService.light();
-    }
-
-    try {
-      final result = await operation();
-      ContextualLoadingManager.stopLoading(operationKey);
-      if (includeHaptic) {
-        await hapticService.success();
-      }
-
-      if (showToast && context.mounted) {
-        toastService.showSuccess(
-          context: context,
-          message: successMessage ?? 'Operação concluída!',
-        );
-      }
-      if (context.mounted) {
-        feedbackService.showSuccess(
-          context: context,
-          message: successMessage ?? 'Sucesso!',
-          animation: successAnimation,
-        );
-      }
-
-      return result;
-    } catch (error) {
-      ContextualLoadingManager.stopLoading(operationKey);
-      if (includeHaptic) {
-        await hapticService.heavy();
-      }
-
-      final finalErrorMessage =
-          errorMessage ?? 'Erro na operação: ${error.toString()}';
-
-      if (showToast && context.mounted) {
-        toastService.showError(context: context, message: finalErrorMessage);
-      }
-
-      if (context.mounted) {
-        feedbackService.showError(context: context, message: finalErrorMessage);
-      }
-
-      rethrow;
-    }
   }
 
-  /// Executa operação com progresso determinado
+  @Deprecated('Use FeedbackOrchestrator.executeWithProgress()')
   static Future<T> executeWithProgress<T>({
     required BuildContext context,
     required String operationKey,
@@ -107,172 +99,119 @@ class UnifiedFeedbackSystem {
     String? successMessage,
     bool includeHaptic = true,
     bool showToast = true,
-  }) async {
-    final progressOp = ProgressTracker.startOperation(
-      key: operationKey,
-      title: title,
-      description: description,
-      type: ProgressType.determinate,
-      includeHaptic: includeHaptic,
-    );
-
-    progressOp.setContext(context);
-
-    try {
-      final result = await operation((progress, message) {
-        ProgressTracker.updateProgress(
-          operationKey,
-          progress: progress,
-          message: message,
-          includeHaptic: false, // Evitar spam de haptic
-        );
-      });
-      ProgressTracker.completeOperation(
-        operationKey,
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(context, container).executeWithProgress<T>(
+      context: context,
+      operationKey: operationKey,
+      operation: operation,
+      config: ProgressOperationConfig(
+        title: title,
+        description: description,
         successMessage: successMessage,
-        showToast: showToast,
         includeHaptic: includeHaptic,
-      );
-
-      return result;
-    } catch (error) {
-      ProgressTracker.failOperation(
-        operationKey,
-        errorMessage: 'Erro: ${error.toString()}',
         showToast: showToast,
-        includeHaptic: includeHaptic,
-        onRetry: () {},
-      );
-
-      rethrow;
-    }
+      ),
+    );
   }
 
-  /// Salvar planta com feedback completo
+  // Convenience methods - delegate to helpers
+  @Deprecated('Use PlantFeedbackHelpers.savePlant()')
   static Future<T> savePlant<T>({
     required BuildContext context,
     required Future<T> Function() saveOperation,
     required String plantName,
     bool isEdit = false,
-  }) async {
-    return executeWithFeedback<T>(
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(context, container).savePlant<T>(
       context: context,
-      operationKey: 'save_plant_${DateTime.now().millisecondsSinceEpoch}',
       operation: saveOperation,
-      loadingMessage: isEdit
-          ? 'Atualizando $plantName...'
-          : 'Salvando $plantName...',
-      successMessage: isEdit
-          ? 'Planta atualizada!'
-          : 'Planta salva com sucesso!',
-      loadingType: LoadingType.save,
-      successAnimation: SuccessAnimationType.bounce,
+      plantName: plantName,
+      isEdit: isEdit,
     );
   }
 
-  /// Completar tarefa com feedback completo
+  @Deprecated('Use TaskFeedbackHelpers.completeTask()')
   static Future<T> completeTask<T>({
     required BuildContext context,
     required Future<T> Function() completeOperation,
     required String taskName,
-  }) async {
-    return executeWithFeedback<T>(
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(context, container).completeTask<T>(
       context: context,
-      operationKey: 'complete_task_${DateTime.now().millisecondsSinceEpoch}',
       operation: completeOperation,
-      loadingMessage: 'Concluindo tarefa...',
-      successMessage: 'Tarefa "$taskName" concluída!',
-      loadingType: LoadingType.standard,
-      successAnimation: SuccessAnimationType.confetti,
+      taskName: taskName,
     );
   }
 
-  /// Login com feedback completo
+  @Deprecated('Use AuthFeedbackHelpers.login()')
   static Future<T> login<T>({
     required BuildContext context,
     required Future<T> Function() loginOperation,
     String? userName,
-  }) async {
-    return executeWithFeedback<T>(
-      context: context,
-      operationKey: 'login_${DateTime.now().millisecondsSinceEpoch}',
-      operation: loginOperation,
-      loadingMessage: 'Fazendo login...',
-      successMessage: userName != null
-          ? 'Bem-vindo, $userName!'
-          : 'Login realizado com sucesso!',
-      loadingType: LoadingType.auth,
-      successAnimation: SuccessAnimationType.checkmark,
-    );
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(
+      context,
+      container,
+    ).login<T>(context: context, operation: loginOperation, userName: userName);
   }
 
-  /// Compra premium com feedback completo
+  @Deprecated('Use AuthFeedbackHelpers.purchasePremium()')
   static Future<T> purchasePremium<T>({
     required BuildContext context,
     required Future<T> Function() purchaseOperation,
-  }) async {
-    return executeWithFeedback<T>(
-      context: context,
-      operationKey: 'purchase_premium_${DateTime.now().millisecondsSinceEpoch}',
-      operation: purchaseOperation,
-      loadingMessage: 'Processando compra...',
-      successMessage: 'Premium ativado com sucesso!',
-      loadingType: LoadingType.purchase,
-      successAnimation: SuccessAnimationType.confetti,
-      timeout: const Duration(minutes: 2),
-    );
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(
+      context,
+      container,
+    ).purchasePremium<T>(context: context, operation: purchaseOperation);
   }
 
-  /// Backup com progresso
+  @Deprecated('Use SyncFeedbackHelpers.backup()')
   static Future<T> backup<T>({
     required BuildContext context,
     required Future<T> Function(void Function(double, String?) progressCallback)
     backupOperation,
-  }) async {
-    return executeWithProgress<T>(
-      context: context,
-      operationKey: 'backup_${DateTime.now().millisecondsSinceEpoch}',
-      operation: backupOperation,
-      title: 'Criando backup',
-      description: 'Salvando seus dados na nuvem...',
-      successMessage: 'Backup criado com sucesso!',
-    );
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(
+      context,
+      container,
+    ).backup<T>(context: context, operation: backupOperation);
   }
 
-  /// Upload de imagem com progresso
+  @Deprecated('Use PlantFeedbackHelpers.uploadPlantImage()')
   static Future<T> uploadImage<T>({
     required BuildContext context,
     required Future<T> Function(void Function(double, String?) progressCallback)
     uploadOperation,
     required String imageName,
-  }) async {
-    return executeWithProgress<T>(
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(context, container).uploadPlantImage<T>(
       context: context,
-      operationKey: 'upload_image_${DateTime.now().millisecondsSinceEpoch}',
       operation: uploadOperation,
-      title: 'Enviando imagem',
-      description: 'Upload de $imageName',
-      successMessage: 'Imagem enviada com sucesso!',
+      imageName: imageName,
     );
   }
 
-  /// Sincronização com feedback
+  @Deprecated('Use SyncFeedbackHelpers.sync()')
   static Future<T> sync<T>({
     required BuildContext context,
     required Future<T> Function() syncOperation,
-  }) async {
-    return executeWithFeedback<T>(
-      context: context,
-      operationKey: 'sync_${DateTime.now().millisecondsSinceEpoch}',
-      operation: syncOperation,
-      loadingMessage: 'Sincronizando dados...',
-      successMessage: 'Dados sincronizados!',
-      loadingType: LoadingType.sync,
-      successAnimation: SuccessAnimationType.checkmark,
-    );
+    ProviderContainer? container,
+  }) {
+    return _getOrchestrator(
+      context,
+      container,
+    ).sync<T>(context: context, operation: syncOperation);
   }
 
-  /// Confirmação com feedback háptico
+  @Deprecated('Use FeedbackOrchestrator.showConfirmation()')
   static Future<bool> confirm({
     required BuildContext context,
     required String title,
@@ -282,13 +221,8 @@ class UnifiedFeedbackSystem {
     ConfirmationType type = ConfirmationType.info,
     IconData? icon,
     ProviderContainer? container,
-  }) async {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final confirmationService = providerContainer.read(
-      confirmationServiceProvider,
-    );
-
-    return await confirmationService.showConfirmation(
+  }) {
+    return _getOrchestrator(context, container).showConfirmation(
       context: context,
       title: title,
       message: message,
@@ -299,7 +233,7 @@ class UnifiedFeedbackSystem {
     );
   }
 
-  /// Confirmação destrutiva com feedback
+  @Deprecated('Use FeedbackOrchestrator.showDestructiveConfirmation()')
   static Future<bool> confirmDestruction({
     required BuildContext context,
     required String title,
@@ -307,13 +241,8 @@ class UnifiedFeedbackSystem {
     String confirmLabel = 'Deletar',
     bool requireDouble = false,
     ProviderContainer? container,
-  }) async {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final confirmationService = providerContainer.read(
-      confirmationServiceProvider,
-    );
-
-    return await confirmationService.showDestructiveConfirmation(
+  }) {
+    return _getOrchestrator(context, container).showDestructiveConfirmation(
       context: context,
       title: title,
       message: message,
@@ -322,133 +251,77 @@ class UnifiedFeedbackSystem {
     );
   }
 
-  /// Toast de sucesso rápido
+  @Deprecated('Use FeedbackOrchestrator.showSuccessToast()')
   static void successToast(
     BuildContext context,
     String message, {
     ProviderContainer? container,
   }) {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final toastService = providerContainer.read(toastServiceProvider);
-    toastService.showSuccess(context: context, message: message);
+    _getOrchestrator(context, container).showSuccessToast(context, message);
   }
 
-  /// Toast de erro com ação
+  @Deprecated('Use FeedbackOrchestrator.showErrorToast()')
   static void errorToast(
     BuildContext context,
     String message, {
     VoidCallback? onRetry,
     ProviderContainer? container,
   }) {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final toastService = providerContainer.read(toastServiceProvider);
-    toastService.showError(
-      context: context,
-      message: message,
-      onAction: onRetry,
-      actionLabel: onRetry != null ? 'Tentar novamente' : null,
-    );
+    _getOrchestrator(
+      context,
+      container,
+    ).showErrorToast(context, message, onRetry: onRetry);
   }
 
-  /// Toast de info
+  @Deprecated('Use FeedbackOrchestrator.showInfoToast()')
   static void infoToast(
     BuildContext context,
     String message, {
     ProviderContainer? container,
   }) {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final toastService = providerContainer.read(toastServiceProvider);
-    toastService.showInfo(context: context, message: message);
+    _getOrchestrator(context, container).showInfoToast(context, message);
   }
 
-  /// Toast de warning
+  @Deprecated('Use FeedbackOrchestrator.showWarningToast()')
   static void warningToast(
     BuildContext context,
     String message, {
     ProviderContainer? container,
   }) {
-    final providerContainer = container ?? ProviderScope.containerOf(context);
-    final toastService = providerContainer.read(toastServiceProvider);
-    toastService.showWarning(context: context, message: message);
+    _getOrchestrator(context, container).showWarningToast(context, message);
   }
 
-  /// Haptic para ações básicas
+  @Deprecated('Use FeedbackOrchestrator.lightHaptic()')
   static Future<void> lightHaptic({
     BuildContext? context,
     ProviderContainer? container,
-  }) async {
-    final providerContainer =
-        container ??
-        (context != null ? ProviderScope.containerOf(context) : null);
-    if (providerContainer != null) {
-      final hapticService = providerContainer.read(hapticServiceProvider);
-      await hapticService.light();
-    }
+  }) {
+    return _getOrchestrator(context, container).lightHaptic();
   }
 
-  /// Haptic para ações importantes
+  @Deprecated('Use FeedbackOrchestrator.mediumHaptic()')
   static Future<void> mediumHaptic({
     BuildContext? context,
     ProviderContainer? container,
-  }) async {
-    final providerContainer =
-        container ??
-        (context != null ? ProviderScope.containerOf(context) : null);
-    if (providerContainer != null) {
-      final hapticService = providerContainer.read(hapticServiceProvider);
-      await hapticService.medium();
-    }
+  }) {
+    return _getOrchestrator(context, container).mediumHaptic();
   }
 
-  /// Haptic para ações críticas
+  @Deprecated('Use FeedbackOrchestrator.heavyHaptic()')
   static Future<void> heavyHaptic({
     BuildContext? context,
     ProviderContainer? container,
-  }) async {
-    final providerContainer =
-        container ??
-        (context != null ? ProviderScope.containerOf(context) : null);
-    if (providerContainer != null) {
-      final hapticService = providerContainer.read(hapticServiceProvider);
-      await hapticService.heavy();
-    }
+  }) {
+    return _getOrchestrator(context, container).heavyHaptic();
   }
 
-  /// Haptic contextual
+  @Deprecated('Use FeedbackOrchestrator.contextualHaptic()')
   static Future<void> contextualHaptic(
     String contextType, {
     BuildContext? context,
     ProviderContainer? container,
-  }) async {
-    final providerContainer =
-        container ??
-        (context != null ? ProviderScope.containerOf(context) : null);
-    if (providerContainer != null) {
-      final hapticService = providerContainer.read(hapticServiceProvider);
-      // Mapeia contextos para métodos específicos do HapticService
-      switch (contextType) {
-        case 'button_tap':
-          await hapticService.buttonTap();
-          break;
-        case 'task_complete':
-          await hapticService.completeTask();
-          break;
-        case 'plant_save':
-          await hapticService.addPlant();
-          break;
-        case 'premium_purchase':
-          await hapticService.purchaseSuccess();
-          break;
-        case 'error':
-          await hapticService.error();
-          break;
-        case 'success':
-          await hapticService.success();
-          break;
-        default:
-          await hapticService.light();
-      }
-    }
+  }) {
+    return _getOrchestrator(context, container).contextualHaptic(contextType);
   }
 
   /// Limpa todos os sistemas de feedback

@@ -1,0 +1,341 @@
+# 🚀 Próximas Prioridades - Taskolist
+
+**Última atualização:** 17 de Dezembro de 2025  
+**Status:** Planejamento de Features Pós-MVP "Meu Dia"
+
+---
+
+## ✅ Status Atual
+
+### Features Completas (100%)
+- ✅ **CRUD de Tarefas** - TaskEntity completo com todos os campos
+- ✅ **Estados/Status** - pending, inProgress, completed, cancelled
+- ✅ **Prioridades** - low, medium, high, urgent
+- ✅ **Favoritar** - Campo isStarred implementado
+- ✅ **Notas** - Campo notes para descrições longas
+- ✅ **Data de Vencimento** - Campo dueDate com helpers (isOverdue, isDueToday)
+- ✅ **Tags** - Campo tags: List<String>
+- ✅ **Posicionamento** - Campo position para ordenação customizada
+- ✅ **Soft Delete** - Campo isDeleted do BaseSyncEntity
+- ✅ **Versionamento** - Campo version para resolução de conflitos
+- ✅ **Meu Dia (My Day)** - Planejador diário completo (100% funcional)
+
+### Features Parcialmente Implementadas
+- 🟡 **Subtarefas** - Estrutura existe (parentTaskId), falta UI completa
+- 🟡 **Múltiplas Listas** - TaskListEntity existe, falta CRUD completo na UI
+- 🟡 **Lembretes** - Campo reminderDate existe, falta implementar notificações
+
+---
+
+## 🎯 PRIORIDADES PARA HOJE (17/12/2025)
+
+### Opção 1: Quick Wins - Melhorias Imediatas (2-3h) ⚡
+**Objetivo:** Completar integrações pendentes da feature "Meu Dia"
+
+#### Tarefas:
+1. **Adicionar botão "Adicionar ao Meu Dia" nas TaskLists** (30min)
+   - Ícone de sol (⭐) em cada TaskListTile
+   - Toggle on/off visual
+   - Feedback imediato ao adicionar/remover
+
+2. **Badge no Drawer mostrando quantidade** (20min)
+   - Contador de tasks do Meu Dia
+   - Exemplo: "Meu Dia (5)"
+   - Atualização em tempo real (Stream)
+
+3. **Melhorias na UI do MyDayPage** (1h)
+   - Pull to refresh
+   - Swipe to delete gesture
+   - Animação ao completar tarefa
+   - Skeleton loading
+
+4. **Analytics de uso** (30min)
+   - Firebase Analytics events:
+     - `my_day_task_added`
+     - `my_day_task_removed`
+     - `my_day_cleared`
+     - `my_day_suggestions_viewed`
+
+**Critérios de Aceite:**
+- [ ] Adicionar task ao Meu Dia de qualquer lista em 1 toque
+- [ ] Badge no drawer mostra quantidade correta
+- [ ] Gestos funcionam suavemente
+- [ ] Events sendo logados no Firebase Analytics
+
+---
+
+### Opção 2: Sistema de Listas Completo (4-6h) 📋
+**Objetivo:** Implementar CRUD completo de listas com personalização visual
+
+#### ✅ Fase 0: Listas Coloridas (IMPLEMENTADO)
+1. **Core Theme System**
+   - [x] Criado `ListColors` com 12 cores pré-definidas
+   - [x] Helper methods para conversão String ↔ Color
+   
+2. **Widgets de Seleção**
+   - [x] `ColorSelector` - Widget inline horizontal
+   - [x] `ColorPickerDialog` - Modal com grid de cores
+   - [x] `ListColorIndicator` - Badge visual de cor
+   
+3. **Documentação**
+   - [x] Criado `docs/features/listas-coloridas.md`
+   - [x] Exemplos de uso e integração
+
+#### Fase 1: Backend & Repository (1-2h)
+1. **TaskListRepository Implementation**
+   - [ ] Criar `TaskListLocalDataSource` (Drift)
+   - [ ] Criar `TaskListRepositoryImpl`
+   - [ ] Criar Riverpod providers
+
+2. **Use Cases**
+   - [ ] `CreateTaskList`
+   - [ ] `UpdateTaskList`
+   - [ ] `DeleteTaskList`
+   - [ ] `GetAllTaskLists`
+   - [ ] `WatchTaskLists` (Stream)
+   - [ ] `ReorderTaskLists`
+   - [ ] `ArchiveTaskList`
+
+#### Fase 2: UI/UX (2-3h)
+3. **Sidebar com Lista de Listas**
+   - [ ] ModernDrawer section "Minhas Listas"
+   - [ ] Contador de tarefas por lista (badge)
+   - [ ] Lista padrão "Tarefas" (não deletável)
+   - [ ] Seção separada para arquivadas
+
+4. **Dialog de Criar/Editar Lista**
+   - [ ] TextField para nome da lista
+   - [ ] Color picker (paleta 10 cores predefinidas)
+   - [ ] Icon picker (grid 20 ícones Material)
+   - [ ] Preview em tempo real
+
+5. **Reordenamento de Listas**
+   - [ ] Drag-and-drop com `ReorderableListView`
+   - [ ] Persistir ordem (campo `position`)
+   - [ ] Animação suave
+
+#### Fase 3: Polish (1h)
+6. **Features Adicionais**
+   - [ ] Swipe to archive gesture
+   - [ ] Confirmação ao deletar lista (se tiver tarefas)
+   - [ ] Empty state para listas sem tarefas
+   - [ ] Pesquisa de listas (se >10 listas)
+
+**Critérios de Aceite:**
+- [ ] Criar nova lista em <5 toques
+- [ ] Mudar cor de lista e ver refletido imediatamente
+- [ ] Reordenar listas e persistir ordem
+- [ ] Ver contador de tarefas (5 pendentes / 12 total)
+- [ ] Arquivar lista move para seção separada
+- [ ] Deletar lista mostra confirmação
+
+**Estrutura de Dados:**
+```dart
+// TaskListEntity já existe em:
+// lib/features/tasks/domain/task_list_entity.dart
+class TaskListEntity extends Equatable {
+  final String id;
+  final String title;
+  final String? description;
+  final String color;              // Hex: "#FF5733"
+  final String? iconCodePoint;     // Icon codepoint (opcional)
+  final String ownerId;
+  final List<String> memberIds;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  final bool isShared;
+  final bool isArchived;
+  final int position;
+}
+```
+
+---
+
+### Opção 3: Subtarefas/Steps Completo (3-4h) ✅
+**Objetivo:** Implementar sistema completo de etapas (steps) dentro de tarefas
+
+#### Fase 1: Backend (1h)
+1. **SubTask Entity & Model**
+   - [ ] Criar `SubTaskEntity` (ou usar TaskEntity com parentTaskId)
+   - [ ] Adicionar campo `completedSteps` e `totalSteps` no TaskEntity
+   - [ ] Migration Drift para novos campos
+
+2. **Repository & Use Cases**
+   - [ ] `AddStepToTask`
+   - [ ] `RemoveStepFromTask`
+   - [ ] `ToggleStepCompletion`
+   - [ ] `ReorderSteps`
+   - [ ] `GetTaskSteps` (Stream)
+
+#### Fase 2: UI (2h)
+3. **Task Detail Page - Steps Section**
+   - [ ] Lista de steps com checkbox
+   - [ ] Campo de texto inline para adicionar step
+   - [ ] Swipe to delete step
+   - [ ] Drag to reorder steps
+   - [ ] Barra de progresso (3/5 etapas)
+
+4. **Task Card - Progress Indicator**
+   - [ ] Mini barra de progresso se task tiver steps
+   - [ ] Badge "3/5 ✓"
+
+#### Fase 3: Lógica Avançada (1h)
+5. **Auto-Complete Parent Task**
+   - [ ] Configuração: "Auto-completar tarefa quando steps finalizarem"
+   - [ ] Lógica de verificação ao marcar step
+   - [ ] Notificação ao completar tudo
+
+**Critérios de Aceite:**
+- [ ] Adicionar step em 2 toques
+- [ ] Progresso visual "3/5 etapas"
+- [ ] Tarefa pai completa automaticamente quando steps finalizarem
+- [ ] Reordenar steps e persistir ordem
+- [ ] Deletar step com swipe
+
+---
+
+### Opção 4: Notificações e Lembretes (6-8h) 🔔
+**Objetivo:** Implementar sistema completo de notificações locais
+
+**⚠️ COMPLEXIDADE ALTA - Recomendado fazer em dia separado**
+
+#### Fase 1: Setup (2h)
+1. **Dependências**
+   - [ ] Adicionar `flutter_local_notifications: ^17.0.0`
+   - [ ] Adicionar `timezone: ^0.9.0`
+   - [ ] Configurar permissões Android (manifest)
+   - [ ] Configurar permissões iOS (Info.plist)
+   - [ ] Inicializar no main.dart
+
+2. **Service Layer**
+   - [ ] Criar `NotificationService` (core/services)
+   - [ ] Método `scheduleNotification()`
+   - [ ] Método `cancelNotification()`
+   - [ ] Método `cancelAllNotifications()`
+   - [ ] Método `getBadgeCount()`
+
+#### Fase 2: Backend Integration (2h)
+3. **Repository & Use Cases**
+   - [ ] Adicionar campo `notificationId` ao TaskEntity
+   - [ ] `ScheduleReminderUseCase`
+   - [ ] `CancelReminderUseCase`
+   - [ ] Sincronizar com TaskRepository
+
+4. **Background Scheduler**
+   - [ ] WorkManager para Android (opcional)
+   - [ ] Background Fetch para iOS (opcional)
+
+#### Fase 3: UI (2h)
+5. **Date/Time Picker**
+   - [ ] Botão "Lembrar-me" em Task Detail
+   - [ ] Date Picker nativo
+   - [ ] Time Picker nativo
+   - [ ] Preview: "Amanhã às 14:00"
+
+6. **Quick Actions**
+   - [ ] Preset buttons: "Daqui 1h", "Amanhã 9h", "Segunda 14h"
+   - [ ] Custom date/time
+
+#### Fase 4: Notificação (2h)
+7. **Payload & Actions**
+   - [ ] Ao tocar: abrir TaskDetailPage
+   - [ ] Action buttons: "Concluir", "Adiar 10min", "Adiar 1h"
+   - [ ] Badge count no ícone do app
+
+**Critérios de Aceite:**
+- [ ] Receber notificação na hora exata
+- [ ] Tocar na notificação abre a tarefa
+- [ ] Snooze funciona e reagenda
+- [ ] Badge mostra tarefas pendentes de hoje
+- [ ] Cancelar lembrete remove notificação
+
+---
+
+## 📊 Matriz de Decisão
+
+| Opção | Tempo | Complexidade | Impacto UX | Dependências | Recomendação |
+|-------|-------|--------------|-----------|--------------|--------------|
+| **1. Quick Wins** | 2-3h | 🟢 Baixa | 🟡 Médio | Nenhuma | ✅ **COMEÇAR AQUI** |
+| **2. Sistema de Listas** | 4-6h | 🟡 Média | 🟢 Alto | Nenhuma | ⭐ **ALTA PRIORIDADE** |
+| **3. Subtarefas** | 3-4h | 🟡 Média | 🟢 Alto | Nenhuma | ⭐ **ALTA PRIORIDADE** |
+| **4. Notificações** | 6-8h | 🔴 Alta | 🟢 Alto | Permissões | 🔜 **PRÓXIMO DIA** |
+
+---
+
+## 🗓️ Plano Sugerido para Hoje
+
+### Manhã (4h)
+1. ✅ **Quick Wins** (2-3h)
+   - Integrações do Meu Dia
+   - Analytics
+   - Melhorias de UX
+
+2. 🎯 **Sistema de Listas - Fase 1** (1-2h)
+   - Repository completo
+   - Use cases
+
+### Tarde (4h)
+3. 🎯 **Sistema de Listas - Fase 2** (2-3h)
+   - UI completa
+   - Color picker
+   - Icon picker
+
+4. 🎯 **Sistema de Listas - Fase 3** (1h)
+   - Polish
+   - Testes manuais
+
+**Resultado esperado:** Sistema de Listas 100% funcional ao final do dia
+
+---
+
+## 📝 Próximos Dias (Roadmap Semana)
+
+### Dia 2 (18/12)
+- ✅ **Subtarefas/Steps** completo (3-4h)
+- 🎨 **UI/UX Polish** - Animações e gestos (2-3h)
+
+### Dia 3 (19/12)
+- 🔔 **Notificações e Lembretes** (6-8h)
+
+### Dia 4 (20/12)
+- 🔄 **Recorrência de Tarefas** (início)
+- 📊 **Testes unitários** das features implementadas
+
+### Dia 5 (21/12)
+- 🔄 **Recorrência de Tarefas** (conclusão)
+- 🎨 **Tema escuro** e personalização
+
+---
+
+## 🎯 Critérios de Sucesso da Semana
+
+Ao final da semana (21/12), o app deve ter:
+- [x] ✅ Meu Dia funcional (COMPLETO)
+- [ ] ✅ Sistema de Listas completo
+- [ ] ✅ Subtarefas/Steps funcionando
+- [ ] ✅ Notificações básicas
+- [ ] 🟡 Recorrência de tarefas (MVP)
+- [ ] 🎨 UI polida (tema escuro)
+- [ ] 📊 70%+ de cobertura de testes
+
+**Meta:** App utilizável no dia-a-dia como substituto do Microsoft To Do para uso pessoal.
+
+---
+
+## 📚 Referências Técnicas
+
+### Exemplos no Monorepo
+- **Sistema de Sync**: `app-gasometer` e `app-plantis` (referência de UnifiedSyncManager)
+- **Drift Migrations**: `app-taskolist/lib/core/database/drift_database.dart`
+- **Riverpod Patterns**: `app-receituagro` (100% Riverpod 3.0)
+- **UI/UX Components**: `app-nebulalist` (ModernDrawer, Animations)
+
+### Documentação
+- [Flutter Local Notifications](https://pub.dev/packages/flutter_local_notifications)
+- [Drift Documentation](https://drift.simonbinder.eu/)
+- [Riverpod Best Practices](https://riverpod.dev/)
+- [Material Design 3](https://m3.material.io/)
+
+---
+
+**👤 Decisão do Usuário:** Qual opção vamos implementar agora?

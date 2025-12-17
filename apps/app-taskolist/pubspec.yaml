@@ -26,6 +26,9 @@ dependencies:
   # Share functionality
   share_plus: any
   
+  # Date formatting
+  intl: any
+  
   dartz: any
   cloud_firestore: any
   shared_preferences: any

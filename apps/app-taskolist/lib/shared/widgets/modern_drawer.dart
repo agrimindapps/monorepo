@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/settings/presentation/settings_page.dart';
+import '../../features/tasks/presentation/my_day_page.dart';
 import '../providers/auth_providers.dart';
 
 class ModernDrawer extends ConsumerWidget {
@@ -93,6 +94,23 @@ class ModernDrawer extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
+                _buildMenuItem(
+                  context,
+                  icon: Icons.wb_sunny_rounded,
+                  title: 'Meu Dia',
+                  subtitle: 'Tarefas de hoje',
+                  iconColor: Colors.blue,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<dynamic>(
+                        builder: (context) => const MyDayPage(),
+                      ),
+                    );
+                  },
+                ),
+
                 _buildMenuItem(
                   context,
                   icon: Icons.home_rounded,
@@ -195,6 +213,7 @@ class ModernDrawer extends ConsumerWidget {
     required String subtitle,
     required VoidCallback onTap,
     bool isDestructive = false,
+    Color? iconColor,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -208,12 +227,12 @@ class ModernDrawer extends ConsumerWidget {
             color:
                 isDestructive
                     ? Colors.red.withAlpha(26)
-                    : AppColors.primaryColor.withAlpha(26),
+                    : (iconColor ?? AppColors.primaryColor).withAlpha(26),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: isDestructive ? Colors.red[600] : AppColors.primaryColor,
+            color: isDestructive ? Colors.red[600] : (iconColor ?? AppColors.primaryColor),
             size: 24,
           ),
         ),

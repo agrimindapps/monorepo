@@ -15,6 +15,7 @@ import '../../domain/repositories/i_performance_repository.dart';
 /// Implementação do serviço de monitoramento de performance
 class PerformanceService implements IPerformanceRepository, IDisposableService {
   static final PerformanceService _instance = PerformanceService._internal();
+
   /// Obtém a instância singleton do PerformanceService
   factory PerformanceService() => _instance;
   PerformanceService._internal();
@@ -22,7 +23,9 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   bool _isDisposed = false;
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
   // Firebase Performance não é suportado no web
-  final FirebasePerformance? _firebasePerformance = kIsWeb ? null : FirebasePerformance.instance;
+  final FirebasePerformance? _firebasePerformance = kIsWeb
+      ? null
+      : FirebasePerformance.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   PerformanceMonitoringState _state = PerformanceMonitoringState.stopped;
   PerformanceConfig _config = const PerformanceConfig();
@@ -32,7 +35,8 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   final List<double> _fpsHistory = [];
   DateTime? _lastFrameTime;
   final List<Duration> _frameTimes = [];
-  final StreamController<MemoryUsage> _memoryController = StreamController.broadcast();
+  final StreamController<MemoryUsage> _memoryController =
+      StreamController.broadcast();
   Timer? _memoryTimer;
   final List<MemoryUsage> _memoryHistory = [];
   final StreamController<double> _cpuController = StreamController.broadcast();
@@ -45,7 +49,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   final List<TraceResult> _completedTraces = [];
   final List<PerformanceMetrics> _performanceHistory = [];
   Timer? _metricsCollectionTimer;
-  final StreamController<Map<String, dynamic>> _alertsController = 
+  final StreamController<Map<String, dynamic>> _alertsController =
       StreamController.broadcast();
   void Function(String, Map<String, dynamic>)? _alertCallback;
 
@@ -149,11 +153,11 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   Future<bool> pausePerformanceTracking() async {
     if (_state == PerformanceMonitoringState.running) {
       _state = PerformanceMonitoringState.paused;
-      
+
       _fpsTimer?.cancel();
       _memoryTimer?.cancel();
       _cpuTimer?.cancel();
-      
+
       return true;
     }
     return false;
@@ -163,11 +167,11 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   Future<bool> resumePerformanceTracking() async {
     if (_state == PerformanceMonitoringState.paused) {
       _state = PerformanceMonitoringState.running;
-      
+
       if (_config.enableFpsMonitoring) _startFpsTracking();
       if (_config.enableMemoryMonitoring) _startMemoryTracking();
       if (_config.enableCpuMonitoring) _startCpuTracking();
-      
+
       return true;
     }
     return false;
@@ -177,7 +181,9 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   PerformanceMonitoringState getMonitoringState() => _state;
 
   @override
-  Future<void> setPerformanceThresholds(PerformanceThresholds thresholds) async {
+  Future<void> setPerformanceThresholds(
+    PerformanceThresholds thresholds,
+  ) async {
     _thresholds = thresholds;
   }
 
@@ -191,7 +197,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   void _onFrame(Duration timeStamp) {
     final now = DateTime.now();
-    
+
     if (_lastFrameTime != null) {
       final frameTime = now.difference(_lastFrameTime!);
       _frameTimes.add(frameTime);
@@ -199,14 +205,16 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
         _frameTimes.removeAt(0);
       }
     }
-    
+
     _lastFrameTime = now;
   }
 
   void _onFirstFrame() {
     if (_appStartTime != null && _firstFrameTime != null) {
       final timeToFirstFrame = _firstFrameTime!.difference(_appStartTime!);
-      debugPrint('⏱️ Time to first frame: ${timeToFirstFrame.inMilliseconds}ms');
+      debugPrint(
+        '⏱️ Time to first frame: ${timeToFirstFrame.inMilliseconds}ms',
+      );
       recordCustomMetric(
         name: 'time_to_first_frame',
         value: timeToFirstFrame.inMilliseconds.toDouble(),
@@ -219,7 +227,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   void _calculateAndEmitFps() {
     if (_frameTimes.isEmpty) return;
     final totalTime = _frameTimes.fold<Duration>(
-      Duration.zero, 
+      Duration.zero,
       (sum, frameTime) => sum + frameTime,
     );
 
@@ -227,7 +235,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
       final avgFrameTime = totalTime.inMilliseconds / _frameTimes.length;
       final fps = 1000 / avgFrameTime;
       final clampedFps = fps.clamp(0, 60).toDouble();
-      
+
       _fpsHistory.add(clampedFps);
       if (_fpsHistory.length > 100) {
         _fpsHistory.removeAt(0);
@@ -255,8 +263,10 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   @override
   Future<FpsMetrics> getFpsMetrics({Duration? period}) async {
-    final relevantData = period != null 
-        ? _fpsHistory.take(_fpsHistory.length).toList()  // Implementar filtro por período
+    final relevantData = period != null
+        ? _fpsHistory
+              .take(_fpsHistory.length)
+              .toList() // Implementar filtro por período
         : _fpsHistory;
 
     if (relevantData.isEmpty) {
@@ -272,7 +282,8 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     }
 
     final currentFps = relevantData.last;
-    final averageFps = relevantData.reduce((a, b) => a + b) / relevantData.length;
+    final averageFps =
+        relevantData.reduce((a, b) => a + b) / relevantData.length;
     final minFps = relevantData.reduce((a, b) => a < b ? a : b);
     final maxFps = relevantData.reduce((a, b) => a > b ? a : b);
     final frameDrops = relevantData.where((fps) => fps < 30).length;
@@ -297,7 +308,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   void _startMemoryTracking() {
     _memoryTimer?.cancel();
-    
+
     _memoryTimer = Timer.periodic(_config.monitoringInterval, (_) async {
       try {
         final memoryUsage = await getMemoryUsage();
@@ -328,7 +339,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
       if (kIsWeb) {
         return await _getGenericMemoryUsage();
       }
-      
+
       if (Platform.isAndroid) {
         return await _getAndroidMemoryUsage();
       } else if (Platform.isIOS) {
@@ -349,7 +360,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     try {
       const platform = MethodChannel('performance_service');
       final result = await platform.invokeMethod('getMemoryInfo');
-      
+
       return MemoryUsage(
         usedMemory: (result['usedMemory'] as int?) ?? 0,
         totalMemory: (result['totalMemory'] as int?) ?? 0,
@@ -366,10 +377,10 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     try {
       final result = await Process.run('cat', ['/proc/meminfo']);
       final lines = result.stdout.toString().split('\n');
-      
+
       int totalMemory = 0;
       int availableMemory = 0;
-      
+
       for (final line in lines) {
         if (line.startsWith('MemTotal:')) {
           totalMemory = _parseMemoryValue(line) * 1024; // KB para bytes
@@ -377,9 +388,9 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
           availableMemory = _parseMemoryValue(line) * 1024;
         }
       }
-      
+
       final usedMemory = totalMemory - availableMemory;
-      
+
       return MemoryUsage(
         usedMemory: usedMemory,
         totalMemory: totalMemory,
@@ -395,7 +406,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     try {
       const platform = MethodChannel('performance_service');
       final result = await platform.invokeMethod('getMemoryUsage');
-      
+
       return MemoryUsage(
         usedMemory: (result['used'] as int?) ?? 0,
         totalMemory: (result['total'] as int?) ?? 0,
@@ -412,7 +423,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   Future<MemoryUsage> _getGenericMemoryUsage() async {
     return const MemoryUsage(
-      usedMemory: 100 * 1024 * 1024,     // 100MB estimado
+      usedMemory: 100 * 1024 * 1024, // 100MB estimado
       totalMemory: 4 * 1024 * 1024 * 1024, // 4GB estimado
       availableMemory: 3 * 1024 * 1024 * 1024, // 3GB estimado
     );
@@ -447,11 +458,11 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   void _startCpuTracking() {
     _cpuTimer?.cancel();
-    
+
     _cpuTimer = Timer.periodic(_config.monitoringInterval, (_) async {
       try {
         final cpuUsage = await getCpuUsage();
-        
+
         if (!_cpuController.isClosed) {
           _cpuController.add(cpuUsage);
         }
@@ -473,7 +484,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
       if (kIsWeb) {
         return 0.0;
       }
-      
+
       if (Platform.isLinux || Platform.isAndroid) {
         return await _getLinuxCpuUsage();
       } else if (Platform.isIOS || Platform.isMacOS) {
@@ -490,19 +501,23 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     try {
       final result = await Process.run('cat', ['/proc/stat']);
       final lines = result.stdout.toString().split('\n');
-      
+
       if (lines.isNotEmpty) {
         final cpuLine = lines.first;
         final values = cpuLine.split(' ').where((s) => s.isNotEmpty).toList();
-        
+
         if (values.length >= 5) {
           final idle = int.parse(values[4]);
-          final total = values.skip(1).take(7).map(int.parse).reduce((a, b) => a + b);
+          final total = values
+              .skip(1)
+              .take(7)
+              .map(int.parse)
+              .reduce((a, b) => a + b);
           final usage = ((total - idle) / total) * 100;
           return usage.clamp(0, 100).toDouble();
         }
       }
-      
+
       return 0.0;
     } catch (e) {
       debugPrint('❌ Error getting Linux CPU usage: $e');
@@ -548,14 +563,14 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   @override
   Future<AppStartupMetrics> getStartupMetrics() async {
     final now = DateTime.now();
-    
+
     return AppStartupMetrics(
-      coldStartTime: _appStartTime != null 
-          ? now.difference(_appStartTime!) 
+      coldStartTime: _appStartTime != null
+          ? now.difference(_appStartTime!)
           : Duration.zero,
       warmStartTime: Duration.zero, // Implementar lógica específica
       firstFrameTime: _firstFrameTime != null && _appStartTime != null
-          ? _firstFrameTime!.difference(_appStartTime!) 
+          ? _firstFrameTime!.difference(_appStartTime!)
           : Duration.zero,
       timeToInteractive: _appInteractiveTime != null && _appStartTime != null
           ? _appInteractiveTime!.difference(_appStartTime!)
@@ -564,18 +579,21 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   }
 
   @override
-  Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {
+  Future<void> startTrace(
+    String traceName, {
+    Map<String, String>? attributes,
+  }) async {
     try {
       _activeTraces[traceName] = DateTime.now();
       if (_config.enableFirebaseIntegration && _firebasePerformance != null) {
         final trace = _firebasePerformance!.newTrace(traceName);
-        
+
         if (attributes != null) {
           for (final entry in attributes.entries) {
             trace.putAttribute(entry.key, entry.value);
           }
         }
-        
+
         await trace.start();
         _firebaseTraces[traceName] = trace;
       }
@@ -585,11 +603,14 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   }
 
   @override
-  Future<TraceResult?> stopTrace(String traceName, {Map<String, double>? metrics}) async {
+  Future<TraceResult?> stopTrace(
+    String traceName, {
+    Map<String, double>? metrics,
+  }) async {
     try {
       final startTime = _activeTraces.remove(traceName);
       if (startTime == null) return null;
-      
+
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
       final firebaseTrace = _firebaseTraces.remove(traceName);
@@ -601,7 +622,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
         }
         await firebaseTrace.stop();
       }
-      
+
       final result = TraceResult(
         name: traceName,
         duration: duration,
@@ -609,9 +630,9 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
         endTime: endTime,
         metrics: metrics ?? {},
       );
-      
+
       _completedTraces.add(result);
-      
+
       return result;
     } catch (e) {
       debugPrint('❌ Error stopping trace: $e');
@@ -626,17 +647,18 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     Map<String, String>? attributes,
   }) async {
     await startTrace(operationName, attributes: attributes);
-    
+
     final stopwatch = Stopwatch()..start();
     try {
       await operation();
     } finally {
       stopwatch.stop();
-      await stopTrace(operationName, metrics: {
-        'duration_ms': stopwatch.elapsedMilliseconds.toDouble(),
-      });
+      await stopTrace(
+        operationName,
+        metrics: {'duration_ms': stopwatch.elapsedMilliseconds.toDouble()},
+      );
     }
-    
+
     return stopwatch.elapsed;
   }
 
@@ -668,7 +690,10 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   }
 
   @override
-  Future<void> incrementCounter(String name, {Map<String, String>? tags}) async {
+  Future<void> incrementCounter(
+    String name, {
+    Map<String, String>? tags,
+  }) async {
     await recordCustomMetric(
       name: name,
       value: 1,
@@ -678,7 +703,11 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   }
 
   @override
-  Future<void> recordGauge(String name, double value, {Map<String, String>? tags}) async {
+  Future<void> recordGauge(
+    String name,
+    double value, {
+    Map<String, String>? tags,
+  }) async {
     await recordCustomMetric(
       name: name,
       value: value,
@@ -688,7 +717,11 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   }
 
   @override
-  Future<void> recordTiming(String name, Duration duration, {Map<String, String>? tags}) async {
+  Future<void> recordTiming(
+    String name,
+    Duration duration, {
+    Map<String, String>? tags,
+  }) async {
     await recordCustomMetric(
       name: name,
       value: duration.inMilliseconds.toDouble(),
@@ -700,7 +733,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   void _startMetricsCollection() {
     _metricsCollectionTimer?.cancel();
-    
+
     _metricsCollectionTimer = Timer.periodic(
       const Duration(seconds: 30), // Coletar métricas a cada 30s
       (_) => _collectCurrentMetrics(),
@@ -724,7 +757,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     final fps = await getCurrentFps();
     final memoryUsage = await getMemoryUsage();
     final cpuUsage = await getCpuUsage();
-    
+
     return PerformanceMetrics(
       timestamp: DateTime.now(),
       fps: fps,
@@ -741,20 +774,20 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     Duration? period,
   }) async {
     var filtered = _performanceHistory;
-    
+
     if (since != null) {
       filtered = filtered.where((m) => m.timestamp.isAfter(since)).toList();
     }
-    
+
     if (period != null) {
       final cutoff = DateTime.now().subtract(period);
       filtered = filtered.where((m) => m.timestamp.isAfter(cutoff)).toList();
     }
-    
+
     if (limit != null) {
       filtered = filtered.take(limit).toList();
     }
-    
+
     return filtered;
   }
 
@@ -764,16 +797,17 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
       'timestamp': DateTime.now().toIso8601String(),
       'data': data,
     };
-    
+
     if (!_alertsController.isClosed) {
       _alertsController.add(alert);
     }
-    
+
     _alertCallback?.call(alertType, data);
   }
 
   @override
-  Stream<Map<String, dynamic>> getPerformanceAlertsStream() => _alertsController.stream;
+  Stream<Map<String, dynamic>> getPerformanceAlertsStream() =>
+      _alertsController.stream;
 
   @override
   Future<void> setPerformanceAlertCallback(
@@ -785,22 +819,24 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   @override
   Future<List<String>> checkPerformanceIssues() async {
     final issues = <String>[];
-    
+
     final fps = await getCurrentFps();
     if (fps < _thresholds.minFps) {
       issues.add('Low FPS detected: ${fps.toStringAsFixed(1)}');
     }
-    
+
     final memory = await getMemoryUsage();
     if (memory.usagePercentage > _thresholds.maxMemoryUsagePercent) {
-      issues.add('High memory usage: ${memory.usagePercentage.toStringAsFixed(1)}%');
+      issues.add(
+        'High memory usage: ${memory.usagePercentage.toStringAsFixed(1)}%',
+      );
     }
-    
+
     final cpu = await getCpuUsage();
     if (cpu > _thresholds.maxCpuUsage) {
       issues.add('High CPU usage: ${cpu.toStringAsFixed(1)}%');
     }
-    
+
     return issues;
   }
 
@@ -811,7 +847,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   }) async {
     final metrics = await getCurrentMetrics();
     final fpsMetrics = await getFpsMetrics();
-    
+
     return {
       'current_metrics': {
         'fps': metrics.fps,
@@ -844,14 +880,16 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
       startTime: startTime,
       endTime: endTime,
     );
-    
+
     if (format.toLowerCase() == 'json') {
       return data.toString();
     }
 
     // Only JSON format is currently supported for performance exports
     // Other formats (CSV, XML) can be added as needed
-    throw UnsupportedError('Format $format not supported - only JSON is available');
+    throw UnsupportedError(
+      'Format $format not supported - only JSON is available',
+    );
   }
 
   @override
@@ -890,9 +928,13 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   @override
   Future<void> clearOldPerformanceData({Duration? olderThan}) async {
-    final cutoff = DateTime.now().subtract(olderThan ?? const Duration(days: 7));
-    
-    _performanceHistory.removeWhere((metrics) => metrics.timestamp.isBefore(cutoff));
+    final cutoff = DateTime.now().subtract(
+      olderThan ?? const Duration(days: 7),
+    );
+
+    _performanceHistory.removeWhere(
+      (metrics) => metrics.timestamp.isBefore(cutoff),
+    );
     _completedTraces.removeWhere((trace) => trace.startTime.isBefore(cutoff));
   }
 
@@ -912,7 +954,8 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     return {
       'fps_monitoring': true,
       'memory_monitoring': !kIsWeb && (Platform.isAndroid || Platform.isIOS),
-      'cpu_monitoring': !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isLinux),
+      'cpu_monitoring':
+          !kIsWeb && (Platform.isAndroid || Platform.isIOS || Platform.isLinux),
       'firebase_performance': true,
       'custom_traces': true,
       'device_info': true,

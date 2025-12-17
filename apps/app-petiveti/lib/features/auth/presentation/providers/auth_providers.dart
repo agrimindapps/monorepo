@@ -13,6 +13,7 @@ import '../../domain/services/auth_validation_service.dart';
 import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/services/rate_limit_service.dart';
 import '../../domain/usecases/auth_usecases.dart';
+import 'auth_provider.dart';
 
 part 'auth_providers.g.dart';
 
@@ -147,4 +148,12 @@ LocalProfileImageService localProfileImageService(Ref ref) {
   return LocalProfileImageService(
     ref.watch(core_providers.analyticsRepositoryProvider),
   );
+}
+
+/// Provider para obter o userId do usuário autenticado atual
+/// Retorna null se não houver usuário autenticado
+@riverpod
+String? currentUserId(Ref ref) {
+  final authState = ref.watch(authProvider);
+  return authState.user?.id;
 }

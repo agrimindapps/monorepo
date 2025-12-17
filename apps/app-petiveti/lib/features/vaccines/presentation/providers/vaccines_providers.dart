@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/database_providers.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../data/datasources/vaccine_local_datasource.dart';
 import '../../data/datasources/vaccine_remote_datasource.dart';
 import '../../data/repositories/vaccine_repository_impl.dart';
@@ -35,8 +36,7 @@ VaccineLocalDataSource vaccineLocalDataSource(Ref ref) {
 @riverpod
 VaccineRemoteDataSource vaccineRemoteDataSource(Ref ref) {
   final firestore = FirebaseFirestore.instance;
-  // TODO: Get actual user ID from auth provider
-  const userId = 'temp_user_id'; 
+  final userId = ref.watch(currentUserIdProvider) ?? 'anonymous';
   return VaccineRemoteDataSourceImpl(firestore, userId);
 }
 

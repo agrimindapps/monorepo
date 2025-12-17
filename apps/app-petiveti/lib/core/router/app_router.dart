@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/account/presentation/pages/account_profile_page.dart';
 import '../../features/animals/presentation/pages/animals_page.dart';
+import '../../features/appointments/presentation/pages/appointment_details_page.dart';
 import '../../features/appointments/presentation/pages/appointments_page.dart';
 import '../../features/appointments/presentation/widgets/add_appointment_form.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -144,10 +145,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 name: 'appointment-details',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
-                  return Scaffold(
-                    body: Center(
-                      child: Text('Appointment Details: $id - Coming Soon'),
-                    ),
+                  return AppointmentDetailsPage(appointmentId: id);
+                },
                   );
                 },
                 routes: [

@@ -50,8 +50,17 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
 
   @override
   Future<List<MedicationModel>> getActiveMedications(String userId) async {
-    // TODO: implement getActiveMedications
-    throw UnimplementedError();
+    // Get all medications for the user
+    final allMedications = await _database.medicationDao.getAllMedications(userId);
+    
+    // Filter active medications (not ended yet)
+    final now = DateTime.now();
+    final activeMedications = allMedications.where((med) {
+      if (med.endDate == null) return true; // No end date = active
+      return med.endDate!.isAfter(now) || med.endDate!.isAtSameMomentAs(now);
+    }).toList();
+    
+    return activeMedications.map(_toModel).toList();
   }
 
   @override
@@ -142,29 +151,67 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
   }
 
   @override
-  Future<void> cacheMedications(List<MedicationModel> medications) {
-    // TODO: implement cacheMedications
-    throw UnimplementedError();
+  Future<void> cacheMedications(List<MedicationModel> medications) async {
+    // Batch insert/update medications
+    await _database.batch((batch) {
+      for (final medication in medications) {
+        final companion = _toCompanion(medication);
+        batch.insert(
+          _database.medications,
+          companion,
+          mode: InsertMode.insertOrReplace,
+        );
+      }
+    });
   }
 
   @override
   Future<List<MedicationModel>> checkMedicationConflicts(
     MedicationModel medication,
-  ) {
-    // TODO: implement checkMedicationConflicts
-    throw UnimplementedError();
+  ) async {
+    // Get all active medications for the same animal
+    final animalMedications = await _database.medicationDao
+        .getMedicationsByAnimal(medication.animalId);
+    
+    final now = DateTime.now();
+    final conflicts = animalMedications.where((med) {
+      // Skip the same medication if updating
+      if (medication.id != null && med.id == medication.id) return false;
+      
+      // Check if it's active
+      if (med.endDate != null && med.endDate!.isBefore(now)) return false;
+      
+      // Check for same medication name (potential conflict)
+      return med.name.toLowerCase() == medication.name.toLowerCase();
+    }).toList();
+    
+    return conflicts.map(_toModel).toList();
   }
 
   @override
-  Future<void> discontinueMedication(String id, String reason) {
-    // TODO: implement discontinueMedication
-    throw UnimplementedError();
+  Future<void> discontinueMedication(String id, String reason) async {
+    final medId = int.tryParse(id);
+    if (medId == null) return;
+    
+    // Mark medication as ended with current date and add reason to notes
+    await _database.medicationDao.updateMedication(
+      medId,
+      MedicationsCompanion(
+        endDate: Value(DateTime.now()),
+        notes: Value('Discontinued: $reason'),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
   }
 
   @override
-  Future<int> getActiveMedicationsCount(String animalId) {
-    // TODO: implement getActiveMedicationsCount
-    throw UnimplementedError();
+  Future<int> getActiveMedicationsCount(String animalId) async {
+    final animalIdInt = int.tryParse(animalId);
+    if (animalIdInt == null) return 0;
+    
+    final activeMedications = await _database.medicationDao
+        .getActiveMedications(animalIdInt);
+    return activeMedications.length;
   }
 
   @override
@@ -172,32 +219,76 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
     String animalId,
     DateTime startDate,
     DateTime endDate,
-  ) {
-    // TODO: implement getMedicationHistory
-    throw UnimplementedError();
+  ) async {
+    final animalIdInt = int.tryParse(animalId);
+    if (animalIdInt == null) return [];
+    
+    final allMedications = await _database.medicationDao
+        .getMedicationsByAnimal(animalIdInt);
+    
+    // Filter by date range
+    final filtered = allMedications.where((med) {
+      // Check if medication overlaps with the date range
+      final medStart = med.startDate;
+      final medEnd = med.endDate ?? DateTime.now();
+      
+      return (medStart.isBefore(endDate) || medStart.isAtSameMomentAs(endDate)) &&
+             (medEnd.isAfter(startDate) || medEnd.isAtSameMomentAs(startDate));
+    }).toList();
+    
+    return filtered.map(_toModel).toList();
   }
 
   @override
-  Future<void> hardDeleteMedication(String id) {
-    // TODO: implement hardDeleteMedication
-    throw UnimplementedError();
+  Future<void> hardDeleteMedication(String id) async {
+    final medId = int.tryParse(id);
+    if (medId == null) return;
+    
+    // Permanently delete from database
+    await (_database.delete(_database.medications)
+          ..where((tbl) => tbl.id.equals(medId)))
+        .go();
   }
 
   @override
-  Future<List<MedicationModel>> searchMedications(String query) {
-    // TODO: implement searchMedications
-    throw UnimplementedError();
+  Future<List<MedicationModel>> searchMedications(String query) async {
+    if (query.isEmpty) return [];
+    
+    final queryLower = query.toLowerCase();
+    
+    // Simple search in memory (could be optimized with Drift's like operator)
+    final allMedications = await (_database.select(_database.medications)
+          ..where((tbl) => tbl.isDeleted.equals(false)))
+        .get();
+    
+    final results = allMedications.where((med) {
+      return med.name.toLowerCase().contains(queryLower) ||
+             (med.notes?.toLowerCase().contains(queryLower) ?? false) ||
+             (med.veterinarian?.toLowerCase().contains(queryLower) ?? false);
+    }).toList();
+    
+    return results.map(_toModel).toList();
   }
 
   @override
   Stream<List<MedicationModel>> watchActiveMedications() {
-    // TODO: implement watchActiveMedications
-    throw UnimplementedError();
+    final now = DateTime.now();
+    
+    return (_database.select(_database.medications)
+          ..where((tbl) => 
+            tbl.isDeleted.equals(false) &
+            (tbl.endDate.isNull() | tbl.endDate.isBiggerOrEqualValue(now)))
+          ..orderBy([(t) => OrderingTerm.desc(t.startDate)]))
+        .watch()
+        .map((medications) => medications.map(_toModel).toList());
   }
 
   @override
   Stream<List<MedicationModel>> watchMedications() {
-    // TODO: implement watchMedications
-    throw UnimplementedError();
+    return (_database.select(_database.medications)
+          ..where((tbl) => tbl.isDeleted.equals(false))
+          ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
+        .watch()
+        .map((medications) => medications.map(_toModel).toList());
   }
 }

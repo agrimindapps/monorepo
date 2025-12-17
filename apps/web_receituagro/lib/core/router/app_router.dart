@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../app-site/pages/detalhes_defensivos_page.dart';
-import '../../app-site/pages/home_defensivos_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/culturas/presentation/pages/cultura_cadastro_page.dart';
 import '../../features/culturas/presentation/pages/culturas_list_page.dart';
@@ -12,6 +10,8 @@ import '../../features/export/presentation/pages/export_page.dart';
 import '../../features/pragas/presentation/pages/praga_cadastro_page.dart';
 import '../../features/pragas/presentation/pages/praga_detalhes_page.dart';
 import '../../features/pragas/presentation/pages/pragas_list_page.dart';
+import '../../features/public_consultation/presentation/pages/public_defensivo_details_page.dart';
+import '../../features/public_consultation/presentation/pages/public_defensivos_list_page.dart';
 import 'route_guard.dart';
 
 /// Application router
@@ -25,7 +25,7 @@ class AppRouter {
       case '/home':
         // Public - Página inicial do site público
         return MaterialPageRoute(
-          builder: (_) => const DefensivosListarPage(),
+          builder: (_) => const PublicDefensivosListPage(),
         );
 
       case '/defensivo':
@@ -35,7 +35,7 @@ class AppRouter {
           return _buildErrorRoute('ID do defensivo é obrigatório');
         }
         return MaterialPageRoute(
-          builder: (_) => DefensivosDetalhesPage(id: args['id'] as String),
+          builder: (_) => PublicDefensivoDetailsPage(id: args['id'] as String),
         );
 
       case '/login':

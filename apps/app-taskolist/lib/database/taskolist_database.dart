@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'daos/task_dao.dart';
 import 'daos/user_dao.dart';
 // Tables
+import 'tables/my_day_tasks_table.dart';
 import 'tables/tasks_table.dart';
 import 'tables/users_table.dart';
 
@@ -23,20 +24,21 @@ part 'taskolist_database.g.dart';
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
 ///
-/// **TABELAS (2 total):**
+/// **TABELAS (3 total):**
 /// 1. Tasks - Tarefas e gerenciamento
 /// 2. Users - Usuários e preferências
+/// 3. MyDayTasks - Tarefas do planejador diário "Meu Dia"
 ///
-/// **SCHEMA VERSION:** 1 (inicial)
+/// **SCHEMA VERSION:** 2 (adicionado MyDayTasks)
 /// ============================================================================
 
-@DriftDatabase(tables: [Tasks, Users], daos: [TaskDao, UserDao])
+@DriftDatabase(tables: [Tasks, Users, MyDayTasks], daos: [TaskDao, UserDao])
 class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
   TaskolistDatabase(super.e);
 
   /// Versão do schema do banco de dados
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   /// Factory constructor para ambiente de produção
   factory TaskolistDatabase.production() {
@@ -86,7 +88,10 @@ class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
       await customStatement('PRAGMA foreign_keys = ON');
     },
     onUpgrade: (Migrator m, int from, int to) async {
-      // Future schema migrations will go here
+      // Migration from v1 to v2: Add MyDayTasks table
+      if (from == 1 && to == 2) {
+        await m.createTable(myDayTasks);
+      }
     },
   );
 }

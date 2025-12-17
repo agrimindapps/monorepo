@@ -1,9 +1,9 @@
-name: receituagro
-description: "A new Flutter project."
+name: agrimind_site
+description: "Agrimind Landing Page"
 
 publish_to: 'none' 
 
-version: 2024.08.05+2
+version: 1.0.0+1
 
 environment:
   sdk: ">=3.9.0 <4.0.0"
@@ -15,78 +15,21 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
 
-  # Core Package
-  core:
-    path: ../../packages/core
-
   # UI Components
-  cupertino_icons: any
-  icons_plus: any
+  cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
-  carousel_slider: any
-  flutter_staggered_grid_view: any
-  skeletonizer: ^2.1.0
-
-  # State Management
-  flutter_riverpod: any
-  riverpod_annotation: any
-
-  # Functional Programming
-  dartz: any
-
-  # Immutability
-  freezed_annotation: any
-
-  # Utils
-  equatable: any
-  uuid: ^4.5.1
-
-  # Firebase & Database
-  firebase_analytics: any
-  firebase_core: any
-  cloud_firestore: any
-  supabase_flutter: any
-
+  
   # Utilities
-  share_plus: any
-  intl: any
-  shared_preferences: any
-  html_unescape: ^2.0.0
-  package_info_plus: any
-  logger: any
-  url_launcher: any
-  app_settings: ^6.1.1
-  device_info_plus: any
-
-  # Localization
-  flutter_localization: ^0.3.3
-  flutter_localizations:
-    sdk: flutter
-  get: ^4.7.2
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
-  flutter_lints: any
-
-  # Code Generation
-  build_runner: any
-  riverpod_generator: any
-  freezed: any
-  json_serializable: any
-
-  # Testing
-  mocktail: ^1.0.4
-
-# dependency_overrides:
-#   analyzer: 6.10.0
-#   analyzer_plugin: 0.12.0
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
   assets:
     - lib/assets/
-    - lib/assets/billing/
-    - lib/assets/icons/

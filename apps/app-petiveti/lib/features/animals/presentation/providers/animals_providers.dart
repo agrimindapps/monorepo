@@ -1,13 +1,16 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;
+import '../../../../core/providers/app_state_providers.dart';
 import '../../../../core/providers/database_providers.dart';
+import '../../../../database/providers/unified_sync_manager_provider.dart';
 import '../../data/datasources/animal_local_datasource.dart';
 import '../../data/repositories/animal_repository_impl.dart';
-import '../../data/repositories/noop_sync_manager.dart';
+import '../../data/repositories/unified_sync_manager_adapter.dart';
 import '../../data/services/animal_error_handling_service.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/repositories/animal_repository.dart';
+import '../../domain/repositories/isync_manager.dart';
 import '../../domain/services/animal_validation_service.dart';
 import '../../domain/usecases/add_animal.dart';
 import '../../domain/usecases/delete_animal.dart';
@@ -44,6 +47,17 @@ AnimalLocalDataSource animalLocalDataSource(Ref ref) {
 }
 
 // ============================================================================
+// SYNC MANAGER
+// ============================================================================
+
+/// Adapter que conecta ISyncManager com UnifiedSyncManager
+@riverpod
+ISyncManager animalSyncManager(Ref ref) {
+  final unifiedSyncManager = ref.watch(unifiedSyncManagerProvider);
+  return UnifiedSyncManagerAdapter(unifiedSyncManager, 'petiveti');
+}
+
+// ============================================================================
 // REPOSITORY
 // ============================================================================
 
@@ -51,7 +65,7 @@ AnimalLocalDataSource animalLocalDataSource(Ref ref) {
 AnimalRepository animalRepository(Ref ref) {
   return AnimalRepositoryImpl(
     ref.watch(animalLocalDataSourceProvider),
-    const NoOpSyncManager(), // TODO: Implement proper sync manager
+    ref.watch(animalSyncManagerProvider),
     ref.watch(animalErrorHandlingServiceProvider),
   );
 }
@@ -266,4 +280,17 @@ Future<Animal?> animalById(Ref ref, String id) async {
 Stream<List<Animal>> animalsStream(Ref ref) {
   final repository = ref.watch(animalRepositoryProvider);
   return repository.watchAnimals();
+}
+
+/// Provider que retorna o animal atualmente selecionado
+/// Usa o selectedAnimalIdProvider (core) para evitar dependências circulares
+@riverpod
+Future<Animal?> selectedAnimal(Ref ref) async {
+  // Observa o ID selecionado
+  final selectedId = ref.watch(selectedAnimalIdProvider);
+
+  if (selectedId == null) return null;
+
+  // Busca o animal pelo ID
+  return await ref.read(animalByIdProvider(selectedId).future);
 }

@@ -29,6 +29,11 @@ class Diagnostico extends Equatable {
   final String? intervalo2; // Intervalo de reentrada
   final String? epocaAplicacao;
 
+  // Campos opcionais para exibição (vindos de views)
+  final String? culturaNome;
+  final String? pragaNomeComum;
+  final String? pragaNomeCientifico;
+
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -49,6 +54,9 @@ class Diagnostico extends Equatable {
     this.intervalo,
     this.intervalo2,
     this.epocaAplicacao,
+    this.culturaNome,
+    this.pragaNomeComum,
+    this.pragaNomeCientifico,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -71,6 +79,9 @@ class Diagnostico extends Equatable {
         intervalo,
         intervalo2,
         epocaAplicacao,
+        culturaNome,
+        pragaNomeComum,
+        pragaNomeCientifico,
         createdAt,
         updatedAt,
       ];
@@ -92,6 +103,9 @@ class Diagnostico extends Equatable {
     String? intervalo,
     String? intervalo2,
     String? epocaAplicacao,
+    String? culturaNome,
+    String? pragaNomeComum,
+    String? pragaNomeCientifico,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -112,6 +126,9 @@ class Diagnostico extends Equatable {
       intervalo: intervalo ?? this.intervalo,
       intervalo2: intervalo2 ?? this.intervalo2,
       epocaAplicacao: epocaAplicacao ?? this.epocaAplicacao,
+      culturaNome: culturaNome ?? this.culturaNome,
+      pragaNomeComum: pragaNomeComum ?? this.pragaNomeComum,
+      pragaNomeCientifico: pragaNomeCientifico ?? this.pragaNomeCientifico,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

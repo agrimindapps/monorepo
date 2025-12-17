@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/uuid_generator.dart';
+import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/appointment.dart';
 import '../providers/appointments_providers.dart';
 
@@ -76,34 +77,34 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // TODO: Implement selectedAnimalProvider or get animal from route params
-    // final selectedAnimal = ref.watch(selectedAnimalProvider);
-    const selectedAnimal = null;
+    final selectedAnimalAsync = ref.watch(selectedAnimalProvider);
 
-    if (selectedAnimal == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Adicionar Consulta')),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.pets, size: 64, color: Colors.grey),
-              SizedBox(height: 16),
-              Text(
-                'Nenhum animal selecionado',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
-              ),
-              Text(
-                'Selecione um animal primeiro',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
+    return selectedAnimalAsync.when(
+      data: (selectedAnimal) {
+        if (selectedAnimal == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Adicionar Consulta')),
+            body: const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.pets, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'Nenhum animal selecionado',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                Text(
+                  'Selecione um animal primeiro',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    }
+        );
+      }
 
-    return Scaffold(
+      return Scaffold(
       appBar: AppBar(
         title: Text(widget.isEditing ? 'Editar Consulta' : 'Nova Consulta'),
         actions: [
@@ -307,6 +308,18 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
         ],
       ),
     );
+      },
+      loading: () => Scaffold(
+        appBar: AppBar(title: const Text('Carregando...')),
+        body: const Center(child: CircularProgressIndicator()),
+      ),
+      error: (error, stack) => Scaffold(
+        appBar: AppBar(title: const Text('Erro')),
+        body: Center(
+          child: Text('Erro ao carregar animal: $error'),
+        ),
+      ),
+    );
   }
 
   Widget _buildDateField(BuildContext context) {
@@ -385,10 +398,15 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
     });
 
     try {
-      // TODO: Implement selectedAnimalProvider or get animal from route params
-      // final selectedAnimal = ref.read(selectedAnimalProvider);
-      const selectedAnimal = null;
-      if (selectedAnimal == null) return;
+      final selectedAnimal = await ref.read(selectedAnimalProvider.future);
+      if (selectedAnimal == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Nenhum animal selecionado')),
+          );
+        }
+        return;
+      }
       final appointmentDate = DateTime(
         _selectedDate.year,
         _selectedDate.month,
@@ -403,7 +421,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
 
       final appointment = Appointment(
         id: widget.initialAppointment?.id ?? UuidGenerator.generate(),
-        animalId: selectedAnimal.id as String,
+        animalId: selectedAnimal.id,
         veterinarianName: _veterinarianController.text.trim(),
         date: appointmentDate,
         reason: _reasonController.text.trim(),

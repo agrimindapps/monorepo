@@ -104,3 +104,28 @@ class AuthFailure extends Failure {
   @override
   List<Object> get props => [_message];
 }
+
+class DatabaseFailure extends Failure {
+  final String _message;
+
+  const DatabaseFailure(this._message);
+
+  @override
+  String get message => _message;
+
+  @override
+  List<Object> get props => [_message];
+}
+
+class NotFoundFailure extends Failure {
+  final String _message;
+
+  const NotFoundFailure(this._message);
+
+  @override
+  String get message => _message;
+
+  @override
+  List<Object> get props => [_message];
+}
+

@@ -216,9 +216,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     ),
   );
 
-  Widget _buildLoadingOverlay() => Container(
+  Widget _buildLoadingOverlay() => const ColoredBox(
     color: Colors.black26,
-    child: const Center(
+    child: Center(
       child: CircularProgressIndicator(),
     ),
   );
@@ -293,11 +293,11 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
+                const Row(
                   children: [
-                    const Icon(Icons.verified, color: Colors.green),
-                    const SizedBox(width: 8),
-                    const Text(
+                    Icon(Icons.verified, color: Colors.green),
+                    SizedBox(width: 8),
+                    Text(
                       'Assinatura Premium Ativa',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,

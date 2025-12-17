@@ -13,13 +13,7 @@ import '../providers/auth_providers.dart';
 
 part 'auth_notifier.g.dart';
 
-enum AuthStatus {
-  initial,
-  loading,
-  authenticated,
-  unauthenticated,
-  error,
-}
+enum AuthStatus { initial, loading, authenticated, unauthenticated, error }
 
 class AuthState {
   final AuthStatus status;
@@ -105,7 +99,9 @@ class AuthNotifier extends _$AuthNotifier {
     _sendEmailVerification = ref.watch(sendEmailVerificationProvider);
     _sendPasswordResetEmail = ref.watch(sendPasswordResetEmailProvider);
     _updateProfile = ref.watch(updateProfileProvider);
-    _enhancedDeletionService = ref.watch(enhancedAccountDeletionServiceProvider);
+    _enhancedDeletionService = ref.watch(
+      enhancedAccountDeletionServiceProvider,
+    );
     _rateLimitService = ref.watch(rateLimitServiceProvider);
     _petDataSyncService = ref.watch(petDataSyncServiceProvider);
 
@@ -117,12 +113,12 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<void> _checkAuthState() async {
     final result = await _getCurrentUser(const local.NoParams());
-    
+
     // Verificar se o provider ainda está montado
     if (!ref.mounted) return;
-    
-    result.fold(
-      (failure) {
+
+    await result.fold(
+      (failure) async {
         if (!ref.mounted) return;
         state = state.copyWith(
           status: AuthStatus.unauthenticated,
@@ -131,7 +127,7 @@ class AuthNotifier extends _$AuthNotifier {
       },
       (user) async {
         if (!ref.mounted) return;
-        
+
         final isAnonymous = user?.isAnonymous ?? false;
         if (user == null && await shouldUseAnonymousMode()) {
           if (!ref.mounted) return;
@@ -140,7 +136,7 @@ class AuthNotifier extends _$AuthNotifier {
         }
 
         if (!ref.mounted) return;
-        
+
         state = state.copyWith(
           status: user != null
               ? AuthStatus.authenticated
@@ -151,7 +147,9 @@ class AuthNotifier extends _$AuthNotifier {
 
         // Iniciar realtime sync se autenticado
         if (user != null && ref.mounted) {
-          unawaited(ref.read(realtimeSyncProvider.notifier).startListening(user.id));
+          unawaited(
+            ref.read(realtimeSyncProvider.notifier).startListening(user.id),
+          );
         }
       },
     );
@@ -169,8 +167,10 @@ class AuthNotifier extends _$AuthNotifier {
 
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
-    final params =
-        auth_usecases.SignInWithEmailParams(email: email, password: password);
+    final params = auth_usecases.SignInWithEmailParams(
+      email: email,
+      password: password,
+    );
     final result = await _signInWithEmail(params);
 
     return result.fold(
@@ -184,10 +184,7 @@ class AuthNotifier extends _$AuthNotifier {
       (user) {
         _rateLimitService.resetLoginAttempts();
 
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = state.copyWith(status: AuthStatus.authenticated, user: user);
 
         // Iniciar realtime sync
         ref.read(realtimeSyncProvider.notifier).startListening(user.id);
@@ -199,8 +196,11 @@ class AuthNotifier extends _$AuthNotifier {
 
   /// Login com sincronização automática de dados dos pets
   /// Adaptado do padrão usado no gasometer e plantis para o contexto do PetiVeti
-  Future<bool> loginAndSync(String email, String password,
-      {bool showSyncOverlay = true}) async {
+  Future<bool> loginAndSync(
+    String email,
+    String password, {
+    bool showSyncOverlay = true,
+  }) async {
     if (!_rateLimitService.canAttemptLogin()) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -213,8 +213,10 @@ class AuthNotifier extends _$AuthNotifier {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
     try {
-      final params =
-          auth_usecases.SignInWithEmailParams(email: email, password: password);
+      final params = auth_usecases.SignInWithEmailParams(
+        email: email,
+        password: password,
+      );
       final loginResult = await _signInWithEmail(params);
 
       bool loginSuccess = false;
@@ -228,13 +230,12 @@ class AuthNotifier extends _$AuthNotifier {
         (user) async {
           _rateLimitService.resetLoginAttempts();
 
-          state = state.copyWith(
-            status: AuthStatus.authenticated,
-            user: user,
-          );
+          state = state.copyWith(status: AuthStatus.authenticated, user: user);
 
           // Iniciar realtime sync
-          unawaited(ref.read(realtimeSyncProvider.notifier).startListening(user.id));
+          unawaited(
+            ref.read(realtimeSyncProvider.notifier).startListening(user.id),
+          );
 
           loginSuccess = true;
         },
@@ -256,7 +257,10 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   Future<bool> signUpWithEmail(
-      String email, String password, String? name) async {
+    String email,
+    String password,
+    String? name,
+  ) async {
     if (!_rateLimitService.canAttemptRegister()) {
       state = state.copyWith(
         status: AuthStatus.error,
@@ -269,7 +273,10 @@ class AuthNotifier extends _$AuthNotifier {
     state = state.copyWith(status: AuthStatus.loading, error: null);
 
     final params = auth_usecases.SignUpWithEmailParams(
-        email: email, password: password, name: name);
+      email: email,
+      password: password,
+      name: name,
+    );
     final result = await _signUpWithEmail(params);
 
     return result.fold(
@@ -283,10 +290,7 @@ class AuthNotifier extends _$AuthNotifier {
       (user) {
         _rateLimitService.resetRegisterAttempts();
 
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = state.copyWith(status: AuthStatus.authenticated, user: user);
 
         // Iniciar realtime sync
         ref.read(realtimeSyncProvider.notifier).startListening(user.id);
@@ -310,10 +314,7 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (user) {
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = state.copyWith(status: AuthStatus.authenticated, user: user);
 
         // Iniciar realtime sync
         ref.read(realtimeSyncProvider.notifier).startListening(user.id);
@@ -337,10 +338,7 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (user) {
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = state.copyWith(status: AuthStatus.authenticated, user: user);
 
         // Iniciar realtime sync
         ref.read(realtimeSyncProvider.notifier).startListening(user.id);
@@ -364,10 +362,7 @@ class AuthNotifier extends _$AuthNotifier {
         return false;
       },
       (user) {
-        state = state.copyWith(
-          status: AuthStatus.authenticated,
-          user: user,
-        );
+        state = state.copyWith(status: AuthStatus.authenticated, user: user);
 
         // Iniciar realtime sync
         ref.read(realtimeSyncProvider.notifier).startListening(user.id);
@@ -422,10 +417,7 @@ class AuthNotifier extends _$AuthNotifier {
           ref.read(realtimeSyncProvider.notifier).stopListening();
         }
 
-        state = state.copyWith(
-          status: AuthStatus.unauthenticated,
-          user: null,
-        );
+        state = state.copyWith(status: AuthStatus.unauthenticated, user: null);
       },
     );
   }
@@ -437,18 +429,17 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<bool> sendPasswordResetEmail(String email) async {
     final result = await _sendPasswordResetEmail(email);
-    return result.fold(
-      (failure) {
-        state = state.copyWith(error: failure.message);
-        return false;
-      },
-      (_) => true,
-    );
+    return result.fold((failure) {
+      state = state.copyWith(error: failure.message);
+      return false;
+    }, (_) => true);
   }
 
   Future<bool> updateProfile(String? name, String? photoUrl) async {
-    final params =
-        auth_usecases.UpdateProfileParams(name: name, photoUrl: photoUrl);
+    final params = auth_usecases.UpdateProfileParams(
+      name: name,
+      photoUrl: photoUrl,
+    );
     final result = await _updateProfile(params);
 
     return result.fold(
@@ -512,10 +503,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   void _performPostDeletionCleanup() {
-    state = state.copyWith(
-      status: AuthStatus.unauthenticated,
-      user: null,
-    );
+    state = state.copyWith(status: AuthStatus.unauthenticated, user: null);
   }
 
   void clearError() {

@@ -43,6 +43,8 @@ dependencies:
   # Auth & Preferences
   google_sign_in: any
   shared_preferences: any
+  go_router: any
+  freezed_annotation: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

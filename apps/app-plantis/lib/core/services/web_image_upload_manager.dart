@@ -124,18 +124,15 @@ class WebImageUploadManager {
             mimeType: image.mimeType ?? 'image/jpeg',
           );
 
-          await uploadResult.fold(
-            (_) async => null,
-            (downloadUrl) async {
-              results[image.id] = downloadUrl;
+          await uploadResult.fold((_) async => null, (downloadUrl) async {
+            results[image.id] = downloadUrl;
 
-              // Marca como sincronizado
-              await _cacheService.markAsSynced(
-                image.id,
-                downloadUrl: downloadUrl,
-              );
-            },
-          );
+            // Marca como sincronizado
+            await _cacheService.markAsSynced(
+              image.id,
+              downloadUrl: downloadUrl,
+            );
+          });
         }
 
         return Right(results);

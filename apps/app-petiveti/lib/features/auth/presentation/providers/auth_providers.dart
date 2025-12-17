@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide SignInWithApple;
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/core_services_providers.dart'
     as core_providers;
@@ -12,7 +13,6 @@ import '../../domain/services/auth_validation_service.dart';
 import '../../domain/services/pet_data_sync_service.dart';
 import '../../domain/services/rate_limit_service.dart';
 import '../../domain/usecases/auth_usecases.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_providers.g.dart';
 

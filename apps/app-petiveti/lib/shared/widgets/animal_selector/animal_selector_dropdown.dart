@@ -33,7 +33,7 @@ class AnimalSelectorDropdown extends StatelessWidget {
 
     return FadeTransition(
       opacity: fadeAnimation,
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),

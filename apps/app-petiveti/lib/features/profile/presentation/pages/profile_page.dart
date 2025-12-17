@@ -5,8 +5,8 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/account_actions_section.dart';
 import '../widgets/account_info_section.dart';
 import '../widgets/profile_header.dart';
-import '../widgets/profile_subscription_section.dart';
 import '../widgets/profile_state_handlers.dart';
+import '../widgets/profile_subscription_section.dart';
 
 /// Profile page widget for displaying user information and settings
 ///

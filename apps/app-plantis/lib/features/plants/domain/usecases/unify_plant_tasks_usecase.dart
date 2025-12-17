@@ -143,7 +143,7 @@ class UnifyPlantTasksUseCase
 
       if (kDebugMode) {
         debugPrint('📊 UnifyPlantTasksUseCase: Relatório de unificação:');
-        debugPrint(report);
+        debugPrint(report.toString());
       }
 
       return Right(

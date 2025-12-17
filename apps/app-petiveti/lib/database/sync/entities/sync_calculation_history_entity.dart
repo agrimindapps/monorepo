@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 
 /// Entity for syncing CalculationHistory with Firestore

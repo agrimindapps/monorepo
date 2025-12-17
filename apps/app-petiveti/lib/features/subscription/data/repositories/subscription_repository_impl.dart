@@ -101,14 +101,14 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
       // Layer 1: Try Drift database (Secure & Offline)
       if (_authService != null && _subscriptionLocalRepository != null) {
         try {
-          final userResult = await _authService!.getCurrentUser();
+          final userResult = await _authService.getCurrentUser();
           await userResult.fold(
             (failure) async {
               // Ignore auth errors, fall through to layer 2
             },
             (user) async {
               if (user != null) {
-                final localSub = await _subscriptionLocalRepository!
+                final localSub = await _subscriptionLocalRepository
                     .getActiveSubscription(user.id);
                 if (localSub != null) {
                   final now = DateTime.now();

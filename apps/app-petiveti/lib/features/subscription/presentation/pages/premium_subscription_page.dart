@@ -1,8 +1,6 @@
-import 'package:core/core.dart' hide Column, SubscriptionState, SubscriptionInfo, subscriptionProvider;
-import 'package:flutter/foundation.dart';
+import 'package:core/core.dart'
+    hide Column, SubscriptionState, SubscriptionInfo, subscriptionProvider;
 import 'package:flutter/material.dart';
-
-import '../../../../core/theme/app_colors.dart';
 import '../state/subscription_notifier.dart';
 import '../state/subscription_state.dart';
 import '../widgets/petiveti_payment_actions_widget.dart';
@@ -69,8 +67,8 @@ class _PremiumSubscriptionPageState
                 child: state.isLoading
                     ? _buildLoadingView()
                     : state.isPremium
-                        ? _buildActiveSubscriptionView(state)
-                        : _buildPlansView(state),
+                    ? _buildActiveSubscriptionView(state)
+                    : _buildPlansView(state),
               ),
             ],
           ),
@@ -96,12 +94,12 @@ class _PremiumSubscriptionPageState
               ),
             ),
           ),
-          Row(
+          const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.pets, color: Colors.white, size: 24),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(Icons.pets, color: Colors.white, size: 24),
+              SizedBox(width: 8),
+              Text(
                 'Premium PetiVeti',
                 style: TextStyle(
                   color: Colors.white,
@@ -220,7 +218,7 @@ class _PremiumSubscriptionPageState
   /// Card de status premium ativo
   Widget _buildPremiumStatusCard(SubscriptionState state) {
     final subscription = state.currentSubscription;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(24),
@@ -330,21 +328,20 @@ class _PremiumSubscriptionPageState
 
   /// Restaura compras anteriores
   Future<void> _restorePurchases() async {
-    final result = await ref.read(subscriptionProvider.notifier).restorePurchases();
+    final result = await ref
+        .read(subscriptionProvider.notifier)
+        .restorePurchases();
 
     if (!mounted) return;
 
-    result.fold(
-      (error) => _showErrorSnackBar(error),
-      (_) {
-        final state = ref.read(subscriptionProvider);
-        if (state.isPremium) {
-          _showSuccessSnackBar('Compras restauradas com sucesso!');
-        } else {
-          _showInfoSnackBar('Nenhuma compra anterior encontrada');
-        }
-      },
-    );
+    result.fold((error) => _showErrorSnackBar(error), (_) {
+      final state = ref.read(subscriptionProvider);
+      if (state.isPremium) {
+        _showSuccessSnackBar('Compras restauradas com sucesso!');
+      } else {
+        _showInfoSnackBar('Nenhuma compra anterior encontrada');
+      }
+    });
   }
 
   /// Abre gerenciamento de assinatura

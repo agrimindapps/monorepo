@@ -38,8 +38,8 @@ class PlantisSyncService implements ISyncService {
     required IAuthRepository authRepository,
   }) : _subscriptionSyncAdapter = subscriptionSyncAdapter,
        _authRepository = authRepository;
-       // Note: Repository parameters are kept for future implementation
-       // They will be assigned to fields when sync methods are fully implemented
+  // Note: Repository parameters are kept for future implementation
+  // They will be assigned to fields when sync methods are fully implemented
 
   @override
   String get serviceId => 'plantis';

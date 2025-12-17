@@ -1,11 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
-import '../../../subscription/domain/entities/user_subscription.dart';
-import '../../../subscription/domain/entities/subscription_plan.dart';
-import '../../../subscription/presentation/widgets/subscription_info_card.dart';
 
 /// Widget para exibir status de assinatura premium
 class ProfileSubscriptionSection extends ConsumerWidget {
@@ -14,7 +10,6 @@ class ProfileSubscriptionSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +35,9 @@ class ProfileSubscriptionSection extends ConsumerWidget {
                 child: ListTile(
                   leading: const Icon(Icons.stars, color: AppColors.primary),
                   title: const Text('Premium Ativo'),
-                  subtitle: const Text('Você tem acesso a todos os recursos premium'),
+                  subtitle: const Text(
+                    'Você tem acesso a todos os recursos premium',
+                  ),
                   trailing: const Icon(Icons.check_circle, color: Colors.green),
                   onTap: () => context.push('/subscription'),
                 ),
@@ -50,7 +47,10 @@ class ProfileSubscriptionSection extends ConsumerWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 child: ListTile(
-                  leading: const Icon(Icons.workspace_premium, color: Colors.orange),
+                  leading: const Icon(
+                    Icons.workspace_premium,
+                    color: Colors.orange,
+                  ),
                   title: const Text('Faça Upgrade para Premium'),
                   subtitle: const Text('Desbloqueie recursos exclusivos'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),

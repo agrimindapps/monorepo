@@ -108,7 +108,9 @@ class ExpenseFormView extends ConsumerWidget {
                     required: true,
                     onChanged: (value) {},
                   ),
+                
                 const SizedBox(height: GasometerDesignTokens.spacingMd),
+                
                 if (isReadOnly)
                   ReadOnlyField(
                     label: 'Quilometragem Atual',

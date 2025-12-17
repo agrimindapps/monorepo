@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:core/core.dart';
 
 /// Entity para sincronização de Vaccines com Firebase
@@ -116,7 +115,8 @@ class VaccineEntity extends BaseSyncEntity {
       notes: notes ?? this.notes,
       isRequired: isRequired ?? this.isRequired,
       isCompleted: isCompleted ?? this.isCompleted,
-      reminderDateTimestamp: reminderDateTimestamp ?? this.reminderDateTimestamp,
+      reminderDateTimestamp:
+          reminderDateTimestamp ?? this.reminderDateTimestamp,
       status: status ?? this.status,
       createdAtTimestamp: createdAtTimestamp ?? this.createdAtTimestamp,
       updatedAtTimestamp: updatedAtTimestamp ?? this.updatedAtTimestamp,
@@ -151,7 +151,8 @@ class VaccineEntity extends BaseSyncEntity {
   VaccineEntity withUserId(String userId) => copyWith(userId: userId);
 
   @override
-  VaccineEntity withModule(String moduleName) => copyWith(moduleName: moduleName);
+  VaccineEntity withModule(String moduleName) =>
+      copyWith(moduleName: moduleName);
 
   @override
   Map<String, dynamic> toFirebaseMap() => toFirestore();

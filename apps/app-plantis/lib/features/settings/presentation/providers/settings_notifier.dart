@@ -116,6 +116,17 @@ class SettingsState {
     }
     return '${(difference.inDays / 30).floor()}m atrás';
   }
+
+  /// Texto para subtitle do tema
+  String get themeSubtitle {
+    if (isDarkMode) {
+      return 'Tema escuro ativo';
+    } else if (isLightMode) {
+      return 'Tema claro ativo';
+    } else {
+      return 'Seguir sistema';
+    }
+  }
 }
 
 @riverpod
@@ -458,6 +469,59 @@ class SettingsNotifier extends _$SettingsNotifier {
     }
   }
 
+  /// Revoga acesso de um dispositivo específico
+  Future<void> revokeDevice(String deviceUuid) async {
+    try {
+      final currentState = state.value ?? SettingsState.initial();
+      final updatedDevices = currentState.connectedDevices
+          .map((device) => device.uuid == deviceUuid 
+              ? device.copyWith(isActive: false) 
+              : device)
+          .toList()
+          .cast<DeviceEntity>();
+      
+      state = AsyncValue.data(
+        currentState.copyWith(
+          connectedDevices: updatedDevices,
+          successMessage: 'Dispositivo revogado com sucesso',
+        ),
+      );
+    } catch (e) {
+      state = AsyncValue.data(
+        (state.value ?? SettingsState.initial()).copyWith(
+          errorMessage: 'Erro ao revogar dispositivo: $e',
+        ),
+      );
+    }
+  }
+
+  /// Revoga acesso de todos os outros dispositivos (exceto o atual)
+  Future<void> revokeAllOtherDevices() async {
+    try {
+      final currentState = state.value ?? SettingsState.initial();
+      final currentDeviceUuid = currentState.currentDevice?.uuid;
+      final updatedDevices = currentState.connectedDevices
+          .map((device) => device.uuid != currentDeviceUuid 
+              ? device.copyWith(isActive: false) 
+              : device)
+          .toList()
+          .cast<DeviceEntity>();
+      
+      state = AsyncValue.data(
+        currentState.copyWith(
+          connectedDevices: updatedDevices,
+          successMessage: 'Todos os outros dispositivos foram revogados',
+        ),
+      );
+    } catch (e) {
+      state = AsyncValue.data(
+        (state.value ?? SettingsState.initial()).copyWith(
+          errorMessage: 'Erro ao revogar dispositivos: $e',
+        ),
+      );
+    }
+  }
+
   /// Verifica se deve mostrar notificação
   bool shouldShowNotification(String notificationType, {String? taskType}) {
     final currentState = state.value ?? SettingsState.initial();
@@ -670,17 +734,6 @@ extension SettingsStateExtensions on SettingsState {
     return hasPermissionsGranted
         ? Icons.notifications_active
         : Icons.notifications_off;
-  }
-
-  /// Texto para subtitle do tema
-  String get themeSubtitle {
-    if (this.isDarkMode) {
-      return 'Tema escuro ativo';
-    } else if (isLightMode) {
-      return 'Tema claro ativo';
-    } else {
-      return 'Seguir sistema';
-    }
   }
 }
 

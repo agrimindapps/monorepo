@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:core/core.dart'
     hide AuthState, AuthStatus, deviceManagementProvider;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/services/data_sanitization_service.dart';
 import '../../../../core/theme/app_colors.dart';

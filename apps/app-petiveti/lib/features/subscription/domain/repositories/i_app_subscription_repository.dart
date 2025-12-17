@@ -1,5 +1,4 @@
-import 'package:core/core.dart' hide ISubscriptionRepository;
-import 'package:core/core.dart' show ISubscriptionRepository;
+import 'package:core/core.dart';
 
 /// Interface app-specific para repositório de assinaturas do Petiveti
 /// Estende funcionalidades sobre o ISubscriptionRepository do core

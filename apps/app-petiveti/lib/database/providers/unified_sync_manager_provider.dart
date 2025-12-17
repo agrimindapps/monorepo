@@ -1,5 +1,3 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -22,18 +20,16 @@ part 'unified_sync_manager_provider.g.dart';
 @riverpod
 UnifiedSyncManager unifiedSyncManager(Ref ref) {
   // Get all sync adapters (7 ativos, 2 desabilitados temporariamente)
-  final adapters = [
-    ref.watch(animalSyncAdapterProvider),
-    ref.watch(medicationSyncAdapterProvider),
-    ref.watch(vaccineSyncAdapterProvider),
-    ref.watch(appointmentSyncAdapterProvider),
-    ref.watch(weightRecordSyncAdapterProvider),
-    ref.watch(expenseSyncAdapterProvider),
-    ref.watch(reminderSyncAdapterProvider),
-    // TODO: Re-enable quando calculation_history e promo_content forem refatorados
-    // ref.watch(calculationHistorySyncAdapterProvider),
-    // ref.watch(promoContentSyncAdapterProvider),
-  ];
+  ref.watch(animalSyncAdapterProvider);
+  ref.watch(medicationSyncAdapterProvider);
+  ref.watch(vaccineSyncAdapterProvider);
+  ref.watch(appointmentSyncAdapterProvider);
+  ref.watch(weightRecordSyncAdapterProvider);
+  ref.watch(expenseSyncAdapterProvider);
+  ref.watch(reminderSyncAdapterProvider);
+  // TODO: Re-enable quando calculation_history e promo_content forem refatorados
+  // ref.watch(calculationHistorySyncAdapterProvider);
+  // ref.watch(promoContentSyncAdapterProvider);
 
   // Use o singleton UnifiedSyncManager.instance ao invés de criar nova instância
   return UnifiedSyncManager.instance;

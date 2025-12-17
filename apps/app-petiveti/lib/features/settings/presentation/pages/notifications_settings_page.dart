@@ -139,7 +139,7 @@ class _NotificationsSettingsPageState
   }
 
   Widget _buildStatusCard(BuildContext context, ThemeData theme) {
-    final isWeb = kIsWeb;
+    const isWeb = kIsWeb;
     final hasPermission = _permissionStatus?.isGranted ?? false;
     final isDenied = _permissionStatus?.isDenied ?? false;
     final isPermanentlyDenied = _permissionStatus?.isPermanentlyDenied ?? false;
@@ -262,7 +262,7 @@ class _NotificationsSettingsPageState
     dynamic settings,
   ) {
     final isEnabled = settings.notificationsEnabled as bool;
-    final isWeb = kIsWeb;
+    const isWeb = kIsWeb;
     final hasPermission = _permissionStatus?.isGranted ?? false;
     final canEnable = !isWeb && hasPermission;
 

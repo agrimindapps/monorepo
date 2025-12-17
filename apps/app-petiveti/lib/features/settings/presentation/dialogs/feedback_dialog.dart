@@ -52,11 +52,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
           Icon(Icons.feedback, color: AppColors.primary),
-          const SizedBox(width: 12),
-          const Text('Enviar Feedback'),
+          SizedBox(width: 12),
+          Text('Enviar Feedback'),
         ],
       ),
       content: SingleChildScrollView(
@@ -72,7 +72,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedType,
+                initialValue: _selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Tipo de Feedback',
                   border: OutlineInputBorder(),

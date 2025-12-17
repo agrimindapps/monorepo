@@ -89,7 +89,7 @@ class ProfileSubscriptionSection extends ConsumerWidget {
 
   /// Widget para quando tem premium
   Widget _buildPremiumCard(BuildContext context, SubscriptionInfo subscription, bool isDark) {
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: isDark

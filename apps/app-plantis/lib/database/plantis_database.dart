@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 

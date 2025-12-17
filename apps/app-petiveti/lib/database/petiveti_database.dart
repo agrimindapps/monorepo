@@ -19,9 +19,9 @@ import 'tables/expenses_table.dart';
 import 'tables/medications_table.dart';
 import 'tables/promo_content_table.dart';
 import 'tables/reminders_table.dart';
+import 'tables/user_subscriptions_table.dart';
 import 'tables/vaccines_table.dart';
 import 'tables/weight_records_table.dart';
-import 'tables/user_subscriptions_table.dart';
 
 part 'petiveti_database.g.dart';
 

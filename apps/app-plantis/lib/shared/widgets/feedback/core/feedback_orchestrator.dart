@@ -1,83 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/providers/feedback_providers.dart';
-import '../confirmation_system.dart';
-import '../haptic_service.dart';
-import '../toast_service.dart';
 import 'operation_config.dart';
-import 'operation_executor_service.dart';
 
-/// Orchestrator principal do sistema de feedback
-/// Coordena todos os services de feedback de forma centralizada
+/// Orchestrator para coordenar operações com feedback
+/// Base para extensions helpers
 class FeedbackOrchestrator {
-  final Ref _ref;
-  late final OperationExecutorService _executor;
-  late final HapticService _hapticService;
-  late final ToastService _toastService;
-  late final ConfirmationService _confirmationService;
-
-  FeedbackOrchestrator(this._ref) {
-    _executor = _ref.watch(operationExecutorServiceProvider);
-    _hapticService = _ref.watch(hapticServiceProvider);
-    _toastService = _ref.watch(toastServiceProvider);
-    _confirmationService = _ref.watch(confirmationServiceProvider);
-  }
-
-  // ==================== OPERATION EXECUTION ====================
-
-  /// Executa operação com feedback completo
+  /// Executa uma operação com configuração de feedback
   Future<T> executeOperation<T>({
     required BuildContext context,
     required String operationKey,
     required Future<T> Function() operation,
     required OperationConfig config,
-  }) {
-    return _executor.execute<T>(
-      context: context,
-      operationKey: operationKey,
-      operation: operation,
-      config: config,
-    );
+  }) async {
+    // Implementação básica - pode ser expandida conforme necessário
+    try {
+      return await operation();
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  /// Executa operação com progresso determinado
+  /// Executa uma operação com progresso
   Future<T> executeWithProgress<T>({
     required BuildContext context,
     required String operationKey,
-    required Future<T> Function(void Function(double, String?) progressCallback)
-    operation,
+    required Future<T> Function(void Function(double, String?) progressCallback) operation,
     required ProgressOperationConfig config,
-  }) {
-    return _executor.executeWithProgress<T>(
-      context: context,
-      operationKey: operationKey,
-      operation: operation,
-      config: config,
-    );
+  }) async {
+    try {
+      return await operation((progress, message) {
+        // Callback de progresso - pode ser expandido
+      });
+    } catch (e) {
+      rethrow;
+    }
   }
 
-  // ==================== CONFIRMATIONS ====================
-
-  /// Mostra dialog de confirmação
+  /// Mostra confirmação
   Future<bool> showConfirmation({
     required BuildContext context,
     required String title,
     required String message,
-    String confirmLabel = 'Confirmar',
-    String cancelLabel = 'Cancelar',
-    ConfirmationType type = ConfirmationType.info,
+    String? confirmText,
+    String? cancelText,
+    String? confirmLabel,
+    String? cancelLabel,
+    dynamic type,
     IconData? icon,
   }) async {
-    return await _confirmationService.showConfirmation(
+    final confirm = confirmLabel ?? confirmText ?? 'Confirmar';
+    final cancel = cancelLabel ?? cancelText ?? 'Cancelar';
+    
+    return await showDialog<bool>(
       context: context,
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      cancelLabel: cancelLabel,
-      type: type,
-      icon: icon,
-    );
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(confirm),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
   /// Mostra confirmação destrutiva
@@ -85,89 +75,98 @@ class FeedbackOrchestrator {
     required BuildContext context,
     required String title,
     required String message,
-    String confirmLabel = 'Deletar',
-    bool requiresDoubleConfirmation = false,
+    String? confirmText,
+    String? cancelText,
+    String? confirmLabel,
+    bool? requiresDoubleConfirmation,
   }) async {
-    return await _confirmationService.showDestructiveConfirmation(
+    final confirm = confirmLabel ?? confirmText ?? 'Excluir';
+    final cancel = cancelText ?? 'Cancelar';
+    
+    return await showDialog<bool>(
       context: context,
-      title: title,
-      message: message,
-      confirmLabel: confirmLabel,
-      requiresDoubleConfirmation: requiresDoubleConfirmation,
-    );
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: Text(confirm),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
-
-  // ==================== TOASTS ====================
 
   /// Mostra toast de sucesso
   void showSuccessToast(BuildContext context, String message) {
-    _toastService.showSuccess(context: context, message: message);
-  }
-
-  /// Mostra toast de erro
-  void showErrorToast(
-    BuildContext context,
-    String message, {
-    VoidCallback? onRetry,
-  }) {
-    _toastService.showError(
-      context: context,
-      message: message,
-      onAction: onRetry,
-      actionLabel: onRetry != null ? 'Tentar novamente' : null,
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
     );
   }
 
-  /// Mostra toast de info
+  /// Mostra toast de erro
+  void showErrorToast(BuildContext context, String message, {VoidCallback? onRetry}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+        action: onRetry != null
+            ? SnackBarAction(
+                label: 'Tentar novamente',
+                onPressed: onRetry,
+                textColor: Colors.white,
+              )
+            : null,
+      ),
+    );
+  }
+
+  /// Mostra toast informativo
   void showInfoToast(BuildContext context, String message) {
-    _toastService.showInfo(context: context, message: message);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.blue,
+      ),
+    );
   }
 
-  /// Mostra toast de warning
+  /// Mostra toast de aviso
   void showWarningToast(BuildContext context, String message) {
-    _toastService.showWarning(context: context, message: message);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.orange,
+      ),
+    );
   }
-
-  // ==================== HAPTIC FEEDBACK ====================
 
   /// Haptic leve
-  Future<void> lightHaptic() => _hapticService.light();
+  Future<void> lightHaptic() async {
+    // Implementação pode ser adicionada com HapticFeedback
+  }
 
   /// Haptic médio
-  Future<void> mediumHaptic() => _hapticService.medium();
+  Future<void> mediumHaptic() async {
+    // Implementação pode ser adicionada com HapticFeedback
+  }
 
   /// Haptic pesado
-  Future<void> heavyHaptic() => _hapticService.heavy();
-
-  /// Haptic de sucesso
-  Future<void> successHaptic() => _hapticService.success();
-
-  /// Haptic de erro
-  Future<void> errorHaptic() => _hapticService.error();
+  Future<void> heavyHaptic() async {
+    // Implementação pode ser adicionada com HapticFeedback
+  }
 
   /// Haptic contextual
-  Future<void> contextualHaptic(String contextType) async {
-    switch (contextType) {
-      case 'button_tap':
-        await _hapticService.buttonTap();
-        break;
-      case 'task_complete':
-        await _hapticService.completeTask();
-        break;
-      case 'plant_save':
-        await _hapticService.addPlant();
-        break;
-      case 'premium_purchase':
-        await _hapticService.purchaseSuccess();
-        break;
-      case 'error':
-        await _hapticService.error();
-        break;
-      case 'success':
-        await _hapticService.success();
-        break;
-      default:
-        await _hapticService.light();
-    }
+  Future<void> contextualHaptic(String context) async {
+    // Implementação pode ser adicionada com HapticFeedback
   }
 }

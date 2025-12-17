@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
-import '../entities/sync_calculation_history_entity.dart';
 import '../../petiveti_database.dart';
 import '../../tables/calculation_history_table.dart';
+import '../entities/sync_calculation_history_entity.dart';
 
 /// Adapter de sincronização para Calculation History
 class CalculationHistoryDriftSyncAdapter

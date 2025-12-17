@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 
 import 'plant_field_converter.dart';
 

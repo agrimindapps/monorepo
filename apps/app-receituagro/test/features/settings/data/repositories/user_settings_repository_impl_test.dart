@@ -1,5 +1,4 @@
 import 'package:app_receituagro/features/settings/data/repositories/user_settings_repository_impl.dart';
-import 'package:app_receituagro/features/settings/domain/entities/user_settings_entity.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -128,18 +127,20 @@ void main() {
       expect(result!.language, 'en-US');
     });
 
-    test('should throw RepositoryException when settings not found for update',
-        () async {
-      // Arrange
-      SharedPreferences.setMockInitialValues({});
-      const userId = 'non-existent-user';
+    test(
+      'should throw RepositoryException when settings not found for update',
+      () async {
+        // Arrange
+        SharedPreferences.setMockInitialValues({});
+        const userId = 'non-existent-user';
 
-      // Act & Assert
-      expect(
-        () => repository.updateSetting(userId, 'isDarkTheme', true),
-        throwsA(isA<RepositoryException>()),
-      );
-    });
+        // Act & Assert
+        expect(
+          () => repository.updateSetting(userId, 'isDarkTheme', true),
+          throwsA(isA<RepositoryException>()),
+        );
+      },
+    );
   });
 
   // ===== GROUP 3: RESET TO DEFAULT =====
@@ -189,18 +190,20 @@ void main() {
       expect(exported['language'], settings.language);
     });
 
-    test('should return empty map when exporting non-existent settings',
-        () async {
-      // Arrange
-      SharedPreferences.setMockInitialValues({});
-      const userId = 'non-existent-user';
+    test(
+      'should return empty map when exporting non-existent settings',
+      () async {
+        // Arrange
+        SharedPreferences.setMockInitialValues({});
+        const userId = 'non-existent-user';
 
-      // Act
-      final exported = await repository.exportSettings(userId);
+        // Act
+        final exported = await repository.exportSettings(userId);
 
-      // Assert
-      expect(exported, isEmpty);
-    });
+        // Assert
+        expect(exported, isEmpty);
+      },
+    );
 
     test('should import settings from map', () async {
       // Arrange
@@ -226,7 +229,10 @@ void main() {
       final result = await repository.getUserSettings(userId);
 
       // Assert
-      expect(result!.userId, userId); // Should use provided userId, not from data
+      expect(
+        result!.userId,
+        userId,
+      ); // Should use provided userId, not from data
       expect(result.isDarkTheme, true);
       expect(result.language, 'en-US');
     });
@@ -235,9 +241,7 @@ void main() {
       // Arrange
       SharedPreferences.setMockInitialValues({});
       const userId = 'user-123';
-      final invalidData = <String, dynamic>{
-        'invalid': 'data'
-      };
+      final invalidData = <String, dynamic>{'invalid': 'data'};
 
       // Act & Assert
       expect(
@@ -341,8 +345,9 @@ void main() {
       SharedPreferences.setMockInitialValues({});
       const userId = 'user-123';
       final now = DateTime.now();
-      final settings = TestFixtures.createTestSettings(userId: userId)
-          .copyWith(lastUpdated: now, createdAt: now);
+      final settings = TestFixtures.createTestSettings(
+        userId: userId,
+      ).copyWith(lastUpdated: now, createdAt: now);
 
       // Act
       await repository.saveUserSettings(settings);
@@ -391,8 +396,9 @@ void main() {
       // Arrange
       SharedPreferences.setMockInitialValues({});
       const userId = 'user-123';
-      final settings = TestFixtures.createTestSettings(userId: userId)
-          .copyWith(language: 'pt-BR');
+      final settings = TestFixtures.createTestSettings(
+        userId: userId,
+      ).copyWith(language: 'pt-BR');
 
       // Act
       await repository.saveUserSettings(settings);
@@ -424,7 +430,8 @@ void main() {
       // Arrange
       const userId = 'user-123';
       SharedPreferences.setMockInitialValues({
-        'user_settings_$userId': '{"userId": "user-123"}', // Missing required fields
+        'user_settings_$userId':
+            '{"userId": "user-123"}', // Missing required fields
       });
 
       // Act

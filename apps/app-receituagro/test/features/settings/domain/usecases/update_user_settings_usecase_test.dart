@@ -1,4 +1,3 @@
-import 'package:app_receituagro/features/settings/domain/entities/user_settings_entity.dart';
 import 'package:app_receituagro/features/settings/domain/exceptions/settings_exceptions.dart';
 import 'package:app_receituagro/features/settings/domain/repositories/i_user_settings_repository.dart';
 import 'package:app_receituagro/features/settings/domain/usecases/update_user_settings_usecase.dart';
@@ -30,11 +29,14 @@ void main() {
   group('UpdateUserSettingsUseCase - Complete Updates', () {
     test('should update complete settings successfully', () async {
       // Arrange
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(isDarkTheme: true, language: 'en-US');
+      final settings = TestFixtures.createTestSettings().copyWith(
+        isDarkTheme: true,
+        language: 'en-US',
+      );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -48,11 +50,13 @@ void main() {
     test('should update lastUpdated timestamp', () async {
       // Arrange
       final oldTime = DateTime(2024, 1, 1);
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(lastUpdated: oldTime);
+      final settings = TestFixtures.createTestSettings().copyWith(
+        lastUpdated: oldTime,
+      );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -69,8 +73,9 @@ void main() {
         analyticsEnabled: true,
       );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -84,53 +89,57 @@ void main() {
   // ===== GROUP 2: VALIDATION ERRORS =====
 
   group('UpdateUserSettingsUseCase - Validation Errors', () {
-    test('should throw InvalidSettingsException when settings are invalid',
-        () async {
-      // Arrange
-      final invalidSettings = TestFixtures.createTestSettings().copyWith(
-        createdAt: DateTime.now().add(const Duration(days: 1)),
-      );
+    test(
+      'should throw InvalidSettingsException when settings are invalid',
+      () async {
+        // Arrange
+        final invalidSettings = TestFixtures.createTestSettings().copyWith(
+          createdAt: DateTime.now().add(const Duration(days: 1)),
+        );
 
-      // Act & Assert
-      expect(
-        () => useCase(invalidSettings),
-        throwsA(isA<InvalidSettingsException>()),
-      );
-      verifyNever(() => mockRepository.saveUserSettings(any()));
-    });
+        // Act & Assert
+        expect(
+          () => useCase(invalidSettings),
+          throwsA(isA<InvalidSettingsException>()),
+        );
+        verifyNever(() => mockRepository.saveUserSettings(any()));
+      },
+    );
 
-    test('should throw UnsupportedLanguageException for invalid language',
-        () async {
-      // Arrange
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(language: 'invalid-lang');
+    test(
+      'should throw UnsupportedLanguageException for invalid language',
+      () async {
+        // Arrange
+        final settings = TestFixtures.createTestSettings().copyWith(
+          language: 'invalid-lang',
+        );
 
-      // Act & Assert
-      expect(
-        () => useCase(settings),
-        throwsA(isA<UnsupportedLanguageException>()),
-      );
-      verifyNever(() => mockRepository.saveUserSettings(any()));
-    });
+        // Act & Assert
+        expect(
+          () => useCase(settings),
+          throwsA(isA<UnsupportedLanguageException>()),
+        );
+        verifyNever(() => mockRepository.saveUserSettings(any()));
+      },
+    );
 
     test('should throw InvalidUserIdException when userId is empty', () async {
       // Arrange
       final settings = TestFixtures.createTestSettings().copyWith(userId: '');
 
       // Act & Assert
-      expect(
-        () => useCase(settings),
-        throwsA(isA<InvalidUserIdException>()),
-      );
+      expect(() => useCase(settings), throwsA(isA<InvalidUserIdException>()));
     });
 
     test('should accept pt-BR language', () async {
       // Arrange
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(language: 'pt-BR');
+      final settings = TestFixtures.createTestSettings().copyWith(
+        language: 'pt-BR',
+      );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -141,11 +150,13 @@ void main() {
 
     test('should accept en-US language', () async {
       // Arrange
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(language: 'en-US');
+      final settings = TestFixtures.createTestSettings().copyWith(
+        language: 'en-US',
+      );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -156,11 +167,13 @@ void main() {
 
     test('should accept es-ES language', () async {
       // Arrange
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(language: 'es-ES');
+      final settings = TestFixtures.createTestSettings().copyWith(
+        language: 'es-ES',
+      );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -178,17 +191,15 @@ void main() {
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
-      final result = await useCase.updateSingle(
-        userId,
-        'isDarkTheme',
-        true,
-      );
+      final result = await useCase.updateSingle(userId, 'isDarkTheme', true);
 
       // Assert
       expect(result.isDarkTheme, true);
@@ -201,56 +212,60 @@ void main() {
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
-      final result = await useCase.updateSingle(
-        userId,
-        'language',
-        'en-US',
-      );
+      final result = await useCase.updateSingle(userId, 'language', 'en-US');
 
       // Assert
       expect(result.language, 'en-US');
     });
 
-    test('should throw InvalidUserIdException for empty userId in updateSingle',
-        () async {
-      // Arrange
-      const userId = '';
+    test(
+      'should throw InvalidUserIdException for empty userId in updateSingle',
+      () async {
+        // Arrange
+        const userId = '';
 
-      // Act & Assert
-      expect(
-        () => useCase.updateSingle(userId, 'isDarkTheme', true),
-        throwsA(isA<InvalidUserIdException>()),
-      );
-    });
+        // Act & Assert
+        expect(
+          () => useCase.updateSingle(userId, 'isDarkTheme', true),
+          throwsA(isA<InvalidUserIdException>()),
+        );
+      },
+    );
 
-    test('should throw SettingsNotFoundException when settings not found',
-        () async {
-      // Arrange
-      const userId = 'non-existent-user';
+    test(
+      'should throw SettingsNotFoundException when settings not found',
+      () async {
+        // Arrange
+        const userId = 'non-existent-user';
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => null);
+        when(
+          () => mockRepository.getUserSettings(userId),
+        ).thenAnswer((_) async => null);
 
-      // Act & Assert
-      expect(
-        () => useCase.updateSingle(userId, 'isDarkTheme', true),
-        throwsA(isA<SettingsNotFoundException>()),
-      );
-    });
+        // Act & Assert
+        expect(
+          () => useCase.updateSingle(userId, 'isDarkTheme', true),
+          throwsA(isA<SettingsNotFoundException>()),
+        );
+      },
+    );
 
     test('should throw InvalidUpdateException for invalid key', () async {
       // Arrange
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
 
       // Act & Assert
       expect(
@@ -264,8 +279,9 @@ void main() {
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
 
       // Act & Assert
       expect(
@@ -288,10 +304,12 @@ void main() {
         'soundEnabled': false,
       };
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase.batchUpdate(userId, updates);
@@ -304,46 +322,49 @@ void main() {
       verify(() => mockRepository.saveUserSettings(any())).called(1);
     });
 
-    test('should throw InvalidUpdateException when updates map is empty',
-        () async {
-      // Arrange
-      const userId = 'user-123';
-      final updates = <String, dynamic>{};
+    test(
+      'should throw InvalidUpdateException when updates map is empty',
+      () async {
+        // Arrange
+        const userId = 'user-123';
+        final updates = <String, dynamic>{};
 
-      // Act & Assert
-      expect(
-        () => useCase.batchUpdate(userId, updates),
-        throwsA(isA<InvalidUpdateException>()),
-      );
-    });
+        // Act & Assert
+        expect(
+          () => useCase.batchUpdate(userId, updates),
+          throwsA(isA<InvalidUpdateException>()),
+        );
+      },
+    );
 
-    test('should throw SettingsNotFoundException for batch update when not found',
-        () async {
-      // Arrange
-      const userId = 'non-existent-user';
-      final updates = {'isDarkTheme': true};
+    test(
+      'should throw SettingsNotFoundException for batch update when not found',
+      () async {
+        // Arrange
+        const userId = 'non-existent-user';
+        final updates = {'isDarkTheme': true};
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => null);
+        when(
+          () => mockRepository.getUserSettings(userId),
+        ).thenAnswer((_) async => null);
 
-      // Act & Assert
-      expect(
-        () => useCase.batchUpdate(userId, updates),
-        throwsA(isA<SettingsNotFoundException>()),
-      );
-    });
+        // Act & Assert
+        expect(
+          () => useCase.batchUpdate(userId, updates),
+          throwsA(isA<SettingsNotFoundException>()),
+        );
+      },
+    );
 
     test('should validate all updates in batch', () async {
       // Arrange
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
-      final updates = {
-        'isDarkTheme': true,
-        'invalidKey': 'value',
-      };
+      final updates = {'isDarkTheme': true, 'invalidKey': 'value'};
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
 
       // Act & Assert
       expect(
@@ -358,11 +379,13 @@ void main() {
   group('UpdateUserSettingsUseCase - Business Rules', () {
     test('should disable speechToText when no valid subscription', () async {
       // Arrange
-      final settings = TestFixtures.createTestSettings()
-          .copyWith(speechToTextEnabled: true);
+      final settings = TestFixtures.createTestSettings().copyWith(
+        speechToTextEnabled: true,
+      );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -382,8 +405,9 @@ void main() {
         analyticsEnabled: true, // Will be disabled due to dev mode
       );
 
-      when(() => mockRepository.saveUserSettings(any()))
-          .thenAnswer((_) async => {});
+      when(
+        () => mockRepository.saveUserSettings(any()),
+      ).thenAnswer((_) async => {});
 
       // Act
       final result = await useCase(settings);
@@ -408,10 +432,7 @@ void main() {
       when(() => mockRepository.saveUserSettings(any())).thenThrow(exception);
 
       // Act & Assert
-      expect(
-        () => useCase(settings),
-        throwsA(equals(exception)),
-      );
+      expect(() => useCase(settings), throwsA(equals(exception)));
     });
 
     test('should handle invalid language in single update', () async {
@@ -419,8 +440,9 @@ void main() {
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
 
       // Act & Assert
       expect(
@@ -434,8 +456,9 @@ void main() {
       const userId = 'user-123';
       final existingSettings = TestFixtures.createTestSettings(userId: userId);
 
-      when(() => mockRepository.getUserSettings(userId))
-          .thenAnswer((_) async => existingSettings);
+      when(
+        () => mockRepository.getUserSettings(userId),
+      ).thenAnswer((_) async => existingSettings);
 
       // Act & Assert
       expect(

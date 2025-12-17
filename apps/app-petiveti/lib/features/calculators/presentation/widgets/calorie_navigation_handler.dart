@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import '../providers/calorie_provider.dart';
 
 /// Navigation handler for Calorie Calculator
-/// 
+///
 /// Responsibilities:
 /// - Handle step navigation logic
-/// - Manage page controller transitions  
+/// - Manage page controller transitions
 /// - Coordinate with provider state changes
 /// - Enhanced loading states during transitions
 class CalorieNavigationHandler {
@@ -25,14 +25,14 @@ class CalorieNavigationHandler {
   /// Navigate to the next step or calculate if last step
   Future<void> goToNextStep(bool isLastStep) async {
     if (_isTransitioning) return;
-    
+
     try {
       _isTransitioning = true;
-      
+
       if (isLastStep) {
         ref.read(calorieProvider.notifier).setTransitionLoading(true);
         await Future<void>.delayed(const Duration(milliseconds: 200));
-        ref.read(calorieProvider.notifier).calculate();
+        await ref.read(calorieProvider.notifier).calculate();
       } else {
         ref.read(calorieProvider.notifier).setTransitionLoading(true);
         ref.read(calorieProvider.notifier).nextStep();
@@ -48,14 +48,14 @@ class CalorieNavigationHandler {
   /// Navigate to the previous step
   Future<void> goToPreviousStep() async {
     if (_isTransitioning) return;
-    
+
     try {
       _isTransitioning = true;
       ref.read(calorieProvider.notifier).setTransitionLoading(true);
-      
+
       ref.read(calorieProvider.notifier).previousStep();
       final currentStep = ref.read(calorieProvider).currentStep;
-      
+
       await _animateToPageWithLoading(currentStep);
     } finally {
       _isTransitioning = false;
@@ -83,7 +83,7 @@ class CalorieNavigationHandler {
   /// Private method to handle page animation
   void _animateToPage(int page) {
     if (!pageController.hasClients) return;
-    
+
     pageController.animateToPage(
       page,
       duration: const Duration(milliseconds: 300),
@@ -96,13 +96,13 @@ class CalorieNavigationHandler {
   Future<void> _animateToPageWithLoading(int page) async {
     if (!pageController.hasClients) return;
     await Future<void>.delayed(const Duration(milliseconds: 150));
-    
+
     await pageController.animateToPage(
       page,
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
     );
-    
+
     onTransition?.call();
     await Future<void>.delayed(const Duration(milliseconds: 100));
   }
@@ -116,6 +116,5 @@ class CalorieNavigationHandler {
   }
 
   /// Dispose of resources
-  void dispose() {
-  }
+  void dispose() {}
 }

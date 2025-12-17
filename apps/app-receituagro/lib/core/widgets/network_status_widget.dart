@@ -92,8 +92,8 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
   /// Check initial network status
   Future<void> _checkInitialNetworkStatus() async {
     final result = await _connectivityService.isOnline();
-    result.fold(
-      (failure) {
+    await result.fold(
+      (failure) async {
         setState(() {
           _currentStatus = NetworkStatus.unknown;
           _connectionType = ConnectivityType.none;
@@ -141,7 +141,7 @@ class _NetworkStatusWidgetState extends State<NetworkStatusWidget>
         case ConnectivityType.other:
           _currentStatus = NetworkStatus.limited;
           _connectionQuality = ConnectionQuality.poor;
-          _pulseController.repeat(reverse: true);
+          unawaited(_pulseController.repeat(reverse: true));
           break;
         case ConnectivityType.none:
           _currentStatus = NetworkStatus.disconnected;

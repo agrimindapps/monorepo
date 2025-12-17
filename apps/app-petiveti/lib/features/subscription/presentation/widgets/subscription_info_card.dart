@@ -237,10 +237,12 @@ class SubscriptionInfoCard extends StatelessWidget {
   String _getPlanName(String productId) {
     final lower = productId.toLowerCase();
     if (lower.contains('anual') || lower.contains('year')) return 'Plano Anual';
-    if (lower.contains('semestral') || lower.contains('semester'))
+    if (lower.contains('semestral') || lower.contains('semester')) {
       return 'Plano Semestral';
-    if (lower.contains('mensal') || lower.contains('month'))
+    }
+    if (lower.contains('mensal') || lower.contains('month')) {
       return 'Plano Mensal';
+    }
     return 'Premium';
   }
 

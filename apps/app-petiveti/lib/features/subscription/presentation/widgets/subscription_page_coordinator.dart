@@ -50,7 +50,6 @@ class SubscriptionPageCoordinator extends ConsumerWidget {
     String userId,
     SubscriptionPlan plan,
   ) async {
-    final actions = ref.read(purchaseActionsProvider);
     // TODO: Adapt to use purchasePackage
     return false;
   }

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/domain/usecases/send_password_reset_email_usecase.dart';
 import '../../features/auth/domain/usecases/update_profile_usecase.dart';
 import 'auth_notifier.dart';
-import 'auth_state.dart' as local;
 import 'core_providers.dart';
 
 // Re-export authProvider from auth_notifier (generated in auth_notifier.g.dart)
@@ -47,9 +46,10 @@ final updateProfileUseCaseProvider = Provider<UpdateProfileUseCase>((ref) {
   return UpdateProfileUseCase(ref.watch(authRepositoryProvider));
 });
 
-final sendPasswordResetEmailUseCaseProvider = Provider<SendPasswordResetEmailUseCase>((ref) {
-  return SendPasswordResetEmailUseCase(ref.watch(authRepositoryProvider));
-});
+final sendPasswordResetEmailUseCaseProvider =
+    Provider<SendPasswordResetEmailUseCase>((ref) {
+      return SendPasswordResetEmailUseCase(ref.watch(authRepositoryProvider));
+    });
 
 // ============================================================================
 // Derived Providers (computed from auth state)

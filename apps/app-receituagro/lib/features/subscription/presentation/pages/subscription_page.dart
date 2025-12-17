@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/theme/receituagro_colors.dart';
 import '../../../../core/widgets/modern_header_widget.dart';
 import '../../../../core/widgets/receituagro_loading_widget.dart';
 import '../providers/subscription_notifier.dart';
@@ -47,23 +46,23 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     final subscriptionState = ref.watch(subscriptionManagementProvider);
 
     // Listen to state changes and show messages only when they change
-    ref.listen<AsyncValue<SubscriptionState>>(
-      subscriptionManagementProvider,
-      (previous, next) {
-        next.whenData((state) {
-          if (state.errorMessage != null) {
-            _showSnackBar(context, state.errorMessage!, Colors.red);
-            ref.read(subscriptionManagementProvider.notifier).clearMessages();
-          } else if (state.successMessage != null) {
-            _showSnackBar(context, state.successMessage!, Colors.green);
-            ref.read(subscriptionManagementProvider.notifier).clearMessages();
-          } else if (state.infoMessage != null) {
-            _showSnackBar(context, state.infoMessage!, Colors.blue);
-            ref.read(subscriptionManagementProvider.notifier).clearMessages();
-          }
-        });
-      },
-    );
+    ref.listen<AsyncValue<SubscriptionState>>(subscriptionManagementProvider, (
+      previous,
+      next,
+    ) {
+      next.whenData((state) {
+        if (state.errorMessage != null) {
+          _showSnackBar(context, state.errorMessage!, Colors.red);
+          ref.read(subscriptionManagementProvider.notifier).clearMessages();
+        } else if (state.successMessage != null) {
+          _showSnackBar(context, state.successMessage!, Colors.green);
+          ref.read(subscriptionManagementProvider.notifier).clearMessages();
+        } else if (state.infoMessage != null) {
+          _showSnackBar(context, state.infoMessage!, Colors.blue);
+          ref.read(subscriptionManagementProvider.notifier).clearMessages();
+        }
+      });
+    });
 
     return subscriptionState.when(
       data: (state) {
@@ -84,7 +83,10 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
             ),
             child: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
                     ModernHeaderWidget(
@@ -100,8 +102,8 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                       child: state.isLoading
                           ? _buildLoadingView()
                           : state.hasActiveSubscription
-                              ? _buildActiveSubscriptionView(state)
-                              : _buildPlansView(state),
+                          ? _buildActiveSubscriptionView(state)
+                          : _buildPlansView(state),
                     ),
                   ],
                 ),
@@ -110,16 +112,9 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
           ),
         );
       },
-      loading: () => Scaffold(
-        body: _buildLoadingView(),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(
-          child: Text(
-            'Erro ao carregar dados: $error',
-          ),
-        ),
-      ),
+      loading: () => Scaffold(body: _buildLoadingView()),
+      error: (error, stack) =>
+          Scaffold(body: Center(child: Text('Erro ao carregar dados: $error'))),
     );
   }
 
@@ -247,7 +242,10 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
 
   /// Helper para mostrar snackbars
   void _showSnackBar(
-      BuildContext context, String message, Color backgroundColor) {
+    BuildContext context,
+    String message,
+    Color backgroundColor,
+  ) {
     if (mounted) {
       // Clear any existing snackbars to prevent duplicates
       ScaffoldMessenger.of(context).clearSnackBars();

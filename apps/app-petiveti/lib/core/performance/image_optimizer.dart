@@ -15,10 +15,10 @@ class ImageOptimizer {
   final Map<String, CachedImage> _memoryCache = {};
   final Map<String, Future<ui.Image?>> _loadingImages = {};
   final Set<String> _preloadedImages = {};
-  
+
   static const int maxMemoryCache = 50; // Máximo de imagens na memória
   static const int maxCacheSizeMB = 100; // Máximo 100MB de cache
-  
+
   int _currentCacheSize = 0;
 
   /// Carrega imagem com cache otimizado
@@ -43,14 +43,14 @@ class ImageOptimizer {
 
     try {
       final image = await loadingFuture;
-      
+
       if (image != null && useCache) {
         _cacheImage(cacheKey, image);
       }
-      
+
       return image;
     } finally {
-      _loadingImages.remove(cacheKey);
+      unawaited(_loadingImages.remove(cacheKey) ?? Future.value());
     }
   }
 
@@ -59,14 +59,14 @@ class ImageOptimizer {
     final futures = sources
         .where((source) => !_preloadedImages.contains(source))
         .map((source) async {
-      try {
-        await loadImage(source, quality: ImageQuality.low);
-        _preloadedImages.add(source);
-      } catch (e) {
-      }
-    });
+          try {
+            await loadImage(source, quality: ImageQuality.low);
+            _preloadedImages.add(source);
+          } catch (e) {}
+        })
+        .toList();
 
-    unawaited(Future.wait(futures));
+    await Future.wait(futures);
   }
 
   /// Limpa cache baseado em estratégias inteligentes
@@ -78,7 +78,9 @@ class ImageOptimizer {
       return;
     }
     final entries = _memoryCache.entries.toList();
-    entries.sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
+    entries.sort(
+      (a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed),
+    );
     final removeCount = (entries.length * 0.3).round();
     for (int i = 0; i < removeCount; i++) {
       final entry = entries[i];
@@ -123,10 +125,9 @@ class ImageOptimizer {
         targetWidth: width,
         targetHeight: height,
       );
-      
+
       final frame = await codec.getNextFrame();
       return frame.image;
-      
     } catch (e) {
       return null;
     }
@@ -137,13 +138,15 @@ class ImageOptimizer {
       final client = HttpClient();
       final request = await client.getUrl(Uri.parse(url));
       final response = await request.close();
-      
+
       if (response.statusCode == 200) {
-        final bytes = await response.fold<List<int>>(<int>[], (List<int> previous, List<int> element) => previous..addAll(element));
+        final bytes = await response.fold<List<int>>(
+          <int>[],
+          (List<int> previous, List<int> element) => previous..addAll(element),
+        );
         return Uint8List.fromList(bytes);
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return null;
   }
 
@@ -162,8 +165,7 @@ class ImageOptimizer {
       if (await file.exists()) {
         return await file.readAsBytes();
       }
-    } catch (e) {
-    }
+    } catch (e) {}
     return null;
   }
 
@@ -178,8 +180,8 @@ class ImageOptimizer {
 
   void _cacheImage(String key, ui.Image image) {
     final sizeBytes = _estimateImageSize(image);
-    while (_memoryCache.length >= maxMemoryCache || 
-           (_currentCacheSize + sizeBytes) > (maxCacheSizeMB * 1024 * 1024)) {
+    while (_memoryCache.length >= maxMemoryCache ||
+        (_currentCacheSize + sizeBytes) > (maxCacheSizeMB * 1024 * 1024)) {
       _removeOldestCacheEntry();
     }
 
@@ -189,7 +191,7 @@ class ImageOptimizer {
       cachedAt: DateTime.now(),
       lastAccessed: DateTime.now(),
     );
-    
+
     _currentCacheSize += sizeBytes;
   }
 
@@ -197,14 +199,21 @@ class ImageOptimizer {
     if (_memoryCache.isEmpty) return;
 
     final entries = _memoryCache.entries.toList();
-    entries.sort((a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed));
-    
+    entries.sort(
+      (a, b) => a.value.lastAccessed.compareTo(b.value.lastAccessed),
+    );
+
     final oldest = entries.first;
     _currentCacheSize -= oldest.value.sizeBytes;
     _memoryCache.remove(oldest.key);
   }
 
-  String _generateCacheKey(String source, int? width, int? height, ImageQuality quality) {
+  String _generateCacheKey(
+    String source,
+    int? width,
+    int? height,
+    ImageQuality quality,
+  ) {
     return '$source:${width ?? 0}x${height ?? 0}:${quality.name}';
   }
 
@@ -257,7 +266,7 @@ class _OptimizedImageState extends State<OptimizedImage> {
   @override
   void initState() {
     super.initState();
-    
+
     if (!widget.lazyLoad) {
       _loadImage();
     }
@@ -266,7 +275,7 @@ class _OptimizedImageState extends State<OptimizedImage> {
   @override
   void didUpdateWidget(OptimizedImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     if (oldWidget.source != widget.source) {
       _image = null;
       _hasError = false;
@@ -276,7 +285,7 @@ class _OptimizedImageState extends State<OptimizedImage> {
 
   Future<void> _loadImage() async {
     if (_isLoading) return;
-    
+
     setState(() {
       _isLoading = true;
       _hasError = false;
@@ -322,12 +331,13 @@ class _OptimizedImageState extends State<OptimizedImage> {
         fit: widget.fit,
       );
     } else {
-      child = widget.placeholder ?? 
-             SizedBox(
-               width: widget.width,
-               height: widget.height,
-               child: const Center(child: CircularProgressIndicator()),
-             );
+      child =
+          widget.placeholder ??
+          SizedBox(
+            width: widget.width,
+            height: widget.height,
+            child: const Center(child: CircularProgressIndicator()),
+          );
     }
 
     if (widget.lazyLoad) {
@@ -343,10 +353,7 @@ class _OptimizedImageState extends State<OptimizedImage> {
       );
     }
 
-    return AnimatedSwitcher(
-      duration: widget.fadeDuration,
-      child: child,
-    );
+    return AnimatedSwitcher(duration: widget.fadeDuration, child: child);
   }
 }
 
@@ -380,19 +387,22 @@ class _VisibilityDetectorState extends State<VisibilityDetector> {
       final position = renderBox.localToGlobal(Offset.zero);
       final size = renderBox.size;
       final rect = position & size;
-      
+
       final screenSize = MediaQuery.of(context).size;
       final screenRect = Offset.zero & screenSize;
-      
+
       final intersection = rect.intersect(screenRect);
-      final visibleFraction = intersection.isEmpty 
-          ? 0.0 
-          : (intersection.width * intersection.height) / (rect.width * rect.height);
-      
-      widget.onVisibilityChanged(VisibilityInfo(
-        visibleFraction: visibleFraction,
-        visibleBounds: intersection,
-      ));
+      final visibleFraction = intersection.isEmpty
+          ? 0.0
+          : (intersection.width * intersection.height) /
+                (rect.width * rect.height);
+
+      widget.onVisibilityChanged(
+        VisibilityInfo(
+          visibleFraction: visibleFraction,
+          visibleBounds: intersection,
+        ),
+      );
     }
   }
 
@@ -443,9 +453,12 @@ class _OptimizedImageGridState extends State<OptimizedImageGrid> {
   }
 
   void _preloadVisibleImages() {
-    final visibleCount = (widget.crossAxisCount * 3).clamp(1, widget.imageSources.length);
+    final visibleCount = (widget.crossAxisCount * 3).clamp(
+      1,
+      widget.imageSources.length,
+    );
     final visibleSources = widget.imageSources.take(visibleCount).toList();
-    
+
     ImageOptimizer().preloadImages(visibleSources);
   }
 
@@ -477,12 +490,7 @@ class _OptimizedImageGridState extends State<OptimizedImageGrid> {
 }
 
 /// Classes de apoio
-enum ImageQuality {
-  low,
-  medium,
-  high,
-  original,
-}
+enum ImageQuality { low, medium, high, original }
 
 class CachedImage {
   final ui.Image image;

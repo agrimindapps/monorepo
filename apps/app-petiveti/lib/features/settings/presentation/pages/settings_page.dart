@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../dialogs/feedback_dialog.dart';

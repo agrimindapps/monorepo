@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../../../features/plants/domain/entities/plant.dart';
 import 'base_sync_model.dart';
 

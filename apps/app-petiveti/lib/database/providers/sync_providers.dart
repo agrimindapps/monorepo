@@ -1,19 +1,17 @@
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../repositories/subscription_local_repository.dart';
-import '../sync/adapters/animal_drift_sync_adapter.dart';
-import '../sync/adapters/medication_drift_sync_adapter.dart';
-import '../sync/adapters/vaccine_drift_sync_adapter.dart';
-import '../sync/adapters/appointment_drift_sync_adapter.dart';
-import '../sync/adapters/weight_record_drift_sync_adapter.dart';
-import '../sync/adapters/expense_drift_sync_adapter.dart';
-import '../sync/adapters/reminder_drift_sync_adapter.dart';
 // import '../sync/adapters/calculation_history_drift_sync_adapter.dart';
 // import '../sync/adapters/promo_content_drift_sync_adapter.dart';
 import '../petiveti_database.dart';
+import '../repositories/subscription_local_repository.dart';
+import '../sync/adapters/animal_drift_sync_adapter.dart';
+import '../sync/adapters/appointment_drift_sync_adapter.dart';
+import '../sync/adapters/expense_drift_sync_adapter.dart';
+import '../sync/adapters/medication_drift_sync_adapter.dart';
+import '../sync/adapters/reminder_drift_sync_adapter.dart';
+import '../sync/adapters/vaccine_drift_sync_adapter.dart';
+import '../sync/adapters/weight_record_drift_sync_adapter.dart';
 
 part 'sync_providers.g.dart';
 

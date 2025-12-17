@@ -5,20 +5,14 @@ import 'package:flutter/material.dart';
 class SubscriptionPageSimple extends ConsumerWidget {
   final String userId;
 
-  const SubscriptionPageSimple({
-    super.key,
-    required this.userId,
-  });
+  const SubscriptionPageSimple({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final subscriptionState = ref.watch(subscriptionProvider);
-    final isPremium = ref.watch(isPremiumProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Assinaturas Premium'),
-      ),
+      appBar: AppBar(title: const Text('Assinaturas Premium')),
       body: subscriptionState.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         active: (info) => _buildActiveSubscription(context, info),
@@ -41,7 +35,11 @@ class SubscriptionPageSimple extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 32),
+                    const Icon(
+                      Icons.check_circle,
+                      color: Colors.green,
+                      size: 32,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -54,10 +52,7 @@ class SubscriptionPageSimple extends ConsumerWidget {
                 const SizedBox(height: 16),
                 _buildInfoRow('Plano', info.productId),
                 if (info.expirationDate != null)
-                  _buildInfoRow(
-                    'Expira em',
-                    _formatDate(info.expirationDate!),
-                  ),
+                  _buildInfoRow('Expira em', _formatDate(info.expirationDate!)),
                 if (info.isTrialPeriod)
                   Chip(
                     label: const Text('Período de teste'),
@@ -87,14 +82,14 @@ class SubscriptionPageSimple extends ConsumerWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Icon(Icons.warning_amber, color: Colors.orange, size: 48),
+                const Icon(Icons.warning_amber, color: Colors.orange, size: 48),
                 const SizedBox(height: 12),
                 Text(
                   'Assinatura Expirada',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Renove sua assinatura para continuar aproveitando os benefícios premium',
                   textAlign: TextAlign.center,
                 ),
@@ -117,7 +112,11 @@ class SubscriptionPageSimple extends ConsumerWidget {
             padding: const EdgeInsets.all(24),
             child: Column(
               children: [
-                Icon(Icons.workspace_premium, size: 64, color: Colors.amber),
+                const Icon(
+                  Icons.workspace_premium,
+                  size: 64,
+                  color: Colors.amber,
+                ),
                 const SizedBox(height: 16),
                 Text(
                   'Desbloqueie Recursos Premium',
@@ -125,7 +124,7 @@ class SubscriptionPageSimple extends ConsumerWidget {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   'Assine para ter acesso completo a todos os recursos',
                   textAlign: TextAlign.center,
                 ),
@@ -150,7 +149,7 @@ class SubscriptionPageSimple extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red),
+            const Icon(Icons.error_outline, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar assinatura',
@@ -205,7 +204,7 @@ class SubscriptionPageSimple extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
-          Icon(Icons.check_circle, color: Colors.green, size: 20),
+          const Icon(Icons.check_circle, color: Colors.green, size: 20),
           const SizedBox(width: 12),
           Text(feature),
         ],
@@ -218,9 +217,7 @@ class SubscriptionPageSimple extends ConsumerWidget {
       onPressed: () {
         // TODO: Implement subscription flow with RevenueCat
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Funcionalidade em desenvolvimento'),
-          ),
+          const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
         );
       },
       style: ElevatedButton.styleFrom(

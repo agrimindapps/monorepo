@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/theme/receituagro_colors.dart';
-import '../../../../core/widgets/receituagro_loading_widget.dart';
 
 class PaymentActionsWidget extends ConsumerWidget {
   const PaymentActionsWidget({
@@ -74,8 +72,9 @@ class PaymentActionsWidget extends ConsumerWidget {
                 width: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(ReceitaAgroColors.primary),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    ReceitaAgroColors.primary,
+                  ),
                 ),
               )
             : Row(
@@ -88,7 +87,9 @@ class PaymentActionsWidget extends ConsumerWidget {
                         ? 'Assinar Premium'
                         : 'Selecione um Plano',
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.w600),
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -167,8 +168,7 @@ class PaymentActionsWidget extends ConsumerWidget {
                   SizedBox(width: 8),
                   Text(
                     'Gerenciar Assinatura',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ],
               ),

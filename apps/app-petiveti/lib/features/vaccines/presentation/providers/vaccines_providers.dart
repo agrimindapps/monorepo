@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/vaccine_local_datasource.dart';
@@ -19,7 +20,6 @@ import '../../domain/usecases/mark_vaccine_completed.dart';
 import '../../domain/usecases/schedule_vaccine_reminder.dart';
 import '../../domain/usecases/search_vaccines.dart';
 import '../../domain/usecases/update_vaccine.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'vaccines_providers.g.dart';
 

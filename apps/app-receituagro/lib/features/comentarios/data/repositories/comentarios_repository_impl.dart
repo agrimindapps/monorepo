@@ -2,9 +2,7 @@ import 'package:core/core.dart' hide Column;
 
 import '../../../../database/repositories/comentarios_repository.dart';
 import '../../domain/entities/comentario_entity.dart';
-import '../../domain/repositories/i_comentarios_read_repository.dart';
 import '../../domain/repositories/i_comentarios_repository.dart';
-import '../../domain/repositories/i_comentarios_write_repository.dart';
 import '../services/comentarios_mapper.dart';
 
 /// Implementation of IComentariosRepository using Drift local storage.
@@ -24,8 +22,7 @@ import '../services/comentarios_mapper.dart';
 /// - IComentariosReadRepository (via module)
 /// - IComentariosWriteRepository (via module)
 
-class ComentariosRepositoryImpl
-    implements IComentariosRepository {
+class ComentariosRepositoryImpl implements IComentariosRepository {
   final ComentariosRepository _repository;
   final IComentariosMapper _mapper;
 

@@ -31,8 +31,7 @@ class EnhancedAnimalSelector extends ConsumerStatefulWidget {
       _EnhancedAnimalSelectorState();
 }
 
-class _EnhancedAnimalSelectorState
-    extends ConsumerState<EnhancedAnimalSelector>
+class _EnhancedAnimalSelectorState extends ConsumerState<EnhancedAnimalSelector>
     with TickerProviderStateMixin {
   static const String _selectedAnimalKey = 'selected_animal_id';
   String? _currentSelectedAnimalId;
@@ -114,10 +113,7 @@ class _EnhancedAnimalSelectorState
     if (animals.isEmpty) return null;
 
     final sortedAnimals = List<Animal>.from(animals)
-      ..sort(
-        (a, b) => (b.createdAt ?? DateTime(1900))
-            .compareTo(a.createdAt ?? DateTime(1900)),
-      );
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
     return sortedAnimals.first;
   }
@@ -205,16 +201,21 @@ class _EnhancedAnimalSelectorState
                     title: Text(
                       animal.name,
                       style: TextStyle(
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                        fontWeight: isSelected
+                            ? FontWeight.w600
+                            : FontWeight.normal,
                       ),
                     ),
-                    subtitle: Text((animal.breed != null && animal.breed!.isNotEmpty)
-                        ? animal.breed!
-                        : animal.species.displayName),
+                    subtitle: Text(
+                      (animal.breed != null && animal.breed!.isNotEmpty)
+                          ? animal.breed!
+                          : animal.species.displayName,
+                    ),
                     trailing: isSelected
-                        ? Icon(Icons.check_circle,
-                            color: Theme.of(context).primaryColor)
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).primaryColor,
+                          )
                         : null,
                     selected: isSelected,
                     onTap: () {
@@ -239,11 +240,7 @@ class _EnhancedAnimalSelectorState
         color: color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
       ),
-      child: Icon(
-        _getAnimalIcon(animal.species),
-        size: 20,
-        color: color,
-      ),
+      child: Icon(_getAnimalIcon(animal.species), size: 20, color: color),
     );
   }
 

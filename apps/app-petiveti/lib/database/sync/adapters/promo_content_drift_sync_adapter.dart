@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
-import '../entities/sync_promo_content_entity.dart';
 import '../../petiveti_database.dart';
 import '../../tables/promo_content_table.dart';
+import '../entities/sync_promo_content_entity.dart';
 
 /// Adapter de sincronização para Promo Content
 class PromoContentDriftSyncAdapter

@@ -1,10 +1,10 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/calorie_input.dart';
 import '../../domain/entities/calorie_output.dart';
 import '../../domain/strategies/calculator_strategy.dart';
 import '../../domain/strategies/calorie_calculator_strategy.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'calorie_provider.g.dart';
 

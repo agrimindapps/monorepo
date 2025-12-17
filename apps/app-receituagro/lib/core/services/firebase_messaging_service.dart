@@ -224,7 +224,10 @@ class ReceitaAgroFirebaseMessagingService {
 
     switch (notification.type) {
       case NotificationType.premium:
-        _navigationService!.navigateTo<void>('/premium', pageType: 'premium');
+        await _navigationService!.navigateTo<void>(
+          '/premium',
+          pageType: 'premium',
+        );
         break;
       case NotificationType.newFeature:
         if (notification.targetScreen != null) {

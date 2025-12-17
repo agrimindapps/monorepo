@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;

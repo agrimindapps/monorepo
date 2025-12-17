@@ -2,7 +2,6 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../sync/petiveti_sync_config.dart';
 import '../sync/petiveti_sync_manager.dart';
 import '../sync/petiveti_sync_service.dart';
 
@@ -164,10 +163,10 @@ Stream<EmergencySyncStatus> emergencySyncStatus(Ref ref) {
 @riverpod
 Map<String, dynamic> syncDebugInfo(Ref ref) {
   final syncNotifier = ref.watch(syncServiceProvider);
-  
+
   if (!syncNotifier.isInitialized) {
     return {'status': 'not_initialized'};
   }
-  
+
   return PetivetiSyncService.instance.getDebugInfo();
 }

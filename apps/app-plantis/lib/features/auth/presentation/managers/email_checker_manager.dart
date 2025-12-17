@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Manager for checking if email already exists
 /// Extracted from register_notifier for better separation of concerns
 class EmailCheckerManager {

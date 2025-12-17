@@ -1,7 +1,6 @@
 import 'package:core/core.dart'
     hide Column, DeviceManagementState, deviceManagementProvider;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../device_management/presentation/providers/device_management_notifier.dart';
 import '../utils/widget_utils.dart';

@@ -224,5 +224,5 @@ OperationExecutorService operationExecutorService(Ref ref) {
 /// Provider para FeedbackOrchestrator
 @Riverpod(keepAlive: true)
 FeedbackOrchestrator feedbackOrchestrator(Ref ref) {
-  return FeedbackOrchestrator(ref);
+  return FeedbackOrchestrator();
 }

@@ -7,9 +7,7 @@ part 'operation_config.freezed.dart';
 
 /// Configuração para execução de operações com feedback
 @freezed
-class OperationConfig with _$OperationConfig {
-  const OperationConfig._();
-
+sealed class OperationConfig with _$OperationConfig {
   const factory OperationConfig({
     required String loadingMessage,
     String? successMessage,
@@ -25,9 +23,7 @@ class OperationConfig with _$OperationConfig {
 
 /// Configuração para operações com progresso determinado
 @freezed
-class ProgressOperationConfig with _$ProgressOperationConfig {
-  const ProgressOperationConfig._();
-
+sealed class ProgressOperationConfig with _$ProgressOperationConfig {
   const factory ProgressOperationConfig({
     required String title,
     String? description,

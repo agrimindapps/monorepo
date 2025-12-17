@@ -35,7 +35,10 @@ class _DetalheDiagnosticoPageState extends ConsumerState<DetalheDiagnosticoPage>
       }
 
       final notifier = ref.read(detalheDiagnosticoProvider.notifier);
-      await notifier.loadDiagnosticoData(widget.diagnosticoId);
+      await notifier.loadDiagnosticoData(
+        widget.diagnosticoId,
+        nomeDefensivoFallback: widget.nomeDefensivo,
+      );
       await notifier.loadFavoritoState(widget.diagnosticoId);
       await notifier.loadPremiumStatus();
     });

@@ -22,9 +22,11 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Performance Monitoring early
-  final performance = PerformanceService();
-  await performance.markAppStarted();
+  // Initialize Performance Monitoring early (skip on web - Firebase Performance not supported)
+  if (!kIsWeb) {
+    final performance = PerformanceService();
+    await performance.markAppStarted();
+  }
 
   // Skip orientation lock on web
   if (!kIsWeb) {

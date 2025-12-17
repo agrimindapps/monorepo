@@ -21,7 +21,8 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
 
   bool _isDisposed = false;
   final DeviceInfoPlugin _deviceInfo = DeviceInfoPlugin();
-  final FirebasePerformance _firebasePerformance = FirebasePerformance.instance;
+  // Firebase Performance não é suportado no web
+  final FirebasePerformance? _firebasePerformance = kIsWeb ? null : FirebasePerformance.instance;
   final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   PerformanceMonitoringState _state = PerformanceMonitoringState.stopped;
   PerformanceConfig _config = const PerformanceConfig();
@@ -566,8 +567,8 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
   Future<void> startTrace(String traceName, {Map<String, String>? attributes}) async {
     try {
       _activeTraces[traceName] = DateTime.now();
-      if (_config.enableFirebaseIntegration) {
-        final trace = _firebasePerformance.newTrace(traceName);
+      if (_config.enableFirebaseIntegration && _firebasePerformance != null) {
+        final trace = _firebasePerformance!.newTrace(traceName);
         
         if (attributes != null) {
           for (final entry in attributes.entries) {

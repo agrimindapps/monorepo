@@ -96,7 +96,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
   }
 
   /// Load diagnostico data
-  Future<void> loadDiagnosticoData(String diagnosticoId) async {
+  Future<void> loadDiagnosticoData(String diagnosticoId, {String? nomeDefensivoFallback}) async {
     final currentState = state.value;
     if (currentState == null) return;
 
@@ -135,10 +135,37 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                debugPrint('   pragaId: ${diagnosticoDrift.pragaId}');
                
                defensivo = await fitossanitariosRepo.findById(diagnosticoDrift.defensivoId);
+               
+               // Fallback: Se não achou por ID, tenta pelo nome (Self-Healing)
+               if (defensivo == null && nomeDefensivoFallback != null && nomeDefensivoFallback.isNotEmpty) {
+                 debugPrint('⚠️ [DetalheDiagnosticoNotifier] Defensivo não encontrado por ID. Tentando fallback por nome: "$nomeDefensivoFallback"');
+                 final matches = await fitossanitariosRepo.findByNome(nomeDefensivoFallback);
+                 // Tenta match exato primeiro
+                 defensivo = matches.firstWhere(
+                   (f) => f.nome.toLowerCase() == nomeDefensivoFallback.toLowerCase(),
+                   orElse: () => matches.isNotEmpty ? matches.first : throw Exception('Defensivo não encontrado'),
+                 );
+                 if (defensivo != null) {
+                   debugPrint('✅ [DetalheDiagnosticoNotifier] Defensivo recuperado por nome: ${defensivo.nome} (ID: ${defensivo.id})');
+                 }
+               }
+
                debugPrint('   defensivo encontrado: ${defensivo != null ? defensivo.nome : "NULL"}');
                
                if (defensivo != null) {
+                  // Tenta buscar Info pelo ID do defensivo (Foreign Key)
                   defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(defensivo.id);
+                  
+                  // Se não achou, tenta buscar pelo ID da tabela (caso onde ID == DefensivoID)
+                  if (defensivoInfo == null) {
+                     defensivoInfo = await fitossanitariosInfoRepo.findById(defensivo.id);
+                  }
+
+                  // Se ainda não achou, tenta pelo idDefensivo (String)
+                  if (defensivoInfo == null) {
+                     defensivoInfo = await fitossanitariosInfoRepo.findByIdReg(defensivo.idDefensivo);
+                  }
+
                   debugPrint('   defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}');
                   if (defensivoInfo != null) {
                     debugPrint('   - formulacao: ${defensivoInfo.formulacao}');
@@ -220,7 +247,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
           
           FitossanitariosInfoData? defensivoInfo;
           if (defensivo != null) {
-             defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(defensivo.id);
+             // O id em FitossanitariosInfo é o mesmo id do Fitossanitario
+             defensivoInfo = await fitossanitariosInfoRepo.findById(defensivo.id);
              debugPrint('🔍 [Fallback] defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}');
           }
           final praga = await pragasRepo.findById(diagnosticoDrift.pragaId);

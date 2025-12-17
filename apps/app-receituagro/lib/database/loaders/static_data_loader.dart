@@ -448,25 +448,40 @@ class StaticDataLoader {
           final idReg = data['idReg'] as String?;
           if (idReg == null) continue;
 
+          // CORREÇÃO: Usar fkIdDefensivo (não idReg) para buscar o Fitossanitario
+          // O idReg do Info é único para cada info, mas fkIdDefensivo é o ID do defensivo relacionado
+          final fkIdDefensivo = data['fkIdDefensivo'] as String?;
+          final defensivoIdToSearch = fkIdDefensivo ?? idReg; // Fallback para idReg se fkIdDefensivo não existir
+
           // Encontrar o defensivoId correspondente
           final defensivoQuery = db.select(db.fitossanitarios)
-            ..where((f) => f.idDefensivo.equals(idReg));
+            ..where((f) => f.idDefensivo.equals(defensivoIdToSearch));
           final defensivo = await defensivoQuery.getSingleOrNull();
 
           if (defensivo == null) {
             continue;
           }
 
-          // Verificar se já existe info com modoAcao
-          final existingInfo = await (db.select(db.fitossanitariosInfo)
-                ..where((t) => t.idReg.equals(idReg)))
+          // CORREÇÃO: Verificar se já existe info pelo defensivoId (mais confiável) ou idReg
+          // Primeiro tenta por defensivoId, depois por idReg
+          final existingByDefensivoId = await (db.select(db.fitossanitariosInfo)
+                ..where((t) => t.defensivoId.equals(defensivo.id)))
               .getSingleOrNull();
+          
+          // Se não encontrou por defensivoId, tentar por idReg como fallback
+          final existingByIdReg = existingByDefensivoId == null
+              ? await (db.select(db.fitossanitariosInfo)
+                    ..where((t) => t.idReg.equals(idReg)))
+                  .getSingleOrNull()
+              : null;
+          
+          final existingInfo = existingByDefensivoId ?? existingByIdReg;
 
           if (existingInfo != null) {
             // Atualizar apenas campos que não sobrescrevem modoAcao existente
             final newModoAcao = data['modoAcao'] as String?;
             await (db.update(db.fitossanitariosInfo)
-                  ..where((t) => t.idReg.equals(idReg)))
+                  ..where((t) => t.id.equals(existingInfo.id)))
                 .write(
               FitossanitariosInfoCompanion(
                 // Preservar modoAcao se já existir e novo for nulo
@@ -491,9 +506,10 @@ class StaticDataLoader {
               ),
             );
           } else {
-            // Inserir novo registro
+            // Inserir novo registro com id igual ao id do Fitossanitario
             await db.into(db.fitossanitariosInfo).insert(
                   FitossanitariosInfoCompanion.insert(
+                    id: Value(defensivo.id),
                     idReg: idReg,
                     defensivoId: defensivo.id,
                     modoAcao: Value(data['modoAcao'] as String?),
@@ -504,7 +520,7 @@ class StaticDataLoader {
                       data['informacoesAdicionais'] as String?,
                     ),
                   ),
-                  mode: InsertMode.insertOrIgnore,
+                  mode: InsertMode.insertOrReplace,
                 );
           }
           loaded++;

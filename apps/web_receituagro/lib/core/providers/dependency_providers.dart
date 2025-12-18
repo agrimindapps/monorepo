@@ -63,6 +63,7 @@ import '../../features/defensivos/domain/usecases/create_defensivo_usecase.dart'
 import '../../features/defensivos/domain/usecases/create_diagnostico_usecase.dart';
 import '../../features/defensivos/domain/usecases/delete_defensivo_usecase.dart';
 import '../../features/defensivos/domain/usecases/get_all_defensivos_usecase.dart';
+import '../../features/defensivos/domain/usecases/get_defensivo_by_id_usecase.dart';
 import '../../features/defensivos/domain/usecases/get_defensivo_info_by_defensivo_id_usecase.dart';
 import '../../features/defensivos/domain/usecases/get_diagnosticos_by_defensivo_id_usecase.dart';
 import '../../features/defensivos/domain/usecases/save_defensivo_info_usecase.dart';
@@ -117,8 +118,9 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
 // ============================================================================
 
 /// Culturas remote data source provider
-final culturasRemoteDataSourceProvider =
-    Provider<CulturasRemoteDataSource>((ref) {
+final culturasRemoteDataSourceProvider = Provider<CulturasRemoteDataSource>((
+  ref,
+) {
   final client = ref.watch(supabaseClientProvider);
   return CulturasSupabaseDataSource(client);
 });
@@ -198,8 +200,9 @@ final deletePragaUseCaseProvider = Provider<DeletePragaUseCase>((ref) {
 // ============================================================================
 
 /// Praga info remote data source provider
-final pragaInfoRemoteDataSourceProvider =
-    Provider<PragaInfoRemoteDataSource>((ref) {
+final pragaInfoRemoteDataSourceProvider = Provider<PragaInfoRemoteDataSource>((
+  ref,
+) {
   final client = ref.watch(supabaseClientProvider);
   return PragaInfoSupabaseDataSource(client);
 });
@@ -227,11 +230,12 @@ final savePragaInfoUseCaseProvider = Provider<SavePragaInfoUseCase>((ref) {
 // ============================================================================
 
 /// Planta info remote data source provider
-final plantaInfoRemoteDataSourceProvider =
-    Provider<PlantaInfoRemoteDataSource>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return PlantaInfoSupabaseDataSource(client);
-});
+final plantaInfoRemoteDataSourceProvider = Provider<PlantaInfoRemoteDataSource>(
+  (ref) {
+    final client = ref.watch(supabaseClientProvider);
+    return PlantaInfoSupabaseDataSource(client);
+  },
+);
 
 /// Planta info repository provider
 final plantaInfoRepositoryProvider = Provider<PlantaInfoRepository>((ref) {
@@ -256,11 +260,12 @@ final savePlantaInfoUseCaseProvider = Provider<SavePlantaInfoUseCase>((ref) {
 // ============================================================================
 
 /// Defensivos remote data source provider
-final defensivosRemoteDataSourceProvider =
-    Provider<DefensivosRemoteDataSource>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return DefensivosSupabaseDataSource(client);
-});
+final defensivosRemoteDataSourceProvider = Provider<DefensivosRemoteDataSource>(
+  (ref) {
+    final client = ref.watch(supabaseClientProvider);
+    return DefensivosSupabaseDataSource(client);
+  },
+);
 
 /// Defensivos repository provider
 final defensivosRepositoryProvider = Provider<DefensivosRepository>((ref) {
@@ -269,15 +274,25 @@ final defensivosRepositoryProvider = Provider<DefensivosRepository>((ref) {
 });
 
 /// Get all defensivos use case provider
-final getAllDefensivosUseCaseProvider =
-    Provider<GetAllDefensivosUseCase>((ref) {
+final getAllDefensivosUseCaseProvider = Provider<GetAllDefensivosUseCase>((
+  ref,
+) {
   final repository = ref.watch(defensivosRepositoryProvider);
   return GetAllDefensivosUseCase(repository);
 });
 
+/// Get defensivo by ID use case provider
+final getDefensivoByIdUseCaseProvider = Provider<GetDefensivoByIdUseCase>((
+  ref,
+) {
+  final repository = ref.watch(defensivosRepositoryProvider);
+  return GetDefensivoByIdUseCase(repository);
+});
+
 /// Search defensivos use case provider
-final searchDefensivosUseCaseProvider =
-    Provider<SearchDefensivosUseCase>((ref) {
+final searchDefensivosUseCaseProvider = Provider<SearchDefensivosUseCase>((
+  ref,
+) {
   final repository = ref.watch(defensivosRepositoryProvider);
   return SearchDefensivosUseCase(repository);
 });
@@ -313,13 +328,14 @@ final deleteDefensivoUseCaseProvider = Provider<DeleteDefensivoUseCase>((ref) {
 /// Defensivos info remote data source provider
 final defensivosInfoRemoteDataSourceProvider =
     Provider<DefensivosInfoRemoteDataSource>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return DefensivosInfoSupabaseDataSource(client);
-});
+      final client = ref.watch(supabaseClientProvider);
+      return DefensivosInfoSupabaseDataSource(client);
+    });
 
 /// Defensivos info repository provider
-final defensivosInfoRepositoryProvider =
-    Provider<DefensivosInfoRepository>((ref) {
+final defensivosInfoRepositoryProvider = Provider<DefensivosInfoRepository>((
+  ref,
+) {
   final dataSource = ref.watch(defensivosInfoRemoteDataSourceProvider);
   return DefensivosInfoRepositoryImpl(dataSource);
 });
@@ -327,13 +343,14 @@ final defensivosInfoRepositoryProvider =
 /// Get defensivo info by defensivo ID use case provider
 final getDefensivoInfoByDefensivoIdUseCaseProvider =
     Provider<GetDefensivoInfoByDefensivoIdUseCase>((ref) {
-  final repository = ref.watch(defensivosInfoRepositoryProvider);
-  return GetDefensivoInfoByDefensivoIdUseCase(repository);
-});
+      final repository = ref.watch(defensivosInfoRepositoryProvider);
+      return GetDefensivoInfoByDefensivoIdUseCase(repository);
+    });
 
 /// Save defensivo info use case provider
-final saveDefensivoInfoUseCaseProvider =
-    Provider<SaveDefensivoInfoUseCase>((ref) {
+final saveDefensivoInfoUseCaseProvider = Provider<SaveDefensivoInfoUseCase>((
+  ref,
+) {
   final repository = ref.watch(defensivosInfoRepositoryProvider);
   return SaveDefensivoInfoUseCase(repository);
 });
@@ -345,9 +362,9 @@ final saveDefensivoInfoUseCaseProvider =
 /// Diagnosticos remote data source provider
 final diagnosticosRemoteDataSourceProvider =
     Provider<DiagnosticosRemoteDataSource>((ref) {
-  final client = ref.watch(supabaseClientProvider);
-  return DiagnosticosSupabaseDataSource(client);
-});
+      final client = ref.watch(supabaseClientProvider);
+      return DiagnosticosSupabaseDataSource(client);
+    });
 
 /// Diagnosticos repository provider
 final diagnosticosRepositoryProvider = Provider<DiagnosticosRepository>((ref) {
@@ -358,13 +375,14 @@ final diagnosticosRepositoryProvider = Provider<DiagnosticosRepository>((ref) {
 /// Get diagnosticos by defensivo ID use case provider
 final getDiagnosticosByDefensivoIdUseCaseProvider =
     Provider<GetDiagnosticosByDefensivoIdUseCase>((ref) {
-  final repository = ref.watch(diagnosticosRepositoryProvider);
-  return GetDiagnosticosByDefensivoIdUseCase(repository);
-});
+      final repository = ref.watch(diagnosticosRepositoryProvider);
+      return GetDiagnosticosByDefensivoIdUseCase(repository);
+    });
 
 /// Create diagnostico use case provider
-final createDiagnosticoUseCaseProvider =
-    Provider<CreateDiagnosticoUseCase>((ref) {
+final createDiagnosticoUseCaseProvider = Provider<CreateDiagnosticoUseCase>((
+  ref,
+) {
   final repository = ref.watch(diagnosticosRepositoryProvider);
   return CreateDiagnosticoUseCase(repository);
 });

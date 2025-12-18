@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../providers/public_defensivos_providers.dart';
 
@@ -8,10 +7,12 @@ class PublicDefensivosListPage extends ConsumerStatefulWidget {
   const PublicDefensivosListPage({super.key});
 
   @override
-  ConsumerState<PublicDefensivosListPage> createState() => _PublicDefensivosListPageState();
+  ConsumerState<PublicDefensivosListPage> createState() =>
+      _PublicDefensivosListPageState();
 }
 
-class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListPage> {
+class _PublicDefensivosListPageState
+    extends ConsumerState<PublicDefensivosListPage> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -22,7 +23,7 @@ class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListP
 
   @override
   Widget build(BuildContext context) {
-    final defensivosAsync = ref.watch(publicDefensivosNotifierProvider);
+    final defensivosAsync = ref.watch(publicDefensivosProvider);
     final paginatedDefensivos = ref.watch(publicPaginatedDefensivosProvider);
     final currentPage = ref.watch(publicCurrentPageProvider);
     final totalPages = ref.watch(publicTotalPagesProvider);
@@ -34,7 +35,7 @@ class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListP
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.read(publicDefensivosNotifierProvider.notifier).refresh();
+              ref.read(publicDefensivosProvider.notifier).refresh();
             },
           ),
         ],
@@ -57,12 +58,12 @@ class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListP
                   icon: const Icon(Icons.clear),
                   onPressed: () {
                     _searchController.clear();
-                    ref.read(publicDefensivosNotifierProvider.notifier).search('');
+                    ref.read(publicDefensivosProvider.notifier).search('');
                   },
                 ),
               ),
               onSubmitted: (value) {
-                ref.read(publicDefensivosNotifierProvider.notifier).search(value);
+                ref.read(publicDefensivosProvider.notifier).search(value);
               },
             ),
           ),
@@ -112,9 +113,8 @@ class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListP
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, stack) => Center(
-                child: Text('Erro ao carregar defensivos: $error'),
-              ),
+              error: (error, stack) =>
+                  Center(child: Text('Erro ao carregar defensivos: $error')),
             ),
           ),
 
@@ -129,8 +129,8 @@ class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListP
                     icon: const Icon(Icons.chevron_left),
                     onPressed: currentPage > 0
                         ? () => ref
-                            .read(publicCurrentPageProvider.notifier)
-                            .previousPage()
+                              .read(publicCurrentPageProvider.notifier)
+                              .previousPage()
                         : null,
                   ),
                   Text('Página ${currentPage + 1} de $totalPages'),
@@ -138,8 +138,8 @@ class _PublicDefensivosListPageState extends ConsumerState<PublicDefensivosListP
                     icon: const Icon(Icons.chevron_right),
                     onPressed: currentPage < totalPages - 1
                         ? () => ref
-                            .read(publicCurrentPageProvider.notifier)
-                            .nextPage(totalPages)
+                              .read(publicCurrentPageProvider.notifier)
+                              .nextPage(totalPages)
                         : null,
                   ),
                 ],

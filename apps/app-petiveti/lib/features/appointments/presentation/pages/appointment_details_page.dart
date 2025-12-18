@@ -109,6 +109,10 @@ class AppointmentDetailsPage extends ConsumerWidget {
         statusColor = colorScheme.errorContainer;
         statusTextColor = colorScheme.onErrorContainer;
         break;
+      case AppointmentStatus.inProgress:
+        statusColor = colorScheme.secondaryContainer;
+        statusTextColor = colorScheme.onSecondaryContainer;
+        break;
     }
 
     return Card(
@@ -407,7 +411,7 @@ class AppointmentDetailsPage extends ConsumerWidget {
       ),
     ).then((_) {
       // Recarrega appointments após edição
-      ref.read(appointmentsProvider.notifier).loadAppointments();
+      ref.read(appointmentsProvider.notifier).loadAppointments(appointment.animalId);
     });
   }
 

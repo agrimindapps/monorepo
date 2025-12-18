@@ -398,8 +398,8 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
     });
 
     try {
-      final selectedAnimal = await ref.read(selectedAnimalProvider.future);
-      if (selectedAnimal == null) {
+      final selectedAnimalData = await ref.read(selectedAnimalProvider.future);
+      if (selectedAnimalData == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Nenhum animal selecionado')),
@@ -421,7 +421,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
 
       final appointment = Appointment(
         id: widget.initialAppointment?.id ?? UuidGenerator.generate(),
-        animalId: selectedAnimal.id,
+        animalId: selectedAnimalData?.id ?? '',
         veterinarianName: _veterinarianController.text.trim(),
         date: appointmentDate,
         reason: _reasonController.text.trim(),

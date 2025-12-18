@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide SyncEvent, SyncEventType;
 import 'package:flutter/foundation.dart';
 
 import '../../domain/repositories/isync_manager.dart';
@@ -49,7 +49,7 @@ class UnifiedSyncManagerAdapter implements ISyncManager {
       }
 
       // Force sync de todas as entidades do app
-      final result = await _unifiedSyncManager.forceSyncAll(_appName);
+      final result = await _unifiedSyncManager.forceSyncApp(_appName);
 
       return result.fold(
         (Failure failure) {
@@ -89,7 +89,7 @@ class UnifiedSyncManagerAdapter implements ISyncManager {
         .map((event) => _convertToSyncEvent(event));
   }
 
-  /// Converte AppSyncEvent para SyncEvent
+  /// Converte AppSyncEvent para SyncEvent local
   SyncEvent _convertToSyncEvent(AppSyncEvent event) {
     final type = _convertEventType(event.action);
     return SyncEvent(

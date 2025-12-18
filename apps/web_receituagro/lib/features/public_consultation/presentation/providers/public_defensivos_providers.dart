@@ -5,7 +5,6 @@ import '../../../../core/providers/dependency_providers.dart';
 import '../../../defensivos/domain/entities/defensivo.dart';
 import '../../../defensivos/domain/entities/diagnostico.dart';
 import '../../../defensivos/domain/usecases/search_defensivos_usecase.dart';
-import '../../../defensivos/presentation/providers/defensivos_usecases_providers.dart';
 
 part 'public_defensivos_providers.g.dart';
 
@@ -71,7 +70,10 @@ Future<Defensivo> publicDefensivoDetails(Ref ref, String id) async {
 
 /// Fetch diagnosticos by defensivo ID
 @riverpod
-Future<List<Diagnostico>> publicDefensivoDiagnosticos(Ref ref, String id) async {
+Future<List<Diagnostico>> publicDefensivoDiagnosticos(
+  Ref ref,
+  String id,
+) async {
   final useCase = ref.read(getDiagnosticosByDefensivoIdUseCaseProvider);
   final result = await useCase(id);
 
@@ -115,7 +117,7 @@ class PublicCurrentPage extends _$PublicCurrentPage {
 /// Paginated public defensivos
 @riverpod
 List<Defensivo> publicPaginatedDefensivos(Ref ref) {
-  final defensivosAsync = ref.watch(publicDefensivosNotifierProvider);
+  final defensivosAsync = ref.watch(publicDefensivosProvider);
   final currentPage = ref.watch(publicCurrentPageProvider);
   const pageSize = 12;
 
@@ -123,11 +125,11 @@ List<Defensivo> publicPaginatedDefensivos(Ref ref) {
     data: (defensivos) {
       final startIndex = currentPage * pageSize;
       if (startIndex >= defensivos.length) return [];
-      
+
       final endIndex = startIndex + pageSize;
       return defensivos.sublist(
-        startIndex, 
-        endIndex > defensivos.length ? defensivos.length : endIndex
+        startIndex,
+        endIndex > defensivos.length ? defensivos.length : endIndex,
       );
     },
     loading: () => [],
@@ -138,7 +140,7 @@ List<Defensivo> publicPaginatedDefensivos(Ref ref) {
 /// Total pages for public list
 @riverpod
 int publicTotalPages(Ref ref) {
-  final defensivosAsync = ref.watch(publicDefensivosNotifierProvider);
+  final defensivosAsync = ref.watch(publicDefensivosProvider);
   const pageSize = 12;
 
   return defensivosAsync.when(

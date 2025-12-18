@@ -36,7 +36,8 @@ VaccineLocalDataSource vaccineLocalDataSource(Ref ref) {
 @riverpod
 VaccineRemoteDataSource vaccineRemoteDataSource(Ref ref) {
   final firestore = FirebaseFirestore.instance;
-  final userId = ref.watch(currentUserIdProvider) ?? 'anonymous';
+  final currentUser = ref.watch(domainCurrentUserProvider);
+  final userId = currentUser?.id ?? 'anonymous';
   return VaccineRemoteDataSourceImpl(firestore, userId);
 }
 

@@ -147,8 +147,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   final id = state.pathParameters['id']!;
                   return AppointmentDetailsPage(appointmentId: id);
                 },
-                  );
-                },
                 routes: [
                   GoRoute(
                     path: '/edit',

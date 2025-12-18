@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/config/app_constants.dart';
+import '../../../../core/theme/theme_notifier.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/settings_item.dart';
 import '../widgets/settings_section.dart';
@@ -105,7 +106,7 @@ class SettingsPage extends ConsumerWidget {
                 icon: Icons.palette,
                 title: 'Tema',
                 subtitle: 'Escolha entre claro, escuro ou automático',
-                onTap: () => _showThemeDialog(context),
+                onTap: () => _showThemeDialog(context, ref),
               ),
             ],
           ),
@@ -255,7 +256,9 @@ class SettingsPage extends ConsumerWidget {
     );
   }
 
-  void _showThemeDialog(BuildContext context) {
+  void _showThemeDialog(BuildContext context, WidgetRef ref) {
+    final currentTheme = ref.read(themeProvider);
+
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
@@ -265,24 +268,30 @@ class SettingsPage extends ConsumerWidget {
           children: [
             _buildThemeOption(
               context,
+              ref,
               ThemeMode.system,
               'Automático (Sistema)',
               'Segue a configuração do sistema',
               Icons.brightness_auto,
+              currentTheme,
             ),
             _buildThemeOption(
               context,
+              ref,
               ThemeMode.light,
               'Claro',
               'Tema claro sempre ativo',
               Icons.brightness_high,
+              currentTheme,
             ),
             _buildThemeOption(
               context,
+              ref,
               ThemeMode.dark,
               'Escuro',
               'Tema escuro sempre ativo',
               Icons.brightness_2,
+              currentTheme,
             ),
           ],
         ),
@@ -298,30 +307,48 @@ class SettingsPage extends ConsumerWidget {
 
   Widget _buildThemeOption(
     BuildContext context,
+    WidgetRef ref,
     ThemeMode mode,
     String title,
     String subtitle,
     IconData icon,
+    ThemeMode currentTheme,
   ) {
-    // TODO: Integrate with theme provider when implemented
-    // TODO: Implement selected state based on current theme mode
+    final isSelected = currentTheme == mode;
+    final theme = Theme.of(context);
 
     return InkWell(
-      onTap: () {
-        // TODO: Implement theme change
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Tema "$title" selecionado (em desenvolvimento)')),
-        );
-        Navigator.of(context).pop();
+      onTap: () async {
+        await ref.read(themeProvider.notifier).setThemeMode(mode);
+        if (context.mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Tema "$title" selecionado')),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+              : null,
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected
+              ? Border.all(
+                  color: theme.colorScheme.primary,
+                  width: 2,
+                )
+              : null,
+        ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -330,20 +357,26 @@ class SettingsPage extends ConsumerWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.normal,
+                    style: TextStyle(
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected ? theme.colorScheme.primary : null,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
               ),
             ),
+            if (isSelected)
+              Icon(
+                Icons.check_circle,
+                color: theme.colorScheme.primary,
+              ),
           ],
         ),
       ),

@@ -39,9 +39,7 @@ void main() {
       ).thenAnswer((_) async => const Right(null));
 
       // Act
-      final result = await deletePlantUseCase(
-        const DeletePlantParams(plantId: plantId),
-      );
+      final result = await deletePlantUseCase(plantId);
 
       // Assert
       expect(result.isRight(), true);
@@ -57,9 +55,7 @@ void main() {
       ).thenAnswer((_) async => const Left(ServerFailure('Erro ao deletar')));
 
       // Act
-      final result = await deletePlantUseCase(
-        const DeletePlantParams(plantId: plantId),
-      );
+      final result = await deletePlantUseCase(plantId);
 
       // Assert
       expect(result.isLeft(), true);
@@ -71,9 +67,7 @@ void main() {
 
     test('should validate plant ID not empty', () async {
       // Act
-      final result = await deletePlantUseCase(
-        const DeletePlantParams(plantId: ''),
-      );
+      final result = await deletePlantUseCase('');
 
       // Assert
       expect(result.isLeft(), true);
@@ -93,9 +87,7 @@ void main() {
       ).thenAnswer((_) async => const Left(NetworkFailure('Sem conexão')));
 
       // Act
-      final result = await deletePlantUseCase(
-        const DeletePlantParams(plantId: plantId),
-      );
+      final result = await deletePlantUseCase(plantId);
 
       // Assert
       expect(result.isLeft(), true);

@@ -112,7 +112,8 @@ class MyDayRepositoryImpl implements MyDayRepository {
 
         if (isInMyDay) continue; // Pular se já está no Meu Dia
 
-        final taskEntity = taskModel.toEntity();
+        // TaskModel extends TaskEntity, então podemos usar diretamente
+        final taskEntity = taskModel as TaskEntity;
         final dueDate = taskEntity.dueDate;
 
         // Sugerir se:

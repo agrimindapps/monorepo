@@ -1,4 +1,6 @@
 import 'package:app_plantis/core/auth/auth_state_notifier.dart';
+import 'package:app_plantis/features/tasks/domain/entities/task.dart'
+    as task_entity;
 import 'package:app_plantis/features/tasks/domain/usecases/get_tasks_usecase.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
@@ -114,14 +116,11 @@ void main() {
         TestFixtures.createTestTask(
           id: 'task-1',
           title: 'Regar plantas',
-          isRecurring: true,
-          recurringIntervalDays: 7,
-        ),
+        ).copyWithTaskData(isRecurring: true, recurringIntervalDays: 7),
         TestFixtures.createTestTask(
           id: 'task-2',
           title: 'Fertilizar',
-          isRecurring: false,
-        ),
+        ).copyWithTaskData(isRecurring: false),
       ];
 
       when(
@@ -143,9 +142,18 @@ void main() {
     test('should return tasks with different statuses', () async {
       // Arrange
       final tasks = [
-        TestFixtures.createTestTask(id: 'task-1', status: TaskStatus.pending),
-        TestFixtures.createTestTask(id: 'task-2', status: TaskStatus.completed),
-        TestFixtures.createTestTask(id: 'task-3', status: TaskStatus.overdue),
+        TestFixtures.createTestTask(
+          id: 'task-1',
+          status: task_entity.TaskStatus.pending,
+        ),
+        TestFixtures.createTestTask(
+          id: 'task-2',
+          status: task_entity.TaskStatus.completed,
+        ),
+        TestFixtures.createTestTask(
+          id: 'task-3',
+          status: task_entity.TaskStatus.overdue,
+        ),
       ];
 
       when(
@@ -158,21 +166,27 @@ void main() {
       // Assert
       expect(result.isRight(), true);
       result.fold((_) => fail('Should return success'), (taskList) {
-        expect(taskList[0].status, TaskStatus.pending);
-        expect(taskList[1].status, TaskStatus.completed);
-        expect(taskList[2].status, TaskStatus.overdue);
+        expect(taskList[0].status, task_entity.TaskStatus.pending);
+        expect(taskList[1].status, task_entity.TaskStatus.completed);
+        expect(taskList[2].status, task_entity.TaskStatus.overdue);
       });
     });
 
     test('should return tasks with different priorities', () async {
       // Arrange
       final tasks = [
-        TestFixtures.createTestTask(id: 'task-1', priority: TaskPriority.high),
+        TestFixtures.createTestTask(
+          id: 'task-1',
+          priority: task_entity.TaskPriority.high,
+        ),
         TestFixtures.createTestTask(
           id: 'task-2',
-          priority: TaskPriority.medium,
+          priority: task_entity.TaskPriority.medium,
         ),
-        TestFixtures.createTestTask(id: 'task-3', priority: TaskPriority.low),
+        TestFixtures.createTestTask(
+          id: 'task-3',
+          priority: task_entity.TaskPriority.low,
+        ),
       ];
 
       when(
@@ -185,9 +199,9 @@ void main() {
       // Assert
       expect(result.isRight(), true);
       result.fold((_) => fail('Should return success'), (taskList) {
-        expect(taskList[0].priority, TaskPriority.high);
-        expect(taskList[1].priority, TaskPriority.medium);
-        expect(taskList[2].priority, TaskPriority.low);
+        expect(taskList[0].priority, task_entity.TaskPriority.high);
+        expect(taskList[1].priority, task_entity.TaskPriority.medium);
+        expect(taskList[2].priority, task_entity.TaskPriority.low);
       });
     });
   });

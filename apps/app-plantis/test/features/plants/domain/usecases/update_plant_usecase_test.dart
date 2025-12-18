@@ -9,6 +9,7 @@ import '../../../../helpers/test_fixtures.dart';
 
 void main() {
   late MockPlantsRepository mockPlantsRepository;
+  late MockGenerateInitialTasksUseCase mockGenerateTasksUseCase;
   late UpdatePlantUseCase updatePlantUseCase;
 
   setUpAll(() {
@@ -25,7 +26,11 @@ void main() {
 
   setUp(() {
     mockPlantsRepository = MockPlantsRepository();
-    updatePlantUseCase = UpdatePlantUseCase(mockPlantsRepository);
+    mockGenerateTasksUseCase = MockGenerateInitialTasksUseCase();
+    updatePlantUseCase = UpdatePlantUseCase(
+      mockPlantsRepository,
+      mockGenerateTasksUseCase,
+    );
   });
 
   tearDownAll(() {
@@ -47,7 +52,11 @@ void main() {
 
       // Act
       final result = await updatePlantUseCase(
-        UpdatePlantParams(plant: updatedPlant),
+        UpdatePlantParams(
+          id: updatedPlant.id,
+          name: updatedPlant.name,
+          notes: updatedPlant.notes,
+        ),
       );
 
       // Assert
@@ -68,7 +77,9 @@ void main() {
       ).thenAnswer((_) async => const Left(ServerFailure('Erro no servidor')));
 
       // Act
-      final result = await updatePlantUseCase(UpdatePlantParams(plant: plant));
+      final result = await updatePlantUseCase(
+        UpdatePlantParams(id: plant.id, name: plant.name),
+      );
 
       // Assert
       expect(result.isLeft(), true);
@@ -83,7 +94,9 @@ void main() {
       final plant = TestFixtures.createTestPlant(id: 'plant-1', name: '');
 
       // Act
-      final result = await updatePlantUseCase(UpdatePlantParams(plant: plant));
+      final result = await updatePlantUseCase(
+        UpdatePlantParams(id: plant.id, name: plant.name),
+      );
 
       // Assert
       expect(result.isLeft(), true);
@@ -99,7 +112,9 @@ void main() {
       final plant = TestFixtures.createTestPlant(id: 'plant-1', name: 'A');
 
       // Act
-      final result = await updatePlantUseCase(UpdatePlantParams(plant: plant));
+      final result = await updatePlantUseCase(
+        UpdatePlantParams(id: plant.id, name: plant.name),
+      );
 
       // Assert
       expect(result.isLeft(), true);
@@ -123,7 +138,14 @@ void main() {
       ).thenAnswer((_) async => Right(plant));
 
       // Act
-      final result = await updatePlantUseCase(UpdatePlantParams(plant: plant));
+      final result = await updatePlantUseCase(
+        UpdatePlantParams(
+          id: plant.id,
+          name: plant.name,
+          species: plant.species,
+          notes: plant.notes,
+        ),
+      );
 
       // Assert
       expect(result.isRight(), true);

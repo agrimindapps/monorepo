@@ -1,10 +1,10 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../core/services/navigation_service.dart';
-import '../../../shared/widgets/subtask_list_widget.dart';
-import '../domain/task_entity.dart';
-import 'providers/task_notifier.dart';
+import '../../../../core/services/navigation_service.dart';
+import '../../../../shared/widgets/subtask_list_widget.dart';
+import '../../domain/task_entity.dart';
+import '../providers/task_notifier.dart';
 
 class TaskDetailPage extends ConsumerStatefulWidget {
   final TaskEntity task;
@@ -22,6 +22,7 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
   late TaskStatus _selectedStatus;
   late TaskPriority _selectedPriority;
   late bool _isStarred;
+  String? _recurrenceRule;
   bool _isEditing = false;
   bool _isLoading = false;
 
@@ -35,6 +36,8 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
     _selectedStatus = widget.task.status;
     _selectedPriority = widget.task.priority;
     _isStarred = widget.task.isStarred;
+    // TODO: Implementar recurrence
+    // _recurrenceRule = widget.task.recurrenceRule;
   }
 
   @override
@@ -64,6 +67,8 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
         status: _selectedStatus,
         priority: _selectedPriority,
         isStarred: _isStarred,
+        // TODO: Implementar recurrence
+        // recurrenceRule: _recurrenceRule,
         updatedAt: DateTime.now(),
       );
 
@@ -345,6 +350,16 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                         color: _isStarred ? Colors.amber : null,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    // TODO: Implementar RecurrenceSelector
+                    // RecurrenceSelector(
+                    //   currentRule: _recurrenceRule,
+                    //   onChanged: _isEditing
+                    //       ? (rule) {
+                    //           setState(() => _recurrenceRule = rule);
+                    //         }
+                    //       : null,
+                    // ),
                     const SizedBox(height: 24),
                     Card(
                       child: Padding(

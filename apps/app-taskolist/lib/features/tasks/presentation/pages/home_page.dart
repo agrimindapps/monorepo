@@ -1,16 +1,16 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../core/enums/task_filter.dart';
-import '../../../core/utils/sample_data.dart';
-import '../../../shared/widgets/bottom_input_bar.dart';
-import '../../../shared/widgets/filter_side_panel.dart';
-import '../../../shared/widgets/modern_drawer.dart';
-import '../../../shared/widgets/premium_banner.dart';
-import '../../../shared/widgets/task_detail_drawer.dart';
-import '../../../shared/widgets/task_list_widget.dart';
-import '../domain/task_entity.dart';
-import 'providers/task_notifier.dart';
+import '../../../../core/enums/task_filter.dart';
+import '../../../../core/utils/sample_data.dart';
+import '../../../../shared/widgets/bottom_input_bar.dart';
+import '../../../../shared/widgets/filter_side_panel.dart';
+import '../../../../shared/widgets/modern_drawer.dart';
+import '../../../../shared/widgets/premium_banner.dart';
+import '../../../../shared/widgets/task_detail_drawer.dart';
+import '../../../../shared/widgets/task_list_widget.dart';
+import '../../domain/task_entity.dart';
+import '../providers/task_notifier.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});

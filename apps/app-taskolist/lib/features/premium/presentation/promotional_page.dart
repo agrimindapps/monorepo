@@ -2,7 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../auth/presentation/login_page.dart';
-import '../../tasks/presentation/home_page.dart';
+import '../../tasks/presentation/pages/home_page.dart';
 import 'premium_page.dart';
 
 /// Página promocional principal do Task Manager

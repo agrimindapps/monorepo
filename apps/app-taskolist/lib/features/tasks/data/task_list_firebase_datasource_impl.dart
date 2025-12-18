@@ -24,12 +24,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
       final model = TaskListModel.fromEntity(taskList);
       final docRef = await _collection.add(model.toMap());
       return docRef.id;
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao criar lista: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao criar lista: ${e.toString()}');
     }
   }
 
@@ -38,19 +34,11 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
     try {
       final doc = await _collection.doc(id).get();
       if (!doc.exists) {
-        throw const ServerException(
-          message: 'Lista não encontrada',
-          statusCode: '404',
-        );
+        throw Exception('Lista não encontrada');
       }
       return TaskListModel.fromFirestore(doc);
-    } catch (e, s) {
-      if (e is ServerException) rethrow;
-      throw ServerException(
-        message: 'Erro ao buscar lista: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -84,12 +72,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
       return snapshot.docs
           .map((doc) => TaskListModel.fromFirestore(doc))
           .toList();
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao buscar listas: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao buscar listas: ${e.toString()}');
     }
   }
 
@@ -98,12 +82,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
     try {
       final model = TaskListModel.fromEntity(taskList);
       await _collection.doc(taskList.id).update(model.toMap());
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao atualizar lista: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao atualizar lista: ${e.toString()}');
     }
   }
 
@@ -111,12 +91,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
   Future<void> deleteTaskList(String id) async {
     try {
       await _collection.doc(id).delete();
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao deletar lista: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao deletar lista: ${e.toString()}');
     }
   }
 
@@ -128,12 +104,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
         'isShared': memberIds.isNotEmpty,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao compartilhar lista: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao compartilhar lista: ${e.toString()}');
     }
   }
 
@@ -144,12 +116,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
         'isArchived': true,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao arquivar lista: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao arquivar lista: ${e.toString()}');
     }
   }
 
@@ -181,12 +149,8 @@ class TaskListFirebaseDatasourceImpl implements TaskListFirebaseDatasource {
                 .map((doc) => TaskListModel.fromFirestore(doc))
                 .toList(),
           );
-    } catch (e, s) {
-      throw ServerException(
-        message: 'Erro ao observar listas: ${e.toString()}',
-        statusCode: '500',
-        stackTrace: s,
-      );
+    } catch (e) {
+      throw Exception('Erro ao observar listas: ${e.toString()}');
     }
   }
 }

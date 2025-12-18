@@ -11,6 +11,7 @@ import 'core/utils/notification_test_helper.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/premium/presentation/promotional_page.dart';
 import 'features/subscription/data/revenue_cat_service.dart';
+import 'features/tasks/presentation/providers/recurrence_processor_provider.dart';
 import 'features/tasks/presentation/providers/theme_provider.dart';
 import 'firebase_options.dart';
 
@@ -61,6 +62,14 @@ void main() async {
   // Wait for auth state to propagate to sync services
   await Future<void>.delayed(const Duration(milliseconds: 500));
   debugPrint('✅ [MAIN] TaskolistSyncConfig initialized');
+
+  // Process recurring tasks on app start
+  try {
+    await providerContainer.read(recurrenceProcessorProvider.future);
+    debugPrint('✅ [MAIN] Recurring tasks processed');
+  } catch (e) {
+    debugPrint('⚠️ [MAIN] Error processing recurring tasks: $e');
+  }
 
   // Initialize navigation and notification services
   local_nav.NavigationService.initialize(providerContainer);

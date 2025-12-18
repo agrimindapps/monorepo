@@ -56,6 +56,23 @@ class Tasks extends Table {
   
   TextColumn get parentTaskId => text().nullable()();
   TextColumn get notes => text().nullable()();
+  
+  // ========== RECURRENCE FIELDS ==========
+  
+  /// Recurrence type: none, daily, weekly, monthly, yearly, custom
+  TextColumn get recurrenceType => text().withDefault(const Constant('none'))();
+  
+  /// Recurrence interval (e.g., every 2 days, every 3 weeks)
+  IntColumn get recurrenceInterval => integer().withDefault(const Constant(1))();
+  
+  /// Days of week for weekly recurrence (JSON array: [1,2,3] = Mon,Tue,Wed)
+  TextColumn get recurrenceDaysOfWeek => text().nullable()();
+  
+  /// Day of month for monthly recurrence (1-31)
+  IntColumn get recurrenceDayOfMonth => integer().nullable()();
+  
+  /// End date for recurrence (null = infinite)
+  DateTimeColumn get recurrenceEndDate => dateTime().nullable()();
 
   // ========== INDICES ==========
 

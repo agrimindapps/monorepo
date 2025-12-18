@@ -1,28 +1,31 @@
-import 'package:dartz/dartz.dart';
-
-import '../../../core/errors/failures.dart';
+import '../../../core/utils/typedef.dart';
 import 'my_day_task_entity.dart';
+import 'task_entity.dart';
 
 /// Repository para gerenciar tarefas do "Meu Dia"
 abstract class MyDayRepository {
   /// Adiciona tarefa ao Meu Dia
-  Future<Either<Failure, MyDayTaskEntity>> add(MyDayTaskEntity myDayTask);
-  
-  /// Atualiza registro do Meu Dia
-  Future<Either<Failure, void>> update(MyDayTaskEntity myDayTask);
-  
-  /// Busca tarefas ativas de uma data específica
-  Future<Either<Failure, List<MyDayTaskEntity>>> getActiveByDate(DateTime date);
-  
-  /// Busca registro específico por tarefa e data
-  Future<MyDayTaskEntity?> getByTaskAndDate(String taskId, DateTime date);
-  
-  /// Arquiva tarefas de dias passados
-  Future<Either<Failure, void>> archiveOldTasks();
-  
-  /// Busca histórico de um dia específico (para estatísticas futuras)
-  Future<Either<Failure, List<MyDayTaskEntity>>> getHistoryByDate(DateTime date);
-  
-  /// Remove tarefa do Meu Dia (marca como removida)
-  Future<Either<Failure, void>> remove(String taskId, DateTime date);
+  ResultFuture<void> addTaskToMyDay({
+    required String taskId,
+    required String userId,
+  });
+
+  /// Remove tarefa do Meu Dia
+  ResultFuture<void> removeTaskFromMyDay({required String taskId});
+
+  /// Busca tarefas do Meu Dia
+  ResultFuture<List<MyDayTaskEntity>> getMyDayTasks({
+    required String userId,
+  });
+
+  /// Observa mudanças nas tarefas do Meu Dia
+  Stream<List<MyDayTaskEntity>> watchMyDayTasks({required String userId});
+
+  /// Limpa todas as tarefas do Meu Dia
+  ResultFuture<void> clearMyDay({required String userId});
+
+  /// Busca sugestões para o Meu Dia
+  ResultFuture<List<TaskEntity>> getMyDaySuggestions({
+    required String userId,
+  });
 }

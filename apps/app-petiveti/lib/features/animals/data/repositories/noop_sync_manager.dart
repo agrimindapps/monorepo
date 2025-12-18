@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/error/failures.dart';
+import 'package:core/core.dart' hide SyncEvent;
 import '../../domain/repositories/isync_manager.dart';
 
 /// No-op implementation of ISyncManager for compilation

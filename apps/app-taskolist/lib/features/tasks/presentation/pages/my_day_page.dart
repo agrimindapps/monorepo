@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../shared/providers/auth_providers.dart';
-import '../domain/my_day_task_entity.dart';
-import 'providers/my_day_notifier.dart';
+import '../../../../shared/providers/auth_providers.dart';
+import '../../domain/my_day_task_entity.dart';
+import '../../domain/task_entity.dart';
+import '../../providers/task_providers.dart';
+import '../providers/my_day_notifier.dart';
+import '../providers/task_notifier.dart';
 
 class MyDayPage extends ConsumerStatefulWidget {
   const MyDayPage({super.key});
@@ -171,48 +174,103 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
     MyDayTaskEntity myDayTask,
     String userId,
   ) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Checkbox(
-          value: false,
-          shape: const CircleBorder(),
-          onChanged: (value) async {
-            // TODO: Toggle task completion
-          },
-        ),
-        title: Text(
-          'Task ID: ${myDayTask.taskId}',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            'Adicionada: ${_formatTime(myDayTask.addedAt)}',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
+    final taskAsync = ref.watch(getTaskByIdProvider(myDayTask.taskId));
+
+    return taskAsync.when(
+      data: (task) {
+        if (task == null) {
+          return const SizedBox.shrink(); // Task não encontrada
+        }
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            leading: Checkbox(
+              value: task.status == TaskStatus.completed,
+              shape: const CircleBorder(),
+              onChanged: (value) async {
+                final newStatus = value == true 
+                    ? TaskStatus.completed 
+                    : TaskStatus.pending;
+                final updatedTask = task.copyWith(
+                  status: newStatus,
+                  updatedAt: DateTime.now(),
+                );
+                await ref.read(taskProvider.notifier).updateTask(updatedTask);
+              },
             ),
+            title: Text(
+              task.title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+                decoration: task.status == TaskStatus.completed
+                    ? TextDecoration.lineThrough
+                    : null,
+              ),
+            ),
+            subtitle: task.description != null && task.description!.isNotEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      task.description!,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Row(
+                      children: [
+                        Icon(Icons.wb_sunny, size: 14, color: Colors.orange[300]),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Adicionada: ${_formatTime(myDayTask.addedAt)}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+            trailing: IconButton(
+              icon: const Icon(Icons.close, size: 20),
+              onPressed: () async {
+                await ref
+                    .read(myDayProvider(userId).notifier)
+                    .removeTask(myDayTask.taskId);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Removida do Meu Dia'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
+              },
+            ),
+            onTap: () {
+              // TODO: Abrir detalhes da tarefa
+            },
           ),
+        );
+      },
+      loading: () => const Card(
+        margin: EdgeInsets.only(bottom: 12),
+        child: ListTile(
+          leading: CircularProgressIndicator(),
+          title: Text('Carregando...'),
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.close, size: 20),
-          onPressed: () async {
-            await ref
-                .read(myDayProvider(userId).notifier)
-                .removeTask(myDayTask.taskId);
-          },
-        ),
-        onTap: () {
-          // TODO: Abrir detalhes da tarefa
-        },
       ),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

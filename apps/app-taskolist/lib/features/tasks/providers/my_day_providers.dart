@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/core_providers.dart';
+import '../../task_lists/providers/task_list_providers.dart';
 import '../data/my_day_local_datasource.dart';
 import '../data/my_day_local_datasource_impl.dart';
 import '../data/my_day_repository_impl.dart';
@@ -78,4 +79,42 @@ ClearMyDay clearMyDay(Ref ref) {
 GetMyDaySuggestions getMyDaySuggestions(Ref ref) {
   final repository = ref.watch(myDayRepositoryProvider);
   return GetMyDaySuggestions(repository);
+}
+
+// ============================================================================
+// PRESENTATION LAYER - NOTIFIERS
+// ============================================================================
+
+/// Notifier simplificado para adicionar tarefas ao Meu Dia
+@riverpod
+class MyDayNotifier extends _$MyDayNotifier {
+  @override
+  void build() {}
+
+  Future<void> addTask(String taskId) async {
+    final useCase = ref.read(addTaskToMyDayProvider);
+    final userId = ref.read(currentUserIdProvider); // Assumindo que existe
+    if (userId == null) return;
+    
+    await useCase.call(AddTaskToMyDayParams(
+      taskId: taskId,
+      userId: userId,
+    ));
+  }
+
+  Future<void> removeTask(String taskId) async {
+    final useCase = ref.read(removeTaskFromMyDayProvider);
+    
+    await useCase.call(RemoveTaskFromMyDayParams(
+      taskId: taskId,
+    ));
+  }
+
+  Future<void> clearAll() async {
+    final useCase = ref.read(clearMyDayProvider);
+    final userId = ref.read(currentUserIdProvider);
+    if (userId == null) return;
+    
+    await useCase.call(ClearMyDayParams(userId: userId));
+  }
 }

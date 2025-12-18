@@ -251,6 +251,8 @@ class TaskDao extends DatabaseAccessor<TaskolistDatabase> with _$TaskDaoMixin {
       tags: (jsonDecode(data.tags) as List<dynamic>).cast<String>(),
       parentTaskId: data.parentTaskId,
       notes: data.notes,
+      // TODO: Implementar recurrence quando a feature for completa
+      // recurrence: RecurrencePattern(...),
     );
   }
 
@@ -280,6 +282,15 @@ class TaskDao extends DatabaseAccessor<TaskolistDatabase> with _$TaskDaoMixin {
       tags: Value(jsonEncode(model.tags)),
       parentTaskId: Value(model.parentTaskId),
       notes: Value(model.notes),
+      recurrenceType: Value(model.recurrence.type.name),
+      recurrenceInterval: Value(model.recurrence.interval),
+      recurrenceDaysOfWeek: Value(
+        model.recurrence.daysOfWeek != null
+            ? jsonEncode(model.recurrence.daysOfWeek)
+            : null,
+      ),
+      recurrenceDayOfMonth: Value(model.recurrence.dayOfMonth),
+      recurrenceEndDate: Value(model.recurrence.endDate),
     );
   }
 }

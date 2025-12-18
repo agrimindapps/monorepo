@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 
+import '../domain/recurrence_entity.dart';
 import '../domain/task_entity.dart';
 
 part 'task_model.g.dart';
@@ -30,6 +31,7 @@ class TaskModel extends TaskEntity {
     super.tags,
     super.parentTaskId,
     super.notes,
+    super.recurrence = const RecurrencePattern(),
   });
 
   factory TaskModel.fromJson(Map<String, dynamic> json) =>
@@ -62,6 +64,7 @@ class TaskModel extends TaskEntity {
       tags: entity.tags,
       parentTaskId: entity.parentTaskId,
       notes: entity.notes,
+      recurrence: entity.recurrence,
     );
   }
 
@@ -90,6 +93,7 @@ class TaskModel extends TaskEntity {
     List<String>? tags,
     String? parentTaskId,
     String? notes,
+    RecurrencePattern? recurrence,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -115,6 +119,7 @@ class TaskModel extends TaskEntity {
       tags: tags ?? this.tags,
       parentTaskId: parentTaskId ?? this.parentTaskId,
       notes: notes ?? this.notes,
+      recurrence: recurrence ?? this.recurrence,
     );
   }
 }

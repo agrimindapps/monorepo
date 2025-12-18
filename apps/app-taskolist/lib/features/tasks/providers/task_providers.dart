@@ -14,8 +14,10 @@ import '../domain/delete_task.dart';
 import '../domain/get_subtasks.dart';
 import '../domain/get_tasks.dart';
 import '../domain/reorder_tasks.dart';
+import '../domain/task_entity.dart';
 import '../domain/task_repository.dart';
 import '../domain/update_task.dart';
+import '../domain/usecases/create_next_recurrence_usecase.dart';
 import '../domain/watch_tasks.dart';
 
 part 'task_providers.g.dart';
@@ -118,4 +120,26 @@ UpdateTask updateTask(Ref ref) {
 WatchTasks watchTasks(Ref ref) {
   final repository = ref.watch(taskRepositoryProvider);
   return WatchTasks(repository);
+}
+
+/// Provider para CreateNextRecurrenceUseCase use case
+@riverpod
+CreateNextRecurrenceUseCase createNextRecurrence(Ref ref) {
+  final repository = ref.watch(taskRepositoryProvider);
+  return CreateNextRecurrenceUseCase(repository);
+}
+
+// ============================================================================
+// PRESENTATION LAYER - DATA PROVIDERS
+// ============================================================================
+
+/// Provider para obter uma task por ID
+@riverpod
+Future<TaskEntity?> getTaskById(Ref ref, String taskId) async {
+  final repository = ref.watch(taskRepositoryProvider);
+  final result = await repository.getTask(taskId);
+  return result.fold(
+    (failure) => null,
+    (task) => task,
+  );
 }

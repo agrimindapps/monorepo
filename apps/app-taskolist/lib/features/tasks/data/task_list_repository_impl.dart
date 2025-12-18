@@ -1,6 +1,7 @@
-import 'package:core/core.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../../core/errors/failures.dart';
+import '../../../core/utils/typedef.dart';
 import '../domain/task_list_entity.dart';
 import '../domain/task_list_repository.dart';
 import 'task_list_firebase_datasource.dart';
@@ -17,16 +18,8 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       final id = await _remoteDatasource.createTaskList(taskList);
       return Right(id);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao criar lista: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
+    } catch (e) {
+      return Left(ServerFailure('Erro ao criar lista: ${e.toString()}'));
     }
   }
 
@@ -35,16 +28,8 @@ class TaskListRepositoryImpl implements TaskListRepository {
     try {
       final taskList = await _remoteDatasource.getTaskList(id);
       return Right(taskList);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao buscar lista: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
+    } catch (e) {
+      return Left(ServerFailure('Erro ao buscar lista: ${e.toString()}'));
     }
   }
 
@@ -54,93 +39,10 @@ class TaskListRepositoryImpl implements TaskListRepository {
     bool? isArchived,
   }) async {
     try {
-      final taskLists = await _remoteDatasource.getTaskLists(
-        userId: userId,
-        isArchived: isArchived,
-      );
+      final taskLists = await _remoteDatasource.getTaskLists();
       return Right(taskLists);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao buscar listas: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
-    }
-  }
-
-  @override
-  ResultFuture<void> updateTaskList(TaskListEntity taskList) async {
-    try {
-      await _remoteDatasource.updateTaskList(taskList);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao atualizar lista: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
-    }
-  }
-
-  @override
-  ResultFuture<void> deleteTaskList(String id) async {
-    try {
-      await _remoteDatasource.deleteTaskList(id);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao deletar lista: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
-    }
-  }
-
-  @override
-  ResultFuture<void> shareTaskList(String id, List<String> memberIds) async {
-    try {
-      await _remoteDatasource.shareTaskList(id, memberIds);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao compartilhar lista: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
-    }
-  }
-
-  @override
-  ResultFuture<void> archiveTaskList(String id) async {
-    try {
-      await _remoteDatasource.archiveTaskList(id);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure.fromException(e));
-    } catch (e, s) {
-      return Left(
-        ServerFailure(
-          message: 'Erro ao arquivar lista: ${e.toString()}',
-          statusCode: 500,
-          stackTrace: s,
-        ),
-      );
+    } catch (e) {
+      return Left(ServerFailure('Erro ao buscar listas: ${e.toString()}'));
     }
   }
 
@@ -151,7 +53,47 @@ class TaskListRepositoryImpl implements TaskListRepository {
   }) {
     return _remoteDatasource.watchTaskLists(
       userId: userId,
-      isArchived: isArchived,
+      isArchived: isArchived ?? false,
     );
+  }
+
+  @override
+  ResultFuture<void> updateTaskList(TaskListEntity taskList) async {
+    try {
+      await _remoteDatasource.updateTaskList(taskList);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Erro ao atualizar lista: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<void> deleteTaskList(String id) async {
+    try {
+      await _remoteDatasource.deleteTaskList(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Erro ao deletar lista: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<void> shareTaskList(String id, List<String> memberIds) async {
+    try {
+      await _remoteDatasource.shareTaskList(id, memberIds);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Erro ao compartilhar lista: ${e.toString()}'));
+    }
+  }
+
+  @override
+  ResultFuture<void> archiveTaskList(String id) async {
+    try {
+      await _remoteDatasource.archiveTaskList(id);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure('Erro ao arquivar lista: ${e.toString()}'));
+    }
   }
 }

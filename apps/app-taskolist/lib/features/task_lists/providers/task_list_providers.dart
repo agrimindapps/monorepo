@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../core/providers/auth_providers.dart';
+import '../../../shared/providers/auth_providers.dart';
 import '../../tasks/data/task_list_firebase_datasource.dart';
 import '../../tasks/data/task_list_firebase_datasource_impl.dart';
 import '../../tasks/data/task_list_repository_impl.dart';
@@ -11,12 +11,22 @@ import '../../tasks/domain/task_list_repository.dart';
 part 'task_list_providers.g.dart';
 
 // ============================================================================
+// AUTH HELPERS
+// ============================================================================
+
+@riverpod
+String? currentUserId(Ref ref) {
+  final user = ref.watch(currentAuthenticatedUserProvider);
+  return user?.id;
+}
+
+// ============================================================================
 // DATASOURCES
 // ============================================================================
 
 @riverpod
 TaskListFirebaseDatasource taskListFirebaseDatasource(
-  TaskListFirebaseDatasourceRef ref,
+  Ref ref,
 ) {
   final userId = ref.watch(currentUserIdProvider);
   return TaskListFirebaseDatasourceImpl(
@@ -30,7 +40,7 @@ TaskListFirebaseDatasource taskListFirebaseDatasource(
 // ============================================================================
 
 @riverpod
-TaskListRepository taskListRepository(TaskListRepositoryRef ref) {
+TaskListRepository taskListRepository(Ref ref) {
   return TaskListRepositoryImpl(
     remoteDatasource: ref.watch(taskListFirebaseDatasourceProvider),
   );
@@ -42,7 +52,7 @@ TaskListRepository taskListRepository(TaskListRepositoryRef ref) {
 
 /// Stream de todas as listas ativas do usuário (não arquivadas)
 @riverpod
-Stream<List<TaskListEntity>> taskLists(TaskListsRef ref) {
+Stream<List<TaskListEntity>> taskLists(Ref ref) {
   final userId = ref.watch(currentUserIdProvider);
   final repository = ref.watch(taskListRepositoryProvider);
 
@@ -58,7 +68,7 @@ Stream<List<TaskListEntity>> taskLists(TaskListsRef ref) {
 
 /// Stream de listas arquivadas
 @riverpod
-Stream<List<TaskListEntity>> archivedTaskLists(ArchivedTaskListsRef ref) {
+Stream<List<TaskListEntity>> archivedTaskLists(Ref ref) {
   final userId = ref.watch(currentUserIdProvider);
   final repository = ref.watch(taskListRepositoryProvider);
 
@@ -75,7 +85,7 @@ Stream<List<TaskListEntity>> archivedTaskLists(ArchivedTaskListsRef ref) {
 /// Busca uma lista específica por ID
 @riverpod
 Future<TaskListEntity?> taskListById(
-  TaskListByIdRef ref,
+  Ref ref,
   String listId,
 ) async {
   final repository = ref.watch(taskListRepositoryProvider);
@@ -128,7 +138,7 @@ class UpdateTaskList extends _$UpdateTaskList {
     state = await AsyncValue.guard(() async {
       result.fold(
         (failure) => throw failure,
-        (_) => _,
+        (success) => success,
       );
     });
 
@@ -151,7 +161,7 @@ class DeleteTaskList extends _$DeleteTaskList {
     state = await AsyncValue.guard(() async {
       result.fold(
         (failure) => throw failure,
-        (_) => _,
+        (success) => success,
       );
     });
 
@@ -174,7 +184,7 @@ class ShareTaskList extends _$ShareTaskList {
     state = await AsyncValue.guard(() async {
       result.fold(
         (failure) => throw failure,
-        (_) => _,
+        (success) => success,
       );
     });
 
@@ -197,7 +207,7 @@ class ArchiveTaskList extends _$ArchiveTaskList {
     state = await AsyncValue.guard(() async {
       result.fold(
         (failure) => throw failure,
-        (_) => _,
+        (success) => success,
       );
     });
 

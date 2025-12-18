@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../core/providers/core_providers.dart';
 import '../../../infrastructure/services/subscription_service.dart';
 import '../../../shared/widgets/auth_guard.dart';
-import '../../tasks/presentation/home_page.dart';
+import '../../tasks/presentation/pages/home_page.dart';
 
 class PremiumPage extends ConsumerStatefulWidget {
   const PremiumPage({super.key});
@@ -129,7 +129,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute<dynamic>(
-                builder: (context) => const AuthGuard(child: HomePage()),
+                builder: (context) => AuthGuard(child: HomePage()),
               ),
             );
           },
@@ -250,7 +250,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute<dynamic>(
-                          builder: (context) => const AuthGuard(child: HomePage()),
+                          builder: (context) => AuthGuard(child: HomePage()),
                         ),
                       );
                     },

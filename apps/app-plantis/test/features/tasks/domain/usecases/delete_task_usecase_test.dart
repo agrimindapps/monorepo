@@ -1,5 +1,5 @@
 import 'package:app_plantis/core/auth/auth_state_notifier.dart';
-import 'package:app_plantis/features/tasks/domain/usecases/delete_task_usecase.dart';
+import 'package:app_plantis/features/tasks/domain/usecases/complete_task_usecase.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -39,9 +39,7 @@ void main() {
       ).thenAnswer((_) async => const Right(null));
 
       // Act
-      final result = await deleteTaskUseCase(
-        const DeleteTaskParams(taskId: taskId),
-      );
+      final result = await deleteTaskUseCase(DeleteTaskParams(taskId: taskId));
 
       // Assert
       expect(result.isRight(), true);
@@ -57,9 +55,7 @@ void main() {
       ).thenAnswer((_) async => const Left(ServerFailure('Erro ao deletar')));
 
       // Act
-      final result = await deleteTaskUseCase(
-        const DeleteTaskParams(taskId: taskId),
-      );
+      final result = await deleteTaskUseCase(DeleteTaskParams(taskId: taskId));
 
       // Assert
       expect(result.isLeft(), true);
@@ -71,9 +67,7 @@ void main() {
 
     test('should validate task ID not empty', () async {
       // Act
-      final result = await deleteTaskUseCase(
-        const DeleteTaskParams(taskId: ''),
-      );
+      final result = await deleteTaskUseCase(DeleteTaskParams(taskId: ''));
 
       // Assert
       expect(result.isLeft(), true);
@@ -93,9 +87,7 @@ void main() {
       ).thenAnswer((_) async => const Left(NetworkFailure('Sem conexão')));
 
       // Act
-      final result = await deleteTaskUseCase(
-        const DeleteTaskParams(taskId: taskId),
-      );
+      final result = await deleteTaskUseCase(DeleteTaskParams(taskId: taskId));
 
       // Assert
       expect(result.isLeft(), true);
@@ -114,9 +106,7 @@ void main() {
       ).thenAnswer((_) async => const Left(CacheFailure('Erro no cache')));
 
       // Act
-      final result = await deleteTaskUseCase(
-        const DeleteTaskParams(taskId: taskId),
-      );
+      final result = await deleteTaskUseCase(DeleteTaskParams(taskId: taskId));
 
       // Assert
       expect(result.isLeft(), true);

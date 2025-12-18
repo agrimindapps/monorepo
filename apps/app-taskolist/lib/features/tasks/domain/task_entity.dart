@@ -1,5 +1,7 @@
 import 'package:core/core.dart';
 
+import 'recurrence_entity.dart';
+
 enum TaskPriority { low, medium, high, urgent }
 
 enum TaskStatus { pending, inProgress, completed, cancelled }
@@ -27,6 +29,7 @@ class TaskEntity extends BaseSyncEntity {
   final List<String> tags;
   final String? parentTaskId;
   final String? notes;
+  final RecurrencePattern recurrence;
 
   const TaskEntity({
     // BaseSyncEntity fields
@@ -54,6 +57,7 @@ class TaskEntity extends BaseSyncEntity {
     this.tags = const [],
     this.parentTaskId,
     this.notes,
+    this.recurrence = const RecurrencePattern(),
   });
 
   // Override to provide non-nullable types for task domain
@@ -87,6 +91,11 @@ class TaskEntity extends BaseSyncEntity {
     return dueDate!.isAfter(startOfWeek.subtract(const Duration(days: 1))) && 
            dueDate!.isBefore(endOfWeek.add(const Duration(days: 1)));
   }
+  
+  bool get isRecurring => recurrence.isRecurring;
+  
+  /// Get next occurrence for recurring task
+  DateTime? get nextOccurrence => recurrence.getNextOccurrence(dueDate ?? DateTime.now());
 
   @override
   TaskEntity copyWith({
@@ -113,6 +122,7 @@ class TaskEntity extends BaseSyncEntity {
     List<String>? tags,
     String? parentTaskId,
     String? notes,
+    RecurrencePattern? recurrence,
   }) {
     return TaskEntity(
       id: id ?? this.id,
@@ -138,6 +148,7 @@ class TaskEntity extends BaseSyncEntity {
       tags: tags ?? this.tags,
       parentTaskId: parentTaskId ?? this.parentTaskId,
       notes: notes ?? this.notes,
+      recurrence: recurrence ?? this.recurrence,
     );
   }
 
@@ -160,6 +171,11 @@ class TaskEntity extends BaseSyncEntity {
       'tags': tags,
       'parent_task_id': parentTaskId,
       'notes': notes,
+      'recurrence_type': recurrence.type.name,
+      'recurrence_interval': recurrence.interval,
+      'recurrence_days_of_week': recurrence.daysOfWeek,
+      'recurrence_day_of_month': recurrence.dayOfMonth,
+      'recurrence_end_date': recurrence.endDate?.toIso8601String(),
     };
   }
 
@@ -244,6 +260,18 @@ class TaskEntity extends BaseSyncEntity {
       tags: (map['tags'] as List<dynamic>?)?.cast<String>() ?? [],
       parentTaskId: map['parent_task_id'] as String?,
       notes: map['notes'] as String?,
+      recurrence: RecurrencePattern(
+        type: RecurrenceType.values.firstWhere(
+          (e) => e.name == map['recurrence_type'],
+          orElse: () => RecurrenceType.none,
+        ),
+        interval: map['recurrence_interval'] as int? ?? 1,
+        daysOfWeek: (map['recurrence_days_of_week'] as List<dynamic>?)?.cast<int>(),
+        dayOfMonth: map['recurrence_day_of_month'] as int?,
+        endDate: map['recurrence_end_date'] != null
+            ? DateTime.parse(map['recurrence_end_date'] as String)
+            : null,
+      ),
     );
   }
 
@@ -264,5 +292,6 @@ class TaskEntity extends BaseSyncEntity {
         tags,
         parentTaskId,
         notes,
+        recurrence,
       ];
 }

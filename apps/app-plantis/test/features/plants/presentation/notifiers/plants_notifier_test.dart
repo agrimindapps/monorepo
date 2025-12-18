@@ -1,6 +1,9 @@
 import 'package:app_plantis/core/auth/auth_state_notifier.dart';
-import 'package:app_plantis/features/plants/domain/entities/plant.dart';
-import 'package:app_plantis/features/plants/presentation/notifiers/plants_notifier.dart';
+import 'package:app_plantis/features/plants/domain/usecases/add_plant_usecase.dart';
+import 'package:app_plantis/features/plants/domain/usecases/update_plant_usecase.dart';
+import 'package:app_plantis/features/plants/presentation/providers/plants_notifier.dart';
+import 'package:app_plantis/features/plants/presentation/providers/plants_providers.dart';
+import 'package:app_plantis/core/providers/repository_providers.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -103,15 +106,15 @@ void main() {
       ).thenAnswer((_) async => Right([newPlant]));
       when(
         () => mockGenerateTasksUseCase(any()),
-      ).thenAnswer((_) async => const Right(null));
+      ).thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
-          .addPlant(name: 'Rosa', species: 'Rosa gallica');
+          .addPlant(AddPlantParams(name: 'Rosa', species: 'Rosa gallica'));
 
       // Assert
-      expect(result.isRight(), true);
+      expect(result, true);
       verify(() => mockRepository.addPlant(any())).called(1);
       verify(() => mockGenerateTasksUseCase(any())).called(1);
     });
@@ -120,10 +123,10 @@ void main() {
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
-          .addPlant(name: '');
+          .addPlant(AddPlantParams(name: ''));
 
       // Assert
-      expect(result.isLeft(), true);
+      expect(result, false);
       verifyNever(() => mockRepository.addPlant(any()));
     });
 
@@ -144,23 +147,21 @@ void main() {
       ).thenAnswer((_) async => Right([newPlant]));
       when(
         () => mockGenerateTasksUseCase(any()),
-      ).thenAnswer((_) async => const Right(null));
+      ).thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
           .addPlant(
-            name: 'Orquídea',
-            species: 'Phalaenopsis',
-            notes: 'Luz indireta',
+            AddPlantParams(
+              name: 'Orquídea',
+              species: 'Phalaenopsis',
+              notes: 'Luz indireta',
+            ),
           );
 
       // Assert
-      expect(result.isRight(), true);
-      result.fold((_) => fail('Should succeed'), (plant) {
-        expect(plant.species, 'Phalaenopsis');
-        expect(plant.notes, 'Luz indireta');
-      });
+      expect(result, true);
     });
   });
 
@@ -183,11 +184,17 @@ void main() {
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
-          .updatePlant(updatedPlant);
+          .updatePlant(
+            UpdatePlantParams(
+              id: updatedPlant.id,
+              name: updatedPlant.name,
+              notes: updatedPlant.notes,
+            ),
+          );
 
       // Assert
-      expect(result.isRight(), true);
-      verify(() => mockRepository.updatePlant(updatedPlant)).called(1);
+      expect(result, true);
+      verify(() => mockRepository.updatePlant(any())).called(1);
     });
 
     test('should handle update failure', () async {
@@ -201,10 +208,10 @@ void main() {
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
-          .updatePlant(plant);
+          .updatePlant(UpdatePlantParams(id: plant.id, name: plant.name));
 
       // Assert
-      expect(result.isLeft(), true);
+      expect(result, false);
     });
   });
 
@@ -215,7 +222,7 @@ void main() {
 
       when(
         () => mockRepository.deletePlant(plantId),
-      ).thenAnswer((_) async => const Right(null));
+      ).thenAnswer((_) async => const Right([]));
       when(
         () => mockRepository.getPlants(),
       ).thenAnswer((_) async => const Right([]));
@@ -226,7 +233,7 @@ void main() {
           .deletePlant(plantId);
 
       // Assert
-      expect(result.isRight(), true);
+      expect(result, true);
       verify(() => mockRepository.deletePlant(plantId)).called(1);
     });
 
@@ -244,7 +251,7 @@ void main() {
           .deletePlant(plantId);
 
       // Assert
-      expect(result.isLeft(), true);
+      expect(result, false);
     });
   });
 
@@ -260,7 +267,7 @@ void main() {
       await container.read(plantsNotifierProvider.notifier).loadPlants();
 
       // Act
-      final result = container
+      final result = await container
           .read(plantsNotifierProvider.notifier)
           .getPlantById('plant-1');
 
@@ -278,7 +285,7 @@ void main() {
       await container.read(plantsNotifierProvider.notifier).loadPlants();
 
       // Act
-      final result = container
+      final result = await container
           .read(plantsNotifierProvider.notifier)
           .getPlantById('non-existent');
 

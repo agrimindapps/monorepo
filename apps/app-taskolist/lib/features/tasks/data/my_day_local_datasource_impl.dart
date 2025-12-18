@@ -29,7 +29,7 @@ class MyDayLocalDataSourceImpl implements MyDayLocalDataSource {
       addedAt: DateTime.now(),
     );
 
-    await _myDayDao.insertMyDayTask(myDayTask.toTableData());
+    await _myDayDao.insertMyDayTask(myDayTask.toCompanion());
   }
 
   @override

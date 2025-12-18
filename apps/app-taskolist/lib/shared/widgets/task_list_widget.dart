@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/enums/task_filter.dart';
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_notifier.dart';
+import '../../features/tasks/providers/my_day_providers.dart';
 
 class TaskListWidget extends ConsumerWidget {
   final void Function(TaskEntity)? onTaskTap;
@@ -154,18 +155,38 @@ class TaskListWidget extends ConsumerWidget {
           ),
         ),
         subtitle: task.description != null ? Text(task.description!) : null,
-        trailing: IconButton(
-          icon: Icon(
-            task.isStarred ? Icons.star : Icons.star_border,
-            color: task.isStarred ? Colors.amber : null,
-          ),
-          onPressed: () {
-            final updatedTask = task.copyWith(
-              isStarred: !task.isStarred,
-              updatedAt: DateTime.now(),
-            );
-            ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
-          },
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Botão Adicionar ao Meu Dia
+            IconButton(
+              icon: const Icon(Icons.wb_sunny_outlined),
+              tooltip: 'Adicionar ao Meu Dia',
+              onPressed: () {
+                ref.read(myDayProvider.notifier).addTask(task.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Tarefa adicionada ao Meu Dia'),
+                    duration: Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+            // Botão Starred
+            IconButton(
+              icon: Icon(
+                task.isStarred ? Icons.star : Icons.star_border,
+                color: task.isStarred ? Colors.amber : null,
+              ),
+              onPressed: () {
+                final updatedTask = task.copyWith(
+                  isStarred: !task.isStarred,
+                  updatedAt: DateTime.now(),
+                );
+                ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
+              },
+            ),
+          ],
         ),
         onTap: () {
           if (onTaskTap != null) {

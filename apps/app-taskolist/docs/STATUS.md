@@ -27,6 +27,7 @@
 | Feature | ID | Tarefa | Progresso |
 |---------|-----|--------|-----------|
 | tasks | MEU-DIA-001 | Implementar Meu Dia feature | ✅ 100% |
+| tasks | RECURRENCE-001 | Tarefas Recorrentes (lembretes/dueDate) | 🟡 85% |
 
 ---
 

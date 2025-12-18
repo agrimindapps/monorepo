@@ -3,7 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../features/settings/presentation/settings_page.dart';
-import '../../features/tasks/presentation/my_day_page.dart';
+import '../../features/task_lists/presentation/create_edit_task_list_page.dart';
+import '../../features/task_lists/providers/task_list_providers.dart';
+import '../../features/tasks/domain/task_list_entity.dart';
+import '../../features/tasks/presentation/pages/my_day_page.dart';
+import '../constants/task_list_colors.dart';
 import '../providers/auth_providers.dart';
 
 class ModernDrawer extends ConsumerWidget {
@@ -119,12 +123,41 @@ class ModernDrawer extends ConsumerWidget {
                   onTap: () => Navigator.pop(context),
                 ),
 
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    'MINHAS LISTAS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+
+                _buildTaskListsSection(context, ref),
+
                 _buildMenuItem(
                   context,
-                  icon: Icons.task_rounded,
-                  title: 'Minhas Tarefas',
-                  subtitle: 'Gerenciar atividades',
-                  onTap: () => Navigator.pop(context),
+                  icon: Icons.add_circle_outline_rounded,
+                  title: 'Nova Lista',
+                  subtitle: 'Criar lista personalizada',
+                  iconColor: Colors.green,
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<dynamic>(
+                        builder: (context) => const CreateEditTaskListPage(),
+                      ),
+                    );
+                  },
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Divider(),
                 ),
 
                 _buildMenuItem(
@@ -214,6 +247,7 @@ class ModernDrawer extends ConsumerWidget {
     required VoidCallback onTap,
     bool isDestructive = false,
     Color? iconColor,
+    Widget? trailing,
   }) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -256,17 +290,198 @@ class ModernDrawer extends ConsumerWidget {
             letterSpacing: 0.1,
           ),
         ),
-        trailing: Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 16,
-          color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(102),
-        ),
+        trailing: trailing ??
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(102),
+            ),
         onTap: onTap,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         hoverColor:
             isDestructive
                 ? Colors.red.withAlpha(13)
                 : AppColors.primaryColor.withAlpha(13),
+      ),
+    );
+  }
+
+  Widget _buildTaskListsSection(BuildContext context, WidgetRef ref) {
+    final taskListsAsync = ref.watch(taskListsProvider);
+
+    return taskListsAsync.when(
+      data: (lists) {
+        if (lists.isEmpty) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(
+              'Nenhuma lista criada',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(128),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          );
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: lists.map((list) {
+            final color = TaskListColors.fromHex(list.color);
+            
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(12)),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: color.withAlpha(26),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.list_rounded,
+                    color: color,
+                    size: 24,
+                  ),
+                ),
+                title: Text(
+                  list.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                subtitle: list.description != null
+                    ? Text(
+                        list.description!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(153),
+                          letterSpacing: 0.1,
+                        ),
+                      )
+                    : null,
+                trailing: Icon(
+                  Icons.arrow_forward_ios_rounded,
+                  size: 16,
+                  color: Theme.of(context).textTheme.bodySmall?.color?.withAlpha(102),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  // TODO: Navigate to TaskListPage with list.id
+                },
+                onLongPress: () {
+                  _showListOptions(context, ref, list);
+                },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                hoverColor: color.withAlpha(13),
+              ),
+            );
+          }).toList(),
+        );
+      },
+      loading: () => const Padding(
+        padding: EdgeInsets.all(16),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      ),
+      error: (error, stack) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Text(
+          'Erro ao carregar listas',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.red[600],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showListOptions(BuildContext context, WidgetRef ref, TaskListEntity taskList) {
+    showModalBottomSheet<void>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_rounded, color: Colors.blue),
+              title: const Text('Editar Lista'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push<void>(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (context) => CreateEditTaskListPage(taskList: taskList),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.archive_rounded, color: Colors.orange),
+              title: const Text('Arquivar Lista'),
+              onTap: () async {
+                Navigator.pop(context);
+                await ref.read(archiveTaskListProvider.notifier).call(taskList.id);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Lista arquivada!')),
+                  );
+                }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_rounded, color: Colors.red),
+              title: const Text('Deletar Lista'),
+              onTap: () async {
+                Navigator.pop(context);
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Deletar Lista?'),
+                    content: const Text('Esta ação não pode ser desfeita.'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancelar'),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                        child: const Text('Deletar'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true) {
+                  await ref.read(deleteTaskListProvider.notifier).call(taskList.id);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Lista deletada!')),
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

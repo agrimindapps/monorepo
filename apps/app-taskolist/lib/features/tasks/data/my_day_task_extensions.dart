@@ -25,8 +25,8 @@ extension MyDayTaskModelX on MyDayTaskModel {
     );
   }
 
-  MyDayTaskData toTableData() {
-    return MyDayTaskData(
+  MyDayTasksCompanion toCompanion() {
+    return MyDayTasksCompanion.insert(
       id: id,
       taskId: taskId,
       userId: userId,

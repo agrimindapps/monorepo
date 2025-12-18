@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import '../../../core/errors/failures.dart' as local;
 import '../../../shared/providers/auth_providers.dart';
 import '../../../shared/widgets/sync/task_sync_loading.dart';
-import '../../tasks/presentation/home_page.dart';
+import '../../tasks/presentation/pages/home_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends ConsumerStatefulWidget {

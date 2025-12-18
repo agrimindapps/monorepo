@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
 // DAOs
+import 'daos/my_day_task_dao.dart';
 import 'daos/task_dao.dart';
 import 'daos/user_dao.dart';
 // Tables
@@ -32,7 +33,7 @@ part 'taskolist_database.g.dart';
 /// **SCHEMA VERSION:** 2 (adicionado MyDayTasks)
 /// ============================================================================
 
-@DriftDatabase(tables: [Tasks, Users, MyDayTasks], daos: [TaskDao, UserDao])
+@DriftDatabase(tables: [Tasks, Users, MyDayTasks], daos: [TaskDao, UserDao, MyDayTaskDao])
 class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
   TaskolistDatabase(super.e);
 

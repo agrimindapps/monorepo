@@ -1,4 +1,6 @@
 import 'package:app_plantis/core/auth/auth_state_notifier.dart';
+import 'package:app_plantis/features/tasks/domain/entities/task.dart'
+    as task_entity;
 import 'package:app_plantis/features/tasks/domain/usecases/complete_task_usecase.dart';
 import 'package:core/core.dart' hide Column;
 import 'package:flutter_test/flutter_test.dart';
@@ -37,12 +39,16 @@ void main() {
       // Arrange
       final task = TestFixtures.createTestTask(id: 'task-1');
       final completedTask = task.copyWithTaskData(
-        status: TaskStatus.completed,
+        status: task_entity.TaskStatus.completed,
         completedAt: DateTime.now(),
       );
 
       when(
-        () => mockTasksRepository.completeTask(task.id, null, null),
+        () => mockTasksRepository.completeTask(
+          task.id,
+          notes: null,
+          nextDueDate: null,
+        ),
       ).thenAnswer((_) async => Right(completedTask));
 
       // Act
@@ -53,11 +59,15 @@ void main() {
       // Assert
       expect(result.isRight(), true);
       result.fold((_) => fail('Should return success'), (completedTask) {
-        expect(completedTask.status, TaskStatus.completed);
+        expect(completedTask.status, task_entity.TaskStatus.completed);
         expect(completedTask.completedAt, isNotNull);
       });
       verify(
-        () => mockTasksRepository.completeTask(task.id, null, null),
+        () => mockTasksRepository.completeTask(
+          task.id,
+          notes: null,
+          nextDueDate: null,
+        ),
       ).called(1);
     });
 
@@ -66,13 +76,17 @@ void main() {
       final task = TestFixtures.createTestTask(id: 'task-1');
       const notes = 'Concluída com sucesso';
       final completedTask = task.copyWithTaskData(
-        status: TaskStatus.completed,
+        status: task_entity.TaskStatus.completed,
         completedAt: DateTime.now(),
         completionNotes: notes,
       );
 
       when(
-        () => mockTasksRepository.completeTask(task.id, notes, null),
+        () => mockTasksRepository.completeTask(
+          task.id,
+          notes: notes,
+          nextDueDate: null,
+        ),
       ).thenAnswer((_) async => Right(completedTask));
 
       // Act
@@ -94,16 +108,18 @@ void main() {
         // Arrange
         final recurringTask = TestFixtures.createTestTask(
           id: 'task-1',
-          isRecurring: true,
-          recurringIntervalDays: 7,
-        );
+        ).copyWithTaskData(isRecurring: true, recurringIntervalDays: 7);
         final completedTask = recurringTask.copyWithTaskData(
-          status: TaskStatus.completed,
+          status: task_entity.TaskStatus.completed,
           completedAt: DateTime.now(),
         );
 
         when(
-          () => mockTasksRepository.completeTask(recurringTask.id, null, null),
+          () => mockTasksRepository.completeTask(
+            recurringTask.id,
+            notes: null,
+            nextDueDate: null,
+          ),
         ).thenAnswer((_) async => Right(completedTask));
 
         // Act
@@ -114,7 +130,7 @@ void main() {
         // Assert
         expect(result.isRight(), true);
         result.fold((_) => fail('Should return success'), (task) {
-          expect(task.status, TaskStatus.completed);
+          expect(task.status, task_entity.TaskStatus.completed);
           expect(task.isRecurring, true);
         });
       },
@@ -126,20 +142,18 @@ void main() {
         // Arrange
         final recurringTask = TestFixtures.createTestTask(
           id: 'task-1',
-          isRecurring: true,
-          recurringIntervalDays: 7,
-        );
+        ).copyWithTaskData(isRecurring: true, recurringIntervalDays: 7);
         final nextDueDate = DateTime.now().add(const Duration(days: 14));
         final completedTask = recurringTask.copyWithTaskData(
-          status: TaskStatus.completed,
+          status: task_entity.TaskStatus.completed,
           completedAt: DateTime.now(),
         );
 
         when(
           () => mockTasksRepository.completeTask(
             recurringTask.id,
-            null,
-            nextDueDate,
+            notes: null,
+            nextDueDate: nextDueDate,
           ),
         ).thenAnswer((_) async => Right(completedTask));
 
@@ -156,8 +170,8 @@ void main() {
         verify(
           () => mockTasksRepository.completeTask(
             recurringTask.id,
-            null,
-            nextDueDate,
+            notes: null,
+            nextDueDate: nextDueDate,
           ),
         ).called(1);
       },
@@ -168,12 +182,16 @@ void main() {
       const taskId = 'task-1';
 
       when(
-        () => mockTasksRepository.completeTask(taskId, null, null),
+        () => mockTasksRepository.completeTask(
+          taskId,
+          notes: null,
+          nextDueDate: null,
+        ),
       ).thenAnswer((_) async => const Left(ServerFailure('Erro ao completar')));
 
       // Act
       final result = await completeTaskUseCase(
-        const CompleteTaskParams(taskId: taskId),
+        CompleteTaskParams(taskId: taskId),
       );
 
       // Assert
@@ -186,9 +204,7 @@ void main() {
 
     test('should validate task ID not empty', () async {
       // Act
-      final result = await completeTaskUseCase(
-        const CompleteTaskParams(taskId: ''),
-      );
+      final result = await completeTaskUseCase(CompleteTaskParams(taskId: ''));
 
       // Assert
       expect(result.isLeft(), true);
@@ -196,7 +212,13 @@ void main() {
         expect(failure, isA<ValidationFailure>());
         expect(failure.message, contains('ID'));
       }, (_) => fail('Should return validation failure'));
-      verifyNever(() => mockTasksRepository.completeTask(any(), any(), any()));
+      verifyNever(
+        () => mockTasksRepository.completeTask(
+          any(),
+          notes: any(),
+          nextDueDate: any(),
+        ),
+      );
     });
 
     test(

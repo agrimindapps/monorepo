@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/item_master_model.dart';
 
 /// Remote data source for ItemMaster using Firestore
-/// Optional sync - offline-first with Hive is primary
+/// Optional sync - offline-first with Drift is primary
 class ItemMasterRemoteDataSource {
   final FirebaseFirestore _firestore;
 

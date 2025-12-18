@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../core/enums/task_filter.dart';
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_notifier.dart';
+import '../../features/tasks/presentation/widgets/subtask_progress_indicator.dart';
 import '../../features/tasks/providers/my_day_providers.dart';
 
 class TaskListWidget extends ConsumerWidget {
@@ -154,7 +155,14 @@ class TaskListWidget extends ConsumerWidget {
                     : null,
           ),
         ),
-        subtitle: task.description != null ? Text(task.description!) : null,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (task.description != null) Text(task.description!),
+            if (task.description != null) const SizedBox(height: 4),
+            SubtaskProgressBadge(taskId: task.id),
+          ],
+        ),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -162,14 +170,16 @@ class TaskListWidget extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.wb_sunny_outlined),
               tooltip: 'Adicionar ao Meu Dia',
-              onPressed: () {
-                ref.read(myDayProvider.notifier).addTask(task.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tarefa adicionada ao Meu Dia'),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+              onPressed: () async {
+                await ref.read(myDayProvider.notifier).addTask(task.id, source: 'task_list');
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Tarefa adicionada ao Meu Dia'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
             ),
             // Botão Starred

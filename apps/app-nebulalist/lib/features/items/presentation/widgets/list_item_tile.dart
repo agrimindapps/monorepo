@@ -103,7 +103,7 @@ class ListItemTile extends StatelessWidget {
           style: listItem.isCompleted
               ? TextStyle(
                   decoration: TextDecoration.lineThrough,
-                  color: theme.colorScheme.onSurface.withOpacity(0.5),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 )
               : null,
         ),
@@ -141,7 +141,7 @@ class ListItemTile extends StatelessWidget {
       overflow: TextOverflow.ellipsis,
       style: listItem.isCompleted
           ? TextStyle(
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
             )
           : null,
     );
@@ -186,7 +186,7 @@ class ListItemTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(

@@ -12,7 +12,7 @@ class CheckListLimitUseCase {
   CheckListLimitUseCase(this._repository);
 
   /// Check if user can create a new list
-  /// Returns Either<Failure, bool>
+  /// Returns `Either<Failure, bool>`
   ///
   /// For free tier users:
   /// - Returns true if active lists < 10

@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/core_providers.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../task_lists/providers/task_list_providers.dart';
 import '../data/my_day_local_datasource.dart';
 import '../data/my_day_local_datasource_impl.dart';
@@ -91,7 +92,7 @@ class MyDayNotifier extends _$MyDayNotifier {
   @override
   void build() {}
 
-  Future<void> addTask(String taskId) async {
+  Future<void> addTask(String taskId, {String source = 'task_list'}) async {
     final useCase = ref.read(addTaskToMyDayProvider);
     final userId = ref.read(currentUserIdProvider); // Assumindo que existe
     if (userId == null) return;
@@ -100,6 +101,10 @@ class MyDayNotifier extends _$MyDayNotifier {
       taskId: taskId,
       userId: userId,
     ));
+
+    // Log analytics
+    final analytics = ref.read(analyticsServiceProvider);
+    await analytics.logMyDayTaskAdded(taskId: taskId, source: source);
   }
 
   Future<void> removeTask(String taskId) async {
@@ -108,6 +113,10 @@ class MyDayNotifier extends _$MyDayNotifier {
     await useCase.call(RemoveTaskFromMyDayParams(
       taskId: taskId,
     ));
+
+    // Log analytics
+    final analytics = ref.read(analyticsServiceProvider);
+    await analytics.logMyDayTaskRemoved(taskId: taskId);
   }
 
   Future<void> clearAll() async {
@@ -115,6 +124,15 @@ class MyDayNotifier extends _$MyDayNotifier {
     final userId = ref.read(currentUserIdProvider);
     if (userId == null) return;
     
+    // Buscar contagem antes de limpar
+    final getTasks = ref.read(getMyDayTasksProvider);
+    final tasksResult = await getTasks(GetMyDayTasksParams(userId: userId));
+    final taskCount = tasksResult.fold((_) => 0, (tasks) => tasks.length);
+    
     await useCase.call(ClearMyDayParams(userId: userId));
+
+    // Log analytics
+    final analytics = ref.read(analyticsServiceProvider);
+    await analytics.logMyDayCleared(taskCount: taskCount);
   }
 }

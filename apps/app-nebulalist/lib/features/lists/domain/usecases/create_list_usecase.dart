@@ -10,7 +10,7 @@ class CreateListUseCase {
   CreateListUseCase(this._repository);
 
   /// Creates a new list with validations
-  /// Returns Either<Failure, ListEntity>
+  /// Returns `Either<Failure, ListEntity>`
   ///
   /// Validations:
   /// - Name: 1-100 characters, not just spaces

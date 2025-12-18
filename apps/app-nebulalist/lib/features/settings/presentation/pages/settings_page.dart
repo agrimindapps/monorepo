@@ -321,7 +321,7 @@ class SettingsPage extends ConsumerWidget {
           children: [
             Icon(
               icon,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -338,7 +338,7 @@ class SettingsPage extends ConsumerWidget {
                     subtitle,
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],

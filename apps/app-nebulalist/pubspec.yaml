@@ -13,7 +13,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
 
-  # Core Package - Shared services (Firebase, Riverpod, Hive, dartz, equatable)
+  # Core Package - Shared services (Firebase, Riverpod, dartz, equatable)
   core:
     path: ../../packages/core
 
@@ -24,8 +24,6 @@ dependencies:
   path_provider: any
   path: any
   freezed_annotation: any
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   
   # Firebase (re-exported from core but needed for direct imports)
   cloud_firestore: any
@@ -35,6 +33,7 @@ dependencies:
   flutter_riverpod: any
   riverpod_annotation: any
   go_router: any
+  shared_preferences: any  # For app settings and preferences
 
 dev_dependencies:
   flutter_test:

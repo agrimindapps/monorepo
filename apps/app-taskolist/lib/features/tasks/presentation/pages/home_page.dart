@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/enums/task_filter.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/sample_data.dart';
 import '../../../../shared/widgets/bottom_input_bar.dart';
 import '../../../../shared/widgets/filter_side_panel.dart';
@@ -172,7 +173,7 @@ class _HomePageState extends ConsumerState<HomePage>
                             children: [
                               Icon(
                                 Icons.schedule_rounded,
-                                color: Colors.orange,
+                                color: AppColors.pendingColor,
                               ),
                               SizedBox(width: 8),
                               Text('Pendentes'),
@@ -185,7 +186,7 @@ class _HomePageState extends ConsumerState<HomePage>
                             children: [
                               Icon(
                                 Icons.play_circle_rounded,
-                                color: Colors.blue,
+                                color: AppColors.inProgressColor,
                               ),
                               SizedBox(width: 8),
                               Text('Em Progresso'),
@@ -198,7 +199,7 @@ class _HomePageState extends ConsumerState<HomePage>
                             children: [
                               Icon(
                                 Icons.check_circle_rounded,
-                                color: Colors.green,
+                                color: AppColors.completedColor,
                               ),
                               SizedBox(width: 8),
                               Text('Concluídas'),
@@ -241,7 +242,7 @@ class _HomePageState extends ConsumerState<HomePage>
             GestureDetector(
               onTap: _closeTaskDrawer,
               child: Container(
-                color: Colors.black54,
+                color: AppColors.overlay,
                 width: double.infinity,
                 height: double.infinity,
               ),
@@ -255,7 +256,7 @@ class _HomePageState extends ConsumerState<HomePage>
               return GestureDetector(
                 onTap: _closeFilterDrawer,
                 child: Container(
-                  color: Colors.black54.withValues(
+                  color: AppColors.overlay.withValues(
                     alpha: _filterDrawerAnimationController.value * 0.5,
                   ),
                   width: double.infinity,

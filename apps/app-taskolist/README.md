@@ -1,31 +1,42 @@
-# 📋 Task Manager - Gerenciador de Tarefas Pessoal
+# 📋 Task Manager - Gerenciador de Tarefas Inteligente
 
-Um aplicativo Flutter moderno para gerenciamento de tarefas pessoais, seguindo princípios de Clean Architecture e design minimalista.
+Um aplicativo Flutter moderno e completo para gerenciamento de tarefas, construído com **Clean Architecture**, **Firebase** e **Riverpod**, oferecendo sincronização em nuvem, notificações inteligentes e experiência premium.
+
+---
 
 ## 🎯 Visão do Produto
 
 ### Propósito
-**Aplicativo monousuário** focado em **produtividade pessoal**, permitindo organizar tarefas por contextos/categorias sem complexidade colaborativa desnecessária.
+Aplicativo de **produtividade pessoal** com recursos avançados:
+- 🔄 **Sincronização em Nuvem** - Firebase Firestore
+- 🔔 **Notificações Inteligentes** - Lembretes e alertas
+- 📊 **Insights de Produtividade** - Analytics e métricas
+- 🌐 **Multi-Plataforma** - Android, iOS e Web
+- 💎 **Modelo Premium** - RevenueCat + paywall
 
 ### Público-Alvo
-- **Profissionais** que precisam organizar trabalho e vida pessoal
-- **Estudantes** gerenciando múltiplas disciplinas e projetos
-- **Pessoas organizadas** que preferem simplicidade à complexidade
+- **Profissionais** organizando trabalho e vida pessoal
+- **Estudantes** gerenciando projetos e disciplinas
+- **Equipes pequenas** compartilhando listas de tarefas
+- **Power users** buscando automação e insights
 
 ### Diferencial
-- **Simplicidade sobre funcionalidades** - foco no essencial
-- **Offline-first** - funciona sem internet
-- **Performance** - interface rápida e responsiva
-- **Privacidade** - dados apenas locais, sem tracking
+- ✨ **Offline-First com Sync** - Funciona sem internet, sincroniza quando online
+- 🎯 **Subtarefas e Hierarquia** - Decomponha projetos complexos
+- 🔔 **Lembretes Avançados** - Quick presets e custom scheduling
+- 📊 **Analytics Integrado** - Firebase Analytics + Crashlytics
+- 💰 **Monetização Integrada** - RevenueCat pronto para premium features
+
+---
 
 ## 🏗️ Arquitetura
 
-### Clean Architecture + SOLID
+### Clean Architecture + SOLID + Firebase
 ```
 📱 Presentation (UI)
-├── Pages (Telas)
-├── Widgets (Componentes)
-└── Providers (Estado - Riverpod)
+├── Pages (Telas - Material 3)
+├── Widgets (Componentes Reutilizáveis)
+└── Providers (Estado - Riverpod 3.0)
 
 🎯 Domain (Regras de Negócio)
 ├── Entities (Modelos de Domínio)
@@ -33,142 +44,207 @@ Um aplicativo Flutter moderno para gerenciamento de tarefas pessoais, seguindo p
 └── Repositories (Contratos)
 
 💾 Data (Dados)
-├── Models (Serialização)
-├── DataSources (Local/Remote)
+├── Models (Serialização JSON)
+├── DataSources (Drift + Firestore)
 └── Repositories (Implementações)
 
-🔧 Core (Infraestrutura)
-├── DI (Injeção de Dependência)
-├── Database (Drift Config)
-└── Utils (Utilitários)
+🔧 Core Package (Compartilhado - Monorepo)
+├── Firebase Services (Analytics, Crashlytics, Performance)
+├── Notification Repository (Local Notifications)
+├── RevenueCat Service (In-App Purchases)
+└── Sync Manager (Offline-First + Cloud Sync)
 ```
 
 ### Stack Tecnológica
-- **Flutter 3.24+** - Framework UI
-- **Riverpod** - Gerenciamento de estado
-- **Drift** - Database local (SQLite)
-- **Dartz** - Programação funcional
-- **GetIt** - Injeção de dependência
+- **Flutter 3.24+** - Framework UI cross-platform
+- **Riverpod 3.0** - State management com code generation
+- **Firebase** - Backend-as-a-Service
+  - Firestore (Database)
+  - Auth (Autenticação)
+  - Analytics (Métricas)
+  - Crashlytics (Error tracking)
+  - Performance (Monitoramento)
+- **Drift** - SQLite local (Offline-first)
+- **RevenueCat** - In-App Purchases e Subscriptions
+- **Dartz** - Functional programming (Either)
 - **UUID** - Geração de IDs únicos
+- **flutter_local_notifications** - Notificações locais
 
-## ✅ Status Atual (v1.0 - MVP)
+---
 
-### 🎉 Implementado
-- ✅ **Autenticação** - Login/registro local
-- ✅ **CRUD de Tasks** - Criar, editar, excluir tarefas
-- ✅ **Estados** - Pendente, em progresso, concluída
-- ✅ **Prioridades** - Baixa, média, alta, urgente
-- ✅ **Favoritos** - Marcar tasks importantes
-- ✅ **Filtros** - Por status (pendente, progresso, concluída)
-- ✅ **Persistência** - Armazenamento local com Drift (SQLite)
-- ✅ **Offline** - Funciona completamente offline
-- ✅ **UI Responsiva** - Estados de loading/erro/dados
+## ✅ Status Atual (v1.5 - Production Ready)
+
+### 🎉 Funcionalidades Completas
+
+#### 🔐 Autenticação
+- ✅ Login com Email/Senha
+- ✅ Registro de novos usuários
+- ✅ Login Anônimo (com dialog informativo)
+- ✅ Logout e gerenciamento de sessão
+- ✅ Página de Login separada (Mobile vs Web)
+  - Mobile: Login + Registro
+  - Web: Apenas Login
+
+#### 📋 Gestão de Tarefas
+- ✅ **CRUD Completo** - Criar, editar, visualizar, excluir
+- ✅ **Estados** - Pendente, Em Progresso, Concluída, Cancelada
+- ✅ **Prioridades** - Baixa, Média, Alta, Urgente
+- ✅ **Favoritos** - Marcar tarefas importantes (⭐)
+- ✅ **Subtarefas** - Hierarquia completa com progress tracking
+  - Quick Add inline
+  - Dialog para edição detalhada
+  - Swipe-to-delete
+  - Checkbox para completar
+  - Barra de progresso visual
+- ✅ **Filtros Avançados**
+  - Por status
+  - Por tag
+  - Por tipo (todas, hoje, favoritas, etc)
+  - Drawer lateral com filtros
+
+#### 🔔 Sistema de Notificações (100%)
+- ✅ **Lembretes de Tarefas**
+  - Quick presets (15min, 30min, 1h, 2h, Amanhã 9h)
+  - Custom date/time picker
+  - Widget integrado na TaskDetailPage
+- ✅ **Alertas de Prazo** - Notificação antes do vencimento
+- ✅ **Confirmações de Conclusão** - Feedback ao completar
+- ✅ **Revisão Semanal** - Lembrete semanal configurável
+- ✅ **Lembrete de Produtividade** - Daily reminder
+- ✅ **Deep Link** - Tocar na notificação abre a tarefa
+- ✅ **Actions** - Marcar como feita, Snooze 1h, Adiar prazo
+- ✅ **Página de Configurações** - Gerenciar preferências
+- ✅ **Estatísticas** - Ver notificações pendentes
+
+#### 🔄 Sincronização
+- ✅ **Offline-First** - Trabalha sem internet
+- ✅ **Firebase Sync** - Sincronização automática em background
+- ✅ **UnifiedSyncManager** - Orquestra sync entre Drift + Firestore
+- ✅ **Conflict Resolution** - Última escrita vence
+- ✅ **Loading States** - Feedback visual durante sync
+
+#### 💎 Premium & Monetização
+- ✅ **RevenueCat Integration** - In-App Purchases configurado
+- ✅ **Premium Gate** - Controle de acesso a features premium
+- ✅ **Promotional Page** - Landing page moderna (Web)
+- ✅ **Premium Banner** - Incentivo sutil na HomePage
+- ✅ **Premium Page** - Detalhes de planos e benefícios
+
+#### 📊 Analytics & Monitoring
+- ✅ **Firebase Analytics** - Eventos customizados
+- ✅ **Crashlytics** - Error tracking automático
+- ✅ **Performance Monitoring** - Métricas de performance
+- ✅ **Custom Events** - Task created, completed, deleted, etc
 
 ### 🏗️ Arquitetura Implementada
-- ✅ **Clean Architecture** completa
-- ✅ **Dependency Injection** configurado
-- ✅ **Error Handling** tipificado
-- ✅ **Use Cases** granulares
-- ✅ **Repository Pattern** implementado
-- ✅ **TypeAdapters** Drift configurados
+- ✅ **Clean Architecture** - 3 camadas bem definidas
+- ✅ **SOLID Principles** - Código maintível
+- ✅ **Repository Pattern** - Abstração de dados
+- ✅ **Use Cases Granulares** - Single Responsibility
+- ✅ **Error Handling** - Either pattern com Dartz
+- ✅ **Dependency Injection** - Riverpod providers
+- ✅ **Code Generation** - Riverpod + Drift codegen
+- ✅ **Type Safety** - Null safety e enums tipados
 
-## 🚀 Roadmap
+---
 
-### 📋 Fase 2: Gestão de Listas (Próxima)
-**Objetivo:** Organizar tasks em contextos diferentes
+## 📱 Plataformas Suportadas
 
-#### Funcionalidades Planejadas:
-- 📁 **Múltiplas Listas** - "Trabalho", "Casa", "Estudos"
+### ✅ Android
+- Build APK gerado com sucesso (75.7 MB)
+- Notificações locais funcionais
+- Deep linking configurado
+- Firebase integrado
+
+### ✅ iOS
+- Suporte completo (não testado fisicamente)
+- Push notifications ready
+- Firebase configurado
+
+### ✅ Web
+- Login page customizada (sem registro)
+- Promotional page responsiva
+- Firebase Auth + Firestore funcionais
+
+---
+
+## 🚀 Roadmap Futuro
+
+### 📋 Fase 3: Listas e Projetos
+- 📁 **Múltiplas Listas** - Trabalho, Casa, Estudos
 - 🎨 **Personalização** - Cores e ícones por lista
-- 📊 **Contadores** - Tasks por lista
-- 📤 **Export/Share** - Compartilhar lista como texto
-- 📋 **Templates** - Listas pré-definidas ("Projeto", "Viagem")
+- 📊 **Dashboard** - Visão geral de todos os projetos
 - 🗃️ **Arquivamento** - Listas concluídas
 
-#### Estrutura Técnica:
-```dart
-TaskListEntity:
-├── id, name, description
-├── color, icon, position
-├── createdAt, updatedAt
-└── taskCount, completedCount
+### 🔄 Fase 4: Recorrência e Automação
+- ⏰ **Tasks Recorrentes** - Diárias, semanais, mensais
+- 🤖 **Automações** - Regras customizadas
+- 📅 **Calendário** - Integração visual de prazos
 
-TaskEntity (Atualizada):
-├── listId (referência à lista)
-└── demais campos mantidos
-```
-
-### 🔔 Fase 3: Notificações e Lembretes
-- 📱 **Notificações Locais** - Lembretes por task
-- ⏰ **Agendamento** - Data/hora específica
-- 🔄 **Recorrência** - Tasks repetitivas
-- ⚙️ **Configurações** - Personalizar notificações
-
-### 📊 Fase 4: Produtividade e Insights
-- 📈 **Estatísticas** - Tasks concluídas por período
+### 📊 Fase 5: Insights e Gamificação
+- 📈 **Estatísticas Avançadas** - Produtividade ao longo do tempo
+- 🏆 **Conquistas** - Gamificação com badges
 - 🎯 **Metas** - Objetivos diários/semanais
-- 📅 **Visualizações** - Calendário, timeline
-- 🏆 **Gamificação** - Streaks, conquistas
+- 🔥 **Streaks** - Dias consecutivos produtivos
 
-### 🎨 Fase 5: Melhorias de UX
-- 🌙 **Tema Escuro** - Alternância de temas
-- 🎭 **Customização** - Cores, fontes, layouts
-- ⚡ **Gestos** - Swipe actions, shortcuts
-- 📱 **Widgets** - Shortcuts na tela inicial
+### 🎨 Fase 6: UX Refinements
+- 🌙 **Tema Escuro** - Dark mode completo
+- ⚡ **Gestos Avançados** - Swipe actions em mais telas
+- 📱 **Widgets** - Home screen widgets
+- 🎭 **Temas Customizados** - Escolha de cores
 
-## 🚫 Fora do Escopo
-
-### Não Implementaremos:
-- ❌ **Múltiplos Usuários** - Foco monousuário
-- ❌ **Sincronização Cloud** - Offline-first
-- ❌ **Colaboração** - Sem compartilhamento online
-- ❌ **Chat/Comentários** - Sem interação social
-- ❌ **Integrações** - Sem APIs externas
-- ❌ **Assinatura** - App gratuito
-
-### Compartilhamento Simples:
-- ✅ **Export de texto** - Copiar lista como texto
-- ✅ **Share nativo** - WhatsApp, email, etc.
-- ✅ **Formato markdown** - Para desenvolvedores
+---
 
 ## 🔧 Desenvolvimento
 
 ### Configuração do Ambiente
 ```bash
-# Clone o repositório
+# Clone o monorepo
 git clone [repo-url]
-cd monorepo/apps/app_task_manager
+cd monorepo
+
+# Navegar para o app
+cd apps/app-taskolist
 
 # Instalar dependências
 flutter pub get
 
-# Gerar código (tables, serialização)
+# Gerar código (Riverpod + Drift)
 dart run build_runner build --delete-conflicting-outputs
 
-# Executar
+# Executar (Debug)
 flutter run
+
+# Build APK (Release)
+flutter build apk --release
+
+# Build Web
+flutter build web
 ```
 
 ### Estrutura de Pastas
 ```
 lib/
-├── core/                 # Infraestrutura
-│   ├── database/        # Configuração Hive
-│   ├── di/              # Injeção de Dependência
-│   ├── errors/          # Error handling
-│   └── utils/           # Utilitários
-├── data/                # Camada de Dados
-│   ├── datasources/     # Fontes de dados
-│   ├── models/          # Modelos de dados
-│   └── repositories/    # Implementações
-├── domain/              # Regras de Negócio
-│   ├── entities/        # Entidades
-│   ├── repositories/    # Contratos
-│   └── usecases/        # Casos de uso
-└── presentation/        # Interface
-    ├── pages/           # Telas
-    ├── providers/       # Estado (Riverpod)
-    └── widgets/         # Componentes
+├── core/                    # Infraestrutura
+│   ├── database/           # Drift config (SQLite)
+│   ├── enums/              # Task filters, status, priority
+│   ├── errors/             # Failures tipificados
+│   ├── services/           # Navigation, NotificationActions
+│   ├── sync/               # TaskolistSyncConfig
+│   ├── theme/              # AppTheme (Material 3)
+│   └── utils/              # Helpers, sample data
+├── features/               # Módulos por feature
+│   ├── auth/              # Login, Register, Auth providers
+│   ├── notifications/     # Settings page, providers
+│   ├── premium/           # Promotional, Premium pages
+│   ├── subscription/      # RevenueCat service
+│   └── tasks/             # CRUD, domain, presentation
+│       ├── data/          # Models, repositories
+│       ├── domain/        # Entities, use cases
+│       └── presentation/  # Pages, widgets, providers
+└── shared/                # Componentes compartilhados
+    ├── providers/         # Auth, notification providers
+    └── widgets/           # Reusable widgets
 ```
 
 ### Comandos Úteis
@@ -176,87 +252,107 @@ lib/
 # Análise de código
 flutter analyze
 
-# Gerar código Drift/JSON
-dart run build_runner build
+# Gerar código
+dart run build_runner watch  # Modo watch
 
-# Limpar cache de build
+# Limpar build
 flutter clean && flutter pub get
 
-# Executar testes
+# Testes (futuro)
 flutter test
+
+# Build para produção
+flutter build apk --release --no-tree-shake-icons
+flutter build appbundle --release  # Para Play Store
+flutter build ios --release         # Para App Store
 ```
+
+---
 
 ## 🎨 Design System
 
 ### Princípios de UI/UX
-- **Minimalismo** - Interface limpa, sem distrações
-- **Consistência** - Padrões visuais uniformes
-- **Performance** - Transições fluidas, carregamento rápido
-- **Acessibilidade** - Suporte a diferentes necessidades
+- **Material 3** - Design moderno e consistente
+- **Glassmorphism** - Efeitos de vidro na login page
+- **Animations** - Transições fluidas e naturais
+- **Haptic Feedback** - Feedback tátil em ações importantes
+- **Accessibility** - Suporte a leitores de tela (futuro)
 
 ### Paleta de Cores
-- **Primary:** Blue (#2196F3) - Ações principais
+- **Primary:** Indigo (#6366F1) - Ações principais, gradientes
+- **Secondary:** Purple (#8B5CF6) - Destaques
 - **Success:** Green (#4CAF50) - Tasks concluídas
-- **Warning:** Orange (#FF9800) - Prioridade alta
-- **Error:** Red (#F44336) - Erros e exclusões
-- **Surface:** White/Dark - Backgrounds
+- **Warning:** Orange (#FF9800) - Prioridade alta, alertas
+- **Error:** Red (#F44336) - Erros, exclusões
+- **Surface:** White/Dark - Backgrounds adaptativos
 
-## 📱 Casos de Uso
+### Componentes Customizados
+- ✅ **TaskReminderWidget** - Widget de lembretes
+- ✅ **SubtaskProgressIndicator** - Barra de progresso
+- ✅ **QuickAddSubtaskField** - Campo inline para subtarefas
+- ✅ **ModernDrawer** - Menu lateral customizado
+- ✅ **FilterSidePanel** - Painel de filtros lateral
+- ✅ **TaskDetailDrawer** - Drawer de detalhes da tarefa
 
-### Profissional
-```
-📊 Trabalho
-├── ✅ Code review PR #123
-├── 🔄 Implementar autenticação
-├── 📝 Documentar API endpoints
-└── 📧 Responder emails importantes
+---
 
-💼 Pessoal
-├── 📞 Agendar consulta médica
-├── 🛒 Comprar presente aniversário
-└── 💳 Pagar conta de luz
-```
+## 📊 Métricas de Código
 
-### Estudante
-```
-📚 Matemática
-├── ✅ Resolver exercícios cap. 5
-├── 📝 Estudar para prova
-└── 🎯 Revisar derivadas
+| Métrica | Valor |
+|---------|-------|
+| **Linhas de Código** | ~10.000+ |
+| **Arquivos Dart** | 80+ |
+| **Features** | 5 módulos principais |
+| **Widgets Customizados** | 30+ |
+| **Providers (Riverpod)** | 25+ |
+| **Use Cases** | 15+ |
+| **Repositories** | 5 implementações |
+| **APK Size (Release)** | 75.7 MB |
 
-🔬 Química
-├── 🧪 Relatório experimento
-├── 📖 Ler artigo sobre átomos
-└── ✏️ Fazer lista de exercícios
-```
+---
 
 ## 🤝 Contribuição
 
 ### Como Contribuir
 1. **Fork** o projeto
-2. **Crie** uma branch (`git checkout -b feature/nova-funcionalidade`)
-3. **Commit** suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. **Push** para a branch (`git push origin feature/nova-funcionalidade`)
+2. **Crie** uma branch (`git checkout -b feature/nova-feature`)
+3. **Commit** mudanças (`git commit -m 'Add: nova feature'`)
+4. **Push** para a branch (`git push origin feature/nova-feature`)
 5. **Abra** um Pull Request
 
 ### Padrões de Código
-- **Clean Architecture** - Separação clara de responsabilidades
-- **SOLID Principles** - Código maintível e extensível
-- **Flutter Best Practices** - Seguir convenções da comunidade
-- **Testes** - Cobertura mínima de 80% em use cases
+- **Clean Architecture** - Separação clara de camadas
+- **SOLID Principles** - Código extensível e testável
+- **Riverpod Best Practices** - Code generation, AsyncValue
+- **Flutter Conventions** - Naming, estrutura, imports
+- **Commit Messages** - Conventional Commits (feat, fix, docs, etc)
+
+---
 
 ## 📄 Licença
 
 Este projeto está sob licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
+---
+
 ## 🎯 Contato
 
-- **Desenvolvedor:** [Seu Nome]
-- **Email:** [seu.email@exemplo.com]
-- **GitHub:** [seu-usuario]
+- **Desenvolvedor:** Lucineio Loch
+- **Projeto:** Task Manager (Monorepo)
+- **Status:** ✅ Production Ready (v1.5)
 
 ---
 
-> 💡 **Filosofia do Projeto:** "Simplicidade é a sofisticação suprema" - Leonardo da Vinci
+## 📚 Documentação Adicional
 
-> 🎯 **Objetivo:** Criar uma ferramenta que ajude as pessoas a serem mais produtivas sem adicionar complexidade desnecessária às suas vidas.
+Veja a pasta `docs/` para documentação detalhada:
+- `NOTIFICATIONS_STATUS.md` - Sistema de notificações (100%)
+- `BUILD_APK_SUCCESS.md` - Processo de build Android
+- `LOGIN_PAGES_SPLIT.md` - Separação Mobile/Web
+- `INTERNAL_UI_ANALYSIS.md` - Análise de UI/UX interna
+
+---
+
+> 💡 **Filosofia do Projeto:** "Simplicidade com poder - features avançadas sem complexidade desnecessária"
+
+> 🎯 **Objetivo:** Criar uma ferramenta de produtividade completa, moderna e escalável, pronta para monetização e crescimento orgânico.

@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../features/tasks/domain/task_entity.dart';
 import '../providers/notification_providers.dart';
 
@@ -29,7 +30,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           children: [
             Row(
               children: [
-                const Icon(Icons.notifications, color: Colors.blue),
+                const Icon(Icons.notifications, color: AppColors.primaryColor),
                 const SizedBox(width: 8),
                 const Text(
                   'Lembrete',
@@ -133,18 +134,18 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.blue[50],
+            color: Theme.of(context).colorScheme.primaryContainer.withAlpha(50),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.blue[200]!),
+            border: Border.all(color: Theme.of(context).colorScheme.primary.withAlpha(100)),
           ),
           child: Row(
             children: [
-              Icon(Icons.access_time, color: Colors.blue[700], size: 20),
+              Icon(Icons.access_time, color: Theme.of(context).colorScheme.primary, size: 20),
               const SizedBox(width: 8),
               Text(
                 'Lembrete em ${_formatDuration(quickReminderDuration)}',
                 style: TextStyle(
-                  color: Colors.blue[700],
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -168,8 +169,8 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           });
         }
       },
-      selectedColor: Colors.blue[100],
-      checkmarkColor: Colors.blue[700],
+      selectedColor: Theme.of(context).colorScheme.primaryContainer,
+      checkmarkColor: Theme.of(context).colorScheme.primary,
     );
   }
 
@@ -185,7 +186,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
 
         DecoratedBox(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(8),
           ),
           child: ListTile(
@@ -210,18 +211,18 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.red[50],
+              color: Theme.of(context).colorScheme.errorContainer.withAlpha(50),
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red[200]!),
+              border: Border.all(color: Theme.of(context).colorScheme.error.withAlpha(100)),
             ),
             child: Row(
               children: [
-                Icon(Icons.warning, color: Colors.red[700], size: 16),
+                Icon(Icons.warning, color: Theme.of(context).colorScheme.error, size: 16),
                 const SizedBox(width: 6),
-                const Expanded(
+                Expanded(
                   child: Text(
                     'Data no passado. Selecione uma data futura.',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.error),
                   ),
                 ),
               ],
@@ -297,7 +298,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
               content: Text(
                 'Lembrete agendado para ${_formatDateTime(reminderTime)}',
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.success,
             ),
           );
           widget.onReminderSet?.call();
@@ -305,7 +306,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Erro ao agendar lembrete'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -313,7 +314,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erro: $e'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -340,14 +341,14 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Alerta de prazo agendado'),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.success,
             ),
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Erro ao agendar alerta de prazo'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -355,7 +356,7 @@ class _TaskReminderWidgetState extends ConsumerState<TaskReminderWidget> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erro: $e'), backgroundColor: AppColors.error),
         );
       }
     }

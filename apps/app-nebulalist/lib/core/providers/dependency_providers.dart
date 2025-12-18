@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:core/src/services/optimized_analytics_wrapper.dart';
 
 import '../../features/items/data/datasources/item_master_local_datasource.dart';
 import '../../features/items/data/datasources/item_master_remote_datasource.dart';
@@ -29,10 +28,17 @@ import '../../features/lists/domain/usecases/delete_list_usecase.dart';
 import '../../features/lists/domain/usecases/get_lists_usecase.dart';
 import '../../features/lists/domain/usecases/update_list_usecase.dart';
 import '../auth/auth_state_notifier.dart';
+import '../../features/items/data/adapters/item_master_drift_sync_adapter.dart';
+import '../../features/items/data/adapters/list_item_drift_sync_adapter.dart';
+import '../../features/lists/data/adapters/list_drift_sync_adapter.dart';
 import '../services/analytics_service.dart';
+import '../services/background_sync_service.dart';
+import '../services/nebulalist_sync_service.dart';
 import '../services/notification_service.dart';
 import '../services/share_service.dart';
 import '../sync/basic_sync_service.dart';
+import '../sync/nebulalist_sync_queue_service.dart';
+import 'database_providers.dart';
 
 // =============================================================================
 // THIRD-PARTY PROVIDERS
@@ -58,6 +64,11 @@ final authStateNotifierProvider = Provider<AuthStateNotifier>((ref) {
   return AuthStateNotifier.instance;
 });
 
+/// IAuthRepository from FirebaseAuthService (core package)
+final authRepositoryProvider = Provider<IAuthRepository>((ref) {
+  return FirebaseAuthService();
+});
+
 // =============================================================================
 // CORE SERVICES PROVIDERS
 // =============================================================================
@@ -78,9 +89,70 @@ final notificationRepositoryProvider =
   return EnhancedNotificationService();
 });
 
-/// BasicSyncService for manual sync operations
+/// BasicSyncService for manual sync operations (legacy - will be replaced)
 final basicSyncServiceProvider = Provider<BasicSyncService>((ref) {
   return BasicSyncService.instance;
+});
+
+/// NebulalistSyncQueueService for offline sync queue management
+final syncQueueServiceProvider = Provider<NebulalistSyncQueueService>((ref) {
+  final db = ref.watch(nebulalistDatabaseProvider);
+  return NebulalistSyncQueueService(db.syncQueueDao);
+});
+
+// =============================================================================
+// SYNC ADAPTERS
+// =============================================================================
+
+/// ListDriftSyncAdapter for Lists sync (push + pull)
+final listSyncAdapterProvider = Provider<ListDriftSyncAdapter>((ref) {
+  return ListDriftSyncAdapter(
+    localDataSource: ref.watch(listLocalDataSourceProvider),
+    remoteDataSource: ref.watch(listRemoteDataSourceProvider),
+  );
+});
+
+/// ItemMasterDriftSyncAdapter for ItemMasters sync (push + pull)
+final itemMasterSyncAdapterProvider =
+    Provider<ItemMasterDriftSyncAdapter>((ref) {
+  return ItemMasterDriftSyncAdapter(
+    localDataSource: ref.watch(itemMasterLocalDataSourceProvider),
+    remoteDataSource: ref.watch(itemMasterRemoteDataSourceProvider),
+  );
+});
+
+/// ListItemDriftSyncAdapter for ListItems sync (push + pull)
+final listItemSyncAdapterProvider = Provider<ListItemDriftSyncAdapter>((ref) {
+  return ListItemDriftSyncAdapter(
+    localDataSource: ref.watch(listItemLocalDataSourceProvider),
+    remoteDataSource: ref.watch(listItemRemoteDataSourceProvider),
+  );
+});
+
+/// NebulalistSyncService - implements ISyncService
+/// Main sync orchestrator for Lists, ItemMasters, and ListItems
+final nebulalistSyncServiceProvider = Provider<NebulalistSyncService>((ref) {
+  return NebulalistSyncService(
+    listRepository: ref.watch(listRepositoryProvider) as ListRepository,
+    itemMasterRepository:
+        ref.watch(itemMasterRepositoryProvider) as ItemMasterRepository,
+    listItemRepository:
+        ref.watch(listItemRepositoryProvider) as ListItemRepository,
+    authRepository: ref.watch(authRepositoryProvider),
+    listSyncAdapter: ref.watch(listSyncAdapterProvider),
+    itemMasterSyncAdapter: ref.watch(itemMasterSyncAdapterProvider),
+    listItemSyncAdapter: ref.watch(listItemSyncAdapterProvider),
+  );
+});
+
+/// BackgroundSyncService for periodic auto-sync
+/// Runs sync every 15 minutes when app is active
+final backgroundSyncServiceProvider = Provider<BackgroundSyncService>((ref) {
+  final syncService = ref.watch(nebulalistSyncServiceProvider);
+  return BackgroundSyncService(
+    syncService: syncService,
+    intervalMinutes: 15, // Sync every 15 minutes
+  );
 });
 
 // =============================================================================
@@ -103,12 +175,13 @@ final appNotificationServiceProvider = Provider<NotificationService>((ref) {
 });
 
 // =============================================================================
-// LISTS FEATURE - DATA SOURCES
+// LISTS FEATURE - DATA SOURCES (DRIFT)
 // =============================================================================
 
-/// Local data source for lists
+/// Local data source for lists (using Drift)
 final listLocalDataSourceProvider = Provider<IListLocalDataSource>((ref) {
-  return ListLocalDataSourceImpl();
+  final db = ref.watch(nebulalistDatabaseProvider);
+  return ListLocalDataSourceImpl(db);
 });
 
 /// Remote data source for lists
@@ -126,6 +199,7 @@ final listRepositoryProvider = Provider<IListRepository>((ref) {
     ref.watch(listLocalDataSourceProvider),
     ref.watch(listRemoteDataSourceProvider),
     ref.watch(authStateNotifierProvider),
+    ref.watch(syncQueueServiceProvider),
   );
 });
 
@@ -159,13 +233,14 @@ final checkListLimitUseCaseProvider = Provider<CheckListLimitUseCase>((ref) {
 });
 
 // =============================================================================
-// ITEMS FEATURE - DATA SOURCES
+// ITEMS FEATURE - DATA SOURCES (DRIFT)
 // =============================================================================
 
-/// Local data source for item masters
+/// Local data source for item masters (using Drift)
 final itemMasterLocalDataSourceProvider =
     Provider<ItemMasterLocalDataSource>((ref) {
-  return ItemMasterLocalDataSource();
+  final db = ref.watch(nebulalistDatabaseProvider);
+  return ItemMasterLocalDataSource(db);
 });
 
 /// Remote data source for item masters
@@ -174,10 +249,11 @@ final itemMasterRemoteDataSourceProvider =
   return ItemMasterRemoteDataSource(ref.watch(firestoreProvider));
 });
 
-/// Local data source for list items
+/// Local data source for list items (using Drift)
 final listItemLocalDataSourceProvider =
     Provider<ListItemLocalDataSource>((ref) {
-  return ListItemLocalDataSource();
+  final db = ref.watch(nebulalistDatabaseProvider);
+  return ListItemLocalDataSource(db);
 });
 
 /// Remote data source for list items
@@ -196,6 +272,7 @@ final itemMasterRepositoryProvider = Provider<IItemMasterRepository>((ref) {
     ref.watch(itemMasterLocalDataSourceProvider),
     ref.watch(itemMasterRemoteDataSourceProvider),
     ref.watch(authStateNotifierProvider),
+    ref.watch(syncQueueServiceProvider),
   );
 });
 
@@ -206,6 +283,7 @@ final listItemRepositoryProvider = Provider<IListItemRepository>((ref) {
     ref.watch(listItemRemoteDataSourceProvider),
     ref.watch(listRepositoryProvider),
     ref.watch(authStateNotifierProvider),
+    ref.watch(syncQueueServiceProvider),
   );
 });
 

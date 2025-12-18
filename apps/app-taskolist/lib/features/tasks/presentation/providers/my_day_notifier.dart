@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/services/analytics_service.dart';
 import '../../domain/add_task_to_my_day.dart';
 import '../../domain/clear_my_day.dart';
 import '../../domain/get_my_day_suggestions.dart';
@@ -25,7 +26,7 @@ class MyDayNotifier extends _$MyDayNotifier {
     );
   }
 
-  Future<void> addTask(String taskId) async {
+  Future<void> addTask(String taskId, {String source = 'manual'}) async {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
@@ -38,6 +39,10 @@ class MyDayNotifier extends _$MyDayNotifier {
       return result.fold(
         (failure) => throw Exception(failure.message),
         (_) async {
+          // Log analytics
+          final analytics = ref.read(analyticsServiceProvider);
+          await analytics.logMyDayTaskAdded(taskId: taskId, source: source);
+
           // Recarrega a lista
           final getMyDayTasks = ref.read(getMyDayTasksProvider);
           final tasksResult = await getMyDayTasks(
@@ -65,6 +70,10 @@ class MyDayNotifier extends _$MyDayNotifier {
       return result.fold(
         (failure) => throw Exception(failure.message),
         (_) {
+          // Log analytics
+          final analytics = ref.read(analyticsServiceProvider);
+          analytics.logMyDayTaskRemoved(taskId: taskId);
+
           final currentTasks = state.value ?? [];
           return currentTasks.where((t) => t.taskId != taskId).toList();
         },
@@ -77,12 +86,20 @@ class MyDayNotifier extends _$MyDayNotifier {
 
     state = await AsyncValue.guard(() async {
       final userId = state.value?.firstOrNull?.userId ?? '';
+      final taskCount = state.value?.length ?? 0;
+      
       final clearMyDay = ref.read(clearMyDayProvider);
       final result = await clearMyDay(ClearMyDayParams(userId: userId));
 
       return result.fold(
         (failure) => throw Exception(failure.message),
-        (_) => <MyDayTaskEntity>[],
+        (_) {
+          // Log analytics
+          final analytics = ref.read(analyticsServiceProvider);
+          analytics.logMyDayCleared(taskCount: taskCount);
+
+          return <MyDayTaskEntity>[];
+        },
       );
     });
   }
@@ -94,6 +111,10 @@ class MyDayNotifier extends _$MyDayNotifier {
       final userId = state.value?.firstOrNull?.userId ?? '';
       final getMyDayTasks = ref.read(getMyDayTasksProvider);
       final result = await getMyDayTasks(GetMyDayTasksParams(userId: userId));
+
+      // Log analytics
+      final analytics = ref.read(analyticsServiceProvider);
+      await analytics.logMyDayRefreshed();
 
       return result.fold(
         (failure) => throw Exception(failure.message),

@@ -15,7 +15,7 @@ class AddItemToListUseCase {
   );
 
   /// Adds a ListItem to a list and increments ItemMaster usage count
-  /// Returns Either<Failure, ListItemEntity>
+  /// Returns `Either<Failure, ListItemEntity>`
   ///
   /// Validations:
   /// - Quantity: 0-50 characters if provided

@@ -25,10 +25,7 @@ class ShareService {
       itemNames: itemNames,
     );
 
-    await Share.share(
-      text,
-      subject: '📋 Lista: $listName - NebulaList',
-    );
+    await Share.share(text);
   }
 
   /// Share a single item details
@@ -53,10 +50,7 @@ class ShareService {
       preferredBrand: preferredBrand,
     );
 
-    await Share.share(
-      text,
-      subject: '📦 Item: $itemName - NebulaList',
-    );
+    await Share.share(text);
   }
 
   /// Share multiple lists summary
@@ -74,10 +68,7 @@ class ShareService {
     buffer.writeln('---');
     buffer.writeln('Compartilhado via NebulaList');
 
-    await Share.share(
-      buffer.toString(),
-      subject: '📊 Meu Resumo - NebulaList',
-    );
+    await Share.share(buffer.toString());
   }
 
   /// Build formatted text for list sharing

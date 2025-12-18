@@ -244,7 +244,7 @@ class _CreateItemMasterDialogState
                     ? 'Alterações serão salvas automaticamente'
                     : 'Este item ficará disponível no seu banco para reutilizar',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
             ],

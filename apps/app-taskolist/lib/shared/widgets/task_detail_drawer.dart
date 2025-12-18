@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../core/theme/app_colors.dart';
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_notifier.dart';
 import 'notes_expansion_dialog.dart';
@@ -203,13 +204,13 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
     return Container(
       width: MediaQuery.of(context).size.width * 0.85,
       height: double.infinity,
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black26,
+            color: AppColors.shadow,
             blurRadius: 10,
-            offset: Offset(-5, 0),
+            offset: const Offset(-5, 0),
           ),
         ],
       ),
@@ -223,8 +224,8 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                 Expanded(
                   child: Text(
                     _isEditing ? 'Editar Tarefa' : 'Detalhes da Tarefa',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -232,25 +233,25 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                 ),
                 if (!_isEditing) ...[
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white),
+                    icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () => setState(() => _isEditing = true),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.white),
+                    icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: _isLoading ? null : _deleteTask,
                   ),
                 ] else ...[
                   IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
+                    icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () => setState(() => _isEditing = false),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.check, color: Colors.white),
+                    icon: Icon(Icons.check, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: _isLoading ? null : _saveChanges,
                   ),
                 ],
                 IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
+                  icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
                   onPressed: widget.onClose,
                 ),
               ],
@@ -327,7 +328,7 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
                                               ? const OutlineInputBorder()
                                               : InputBorder.none,
                                       filled: !_isEditing,
-                                      fillColor: Colors.grey[100],
+                                      fillColor: Theme.of(context).colorScheme.surfaceContainerHighest.withAlpha(128),
                                     ),
                                   ),
                                 ],

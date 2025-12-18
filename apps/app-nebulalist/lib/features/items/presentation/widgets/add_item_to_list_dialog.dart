@@ -124,7 +124,7 @@ class _AddItemToListDialogState extends ConsumerState<AddItemToListDialog> {
                                 ? Icons.inventory_2_outlined
                                 : Icons.search_off,
                             size: 80,
-                            color: theme.colorScheme.primary.withOpacity(0.3),
+                            color: theme.colorScheme.primary.withValues(alpha: 0.3),
                           ),
                           const SizedBox(height: 16),
                           Text(
@@ -142,7 +142,7 @@ class _AddItemToListDialogState extends ConsumerState<AddItemToListDialog> {
                                 : 'Tente ajustar a busca',
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color:
-                                  theme.colorScheme.onSurface.withOpacity(0.7),
+                                  theme.colorScheme.onSurface.withValues(alpha: 0.7),
                             ),
                           ),
                         ],
@@ -242,7 +242,7 @@ class _AddItemToListDialogState extends ConsumerState<AddItemToListDialog> {
           children: [
             // Selected item info
             Card(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.3),
+              color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Row(

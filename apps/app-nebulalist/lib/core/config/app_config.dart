@@ -8,16 +8,19 @@ class AppConfig {
   static const String appVersion = '1.0.0';
   static const String packageName = 'br.com.agrimind.nebulalist';
 
-  // Firebase Configuration
-  static const String firebaseProjectId = 'YOUR_FIREBASE_PROJECT_ID'; // TODO: Update
-  static const String firebaseStorageBucket = 'YOUR_BUCKET.appspot.com'; // TODO: Update
+  // Firebase Configuration (configure in google-services.json)
+  static const String firebaseProjectId = 'nebulalist-project';
+  static const String firebaseStorageBucket = 'nebulalist.appspot.com';
 
   // Firestore Collections
   static const String usersCollection = 'users';
-  static const String examplesCollection = 'examples'; // TODO: Update with your collections
+  static const String listsCollection = 'lists';
+  static const String itemMastersCollection = 'item_masters';
+  static const String listItemsCollection = 'list_items';
 
-  // Hive Boxes
-  static const String exampleBoxName = 'examples'; // TODO: Update with your boxes
+  // Drift Database Configuration
+  static const String databaseName = 'nebulalist_drift.db';
+  static const int databaseVersion = 2;
 
   // Feature Flags
   static const bool enableAnalytics = true;

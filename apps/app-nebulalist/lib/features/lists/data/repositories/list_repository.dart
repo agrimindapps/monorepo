@@ -1,7 +1,7 @@
 import 'package:core/core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/sync/nebulalist_sync_queue_service.dart';
 import '../../domain/entities/list_entity.dart';
 import '../../domain/repositories/i_list_repository.dart';
 import '../datasources/list_local_datasource.dart';
@@ -9,11 +9,13 @@ import '../datasources/list_remote_datasource.dart';
 import '../models/list_model.dart';
 
 /// Repository implementation for Lists
-/// Implements offline-first pattern: local storage is primary, remote is backup
+/// Offline-first: Drift is primary, Firestore synced via queue
 class ListRepository implements IListRepository {
   final IListLocalDataSource _localDataSource;
-  final IListRemoteDataSource _remoteDataSource;
+  // ignore: unused_field
+  final IListRemoteDataSource _remoteDataSource; // For future sync features
   final AuthStateNotifier _authNotifier;
+  final NebulalistSyncQueueService _syncQueueService;
 
   // Free tier limit
   static const int _freeListsLimit = 10;
@@ -22,6 +24,7 @@ class ListRepository implements IListRepository {
     this._localDataSource,
     this._remoteDataSource,
     this._authNotifier,
+    this._syncQueueService,
   );
 
   String get _currentUserId {
@@ -100,13 +103,13 @@ class ListRepository implements IListRepository {
       // Save locally (primary)
       await _localDataSource.saveList(model);
 
-      // Try to sync remotely (best effort, don't fail if offline)
-      try {
-        await _remoteDataSource.saveList(model);
-      } catch (e) {
-        // Ignore remote errors (will sync later)
-        debugPrint('Remote save failed, will sync later: $e');
-      }
+      // Enqueue for reliable sync (replaces best-effort try-catch)
+      await _syncQueueService.enqueue(
+        modelType: 'List',
+        modelId: listId,
+        operation: 'create',
+        data: model.toJson(),
+      );
 
       return Right(model.toEntity());
     } on CacheException catch (e) {
@@ -143,12 +146,13 @@ class ListRepository implements IListRepository {
       // Save locally (primary)
       await _localDataSource.saveList(model);
 
-      // Try to sync remotely (best effort)
-      try {
-        await _remoteDataSource.saveList(model);
-      } catch (e) {
-        debugPrint('Remote save failed, will sync later: $e');
-      }
+      // Enqueue for reliable sync (replaces best-effort try-catch)
+      await _syncQueueService.enqueue(
+        modelType: 'List',
+        modelId: list.id,
+        operation: 'update',
+        data: model.toJson(),
+      );
 
       return Right(model.toEntity());
     } on CacheException catch (e) {
@@ -177,12 +181,13 @@ class ListRepository implements IListRepository {
       // Delete locally (primary)
       await _localDataSource.deleteList(id);
 
-      // Try to delete remotely (best effort)
-      try {
-        await _remoteDataSource.deleteList(id);
-      } catch (e) {
-        debugPrint('Remote delete failed, will sync later: $e');
-      }
+      // Enqueue for reliable sync (replaces best-effort try-catch)
+      await _syncQueueService.enqueue(
+        modelType: 'List',
+        modelId: id,
+        operation: 'delete',
+        data: {'id': id}, // Minimal data for delete operation
+      );
 
       return const Right(null);
     } on CacheException catch (e) {
@@ -220,12 +225,13 @@ class ListRepository implements IListRepository {
 
       await _localDataSource.saveList(archived);
 
-      // Try to sync remotely
-      try {
-        await _remoteDataSource.saveList(archived);
-      } catch (e) {
-        debugPrint('Remote save failed, will sync later: $e');
-      }
+      // Enqueue for reliable sync (replaces best-effort try-catch)
+      await _syncQueueService.enqueue(
+        modelType: 'List',
+        modelId: id,
+        operation: 'update',
+        data: archived.toJson(),
+      );
 
       return const Right(null);
     } on CacheException catch (e) {
@@ -262,12 +268,13 @@ class ListRepository implements IListRepository {
 
       await _localDataSource.saveList(restored);
 
-      // Try to sync remotely
-      try {
-        await _remoteDataSource.saveList(restored);
-      } catch (e) {
-        debugPrint('Remote save failed, will sync later: $e');
-      }
+      // Enqueue for reliable sync (replaces best-effort try-catch)
+      await _syncQueueService.enqueue(
+        modelType: 'List',
+        modelId: id,
+        operation: 'update',
+        data: restored.toJson(),
+      );
 
       return const Right(null);
     } on CacheException catch (e) {

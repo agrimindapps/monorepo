@@ -5,6 +5,7 @@ import '../../domain/delete_task.dart';
 import '../../domain/get_subtasks.dart';
 import '../../domain/get_tasks.dart';
 import '../../domain/reorder_tasks.dart';
+import '../../domain/subtask_progress.dart';
 import '../../domain/task_entity.dart';
 import '../../domain/update_task.dart';
 import '../../domain/watch_tasks.dart';
@@ -335,4 +336,15 @@ Future<List<TaskEntity>> subtasks(Ref ref, String parentTaskId) async {
     (failure) => throw Exception(failure.message),
     (subtasks) => subtasks,
   );
+}
+
+/// Provider para obter progresso de subtarefas
+@riverpod
+Future<SubtaskProgress> subtaskProgress(Ref ref, String parentTaskId) async {
+  final subtasks = await ref.watch(subtasksProvider(parentTaskId).future);
+
+  final total = subtasks.length;
+  final completed = subtasks.where((s) => s.isCompleted).length;
+
+  return SubtaskProgress(total: total, completed: completed);
 }

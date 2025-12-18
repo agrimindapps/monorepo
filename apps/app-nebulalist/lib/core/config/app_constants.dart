@@ -8,8 +8,6 @@ class AppConstants {
   static const String loginRoute = '/login';
   static const String signUpRoute = '/signup';
   static const String forgotPasswordRoute = '/forgot-password';
-  static const String exampleRoute = '/example';
-  static const String exampleDetailRoute = '/example/:id';
   static const String settingsRoute = '/settings';
   static const String settingsPageRoute = '/settings-page';
   static const String profileRoute = '/profile';
@@ -17,13 +15,11 @@ class AppConstants {
   static const String promoRoute = '/promo';
   static const String premiumRoute = '/premium';
   static const String listDetailRoute = '/list/:id';
-  // TODO: Add your routes here
 
   // Asset Paths
   static const String imagesPath = 'assets/images/';
   static const String iconsPath = 'assets/icons/';
   static const String logoPath = '${imagesPath}logo.png';
-  // TODO: Add your asset paths here
 
   // Error Messages
   static const String genericError = 'Ocorreu um erro. Tente novamente.';

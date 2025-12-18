@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/list_item_entity.dart' as entities;
 
 /// Data model for ListItem
-/// Provides serialization for Hive and Firestore
+/// Provides serialization for Drift and Firestore
 class ListItemModel {
   final String id;
   final String listId;

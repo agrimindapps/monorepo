@@ -7,6 +7,7 @@ import '../../features/task_lists/presentation/create_edit_task_list_page.dart';
 import '../../features/task_lists/providers/task_list_providers.dart';
 import '../../features/tasks/domain/task_list_entity.dart';
 import '../../features/tasks/presentation/pages/my_day_page.dart';
+import '../../features/tasks/presentation/providers/my_day_notifier.dart';
 import '../constants/task_list_colors.dart';
 import '../providers/auth_providers.dart';
 
@@ -98,22 +99,7 @@ class ModernDrawer extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                _buildMenuItem(
-                  context,
-                  icon: Icons.wb_sunny_rounded,
-                  title: 'Meu Dia',
-                  subtitle: 'Tarefas de hoje',
-                  iconColor: Colors.blue,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<dynamic>(
-                        builder: (context) => const MyDayPage(),
-                      ),
-                    );
-                  },
-                ),
+                _buildMyDayMenuItem(context, ref, user?.id ?? 'anonymous'),
 
                 _buildMenuItem(
                   context,
@@ -235,6 +221,82 @@ class ModernDrawer extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMyDayMenuItem(BuildContext context, WidgetRef ref, String userId) {
+    final myDayTasksAsync = ref.watch(myDayStreamProvider(userId));
+
+    return myDayTasksAsync.when(
+      data: (tasks) {
+        final count = tasks.length;
+        
+        return _buildMenuItem(
+          context,
+          icon: Icons.wb_sunny_rounded,
+          title: 'Meu Dia',
+          subtitle: count > 0 ? '$count ${count == 1 ? 'tarefa' : 'tarefas'}' : 'Tarefas de hoje',
+          iconColor: Colors.blue,
+          trailing: count > 0
+              ? Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    count.toString(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : null,
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute<dynamic>(
+                builder: (context) => const MyDayPage(),
+              ),
+            );
+          },
+        );
+      },
+      loading: () => _buildMenuItem(
+        context,
+        icon: Icons.wb_sunny_rounded,
+        title: 'Meu Dia',
+        subtitle: 'Carregando...',
+        iconColor: Colors.blue,
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute<dynamic>(
+              builder: (context) => const MyDayPage(),
+            ),
+          );
+        },
+      ),
+      error: (_, __) => _buildMenuItem(
+        context,
+        icon: Icons.wb_sunny_rounded,
+        title: 'Meu Dia',
+        subtitle: 'Tarefas de hoje',
+        iconColor: Colors.blue,
+        onTap: () {
+          Navigator.pop(context);
+          Navigator.push(
+            context,
+            MaterialPageRoute<dynamic>(
+              builder: (context) => const MyDayPage(),
+            ),
+          );
+        },
       ),
     );
   }

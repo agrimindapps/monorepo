@@ -37,7 +37,7 @@ class ListCard extends StatelessWidget {
             // Header with favorite icon
             Container(
               padding: const EdgeInsets.all(12),
-              color: colorScheme.primaryContainer.withOpacity(0.3),
+              color: colorScheme.primaryContainer.withValues(alpha: 0.3),
               child: Row(
                 children: [
                   Expanded(

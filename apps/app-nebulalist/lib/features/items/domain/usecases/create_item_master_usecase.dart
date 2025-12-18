@@ -10,7 +10,7 @@ class CreateItemMasterUseCase {
   CreateItemMasterUseCase(this._repository);
 
   /// Creates a new ItemMaster with validations
-  /// Returns Either<Failure, ItemMasterEntity>
+  /// Returns `Either<Failure, ItemMasterEntity>`
   ///
   /// Validations:
   /// - Name: 1-200 characters, not just spaces

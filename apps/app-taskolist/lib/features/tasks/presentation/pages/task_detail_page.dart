@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/services/navigation_service.dart';
 import '../../../../shared/widgets/subtask_list_widget.dart';
+import '../../../../shared/widgets/task_reminder_widget.dart';
 import '../../domain/task_entity.dart';
 import '../providers/task_notifier.dart';
+import '../widgets/subtask_progress_indicator.dart';
 
 class TaskDetailPage extends ConsumerStatefulWidget {
   final TaskEntity task;
@@ -393,6 +395,15 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 24),
+                    // Seção de Lembretes
+                    TaskReminderWidget(
+                      task: widget.task,
+                      onReminderSet: () {
+                        // Refresh se necessário
+                      },
+                    ),
+                    const SizedBox(height: 24),
+                    SubtaskProgressHeader(taskId: widget.task.id),
                     SubtaskListWidget(parentTaskId: widget.task.id),
                   ],
                 ),

@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../database/nebulalist_database.dart';
 import '../database/repositories/list_repository.dart';
 import '../database/repositories/item_repository.dart';
+import '../database/repositories/item_master_repository.dart';
 
 part 'database_providers.g.dart';
 
@@ -44,4 +45,12 @@ ListRepository listRepository(Ref ref) {
 ItemRepository itemRepository(Ref ref) {
   final db = ref.watch(nebulalistDatabaseProvider);
   return ItemRepository(db);
+}
+
+/// Provider do ItemMasterDriftRepository
+/// NOTE: Currently used only by DAOs, not by feature layer
+@riverpod
+ItemMasterDriftRepository itemMasterDriftRepository(Ref ref) {
+  final db = ref.watch(nebulalistDatabaseProvider);
+  return ItemMasterDriftRepository(db);
 }

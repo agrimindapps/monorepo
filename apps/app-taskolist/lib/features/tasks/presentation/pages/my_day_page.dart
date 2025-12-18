@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/services/analytics_service.dart';
 import '../../../../shared/providers/auth_providers.dart';
 import '../../domain/my_day_task_entity.dart';
 import '../../domain/task_entity.dart';
@@ -148,24 +150,31 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
     List<MyDayTaskEntity> myDayTasks,
     String userId,
   ) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: myDayTasks.length + 1,
-      itemBuilder: (context, index) {
-        if (index == myDayTasks.length) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: TextButton.icon(
-              onPressed: () => _showAddTaskDialog(context, userId),
-              icon: const Icon(Icons.add),
-              label: const Text('Adicionar tarefa'),
-            ),
-          );
-        }
-
-        final myDayTask = myDayTasks[index];
-        return _buildTaskCard(context, myDayTask, userId);
+    return RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(myDayStreamProvider(userId));
+        // Aguardar um pouco para dar feedback visual
+        await Future<void>.delayed(const Duration(milliseconds: 500));
       },
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: myDayTasks.length + 1,
+        itemBuilder: (context, index) {
+          if (index == myDayTasks.length) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: TextButton.icon(
+                onPressed: () => _showAddTaskDialog(context, userId),
+                icon: const Icon(Icons.add),
+                label: const Text('Adicionar tarefa'),
+              ),
+            );
+          }
+
+          final myDayTask = myDayTasks[index];
+          return _buildTaskCard(context, myDayTask, userId);
+        },
+      ),
     );
   }
 
@@ -182,84 +191,114 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
           return const SizedBox.shrink(); // Task não encontrada
         }
 
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: Checkbox(
-              value: task.status == TaskStatus.completed,
-              shape: const CircleBorder(),
-              onChanged: (value) async {
-                final newStatus = value == true 
-                    ? TaskStatus.completed 
-                    : TaskStatus.pending;
-                final updatedTask = task.copyWith(
-                  status: newStatus,
-                  updatedAt: DateTime.now(),
-                );
-                await ref.read(taskProvider.notifier).updateTask(updatedTask);
-              },
+        return Dismissible(
+          key: Key(myDayTask.taskId),
+          direction: DismissDirection.endToStart,
+          background: Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.only(right: 20),
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.red,
+              borderRadius: BorderRadius.circular(12),
             ),
-            title: Text(
-              task.title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                decoration: task.status == TaskStatus.completed
-                    ? TextDecoration.lineThrough
-                    : null,
+            child: const Icon(Icons.delete, color: Colors.white),
+          ),
+          onDismissed: (direction) async {
+            await ref
+                .read(myDayProvider(userId).notifier)
+                .removeTask(myDayTask.taskId);
+            HapticFeedback.mediumImpact();
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Removida do Meu Dia'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+          child: Card(
+            margin: const EdgeInsets.only(bottom: 12),
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              leading: Checkbox(
+                value: task.status == TaskStatus.completed,
+                shape: const CircleBorder(),
+                onChanged: (value) async {
+                  HapticFeedback.lightImpact();
+                  final newStatus = value == true 
+                      ? TaskStatus.completed 
+                      : TaskStatus.pending;
+                  final updatedTask = task.copyWith(
+                    status: newStatus,
+                    updatedAt: DateTime.now(),
+                  );
+                  await ref.read(taskProvider.notifier).updateTask(updatedTask);
+                },
               ),
-            ),
-            subtitle: task.description != null && task.description!.isNotEmpty
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      task.description!,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
+              title: Text(
+                task.title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  decoration: task.status == TaskStatus.completed
+                      ? TextDecoration.lineThrough
+                      : null,
+                ),
+              ),
+              subtitle: task.description != null && task.description!.isNotEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        task.description!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Row(
+                        children: [
+                          Icon(Icons.wb_sunny, size: 14, color: Colors.orange[300]),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Adicionada: ${_formatTime(myDayTask.addedAt)}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Row(
-                      children: [
-                        Icon(Icons.wb_sunny, size: 14, color: Colors.orange[300]),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Adicionada: ${_formatTime(myDayTask.addedAt)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-            trailing: IconButton(
-              icon: const Icon(Icons.close, size: 20),
-              onPressed: () async {
-                await ref
-                    .read(myDayProvider(userId).notifier)
-                    .removeTask(myDayTask.taskId);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Removida do Meu Dia'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
+              trailing: IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                onPressed: () async {
+                  await ref
+                      .read(myDayProvider(userId).notifier)
+                      .removeTask(myDayTask.taskId);
+                  HapticFeedback.mediumImpact();
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Removida do Meu Dia'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+              ),
+              onTap: () {
+                // TODO: Abrir detalhes da tarefa
               },
             ),
-            onTap: () {
-              // TODO: Abrir detalhes da tarefa
-            },
           ),
         );
       },
@@ -291,6 +330,15 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
 
   Widget _buildSuggestionsView(BuildContext context, String userId) {
     final suggestionsAsync = ref.watch(myDaySuggestionsProvider(userId));
+
+    // Log analytics quando visualizar sugestões
+    suggestionsAsync.whenData((suggestions) {
+      if (suggestions.isNotEmpty) {
+        ref.read(analyticsServiceProvider).logMyDaySuggestionsViewed(
+          suggestionCount: suggestions.length,
+        );
+      }
+    });
 
     return suggestionsAsync.when(
       data: (suggestions) {
@@ -360,7 +408,7 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
                         onPressed: () async {
                           await ref
                               .read(myDayProvider(userId).notifier)
-                              .addTask(task.id);
+                              .addTask(task.id, source: 'suggestion');
                           setState(() => _showSuggestions = false);
                         },
                       ),

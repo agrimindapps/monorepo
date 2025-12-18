@@ -71,7 +71,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 filled: true,
-                fillColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                fillColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               ),
               onChanged: (value) {
                 setState(() {
@@ -143,7 +143,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                             Icon(
                               Icons.search_off,
                               size: 80,
-                              color: theme.colorScheme.primary.withOpacity(0.3),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.3),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -157,7 +157,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                               'Tente ajustar os filtros',
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color:
-                                    theme.colorScheme.onSurface.withOpacity(0.7),
+                                    theme.colorScheme.onSurface.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -220,7 +220,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                         error.toString(),
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withOpacity(0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(height: 24),
@@ -369,7 +369,7 @@ class _ItemsBankPageState extends ConsumerState<ItemsBankPage> {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.onSurfaceVariant.withOpacity(0.4),
+                      color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),

@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/sync/nebulalist_sync_queue_service.dart';
 import '../../../lists/domain/repositories/i_list_repository.dart';
 import '../../domain/entities/list_item_entity.dart';
 import '../../domain/repositories/i_list_item_repository.dart';
@@ -9,19 +10,22 @@ import '../datasources/list_item_remote_datasource.dart';
 import '../models/list_item_model.dart';
 
 /// Implementation of ListItem repository
-/// Offline-first: Hive is primary, Firestore is optional sync
+/// Offline-first: Drift is primary, Firestore synced via queue
 /// Updates list counts when items change
 class ListItemRepository implements IListItemRepository {
   final ListItemLocalDataSource _localDataSource;
-  final ListItemRemoteDataSource _remoteDataSource;
+  // ignore: unused_field
+  final ListItemRemoteDataSource _remoteDataSource; // For future sync features
   final IListRepository _listRepository;
   final AuthStateNotifier _authNotifier;
+  final NebulalistSyncQueueService _syncQueueService;
 
   ListItemRepository(
     this._localDataSource,
     this._remoteDataSource,
     this._listRepository,
     this._authNotifier,
+    this._syncQueueService,
   );
 
   String? get _currentUserId => _authNotifier.userId;
@@ -31,7 +35,7 @@ class ListItemRepository implements IListItemRepository {
     String listId,
   ) async {
     try {
-      final models = _localDataSource.getListItems(listId);
+      final models = await _localDataSource.getListItems(listId);
       final entities = models.map((m) => m.toEntity()).toList();
 
       return Right(entities);
@@ -43,7 +47,7 @@ class ListItemRepository implements IListItemRepository {
   @override
   Future<Either<Failure, ListItemEntity>> getListItemById(String id) async {
     try {
-      final model = _localDataSource.getListItemById(id);
+      final model = await _localDataSource.getListItemById(id);
 
       if (model == null) {
         return const Left(NotFoundFailure('Item não encontrado'));
@@ -67,9 +71,10 @@ class ListItemRepository implements IListItemRepository {
       }
 
       // Get next order number
-      final existingItems = _localDataSource.getListItems(item.listId);
-      final maxOrder =
-          existingItems.isEmpty ? 0 : existingItems.map((i) => i.order).reduce((a, b) => a > b ? a : b);
+      final existingItems = await _localDataSource.getListItems(item.listId);
+      final maxOrder = existingItems.isEmpty
+          ? 0
+          : existingItems.map((i) => i.order).reduce((a, b) => a > b ? a : b);
 
       // Create with generated ID and order
       final newItem = ListItemEntity(
@@ -94,8 +99,13 @@ class ListItemRepository implements IListItemRepository {
       // Update list item count
       await _updateListCounts(item.listId);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.saveListItem(model).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ListItem',
+        modelId: newItem.id,
+        operation: 'create',
+        data: model.toJson(),
+      );
 
       return Right(newItem);
     } catch (e) {
@@ -116,8 +126,13 @@ class ListItemRepository implements IListItemRepository {
       // Update list counts (in case completion status changed)
       await _updateListCounts(item.listId);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.saveListItem(model).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ListItem',
+        modelId: item.id,
+        operation: 'update',
+        data: model.toJson(),
+      );
 
       return Right(item);
     } catch (e) {
@@ -129,7 +144,7 @@ class ListItemRepository implements IListItemRepository {
   Future<Either<Failure, void>> removeItemFromList(String id) async {
     try {
       // Get item to know which list to update
-      final model = _localDataSource.getListItemById(id);
+      final model = await _localDataSource.getListItemById(id);
       if (model == null) {
         return const Left(NotFoundFailure('Item não encontrado'));
       }
@@ -142,8 +157,13 @@ class ListItemRepository implements IListItemRepository {
       // Update list item count
       await _updateListCounts(listId);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.deleteListItem(id).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ListItem',
+        modelId: id,
+        operation: 'delete',
+        data: {'id': id}, // Minimal data for delete operation
+      );
 
       return const Right(null);
     } catch (e) {
@@ -156,7 +176,7 @@ class ListItemRepository implements IListItemRepository {
     String id,
   ) async {
     try {
-      final model = _localDataSource.getListItemById(id);
+      final model = await _localDataSource.getListItemById(id);
 
       if (model == null) {
         return const Left(NotFoundFailure('Item não encontrado'));
@@ -185,8 +205,13 @@ class ListItemRepository implements IListItemRepository {
       // Update list counts
       await _updateListCounts(model.listId);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.saveListItem(updated).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ListItem',
+        modelId: updated.id,
+        operation: 'update',
+        data: updated.toJson(),
+      );
 
       return Right(updated.toEntity());
     } catch (e) {
@@ -199,7 +224,7 @@ class ListItemRepository implements IListItemRepository {
   @override
   Future<Either<Failure, int>> getListItemsCount(String listId) async {
     try {
-      final count = _localDataSource.getListItemsCount(listId);
+      final count = await _localDataSource.getListItemsCount(listId);
       return Right(count);
     } catch (e) {
       return Left(CacheFailure('Erro ao contar itens: ${e.toString()}'));
@@ -209,7 +234,7 @@ class ListItemRepository implements IListItemRepository {
   @override
   Future<Either<Failure, int>> getCompletedItemsCount(String listId) async {
     try {
-      final count = _localDataSource.getCompletedItemsCount(listId);
+      final count = await _localDataSource.getCompletedItemsCount(listId);
       return Right(count);
     } catch (e) {
       return Left(CacheFailure('Erro ao contar itens: ${e.toString()}'));
@@ -238,7 +263,7 @@ class ListItemRepository implements IListItemRepository {
     try {
       for (var i = 0; i < itemIdsInOrder.length; i++) {
         final itemId = itemIdsInOrder[i];
-        final model = _localDataSource.getListItemById(itemId);
+        final model = await _localDataSource.getListItemById(itemId);
 
         if (model != null) {
           final updated = ListItemModel(
@@ -258,8 +283,13 @@ class ListItemRepository implements IListItemRepository {
 
           await _localDataSource.saveListItem(updated);
 
-          // Optional: Sync to remote (fire and forget)
-          _remoteDataSource.saveListItem(updated).ignore();
+          // Enqueue for reliable sync (replaces fire-and-forget)
+          await _syncQueueService.enqueue(
+            modelType: 'ListItem',
+            modelId: updated.id,
+            operation: 'update',
+            data: updated.toJson(),
+          );
         }
       }
 
@@ -277,9 +307,9 @@ class ListItemRepository implements IListItemRepository {
       listResult.fold(
         (failure) => null, // Ignore if list not found
         (list) async {
-          final itemCount = _localDataSource.getListItemsCount(listId);
+          final itemCount = await _localDataSource.getListItemsCount(listId);
           final completedCount =
-              _localDataSource.getCompletedItemsCount(listId);
+              await _localDataSource.getCompletedItemsCount(listId);
 
           final updated = list.copyWith(
             itemCount: itemCount,

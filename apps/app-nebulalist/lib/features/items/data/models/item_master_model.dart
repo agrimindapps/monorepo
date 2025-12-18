@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/entities/item_master_entity.dart';
 
 /// Data model for ItemMaster
-/// Provides serialization for Hive and Firestore
+/// Provides serialization for Drift and Firestore
 class ItemMasterModel {
   final String id;
   final String ownerId;

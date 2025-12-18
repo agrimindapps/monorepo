@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import '../../domain/entities/list_entity.dart';
 
 /// Data model for List
-/// Provides serialization for Hive and Firestore
+/// Provides serialization for Drift and Firestore
 class ListModel {
   final String id;
   final String name;

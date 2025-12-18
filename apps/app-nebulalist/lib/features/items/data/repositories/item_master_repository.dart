@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/sync/nebulalist_sync_queue_service.dart';
 import '../../domain/entities/item_master_entity.dart';
 import '../../domain/repositories/i_item_master_repository.dart';
 import '../datasources/item_master_local_datasource.dart';
@@ -8,11 +9,13 @@ import '../datasources/item_master_remote_datasource.dart';
 import '../models/item_master_model.dart';
 
 /// Implementation of ItemMaster repository
-/// Offline-first: Hive is primary, Firestore is optional sync
+/// Offline-first: Drift is primary, Firestore synced via queue
 class ItemMasterRepository implements IItemMasterRepository {
   final ItemMasterLocalDataSource _localDataSource;
-  final ItemMasterRemoteDataSource _remoteDataSource;
+  // ignore: unused_field
+  final ItemMasterRemoteDataSource _remoteDataSource; // For future sync features
   final AuthStateNotifier _authNotifier;
+  final NebulalistSyncQueueService _syncQueueService;
 
   static const int _freeItemMasterLimit = 200;
 
@@ -20,6 +23,7 @@ class ItemMasterRepository implements IItemMasterRepository {
     this._localDataSource,
     this._remoteDataSource,
     this._authNotifier,
+    this._syncQueueService,
   );
 
   String? get _currentUserId => _authNotifier.userId;
@@ -27,8 +31,12 @@ class ItemMasterRepository implements IItemMasterRepository {
   @override
   Future<Either<Failure, List<ItemMasterEntity>>> getItemMasters() async {
     try {
+      if (_currentUserId == null) {
+        return const Left(AuthFailure('Usuário não autenticado'));
+      }
+
       // Get from local storage (offline-first)
-      final models = _localDataSource.getItemMasters();
+      final models = await _localDataSource.getItemMasters(_currentUserId!);
       final entities = models.map((m) => m.toEntity()).toList();
 
       return Right(entities);
@@ -42,7 +50,7 @@ class ItemMasterRepository implements IItemMasterRepository {
     String id,
   ) async {
     try {
-      final model = _localDataSource.getItemMasterById(id);
+      final model = await _localDataSource.getItemMasterById(id);
 
       if (model == null) {
         return const Left(NotFoundFailure('Item não encontrado'));
@@ -87,8 +95,13 @@ class ItemMasterRepository implements IItemMasterRepository {
       // Save to local storage
       await _localDataSource.saveItemMaster(model);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.saveItemMaster(model).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ItemMaster',
+        modelId: newItem.id,
+        operation: 'create',
+        data: model.toJson(),
+      );
 
       return Right(newItem);
     } catch (e) {
@@ -106,8 +119,13 @@ class ItemMasterRepository implements IItemMasterRepository {
       // Update in local storage
       await _localDataSource.saveItemMaster(model);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.saveItemMaster(model).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ItemMaster',
+        modelId: itemMaster.id,
+        operation: 'update',
+        data: model.toJson(),
+      );
 
       return Right(itemMaster);
     } catch (e) {
@@ -121,8 +139,13 @@ class ItemMasterRepository implements IItemMasterRepository {
       // Delete from local storage
       await _localDataSource.deleteItemMaster(id);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.deleteItemMaster(id).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ItemMaster',
+        modelId: id,
+        operation: 'delete',
+        data: {'id': id}, // Minimal data for delete operation
+      );
 
       return const Right(null);
     } catch (e) {
@@ -133,7 +156,11 @@ class ItemMasterRepository implements IItemMasterRepository {
   @override
   Future<Either<Failure, int>> getItemMastersCount() async {
     try {
-      final count = _localDataSource.getItemMastersCount();
+      if (_currentUserId == null) {
+        return const Left(AuthFailure('Usuário não autenticado'));
+      }
+
+      final count = await _localDataSource.getItemMastersCount(_currentUserId!);
       return Right(count);
     } catch (e) {
       return Left(CacheFailure('Erro ao contar itens: ${e.toString()}'));
@@ -143,7 +170,7 @@ class ItemMasterRepository implements IItemMasterRepository {
   @override
   Future<Either<Failure, void>> incrementUsageCount(String id) async {
     try {
-      final model = _localDataSource.getItemMasterById(id);
+      final model = await _localDataSource.getItemMasterById(id);
 
       if (model == null) {
         return const Left(NotFoundFailure('Item não encontrado'));
@@ -168,8 +195,13 @@ class ItemMasterRepository implements IItemMasterRepository {
 
       await _localDataSource.saveItemMaster(updated);
 
-      // Optional: Sync to remote (fire and forget)
-      _remoteDataSource.saveItemMaster(updated).ignore();
+      // Enqueue for reliable sync (replaces fire-and-forget)
+      await _syncQueueService.enqueue(
+        modelType: 'ItemMaster',
+        modelId: updated.id,
+        operation: 'update',
+        data: updated.toJson(),
+      );
 
       return const Right(null);
     } catch (e) {
@@ -184,7 +216,12 @@ class ItemMasterRepository implements IItemMasterRepository {
     String query,
   ) async {
     try {
-      final models = _localDataSource.searchItemMasters(query);
+      if (_currentUserId == null) {
+        return const Left(AuthFailure('Usuário não autenticado'));
+      }
+
+      final models =
+          await _localDataSource.searchItemMasters(_currentUserId!, query);
       final entities = models.map((m) => m.toEntity()).toList();
 
       return Right(entities);
@@ -196,11 +233,15 @@ class ItemMasterRepository implements IItemMasterRepository {
   @override
   Future<Either<Failure, bool>> canCreateItemMaster() async {
     try {
+      if (_currentUserId == null) {
+        return const Left(AuthFailure('Usuário não autenticado'));
+      }
+
       // TODO: Check premium status when RevenueCat is integrated
       // Premium users should have unlimited items
 
       // Check free tier limit
-      final count = _localDataSource.getItemMastersCount();
+      final count = await _localDataSource.getItemMastersCount(_currentUserId!);
       return Right(count < _freeItemMasterLimit);
     } catch (e) {
       return Left(CacheFailure('Erro ao verificar limite: ${e.toString()}'));

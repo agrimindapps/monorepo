@@ -1,0 +1,42 @@
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../models/settings_model.dart';
+
+class SettingsLocalDataSource {
+  static const String _settingsKey = 'app_settings';
+
+  Future<SettingsModel> getSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final settingsJson = prefs.getString(_settingsKey);
+
+      if (settingsJson == null) {
+        return SettingsModel.fromEntity(SettingsModel.fromJson({}));
+      }
+
+      final Map<String, dynamic> json = jsonDecode(settingsJson);
+      return SettingsModel.fromJson(json);
+    } catch (e) {
+      return SettingsModel.fromEntity(SettingsModel.fromJson({}));
+    }
+  }
+
+  Future<void> saveSettings(SettingsModel settings) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final settingsJson = jsonEncode(settings.toJson());
+      await prefs.setString(_settingsKey, settingsJson);
+    } catch (e) {
+      throw Exception('Erro ao salvar configurações: $e');
+    }
+  }
+
+  Future<void> clearSettings() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_settingsKey);
+    } catch (e) {
+      throw Exception('Erro ao limpar configurações: $e');
+    }
+  }
+}

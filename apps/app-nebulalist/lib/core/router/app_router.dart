@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,10 +28,13 @@ part 'app_router.g.dart';
 GoRouter goRouter(Ref ref) {
   // Watch auth state to trigger router refresh on auth changes
   final authState = ref.watch(authProvider);
+  
+  // Initial location based on platform (web shows promo, mobile shows login)
+  const initialLocation = kIsWeb ? AppConstants.promoRoute : AppConstants.loginRoute;
 
   return GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: AppConstants.homeRoute,
+    initialLocation: initialLocation,
     routes: [
         // Home route (protected)
         GoRoute(
@@ -127,26 +131,47 @@ GoRouter goRouter(Ref ref) {
       ],
       errorBuilder: (context, state) => _ErrorPage(error: state.error),
 
-      // Redirect logic for authentication
+      // Redirect logic based on auth state (similar to app-plantis)
       redirect: (context, state) {
         final isLoggedIn = authState.currentUser != null;
-        final isAuthRoute = state.matchedLocation == AppConstants.loginRoute ||
-            state.matchedLocation == AppConstants.signUpRoute ||
-            state.matchedLocation == AppConstants.forgotPasswordRoute;
-        final isPublicRoute = isAuthRoute ||
-            state.matchedLocation == AppConstants.promoRoute ||
-            state.matchedLocation == AppConstants.privacyPolicyRoute ||
-            state.matchedLocation == AppConstants.termsOfServiceRoute ||
-            state.matchedLocation == AppConstants.accountDeletionPolicyRoute;
+        final currentLocation = state.matchedLocation;
+        
+        // Public routes
+        final publicRoutes = [
+          AppConstants.loginRoute,
+          AppConstants.signUpRoute,
+          AppConstants.forgotPasswordRoute,
+          AppConstants.promoRoute,
+          AppConstants.privacyPolicyRoute,
+          AppConstants.termsOfServiceRoute,
+          AppConstants.accountDeletionPolicyRoute,
+        ];
+        
+        final isPublicRoute = publicRoutes.any(
+          (route) => currentLocation.startsWith(route) || currentLocation == route,
+        );
+        
+        // Auth routes
+        final authRoutes = [
+          AppConstants.loginRoute,
+          AppConstants.signUpRoute,
+          AppConstants.forgotPasswordRoute,
+        ];
+        
+        final isAuthRoute = authRoutes.any(
+          (route) => currentLocation == route,
+        );
 
-        // Redirect to login if not authenticated and trying to access protected route
-        if (!isLoggedIn && !isPublicRoute) {
-          return AppConstants.loginRoute;
+        // If authenticated and trying to access auth/promo routes, redirect to home
+        if (isLoggedIn && (isAuthRoute || currentLocation == AppConstants.promoRoute)) {
+          return AppConstants.homeRoute;
         }
 
-        // Redirect to home if authenticated and trying to access auth route
-        if (isLoggedIn && isAuthRoute) {
-          return AppConstants.homeRoute;
+        // If not authenticated and trying to access protected route
+        if (!isLoggedIn && !isPublicRoute) {
+          // Web: redirect to promo page
+          // Mobile: redirect to login page
+          return kIsWeb ? AppConstants.promoRoute : AppConstants.loginRoute;
         }
 
         return null; // No redirect needed

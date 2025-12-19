@@ -17,12 +17,22 @@ class CallToAction extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF673AB7), Color(0xFF3F51B5)],
+          colors: [
+            Color(0xFF2E1065), // Deep Purple
+            Color(0xFF4C1D95), // Purple
+            Color(0xFF1E1B4B), // Indigo
+          ],
         ),
       ),
       child: Stack(
         clipBehavior: Clip.none,
         children: [
+          // Nebula effect
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _NebulaCTAPainter(),
+            ),
+          ),
           Positioned(
             top: -80,
             left: -80,
@@ -32,6 +42,13 @@ class CallToAction extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF673AB7).withValues(alpha: 0.2),
+                    blurRadius: 50,
+                    spreadRadius: 10,
+                  ),
+                ],
               ),
             ),
           ),
@@ -44,6 +61,13 @@ class CallToAction extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00BCD4).withValues(alpha: 0.2),
+                    blurRadius: 50,
+                    spreadRadius: 10,
+                  ),
+                ],
               ),
             ),
           ),
@@ -64,12 +88,19 @@ class CallToAction extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                         height: 1.2,
+                        shadows: const [
+                          Shadow(
+                            color: Colors.black26,
+                            offset: Offset(0, 2),
+                            blurRadius: 4,
+                          ),
+                        ],
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Comece gratuitamente e descubra o poder da organização inteligente.',
+                      'Comece gratuitamente e descubra o poder da organização inteligente. Junte-se a milhares de usuários que já alcançaram as estrelas.',
                       style: TextStyle(
                         fontSize: isMobile ? 16 : 18,
                         color: Colors.white.withValues(alpha: 0.9),
@@ -97,16 +128,16 @@ class CallToAction extends StatelessWidget {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            elevation: 6,
-                            shadowColor: Colors.black.withValues(alpha: 0.3),
+                            elevation: 8,
+                            shadowColor: const Color(0xFF00BCD4).withValues(alpha: 0.4),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.login, size: 20),
+                              const Icon(Icons.rocket_launch, size: 20),
                               const SizedBox(width: 12),
                               Text(
-                                'Fazer Login',
+                                'Começar Agora',
                                 style: TextStyle(
                                   fontSize: isMobile ? 16 : 18,
                                   fontWeight: FontWeight.bold,
@@ -200,4 +231,24 @@ class CallToAction extends StatelessWidget {
       ),
     );
   }
+}
+
+class _NebulaCTAPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.05)
+      ..style = PaintingStyle.fill;
+
+    // Draw some stars
+    for (int i = 0; i < 50; i++) {
+      final x = (i * 37) % size.width;
+      final y = (i * 91) % size.height;
+      final radius = (i % 3) + 1.0;
+      canvas.drawCircle(Offset(x, y), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

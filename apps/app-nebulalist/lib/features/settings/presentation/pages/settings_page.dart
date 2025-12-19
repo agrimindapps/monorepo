@@ -1,96 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../providers/settings_providers.dart';
+import '../widgets/section_header_widget.dart';
+import '../widgets/settings_switch_tile.dart';
+import '../widgets/theme_selection_widgets.dart';
+import '../widgets/language_selection_widgets.dart';
+import '../widgets/default_view_selection_widgets.dart';
 
-import '../../../../core/config/app_constants.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../widgets/settings/settings_widgets.dart';
-
-/// Settings page with user info and configuration options
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final user = authState.currentUser;
+    final settingsAsync = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configurações'),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // User Section
-          if (user != null) ...[
-            SettingsUserCard(user: user),
-            const SizedBox(height: 16),
-          ],
-
-          // Premium Card Section
-          const SettingsPremiumCard(),
-          const SizedBox(height: 24),
-
-          // App Section
-          const AppSettingsSection(),
-          const SizedBox(height: 16),
-
-          // Support Section
-          const SupportSection(),
-          const SizedBox(height: 16),
-
-          // About Section
-          const LegalSection(),
-          const SizedBox(height: 24),
-
-          // Danger Zone
-          Card(
-            color: Colors.red.shade50,
-            child: ListTile(
-              leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text(
-                'Sair da Conta',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              onTap: () => _showLogoutConfirmation(context, ref),
+      body: settingsAsync.when(
+        data: (settings) => ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const SectionHeaderWidget(title: 'Aparência'),
+            ThemeSelectionTile(
+              currentTheme: settings.themeMode,
+              onTap: () => _showThemeDialog(context, settings.themeMode),
             ),
-          ),
-        ],
+            LanguageSelectionTile(
+              currentLanguage: settings.language,
+              onTap: () => _showLanguageDialog(context, settings.language),
+            ),
+            const Divider(height: 32),
+            const SectionHeaderWidget(title: 'Notificações'),
+            SettingsSwitchTile(
+              title: 'Notificações',
+              subtitle: 'Receber notificações do app',
+              value: settings.notificationsEnabled,
+              onChanged: (value) => ref.read(settingsProvider.notifier).toggleNotifications(value),
+              icon: Icons.notifications_outlined,
+            ),
+            SettingsSwitchTile(
+              title: 'Sons',
+              subtitle: 'Tocar sons ao completar tarefas',
+              value: settings.soundEffectsEnabled,
+              onChanged: (value) => ref.read(settingsProvider.notifier).toggleSoundEffects(value),
+              icon: Icons.volume_up_outlined,
+            ),
+            const Divider(height: 32),
+            const SectionHeaderWidget(title: 'Sincronização'),
+            SettingsSwitchTile(
+              title: 'Sincronização Automática',
+              subtitle: 'Sincronizar automaticamente com a nuvem',
+              value: settings.autoSyncEnabled,
+              onChanged: (value) => ref.read(settingsProvider.notifier).toggleAutoSync(value),
+              icon: Icons.sync_outlined,
+            ),
+            const Divider(height: 32),
+            const SectionHeaderWidget(title: 'Visualização'),
+            DefaultViewSelectionTile(
+              currentView: settings.defaultView,
+              onTap: () => _showDefaultViewDialog(context, settings.defaultView),
+            ),
+            SettingsSwitchTile(
+              title: 'Mostrar Tarefas Concluídas',
+              subtitle: 'Exibir tarefas já finalizadas',
+              value: settings.showCompletedTasks,
+              onChanged: (value) => ref.read(settingsProvider.notifier).toggleShowCompletedTasks(value),
+              icon: Icons.check_circle_outline,
+            ),
+          ],
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Text('Erro ao carregar configurações: $error'),
+        ),
       ),
     );
   }
 
-  void _showLogoutConfirmation(BuildContext context, WidgetRef ref) async {
-    await showDialog<void>(
+  void _showThemeDialog(BuildContext context, String currentTheme) {
+    showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Confirmar Saída'),
-        content: const Text('Tem certeza que deseja sair da sua conta?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await ref.read(authProvider.notifier).signOut();
-              if (context.mounted) {
-                context.go(AppConstants.loginRoute);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
+      builder: (context) => ThemeDialog(currentTheme: currentTheme),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, String currentLanguage) {
+    showDialog(
+      context: context,
+      builder: (context) => LanguageDialog(currentLanguage: currentLanguage),
+    );
+  }
+
+  void _showDefaultViewDialog(BuildContext context, String currentView) {
+    showDialog(
+      context: context,
+      builder: (context) => DefaultViewDialog(currentView: currentView),
     );
   }
 }

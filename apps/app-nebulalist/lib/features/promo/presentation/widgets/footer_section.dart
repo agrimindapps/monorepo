@@ -6,7 +6,7 @@ class FooterSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[900],
+      color: const Color(0xFF1A1A2E), // Darker background for footer
       padding: const EdgeInsets.fromLTRB(24, 60, 24, 30),
       child: Column(
         children: [
@@ -23,7 +23,7 @@ class FooterSection extends StatelessWidget {
               Container(
                 width: 1,
                 height: 16,
-                color: Colors.grey[600],
+                color: Colors.white.withValues(alpha: 0.2),
               ),
               const SizedBox(width: 20),
               _buildPolicyLink(
@@ -42,7 +42,7 @@ class FooterSection extends StatelessWidget {
                 child: Text(
                   '© 2025 NebulaList. Todos os direitos reservados.',
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 14,
                   ),
                 ),
@@ -73,6 +73,12 @@ class FooterSection extends StatelessWidget {
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF673AB7).withValues(alpha: 0.3),
+                          blurRadius: 8,
+                        ),
+                      ],
                     ),
                     child: const Icon(
                       Icons.checklist,
@@ -89,7 +95,7 @@ class FooterSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w900,
-                            color: Colors.grey[300],
+                            color: Colors.white.withValues(alpha: 0.9),
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -98,7 +104,7 @@ class FooterSection extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w400,
-                            color: Colors.grey[300],
+                            color: Colors.white.withValues(alpha: 0.9),
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -111,7 +117,7 @@ class FooterSection extends StatelessWidget {
               Text(
                 'Organização inteligente para sua vida',
                 style: TextStyle(
-                  color: Colors.grey[500],
+                  color: Colors.white.withValues(alpha: 0.4),
                   fontSize: 12,
                 ),
               ),
@@ -128,7 +134,7 @@ class FooterSection extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: Colors.grey[300],
+          color: Colors.white.withValues(alpha: 0.7),
           fontSize: 14,
           decoration: TextDecoration.underline,
         ),
@@ -142,12 +148,13 @@ class FooterSection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: Colors.grey[800],
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Icon(
           icon,
-          color: Colors.grey[400],
+          color: Colors.white.withValues(alpha: 0.7),
           size: 20,
         ),
       ),

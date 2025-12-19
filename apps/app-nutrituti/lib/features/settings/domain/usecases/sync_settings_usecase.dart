@@ -9,9 +9,7 @@ class SyncSettingsUseCase {
 
   Future<void> execute() async {
     final settings = await _repository.getSettings();
-    final updatedSettings = settings.copyWith(
-      lastSyncDate: DateTime.now(),
-    );
+    final updatedSettings = settings.copyWith(lastSyncDate: DateTime.now());
     await _repository.saveSettings(updatedSettings);
   }
 }

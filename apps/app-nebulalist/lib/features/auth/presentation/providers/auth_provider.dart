@@ -266,4 +266,76 @@ class AuthNotifier extends _$AuthNotifier {
   void clearError() {
     state = state.copyWith(errorMessage: null);
   }
+
+  /// Update user profile (display name)
+  Future<bool> updateProfile({String? displayName}) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final result = await repository.updateProfile(displayName: displayName);
+
+      return result.fold(
+        (failure) {
+          debugPrint('AuthNotifier: Update profile failed - ${failure.message}');
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return false;
+        },
+        (updatedUser) {
+          debugPrint('AuthNotifier: Profile updated successfully');
+          _authStateNotifier.updateUser(updatedUser);
+          state = state.copyWith(
+            isLoading: false,
+            currentUser: updatedUser,
+            errorMessage: null,
+          );
+          return true;
+        },
+      );
+    } catch (e) {
+      debugPrint('AuthNotifier: Update profile error - $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao atualizar perfil: $e',
+      );
+      return false;
+    }
+  }
+
+  /// Delete user account permanently
+  Future<bool> deleteAccount() async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final repository = ref.read(authRepositoryProvider);
+      final result = await repository.deleteAccount();
+
+      return result.fold(
+        (failure) {
+          debugPrint('AuthNotifier: Delete account failed - ${failure.message}');
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return false;
+        },
+        (_) {
+          debugPrint('AuthNotifier: Account deleted successfully');
+          _authStateNotifier.reset();
+          state = AuthState.initial().copyWith(isInitialized: true);
+          return true;
+        },
+      );
+    } catch (e) {
+      debugPrint('AuthNotifier: Delete account error - $e');
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: 'Erro ao excluir conta: $e',
+      );
+      return false;
+    }
+  }
 }

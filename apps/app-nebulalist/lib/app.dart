@@ -14,6 +14,8 @@ class AppNebulalistApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch theme provider for dynamic theme changes
     final themeMode = ref.watch(themeProvider);
+    // Watch router provider
+    final router = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
       title: AppConfig.appName,
@@ -25,7 +27,7 @@ class AppNebulalistApp extends ConsumerWidget {
       themeMode: themeMode,
 
       // Router configuration with auth protection
-      routerConfig: AppRouter.router(ref),
+      routerConfig: router,
 
       // Localization (if needed)
       // localizationsDelegates: const [

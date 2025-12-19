@@ -2,12 +2,14 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../features/account/presentation/account_page.dart';
 import '../../features/settings/presentation/settings_page.dart';
 import '../../features/task_lists/presentation/create_edit_task_list_page.dart';
 import '../../features/task_lists/providers/task_list_providers.dart';
 import '../../features/tasks/domain/task_list_entity.dart';
 import '../../features/tasks/presentation/pages/my_day_page.dart';
 import '../../features/tasks/presentation/providers/my_day_notifier.dart';
+import '../../features/tasks/presentation/providers/task_filter_providers.dart';
 import '../constants/task_list_colors.dart';
 import '../providers/auth_providers.dart';
 
@@ -27,88 +29,69 @@ class ModernDrawer extends ConsumerWidget {
       elevation: 0,
       child: Column(
         children: [
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primaryColor,
-                  AppColors.primaryColor.withBlue(255),
-                ],
-              ),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TweenAnimationBuilder<double>(
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      duration: const Duration(milliseconds: 800),
-                      builder: (context, value, child) {
-                        return Transform.scale(
-                          scale: value,
-                          child: Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withAlpha(51),
-                              border: Border.all(
-                                color: Colors.white.withAlpha(102),
-                                width: 2,
-                              ),
-                            ),
-                            child: Icon(
-                              isAnonymous ? Icons.person_outline : Icons.person,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      userDisplayName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      isAnonymous ? 'Modo Anônimo' : userEmail,
-                      style: TextStyle(
-                        color: Colors.white.withAlpha(204),
-                        fontSize: 14,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          // Header clicável que leva para Account
+          _buildClickableHeader(
+            context,
+            userDisplayName: userDisplayName,
+            userEmail: userEmail,
+            isAnonymous: isAnonymous,
           ),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8),
               children: [
-                _buildMyDayMenuItem(context, ref, user?.id ?? 'anonymous'),
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.home_rounded,
-                  title: 'Início',
-                  subtitle: 'Visualizar tarefas',
-                  onTap: () => Navigator.pop(context),
+                // FILTROS INTELIGENTES
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    'FILTROS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                      color: Colors.grey,
+                    ),
+                  ),
                 ),
 
+                _buildMyDayMenuItem(context, ref, user?.id ?? 'anonymous'),
+
+                _buildSmartFilterItem(
+                  context,
+                  ref,
+                  icon: Icons.star_rounded,
+                  title: 'Importantes',
+                  subtitle: 'Tarefas favoritas',
+                  iconColor: Colors.amber,
+                  filterType: TaskFilterType.starred,
+                ),
+
+                _buildSmartFilterItem(
+                  context,
+                  ref,
+                  icon: Icons.calendar_today_rounded,
+                  title: 'Planejado',
+                  subtitle: 'Com data definida',
+                  iconColor: Colors.blue,
+                  filterType: TaskFilterType.planned,
+                ),
+
+                _buildSmartFilterItem(
+                  context,
+                  ref,
+                  icon: Icons.list_alt_rounded,
+                  title: 'Todas as Tarefas',
+                  subtitle: 'Ver tudo',
+                  iconColor: AppColors.primaryColor,
+                  filterType: TaskFilterType.all,
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Divider(),
+                ),
+
+                // MINHAS LISTAS
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Text(
@@ -140,69 +123,12 @@ class ModernDrawer extends ConsumerWidget {
                     );
                   },
                 ),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Divider(),
-                ),
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.analytics_rounded,
-                  title: 'Estatísticas',
-                  subtitle: 'Visualizar progresso',
-                  onTap: () => Navigator.pop(context),
-                ),
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.category_rounded,
-                  title: 'Categorias',
-                  subtitle: 'Organizar por tags',
-                  onTap: () => Navigator.pop(context),
-                ),
-
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: Divider(),
-                ),
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.settings_rounded,
-                  title: 'Configurações',
-                  subtitle: 'Personalizar app',
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<dynamic>(
-                        builder: (context) => const SettingsPage(),
-                      ),
-                    );
-                  },
-                ),
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.help_rounded,
-                  title: 'Ajuda & Suporte',
-                  subtitle: 'Obter assistência',
-                  onTap: () => Navigator.pop(context),
-                ),
-
-                _buildMenuItem(
-                  context,
-                  icon: Icons.info_rounded,
-                  title: 'Sobre o App',
-                  subtitle: 'Versão e informações',
-                  onTap: () => Navigator.pop(context),
-                ),
               ],
             ),
           ),
+          // Footer com Configurações
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
               color: Theme.of(context).dividerColor.withAlpha(26),
               border: Border(
@@ -213,14 +139,212 @@ class ModernDrawer extends ConsumerWidget {
             ),
             child: _buildMenuItem(
               context,
-              icon: Icons.logout_rounded,
-              title: 'Sair',
-              subtitle: 'Fazer logout',
-              isDestructive: true,
-              onTap: () => _handleLogout(context, ref),
+              icon: Icons.settings_rounded,
+              title: 'Configurações',
+              subtitle: 'Personalizar app',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute<dynamic>(
+                    builder: (context) => const SettingsPage(),
+                  ),
+                );
+              },
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Header clicável que navega para a página de Account/Perfil
+  Widget _buildClickableHeader(
+    BuildContext context, {
+    required String userDisplayName,
+    required String userEmail,
+    required bool isAnonymous,
+  }) {
+    return InkWell(
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute<dynamic>(
+            builder: (context) => const AccountPage(),
+          ),
+        );
+      },
+      child: Container(
+        height: 200,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.primaryColor,
+              AppColors.primaryColor.withBlue(255),
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      duration: const Duration(milliseconds: 800),
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withAlpha(51),
+                              border: Border.all(
+                                color: Colors.white.withAlpha(102),
+                                width: 2,
+                              ),
+                            ),
+                            child: Icon(
+                              isAnonymous ? Icons.person_outline : Icons.person,
+                              size: 35,
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(38),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(
+                        Icons.chevron_right,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  userDisplayName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  isAnonymous ? 'Modo Anônimo' : userEmail,
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(204),
+                    fontSize: 14,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+                if (isAnonymous) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(38),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'Toque para criar conta',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Item de filtro inteligente com contagem de tarefas
+  Widget _buildSmartFilterItem(
+    BuildContext context,
+    WidgetRef ref, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color iconColor,
+    required TaskFilterType filterType,
+  }) {
+    final countAsync = ref.watch(filteredTaskCountProvider(filterType));
+
+    return countAsync.when(
+      data: (taskCount) => _buildMenuItem(
+        context,
+        icon: icon,
+        title: title,
+        subtitle: taskCount > 0 ? '$taskCount ${taskCount == 1 ? 'tarefa' : 'tarefas'}' : subtitle,
+        iconColor: iconColor,
+        trailing: taskCount > 0
+            ? Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: iconColor.withAlpha(51),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  taskCount.toString(),
+                  style: TextStyle(
+                    color: iconColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              )
+            : null,
+        onTap: () {
+          Navigator.pop(context);
+          ref.read(currentTaskFilterProvider.notifier).setFilter(filterType);
+        },
+      ),
+      loading: () => _buildMenuItem(
+        context,
+        icon: icon,
+        title: title,
+        subtitle: 'Carregando...',
+        iconColor: iconColor,
+        onTap: () {
+          Navigator.pop(context);
+          ref.read(currentTaskFilterProvider.notifier).setFilter(filterType);
+        },
+      ),
+      error: (_, __) => _buildMenuItem(
+        context,
+        icon: icon,
+        title: title,
+        subtitle: subtitle,
+        iconColor: iconColor,
+        onTap: () {
+          Navigator.pop(context);
+          ref.read(currentTaskFilterProvider.notifier).setFilter(filterType);
+        },
       ),
     );
   }
@@ -546,58 +670,5 @@ class ModernDrawer extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          title: const Row(
-            children: [
-              Icon(Icons.logout_rounded, color: Colors.red),
-              SizedBox(width: 8),
-              Text('Confirmar Logout'),
-            ],
-          ),
-          content: const Text(
-            'Tem certeza que deseja sair do aplicativo?',
-            style: TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Sair'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed == true) {
-      try {
-        await ref.read(authProvider.notifier).signOut();
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Erro ao fazer logout: ${e.toString()}'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
   }
 }

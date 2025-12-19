@@ -1,4 +1,3 @@
-import '../entities/settings_entity.dart';
 import '../repositories/i_settings_repository.dart';
 
 /// Use case for syncing settings

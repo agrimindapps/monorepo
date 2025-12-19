@@ -80,8 +80,6 @@ class _CreateSubtaskDialogState extends ConsumerState<CreateSubtaskDialog> {
           );
         }
       } else {
-import 'package:uuid/uuid.dart';
-
         final newSubtask = TaskEntity(
           id: const Uuid().v4(),
           title: _titleController.text.trim(),

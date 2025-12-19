@@ -118,6 +118,7 @@ export 'src/infrastructure/services/auth/auth_sign_in_service.dart';
 export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/data_migration_service.dart';
 export 'src/infrastructure/services/device_management_service.dart';
+export 'src/services/optimized_analytics_wrapper.dart';
 // Device Management - Unified Implementation
 export 'src/infrastructure/repositories/datasources/device_local_datasource.dart';
 export 'src/infrastructure/repositories/device_repository_impl.dart';

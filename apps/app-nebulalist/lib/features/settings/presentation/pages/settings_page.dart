@@ -146,27 +146,19 @@ class SettingsPage extends ConsumerWidget {
                 icon: Icons.privacy_tip,
                 title: 'Política de Privacidade',
                 subtitle: 'Como protegemos seus dados',
-                onTap: () {
-                  // TODO: Implementar página de privacidade
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.push(AppConstants.privacyPolicyRoute),
               ),
               SettingsItem(
                 icon: Icons.description,
                 title: 'Termos de Uso',
                 subtitle: 'Termos e condições de uso',
-                onTap: () {
-                  // TODO: Implementar página de termos
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Em desenvolvimento'),
-                    ),
-                  );
-                },
+                onTap: () => context.push(AppConstants.termsOfServiceRoute),
+              ),
+              SettingsItem(
+                icon: Icons.delete_outline,
+                title: 'Política de Exclusão de Conta',
+                subtitle: 'Como seus dados são removidos',
+                onTap: () => context.push(AppConstants.accountDeletionPolicyRoute),
               ),
             ],
           ),

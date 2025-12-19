@@ -15,6 +15,9 @@ class AppConstants {
   static const String promoRoute = '/promo';
   static const String premiumRoute = '/premium';
   static const String listDetailRoute = '/list/:id';
+  static const String privacyPolicyRoute = '/privacy-policy';
+  static const String termsOfServiceRoute = '/terms-of-service';
+  static const String accountDeletionPolicyRoute = '/account-deletion-policy';
 
   // Asset Paths
   static const String imagesPath = 'assets/images/';

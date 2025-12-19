@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -8,6 +9,9 @@ import '../../features/auth/presentation/pages/signup_page.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/items/presentation/pages/items_bank_page.dart';
 import '../../features/items/presentation/pages/list_detail_page.dart';
+import '../../features/legal/presentation/pages/account_deletion_policy_page.dart';
+import '../../features/legal/presentation/pages/privacy_policy_page.dart';
+import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/lists/presentation/pages/lists_page.dart';
 import '../../features/premium/presentation/pages/premium_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
@@ -16,16 +20,18 @@ import '../../features/settings/presentation/pages/profile_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../config/app_constants.dart';
 
-/// Application router configuration using GoRouter with auth protection
-class AppRouter {
-  AppRouter._();
+part 'app_router.g.dart';
 
-  /// Creates GoRouter with authentication redirect logic
-  static GoRouter router(WidgetRef ref) {
-    return GoRouter(
-      debugLogDiagnostics: true,
-      initialLocation: AppConstants.homeRoute,
-      routes: [
+/// GoRouter provider that watches auth state
+@riverpod
+GoRouter goRouter(Ref ref) {
+  // Watch auth state to trigger router refresh on auth changes
+  final authState = ref.watch(authProvider);
+
+  return GoRouter(
+    debugLogDiagnostics: true,
+    initialLocation: AppConstants.homeRoute,
+    routes: [
         // Home route (protected)
         GoRoute(
           path: AppConstants.homeRoute,
@@ -101,18 +107,37 @@ class AppRouter {
             return ListDetailPage(listId: listId);
           },
         ),
+
+        // Legal routes (public)
+        GoRoute(
+          path: AppConstants.privacyPolicyRoute,
+          name: 'privacy-policy',
+          builder: (context, state) => const PrivacyPolicyPage(),
+        ),
+        GoRoute(
+          path: AppConstants.termsOfServiceRoute,
+          name: 'terms-of-service',
+          builder: (context, state) => const TermsOfServicePage(),
+        ),
+        GoRoute(
+          path: AppConstants.accountDeletionPolicyRoute,
+          name: 'account-deletion-policy',
+          builder: (context, state) => const AccountDeletionPolicyPage(),
+        ),
       ],
       errorBuilder: (context, state) => _ErrorPage(error: state.error),
 
       // Redirect logic for authentication
       redirect: (context, state) {
-        final authState = ref.read(authProvider);
         final isLoggedIn = authState.currentUser != null;
         final isAuthRoute = state.matchedLocation == AppConstants.loginRoute ||
             state.matchedLocation == AppConstants.signUpRoute ||
             state.matchedLocation == AppConstants.forgotPasswordRoute;
         final isPublicRoute = isAuthRoute ||
-            state.matchedLocation == AppConstants.promoRoute;
+            state.matchedLocation == AppConstants.promoRoute ||
+            state.matchedLocation == AppConstants.privacyPolicyRoute ||
+            state.matchedLocation == AppConstants.termsOfServiceRoute ||
+            state.matchedLocation == AppConstants.accountDeletionPolicyRoute;
 
         // Redirect to login if not authenticated and trying to access protected route
         if (!isLoggedIn && !isPublicRoute) {
@@ -127,7 +152,6 @@ class AppRouter {
         return null; // No redirect needed
       },
     );
-  }
 }
 
 /// Home page with bottom navigation

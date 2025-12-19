@@ -352,3 +352,13 @@ final toggleItemCompletionUseCaseProvider =
     Provider<ToggleItemCompletionUseCase>((ref) {
   return ToggleItemCompletionUseCase(ref.watch(listItemRepositoryProvider));
 });
+
+// =============================================================================
+// SUBSCRIPTION FEATURE - PROVIDERS
+// =============================================================================
+
+/// Subscription Repository from core package (RevenueCat)
+final subscriptionRepositoryProvider = Provider<ISubscriptionRepository>((ref) {
+  return RevenueCatSubscriptionService();
+});
+

@@ -1,0 +1,101 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===== HELPER FUNCTIONS =====
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasValidTaskData() {
+      return request.resource.data.title is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.isCompleted is bool
+        && request.resource.data.isSynced is bool;
+    }
+
+    function hasValidListData() {
+      return request.resource.data.name is string
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.isSynced is bool;
+    }
+
+    // ===== USUÁRIOS =====
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      // ===== SUBCOLEÇÕES DO USUÁRIO =====
+      
+      // Tasks
+      match /tasks/{taskId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidTaskData();
+        allow update: if isOwner(userId) && hasValidTaskData();
+        allow delete: if isOwner(userId);
+      }
+
+      // Lists
+      match /lists/{listId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && hasValidListData();
+        allow update: if isOwner(userId) && hasValidListData();
+        allow delete: if isOwner(userId);
+      }
+
+      // Subscriptions (RevenueCat)
+      match /subscriptions/{subscriptionId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // ===== DISPOSITIVOS (subcoleção do usuário) =====
+      // Limite: 3 dispositivos mobile por usuário (web não conta)
+      match /devices/{deviceId} {
+        allow read: if isOwner(userId);
+        
+        allow create: if isOwner(userId)
+          && request.resource.data.uuid is string
+          && request.resource.data.platform is string
+          && request.resource.data.isActive is bool
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.lastActiveAt is timestamp;
+        
+        allow update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // User profile data
+      match /profile/{profileId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ===== CONFIGURAÇÕES =====
+    match /userSettings/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ===== DADOS DE SINCRONIZAÇÃO =====
+    match /syncData/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId)
+        && request.resource.data.lastSyncAt is timestamp;
+    }
+
+    // ===== SYNC METADATA =====
+    match /syncMetadata/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ===== BLOQUEAR TODO O RESTO =====
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

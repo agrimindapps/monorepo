@@ -4,6 +4,7 @@ import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_notifier.dart';
 import 'core/config/app_config.dart';
+import 'core/widgets/auth_sync_listener.dart';
 
 /// Main application widget
 /// Configures MaterialApp with routing, theming, and localization
@@ -17,28 +18,30 @@ class AppNebulalistApp extends ConsumerWidget {
     // Watch router provider
     final router = ref.watch(goRouterProvider);
 
-    return MaterialApp.router(
-      title: AppConfig.appName,
-      debugShowCheckedModeBanner: false,
+    return AuthSyncListener(
+      child: MaterialApp.router(
+        title: AppConfig.appName,
+        debugShowCheckedModeBanner: false,
 
-      // Theme configuration with dynamic theme mode
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
+        // Theme configuration with dynamic theme mode
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
 
-      // Router configuration with auth protection
-      routerConfig: router,
+        // Router configuration with auth protection
+        routerConfig: router,
 
-      // Localization (if needed)
-      // localizationsDelegates: const [
-      //   GlobalMaterialLocalizations.delegate,
-      //   GlobalWidgetsLocalizations.delegate,
-      //   GlobalCupertinoLocalizations.delegate,
-      // ],
-      // supportedLocales: const [
-      //   Locale('pt', 'BR'),
-      //   Locale('en', 'US'),
-      // ],
+        // Localization (if needed)
+        // localizationsDelegates: const [
+        //   GlobalMaterialLocalizations.delegate,
+        //   GlobalWidgetsLocalizations.delegate,
+        //   GlobalCupertinoLocalizations.delegate,
+        // ],
+        // supportedLocales: const [
+        //   Locale('pt', 'BR'),
+        //   Locale('en', 'US'),
+        // ],
+      ),
     );
   }
 }

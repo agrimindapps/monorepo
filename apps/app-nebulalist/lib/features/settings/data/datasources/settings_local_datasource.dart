@@ -1,8 +1,17 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../models/settings_model.dart';
 
-class SettingsLocalDataSource {
+part 'settings_local_datasource.g.dart';
+
+abstract class LocalSettingsDataSource {
+  Future<SettingsModel> getSettings();
+  Future<void> saveSettings(SettingsModel settings);
+  Future<void> clearSettings();
+}
+
+class SettingsLocalDataSource implements LocalSettingsDataSource {
   static const String _settingsKey = 'app_settings';
 
   Future<SettingsModel> getSettings() async {
@@ -39,4 +48,9 @@ class SettingsLocalDataSource {
       throw Exception('Erro ao limpar configurações: $e');
     }
   }
+}
+
+@riverpod
+LocalSettingsDataSource localSettingsDataSource(LocalSettingsDataSourceRef ref) {
+  return SettingsLocalDataSource();
 }

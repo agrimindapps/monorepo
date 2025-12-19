@@ -14,7 +14,7 @@ import '../../features/legal/presentation/pages/account_deletion_policy_page.dar
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/terms_of_service_page.dart';
 import '../../features/lists/presentation/pages/lists_page.dart';
-import '../../features/premium/presentation/pages/premium_page.dart';
+import '../../features/subscription/presentation/pages/paywall_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
 import '../../features/settings/presentation/pages/profile_page.dart';
@@ -99,7 +99,7 @@ GoRouter goRouter(Ref ref) {
         GoRoute(
           path: AppConstants.premiumRoute,
           name: 'premium',
-          builder: (context, state) => const PremiumPage(),
+          builder: (context, state) => const PaywallPage(),
         ),
 
         // List detail route (protected)

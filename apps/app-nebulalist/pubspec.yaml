@@ -24,6 +24,7 @@ dependencies:
   path_provider: any
   path: any
   freezed_annotation: any
+  connectivity_plus: any
   
   # Firebase (re-exported from core but needed for direct imports)
   cloud_firestore: any

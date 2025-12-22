@@ -7,7 +7,7 @@ class DeviceLimitConfig {
     this.maxMobileDevices = 3,
     this.maxWebDevices = -1, // -1 = ilimitado
     this.countWebInLimit = false,
-    this.premiumMaxMobileDevices = 10,
+    this.premiumMaxMobileDevices = 6,
     this.premiumMaxWebDevices = -1,
     this.allowEmulators = true,
     this.inactivityDaysForCleanup = 90,

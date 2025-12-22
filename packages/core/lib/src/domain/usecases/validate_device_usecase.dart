@@ -19,7 +19,10 @@ class ValidateDeviceUseCase implements UseCase<DeviceEntity, ValidateDeviceParam
   @override
   Future<Either<Failure, DeviceEntity>> call(ValidateDeviceParams params) async {
     try {
-      final canAddResult = await _deviceRepository.canAddMoreDevices(params.userId);
+      final canAddResult = await _deviceRepository.canAddMoreDevices(
+        params.userId,
+        isPremium: params.isPremium,
+      );
       
       return await canAddResult.fold(
         (failure) async => Left(failure),
@@ -74,13 +77,18 @@ class ValidateDeviceParams {
   /// The device entity to be validated.
   final DeviceEntity device;
 
+  /// Whether the user is a premium subscriber.
+  final bool isPremium;
+
   /// Creates a new instance of [ValidateDeviceParams].
   ///
   /// [userId] The user's unique identifier.
   /// [device] The device entity to be validated.
+  /// [isPremium] Whether the user is a premium subscriber.
   const ValidateDeviceParams({
     required this.userId,
     required this.device,
+    this.isPremium = false,
   });
 
   @override
@@ -88,12 +96,13 @@ class ValidateDeviceParams {
     if (identical(this, other)) return true;
     return other is ValidateDeviceParams &&
         other.userId == userId &&
-        other.device == device;
+        other.device == device &&
+        other.isPremium == isPremium;
   }
 
   @override
-  int get hashCode => userId.hashCode ^ device.hashCode;
+  int get hashCode => userId.hashCode ^ device.hashCode ^ isPremium.hashCode;
 
   @override
-  String toString() => 'ValidateDeviceParams(userId: $userId, device: ${device.uuid})';
+  String toString() => 'ValidateDeviceParams(userId: $userId, device: ${device.uuid}, isPremium: $isPremium)';
 }

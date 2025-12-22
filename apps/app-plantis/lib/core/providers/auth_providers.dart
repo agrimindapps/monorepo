@@ -406,8 +406,21 @@ class AuthNotifier extends _$AuthNotifier {
         return;
       }
 
+      // Verifica status premium atualizado para garantir limite correto
+      bool isPremium = state.value?.isPremium ?? false;
+      if (!isPremium && _subscriptionRepository != null && state.value?.currentUser != null) {
+         final subResult = await _subscriptionRepository!.hasPlantisSubscription();
+         isPremium = subResult.getOrElse(() => false);
+         
+         if (isPremium) {
+           final updatedState = state.value ?? const AuthState();
+           state = AsyncData(updatedState.copyWith(isPremium: true));
+         }
+      }
+
       final result = await _deviceManagementService!.validateDevice(
         currentDevice.toEntity(),
+        isPremium: isPremium,
       );
 
       result.fold(

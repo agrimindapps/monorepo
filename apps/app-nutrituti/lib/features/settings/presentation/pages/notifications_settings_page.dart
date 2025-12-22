@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../widgets/app_colors.dart';
+import '../../../../widgets/app_colors.dart';
+import '../providers/settings_providers.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_switch_item.dart';
@@ -12,7 +13,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final settingsAsync = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,7 +50,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
                     value: settings.notificationsEnabled,
                     onChanged: (value) {
                       ref
-                          .read(settingsNotifierProvider.notifier)
+                          .read(settingsProvider.notifier)
                           .setNotificationsEnabled(value);
                     },
                   ),
@@ -76,7 +77,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
                     onChanged: settings.notificationsEnabled
                         ? (value) {
                             ref
-                                .read(settingsNotifierProvider.notifier)
+                                .read(settingsProvider.notifier)
                                 .setMealReminders(value);
                           }
                         : null,
@@ -89,7 +90,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
                     onChanged: settings.notificationsEnabled
                         ? (value) {
                             ref
-                                .read(settingsNotifierProvider.notifier)
+                                .read(settingsProvider.notifier)
                                 .setWaterReminders(value);
                           }
                         : null,
@@ -102,7 +103,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
                     onChanged: settings.notificationsEnabled
                         ? (value) {
                             ref
-                                .read(settingsNotifierProvider.notifier)
+                                .read(settingsProvider.notifier)
                                 .setExerciseReminders(value);
                           }
                         : null,

@@ -41,7 +41,7 @@ class _AccountDeletionDialogState extends ConsumerState<AccountDeletionDialog> {
     try {
       // Aqui você implementaria a lógica real de exclusão
       // Por exemplo: validar senha, chamar API, etc.
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       if (!mounted) return;
 

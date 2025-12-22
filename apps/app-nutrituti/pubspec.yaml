@@ -23,11 +23,11 @@ dependencies:
   # UI
   cupertino_icons: any
 
-  # State Management (Riverpod 3.0)
+  # State Management (Riverpod 3.0 - inherited from core)
   flutter_riverpod: any
   riverpod_annotation: any
 
-  # Code Generation
+  # Code Generation (inherited from core)
   freezed_annotation: any
   json_annotation: any
 
@@ -82,7 +82,7 @@ dev_dependencies:
   # Linting
   flutter_lints: any
 
-  # Code Generation
+  # Code Generation (inherited from core)
   drift_dev: any
   build_runner: any
   riverpod_generator: any

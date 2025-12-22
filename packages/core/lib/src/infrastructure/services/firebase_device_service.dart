@@ -333,7 +333,7 @@ class FirebaseDeviceService implements IDeviceRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
+  Future<Either<Failure, bool>> canAddMoreDevices(String userId, {bool isPremium = false}) async {
     try {
       final devicesResult = await getUserDevices(userId);
       
@@ -354,11 +354,12 @@ class FirebaseDeviceService implements IDeviceRepository {
           
           // Verifica se pode adicionar mais dispositivos mobile
           // Web não conta no limite por padrão
-          final canAdd = mobileCount < _limitConfig.maxMobileDevices;
+          final limit = _limitConfig.getLimit(isPremium: isPremium);
+          final canAdd = mobileCount < limit;
           
           if (kDebugMode) {
             debugPrint(
-              '📱 FirebaseDevice: Mobile: $mobileCount/${_limitConfig.maxMobileDevices}, '
+              '📱 FirebaseDevice: Mobile: $mobileCount/$limit (Premium: $isPremium), '
               'Web: $webCount (não conta no limite), canAdd: $canAdd',
             );
           }

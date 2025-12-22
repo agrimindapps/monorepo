@@ -1,21 +1,24 @@
 import 'package:core/core.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gasometer_drift/core/providers/dependency_providers.dart';
 import 'package:gasometer_drift/features/auth/domain/entities/user_entity.dart'
     as gasometer_auth;
 import 'package:gasometer_drift/features/auth/presentation/providers/auth_providers.dart'
     as auth_providers;
 import 'package:gasometer_drift/features/vehicles/domain/entities/vehicle_entity.dart';
+import 'package:gasometer_drift/features/vehicles/domain/repositories/vehicle_repository.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/add_vehicle.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/delete_vehicle.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/get_all_vehicles.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/get_vehicle_by_id.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/search_vehicles.dart';
 import 'package:gasometer_drift/features/vehicles/domain/usecases/update_vehicle.dart';
-import 'package:gasometer_drift/features/vehicles/presentation/providers/vehicle_services_providers.dart';
 import 'package:gasometer_drift/features/vehicles/presentation/providers/vehicles_notifier.dart';
 import 'package:mocktail/mocktail.dart';
 
 // Mocks
+class MockVehicleRepository extends Mock implements VehicleRepository {}
+
 class MockGetAllVehicles extends Mock implements GetAllVehicles {}
 
 class MockAddVehicle extends Mock implements AddVehicle {}
@@ -40,6 +43,7 @@ class FakeUpdateVehicleParams extends Fake implements UpdateVehicleParams {}
 class FakeDeleteVehicleParams extends Fake implements DeleteVehicleParams {}
 
 void main() {
+  late MockVehicleRepository mockRepository;
   late MockGetAllVehicles mockGetAllVehicles;
   late MockAddVehicle mockAddVehicle;
   late MockUpdateVehicle mockUpdateVehicle;
@@ -57,6 +61,7 @@ void main() {
   });
 
   setUp(() {
+    mockRepository = MockVehicleRepository();
     mockGetAllVehicles = MockGetAllVehicles();
     mockAddVehicle = MockAddVehicle();
     mockUpdateVehicle = MockUpdateVehicle();
@@ -66,12 +71,17 @@ void main() {
     mockUser = MockUserEntity();
 
     when(() => mockUser.id).thenReturn('user-123');
+    
+    // Setup default for watchVehicles to prevent Firebase calls
+    when(() => mockRepository.watchVehicles())
+        .thenAnswer((_) => Stream.value(const Right([])));
   });
 
   ProviderContainer createContainer() {
     final container = ProviderContainer(
       overrides: [
         auth_providers.currentUserProvider.overrideWithValue(mockUser),
+        vehicleRepositoryProvider.overrideWithValue(mockRepository),
         getAllVehiclesProvider.overrideWithValue(mockGetAllVehicles),
         addVehicleProvider.overrideWithValue(mockAddVehicle),
         updateVehicleProvider.overrideWithValue(mockUpdateVehicle),
@@ -106,6 +116,8 @@ void main() {
       // Arrange
       when(() => mockGetAllVehicles.call())
           .thenAnswer((_) async => Right([tVehicle]));
+      when(() => mockRepository.watchVehicles())
+          .thenAnswer((_) => Stream.value(Right([tVehicle])));
 
       final container = createContainer();
 

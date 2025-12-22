@@ -47,7 +47,7 @@ class _ClearDataDialogState extends ConsumerState<ClearDataDialog> {
 
     try {
       // Simular limpeza (aqui você implementaria a lógica real)
-      await Future.delayed(const Duration(seconds: 2));
+      await Future<void>.delayed(const Duration(seconds: 2));
 
       if (!mounted) return;
 

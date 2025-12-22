@@ -135,8 +135,8 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                 CircleAvatar(
                   backgroundColor: theme.colorScheme.primary,
                   child: Text(
-                    (selectedAnimal.name as String).isNotEmpty
-                        ? (selectedAnimal.name as String)[0].toUpperCase()
+                    selectedAnimal.name.isNotEmpty
+                        ? selectedAnimal.name[0].toUpperCase()
                         : 'A',
                     style: TextStyle(
                       color: theme.colorScheme.onPrimary,
@@ -150,7 +150,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        selectedAnimal.name as String,
+                        selectedAnimal.name,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -421,7 +421,7 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
 
       final appointment = Appointment(
         id: widget.initialAppointment?.id ?? UuidGenerator.generate(),
-        animalId: selectedAnimalData?.id ?? '',
+        animalId: selectedAnimalData.id,
         veterinarianName: _veterinarianController.text.trim(),
         date: appointmentDate,
         reason: _reasonController.text.trim(),

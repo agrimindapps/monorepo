@@ -11,6 +11,7 @@ library;
 import 'package:core/core.dart' hide Column, connectivityServiceProvider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/repository_providers.dart';
 
 part 'device_management_providers.g.dart';
@@ -23,7 +24,7 @@ DeviceLimitConfig plantisDeviceLimitConfig(Ref ref) {
     maxMobileDevices: 3,
     maxWebDevices: -1, // Web ilimitado
     countWebInLimit: false, // Web não conta no limite
-    premiumMaxMobileDevices: 10,
+    premiumMaxMobileDevices: 6,
     allowEmulators: true,
   );
 }
@@ -58,7 +59,8 @@ Future<List<DeviceEntity>> plantisUserDevices(Ref ref) async {
 @riverpod
 Future<bool> plantisCanAddMoreDevices(Ref ref) async {
   final service = ref.watch(plantisDeviceManagementServiceProvider);
-  final result = await service.canAddMoreDevices();
+  final isPremium = ref.watch(isPremiumProvider);
+  final result = await service.canAddMoreDevices(isPremium: isPremium);
 
   return result.fold((failure) => false, (canAdd) => canAdd);
 }

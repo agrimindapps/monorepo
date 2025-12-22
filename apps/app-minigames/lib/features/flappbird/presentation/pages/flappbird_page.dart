@@ -57,7 +57,6 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
             );
           },
           'GameOver': (context, FlappyBirdGame game) {
-            if (!game.isGameOver) return const SizedBox.shrink();
             return GameOverDialog(
               score: _currentScore,
               highScore: highScore,
@@ -67,12 +66,11 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
             );
           },
           'Start': (context, FlappyBirdGame game) {
-            if (game.isPlaying || game.isGameOver) return const SizedBox.shrink();
             return Center(
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
+                  color: Colors.black.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Text(
@@ -87,7 +85,7 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
             );
           },
         },
-        initialActiveOverlays: const ['Score', 'Start', 'GameOver'],
+        initialActiveOverlays: const ['Score'],
       ),
     );
   }

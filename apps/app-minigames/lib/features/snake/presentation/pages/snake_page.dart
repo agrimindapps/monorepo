@@ -15,7 +15,6 @@ import '../game/snake_game.dart';
 
 // Domain imports:
 import '../../domain/entities/enums.dart';
-import '../../domain/entities/game_state.dart';
 import '../../domain/entities/power_up.dart';
 
 /// Snake game page with Neon Arcade theme
@@ -55,7 +54,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
 
   @override
   Widget build(BuildContext context) {
-    final gameState = ref.watch(snakeGameProvider);
+    ref.watch(snakeGameProvider);
     final notifier = ref.read(snakeGameProvider.notifier);
 
     return Scaffold(

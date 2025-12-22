@@ -39,7 +39,7 @@ class GameOverDialog extends StatelessWidget {
     final titleColor = isTimeAttack && survived ? Colors.green : Colors.red;
 
     return Container(
-      color: Colors.black.withOpacity(0.7),
+      color: Colors.black.withValues(alpha: 0.7),
       child: Center(
         child: Container(
           margin: const EdgeInsets.symmetric(horizontal: 40),
@@ -49,7 +49,7 @@ class GameOverDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
               ),
@@ -142,9 +142,9 @@ class GameOverDialog extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.1),
+                    color: Colors.amber.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.withOpacity(0.3)),
+                    border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
                   ),
                   child: Column(
                     children: [
@@ -173,7 +173,7 @@ class GameOverDialog extends StatelessWidget {
                               achievement.title,
                               style: const TextStyle(fontSize: 12),
                             ),
-                            backgroundColor: achievement.rarity.color.withOpacity(0.2),
+                            backgroundColor: achievement.rarity.color.withValues(alpha: 0.2),
                             side: BorderSide(color: achievement.rarity.color),
                           );
                         }).toList(),

@@ -6,7 +6,7 @@ class SettingsSwitchItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged;
   final Color? iconColor;
 
   const SettingsSwitchItem({
@@ -15,7 +15,7 @@ class SettingsSwitchItem extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.value,
-    required this.onChanged,
+    this.onChanged,
     this.iconColor,
   });
 

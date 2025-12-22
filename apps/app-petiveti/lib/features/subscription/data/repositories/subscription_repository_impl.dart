@@ -1,4 +1,4 @@
-import 'package:core/core.dart' hide SubscriptionRepository;
+import 'package:core/core.dart';
 
 import '../../../../core/auth/auth_service.dart';
 import '../../../../core/constants/product_ids.dart';
@@ -13,6 +13,7 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
   SubscriptionRepositoryImpl(
     this._coreRepository,
     this._localStorageRepository,
+    // ignore: unused_element
     this._errorService,
     this._subscriptionLocalRepository,
     this._authService,
@@ -114,7 +115,7 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
                   final now = DateTime.now();
                   if (localSub.expirationDate == null ||
                       localSub.expirationDate!.isAfter(now)) {
-                    return const Right(true);
+                    return const Right<Failure, bool>(true);
                   }
                 }
               }

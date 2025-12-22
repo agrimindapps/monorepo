@@ -22,20 +22,16 @@ dependencies:
   # Game Engine
   flame: ^1.34.0
 
-  # Utils
-  logger: any
-  shared_preferences: any
+  # Utils (using core package versions when available)
   equatable: any
   dartz: any
-  flutter_riverpod: any
-  riverpod_annotation: any
-
-  firebase_core: any
-  cloud_firestore: any
-  firebase_auth: any
   go_router: any
   icons_plus: any
   uuid: any
+  
+  # Riverpod (code generation)
+  flutter_riverpod: any
+  riverpod_annotation: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -11,14 +11,14 @@ part 'settings_providers.g.dart';
 
 /// Provider for SharedPreferences
 @Riverpod(keepAlive: true)
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
+Future<SharedPreferences> sharedPreferences(Ref ref) async {
   return await SharedPreferences.getInstance();
 }
 
 /// Provider for SettingsLocalDataSource
 @Riverpod(keepAlive: true)
 SettingsLocalDataSource settingsLocalDataSource(
-  SettingsLocalDataSourceRef ref,
+  Ref ref,
 ) {
   final prefs = ref.watch(sharedPreferencesProvider).requireValue;
   return SettingsLocalDataSource(prefs);
@@ -26,14 +26,14 @@ SettingsLocalDataSource settingsLocalDataSource(
 
 /// Provider for SettingsRepository
 @Riverpod(keepAlive: true)
-ISettingsRepository settingsRepository(SettingsRepositoryRef ref) {
+ISettingsRepository settingsRepository(Ref ref) {
   final dataSource = ref.watch(settingsLocalDataSourceProvider);
   return SettingsRepository(dataSource);
 }
 
 /// Provider for SyncSettingsUseCase
 @riverpod
-SyncSettingsUseCase syncSettingsUseCase(SyncSettingsUseCaseRef ref) {
+SyncSettingsUseCase syncSettingsUseCase(Ref ref) {
   final repository = ref.watch(settingsRepositoryProvider);
   return SyncSettingsUseCase(repository);
 }

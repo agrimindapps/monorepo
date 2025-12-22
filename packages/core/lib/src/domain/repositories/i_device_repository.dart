@@ -38,7 +38,7 @@ abstract class IDeviceRepository {
   });
 
   /// Verifica se o usuário pode adicionar mais dispositivos
-  Future<Either<Failure, bool>> canAddMoreDevices(String userId);
+  Future<Either<Failure, bool>> canAddMoreDevices(String userId, {bool isPremium = false});
 
   /// Obtém o número atual de dispositivos ativos do usuário
   Future<Either<Failure, int>> getActiveDeviceCount(String userId);

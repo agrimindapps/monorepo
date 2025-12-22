@@ -54,7 +54,15 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, HasCollisionDetection 
     add(bird);
     
     // Start paused
-    pauseGame();
+    isPlaying = false;
+    overlays.add('Start');
+  }
+
+  @override
+  void update(double dt) {
+    if (isPlaying) {
+      super.update(dt);
+    }
   }
 
   @override
@@ -72,12 +80,11 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, HasCollisionDetection 
 
   void startGame() {
     isPlaying = true;
-    resumeEngine();
+    overlays.remove('Start');
   }
 
   void pauseGame() {
     isPlaying = false;
-    pauseEngine();
   }
 
   void gameOver() {
@@ -85,7 +92,7 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, HasCollisionDetection 
     
     isGameOver = true;
     isPlaying = false;
-    pauseEngine();
+    overlays.add('GameOver');
     
     if (onGameOver != null) {
       onGameOver!();
@@ -104,7 +111,9 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, HasCollisionDetection 
     bird.reset();
     pipeManager.reset();
     
-    resumeEngine();
+    overlays.remove('GameOver');
+    overlays.add('Start');
+    
     // Wait for next tap to start
     pauseGame(); 
   }

@@ -85,7 +85,10 @@ class DeviceManagementService {
   }
 
   /// Valida um dispositivo para o usuário atual
-  Future<Either<Failure, DeviceEntity>> validateDevice(DeviceEntity device) async {
+  Future<Either<Failure, DeviceEntity>> validateDevice(
+    DeviceEntity device, {
+    bool isPremium = false,
+  }) async {
     try {
       final isLoggedIn = await _authService.isLoggedIn;
       if (!isLoggedIn) {
@@ -99,9 +102,12 @@ class DeviceManagementService {
       }
 
       if (kDebugMode) {
-        debugPrint('🔄 DeviceManagement: Validating device ${device.uuid} for user ${user.id}');
+        debugPrint('🔄 DeviceManagement: Validating device ${device.uuid} for user ${user.id} (Premium: $isPremium)');
       }
-      final canAddResult = await _deviceRepository.canAddMoreDevices(user.id);
+      final canAddResult = await _deviceRepository.canAddMoreDevices(
+        user.id,
+        isPremium: isPremium,
+      );
       
       return await canAddResult.fold(
         (failure) async => Left(failure),
@@ -139,6 +145,7 @@ class DeviceManagementService {
                   parameters: {
                     'user_id': user.id,
                     'attempted_device': device.uuid,
+                    'is_premium': isPremium,
                   },
                 ));
                 
@@ -180,6 +187,7 @@ class DeviceManagementService {
                       'device_platform': validatedDevice.platform,
                       'device_model': validatedDevice.model,
                       'is_physical': validatedDevice.isPhysicalDevice,
+                      'is_premium': isPremium,
                     },
                   ));
                   
@@ -270,7 +278,7 @@ class DeviceManagementService {
   }
 
   /// Verifica se o usuário pode adicionar mais dispositivos
-  Future<Either<Failure, bool>> canAddMoreDevices() async {
+  Future<Either<Failure, bool>> canAddMoreDevices({bool isPremium = false}) async {
     try {
       final isLoggedIn = await _authService.isLoggedIn;
       if (!isLoggedIn) {
@@ -283,7 +291,10 @@ class DeviceManagementService {
         return const Left(AuthFailure('Usuário não encontrado'));
       }
 
-      return await _deviceRepository.canAddMoreDevices(user.id);
+      return await _deviceRepository.canAddMoreDevices(
+        user.id,
+        isPremium: isPremium,
+      );
     } catch (e) {
       return Left(
         ServerFailure(

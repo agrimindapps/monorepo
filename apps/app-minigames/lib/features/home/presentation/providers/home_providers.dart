@@ -30,8 +30,13 @@ class SearchQuery extends _$SearchQuery {
 List<GameEntity> filteredGames(Ref ref) {
   final category = ref.watch(selectedCategoryProvider);
   final query = ref.watch(searchQueryProvider);
+  final featuredGamesList = ref.watch(featuredGamesProvider);
 
   var games = GamesData.getByCategory(category);
+
+  // Remove featured games from the main list to avoid duplicate Hero tags
+  final featuredIds = featuredGamesList.map((g) => g.id).toSet();
+  games = games.where((g) => !featuredIds.contains(g.id)).toList();
 
   if (query.isNotEmpty) {
     final lowerQuery = query.toLowerCase();
@@ -49,13 +54,21 @@ List<GameEntity> filteredGames(Ref ref) {
 @riverpod
 List<GameEntity> featuredGames(Ref ref) => GamesData.featuredGames;
 
-/// New games
+/// New games (excluding featured to avoid duplicate Heroes)
 @riverpod
-List<GameEntity> newGames(Ref ref) => GamesData.newGames;
+List<GameEntity> newGames(Ref ref) {
+  final featuredGamesList = ref.watch(featuredGamesProvider);
+  final featuredIds = featuredGamesList.map((g) => g.id).toSet();
+  return GamesData.newGames.where((g) => !featuredIds.contains(g.id)).toList();
+}
 
-/// Multiplayer games
+/// Multiplayer games (excluding featured to avoid duplicate Heroes)
 @riverpod
-List<GameEntity> multiplayerGames(Ref ref) => GamesData.multiplayerGames;
+List<GameEntity> multiplayerGames(Ref ref) {
+  final featuredGamesList = ref.watch(featuredGamesProvider);
+  final featuredIds = featuredGamesList.map((g) => g.id).toSet();
+  return GamesData.multiplayerGames.where((g) => !featuredIds.contains(g.id)).toList();
+}
 
 /// All games
 @riverpod

@@ -7,7 +7,10 @@ enum DocumentType {
   termsOfService('terms_of_service', 'Termos de Serviço'),
 
   /// Account Deletion Policy document
-  accountDeletion('account_deletion', 'Política de Exclusão de Conta');
+  accountDeletion('account_deletion', 'Política de Exclusão de Conta'),
+
+  /// Cookies Policy document
+  cookiesPolicy('cookies_policy', 'Política de Cookies');
 
   const DocumentType(this.id, this.displayName);
 

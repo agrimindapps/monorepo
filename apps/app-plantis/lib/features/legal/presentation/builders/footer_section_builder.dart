@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
 /// Builder estático para seção de Footer
 /// SRP: Isolates footer section UI construction
 class FooterSectionBuilder {
-  static Widget build() {
+  static Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
@@ -46,7 +48,7 @@ class FooterSectionBuilder {
                             ),
                             const SizedBox(width: 12),
                             const Text(
-                              'Plantis',
+                              'CantinhoVerde',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -81,10 +83,10 @@ class FooterSectionBuilder {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        _buildFooterLink('Sobre Nós'),
-                        _buildFooterLink('Recursos'),
-                        _buildFooterLink('Documentação'),
-                        _buildFooterLink('Comunidade'),
+                        _buildFooterLink(context, 'Sobre Nós', null),
+                        _buildFooterLink(context, 'Recursos', null),
+                        _buildFooterLink(context, 'Documentação', null),
+                        _buildFooterLink(context, 'Comunidade', null),
                       ],
                     ),
                   ),
@@ -102,10 +104,26 @@ class FooterSectionBuilder {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        _buildFooterLink('Política de Privacidade'),
-                        _buildFooterLink('Termos de Uso'),
-                        _buildFooterLink('Exclusão de Conta'),
-                        _buildFooterLink('Cookies'),
+                        _buildFooterLink(
+                          context,
+                          'Política de Privacidade',
+                          AppRouter.privacyPolicy,
+                        ),
+                        _buildFooterLink(
+                          context,
+                          'Termos de Uso',
+                          AppRouter.termsOfService,
+                        ),
+                        _buildFooterLink(
+                          context,
+                          'Exclusão de Conta',
+                          AppRouter.accountDeletionPolicy,
+                        ),
+                        _buildFooterLink(
+                          context,
+                          'Cookies',
+                          AppRouter.cookies,
+                        ),
                       ],
                     ),
                   ),
@@ -118,7 +136,7 @@ class FooterSectionBuilder {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '© 2024 Plantis. Todos os direitos reservados.',
+                    '© 2024 CantinhoVerde. Todos os direitos reservados.',
                     style: TextStyle(color: Colors.grey[500], fontSize: 14),
                   ),
                   Row(
@@ -139,13 +157,32 @@ class FooterSectionBuilder {
     );
   }
 
-  static Widget _buildFooterLink(String label) {
+  static Widget _buildFooterLink(
+    BuildContext context,
+    String label,
+    String? route,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        label,
-        style: TextStyle(color: Colors.grey[400], fontSize: 14),
-      ),
+      child: route != null
+          ? MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => context.push(route),
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey[400],
+                    fontSize: 14,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            )
+          : Text(
+              label,
+              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            ),
     );
   }
 

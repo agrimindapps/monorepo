@@ -80,7 +80,7 @@ class PromoCallToAction extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    'Junte-se a milhares de jardineiros que já estão cuidando melhor de suas plantas com o Plantis.',
+                    'Junte-se a milhares de jardineiros que já estão cuidando melhor de suas plantas com o CantinhoVerde.',
                     style: GoogleFonts.inter(
                       fontSize: isMobile ? 16 : 18,
                       color: Colors.white.withValues(alpha: 0.9),

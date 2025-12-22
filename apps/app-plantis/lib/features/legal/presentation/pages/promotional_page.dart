@@ -15,7 +15,7 @@ import '../widgets/promo_header_section.dart';
 import '../widgets/promo_navigation_bar.dart';
 import '../widgets/promo_statistics_section.dart';
 
-/// Página promocional moderna do Plantis
+/// Página promocional moderna do CantinhoVerde
 /// Design modular com widgets reutilizáveis
 /// SRP: Page only handles navigation and layout composition
 class PromotionalPage extends ConsumerStatefulWidget {
@@ -89,7 +89,7 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
                       screenWidth: MediaQuery.of(context).size.width,
                     ),
                     const PromoCallToAction(),
-                    FooterSectionBuilder.build(),
+                    FooterSectionBuilder.build(context),
                   ],
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
@@ -103,7 +103,7 @@ class _PromotionalPageState extends ConsumerState<PromotionalPage>
                       screenWidth: MediaQuery.of(context).size.width,
                     ),
                     const PromoCallToAction(),
-                    FooterSectionBuilder.build(),
+                    FooterSectionBuilder.build(context),
                   ],
                 ),
               ),

@@ -100,6 +100,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                         Expanded(
                           flex: 3,
                           child: Column(
+                            mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Badges
@@ -121,13 +122,13 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                 ],
                               ),
 
-                              const Spacer(),
+                              const SizedBox(height: 12),
 
                               // Title
                               Text(
                                 game.name,
                                 style: const TextStyle(
-                                  fontSize: 28,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.white,
                                   shadows: [
@@ -138,27 +139,31 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                     ),
                                   ],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-
-                              // Description
-                              Text(
-                                game.description,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.white.withOpacity(0.9),
-                                ),
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(height: 6),
 
-                              const SizedBox(height: 12),
+                              // Description
+                              Flexible(
+                                child: Text(
+                                  game.description,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.white.withOpacity(0.9),
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+
+                              const SizedBox(height: 10),
 
                               // Play button
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 10,
+                                  horizontal: 18,
+                                  vertical: 8,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
@@ -177,7 +182,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                     Icon(
                                       Icons.play_arrow,
                                       color: game.primaryColor,
-                                      size: 20,
+                                      size: 18,
                                     ),
                                     const SizedBox(width: 6),
                                     Text(

@@ -25,6 +25,9 @@ abstract class LegalRepository {
   /// Get the Account Deletion Policy document
   Future<Either<Failure, LegalDocument>> getAccountDeletionPolicy();
 
+  /// Get the Cookies Policy document
+  Future<Either<Failure, LegalDocument>> getCookiesPolicy();
+
   /// Get all available legal documents
   Future<Either<Failure, List<LegalDocument>>> getAllDocuments();
 }

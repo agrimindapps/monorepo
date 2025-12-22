@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/auth/auth_state_notifier.dart';
 import '../../../../core/sync/nebulalist_sync_queue_service.dart';
+import '../../../subscription/domain/usecases/get_subscription_status.dart';
 import '../../domain/entities/list_entity.dart';
 import '../../domain/repositories/i_list_repository.dart';
 import '../datasources/list_local_datasource.dart';
@@ -16,6 +17,7 @@ class ListRepository implements IListRepository {
   final IListRemoteDataSource _remoteDataSource; // For future sync features
   final AuthStateNotifier _authNotifier;
   final NebulalistSyncQueueService _syncQueueService;
+  final GetSubscriptionStatus _getSubscriptionStatus;
 
   // Free tier limit
   static const int _freeListsLimit = 10;
@@ -25,6 +27,7 @@ class ListRepository implements IListRepository {
     this._remoteDataSource,
     this._authNotifier,
     this._syncQueueService,
+    this._getSubscriptionStatus,
   );
 
   String get _currentUserId {
@@ -299,10 +302,15 @@ class ListRepository implements IListRepository {
   @override
   Future<Either<Failure, bool>> canCreateList() async {
     try {
-      // TODO: Check if user is premium (RevenueCat integration)
-      // Premium users should have unlimited lists
+      // Check if user is premium
+      final isPremium = await _getSubscriptionStatus.isPremium();
+      
+      // Premium users have unlimited lists
+      if (isPremium) {
+        return const Right(true);
+      }
 
-      // Check free tier limit
+      // Free tier: check limit
       final count = await _localDataSource.getActiveListsCount(_currentUserId);
       return Right(count < _freeListsLimit);
     } on CacheException catch (e) {

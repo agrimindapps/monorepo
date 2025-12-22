@@ -163,7 +163,7 @@ Future<void> _initializeFirebaseServices() async {
     }
     await _crashlyticsRepository.setCustomKey(
       key: 'app_name',
-      value: 'Plantis',
+      value: 'CantinhoVerde',
     );
     await _crashlyticsRepository.setCustomKey(
       key: 'environment',

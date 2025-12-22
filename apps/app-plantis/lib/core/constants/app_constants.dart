@@ -1,9 +1,9 @@
-/// Application-wide constants for Plantis
+/// Application-wide constants for CantinhoVerde
 /// Centralizes hardcoded values to improve maintainability
 class AppConstants {
   AppConstants._(); // Private constructor to prevent instantiation
-  static const String appId = 'plantis';
-  static const String appName = 'Plantis';
+  static const String appId = 'cantinhoverde';
+  static const String appName = 'CantinhoVerde';
   static const String packageName = 'br.com.agrimsolution.plantis';
 
   /// App Store ID - Update this before production release
@@ -47,7 +47,7 @@ class AppConstants {
       'Error updating plant notification schedule';
   static const String errorSnoozingReminder = 'Error snoozing reminder';
   static const String errorInitializingSyncService =
-      'Error initializing Plantis sync service';
+      'Error initializing CantinhoVerde sync service';
   static const String errorDuringInitialSync = 'Error during initial sync';
   static const String errorClearingSyncData = 'Error clearing sync data';
   static const String exceptionNotificationNotFound = 'Notification not found';

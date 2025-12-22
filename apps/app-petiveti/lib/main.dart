@@ -51,6 +51,11 @@ Future<void> main() async {
     // Initialize sync service (non-blocking)
     _initializeSyncService(container);
 
+    // 🧪 AUTO-LOGIN para desenvolvimento (apenas em debug mode)
+    if (kDebugMode) {
+      await _performAutoLogin();
+    }
+
     runApp(
       UncontrolledProviderScope(
         container: container,
@@ -147,5 +152,50 @@ void _initializeSyncService(ProviderContainer container) {
     });
   } catch (e) {
     debugPrint('❌ Error starting Sync Service initialization: $e');
+  }
+}
+
+/// Auto-login para desenvolvimento (apenas em kDebugMode)
+/// Facilita testes sem precisar digitar credenciais manualmente
+Future<void> _performAutoLogin() async {
+  try {
+    final auth = FirebaseAuth.instance;
+
+    // Se já está logado, não faz nada
+    if (auth.currentUser != null) {
+      debugPrint(
+        '🧪 [PETIVETI-AUTO-LOGIN] Já autenticado como: ${auth.currentUser!.email}',
+      );
+      return;
+    }
+
+    // Credenciais de desenvolvimento
+    const devEmail = 'lucineiy@hotmail.com';
+    const devPassword = 'QWEqwe@123';
+
+    debugPrint('🧪 [PETIVETI-AUTO-LOGIN] Iniciando auto-login...');
+
+    final userCredential = await auth.signInWithEmailAndPassword(
+      email: devEmail,
+      password: devPassword,
+    );
+
+    if (userCredential.user != null) {
+      debugPrint(
+        '✅ [PETIVETI-AUTO-LOGIN] Login automático bem-sucedido! '
+        'Usuário: ${userCredential.user!.email}',
+      );
+    }
+  } catch (e, stackTrace) {
+    debugPrint('❌ [PETIVETI-AUTO-LOGIN] Falha no auto-login: $e');
+    debugPrint('Stack: $stackTrace');
+    
+    // Em caso de erro, tenta login anônimo como fallback
+    try {
+      await FirebaseAuth.instance.signInAnonymously();
+      debugPrint('⚠️ [PETIVETI-AUTO-LOGIN] Fallback para login anônimo');
+    } catch (e2) {
+      debugPrint('❌ [PETIVETI-AUTO-LOGIN] Falha no fallback anônimo: $e2');
+    }
   }
 }

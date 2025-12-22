@@ -2,6 +2,7 @@ import 'package:core/core.dart' hide Column;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../data/datasources/account_deletion_datasource.dart';
+import '../../data/datasources/cookies_policy_datasource.dart';
 import '../../data/datasources/privacy_policy_datasource.dart';
 import '../../data/datasources/terms_of_service_datasource.dart';
 import '../../data/repositories/legal_repository_impl.dart';
@@ -32,6 +33,11 @@ AccountDeletionDataSource accountDeletionDataSource(Ref ref) {
   return AccountDeletionDataSource();
 }
 
+@riverpod
+CookiesPolicyDataSource cookiesPolicyDataSource(Ref ref) {
+  return CookiesPolicyDataSource();
+}
+
 // ===================================================================
 // Repository
 // ===================================================================
@@ -42,6 +48,7 @@ LegalRepository legalRepository(Ref ref) {
     privacyPolicyDataSource: ref.watch(privacyPolicyDataSourceProvider),
     termsOfServiceDataSource: ref.watch(termsOfServiceDataSourceProvider),
     accountDeletionDataSource: ref.watch(accountDeletionDataSourceProvider),
+    cookiesPolicyDataSource: ref.watch(cookiesPolicyDataSourceProvider),
   );
 }
 

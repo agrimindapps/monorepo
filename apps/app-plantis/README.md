@@ -1,4 +1,4 @@
-# 🌱 Plantis - Plant Care Assistant
+# 🌱 CantinhoVerde - Seu Jardim de Apartamento
 
 <div align="center">
 
@@ -622,7 +622,7 @@ Para questões e suporte:
 
 <div align="center">
 
-**🌱 Plantis - Cuidando das suas plantas com tecnologia de ponta 🌱**
+**🌱 CantinhoVerde - Cuidando das suas plantas com tecnologia de ponta 🌱**
 
 ![Quality](https://img.shields.io/badge/Quality-10%2F10-brightgreen?style=flat-square)
 ![Tests](https://img.shields.io/badge/Tests-Passing-success?style=flat-square)

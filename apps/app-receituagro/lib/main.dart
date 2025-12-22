@@ -18,6 +18,22 @@ late ProviderContainer _container;
 late ICrashlyticsRepository _crashlyticsRepository;
 late IPerformanceRepository _performanceRepository;
 
+/// Verifica se está rodando em localhost (Web apenas)
+bool _isLocalhost() {
+  if (!kIsWeb) return true; // Mobile/Desktop sempre permite em debug
+
+  try {
+    final uri = Uri.base;
+    final host = uri.host.toLowerCase();
+    return host == 'localhost' || host == '127.0.0.1' || host == '::1';
+  } catch (e) {
+    if (kDebugMode) {
+      debugPrint('⚠️ Failed to check localhost status: $e');
+    }
+    return false; // Fail-safe: bloqueia em caso de erro
+  }
+}
+
 /// Handler para mensagens em background (deve ser top-level function)
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -94,9 +110,9 @@ void main() async {
   }
 
   final auth = FirebaseAuth.instance;
-  
-  // 🧪 AUTO-LOGIN para testes (apenas em desenvolvimento)
-  if (kDebugMode && auth.currentUser == null) {
+
+  // 🧪 AUTO-LOGIN para testes (APENAS LOCALHOST)
+  if (kDebugMode && _isLocalhost() && auth.currentUser == null) {
     try {
       debugPrint('🧪 [RECEITUAGRO-TEST] Attempting auto-login...');
       final userCredential = await auth.signInWithEmailAndPassword(
@@ -210,9 +226,9 @@ class _ReceitaAgroAppState extends ConsumerState<ReceitaAgroApp> {
   @override
   void initState() {
     super.initState();
-    
-    // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
-    if (kDebugMode) {
+
+    // 🧪 AUTO-LOGIN PARA TESTES (APENAS LOCALHOST)
+    if (kDebugMode && _isLocalhost()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _performTestAutoLogin();
       });

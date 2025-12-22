@@ -28,7 +28,7 @@ class LandingFooterBuilder {
         Icon(Icons.eco, size: 24, color: PlantisColors.primary),
         SizedBox(width: 8),
         Text(
-          'Plantis',
+          'CantinhoVerde',
           style: TextStyle(
             color: PlantisColors.primary,
             fontSize: 20,
@@ -49,7 +49,7 @@ class LandingFooterBuilder {
 
   static Widget _buildCopyright() {
     return Text(
-      '© 2025 Plantis - Todos os direitos reservados',
+      '© 2025 CantinhoVerde - Todos os direitos reservados',
       textAlign: TextAlign.center,
       style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
     );

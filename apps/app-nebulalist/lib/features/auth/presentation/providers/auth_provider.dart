@@ -28,6 +28,7 @@ abstract class AuthState with _$AuthState {
 enum AuthOperation {
   signIn,
   signUp,
+  signInAnonymously,
   logout,
   resetPassword,
 }
@@ -190,6 +191,38 @@ class AuthNotifier extends _$AuthNotifier {
       },
       (user) {
         debugPrint('AuthNotifier: Signup successful - ${user.email}');
+        _authStateNotifier.updateUser(user);
+        state = state.copyWith(
+          isLoading: false,
+          currentUser: user,
+          errorMessage: null,
+          currentOperation: null,
+        );
+      },
+    );
+  }
+
+  /// Sign in anonymously
+  Future<void> signInAnonymously() async {
+    state = state.copyWith(
+      isLoading: true,
+      errorMessage: null,
+      currentOperation: AuthOperation.signInAnonymously,
+    );
+
+    final result = await ref.read(authRepositoryProvider).signInAnonymously();
+
+    result.fold(
+      (failure) {
+        debugPrint('AuthNotifier: Anonymous login failed - ${failure.message}');
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: failure.message,
+          currentOperation: null,
+        );
+      },
+      (user) {
+        debugPrint('AuthNotifier: Anonymous login successful - ${user.id}');
         _authStateNotifier.updateUser(user);
         state = state.copyWith(
           isLoading: false,

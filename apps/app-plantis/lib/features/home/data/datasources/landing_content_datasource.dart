@@ -12,12 +12,12 @@ class LandingContentDataSource {
   LandingContentModel getLandingContent() {
     return LandingContentModel(
       hero: const HeroContentModel(
-        title: 'Bem-vindo ao Plantis',
+        title: 'Bem-vindo ao CantinhoVerde',
         subtitle:
             'Gerencie suas plantas de forma inteligente com tecnologia e sustentabilidade',
         ctaText: 'Entrar',
         ctaSemanticLabel: 'Botão para entrar no aplicativo',
-        ctaTooltip: 'Fazer login no Plantis',
+        ctaTooltip: 'Fazer login no CantinhoVerde',
         comingSoonLabel: 'Em Breve',
       ),
       features: [

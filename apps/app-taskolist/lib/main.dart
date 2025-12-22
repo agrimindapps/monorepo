@@ -8,8 +8,7 @@ import 'core/services/notification_actions_service.dart';
 import 'core/sync/taskolist_sync_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/notification_test_helper.dart';
-import 'features/auth/presentation/login_page.dart';
-import 'features/premium/presentation/promotional_page.dart';
+import 'features/auth/presentation/auth_gate.dart';
 import 'features/subscription/data/revenue_cat_service.dart';
 import 'features/tasks/presentation/providers/recurrence_processor_provider.dart';
 import 'features/tasks/presentation/providers/theme_provider.dart';
@@ -185,7 +184,7 @@ class TaskManagerApp extends ConsumerWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeMode,
       navigatorKey: local_nav.NavigationService.navigatorKey,
-      home: kIsWeb ? const PromotionalPage() : const LoginPage(),
+      home: const AuthGate(),
     );
   }
 }

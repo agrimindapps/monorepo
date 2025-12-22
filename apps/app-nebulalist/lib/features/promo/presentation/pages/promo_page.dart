@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../auth/presentation/providers/auth_provider.dart';
 import '../widgets/call_to_action.dart';
 import '../widgets/faq_section.dart';
 import '../widgets/features_carousel.dart';
@@ -30,29 +28,13 @@ class _PromoPageState extends ConsumerState<PromoPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAuthenticationAndRedirect();
-    });
+    // Removed auto-redirect logic - PromoPage is now the landing page
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
-  }
-
-  void _checkAuthenticationAndRedirect() {
-    if (!mounted) return;
-
-    final authState = ref.read(authProvider);
-    if (authState.currentUser != null) {
-      debugPrint(
-        'Usuário autenticado na página promocional, redirecionando para página interna',
-      );
-      if (mounted) {
-        context.go('/');
-      }
-    }
   }
 
   void _scrollToSection(GlobalKey key) {

@@ -79,8 +79,9 @@ class Auth extends _$Auth {
     _analytics = ref.watch(gasometerAnalyticsServiceProvider);
     _platformService = ref.watch(platformServiceProvider);
     _rateLimiter = ref.watch(authRateLimiterProvider);
-    _enhancedDeletionService =
-        ref.watch(enhancedAccountDeletionServiceProvider);
+    _enhancedDeletionService = ref.watch(
+      enhancedAccountDeletionServiceProvider,
+    );
 
     // Prevent double initialization
     if (_isInitialized) {
@@ -258,19 +259,20 @@ class Auth extends _$Auth {
     // BackgroundSyncManager executará sync em background
     BackgroundSyncManager.instance
         .triggerSync(
-      'gasometer',
-      force: true, // Force immediate sync
-    )
+          'gasometer',
+          force: true, // Force immediate sync
+        )
         .then((_) {
-      if (kDebugMode) {
-        debugPrint('🔄 Post-login sync triggered successfully');
-      }
-    }).catchError((Object e) {
-      if (kDebugMode) {
-        debugPrint('⚠️ Post-login sync failed (non-blocking): $e');
-      }
-      // Não propagar erro - sync failure não deve impedir login
-    });
+          if (kDebugMode) {
+            debugPrint('🔄 Post-login sync triggered successfully');
+          }
+        })
+        .catchError((Object e) {
+          if (kDebugMode) {
+            debugPrint('⚠️ Post-login sync failed (non-blocking): $e');
+          }
+          // Não propagar erro - sync failure não deve impedir login
+        });
   }
 
   // ============================================================================

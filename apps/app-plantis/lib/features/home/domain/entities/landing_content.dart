@@ -64,7 +64,7 @@ class HeroContent extends Equatable {
       title: 'Cuide das suas plantas\ncom amor e tecnologia',
       subtitle: 'Seu jardim inteligente na palma da mão',
       ctaText: 'Começar Agora',
-      ctaSemanticLabel: 'Botão para começar a usar o Plantis',
+      ctaSemanticLabel: 'Botão para começar a usar o CantinhoVerde',
       ctaTooltip: 'Toque para criar sua conta ou fazer login',
       comingSoonLabel: 'Em Breve',
     );

@@ -36,8 +36,8 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     // ✅ NOVO: Sincronizar imagens pendentes ao abrir o app
     _syncPendingImages();
 
-    // 🧪 AUTO-LOGIN PARA TESTES (remover em produção)
-    if (kDebugMode) {
+    // 🧪 AUTO-LOGIN PARA TESTES (APENAS LOCALHOST)
+    if (kDebugMode && _isLocalhost()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _performTestAutoLogin();
       });
@@ -138,6 +138,23 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
         );
       },
     );
+  }
+
+  /// Verifica se está rodando em localhost (Web apenas)
+  bool _isLocalhost() {
+    if (!kIsWeb) return true; // Mobile/Desktop sempre permite em debug
+
+    try {
+      // No Web, verifica se está em localhost
+      final uri = Uri.base;
+      final host = uri.host.toLowerCase();
+      return host == 'localhost' || host == '127.0.0.1' || host == '::1';
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to check localhost status', error: e);
+      }
+      return false; // Em caso de erro, não permite auto-login
+    }
   }
 
   /// 🧪 AUTO-LOGIN PARA TESTES

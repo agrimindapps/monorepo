@@ -1,9 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/entities/user_profile_entity.dart';
-import '../repositories/settings_repository_impl.dart';
-import '../repositories/sync_repository_impl.dart';
-import '../repositories/user_profile_repository_impl.dart';
+import '../../data/repositories/settings_repository_impl.dart';
+import '../../data/repositories/sync_repository_impl.dart';
+import '../../data/repositories/user_profile_repository_impl.dart';
+import 'settings_providers.dart';
+import 'profile_providers.dart';
 
 part 'sync_provider.g.dart';
 
@@ -75,7 +77,9 @@ class SyncManager extends _$SyncManager {
 
     try {
       final profile = await ref.read(userProfileProvider.future);
-      await ref.read(syncRepositoryProvider).syncProfileToCloud(profile);
+      if (profile != null) {
+        await ref.read(syncRepositoryProvider).syncProfileToCloud(profile);
+      }
 
       state = state.copyWith(
         status: SyncStatus.success,
@@ -193,13 +197,13 @@ class SyncManager extends _$SyncManager {
 
 /// Provider que observa configurações na nuvem
 @riverpod
-Stream<SettingsEntity?> cloudSettings(CloudSettingsRef ref) {
+Stream<SettingsEntity?> cloudSettings(Ref ref) {
   return ref.watch(syncRepositoryProvider).watchCloudSettings();
 }
 
 /// Provider que observa perfil na nuvem
 @riverpod
-Stream<UserProfileEntity?> cloudProfile(CloudProfileRef ref) {
+Stream<UserProfileEntity?> cloudProfile(Ref ref) {
   return ref.watch(syncRepositoryProvider).watchCloudProfile();
 }
 

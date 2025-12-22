@@ -47,7 +47,7 @@ class SudokuAchievementsDialogAdapter extends ConsumerWidget {
   }
 
   List<AchievementItem> _convertAchievements(
-    List<SudokuAchievementWithDefinition> achievements,
+    List<SudokuAchievement> achievements,
   ) {
     return achievements.map((achievement) {
       return AchievementItem(
@@ -60,9 +60,9 @@ class SudokuAchievementsDialogAdapter extends ConsumerWidget {
         rarity: achievement.definition.rarity.label,
         rarityColor: achievement.definition.rarity.color,
         xpReward: achievement.definition.rarity.xpReward,
-        isUnlocked: achievement.achievement.isUnlocked,
+        isUnlocked: achievement.isUnlocked,
         isSecret: achievement.definition.isSecret,
-        currentProgress: achievement.achievement.currentProgress,
+        currentProgress: achievement.currentProgress,
         target: achievement.definition.target,
       );
     }).toList();

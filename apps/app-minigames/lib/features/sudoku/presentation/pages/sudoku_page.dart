@@ -8,7 +8,7 @@ import '../widgets/game_stats_widget.dart';
 import '../widgets/number_pad_widget.dart';
 import '../widgets/sudoku_grid_widget.dart';
 import '../widgets/victory_dialog.dart';
-import '../widgets/achievements_dialog.dart';
+import '../widgets/achievements_dialog_adapter.dart';
 import '../widgets/game_mode_dialog.dart';
 import '../widgets/game_over_mode_dialog.dart';
 
@@ -67,7 +67,7 @@ class _SudokuPageState extends ConsumerState<SudokuPage> {
             onPressed: () {
               showDialog(
                 context: context,
-                builder: (_) => const SudokuAchievementsDialog(),
+                builder: (_) => const SudokuAchievementsDialogAdapter(),
               );
             },
           ),

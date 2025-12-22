@@ -8,7 +8,7 @@
 /// - Re-exportamos os providers do core para uso no app
 library;
 
-import 'package:core/core.dart' hide Column, connectivityServiceProvider;
+import 'package:core/core.dart' hide Column, connectivityServiceProvider, isPremiumProvider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/auth_providers.dart';

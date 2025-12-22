@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/campo_minado_game_notifier.dart';
 import '../widgets/game_header_widget.dart';
 import '../game/minesweeper_game.dart';
-import '../widgets/game_over_dialog.dart';
-import '../widgets/achievements_dialog.dart';
+import '../widgets/game_over_dialog_adapter.dart';
+import '../widgets/achievements_dialog_adapter.dart';
 import '../../domain/entities/enums.dart';
 
 /// Main page for Campo Minado (Minesweeper) game
@@ -141,7 +141,7 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => GameOverDialog(status: status),
+      builder: (context) => CampoMinadoGameOverDialogAdapter(status: status),
     );
   }
 
@@ -234,7 +234,7 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
   void _showAchievementsDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => const CampoMinadoAchievementsDialog(),
+      builder: (_) => const CampoMinadoAchievementsDialogAdapter(),
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
-import '../../features/sync/presentation/providers/sync_providers.dart';
+import '../../features/settings/presentation/providers/sync_provider.dart';
 
 /// Widget that listens to auth changes and triggers sync when user logs in
 class AuthSyncListener extends ConsumerStatefulWidget {
@@ -25,7 +25,7 @@ class _AuthSyncListenerState extends ConsumerState<AuthSyncListener> {
     // Initialize with current user
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authState = ref.read(authProvider);
-      _previousUserId = authState.currentUser?.uid;
+      _previousUserId = authState.currentUser?.id;
       
       // If already logged in, start sync
       if (_previousUserId != null) {
@@ -39,7 +39,7 @@ class _AuthSyncListenerState extends ConsumerState<AuthSyncListener> {
     ref.read(autoSyncProvider.notifier).enable();
     
     // Trigger initial sync
-    ref.read(syncStateProvider.notifier).syncAll();
+    ref.read(syncManagerProvider.notifier).syncAllFromCloud();
   }
 
   void _stopSync() {
@@ -51,7 +51,7 @@ class _AuthSyncListenerState extends ConsumerState<AuthSyncListener> {
   Widget build(BuildContext context) {
     // Listen to auth changes
     ref.listen<AuthState>(authProvider, (previous, next) {
-      final currentUserId = next.currentUser?.uid;
+      final currentUserId = next.currentUser?.id;
       
       // User logged in
       if (_previousUserId == null && currentUserId != null) {

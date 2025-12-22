@@ -54,6 +54,6 @@ class UserProfileLocalDataSource implements LocalUserProfileDataSource {
 }
 
 @riverpod
-LocalUserProfileDataSource localUserProfileDataSource(LocalUserProfileDataSourceRef ref) {
+LocalUserProfileDataSource localUserProfileDataSource(Ref ref) {
   return UserProfileLocalDataSource();
 }

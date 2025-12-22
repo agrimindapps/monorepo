@@ -49,7 +49,7 @@ class CampoMinadoAchievementsDialogAdapter extends ConsumerWidget {
   }
 
   List<AchievementItem> _convertAchievements(
-    List<CampoMinadoAchievementWithDefinition> achievements,
+    List<CampoMinadoAchievement> achievements,
     WidgetRef ref,
   ) {
     return achievements.map((achievement) {
@@ -63,9 +63,9 @@ class CampoMinadoAchievementsDialogAdapter extends ConsumerWidget {
         rarity: achievement.definition.rarity.label,
         rarityColor: achievement.definition.rarity.color,
         xpReward: achievement.definition.rarity.xpReward,
-        isUnlocked: achievement.achievement.isUnlocked,
+        isUnlocked: achievement.isUnlocked,
         isSecret: achievement.definition.isSecret,
-        currentProgress: achievement.achievement.currentProgress,
+        currentProgress: achievement.currentProgress,
         target: achievement.definition.target,
       );
     }).toList();

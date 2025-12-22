@@ -51,6 +51,6 @@ class SettingsLocalDataSource implements LocalSettingsDataSource {
 }
 
 @riverpod
-LocalSettingsDataSource localSettingsDataSource(LocalSettingsDataSourceRef ref) {
+LocalSettingsDataSource localSettingsDataSource(Ref ref) {
   return SettingsLocalDataSource();
 }

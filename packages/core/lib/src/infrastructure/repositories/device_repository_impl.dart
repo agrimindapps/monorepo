@@ -428,7 +428,7 @@ class DeviceRepositoryImpl implements IDeviceRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> canAddMoreDevices(String userId) async {
+  Future<Either<Failure, bool>> canAddMoreDevices(String userId, {bool isPremium = false}) async {
     try {
       // Verificar conectividade
       final connectivityResult = await _connectivityService.checkConnectivity();

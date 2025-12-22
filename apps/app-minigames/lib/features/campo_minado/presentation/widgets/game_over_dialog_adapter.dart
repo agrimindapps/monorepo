@@ -51,11 +51,11 @@ class CampoMinadoGameOverDialogAdapter extends ConsumerWidget {
     return shared.GameOverDialog(
       isVictory: isVictory,
       gameTitle: 'Campo Minado',
-      score: gameState.score,
+      score: gameState.timeSeconds,
       isNewHighScore: false, // TODO: Implement high score tracking
       stats: stats,
       newAchievements: achievements,
-      onPlayAgain: () => ref.read(campoMinadoGameProvider.notifier).newGame(),
+      onPlayAgain: () => ref.read(campoMinadoGameProvider.notifier).startNewGame(),
       onExit: () => context.go('/'),
       victoryColor: Colors.amber,
       defeatColor: Colors.red,

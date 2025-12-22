@@ -359,6 +359,6 @@ final toggleItemCompletionUseCaseProvider =
 
 /// Subscription Repository from core package (RevenueCat)
 final subscriptionRepositoryProvider = Provider<ISubscriptionRepository>((ref) {
-  return RevenueCatSubscriptionService();
+  return RevenueCatService();
 });
 

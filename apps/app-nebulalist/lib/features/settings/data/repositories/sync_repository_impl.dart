@@ -2,8 +2,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/entities/user_profile_entity.dart';
 import '../datasources/firebase_sync_datasource.dart';
-import '../datasources/local_settings_datasource.dart';
-import '../datasources/local_user_profile_datasource.dart';
+import '../datasources/settings_local_datasource.dart';
+import '../datasources/user_profile_local_datasource.dart';
 import '../models/settings_model.dart';
 import '../models/user_profile_model.dart';
 
@@ -112,7 +112,7 @@ class SyncRepositoryImpl implements SyncRepository {
 }
 
 @riverpod
-SyncRepository syncRepository(SyncRepositoryRef ref) {
+SyncRepository syncRepository(Ref ref) {
   return SyncRepositoryImpl(
     firebaseDataSource: ref.watch(firebaseSyncDataSourceProvider),
     localSettingsDataSource: ref.watch(localSettingsDataSourceProvider),
@@ -121,6 +121,6 @@ SyncRepository syncRepository(SyncRepositoryRef ref) {
 }
 
 @riverpod
-FirebaseSyncDataSource firebaseSyncDataSource(FirebaseSyncDataSourceRef ref) {
+FirebaseSyncDataSource firebaseSyncDataSource(Ref ref) {
   return FirebaseSyncDataSourceImpl();
 }

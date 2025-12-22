@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'add_options_bottom_sheet.dart';
+import 'speed_dial_fab.dart';
 
 /// Wrapper widget that adds bottom navigation to standalone pages
 /// Used for pages like Fuel, Odometer, Expenses, Maintenance that are outside the main navigation shell
@@ -11,24 +12,15 @@ class PageWithBottomNav extends StatelessWidget {
     super.key,
     required this.child,
     this.currentIndex = -1, // -1 means no tab is selected (standalone page)
-    this.fabRoute, // Route to navigate when FAB is pressed (e.g., '/fuel/add')
-    this.fabIcon = Icons.add,
-    this.fabLabel,
+    this.showSpeedDial = true, // Show speed dial by default
   });
 
   final Widget child;
   final int currentIndex;
-  final String? fabRoute;
-  final IconData fabIcon;
-  final String? fabLabel;
+  final bool showSpeedDial;
 
   @override
   Widget build(BuildContext context) {
-    // Debug: verificar se FAB está sendo criado
-    if (kDebugMode) {
-      print('🔧 PageWithBottomNav: fabRoute=$fabRoute, fabIcon=$fabIcon, fabLabel=$fabLabel');
-    }
-    
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
@@ -62,18 +54,8 @@ class PageWithBottomNav extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: fabRoute != null
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                if (kDebugMode) {
-                  print('🚀 FAB pressed: navigating to $fabRoute');
-                }
-                context.push(fabRoute!);
-              },
-              icon: Icon(fabIcon),
-              label: Text(fabLabel ?? 'Adicionar'),
-            )
-          : null,
+      floatingActionButton: showSpeedDial ? const SpeedDialFAB() : null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

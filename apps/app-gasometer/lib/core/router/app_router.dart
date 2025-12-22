@@ -233,9 +233,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/fuel',
         name: 'fuel',
         builder: (context, state) => const PageWithBottomNav(
-          fabRoute: '/fuel/add',
-          fabIcon: Icons.local_gas_station,
-          fabLabel: 'Adicionar',
           child: FuelPage(),
         ),
       ),
@@ -248,9 +245,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/maintenance',
         name: 'maintenance',
         builder: (context, state) => const PageWithBottomNav(
-          fabRoute: '/maintenance/add',
-          fabIcon: Icons.build,
-          fabLabel: 'Adicionar',
           child: MaintenancePage(),
         ),
       ),
@@ -263,9 +257,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/expenses',
         name: 'expenses',
         builder: (context, state) => const PageWithBottomNav(
-          fabRoute: '/expenses/add',
-          fabIcon: Icons.attach_money,
-          fabLabel: 'Adicionar',
           child: ExpensesPage(),
         ),
       ),
@@ -278,9 +269,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/odometer',
         name: 'odometer',
         builder: (context, state) => const PageWithBottomNav(
-          fabRoute: '/odometer/add',
-          fabIcon: Icons.speed,
-          fabLabel: 'Adicionar',
           child: OdometerPage(),
         ),
       ),

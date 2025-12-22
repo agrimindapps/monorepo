@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart' hide Column;
 
-import '../../../core/theme/theme_providers.dart';
-import '../../../widgets/app_colors.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_item.dart';
@@ -17,8 +15,9 @@ class SettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = ref.watch(themeNotifierProvider);
-    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final isDark =
+        false; // Simple state - can be expanded to use StateNotifier if needed
+    final settingsAsync = ref.watch(settingsProvider);
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
@@ -68,11 +67,11 @@ class SettingsPage extends ConsumerWidget {
       pinned: true,
       flexibleSpace: FlexibleSpaceBar(
         background: DecoratedBox(
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [AppColors.contentColorCyan, Color(0xFF40B4D4)],
+              colors: [Color(0xFF50E4FF), Color(0xFF40B4D4)],
             ),
           ),
           child: SafeArea(
@@ -117,7 +116,7 @@ class SettingsPage extends ConsumerWidget {
             color: Colors.white,
           ),
           onPressed: () {
-            ref.read(themeNotifierProvider.notifier).toggleTheme();
+            // TODO: Implement dark mode toggle
           },
         ),
       ],
@@ -144,14 +143,10 @@ class SettingsPage extends ConsumerWidget {
                 width: 60,
                 height: 60,
                 decoration: BoxDecoration(
-                  color: AppColors.contentColorCyan,
+                  color: Color(0xFF50E4FF),
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 30,
-                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 30),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -167,8 +162,9 @@ class SettingsPage extends ConsumerWidget {
                     Text(
                       'Faça login para sincronizar seus dados',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -188,7 +184,7 @@ class SettingsPage extends ConsumerWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.contentColorCyan,
+                backgroundColor: Color(0xFF50E4FF),
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
@@ -234,8 +230,9 @@ class SettingsPage extends ConsumerWidget {
                     Text(
                       '• Planos alimentares personalizados\n• Análises nutricionais detalhadas\n• Receitas exclusivas\n• Sincronização ilimitada\n• Sem anúncios',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -326,7 +323,7 @@ class SettingsPage extends ConsumerWidget {
             subtitle: 'Sincronizar dados automaticamente',
             value: settings.autoSync,
             onChanged: (value) {
-              ref.read(settingsNotifierProvider.notifier).setAutoSync(value);
+              ref.read(settingsProvider.notifier).setAutoSync(value);
             },
           ),
           SettingsSwitchItem(
@@ -335,7 +332,7 @@ class SettingsPage extends ConsumerWidget {
             subtitle: 'Trabalhar sem conexão com internet',
             value: settings.offlineMode,
             onChanged: (value) {
-              ref.read(settingsNotifierProvider.notifier).setOfflineMode(value);
+              ref.read(settingsProvider.notifier).setOfflineMode(value);
             },
           ),
           SettingsItem(
@@ -574,12 +571,10 @@ class SettingsPage extends ConsumerWidget {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await ref.read(settingsNotifierProvider.notifier).resetSettings();
+                await ref.read(settingsProvider.notifier).resetSettings();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Dados limpos com sucesso'),
-                    ),
+                    const SnackBar(content: Text('Dados limpos com sucesso')),
                   );
                 }
               },

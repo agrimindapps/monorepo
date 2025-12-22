@@ -178,7 +178,7 @@ class _PromoHeaderSectionState extends State<PromoHeaderSection>
         ),
         const SizedBox(height: 24),
         Text(
-          'Transforme sua paixão por plantas em uma ciência exata. O Plantis combina tecnologia e natureza para garantir que seu jardim prospere.',
+          'Transforme sua paixão por plantas em uma ciência exata. O CantinhoVerde combina tecnologia e natureza para garantir que seu jardim prospere.',
           style: GoogleFonts.inter(
             fontSize: 18,
             color: Colors.grey[300],

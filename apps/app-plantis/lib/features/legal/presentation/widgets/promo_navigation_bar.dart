@@ -83,7 +83,7 @@ class PromoNavigationBar extends StatelessWidget {
             text: TextSpan(
               children: [
                 TextSpan(
-                  text: 'Plan',
+                  text: 'Cantinho',
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -92,7 +92,7 @@ class PromoNavigationBar extends StatelessWidget {
                   ),
                 ),
                 TextSpan(
-                  text: 'tis',
+                  text: 'Verde',
                   style: GoogleFonts.playfairDisplay(
                     fontSize: 24,
                     fontWeight: FontWeight.w400,

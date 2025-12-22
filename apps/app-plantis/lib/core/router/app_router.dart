@@ -8,6 +8,7 @@ import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/data_export/presentation/pages/data_export_page.dart';
 import '../../features/device_management/presentation/pages/device_management_page.dart';
 import '../../features/legal/presentation/pages/account_deletion_page.dart';
+import '../../features/legal/presentation/pages/cookies_policy_page.dart';
 import '../../features/legal/presentation/pages/privacy_policy_page.dart';
 import '../../features/legal/presentation/pages/promotional_page.dart';
 import '../../features/legal/presentation/pages/terms_of_service_page.dart';
@@ -40,6 +41,7 @@ class AppRouter {
   static const String termsOfService = '/terms-of-service';
   static const String privacyPolicy = '/privacy-policy';
   static const String accountDeletionPolicy = '/account-deletion-policy';
+  static const String cookies = '/cookies';
   static const String promotional = '/promotional';
   static const String notificationsSettings = '/notifications-settings';
   static const String backupSettings = '/backup-settings';
@@ -75,6 +77,7 @@ class AppRouter {
           termsOfService,
           privacyPolicy,
           accountDeletionPolicy,
+          cookies,
         ];
 
         final isAccessingPublicRoute = publicRoutes.any(
@@ -238,6 +241,11 @@ class AppRouter {
               path: accountDeletionPolicy,
               name: 'account-deletion-policy',
               builder: (context, state) => const AccountDeletionPage(),
+            ),
+            GoRoute(
+              path: cookies,
+              name: 'cookies',
+              builder: (context, state) => const CookiesPolicyPage(),
             ),
             GoRoute(
               path: notificationsSettings,

@@ -21,9 +21,17 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+import '../../features/timeline/presentation/pages/timeline_page.dart';
+import '../../features/tools/presentation/pages/cost_per_km_calculator_page.dart';
+import '../../features/tools/presentation/pages/dashboard_indicator_detail_page.dart';
+import '../../features/tools/presentation/pages/dashboard_indicators_page.dart';
+import '../../features/tools/presentation/pages/flex_calculator_page.dart';
+import '../../features/tools/presentation/pages/range_calculator_page.dart';
+import '../../features/tools/presentation/pages/tools_page.dart';
 import '../../features/vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
+import '../../shared/widgets/page_with_bottom_nav.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/login';
@@ -61,7 +69,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       // Se está autenticado e está em rota de auth (login/promo), redireciona para home
       if (isAuthenticated && authRoutes.contains(currentLocation)) {
-        return '/vehicles';
+        return '/timeline';
       }
 
       // Se estiver em uma rota pública, permite
@@ -87,20 +95,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AdaptiveMainNavigation(navigationShell: navigationShell);
         },
         branches: [
-          // Branch 0: Vehicles
+          // Branch 0: Timeline (Home)
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/',
-                redirect: (context, state) => '/vehicles',
+                redirect: (context, state) => '/timeline',
               ),
+              GoRoute(
+                path: '/timeline',
+                name: 'timeline',
+                builder: (context, state) => const TimelinePage(),
+              ),
+            ],
+          ),
+
+          // Branch 1: Vehicles
+          StatefulShellBranch(
+            routes: [
               GoRoute(
                 path: '/vehicles',
                 name: 'vehicles',
                 builder: (context, state) => const VehiclesPage(),
                 routes: [
                   GoRoute(
-                    path: '/add',
+                    path: 'add',
                     name: 'add-vehicle',
                     builder: (context, state) => const AddVehiclePage(),
                   ),
@@ -109,90 +128,70 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Branch 1: Odometer
+          // Branch 2: Add (Placeholder - will show bottom sheet)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/odometer',
-                name: 'odometer',
-                builder: (context, state) => const OdometerPage(),
-                routes: [
-                  GoRoute(
-                    path: '/add',
-                    name: 'add-odometer',
-                    builder: (context, state) => const AddOdometerPage(),
-                  ),
-                ],
+                path: '/add',
+                name: 'add',
+                // This will be intercepted by navigation logic to show bottom sheet
+                redirect: (context, state) => '/timeline',
               ),
             ],
           ),
 
-          // Branch 2: Fuel
+          // Branch 3: Tools
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/fuel',
-                name: 'fuel',
-                builder: (context, state) => const FuelPage(),
-                routes: [
-                  GoRoute(
-                    path: '/add',
-                    name: 'add-fuel',
-                    builder: (context, state) => const AddFuelPage(),
-                  ),
-                ],
+                path: '/tools',
+                name: 'tools',
+                builder: (context, state) => const ToolsPage(),
               ),
-            ],
-          ),
-
-          // Branch 3: Expenses
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/expenses',
-                name: 'expenses',
-                builder: (context, state) => const ExpensesPage(),
-                routes: [
-                  GoRoute(
-                    path: '/add',
-                    name: 'add-expense',
-                    builder: (context, state) => const AddExpensePage(),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Branch 4: Maintenance
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/maintenance',
-                name: 'maintenance',
-                builder: (context, state) => const MaintenancePage(),
-                routes: [
-                  GoRoute(
-                    path: '/add',
-                    name: 'add-maintenance',
-                    builder: (context, state) => const AddMaintenancePage(),
-                  ),
-                ],
-              ),
-            ],
-          ),
-
-          // Branch 5: Reports
-          StatefulShellBranch(
-            routes: [
+              // Reports now accessible via Tools
               GoRoute(
                 path: '/reports',
                 name: 'reports',
                 builder: (context, state) => const ReportsPage(),
               ),
+              // Flex Calculator
+              GoRoute(
+                path: '/tools/flex-calculator',
+                name: 'flex-calculator',
+                builder: (context, state) => const FlexCalculatorPage(),
+              ),
+              // Dashboard Indicators
+              GoRoute(
+                path: '/tools/dashboard-indicators',
+                name: 'dashboard-indicators',
+                builder: (context, state) => const DashboardIndicatorsPage(),
+                routes: [
+                  GoRoute(
+                    path: ':id',
+                    name: 'dashboard-indicator-detail',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return DashboardIndicatorDetailPage(indicatorId: id);
+                    },
+                  ),
+                ],
+              ),
+              // Cost per Km Calculator
+              GoRoute(
+                path: '/tools/cost-per-km',
+                name: 'cost-per-km',
+                builder: (context, state) => const CostPerKmCalculatorPage(),
+              ),
+              // Range Calculator
+              GoRoute(
+                path: '/tools/range-calculator',
+                name: 'range-calculator',
+                builder: (context, state) => const RangeCalculatorPage(),
+              ),
             ],
           ),
 
-          // Branch 6: Settings (and others)
+          // Branch 4: Settings
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -229,6 +228,67 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
+      // Standalone routes for list pages and forms (with bottom navigation)
+      GoRoute(
+        path: '/fuel',
+        name: 'fuel',
+        builder: (context, state) => const PageWithBottomNav(
+          fabRoute: '/fuel/add',
+          fabIcon: Icons.local_gas_station,
+          fabLabel: 'Adicionar',
+          child: FuelPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/fuel/add',
+        name: 'add-fuel',
+        builder: (context, state) => const AddFuelPage(),
+      ),
+      GoRoute(
+        path: '/maintenance',
+        name: 'maintenance',
+        builder: (context, state) => const PageWithBottomNav(
+          fabRoute: '/maintenance/add',
+          fabIcon: Icons.build,
+          fabLabel: 'Adicionar',
+          child: MaintenancePage(),
+        ),
+      ),
+      GoRoute(
+        path: '/maintenance/add',
+        name: 'add-maintenance',
+        builder: (context, state) => const AddMaintenancePage(),
+      ),
+      GoRoute(
+        path: '/expenses',
+        name: 'expenses',
+        builder: (context, state) => const PageWithBottomNav(
+          fabRoute: '/expenses/add',
+          fabIcon: Icons.attach_money,
+          fabLabel: 'Adicionar',
+          child: ExpensesPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/expenses/add',
+        name: 'add-expense',
+        builder: (context, state) => const AddExpensePage(),
+      ),
+      GoRoute(
+        path: '/odometer',
+        name: 'odometer',
+        builder: (context, state) => const PageWithBottomNav(
+          fabRoute: '/odometer/add',
+          fabIcon: Icons.speed,
+          fabLabel: 'Adicionar',
+          child: OdometerPage(),
+        ),
+      ),
+      GoRoute(
+        path: '/odometer/add',
+        name: 'add-odometer',
+        builder: (context, state) => const AddOdometerPage(),
+      ),
       GoRoute(
         path: '/login',
         name: 'login',
@@ -263,7 +323,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => context.go('/vehicles'),
+              onPressed: () => context.go('/timeline'),
               child: const Text('Voltar ao Início'),
             ),
           ],

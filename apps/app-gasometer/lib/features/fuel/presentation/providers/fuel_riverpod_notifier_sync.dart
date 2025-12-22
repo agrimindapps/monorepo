@@ -7,7 +7,9 @@ extension FuelRiverpodSync on FuelRiverpod {
   Future<void> _setupConnectivityListener() async {
     final isOnline = await _connectivityService.initialize();
 
-    state = AsyncValue.data(const FuelState().copyWith(isOnline: isOnline));
+    this.state = AsyncValue.data(
+      const FuelState().copyWith(isOnline: isOnline),
+    );
 
     _connectivitySubscription = _connectivityService.addConnectivityListener(
       _onConnectivityChanged,
@@ -20,9 +22,9 @@ extension FuelRiverpodSync on FuelRiverpod {
   }
 
   void _onConnectivityChanged(bool isOnline) {
-    state.whenData((currentState) {
+    this.state.whenData((FuelState currentState) {
       final wasOnline = currentState.isOnline;
-      state = AsyncValue.data(currentState.copyWith(isOnline: isOnline));
+      this.state = AsyncValue.data(currentState.copyWith(isOnline: isOnline));
 
       if (_connectivityService.hasGoneOnline(wasOnline) &&
           currentState.hasPendingRecords) {
@@ -33,26 +35,25 @@ extension FuelRiverpodSync on FuelRiverpod {
 
   Future<List<FuelRecordEntity>> _loadPendingRecords() async {
     final result = await _syncService.loadPendingRecords();
-    return result.fold(
-      (failure) {
-        if (kDebugMode) {
-          debugPrint('🚗 Erro ao carregar registros pendentes: ${failure.message}');
-        }
-        return [];
-      },
-      (records) => records,
-    );
+    return result.fold((failure) {
+      if (kDebugMode) {
+        debugPrint(
+          '🚗 Erro ao carregar registros pendentes: ${failure.message}',
+        );
+      }
+      return [];
+    }, (records) => records);
   }
 
   Future<void> syncPendingRecords() async {
-    final currentState = state.value;
+    final currentState = this.state.value;
     if (currentState == null ||
         !currentState.isOnline ||
         !currentState.hasPendingRecords) {
       return;
     }
 
-    state = AsyncValue.data(currentState.copyWith(isSyncing: true));
+    this.state = AsyncValue.data(currentState.copyWith(isSyncing: true));
 
     if (kDebugMode) {
       debugPrint(
@@ -103,7 +104,7 @@ extension FuelRiverpodSync on FuelRiverpod {
     // Reload pending records
     final updatedPending = await _loadPendingRecords();
 
-    state = AsyncValue.data(
+    this.state = AsyncValue.data(
       currentState.copyWith(pendingRecords: updatedPending, isSyncing: false),
     );
 

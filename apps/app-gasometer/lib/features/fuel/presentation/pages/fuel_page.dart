@@ -33,65 +33,62 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     final isSyncing = ref.watch(fuelIsSyncingProvider);
     final vehiclesAsync = ref.watch(vehiclesProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(context),
-            if (!isOnline || pendingCount > 0)
-              _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
-            _buildVehicleSelector(context),
-            if (_selectedVehicleId != null &&
-                (vehiclesAsync.value?.isNotEmpty ?? false))
-              fuelStateAsync.when(
-                data: (state) => _buildMonthSelector(state),
-                loading: () => const SizedBox(height: 66),
-                error: (_, __) => const SizedBox.shrink(),
+    return SafeArea(
+      child: Column(
+        children: [
+          _buildHeader(context),
+          if (!isOnline || pendingCount > 0)
+            _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
+          _buildVehicleSelector(context),
+          if (_selectedVehicleId != null &&
+              (vehiclesAsync.value?.isNotEmpty ?? false))
+            fuelStateAsync.when(
+              data: (state) => _buildMonthSelector(state),
+              loading: () => const SizedBox(height: 66),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          Expanded(
+            child: vehiclesAsync.when(
+              data: (vehicles) {
+                if (_selectedVehicleId == null) {
+                  return _buildSelectVehicleState();
+                }
+                return fuelStateAsync.when(
+                  data: (fuelState) => _buildContent(context, fuelState),
+                  loading: () => const StandardLoadingView(
+                    message: 'Carregando abastecimentos...',
+                    showProgress: true,
+                  ),
+                  error: (error, stack) => EnhancedEmptyState(
+                    title: 'Erro ao carregar',
+                    description: error.toString(),
+                    icon: Icons.error_outline,
+                    actionLabel: 'Tentar novamente',
+                    onAction: () {
+                      ref
+                          .read(fuelRiverpodProvider.notifier)
+                          .loadFuelRecords();
+                    },
+                  ),
+                );
+              },
+              loading: () => const StandardLoadingView(
+                message: 'Carregando veículos...',
+                showProgress: true,
               ),
-            Expanded(
-              child: vehiclesAsync.when(
-                data: (vehicles) {
-                  if (_selectedVehicleId == null) {
-                    return _buildSelectVehicleState();
-                  }
-                  return fuelStateAsync.when(
-                    data: (fuelState) => _buildContent(context, fuelState),
-                    loading: () => const StandardLoadingView(
-                      message: 'Carregando abastecimentos...',
-                      showProgress: true,
-                    ),
-                    error: (error, stack) => EnhancedEmptyState(
-                      title: 'Erro ao carregar',
-                      description: error.toString(),
-                      icon: Icons.error_outline,
-                      actionLabel: 'Tentar novamente',
-                      onAction: () {
-                        ref
-                            .read(fuelRiverpodProvider.notifier)
-                            .loadFuelRecords();
-                      },
-                    ),
-                  );
+              error: (error, _) => EnhancedEmptyState(
+                title: 'Erro ao carregar veículos',
+                description: error.toString(),
+                icon: Icons.error_outline,
+                actionLabel: 'Tentar novamente',
+                onAction: () {
+                  ref.read(vehiclesProvider.notifier).refresh();
                 },
-                loading: () => const StandardLoadingView(
-                  message: 'Carregando veículos...',
-                  showProgress: true,
-                ),
-                error: (error, _) => EnhancedEmptyState(
-                  title: 'Erro ao carregar veículos',
-                  description: error.toString(),
-                  icon: Icons.error_outline,
-                  actionLabel: 'Tentar novamente',
-                  onAction: () {
-                    ref.read(vehiclesProvider.notifier).refresh();
-                  },
-                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-      floatingActionButton: _buildFloatingActionButton(context),
     );
   }
 

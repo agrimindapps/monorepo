@@ -62,6 +62,40 @@ class GasometerTheme {
       type: BottomNavigationBarType.fixed,
       elevation: 8,
     ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: Colors.white,
+      indicatorColor: GasometerColors.primary.withValues(alpha: 0.12),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(
+            color: GasometerColors.primary,
+            size: 24,
+          );
+        }
+        return IconThemeData(
+          color: Colors.grey.shade600,
+          size: 24,
+        );
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(
+            color: GasometerColors.primary,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter',
+          );
+        }
+        return TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          fontFamily: 'Inter',
+        );
+      }),
+      elevation: 8,
+      height: 80,
+    ),
     cardTheme: CardThemeData(
       elevation: 3,
       shape: RoundedRectangleBorder(
@@ -220,6 +254,40 @@ class GasometerTheme {
       showUnselectedLabels: true,
       type: BottomNavigationBarType.fixed,
       elevation: 8,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: const Color(0xFF1E1E1E),
+      indicatorColor: GasometerColors.primaryLight.withValues(alpha: 0.15),
+      iconTheme: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const IconThemeData(
+            color: GasometerColors.primaryLight,
+            size: 24,
+          );
+        }
+        return IconThemeData(
+          color: Colors.grey.shade600,
+          size: 24,
+        );
+      }),
+      labelTextStyle: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const TextStyle(
+            color: GasometerColors.primaryLight,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter',
+          );
+        }
+        return TextStyle(
+          color: Colors.grey.shade600,
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          fontFamily: 'Inter',
+        );
+      }),
+      elevation: 8,
+      height: 80,
     ),
     cardTheme: CardThemeData(
       elevation: 3,

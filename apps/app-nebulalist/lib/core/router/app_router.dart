@@ -30,7 +30,7 @@ GoRouter goRouter(Ref ref) {
 
   return GoRouter(
     debugLogDiagnostics: true,
-    initialLocation: AppConstants.homeRoute,
+    initialLocation: AppConstants.promoRoute,
     routes: [
         // Home route (protected)
         GoRoute(
@@ -139,9 +139,9 @@ GoRouter goRouter(Ref ref) {
             state.matchedLocation == AppConstants.termsOfServiceRoute ||
             state.matchedLocation == AppConstants.accountDeletionPolicyRoute;
 
-        // Redirect to login if not authenticated and trying to access protected route
+        // Redirect to promo if not authenticated and trying to access protected route
         if (!isLoggedIn && !isPublicRoute) {
-          return AppConstants.loginRoute;
+          return AppConstants.promoRoute;
         }
 
         // Redirect to home if authenticated and trying to access auth route

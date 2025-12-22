@@ -43,7 +43,7 @@ class AppVersionService {
     if (_packageInfo == null) {
       await initialize();
     }
-    return _packageInfo?.appName ?? 'Plantis';
+    return _packageInfo?.appName ?? 'CantinhoVerde';
   }
 
   /// Get package name (bundle identifier)

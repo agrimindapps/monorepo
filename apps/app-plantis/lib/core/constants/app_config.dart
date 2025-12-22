@@ -202,11 +202,11 @@ class AppConfig {
   };
 
   /// App Metadata
-  static const String appName = 'Plantis';
+  static const String appName = 'CantinhoVerde';
   static const String appDescription =
-      'Aplicativo para cuidado de plantas domésticas';
+      'Seu jardim de apartamento sempre vivo';
   static const String appVersion = '1.0.0';
-  static const String companyName = 'Plantis Team';
+  static const String companyName = 'CantinhoVerde Team';
   static const String copyrightText =
       '© 2024 Plantis Team. Todos os direitos reservados.';
 }

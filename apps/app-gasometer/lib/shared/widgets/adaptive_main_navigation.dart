@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/widgets/responsive_content_area.dart';
+import 'add_options_bottom_sheet.dart';
 import 'responsive_sidebar.dart';
 
 /// Main adaptive navigation shell that changes layout based on screen size
@@ -164,9 +165,25 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   
   /// Handle navigation selection
   void _onNavigationSelected(int index) {
+    // Index 2 is the "Add" button - show bottom sheet instead of navigating
+    if (index == 2) {
+      _showAddOptionsBottomSheet();
+      return;
+    }
+
     widget.navigationShell.goBranch(
       index,
       initialLocation: index == widget.navigationShell.currentIndex,
+    );
+  }
+
+  /// Show bottom sheet with add options
+  void _showAddOptionsBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => const AddOptionsBottomSheet(),
     );
   }
   
@@ -174,34 +191,24 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   List<NavigationRailDestination> _getNavigationRailDestinations() {
     return const [
       NavigationRailDestination(
+        icon: Icon(Icons.timeline_outlined),
+        selectedIcon: Icon(Icons.timeline),
+        label: Text('Timeline'),
+      ),
+      NavigationRailDestination(
         icon: Icon(Icons.directions_car_outlined),
         selectedIcon: Icon(Icons.directions_car),
         label: Text('Veículos'),
       ),
       NavigationRailDestination(
-        icon: Icon(Icons.speed_outlined),
-        selectedIcon: Icon(Icons.speed),
-        label: Text('Odômetro'),
-      ),
-      NavigationRailDestination(
-        icon: Icon(Icons.local_gas_station_outlined),
-        selectedIcon: Icon(Icons.local_gas_station),
-        label: Text('Combustível'),
-      ),
-      NavigationRailDestination(
-        icon: Icon(Icons.attach_money_outlined),
-        selectedIcon: Icon(Icons.attach_money),
-        label: Text('Despesas'),
+        icon: Icon(Icons.add_circle_outline),
+        selectedIcon: Icon(Icons.add_circle),
+        label: Text('Adicionar'),
       ),
       NavigationRailDestination(
         icon: Icon(Icons.build_outlined),
         selectedIcon: Icon(Icons.build),
-        label: Text('Manutenção'),
-      ),
-      NavigationRailDestination(
-        icon: Icon(Icons.bar_chart_outlined),
-        selectedIcon: Icon(Icons.bar_chart),
-        label: Text('Estatísticas'),
+        label: Text('Ferramentas'),
       ),
       NavigationRailDestination(
         icon: Icon(Icons.settings_outlined),
@@ -215,34 +222,24 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   List<NavigationDestination> _getNavigationDestinations() {
     return const [
       NavigationDestination(
+        icon: Icon(Icons.timeline_outlined),
+        selectedIcon: Icon(Icons.timeline),
+        label: 'Timeline',
+      ),
+      NavigationDestination(
         icon: Icon(Icons.directions_car_outlined),
         selectedIcon: Icon(Icons.directions_car),
         label: 'Veículos',
       ),
       NavigationDestination(
-        icon: Icon(Icons.speed_outlined),
-        selectedIcon: Icon(Icons.speed),
-        label: 'Odômetro',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.local_gas_station_outlined),
-        selectedIcon: Icon(Icons.local_gas_station),
-        label: 'Combustível',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.attach_money_outlined),
-        selectedIcon: Icon(Icons.attach_money),
-        label: 'Despesas',
+        icon: Icon(Icons.add_circle_outline),
+        selectedIcon: Icon(Icons.add_circle),
+        label: 'Adicionar',
       ),
       NavigationDestination(
         icon: Icon(Icons.build_outlined),
         selectedIcon: Icon(Icons.build),
-        label: 'Manutenção',
-      ),
-      NavigationDestination(
-        icon: Icon(Icons.bar_chart_outlined),
-        selectedIcon: Icon(Icons.bar_chart),
-        label: 'Estatísticas',
+        label: 'Ferramentas',
       ),
       NavigationDestination(
         icon: Icon(Icons.settings_outlined),
@@ -286,15 +283,14 @@ class NavigationUtils {
   static String getLabelByRoute(String route) {
     switch (route) {
       case '/':
+      case '/timeline':
+        return 'Timeline';
+      case '/vehicles':
         return 'Veículos';
-      case '/odometer':
-        return 'Odômetro';
-      case '/fuel':
-        return 'Combustível';
-      case '/expenses':
-        return 'Despesas';
-      case '/maintenance':
-        return 'Manutenção';
+      case '/add':
+        return 'Adicionar';
+      case '/tools':
+        return 'Ferramentas';
       case '/reports':
         return 'Estatísticas';
       case '/settings':
@@ -303,19 +299,18 @@ class NavigationUtils {
         return 'Página';
     }
   }
-  
+
   /// Get navigation icon by route
   static IconData getIconByRoute(String route, {bool selected = false}) {
     switch (route) {
       case '/':
+      case '/timeline':
+        return selected ? Icons.timeline : Icons.timeline_outlined;
+      case '/vehicles':
         return selected ? Icons.directions_car : Icons.directions_car_outlined;
-      case '/odometer':
-        return selected ? Icons.speed : Icons.speed_outlined;
-      case '/fuel':
-        return selected ? Icons.local_gas_station : Icons.local_gas_station_outlined;
-      case '/expenses':
-        return selected ? Icons.attach_money : Icons.attach_money_outlined;
-      case '/maintenance':
+      case '/add':
+        return selected ? Icons.add_circle : Icons.add_circle_outline;
+      case '/tools':
         return selected ? Icons.build : Icons.build_outlined;
       case '/reports':
         return selected ? Icons.bar_chart : Icons.bar_chart_outlined;

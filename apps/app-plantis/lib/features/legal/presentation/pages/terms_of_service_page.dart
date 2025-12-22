@@ -1,12 +1,12 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/plantis_colors.dart';
 import '../../domain/entities/document_type.dart';
 import '../providers/legal_providers.dart';
-import '../widgets/legal_page_content.dart';
+import '../widgets/web_legal_page_layout.dart';
 
 /// Terms of Service page using Riverpod and Clean Architecture
+/// Web-first design following promotional page style
 class TermsOfServicePage extends ConsumerWidget {
   const TermsOfServicePage({super.key});
 
@@ -17,39 +17,45 @@ class TermsOfServicePage extends ConsumerWidget {
     );
 
     return documentAsync.when(
-      data: (document) => BaseLegalPageContent(
+      data: (document) => WebLegalPageLayout(
         title: 'Termos de Uso',
-        headerIcon: Icons.description,
-        headerTitle: 'Termos de Uso do Plantis',
-        headerGradient: PlantisColors.primaryGradient,
+        headerIcon: Icons.description_outlined,
+        headerTitle: 'Termos de Uso',
+        headerSubtitle:
+            'Diretrizes e condições para uso do aplicativo CantinhoVerde',
         sections: document.sections,
         lastUpdated: document.lastUpdated,
-        scrollButtonColor: PlantisColors.primary,
+        accentColor: const Color(0xFF10B981), // Emerald
+        footerIcon: Icons.handshake_outlined,
         footerTitle: 'Concordância dos Termos',
         footerDescription:
-            'Ao usar o Plantis, você confirma que leu, compreendeu e aceita estes Termos de Uso.',
+            'Ao usar o CantinhoVerde, você confirma que leu, compreendeu e aceita estes Termos de Uso. Estamos comprometidos em fornecer a melhor experiência no cuidado de suas plantas.',
       ),
-      loading: () => Scaffold(
-        appBar: AppBar(title: const Text('Termos de Uso')),
-        body: const Center(child: CircularProgressIndicator()),
+      loading: () => const Scaffold(
+        backgroundColor: Color(0xFF0A1F14),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF10B981)),
+        ),
       ),
       error: (error, stack) => Scaffold(
-        appBar: AppBar(title: const Text('Termos de Uso')),
+        backgroundColor: const Color(0xFF0A1F14),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Erro ao carregar documento',
-                style: Theme.of(context).textTheme.titleLarge,
+              const Icon(
+                Icons.error_outline,
+                size: 64,
+                color: Color(0xFFEF4444),
               ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
+              const SizedBox(height: 16),
+              const Text(
+                'Erro ao carregar documento',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
@@ -58,6 +64,14 @@ class TermsOfServicePage extends ConsumerWidget {
                 ),
                 icon: const Icon(Icons.refresh),
                 label: const Text('Tentar Novamente'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                ),
               ),
             ],
           ),

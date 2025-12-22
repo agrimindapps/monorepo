@@ -47,7 +47,7 @@ class PlantisNotificationConfig {
     const NotificationChannelEntity(
       id: 'plantis_general',
       name: 'Notificações Gerais',
-      description: 'Outras notificações do Plantis',
+      description: 'Outras notificações do CantinhoVerde',
       importance: NotificationImportanceEntity.defaultImportance,
       showBadge: true,
       enableLights: false,

@@ -20,7 +20,19 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF121212), // Dark background
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF3ECF8E), // Supabase Green
+          secondary: Color(0xFF66E3CE),
+          surface: Color(0xFF1E1E1E), // Dark cards
+          background: Color(0xFF121212),
+          onPrimary: Colors.black,
+          onSurface: Color(0xFFEDEDED),
+        ),
+        textTheme: TextTheme(
+          bodyMedium: TextStyle(color: Color(0xFFEDEDED)),
+        ),
       ),
       home: const App(),
     );

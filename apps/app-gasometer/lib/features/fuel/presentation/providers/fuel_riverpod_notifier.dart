@@ -79,7 +79,8 @@ class FuelState {
   bool get hasActiveVehicleFilter => selectedVehicleId != null;
   bool get hasActiveMonthFilter => selectedMonth != null;
   bool get hasActiveSearch => searchQuery.isNotEmpty;
-  bool get hasActiveFilters => hasActiveVehicleFilter || hasActiveSearch || hasActiveMonthFilter;
+  bool get hasActiveFilters =>
+      hasActiveVehicleFilter || hasActiveSearch || hasActiveMonthFilter;
   bool get hasPendingRecords => pendingRecords.isNotEmpty;
   int get pendingRecordsCount => pendingRecords.length;
 
@@ -90,9 +91,13 @@ class FuelState {
       records = records.where((r) => r.vehicleId == selectedVehicleId).toList();
     }
     if (selectedMonth != null) {
-      records = records.where((r) =>
-          r.date.year == selectedMonth!.year &&
-          r.date.month == selectedMonth!.month).toList();
+      records = records
+          .where(
+            (r) =>
+                r.date.year == selectedMonth!.year &&
+                r.date.month == selectedMonth!.month,
+          )
+          .toList();
     }
     if (searchQuery.isNotEmpty) {
       final query = searchQuery.toLowerCase();
@@ -171,7 +176,6 @@ class FuelRiverpod extends _$FuelRiverpod {
   /// Cache para itens deletados (para suportar undo)
   final Map<String, FuelRecordEntity> _deletedCache = {};
 
-  @override
   FutureOr<FuelState> build() async {
     // Initialize specialized services via Bridge Providers
     _crudService = ref.watch(fuelCrudServiceProvider);

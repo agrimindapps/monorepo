@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class PromoFeaturesCarousel extends StatefulWidget {
@@ -71,16 +72,16 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel> {
           Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 1400),
-              child: GridView.count(
+              child: AlignedGridView.count(
                 crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 4),
                 mainAxisSpacing: 24,
                 crossAxisSpacing: 24,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: isMobile ? 0.7 : 0.85,
-                children: _features.asMap().entries.map((entry) {
-                  return _buildFeatureCard(entry.value, entry.key, isMobile);
-                }).toList(),
+                itemCount: _features.length,
+                itemBuilder: (context, index) {
+                  return _buildFeatureCard(_features[index], index, isMobile);
+                },
               ),
             ),
           ),
@@ -141,7 +142,7 @@ class _PromoFeaturesCarouselState extends State<PromoFeaturesCarousel> {
         Container(
           constraints: const BoxConstraints(maxWidth: 700),
           child: Text(
-            'Descubra como o Plantis pode transformar o cuidado com suas plantas e ajudá-lo a criar um jardim saudável e vibrante.',
+            'Descubra como o CantinhoVerde pode transformar o cuidado com suas plantas e ajudá-lo a criar um jardim saudável e vibrante.',
             style: GoogleFonts.inter(
               fontSize: 18,
               color: Colors.grey[400],

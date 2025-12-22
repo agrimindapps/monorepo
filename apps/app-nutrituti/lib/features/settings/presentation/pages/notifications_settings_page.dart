@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../widgets/app_colors.dart';
 import '../providers/settings_providers.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_switch_item.dart';
@@ -12,12 +11,12 @@ class NotificationsSettingsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final settingsAsync = ref.watch(settingsNotifierProvider);
+    final settingsAsync = ref.watch(settingsProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notificações'),
-        backgroundColor: AppColors.contentColorCyan,
+        backgroundColor: const Color(0xFF50E4FF),
         foregroundColor: Colors.white,
       ),
       body: settingsAsync.when(
@@ -27,7 +26,9 @@ class NotificationsSettingsPage extends ConsumerWidget {
             Text(
               'Configure seus lembretes e notificações',
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+                color: theme.textTheme.bodyMedium?.color?.withValues(
+                  alpha: 0.7,
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -49,7 +50,7 @@ class NotificationsSettingsPage extends ConsumerWidget {
                     value: settings.notificationsEnabled,
                     onChanged: (value) {
                       ref
-                          .read(settingsNotifierProvider.notifier)
+                          .read(settingsProvider.notifier)
                           .setNotificationsEnabled(value);
                     },
                   ),
@@ -73,39 +74,39 @@ class NotificationsSettingsPage extends ConsumerWidget {
                     title: 'Lembretes de Refeições',
                     subtitle: 'Lembrar horários das refeições',
                     value: settings.mealReminders,
-                    onChanged: settings.notificationsEnabled
-                        ? (value) {
-                            ref
-                                .read(settingsNotifierProvider.notifier)
-                                .setMealReminders(value);
-                          }
-                        : null,
+                    onChanged: (value) {
+                      if (settings.notificationsEnabled) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setMealReminders(value);
+                      }
+                    },
                   ),
                   SettingsSwitchItem(
                     icon: Icons.water_drop_outlined,
                     title: 'Lembretes de Hidratação',
                     subtitle: 'Lembrar de beber água',
                     value: settings.waterReminders,
-                    onChanged: settings.notificationsEnabled
-                        ? (value) {
-                            ref
-                                .read(settingsNotifierProvider.notifier)
-                                .setWaterReminders(value);
-                          }
-                        : null,
+                    onChanged: (value) {
+                      if (settings.notificationsEnabled) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setWaterReminders(value);
+                      }
+                    },
                   ),
                   SettingsSwitchItem(
                     icon: Icons.fitness_center_outlined,
                     title: 'Lembretes de Exercícios',
                     subtitle: 'Lembrar dos exercícios diários',
                     value: settings.exerciseReminders,
-                    onChanged: settings.notificationsEnabled
-                        ? (value) {
-                            ref
-                                .read(settingsNotifierProvider.notifier)
-                                .setExerciseReminders(value);
-                          }
-                        : null,
+                    onChanged: (value) {
+                      if (settings.notificationsEnabled) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setExerciseReminders(value);
+                      }
+                    },
                   ),
                 ],
               ),

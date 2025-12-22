@@ -38,6 +38,7 @@ import '../services/notification_service.dart';
 import '../services/share_service.dart';
 import '../sync/basic_sync_service.dart';
 import '../sync/nebulalist_sync_queue_service.dart';
+import '../../features/subscription/presentation/providers/subscription_providers.dart';
 import 'database_providers.dart';
 
 // =============================================================================
@@ -200,6 +201,7 @@ final listRepositoryProvider = Provider<IListRepository>((ref) {
     ref.watch(listRemoteDataSourceProvider),
     ref.watch(authStateNotifierProvider),
     ref.watch(syncQueueServiceProvider),
+    ref.watch(getSubscriptionStatusProvider),
   );
 });
 

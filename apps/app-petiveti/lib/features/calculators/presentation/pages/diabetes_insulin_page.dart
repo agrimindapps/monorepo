@@ -48,23 +48,28 @@ class _DiabetesInsulinPageState extends ConsumerState<DiabetesInsulinPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoCard(),
-            const SizedBox(height: 24),
-            _buildCalculationForm(),
-            if (state.errorMessage != null) ...[
-              const SizedBox(height: 16),
-              _buildErrorCard(state.errorMessage!),
-            ],
-            if (state.result != null) ...[
-              const SizedBox(height: 24),
-              CalculationResultCard(result: state.result!),
-            ],
-          ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoCard(),
+                const SizedBox(height: 24),
+                _buildCalculationForm(),
+                if (state.errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  _buildErrorCard(state.errorMessage!),
+                ],
+                if (state.result != null) ...[
+                  const SizedBox(height: 24),
+                  CalculationResultCard(result: state.result!),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Página da Calculadora de Idade Animal
 class AnimalAgePage extends StatefulWidget {
@@ -35,29 +36,34 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildInfoCard(),
-              const SizedBox(height: 24),
-              _buildSpeciesSelector(),
-              const SizedBox(height: 16),
-              _buildConversionTypeSelector(),
-              const SizedBox(height: 16),
-              _buildAgeInput(),
-              const SizedBox(height: 24),
-              _buildCalculateButton(),
-              if (_result != null) ...[
-                const SizedBox(height: 24),
-                _buildResultCard(),
-              ],
-              const SizedBox(height: 24),
-              _buildInfoTable(),
-            ],
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildInfoCard(),
+                  const SizedBox(height: 24),
+                  _buildSpeciesSelector(),
+                  const SizedBox(height: 16),
+                  _buildConversionTypeSelector(),
+                  const SizedBox(height: 16),
+                  _buildAgeInput(),
+                  const SizedBox(height: 24),
+                  _buildCalculateButton(),
+                  if (_result != null) ...[
+                    const SizedBox(height: 24),
+                    _buildResultCard(),
+                  ],
+                  const SizedBox(height: 24),
+                  _buildInfoTable(),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -255,6 +261,27 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  tooltip: 'Copiar',
+                  icon: Icon(
+                    Icons.copy,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  onPressed: () => _copyResultToClipboard(isShare: false),
+                ),
+                IconButton(
+                  tooltip: 'Compartilhar',
+                  icon: Icon(
+                    Icons.share,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                  onPressed: () => _copyResultToClipboard(isShare: true),
+                ),
+              ],
+            ),
             Icon(
               Icons.calculate,
               size: 48,
@@ -486,6 +513,28 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
         return 2 + (humanAge - 24) / 4;
       }
     }
+  }
+
+  Future<void> _copyResultToClipboard({required bool isShare}) async {
+    final result = _result;
+    if (result == null) {
+      return;
+    }
+
+    await Clipboard.setData(ClipboardData(text: result));
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isShare
+              ? 'Resultado copiado. Cole para compartilhar.'
+              : 'Resultado copiado para a área de transferência.',
+        ),
+      ),
+    );
   }
 
   String _getResultExplanation() {

@@ -6,12 +6,6 @@ import '../../domain/entities/calculator.dart';
 
 import '../providers/calculators_providers.dart';
 
-/// Provider para gerenciar estado das calculadoras
-final calculatorsProvider = FutureProvider<List<Calculator>>((ref) async {
-  final getCalculators = ref.watch(getCalculatorsProvider);
-  return await getCalculators();
-});
-
 /// Página principal de calculadoras veterinárias
 class CalculatorsMainPage extends ConsumerWidget {
   const CalculatorsMainPage({super.key});
@@ -32,7 +26,8 @@ class CalculatorsMainPage extends ConsumerWidget {
             ),
             Expanded(
               child: calculatorsAsync.when(
-                data: (calculators) => _CalculatorsGrid(calculators: calculators),
+                data: (calculators) =>
+                    _CalculatorsGrid(calculators: calculators),
                 loading: () => const _LoadingState(),
                 error: (error, stack) => _ErrorState(error: error),
               ),
@@ -57,18 +52,25 @@ class _CalculatorsGrid extends StatelessWidget {
       categorizedCalculators.putIfAbsent(calc.category, () => []).add(calc);
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _WelcomeHeader(),
-          const SizedBox(height: 24),
-          ...categorizedCalculators.entries.map(
-            (entry) =>
-                _CategorySection(category: entry.key, calculators: entry.value),
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1120),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _WelcomeHeader(),
+              const SizedBox(height: 24),
+              ...categorizedCalculators.entries.map(
+                (entry) => _CategorySection(
+                  category: entry.key,
+                  calculators: entry.value,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -160,18 +162,30 @@ class _CategorySection extends StatelessWidget {
             ],
           ),
         ),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 1.2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-          ),
-          itemCount: calculators.length,
-          itemBuilder: (context, index) =>
-              _CalculatorCard(calculator: calculators[index]),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final crossAxisCount = switch (width) {
+              >= 1024 => 4,
+              >= 720 => 3,
+              >= 420 => 2,
+              _ => 1,
+            };
+
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                childAspectRatio: 1.2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+              ),
+              itemCount: calculators.length,
+              itemBuilder: (context, index) =>
+                  _CalculatorCard(calculator: calculators[index]),
+            );
+          },
         ),
         const SizedBox(height: 24),
       ],
@@ -304,47 +318,47 @@ class _CalculatorCard extends StatelessWidget {
   }
 
   void _navigateToCalculator(BuildContext context) {
-    String route;
+    String routeName;
     switch (calculator.id) {
       case 'body_condition':
-        route = '/calculators/body-condition';
+        routeName = 'body-condition-calculator';
         break;
       case 'calorie':
-        route = '/calculators/calorie';
+        routeName = 'calorie-calculator';
         break;
       case 'medication_dosage':
-        route = '/calculators/medication-dosage';
+        routeName = 'medication-dosage-calculator';
         break;
       case 'animal_age':
-        route = '/calculators/animal-age';
+        routeName = 'animal-age-calculator';
         break;
       case 'anesthesia':
-        route = '/calculators/anesthesia';
+        routeName = 'anesthesia-calculator';
         break;
       case 'diabetes_insulin':
-        route = '/calculators/diabetes-insulin';
+        routeName = 'diabetes-insulin-calculator';
         break;
       case 'ideal_weight':
-        route = '/calculators/ideal-weight';
+        routeName = 'ideal-weight-calculator';
         break;
       case 'fluid_therapy':
-        route = '/calculators/fluid-therapy';
+        routeName = 'fluid-therapy-calculator';
         break;
       case 'hydration':
-        route = '/calculators/hydration';
+        routeName = 'hydration-calculator';
         break;
       case 'pregnancy_gestacao':
-        route = '/calculators/pregnancy';
+        routeName = 'pregnancy-calculator';
         break;
       case 'exercise':
-        route = '/calculators/exercise';
+        routeName = 'exercise-calculator';
         break;
       default:
         _showComingSoonDialog(context);
         return;
     }
 
-    context.push(route);
+    context.pushNamed(routeName);
   }
 
   void _showComingSoonDialog(BuildContext context) {
@@ -416,13 +430,7 @@ class _ErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute<void>(
-                    builder: (context) => const CalculatorsMainPage(),
-                  ),
-                );
-              },
+              onPressed: () => context.goNamed('calculators'),
               child: const Text('Tentar novamente'),
             ),
           ],

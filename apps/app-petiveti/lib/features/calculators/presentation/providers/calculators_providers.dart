@@ -4,13 +4,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/providers/database_providers.dart';
 import '../../data/datasources/calculator_local_datasource.dart';
 import '../../data/repositories/calculator_repository_impl.dart';
+import '../../domain/entities/calculator.dart';
 import '../../domain/repositories/calculator_repository.dart';
 import '../../domain/usecases/get_calculators.dart';
 import '../../domain/usecases/manage_calculation_history.dart';
 import '../../domain/usecases/perform_calculation.dart';
 
 part 'calculators_providers.g.dart';
-
 
 @riverpod
 CalculatorLocalDatasource calculatorLocalDataSource(Ref ref) {
@@ -33,6 +33,12 @@ PerformCalculation performCalculation(Ref ref) {
 @riverpod
 GetCalculators getCalculators(Ref ref) {
   return GetCalculators(ref.watch(calculatorRepositoryProvider));
+}
+
+@riverpod
+Future<List<Calculator>> calculators(Ref ref) async {
+  final getCalculatorsUseCase = ref.watch(getCalculatorsProvider);
+  return getCalculatorsUseCase();
 }
 
 @riverpod

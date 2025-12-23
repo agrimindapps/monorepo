@@ -1,6 +1,6 @@
 import 'package:core/core.dart' as core;
+import 'package:core/core.dart' show Provider, FutureProvider, StreamProvider, AsyncValue, NotifierProvider, Notifier;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
@@ -121,10 +121,16 @@ class DeviceLimitInfo {
 }
 
 /// Notifier principal para gerenciamento de dispositivos veiculares
-class VehicleDeviceNotifier extends StateNotifier<VehicleDeviceState> {
-  VehicleDeviceNotifier(this._ref, this._deviceService) : super(VehicleDeviceState.empty) {
+class VehicleDeviceNotifier extends Notifier<VehicleDeviceState> {
+  static const int _deviceLimit = 3; // Free tier
+
+  core.DeviceManagementService get _deviceService => 
+      ref.read(deviceManagementServiceProvider);
+
+  @override
+  VehicleDeviceState build() {
     // Listen para mudanças de conectividade
-    _ref.listen<AsyncValue<bool>>(isOnlineStatusProvider, (previous, next) {
+    ref.listen<AsyncValue<bool>>(isOnlineStatusProvider, (previous, next) {
       next.whenData((isOnline) {
         final wasOnline = state.isOnline;
 
@@ -136,11 +142,8 @@ class VehicleDeviceNotifier extends StateNotifier<VehicleDeviceState> {
         state = state.copyWith(isOnline: isOnline);
       });
     });
+    return VehicleDeviceState.empty;
   }
-  
-  static const int _deviceLimit = 3; // Free tier
-  final Ref _ref;
-  final core.DeviceManagementService _deviceService;
 
   /// Carrega dispositivos do usuário do Firebase
   Future<void> loadUserDevices() async {
@@ -426,9 +429,8 @@ class VehicleDeviceNotifier extends StateNotifier<VehicleDeviceState> {
 }
 
 /// Provider principal para VehicleDeviceNotifier
-final vehicleDeviceProvider = StateNotifierProvider<VehicleDeviceNotifier, VehicleDeviceState>((ref) {
-  final deviceService = ref.watch(deviceManagementServiceProvider);
-  return VehicleDeviceNotifier(ref, deviceService);
+final vehicleDeviceProvider = NotifierProvider<VehicleDeviceNotifier, VehicleDeviceState>(() {
+  return VehicleDeviceNotifier();
 });
 
 /// Provider conveniente para acessar o state

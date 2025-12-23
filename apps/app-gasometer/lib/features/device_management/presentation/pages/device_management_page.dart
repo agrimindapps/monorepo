@@ -1,5 +1,5 @@
+import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState, WidgetRef;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';
 import '../providers/vehicle_device_notifier.dart';

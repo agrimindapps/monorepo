@@ -1,6 +1,5 @@
+import 'package:core/core.dart' show DeviceEntity;
 import 'package:flutter/material.dart';
-
-import '../../../../core/services/device_identity_service.dart';
 
 /// Individual device list item component
 /// 
@@ -10,8 +9,10 @@ import '../../../../core/services/device_identity_service.dart';
 /// - Last active timestamp
 /// - Revoke action for non-primary devices
 /// - Platform-specific icons
+/// 
+/// Usa DeviceEntity do core para consistência cross-app
 class DeviceListItem extends StatelessWidget {
-  final DeviceInfo device;
+  final DeviceEntity device;
   final bool isPrimary;
   final VoidCallback? onRevoke;
 

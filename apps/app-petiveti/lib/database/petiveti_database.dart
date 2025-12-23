@@ -12,6 +12,7 @@ import 'daos/reminder_dao.dart';
 import 'daos/vaccine_dao.dart';
 import 'daos/weight_dao.dart';
 // Tables
+import 'tables/animal_images_table.dart';
 import 'tables/animals_table.dart';
 import 'tables/appointments_table.dart';
 import 'tables/calculation_history_table.dart';
@@ -37,24 +38,26 @@ part 'petiveti_database.g.dart';
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
 ///
-/// **TABELAS (10 total):**
+/// **TABELAS (11 total):**
 /// 1. Animals - Cadastro de pets
-/// 2. Medications - Medicamentos e tratamentos
-/// 3. Vaccines - Vacinação
-/// 4. Appointments - Consultas veterinárias
-/// 5. WeightRecords - Histórico de peso
-/// 6. Expenses - Despesas com pets
-/// 7. Reminders - Lembretes e notificações
-/// 8. CalculationHistory - Histórico de calculadoras
-/// 9. PromoContent - Conteúdo promocional
-/// 10. UserSubscriptions - Assinaturas premium (cache local)
+/// 2. AnimalImages - Fotos dos animais (Base64)
+/// 3. Medications - Medicamentos e tratamentos
+/// 4. Vaccines - Vacinação
+/// 5. Appointments - Consultas veterinárias
+/// 6. WeightRecords - Histórico de peso
+/// 7. Expenses - Despesas com pets
+/// 8. Reminders - Lembretes e notificações
+/// 9. CalculationHistory - Histórico de calculadoras
+/// 10. PromoContent - Conteúdo promocional
+/// 11. UserSubscriptions - Assinaturas premium (cache local)
 ///
-/// **SCHEMA VERSION:** 1 (inicial)
+/// **SCHEMA VERSION:** 3 (v3: Adicionada tabela AnimalImages)
 /// ============================================================================
 
 @DriftDatabase(
   tables: [
     Animals,
+    AnimalImages,
     Medications,
     Vaccines,
     Appointments,
@@ -85,8 +88,9 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
   /// Incrementar quando houver mudanças estruturais nas tabelas
   /// v1: Schema inicial
   /// v2: Adicionados campos de sync (firebaseId, isDirty, lastSyncAt, version)
+  /// v3: Adicionada tabela AnimalImages (imagens em Base64)
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Factory constructor para injeção de dependência via Riverpod
   ///
@@ -220,6 +224,12 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
         await m.addColumn(promoContent, promoContent.lastSyncAt);
         await m.addColumn(promoContent, promoContent.isDirty);
         await m.addColumn(promoContent, promoContent.version);
+      }
+
+      // ========== MIGRAÇÃO v2 → v3: Tabela AnimalImages ==========
+      if (from < 3) {
+        // Cria tabela de imagens dos animais com Base64
+        await m.createTable(animalImages);
       }
     },
   );

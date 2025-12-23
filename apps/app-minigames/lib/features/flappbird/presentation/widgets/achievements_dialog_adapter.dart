@@ -27,7 +27,11 @@ class FlappyAchievementsDialogAdapter extends ConsumerWidget {
     final snapshot = achievementsAsync.when(
       data: (achievements) => AsyncSnapshot<List<AchievementItem>>.withData(
         ConnectionState.done,
-        _convertAchievements(achievements),
+        _convertAchievements(
+          achievements
+              .map((a) => FlappyAchievementWithDefinition.fromAchievement(a))
+              .toList(),
+        ),
       ),
       loading: () => const AsyncSnapshot<List<AchievementItem>>.waiting(),
       error: (error, stack) => AsyncSnapshot<List<AchievementItem>>.withError(

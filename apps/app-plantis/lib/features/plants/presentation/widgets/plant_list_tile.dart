@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
@@ -154,22 +152,15 @@ class PlantListTile extends ConsumerWidget {
     const size = 60.0;
 
     if (plant.hasImage) {
-      try {
-        final imageBytes = base64Decode(plant.imageBase64!);
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.memory(
-            imageBytes,
-            width: size,
-            height: size,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) =>
-                _buildPlaceholder(size),
-          ),
-        );
-      } catch (e) {
-        return _buildPlaceholder(size);
-      }
+      // Usar CoreImageWidget que suporta tanto base64 quanto URLs
+      return CoreImageWidget.plant(
+        imageBase64: plant.imageBase64,
+        imageUrls: plant.imageUrls,
+        size: size,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(12),
+        errorWidget: _buildPlaceholder(size),
+      );
     }
 
     return _buildPlaceholder(size);

@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:core/core.dart'
-    hide AuthState, Column, analyticsServiceProvider;
+    hide AuthState, Column, analyticsServiceProvider, deviceIdentityServiceProvider;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../data/models/user_session_data.dart';
 import '../extensions/user_entity_receituagro_extension.dart';
-import '../services/device_identity_service.dart';
 import 'auth_state.dart';
 import 'core_providers.dart';
 
@@ -168,7 +167,7 @@ class AuthNotifier extends _$AuthNotifier {
       if (kDebugMode) {
         print('🔄 Auth Notifier: Handling device login for user ${user.id}');
       }
-      final deviceInfo = await _deviceService.getDeviceInfo();
+      final deviceInfo = await _deviceService.getCurrentDeviceEntity();
       _analytics.trackDeviceAdded(deviceInfo.platform);
 
       if (kDebugMode) {
@@ -902,7 +901,7 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  Future<void> _syncUserProfile(UserEntity user, DeviceInfo deviceInfo) async {
+  Future<void> _syncUserProfile(UserEntity user, DeviceEntity deviceInfo) async {
     try {
       if (user.id.isEmpty) {
         if (kDebugMode) {

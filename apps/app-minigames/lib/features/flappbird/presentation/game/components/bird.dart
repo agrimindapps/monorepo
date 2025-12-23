@@ -24,6 +24,8 @@ class Bird extends PositionComponent with CollisionCallbacks, HasGameRef<FlappyB
   @override
   void update(double dt) {
     super.update(dt);
+    
+    if (!gameRef.isPlaying) return;
 
     // Apply gravity
     velocity += gravity * dt;

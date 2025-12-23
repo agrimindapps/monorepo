@@ -23,6 +23,9 @@ class Pipe extends PositionComponent with HasGameRef<FlappyBirdGame> {
   @override
   void update(double dt) {
     super.update(dt);
+    
+    if (!gameRef.isPlaying) return;
+    
     position.x -= gameRef.gameSpeed * dt;
 
     if (position.x + size.x < 0) {

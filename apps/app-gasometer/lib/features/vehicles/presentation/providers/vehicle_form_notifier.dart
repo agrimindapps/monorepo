@@ -125,14 +125,9 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
 
     state = state.copyWith(selectedFuelType: fuelType);
 
-    final imagePath = vehicle.metadata['foto'] as String?;
-    if (imagePath != null && imagePath.isNotEmpty) {
-      final imageFile = File(imagePath);
-      // Em web, não podemos verificar existência de arquivo sincronamente
-      if (kIsWeb || imageFile.existsSync()) {
-        state = state.copyWith(vehicleImage: imageFile);
-      }
-    }
+    // A imagem agora é armazenada como Base64 em metadata['foto']
+    // Não precisamos carregar como File, pois o CoreImageWidget lida com Base64
+    // O vehicleImage só é usado para novas imagens selecionadas pelo picker
   }
 
   /// Limpa formulário
@@ -308,7 +303,7 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
 
   /// Cria entidade do veículo a partir dos dados do formulário
   /// Requer userId como parâmetro
-  VehicleEntity buildVehicleEntity({String? userId}) {
+  Future<VehicleEntity> buildVehicleEntity({String? userId}) async {
     String? effectiveUserId = userId;
     if (effectiveUserId == null) {
       final authState = ref.read(authProvider);
@@ -352,6 +347,32 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
         ? [FuelType.gasoline, FuelType.ethanol, FuelType.gas]
         : [fuelType];
 
+    // Converter imagem para Base64 otimizado se existir
+    String? imageBase64;
+    if (state.vehicleImage != null) {
+      try {
+        if (!kIsWeb && state.vehicleImage!.existsSync()) {
+          final bytes = await state.vehicleImage!.readAsBytes();
+          
+          // Usar ImageProcessingService para otimizar a imagem (max 600KB)
+          final processed = await ImageProcessingService.instance.processImage(
+            bytes,
+            config: ImageProcessingConfig.standard,
+          );
+          
+          imageBase64 = processed.base64DataUri;
+          debugPrint('📷 Imagem processada: ${processed.sizeBytes} bytes '
+              '(${processed.width}x${processed.height}), '
+              'economia: ${processed.savedPercent.toStringAsFixed(1)}%');
+        }
+      } catch (e) {
+        debugPrint('⚠️ Erro ao processar imagem: $e');
+      }
+    }
+    
+    // Se não conseguiu converter, usar valor existente do veículo em edição
+    imageBase64 ??= state.editingVehicle?.metadata['foto'] as String?;
+
     return VehicleEntity(
       id:
           state.editingVehicle?.id ??
@@ -371,14 +392,14 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
       metadata: {
         if (sanitizedChassis.isNotEmpty) 'chassi': sanitizedChassis,
         if (sanitizedRenavam.isNotEmpty) 'renavam': sanitizedRenavam,
-        if (state.vehicleImage?.path != null) 'foto': state.vehicleImage!.path,
+        if (imageBase64 != null && imageBase64.isNotEmpty) 'foto': imageBase64,
         'odometroInicial': odometerValue,
       },
     );
   }
 
   /// Alias para buildVehicleEntity (compatibilidade)
-  VehicleEntity createVehicleEntity({String? userId}) {
+  Future<VehicleEntity> createVehicleEntity({String? userId}) {
     return buildVehicleEntity(userId: userId);
   }
 
@@ -391,7 +412,7 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final vehicle = buildVehicleEntity();
+      final vehicle = await buildVehicleEntity();
       final notifier = ref.read(vehiclesProvider.notifier);
 
       if (state.isEditing) {

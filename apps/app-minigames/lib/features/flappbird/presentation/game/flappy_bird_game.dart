@@ -4,12 +4,14 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
+import 'package:flutter/services.dart';
+
 import 'components/background.dart';
 import 'components/bird.dart';
 import 'components/ground.dart';
 import 'components/pipe_manager.dart';
 
-class FlappyBirdGame extends FlameGame with TapCallbacks, HasCollisionDetection {
+class FlappyBirdGame extends FlameGame with TapCallbacks, KeyboardEvents, HasCollisionDetection {
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onScoreChanged;
 
@@ -58,15 +60,25 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, HasCollisionDetection 
     overlays.add('Start');
   }
 
-  @override
-  void update(double dt) {
-    if (isPlaying) {
-      super.update(dt);
-    }
-  }
 
   @override
   void onTapUp(TapUpEvent event) {
+    _handleInput();
+  }
+
+  @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    final isSpace = keysPressed.contains(LogicalKeyboardKey.space);
+    
+    if (isSpace && event is KeyDownEvent) {
+      _handleInput();
+      return KeyEventResult.handled;
+    }
+    
+    return KeyEventResult.ignored;
+  }
+
+  void _handleInput() {
     if (isGameOver) {
       return;
     }

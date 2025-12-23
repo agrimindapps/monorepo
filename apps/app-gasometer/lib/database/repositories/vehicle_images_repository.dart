@@ -1,18 +1,24 @@
+import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 import '../gasometer_database.dart';
 
 /// Repository para gerenciar imagens de veículos no Drift
 ///
-/// Armazena imagens como BLOB para funcionamento offline-first.
+/// Armazena imagens como Base64 para sincronização com Firestore.
+/// Usa ImageProcessingService para compressão automática (max 600KB).
+///
 /// Responsabilidades:
 /// - CRUD de imagens locais
+/// - Processamento e compressão automática
 /// - Gerenciamento de imagem primária
-/// - Controle de status de upload
+/// - Controle de sincronização
 class VehicleImagesDriftRepository {
   VehicleImagesDriftRepository(this._db);
 
   final GasometerDatabase _db;
+  final _processingService = ImageProcessingService.instance;
 
   // =========================================================================
   // CREATE
@@ -20,20 +26,32 @@ class VehicleImagesDriftRepository {
 
   /// Salva uma nova imagem para um veículo
   ///
+  /// A imagem é automaticamente processada e comprimida para max 600KB.
+  ///
   /// [vehicleId] - ID local do veículo
-  /// [imageBytes] - Bytes da imagem
+  /// [imageBytes] - Bytes da imagem original
   /// [fileName] - Nome original do arquivo
-  /// [mimeType] - Tipo MIME (image/jpeg, image/png)
   /// [isPrimary] - Se é a imagem principal
   /// [userId] - ID do usuário
+  /// [config] - Configuração de processamento (default: standard)
   Future<int> saveImage({
     required int vehicleId,
     required Uint8List imageBytes,
     required String userId,
     String? fileName,
-    String mimeType = 'image/jpeg',
     bool isPrimary = false,
+    ImageProcessingConfig config = ImageProcessingConfig.standard,
   }) async {
+    // Processar e comprimir imagem
+    final processed = await _processingService.processImage(
+      imageBytes,
+      config: config,
+    );
+
+    _log('Imagem processada: ${processed.sizeBytes} bytes '
+        '(${processed.width}x${processed.height}), '
+        'economia: ${processed.savedPercent.toStringAsFixed(1)}%');
+
     // Se for primária, remove flag de outras imagens
     if (isPrimary) {
       await _clearPrimaryFlag(vehicleId);
@@ -41,21 +59,64 @@ class VehicleImagesDriftRepository {
 
     final companion = VehicleImagesCompanion(
       vehicleId: Value(vehicleId),
-      imageData: Value(imageBytes),
+      imageBase64: Value(processed.base64DataUri),
       fileName: Value(fileName),
-      mimeType: Value(mimeType),
-      sizeBytes: Value(imageBytes.length),
+      mimeType: Value(processed.mimeType),
+      sizeBytes: Value(processed.sizeBytes),
+      width: Value(processed.width),
+      height: Value(processed.height),
       isPrimary: Value(isPrimary),
+      sortOrder: const Value(0),
       userId: Value(userId),
       isDirty: const Value(true),
-      uploadStatus: const Value('pending'),
       createdAt: Value(DateTime.now()),
       updatedAt: Value(DateTime.now()),
     );
 
     final id = await _db.into(_db.vehicleImages).insert(companion);
-    print(
-        '📷 [VehicleImagesDriftRepository] Imagem salva: id=$id, vehicleId=$vehicleId, size=${imageBytes.length} bytes');
+    _log('Imagem salva: id=$id, vehicleId=$vehicleId, size=${processed.sizeBytes} bytes');
+    return id;
+  }
+
+  /// Salva imagem já processada (Base64)
+  ///
+  /// Útil para sincronização quando a imagem já vem processada do Firestore.
+  Future<int> saveProcessedImage({
+    required int vehicleId,
+    required String imageBase64,
+    required String userId,
+    String? fileName,
+    String mimeType = 'image/jpeg',
+    int? sizeBytes,
+    int? width,
+    int? height,
+    bool isPrimary = false,
+    String? firebaseId,
+  }) async {
+    if (isPrimary) {
+      await _clearPrimaryFlag(vehicleId);
+    }
+
+    final companion = VehicleImagesCompanion(
+      vehicleId: Value(vehicleId),
+      imageBase64: Value(imageBase64),
+      fileName: Value(fileName),
+      mimeType: Value(mimeType),
+      sizeBytes: Value(sizeBytes),
+      width: Value(width),
+      height: Value(height),
+      isPrimary: Value(isPrimary),
+      sortOrder: const Value(0),
+      userId: Value(userId),
+      firebaseId: Value(firebaseId),
+      isDirty: Value(firebaseId == null), // Dirty se não tem firebaseId
+      createdAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+      lastSyncAt: firebaseId != null ? Value(DateTime.now()) : const Value.absent(),
+    );
+
+    final id = await _db.into(_db.vehicleImages).insert(companion);
+    _log('Imagem processada salva: id=$id, vehicleId=$vehicleId');
     return id;
   }
 
@@ -80,6 +141,7 @@ class VehicleImagesDriftRepository {
               (i) => i.vehicleId.equals(vehicleId) & i.isDeleted.equals(false))
           ..orderBy([
             (i) => OrderingTerm.desc(i.isPrimary),
+            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .get();
@@ -91,14 +153,18 @@ class VehicleImagesDriftRepository {
         .getSingleOrNull();
   }
 
-  /// Retorna imagens pendentes de upload
-  Future<List<VehicleImage>> getPendingUploads() async {
+  /// Retorna uma imagem pelo Firebase ID
+  Future<VehicleImage?> getImageByFirebaseId(String firebaseId) async {
     return (_db.select(_db.vehicleImages)
-          ..where((i) =>
-              i.uploadStatus.equals('pending') & i.isDeleted.equals(false))
-          ..orderBy([
-            (i) => OrderingTerm.asc(i.createdAt),
-          ]))
+          ..where((i) => i.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+  }
+
+  /// Retorna imagens pendentes de sincronização
+  Future<List<VehicleImage>> getDirtyImages() async {
+    return (_db.select(_db.vehicleImages)
+          ..where((i) => i.isDirty.equals(true) & i.isDeleted.equals(false))
+          ..orderBy([(i) => OrderingTerm.asc(i.createdAt)]))
         .get();
   }
 
@@ -109,6 +175,7 @@ class VehicleImagesDriftRepository {
               (i) => i.vehicleId.equals(vehicleId) & i.isDeleted.equals(false))
           ..orderBy([
             (i) => OrderingTerm.desc(i.isPrimary),
+            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .watch();
@@ -135,32 +202,34 @@ class VehicleImagesDriftRepository {
     await (_db.update(_db.vehicleImages)..where((i) => i.id.equals(imageId)))
         .write(VehicleImagesCompanion(
       isPrimary: const Value(true),
+      isDirty: const Value(true),
       updatedAt: Value(DateTime.now()),
     ));
   }
 
-  /// Atualiza status de upload após envio ao Firebase Storage
-  Future<void> updateUploadStatus({
-    required int imageId,
-    required String status,
-    String? storageUrl,
-    String? firebaseId,
-  }) async {
-    final companion = VehicleImagesCompanion(
-      uploadStatus: Value(status),
-      storageUrl: Value(storageUrl),
-      firebaseId: Value(firebaseId),
-      isDirty: Value(status != 'completed'),
-      lastSyncAt:
-          status == 'completed' ? Value(DateTime.now()) : const Value.absent(),
-      updatedAt: Value(DateTime.now()),
-    );
-
+  /// Atualiza ordem de exibição
+  Future<void> updateSortOrder(int imageId, int sortOrder) async {
     await (_db.update(_db.vehicleImages)..where((i) => i.id.equals(imageId)))
-        .write(companion);
+        .write(VehicleImagesCompanion(
+      sortOrder: Value(sortOrder),
+      isDirty: const Value(true),
+      updatedAt: Value(DateTime.now()),
+    ));
+  }
 
-    print(
-        '📷 [VehicleImagesDriftRepository] Upload status atualizado: id=$imageId, status=$status');
+  /// Marca imagem como sincronizada
+  Future<void> markAsSynced({
+    required int imageId,
+    required String firebaseId,
+  }) async {
+    await (_db.update(_db.vehicleImages)..where((i) => i.id.equals(imageId)))
+        .write(VehicleImagesCompanion(
+      firebaseId: Value(firebaseId),
+      isDirty: const Value(false),
+      lastSyncAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+    ));
+    _log('Imagem $imageId marcada como sincronizada: $firebaseId');
   }
 
   // =========================================================================
@@ -175,17 +244,14 @@ class VehicleImagesDriftRepository {
       isDirty: const Value(true),
       updatedAt: Value(DateTime.now()),
     ));
-
-    print(
-        '📷 [VehicleImagesDriftRepository] Imagem marcada como deletada: id=$imageId');
+    _log('Imagem marcada como deletada: id=$imageId');
   }
 
   /// Remove permanentemente uma imagem
   Future<void> hardDeleteImage(int imageId) async {
     await (_db.delete(_db.vehicleImages)..where((i) => i.id.equals(imageId)))
         .go();
-    print(
-        '📷 [VehicleImagesDriftRepository] Imagem removida permanentemente: id=$imageId');
+    _log('Imagem removida permanentemente: id=$imageId');
   }
 
   /// Remove todas as imagens de um veículo
@@ -210,6 +276,7 @@ class VehicleImagesDriftRepository {
               (i) => i.vehicleId.equals(vehicleId) & i.isPrimary.equals(true)))
         .write(const VehicleImagesCompanion(
       isPrimary: Value(false),
+      isDirty: Value(true),
     ));
   }
 
@@ -222,5 +289,11 @@ class VehicleImagesDriftRepository {
           _db.vehicleImages.isDeleted.equals(false));
 
     return await query.map((row) => row.read(count)!).getSingle();
+  }
+
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('📷 [VehicleImagesDriftRepository] $message');
+    }
   }
 }

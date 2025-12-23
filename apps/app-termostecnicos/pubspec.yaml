@@ -23,64 +23,35 @@ dependencies:
   cupertino_icons: any
 
   # State Management (Riverpod - replacing GetX)
-  flutter_riverpod: any
-  riverpod_annotation: any
 
   # Functional Programming
-  dartz: any
-  equatable: any
 
   # Immutability
-  freezed_annotation: any
 
   # Utils
-  logger: any
 
   # App-specific
   flutter_quill: ^11.0.0
-  flutter_tts: any
   app_settings: ^5.1.1
   purchases_ui_flutter: ^9.8.0
   flutter_localization: ^0.2.1
   flutter_localizations:
     sdk: flutter
-  skeletonizer: ^2.1.1
-  flutter_staggered_grid_view: any
 
   # Navigation
-  go_router: any
 
   # Dependencies from core but used directly in app code
   # (Required for direct imports per analyzer)
-  share_plus: any
-  shared_preferences: any
-  firebase_core: any
-  icons_plus: any
-  url_launcher: any
-  google_mobile_ads: any
-  intl: any
-  purchases_flutter: any
 
   # Database
-  drift: any
-  sqlite3_flutter_libs: any
-  sqlite3_web: any
-  path_provider: any
-  path: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
-  flutter_lints: any
 
   # Code Generation
-  drift_dev: any
-  build_runner: any
-  riverpod_generator: any
-  freezed: any
-  json_serializable: any
 
 flutter:
   uses-material-design: true

@@ -5,6 +5,34 @@ import 'package:flutter/foundation.dart';
 
 import '../presentation/providers/vehicle_device_notifier.dart';
 
+/// Resultado da validação de dispositivo para o app-gasometer
+/// Wrapper simplificado para evitar conflitos com as múltiplas versões do core
+class GasometerDeviceValidationResult {
+  const GasometerDeviceValidationResult._({
+    required this.isSuccess,
+    this.errorMessage,
+    this.deviceEntity,
+  });
+
+  factory GasometerDeviceValidationResult.success(DeviceEntity deviceEntity) =>
+      GasometerDeviceValidationResult._(
+        isSuccess: true,
+        deviceEntity: deviceEntity,
+      );
+
+  factory GasometerDeviceValidationResult.failure(String errorMessage) =>
+      GasometerDeviceValidationResult._(
+        isSuccess: false,
+        errorMessage: errorMessage,
+      );
+
+  final bool isSuccess;
+  final String? errorMessage;
+  final DeviceEntity? deviceEntity;
+
+  bool get isFailure => !isSuccess;
+}
+
 /// Serviço de integração do Device Management com o fluxo de autenticação
 class DeviceIntegrationService {
 
@@ -16,15 +44,15 @@ class DeviceIntegrationService {
   final DeviceInfoPlugin _deviceInfoPlugin;
 
   /// Valida e registra dispositivo durante o login
-  /// Retorna true se o dispositivo foi validado com sucesso
-  Future<DeviceValidationResult> validateDeviceForLogin(String userId) async {
+  /// Retorna GasometerDeviceValidationResult
+  Future<GasometerDeviceValidationResult> validateDeviceForLogin(String userId) async {
     try {
       if (kDebugMode) {
         debugPrint('🔄 DeviceIntegrationService: Validating device for login');
       }
       final deviceInfoResult = await _getCurrentDeviceInfo();
       if (deviceInfoResult.isFailure) {
-        return DeviceValidationResult.failure(
+        return GasometerDeviceValidationResult.failure(
           'Erro ao obter informações do dispositivo: ${deviceInfoResult.error}',
         );
       }
@@ -37,20 +65,20 @@ class DeviceIntegrationService {
           if (kDebugMode) {
             debugPrint('❌ DeviceIntegrationService: Device validation failed - ${failure.message}');
           }
-          return DeviceValidationResult.failure(failure.message);
+          return GasometerDeviceValidationResult.failure(failure.message);
         },
         (validatedDevice) {
           if (kDebugMode) {
             debugPrint('✅ DeviceIntegrationService: Device validated successfully');
           }
-          return DeviceValidationResult.success(validatedDevice);
+          return GasometerDeviceValidationResult.success(validatedDevice);
         },
       );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ DeviceIntegrationService: Unexpected error - $e');
       }
-      return DeviceValidationResult.failure(
+      return GasometerDeviceValidationResult.failure(
         'Erro inesperado na validação do dispositivo: $e',
       );
     }
@@ -79,7 +107,7 @@ class DeviceIntegrationService {
   }
 
   /// Obtém informações do dispositivo atual
-  Future<DeviceInfoResult> _getCurrentDeviceInfo() async {
+  Future<_DeviceInfoResult> _getCurrentDeviceInfo() async {
     try {
       final packageInfo = await PackageInfo.fromPlatform();
       final uuid = await _generateDeviceUuid();
@@ -119,14 +147,14 @@ class DeviceIntegrationService {
           lastActiveAt: DateTime.now(),
         );
       } else {
-        return DeviceInfoResult.failure(
+        return _DeviceInfoResult.failure(
           'Plataforma não suportada: ${Platform.operatingSystem}',
         );
       }
 
-      return DeviceInfoResult.success(deviceEntity);
+      return _DeviceInfoResult.success(deviceEntity);
     } catch (e) {
-      return DeviceInfoResult.failure('Erro ao obter informações do dispositivo: $e');
+      return _DeviceInfoResult.failure('Erro ao obter informações do dispositivo: $e');
     }
   }
 
@@ -161,37 +189,16 @@ class DeviceIntegrationService {
   }
 }
 
-/// Resultado da validação de dispositivo
-class DeviceValidationResult {
+/// Resultado interno da obtenção de informações do dispositivo
+class _DeviceInfoResult {
 
-  DeviceValidationResult._(
-    this.isSuccess,
-    this.errorMessage,
-    this.deviceEntity,
-  );
+  _DeviceInfoResult._(this.isSuccess, this.error, this.deviceEntity);
 
-  factory DeviceValidationResult.success(DeviceEntity deviceEntity) =>
-      DeviceValidationResult._(true, null, deviceEntity);
+  factory _DeviceInfoResult.success(DeviceEntity deviceEntity) =>
+      _DeviceInfoResult._(true, null, deviceEntity);
 
-  factory DeviceValidationResult.failure(String errorMessage) =>
-      DeviceValidationResult._(false, errorMessage, null);
-  final bool isSuccess;
-  final String? errorMessage;
-  final DeviceEntity? deviceEntity;
-
-  bool get isFailure => !isSuccess;
-}
-
-/// Resultado da obtenção de informações do dispositivo
-class DeviceInfoResult {
-
-  DeviceInfoResult._(this.isSuccess, this.error, this.deviceEntity);
-
-  factory DeviceInfoResult.success(DeviceEntity deviceEntity) =>
-      DeviceInfoResult._(true, null, deviceEntity);
-
-  factory DeviceInfoResult.failure(String error) =>
-      DeviceInfoResult._(false, error, null);
+  factory _DeviceInfoResult.failure(String error) =>
+      _DeviceInfoResult._(false, error, null);
   final bool isSuccess;
   final String? error;
   final DeviceEntity? deviceEntity;

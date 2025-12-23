@@ -97,51 +97,56 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
       ),
       backgroundColor: const Color(0xFFFAF8EF),
       body: SafeArea(
-        child: Column(
-          children: [
-            // Controls (score, moves, restart)
-            GameControlsWidget(
-              score: gameState.score,
-              bestScore: gameState.bestScore,
-              moves: gameState.moves,
-              onRestart: () => _showRestartConfirmation(context),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Instructions
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                'Deslize para combinar números e alcançar 2048!',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[700],
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              children: [
+                // Controls (score, moves, restart)
+                GameControlsWidget(
+                  score: gameState.score,
+                  bestScore: gameState.bestScore,
+                  moves: gameState.moves,
+                  onRestart: () => _showRestartConfirmation(context),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-            // Game grid with Flame
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: GameWidget(
-                      game: _game!,
-                      key: ValueKey(gameState.boardSize), // Force rebuild on resize
+                // Instructions
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Text(
+                    'Deslize para combinar números e alcançar 2048!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[700],
                     ),
                   ),
                 ),
-              ),
-            ),
 
-            const SizedBox(height: 24),
-          ],
+                const SizedBox(height: 24),
+
+                // Game grid with Flame
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: GameWidget(
+                          game: _game!,
+                          key: ValueKey(gameState.boardSize), // Force rebuild on resize
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
         ),
       ),
     );

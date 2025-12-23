@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../widgets/shared/game_over_dialog.dart' as shared;
+import '../providers/snake_extended_providers.dart';
 import '../providers/snake_game_notifier.dart';
 
 /// Adapter for Snake game over dialog
@@ -20,33 +21,21 @@ class SnakeGameOverDialogAdapter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final gameState = ref.watch(snakeGameProvider);
-    final newAchievements = ref
-        .read(snakeGameProvider.notifier)
-        .newlyUnlockedAchievements;
+    final playerLevelAsync = ref.watch(playerLevelProvider);
+
+    final playerLevel = playerLevelAsync.when(
+      data: (level) => level.currentLevel,
+      loading: () => 1,
+      error: (_, __) => 1,
+    );
 
     // Convert achievements
-    final achievements = newAchievements
-        .map((achievement) => shared.NewAchievement(
-              title: achievement.title,
-              description: achievement.description,
-              emoji: achievement.emoji,
-              xp: achievement.rarity.xpReward,
-            ))
-        .toList();
+    final achievements = <shared.NewAchievement>[];
 
     // Build stats
     final stats = <shared.GameStat>[
-      shared.GameStat(
-        icon: '🐍',
-        label: 'Tamanho',
-        value: '$snakeLength',
-      ),
-      shared.GameStat(
-        icon: '⭐',
-        label: 'Level',
-        value: '${gameState.playerLevel}',
-      ),
+      shared.GameStat(icon: '🐍', label: 'Tamanho', value: '$snakeLength'),
+      shared.GameStat(icon: '⭐', label: 'Level', value: '$playerLevel'),
     ];
 
     return shared.GameOverDialog(
@@ -56,7 +45,7 @@ class SnakeGameOverDialogAdapter extends ConsumerWidget {
       isNewHighScore: isNewHighScore,
       stats: stats,
       newAchievements: achievements,
-      onPlayAgain: () => ref.read(snakeGameProvider.notifier).resetGame(),
+      onPlayAgain: () => ref.read(snakeGameProvider.notifier).restartGame(),
       onExit: () => context.go('/'),
       victoryColor: Colors.greenAccent,
       defeatColor: Colors.redAccent,

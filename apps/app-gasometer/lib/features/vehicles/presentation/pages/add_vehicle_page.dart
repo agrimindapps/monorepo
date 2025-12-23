@@ -57,11 +57,22 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
     super.initState();
     _currentMode = _initialMode;
     
+    // Inicializa field keys e focus nodes IMEDIATAMENTE
+    _initializeFieldKeysAndFocusNodes();
+    
     // Inicializa o form notifier após o primeiro frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       _initializeFormNotifier();
     });
+  }
+
+  void _initializeFieldKeysAndFocusNodes() {
+    final fields = ['marca', 'modelo', 'ano', 'cor', 'odometro', 'placa', 'chassi', 'renavam', 'observacoes', 'combustivel'];
+    for (final field in fields) {
+      _fieldKeys[field] = GlobalKey();
+      _focusNodes[field] = FocusNode();
+    }
   }
 
   void _initializeFormNotifier() {
@@ -88,13 +99,6 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   void _initializeFormValidator() {
     _formValidator = FormValidator();
     final notifier = ref.read(vehicleFormProvider.notifier);
-    
-    // Initialize keys and focus nodes
-    final fields = ['marca', 'modelo', 'ano', 'cor', 'odometro', 'placa', 'chassi', 'renavam', 'observacoes', 'combustivel'];
-    for (final field in fields) {
-      _fieldKeys[field] = GlobalKey();
-      _focusNodes[field] = FocusNode();
-    }
 
     _formValidator.addFields([
       FormFieldConfig(

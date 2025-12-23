@@ -14,32 +14,16 @@ dependencies:
   core:
     path: ../../packages/core
   
-  riverpod_annotation: any
-  flutter_riverpod: any
 
   # Drift - Local database (SQLite-based)
-  drift: any
-  sqlite3_flutter_libs: any
-  path_provider: any
-  path: any
   
   # Share functionality
-  share_plus: any
   
   # Date formatting
-  intl: any
   
-  dartz: any
-  cloud_firestore: any
-  shared_preferences: any
-  json_annotation: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: any
-  drift_dev: any
-  json_serializable: any
-  riverpod_generator: any
   
 flutter:
   uses-material-design: true

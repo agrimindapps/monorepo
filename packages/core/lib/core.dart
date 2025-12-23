@@ -159,6 +159,8 @@ export 'src/infrastructure/services/storage/storage_encryption_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
+// Device Identity Service - Unified device identification
+export 'src/infrastructure/services/device_identity_service.dart';
 // Drift Storage Service e Sync Infrastructure
 export 'src/infrastructure/storage/drift/services/drift_storage_service.dart';
 export 'src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
@@ -237,3 +239,7 @@ export 'utils/core_icons.dart';
 export 'utils/random_selection_service.dart';
 export 'widgets/core_carousel_widget.dart';
 export 'src/presentation/widgets/profile/profile_image_picker_widget.dart';
+export 'src/presentation/widgets/image/core_image_widget.dart';
+
+// Image Processing & Storage
+export 'src/infrastructure/images/images.dart';

@@ -15,34 +15,28 @@ class GameBoardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
+    return GridView.builder(
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
       ),
-      child: GridView.builder(
-        padding: const EdgeInsets.all(8),
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          crossAxisSpacing: 8,
-          mainAxisSpacing: 8,
-        ),
-        itemCount: 9,
-        itemBuilder: (context, index) {
-          final row = index ~/ 3;
-          final col = index % 3;
-          final isWinningCell = gameState.winningLine?.contains(index) ?? false;
+      itemCount: 9,
+      itemBuilder: (context, index) {
+        final row = index ~/ 3;
+        final col = index % 3;
+        final isWinningCell = gameState.winningLine?.contains(index) ?? false;
 
-          return BoardCellWidget(
-            player: gameState.board[row][col],
-            isWinningCell: isWinningCell,
-            onTap: gameState.isInProgress && gameState.board[row][col].index == 2
-                ? () => onCellTapped(row, col)
-                : null,
-          );
-        },
-      ),
+        return BoardCellWidget(
+          player: gameState.board[row][col],
+          isWinningCell: isWinningCell,
+          onTap: gameState.isInProgress && gameState.board[row][col].index == 2
+              ? () => onCellTapped(row, col)
+              : null,
+        );
+      },
     );
   }
 }

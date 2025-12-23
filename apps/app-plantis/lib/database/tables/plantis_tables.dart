@@ -536,8 +536,9 @@ class PlantImages extends Table {
 
   // ========== DADOS DA IMAGEM ==========
 
-  /// Bytes da imagem (BLOB - armazenamento eficiente)
-  BlobColumn get imageData => blob()();
+  /// Imagem em Base64 com prefixo data URI (max 600KB após compressão)
+  /// Ex: 'data:image/jpeg;base64,/9j/4AAQ...'
+  TextColumn get imageBase64 => text()();
 
   /// Nome original do arquivo
   TextColumn get fileName => text().nullable()();
@@ -545,18 +546,20 @@ class PlantImages extends Table {
   /// MIME type da imagem (image/jpeg, image/png, etc.)
   TextColumn get mimeType => text().withDefault(const Constant('image/jpeg'))();
 
-  /// Tamanho em bytes
+  /// Tamanho em bytes da imagem comprimida
   IntColumn get sizeBytes => integer().nullable()();
 
-  /// URL no Firebase Storage (após upload)
-  TextColumn get storageUrl => text().nullable()();
+  /// Largura em pixels
+  IntColumn get width => integer().nullable()();
+
+  /// Altura em pixels
+  IntColumn get height => integer().nullable()();
 
   /// Indica se é a imagem principal da planta
   BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
 
-  /// Status do upload (pending, uploading, completed, failed)
-  TextColumn get uploadStatus =>
-      text().withDefault(const Constant('pending'))();
+  /// Ordem de exibição (para múltiplas imagens)
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 
   // ========== ÍNDICES ==========
 

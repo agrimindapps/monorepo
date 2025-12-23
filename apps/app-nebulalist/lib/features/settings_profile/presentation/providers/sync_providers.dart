@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/services/task_sync_service.dart';
 import '../../data/services/sync_coordinator.dart';
@@ -8,25 +10,25 @@ part 'sync_providers.g.dart';
 
 /// Provider do TaskSyncService
 @riverpod
-TaskSyncService taskSyncService(TaskSyncServiceRef ref) {
+TaskSyncService taskSyncService(Ref ref) {
   return TaskSyncService();
 }
 
 /// Provider do SyncCoordinator
 @riverpod
-SyncCoordinator syncCoordinator(SyncCoordinatorRef ref) {
+SyncCoordinator syncCoordinator(Ref ref) {
   final coordinator = SyncCoordinator(
     taskSyncService: ref.watch(taskSyncServiceProvider),
   );
-  
+
   // Inicia sincronização automática
   coordinator.startAutoSync();
-  
+
   // Cleanup ao descartar
   ref.onDispose(() {
     coordinator.dispose();
   });
-  
+
   return coordinator;
 }
 
@@ -46,14 +48,14 @@ class CurrentSyncStatus extends _$CurrentSyncStatus {
 
 /// Provider para verificar se está sincronizando
 @riverpod
-bool isSyncing(IsSyncingRef ref) {
+bool isSyncing(Ref ref) {
   final coordinator = ref.watch(syncCoordinatorProvider);
   return coordinator.isSyncing;
 }
 
 /// Provider para stream de tarefas do Firebase
 @riverpod
-Stream<List<TaskModel>> firebaseTasks(FirebaseTasksRef ref) {
+Stream<List<TaskModel>> firebaseTasks(Ref ref) {
   final syncService = ref.watch(taskSyncServiceProvider);
   return syncService.watchUserTasks();
 }
@@ -67,21 +69,21 @@ class TaskSync extends _$TaskSync {
   }
 
   Future<void> syncTask(TaskModel task) async {
-    state = const AsyncLoading();
-    
+    state = const AsyncValue.loading();
+
     final coordinator = ref.read(syncCoordinatorProvider);
     final result = await coordinator.syncTask(task);
-    
-    state = AsyncData(result);
+
+    state = AsyncValue.data(result);
   }
 
   Future<void> deleteTask(String taskId) async {
-    state = const AsyncLoading();
-    
+    state = const AsyncValue.loading();
+
     final coordinator = ref.read(syncCoordinatorProvider);
     final result = await coordinator.deleteTask(taskId);
-    
-    state = AsyncData(result);
+
+    state = AsyncValue.data(result);
   }
 }
 
@@ -94,20 +96,20 @@ class FullSync extends _$FullSync {
   }
 
   Future<void> forceSync(List<TaskModel> localTasks) async {
-    state = const AsyncLoading();
-    
+    state = const AsyncValue.loading();
+
     final coordinator = ref.read(syncCoordinatorProvider);
     final result = await coordinator.forceFullSync(localTasks);
-    
-    state = AsyncData(result);
+
+    state = AsyncValue.data(result);
   }
 
   Future<void> syncNow() async {
-    state = const AsyncLoading();
-    
+    state = const AsyncValue.loading();
+
     final coordinator = ref.read(syncCoordinatorProvider);
     final result = await coordinator.syncNow();
-    
-    state = AsyncData(result);
+
+    state = AsyncValue.data(result);
   }
 }

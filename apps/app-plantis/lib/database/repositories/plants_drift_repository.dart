@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
@@ -48,7 +50,7 @@ class PlantsDriftRepository {
       species: Value(model.species),
       spaceId: Value(localSpaceId),
       imageBase64: Value(model.imageBase64),
-      imageUrls: Value(model.imageUrls.join(',')), // CSV
+      imageUrls: Value(_encodeImageUrls(model.imageUrls)),
       plantingDate: Value(model.plantingDate),
       notes: Value(model.notes),
       createdAt: Value(model.createdAt ?? DateTime.now()),
@@ -226,7 +228,7 @@ class PlantsDriftRepository {
       species: Value(model.species),
       spaceId: Value(localSpaceId),
       imageBase64: Value(model.imageBase64),
-      imageUrls: Value(model.imageUrls.join(',')),
+      imageUrls: Value(_encodeImageUrls(model.imageUrls)),
       plantingDate: Value(model.plantingDate),
       notes: Value(model.notes),
       updatedAt: Value(DateTime.now()),
@@ -435,6 +437,45 @@ class PlantsDriftRepository {
     );
   }
 
+  // ==================== IMAGE URL ENCODING/DECODING ====================
+
+  /// Encodes image URLs to JSON string for storage
+  /// This properly handles base64 images that contain commas
+  String _encodeImageUrls(List<String> imageUrls) {
+    if (imageUrls.isEmpty) return '';
+    return jsonEncode(imageUrls);
+  }
+
+  /// Decodes image URLs from storage
+  /// Supports both new JSON format and legacy CSV format for backwards compatibility
+  List<String> _decodeImageUrls(String? encoded) {
+    if (encoded == null || encoded.isEmpty) return <String>[];
+
+    // Try JSON format first (new format)
+    if (encoded.startsWith('[')) {
+      try {
+        final decoded = jsonDecode(encoded);
+        if (decoded is List) {
+          return decoded.cast<String>();
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('⚠️ Failed to decode imageUrls as JSON: $e');
+        }
+      }
+    }
+
+    // Legacy CSV format fallback
+    // Only split by comma if it looks like simple URLs (not base64)
+    // Base64 starts with "data:image/" so we check for that
+    if (!encoded.contains('data:image/')) {
+      return encoded.split(',').where((s) => s.isNotEmpty).toList();
+    }
+
+    // If it's a single base64 image stored without encoding (edge case)
+    return [encoded];
+  }
+
   // ==================== CONVERTERS ====================
 
   /// Converte Drift Plant → PlantModel com spaceId já resolvido
@@ -442,10 +483,8 @@ class PlantsDriftRepository {
     db.Plant plant,
     String? spaceFirebaseId,
   ) {
-    // Parse imageUrls CSV
-    final imageUrls = plant.imageUrls != null && plant.imageUrls!.isNotEmpty
-        ? plant.imageUrls!.split(',')
-        : <String>[];
+    // Parse imageUrls (supports both JSON and legacy CSV format)
+    final imageUrls = _decodeImageUrls(plant.imageUrls);
 
     return PlantModel(
       id: plant.firebaseId ?? plant.id.toString(),

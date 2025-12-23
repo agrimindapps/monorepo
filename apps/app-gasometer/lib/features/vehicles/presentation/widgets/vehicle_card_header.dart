@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/design_tokens.dart';
@@ -18,6 +19,17 @@ class VehicleCardHeader extends StatelessWidget {
   final VehicleEntity vehicle;
   final bool showIcon;
 
+  /// Verifica se o veículo tem uma imagem válida
+  bool get _hasImage {
+    final imagePath = vehicle.metadata['foto'] as String?;
+    return imagePath != null && imagePath.isNotEmpty;
+  }
+
+  /// Obtém o caminho/URL da imagem do veículo
+  String? get _imageSource {
+    return vehicle.metadata['foto'] as String?;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -27,21 +39,7 @@ class VehicleCardHeader extends StatelessWidget {
       child: Row(
         children: [
           if (showIcon) ...[
-            Semantics(
-              label: 'Ícone do veículo',
-              hint: 'Representação visual do veículo ${vehicle.brand} ${vehicle.model}',
-              child: CircleAvatar(
-                radius: GasometerDesignTokens.iconSizeAvatar / 2,
-                backgroundColor: Theme.of(context).colorScheme.primary.withValues(
-                  alpha: GasometerDesignTokens.opacityOverlay,
-                ),
-                child: Icon(
-                  Icons.directions_car,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: GasometerDesignTokens.iconSizeListItem,
-                ),
-              ),
-            ),
+            _buildVehicleAvatar(context),
             const SizedBox(width: GasometerDesignTokens.spacingMd),
           ],
           Expanded(
@@ -73,6 +71,58 @@ class VehicleCardHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildVehicleAvatar(BuildContext context) {
+    const size = GasometerDesignTokens.iconSizeAvatar;
+    
+    if (_hasImage) {
+      final imageSource = _imageSource!;
+      
+      // Se for uma URL de rede ou Base64, usar CoreImageWidget
+      if (imageSource.startsWith('http') || imageSource.startsWith('data:')) {
+        return CoreImageWidget.vehicle(
+          imageUrl: imageSource.startsWith('http') ? imageSource : null,
+          imageBase64: imageSource.startsWith('data:') ? imageSource : null,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          borderRadius: BorderRadius.circular(size / 2),
+          errorWidget: _buildPlaceholderAvatar(context, size),
+        );
+      }
+      
+      // Se for um caminho local, também pode ser Base64 armazenado
+      // Tentar como Base64 primeiro
+      return CoreImageWidget.vehicle(
+        imageBase64: imageSource,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        borderRadius: BorderRadius.circular(size / 2),
+        errorWidget: _buildPlaceholderAvatar(context, size),
+      );
+    }
+    
+    return _buildPlaceholderAvatar(context, size);
+  }
+
+  Widget _buildPlaceholderAvatar(BuildContext context, double size) {
+    return Semantics(
+      label: 'Ícone do veículo',
+      hint: 'Representação visual do veículo ${vehicle.brand} ${vehicle.model}',
+      child: CircleAvatar(
+        radius: size / 2,
+        backgroundColor: Theme.of(context).colorScheme.primary.withValues(
+          alpha: GasometerDesignTokens.opacityOverlay,
+        ),
+        child: Icon(
+          Icons.directions_car,
+          color: Theme.of(context).colorScheme.primary,
+          size: GasometerDesignTokens.iconSizeListItem,
+        ),
       ),
     );
   }

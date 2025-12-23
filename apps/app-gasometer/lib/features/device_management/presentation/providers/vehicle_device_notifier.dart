@@ -1,30 +1,23 @@
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../domain/extensions/vehicle_device_extension.dart';
 
-part 'vehicle_device_notifier.g.dart';
-
 /// Provider para DeviceManagementService do core
-@riverpod
-core.DeviceManagementService coreDeviceManagementService(Ref ref) {
+final coreDeviceManagementServiceProvider = Provider<core.DeviceManagementService>((ref) {
   return ref.watch(deviceManagementServiceProvider);
-}
+});
 
 /// Provider de conectividade (stream)
-/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
-@riverpod
-Stream<bool> connectivityStream(Ref ref) {
+final connectivityStreamProvider = StreamProvider<bool>((ref) {
   final connectivityService = ref.watch(connectivityServiceProvider);
   return connectivityService.connectivityStream;
-}
+});
 
 /// Provider de status online
-/// Uses ConnectivityService from dependency_providers.dart (Riverpod provider)
-@riverpod
-Future<bool> isOnlineStatus(Ref ref) async {
+final isOnlineStatusProvider = FutureProvider<bool>((ref) async {
   final connectivityService = ref.watch(connectivityServiceProvider);
   final result = await connectivityService.isOnline();
 
@@ -32,7 +25,7 @@ Future<bool> isOnlineStatus(Ref ref) async {
     debugPrint('Connectivity check failed: ${failure.message}');
     return false;
   }, (bool isOnline) => isOnline);
-}
+});
 
 /// State para gerenciamento de dispositivos veiculares
 class VehicleDeviceState {
@@ -128,16 +121,10 @@ class DeviceLimitInfo {
 }
 
 /// Notifier principal para gerenciamento de dispositivos veiculares
-@riverpod
-class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
-  static const int _deviceLimit = 3; // Free tier
-
-  core.DeviceManagementService get _deviceService => 
-      ref.read(coreDeviceManagementServiceProvider);
-
-  @override
-  VehicleDeviceState build() {
-    ref.listen<AsyncValue<bool>>(isOnlineStatusProvider, (previous, next) {
+class VehicleDeviceNotifier extends StateNotifier<VehicleDeviceState> {
+  VehicleDeviceNotifier(this._ref, this._deviceService) : super(VehicleDeviceState.empty) {
+    // Listen para mudanças de conectividade
+    _ref.listen<AsyncValue<bool>>(isOnlineStatusProvider, (previous, next) {
       next.whenData((isOnline) {
         final wasOnline = state.isOnline;
 
@@ -149,8 +136,11 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
         state = state.copyWith(isOnline: isOnline);
       });
     });
-    return VehicleDeviceState.empty;
   }
+  
+  static const int _deviceLimit = 3; // Free tier
+  final Ref _ref;
+  final core.DeviceManagementService _deviceService;
 
   /// Carrega dispositivos do usuário do Firebase
   Future<void> loadUserDevices() async {
@@ -435,43 +425,43 @@ class VehicleDeviceNotifier extends _$VehicleDeviceNotifier {
   }
 }
 
+/// Provider principal para VehicleDeviceNotifier
+final vehicleDeviceProvider = StateNotifierProvider<VehicleDeviceNotifier, VehicleDeviceState>((ref) {
+  final deviceService = ref.watch(deviceManagementServiceProvider);
+  return VehicleDeviceNotifier(ref, deviceService);
+});
+
 /// Provider conveniente para acessar o state
-@riverpod
-VehicleDeviceState vehicleDeviceState(Ref ref) {
+final vehicleDeviceStateProvider = Provider<VehicleDeviceState>((ref) {
   return ref.watch(vehicleDeviceProvider);
-}
+});
 
 /// Provider para dispositivos ativos
-@riverpod
-List<core.DeviceEntity> activeDevices(Ref ref) {
+final activeDevicesProvider = Provider<List<core.DeviceEntity>>((ref) {
   final state = ref.watch(vehicleDeviceStateProvider);
   return state.activeDevices;
-}
+});
 
 /// Provider para dispositivos confiáveis
-@riverpod
-List<core.DeviceEntity> trustedDevices(Ref ref) {
+final trustedDevicesProvider = Provider<List<core.DeviceEntity>>((ref) {
   final state = ref.watch(vehicleDeviceStateProvider);
   return state.trustedDevices;
-}
+});
 
 /// Provider para dispositivo atual
-@riverpod
-core.DeviceEntity? currentDevice(Ref ref) {
+final currentDeviceProvider = Provider<core.DeviceEntity?>((ref) {
   final state = ref.watch(vehicleDeviceStateProvider);
   return state.currentDevice;
-}
+});
 
 /// Provider para estatísticas
-@riverpod
-VehicleDeviceStatistics? deviceStatistics(Ref ref) {
+final deviceStatisticsProvider = Provider<VehicleDeviceStatistics?>((ref) {
   final state = ref.watch(vehicleDeviceStateProvider);
   return state.statistics;
-}
+});
 
 /// Provider para verificar se pode adicionar mais dispositivos
-@riverpod
-bool canAddMoreDevices(Ref ref) {
+final canAddMoreDevicesProvider = Provider<bool>((ref) {
   final notifier = ref.watch(vehicleDeviceProvider.notifier);
   return notifier.canAddMoreDevices;
-}
+});

@@ -35,19 +35,29 @@ class _SnakePageState extends ConsumerState<SnakePage> {
     super.initState();
     _game = SnakeGame(
       onScoreChanged: (score) {
-        setState(() {
-          _currentScore = score;
-        });
+        if (mounted) {
+          setState(() {
+            _currentScore = score;
+          });
+        }
       },
       onActivePowerUpsChanged: (powerUps) {
-        setState(() {
-          _activePowerUps = powerUps;
-        });
+        if (mounted) {
+          setState(() {
+            _activePowerUps = powerUps;
+          });
+        }
       },
       onGameOver: () {
-        final notifier = ref.read(snakeGameProvider.notifier);
-        notifier.saveScore(_game.score);
-        setState(() {}); // Rebuild to show game over overlay
+        if (mounted) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              final notifier = ref.read(snakeGameProvider.notifier);
+              notifier.saveScore(_game.score);
+              setState(() {}); // Rebuild to show game over overlay
+            }
+          });
+        }
       },
     );
   }

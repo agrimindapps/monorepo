@@ -609,3 +609,23 @@ class AchievementDefinitions {
     return all.any((a) => a.id == id);
   }
 }
+
+/// Helper class to combine achievement with its definition
+class SnakeAchievementWithDefinition {
+  final Achievement achievement;
+  final AchievementDefinition definition;
+
+  SnakeAchievementWithDefinition({
+    required this.achievement,
+    required this.definition,
+  });
+
+  factory SnakeAchievementWithDefinition.fromAchievement(
+    Achievement achievement,
+  ) {
+    return SnakeAchievementWithDefinition(
+      achievement: achievement,
+      definition: achievement.definition,
+    );
+  }
+}

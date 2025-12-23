@@ -24,70 +24,34 @@ dependencies:
   cupertino_icons: any
 
   # State Management (Riverpod 3.0 - inherited from core)
-  flutter_riverpod: any
-  riverpod_annotation: any
 
   # Code Generation (inherited from core)
-  freezed_annotation: any
-  json_annotation: any
 
   # Utils
-  logger: any
 
   # Navigation
-  go_router: any
 
   # App-specific
-  supabase_flutter: any
-  skeletonizer: ^2.1.0
-  flutter_staggered_grid_view: any
   table_calendar: ^3.1.2
 
   # Dependencies from core (use core's versions)
-  share_plus: any
 
   # Dependencies from core but used directly in app code
   # (Required for direct imports per analyzer)
-  shared_preferences: any
-  drift: any
-  sqlite3_flutter_libs: any
-  sqlite3_web: any
-  path_provider: any
-  path: any
-  firebase_core: any
-  icons_plus: any
-  url_launcher: any
-  google_mobile_ads: any
-  intl: any
-  purchases_flutter: any
 
   get: any
-  cloud_firestore: any
-  firebase_auth: any
-  connectivity_plus: any
   mask_text_input_formatter: any
   provider: any
-  uuid: any
   audioplayers: any
-  flutter_local_notifications: any
-  timezone: any
   fl_chart: any
-  equatable: any
-  dartz: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
-  flutter_lints: any
 
   # Code Generation (inherited from core)
-  drift_dev: any
-  build_runner: any
-  riverpod_generator: any
-  freezed: any
-  json_serializable: any
 
   # Testing
   mocktail: ^1.0.0

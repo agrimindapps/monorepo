@@ -94,7 +94,7 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
   }
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   /// Estratégia de migração do banco de dados
   ///
@@ -187,11 +187,64 @@ class GasometerDatabase extends _$GasometerDatabase with BaseDriftDatabase {
         await m.createTable(userSubscriptions);
       }
 
-      // Migrações futuras virão aqui
-      // if (from < 3) {
-      //   // Migração da versão 2 para 3
-      //   await m.addColumn(vehicles, vehicles.newColumn);
-      // }
+      // ========== MIGRAÇÃO v4 → v5: Alterar imagens de BLOB para Base64 ==========
+      if (from < 5) {
+        print('📸 Migration v4→v5: Convertendo imagens para Base64...');
+        
+        // Recriar tabela vehicle_images com Base64
+        await customStatement('DROP TABLE IF EXISTS vehicle_images;');
+        await customStatement('''
+          CREATE TABLE vehicle_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            firebase_id TEXT,
+            user_id TEXT NOT NULL,
+            module_name TEXT NOT NULL DEFAULT 'gasometer',
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER,
+            last_sync_at INTEGER,
+            is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            version INTEGER NOT NULL DEFAULT 1,
+            vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+            image_base64 TEXT NOT NULL,
+            file_name TEXT,
+            mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+            size_bytes INTEGER,
+            width INTEGER,
+            height INTEGER,
+            is_primary INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0
+          );
+        ''');
+
+        // Recriar tabela receipt_images com Base64
+        await customStatement('DROP TABLE IF EXISTS receipt_images;');
+        await customStatement('''
+          CREATE TABLE receipt_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            firebase_id TEXT,
+            user_id TEXT NOT NULL,
+            module_name TEXT NOT NULL DEFAULT 'gasometer',
+            created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now')),
+            updated_at INTEGER,
+            last_sync_at INTEGER,
+            is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            version INTEGER NOT NULL DEFAULT 1,
+            entity_type TEXT NOT NULL,
+            entity_id INTEGER NOT NULL,
+            image_base64 TEXT NOT NULL,
+            file_name TEXT,
+            mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+            size_bytes INTEGER,
+            width INTEGER,
+            height INTEGER,
+            sort_order INTEGER NOT NULL DEFAULT 0
+          );
+        ''');
+
+        print('✅ Migration v4→v5: Tabelas de imagens atualizadas para Base64');
+      }
     },
     beforeOpen: (details) async {
       // Habilitar foreign keys

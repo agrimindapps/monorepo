@@ -1,21 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../domain/entities/sync_status.dart';
-import '../datasources/firebase_sync_datasource.dart';
 import '../models/task_model.dart';
 
 class TaskSyncService {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
-  final FirebaseSyncDataSource _syncDataSource;
 
-  TaskSyncService({
-    FirebaseAuth? auth,
-    FirebaseFirestore? firestore,
-    FirebaseSyncDataSource? syncDataSource,
-  })  : _auth = auth ?? FirebaseAuth.instance,
-        _firestore = firestore ?? FirebaseFirestore.instance,
-        _syncDataSource = syncDataSource ?? FirebaseSyncDataSource();
+  TaskSyncService({FirebaseAuth? auth, FirebaseFirestore? firestore})
+    : _auth = auth ?? FirebaseAuth.instance,
+      _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Stream de sincronização de tarefas do usuário
   Stream<List<TaskModel>> watchUserTasks() {
@@ -31,10 +25,10 @@ class TaskSyncService {
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => TaskModel.fromFirestore(doc))
-          .toList();
-    });
+          return snapshot.docs
+              .map((doc) => TaskModel.fromFirestore(doc))
+              .toList();
+        });
   }
 
   /// Sincroniza tarefa local para Firebase
@@ -121,26 +115,24 @@ class TaskSyncService {
         .collection('tasks')
         .get();
 
-    return snapshot.docs
-        .map((doc) => TaskModel.fromFirestore(doc))
-        .toList();
+    return snapshot.docs.map((doc) => TaskModel.fromFirestore(doc)).toList();
   }
 
   /// Verifica se há conflitos entre dados locais e remotos
   Future<bool> hasConflicts(List<TaskModel> localTasks) async {
     final remoteTasks = await fetchAllTasksFromFirebase();
-    
+
     for (final local in localTasks) {
       final remote = remoteTasks.firstWhere(
         (r) => r.id == local.id,
         orElse: () => local,
       );
-      
+
       if (remote.id == local.id && remote.updatedAt != local.updatedAt) {
         return true;
       }
     }
-    
+
     return false;
   }
 

@@ -1,5 +1,8 @@
 import 'package:core/core.dart';
 
+// Re-export DeviceStatistics from core to avoid conflicts
+export 'package:core/core.dart' show DeviceStatistics;
+
 /// Entidade que representa uma sessão de dispositivo
 class DeviceSession extends Equatable {
   const DeviceSession({
@@ -93,44 +96,4 @@ class DeviceSession extends Equatable {
   @override
   String toString() => 
       'DeviceSession(id: $id, deviceUuid: $deviceUuid, isActive: $isActive)';
-}
-
-/// Entidade que representa estatísticas de dispositivos
-class DeviceStatistics extends Equatable {
-  const DeviceStatistics({
-    required this.totalDevices,
-    required this.activeDevices,
-    required this.devicesByPlatform,
-    this.lastActiveDevice,
-    this.oldestDevice,
-    this.newestDevice,
-  });
-
-  final int totalDevices;
-  final int activeDevices;
-  final Map<String, int> devicesByPlatform;
-  final DeviceEntity? lastActiveDevice;
-  final DeviceEntity? oldestDevice;
-  final DeviceEntity? newestDevice;
-
-  /// Dispositivos inativos
-  int get inactiveDevices => totalDevices - activeDevices;
-
-  /// Percentual de dispositivos ativos
-  double get activePercentage => 
-      totalDevices > 0 ? (activeDevices / totalDevices) * 100 : 0;
-
-  @override
-  List<Object?> get props => [
-        totalDevices,
-        activeDevices,
-        devicesByPlatform,
-        lastActiveDevice,
-        oldestDevice,
-        newestDevice,
-      ];
-
-  @override
-  String toString() => 
-      'DeviceStatistics(total: $totalDevices, active: $activeDevices)';
 }

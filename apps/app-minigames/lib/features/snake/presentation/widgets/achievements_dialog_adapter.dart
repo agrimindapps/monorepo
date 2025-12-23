@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../widgets/shared/game_achievements_dialog.dart';
+import '../../../../widgets/shared/game_achievements_dialog.dart' as dialog;
 import '../../domain/entities/achievement.dart';
 import '../providers/achievement_provider.dart';
 
@@ -11,10 +11,10 @@ class SnakeAchievementsDialogAdapter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final achievementsAsync = ref.watch(snakeAchievementsProvider);
-    final statsData = ref.watch(snakeAchievementStatsProvider);
+    final achievementsAsync = ref.watch(achievementsProvider);
+    final statsData = ref.watch(achievementStatsProvider);
 
-    final stats = AchievementStats(
+    final stats = dialog.AchievementStats(
       unlocked: statsData.unlocked,
       total: statsData.total,
       totalXp: statsData.totalXp,
@@ -25,19 +25,26 @@ class SnakeAchievementsDialogAdapter extends ConsumerWidget {
     );
 
     final snapshot = achievementsAsync.when(
-      data: (achievements) => AsyncSnapshot<List<AchievementItem>>.withData(
-        ConnectionState.done,
-        _convertAchievements(achievements),
-      ),
-      loading: () => const AsyncSnapshot<List<AchievementItem>>.waiting(),
-      error: (error, stack) => AsyncSnapshot<List<AchievementItem>>.withError(
-        ConnectionState.done,
-        error,
-        stack,
-      ),
+      data: (achievements) =>
+          AsyncSnapshot<List<dialog.AchievementItem>>.withData(
+            ConnectionState.done,
+            _convertAchievements(
+              achievements
+                  .map((a) => SnakeAchievementWithDefinition.fromAchievement(a))
+                  .toList(),
+            ),
+          ),
+      loading: () =>
+          const AsyncSnapshot<List<dialog.AchievementItem>>.waiting(),
+      error: (error, stack) =>
+          AsyncSnapshot<List<dialog.AchievementItem>>.withError(
+            ConnectionState.done,
+            error,
+            stack,
+          ),
     );
 
-    return GameAchievementsDialog(
+    return dialog.GameAchievementsDialog(
       gameTitle: 'Snake',
       stats: stats,
       achievementsSnapshot: snapshot,
@@ -46,11 +53,11 @@ class SnakeAchievementsDialogAdapter extends ConsumerWidget {
     );
   }
 
-  List<AchievementItem> _convertAchievements(
+  List<dialog.AchievementItem> _convertAchievements(
     List<SnakeAchievementWithDefinition> achievements,
   ) {
     return achievements.map((achievement) {
-      return AchievementItem(
+      return dialog.AchievementItem(
         id: achievement.definition.id,
         title: achievement.definition.title,
         description: achievement.definition.description,

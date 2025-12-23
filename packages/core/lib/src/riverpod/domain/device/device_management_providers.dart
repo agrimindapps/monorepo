@@ -7,6 +7,7 @@ import '../../../domain/repositories/i_device_repository.dart';
 import '../../../infrastructure/repositories/datasources/device_local_datasource.dart';
 import '../../../infrastructure/repositories/device_repository_impl.dart';
 import '../../../infrastructure/services/connectivity_service.dart';
+import '../../../infrastructure/services/device_identity_service.dart';
 import '../../../infrastructure/services/firebase_device_service.dart';
 import '../../../shared/utils/failure.dart';
 import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
@@ -15,6 +16,12 @@ import '../premium/subscription_providers.dart' show currentAppIdProvider, featu
 /// Providers unificados para gerenciamento de dispositivos
 /// Consolida lógica de device management entre todos os apps do monorepo
 /// Migrado para Riverpod 3.0 - sem legacy imports
+
+/// Provider para o DeviceIdentityService
+/// Serviço central para identificação de dispositivos em todo o monorepo
+final deviceIdentityServiceProvider = Provider<DeviceIdentityService>((ref) {
+  return DeviceIdentityService.instance;
+});
 
 /// Provider para configuração de limites de dispositivos
 /// Pode ser overridden por cada app para customizar os limites
@@ -142,25 +149,10 @@ final deviceStatisticsProvider = FutureProvider<DeviceStatistics?>((ref) async {
 });
 
 /// Provider principal para informações do dispositivo atual
+/// Usa DeviceIdentityService para obter informações reais do dispositivo
 final currentDeviceProvider = FutureProvider<DeviceEntity>((ref) async {
-  final now = DateTime.now();
-  return DeviceEntity(
-    id: 'current_device_\${now.millisecondsSinceEpoch}',
-    uuid: 'uuid_\${now.millisecondsSinceEpoch}',
-    name: 'Dispositivo Atual',
-    model: 'Modelo Desconhecido',
-    platform: defaultTargetPlatform.name,
-    systemVersion: '1.0.0',
-    appVersion: '1.0.0',
-    buildNumber: '1',
-    isPhysicalDevice: true,
-    manufacturer: 'Desconhecido',
-    firstLoginAt: now,
-    lastActiveAt: now,
-    isActive: true,
-    createdAt: now,
-    updatedAt: now,
-  );
+  final deviceIdentityService = ref.watch(deviceIdentityServiceProvider);
+  return deviceIdentityService.getCurrentDeviceEntity();
 });
 
 /// Provider para lista de dispositivos do usuário

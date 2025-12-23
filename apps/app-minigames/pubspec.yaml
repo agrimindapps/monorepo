@@ -23,25 +23,15 @@ dependencies:
   flame: ^1.34.0
 
   # Utils (using core package versions when available)
-  equatable: any
-  dartz: any
-  go_router: any
-  icons_plus: any
-  uuid: any
   
   # Riverpod (code generation)
-  flutter_riverpod: any
-  riverpod_annotation: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # Linting
-  flutter_lints: any
 
   # Code Generation
-  build_runner: any
-  riverpod_generator: any
 
   # Testing
   mocktail: ^1.0.0

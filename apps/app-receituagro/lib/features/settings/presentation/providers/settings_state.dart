@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../core/services/device_identity_service.dart';
 import '../../domain/entities/user_settings_entity.dart';
 
 part 'settings_state.freezed.dart';
@@ -87,32 +86,13 @@ sealed class SettingsState with _$SettingsState {
     return SettingsViewState.initial;
   }
 
-  /// Current device as DeviceInfo for UI compatibility
-  DeviceInfo? get currentDeviceInfo =>
-      currentDevice != null ? _convertToDeviceInfo(currentDevice!) : null;
+  /// Current device info for UI compatibility
+  /// Agora DeviceInfo é alias para DeviceEntity, então retornamos diretamente
+  DeviceEntity? get currentDeviceInfo => currentDevice;
 
-  /// Connected devices as DeviceInfo list for UI compatibility
-  List<DeviceInfo> get connectedDevicesInfo =>
-      connectedDevices.map(_convertToDeviceInfo).toList();
-
-  /// Converts DeviceEntity to DeviceInfo for UI compatibility
-  DeviceInfo _convertToDeviceInfo(DeviceEntity entity) {
-    return DeviceInfo(
-      uuid: entity.uuid,
-      name: entity.name,
-      model: entity.model,
-      platform: entity.platform,
-      systemVersion: entity.systemVersion,
-      appVersion: entity.appVersion,
-      buildNumber: entity.buildNumber,
-      identifier: entity.id,
-      isPhysicalDevice: entity.isPhysicalDevice,
-      manufacturer: entity.manufacturer,
-      firstLoginAt: entity.firstLoginAt,
-      lastActiveAt: entity.lastActiveAt,
-      isActive: entity.isActive,
-    );
-  }
+  /// Connected devices info list for UI compatibility  
+  /// Agora DeviceInfo é alias para DeviceEntity, então retornamos diretamente
+  List<DeviceEntity> get connectedDevicesInfo => connectedDevices;
 }
 
 /// Extension para métodos de transformação do state

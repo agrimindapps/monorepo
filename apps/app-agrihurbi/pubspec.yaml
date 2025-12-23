@@ -17,31 +17,13 @@ dependencies:
     path: ../../packages/core
 
   # Riverpod (State Management)
-  riverpod_annotation: any
-  flutter_riverpod: any
 
   # Specific dependencies not in core
   xml: any
-  json_annotation: any
-  drift: any
-  sqlite3_flutter_libs: any
-  dio: any
-  freezed_annotation: any
-  dartz: any
-  go_router: any
-  connectivity_plus: any
 
-  flutter_secure_storage: any
-  intl: any
-  path_provider: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: any
-  json_serializable: any
-  riverpod_generator: any
-  freezed: any
-  drift_dev: any
 
 flutter:
   uses-material-design: true

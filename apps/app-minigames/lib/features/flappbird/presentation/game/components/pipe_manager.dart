@@ -13,6 +13,9 @@ class PipeManager extends Component with HasGameRef<FlappyBirdGame> {
   @override
   void update(double dt) {
     super.update(dt);
+    
+    if (!gameRef.isPlaying) return;
+    
     _timer += dt;
 
     if (_timer >= _spawnInterval) {
@@ -75,6 +78,9 @@ class ScoreTrigger extends PositionComponent with HasGameRef<FlappyBirdGame> {
   @override
   void update(double dt) {
     super.update(dt);
+    
+    if (!gameRef.isPlaying) return;
+    
     position.x -= gameRef.gameSpeed * dt;
 
     if (!_triggered && position.x < gameRef.bird.position.x) {

@@ -1,8 +1,8 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Widget para gerenciamento de dispositivos conectados
-/// Responsabilidade: Display e ações de dispositivos
+/// Usa providers do core para consistência cross-app
 class ProfileDevicesSection extends ConsumerWidget {
   const ProfileDevicesSection({
     required this.settingsData,
@@ -16,6 +16,12 @@ class ProfileDevicesSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    
+    // Usa providers do core para device management
+    final currentDeviceAsync = ref.watch(currentDeviceProvider);
+    final userDevicesAsync = ref.watch(userDevicesProvider);
+    final deviceCount = ref.watch(deviceCountProvider);
+    final maxDevices = ref.watch(maxDevicesProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,24 +40,30 @@ class ProfileDevicesSection extends ConsumerWidget {
           decoration: _getCardDecoration(context),
           child: Column(
             children: [
-              ListTile(
-                leading: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
+              currentDeviceAsync.when(
+                data: (device) => _buildDeviceInfo(context, device, deviceCount, maxDevices),
+                loading: () => const ListTile(
+                  leading: SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(strokeWidth: 2),
                   ),
-                  child: const Icon(
-                    Icons.smartphone,
-                    color: Colors.grey,
-                    size: 20,
-                  ),
+                  title: Text('Carregando dispositivo...'),
                 ),
-                title: const Text('Nenhum dispositivo registrado'),
-                subtitle: const Text('Recursos em desenvolvimento'),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: onManageDevices,
+                error: (_, __) => ListTile(
+                  leading: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.red.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                  ),
+                  title: const Text('Erro ao carregar dispositivo'),
+                  subtitle: const Text('Toque para tentar novamente'),
+                  onTap: () => ref.invalidate(currentDeviceProvider),
+                ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -69,12 +81,31 @@ class ProfileDevicesSection extends ConsumerWidget {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {},
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: userDevicesAsync.when(
+                        data: (devices) => OutlinedButton(
+                          onPressed: devices.length > 1 
+                              ? () => _showRevokeAllDialog(context, ref)
+                              : null,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Desconectar outros'),
                         ),
-                        child: const Text('Desconectar'),
+                        loading: () => const OutlinedButton(
+                          onPressed: null,
+                          child: SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                        error: (_, __) => OutlinedButton(
+                          onPressed: null,
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                          child: const Text('Desconectar'),
+                        ),
                       ),
                     ),
                   ],
@@ -84,6 +115,117 @@ class ProfileDevicesSection extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildDeviceInfo(
+    BuildContext context,
+    DeviceEntity device,
+    int deviceCount,
+    int maxDevices,
+  ) {
+    final theme = Theme.of(context);
+    final limitText = maxDevices == -1 ? 'ilimitado' : '$deviceCount/$maxDevices';
+    
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: _getPlatformColor(device.platform).withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          _getPlatformIcon(device.platform),
+          color: _getPlatformColor(device.platform),
+          size: 20,
+        ),
+      ),
+      title: Text(
+        device.name.isNotEmpty ? device.name : device.model,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        '${device.platform} • $limitText dispositivos',
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      trailing: const Icon(Icons.chevron_right),
+      onTap: onManageDevices,
+    );
+  }
+
+  IconData _getPlatformIcon(String platform) {
+    switch (platform.toLowerCase()) {
+      case 'ios':
+        return Icons.phone_iphone;
+      case 'android':
+        return Icons.android;
+      case 'web':
+        return Icons.language;
+      case 'macos':
+      case 'windows':
+      case 'linux':
+        return Icons.computer;
+      default:
+        return Icons.device_unknown;
+    }
+  }
+
+  Color _getPlatformColor(String platform) {
+    switch (platform.toLowerCase()) {
+      case 'ios':
+        return Colors.grey.shade700;
+      case 'android':
+        return Colors.green;
+      case 'web':
+        return Colors.blue;
+      case 'macos':
+      case 'windows':
+      case 'linux':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _showRevokeAllDialog(BuildContext context, WidgetRef ref) {
+    showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Desconectar outros dispositivos?'),
+        content: const Text(
+          'Todos os outros dispositivos serão desconectados. '
+          'Você precisará fazer login novamente neles.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final actions = ref.read(deviceActionsProvider);
+              final success = await actions.revokeAllOtherDevices();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Outros dispositivos desconectados'
+                          : 'Erro ao desconectar dispositivos',
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text('Desconectar'),
+          ),
+        ],
+      ),
     );
   }
 

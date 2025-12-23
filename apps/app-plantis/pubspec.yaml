@@ -18,35 +18,16 @@ dependencies:
   core:
     path: ../../packages/core
 
-  flutter_staggered_grid_view: any
-  mime: any
 
-  dartz: any
-  path_provider: any
-  url_launcher: any
-  intl: any
-  shared_preferences: any
-  riverpod_annotation: any
-  flutter_riverpod: any
-  cloud_firestore: any
-  go_router: any
-  freezed_annotation: any
 
   # Drift - SQL Database
-  drift: any
-  sqlite3_flutter_libs: any
-  equatable: any
-  firebase_auth: any
   google_fonts: ^6.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  build_runner: any
-  riverpod_generator: any
   mocktail: ^1.0.0
-  freezed: any
-  json_serializable: any
-  drift_dev: any
+  build_runner: ^2.4.0
+  drift_dev: ^2.20.0
 
 flutter:
   uses-material-design: true

@@ -511,3 +511,23 @@ class FlappyAchievementDefinitions {
     return all.any((a) => a.id == id);
   }
 }
+
+/// Helper class to combine achievement with its definition
+class FlappyAchievementWithDefinition {
+  final FlappyAchievement achievement;
+  final FlappyAchievementDefinition definition;
+
+  FlappyAchievementWithDefinition({
+    required this.achievement,
+    required this.definition,
+  });
+
+  factory FlappyAchievementWithDefinition.fromAchievement(
+    FlappyAchievement achievement,
+  ) {
+    return FlappyAchievementWithDefinition(
+      achievement: achievement,
+      definition: achievement.definition,
+    );
+  }
+}

@@ -52,7 +52,7 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
   ///
   /// Incrementar quando houver mudanças estruturais nas tabelas
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Factory constructor para ambiente de produção
   ///
@@ -132,6 +132,44 @@ class PlantisDatabase extends _$PlantisDatabase with BaseDriftDatabase {
           debugPrint('📦 Adding UserSubscriptions table...');
         }
         await m.createTable(userSubscriptions);
+      }
+
+      // ========== MIGRAÇÃO v3 → v4: Alterar PlantImages de BLOB para Base64 ==========
+      if (from < 4) {
+        if (kDebugMode) {
+          debugPrint('📸 Migration v3→v4: Convertendo imagens para Base64...');
+        }
+        
+        // Recriar tabela plant_images com Base64
+        await customStatement('DROP TABLE IF EXISTS plant_images;');
+        await customStatement('''
+          CREATE TABLE plant_images (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            firebase_id TEXT,
+            user_id TEXT,
+            module_name TEXT NOT NULL DEFAULT 'plantis',
+            created_at INTEGER,
+            updated_at INTEGER,
+            last_sync_at INTEGER,
+            is_dirty INTEGER NOT NULL DEFAULT 0,
+            is_deleted INTEGER NOT NULL DEFAULT 0,
+            version INTEGER NOT NULL DEFAULT 1,
+            plant_id INTEGER NOT NULL REFERENCES plants(id) ON DELETE CASCADE,
+            image_base64 TEXT NOT NULL,
+            file_name TEXT,
+            mime_type TEXT NOT NULL DEFAULT 'image/jpeg',
+            size_bytes INTEGER,
+            width INTEGER,
+            height INTEGER,
+            is_primary INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            UNIQUE(firebase_id)
+          );
+        ''');
+
+        if (kDebugMode) {
+          debugPrint('✅ Migration v3→v4: Tabela PlantImages atualizada para Base64');
+        }
       }
 
       if (kDebugMode) {

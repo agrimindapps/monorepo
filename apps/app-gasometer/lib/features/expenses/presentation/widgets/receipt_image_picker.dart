@@ -1,21 +1,38 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/unified_image_widget.dart';
 
 /// Widget para seleção/visualização de imagem do comprovante
+///
+/// Suporta múltiplas fontes de imagem:
+/// - Base64 DataURI (novo padrão para sync)
+/// - Caminho de arquivo local (legacy/temporário)
 class ReceiptImagePicker extends StatelessWidget {
 
   const ReceiptImagePicker({
     super.key,
-    required this.imagePath,
+    this.imagePath,
+    this.imageBase64,
     required this.onImageSelected,
     required this.onImageRemoved,
     required this.hasImage,
   });
+  
+  /// Caminho do arquivo local (legacy)
   final String? imagePath;
+  
+  /// Imagem em Base64 DataURI (novo padrão)
+  final String? imageBase64;
+  
   final VoidCallback onImageSelected;
   final VoidCallback onImageRemoved;
   final bool hasImage;
+
+  /// Verifica se tem imagem disponível (Base64 ou arquivo)
+  bool get _hasImageData => 
+      (imageBase64 != null && imageBase64!.isNotEmpty) ||
+      (imagePath != null && imagePath!.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +47,7 @@ class ReceiptImagePicker extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         
-        if (hasImage && imagePath != null) 
+        if (hasImage && _hasImageData) 
           _buildImagePreview(context)
         else
           _buildImagePicker(context),
@@ -107,34 +124,7 @@ class ReceiptImagePicker extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               height: double.infinity,
-              child: Image.file(
-                File(imagePath!),
-                fit: BoxFit.cover,
-                cacheHeight: 200,
-                cacheWidth: 300,
-                errorBuilder: (context, error, stackTrace) {
-                  return ColoredBox(
-                    color: AppTheme.colors.errorContainer,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 32,
-                          color: AppTheme.colors.onErrorContainer,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Erro ao carregar imagem',
-                          style: AppTheme.textStyles.bodySmall?.copyWith(
-                            color: AppTheme.colors.onErrorContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              child: _buildImage(),
             ),
             Container(
               decoration: BoxDecoration(
@@ -223,6 +213,53 @@ class ReceiptImagePicker extends StatelessWidget {
     );
   }
 
+  /// Constrói a imagem priorizando Base64 sobre arquivo
+  Widget _buildImage() {
+    // Prioriza Base64 (novo padrão)
+    if (imageBase64 != null && imageBase64!.isNotEmpty) {
+      return UnifiedImageWidget.receipt(
+        imageBase64: imageBase64,
+        height: 200,
+      );
+    }
+    
+    // Fallback para arquivo local
+    if (imagePath != null && imagePath!.isNotEmpty) {
+      return Image.file(
+        File(imagePath!),
+        fit: BoxFit.cover,
+        cacheHeight: 200,
+        cacheWidth: 300,
+        errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
+      );
+    }
+    
+    return _buildErrorWidget();
+  }
+
+  Widget _buildErrorWidget() {
+    return ColoredBox(
+      color: AppTheme.colors.errorContainer,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.error_outline,
+            size: 32,
+            color: AppTheme.colors.onErrorContainer,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Erro ao carregar imagem',
+            style: AppTheme.textStyles.bodySmall?.copyWith(
+              color: AppTheme.colors.onErrorContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildActionButton({
     required IconData icon,
     required VoidCallback onPressed,
@@ -265,12 +302,7 @@ class ReceiptImagePicker extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(
-                    File(imagePath!),
-                    fit: BoxFit.contain,
-                    cacheHeight: 600,
-                    cacheWidth: 400,
-                  ),
+                  child: _buildDialogImage(),
                 ),
               ),
             ),
@@ -295,5 +327,29 @@ class ReceiptImagePicker extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildDialogImage() {
+    // Prioriza Base64
+    if (imageBase64 != null && imageBase64!.isNotEmpty) {
+      return UnifiedImageWidget(
+        imageBase64: imageBase64,
+        width: 400,
+        height: 600,
+        fit: BoxFit.contain,
+      );
+    }
+    
+    // Fallback para arquivo
+    if (imagePath != null && imagePath!.isNotEmpty) {
+      return Image.file(
+        File(imagePath!),
+        fit: BoxFit.contain,
+        cacheHeight: 600,
+        cacheWidth: 400,
+      );
+    }
+    
+    return const SizedBox.shrink();
   }
 }

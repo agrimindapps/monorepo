@@ -234,7 +234,12 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
   }
 
   static Future<Uint8List> _decodeBase64(String base64String) async {
-    return base64Decode(base64String);
+    // Remove o prefixo DataURI se presente (ex: 'data:image/jpeg;base64,')
+    String cleanBase64 = base64String;
+    if (base64String.contains(',')) {
+      cleanBase64 = base64String.split(',').last;
+    }
+    return base64Decode(cleanBase64);
   }
 
   @override

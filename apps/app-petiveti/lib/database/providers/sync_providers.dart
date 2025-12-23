@@ -1,9 +1,11 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // import '../sync/adapters/calculation_history_drift_sync_adapter.dart';
 // import '../sync/adapters/promo_content_drift_sync_adapter.dart';
 import '../petiveti_database.dart';
+import '../repositories/animal_images_repository.dart';
 import '../repositories/subscription_local_repository.dart';
 import '../sync/adapters/animal_drift_sync_adapter.dart';
 import '../sync/adapters/appointment_drift_sync_adapter.dart';
@@ -138,3 +140,26 @@ SubscriptionLocalRepository subscriptionLocalRepository(Ref ref) {
   final db = ref.watch(petivetiDatabaseProvider);
   return SubscriptionLocalRepository(db);
 }
+
+// ========== ANIMAL IMAGES PROVIDERS ==========
+
+/// Provider do repositório de imagens de animais
+@riverpod
+AnimalImagesRepository animalImagesRepository(Ref ref) {
+  final db = ref.watch(petivetiDatabaseProvider);
+  return AnimalImagesRepository(db);
+}
+
+/// Stream de imagens de um animal
+final animalImagesStreamProvider = StreamProvider.autoDispose
+    .family<List<AnimalImage>, int>((ref, animalId) {
+      final repo = ref.watch(animalImagesRepositoryProvider);
+      return repo.watchImagesByAnimalId(animalId);
+    });
+
+/// Stream da imagem primária de um animal
+final animalPrimaryImageStreamProvider = StreamProvider.autoDispose
+    .family<AnimalImage?, int>((ref, animalId) {
+      final repo = ref.watch(animalImagesRepositoryProvider);
+      return repo.watchPrimaryImage(animalId);
+    });

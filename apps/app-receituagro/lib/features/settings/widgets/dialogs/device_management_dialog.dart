@@ -1,7 +1,6 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/services/device_identity_service.dart';
 import '../items/device_list_item.dart';
 
 /// Device Management Dialog
@@ -12,8 +11,7 @@ import '../items/device_list_item.dart';
 /// - Revoke multiple devices at once
 /// - Device limit information
 ///
-/// NOTE: Device management is currently in development.
-/// The settingsData parameter is kept for future compatibility.
+/// Usa providers do core para consistência cross-app
 class DeviceManagementDialog extends ConsumerWidget {
   final dynamic settingsData;
 
@@ -22,63 +20,15 @@ class DeviceManagementDialog extends ConsumerWidget {
     required this.settingsData,
   });
 
-  /// Safely extract devices list from settingsData
-  List<DeviceInfo> _extractDevices(dynamic data) {
-    try {
-      // Try to access connectedDevicesInfo if it exists
-      if (data == null) return <DeviceInfo>[];
-      
-      // Check if data has the property using reflection-safe approach
-      final dynamic devicesData = _tryGetProperty(data, 'connectedDevicesInfo');
-      if (devicesData is List) {
-        return devicesData.whereType<DeviceInfo>().toList();
-      }
-      return <DeviceInfo>[];
-    } catch (e) {
-      debugPrint('DeviceManagementDialog: Error extracting devices: $e');
-      return <DeviceInfo>[];
-    }
-  }
-
-  /// Safely extract current device from settingsData
-  DeviceInfo? _extractCurrentDevice(dynamic data) {
-    try {
-      if (data == null) return null;
-      final dynamic deviceData = _tryGetProperty(data, 'currentDeviceInfo');
-      if (deviceData is DeviceInfo) {
-        return deviceData;
-      }
-      return null;
-    } catch (e) {
-      debugPrint('DeviceManagementDialog: Error extracting current device: $e');
-      return null;
-    }
-  }
-
-  /// Try to get a property from an object safely
-  dynamic _tryGetProperty(dynamic obj, String propertyName) {
-    try {
-      // Use noSuchMethod pattern to safely check for property
-      switch (propertyName) {
-        case 'connectedDevicesInfo':
-          // ignore: avoid_dynamic_calls
-          return obj.connectedDevicesInfo;
-        case 'currentDeviceInfo':
-          // ignore: avoid_dynamic_calls
-          return obj.currentDeviceInfo;
-        default:
-          return null;
-      }
-    } catch (e) {
-      return null;
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final devices = _extractDevices(settingsData);
-    final currentDevice = _extractCurrentDevice(settingsData);
+    
+    // Usa providers do core
+    final currentDeviceAsync = ref.watch(currentDeviceProvider);
+    final userDevicesAsync = ref.watch(userDevicesProvider);
+    final deviceCount = ref.watch(deviceCountProvider);
+    final maxDevices = ref.watch(maxDevicesProvider);
 
     return Dialog(
       shape: RoundedRectangleBorder(
@@ -99,71 +49,82 @@ class DeviceManagementDialog extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDeviceLimitInfo(theme, devices.length),
+                    _buildDeviceLimitInfo(theme, deviceCount, maxDevices),
                     
                     const SizedBox(height: 20),
-                    if (currentDevice != null) ...[
-                      Text(
-                        'Dispositivo Atual',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      DeviceListItem(
-                        device: currentDevice,
-                        isPrimary: true,
-                        onRevoke: null,
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                    if (devices.isNotEmpty && devices.length > 1) ...[
-                      Text(
-                        'Outros Dispositivos',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ...devices.where((device) => device.uuid != currentDevice?.uuid).map((device) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: DeviceListItem(
-                            device: device,
-                            isPrimary: false,
-                            onRevoke: () => _revokeDevice(context, ref, device),
-                          ),
-                        );
-                      }),
-                    ],
-                    if (devices.length <= 1) ...[
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: theme.colorScheme.onSurfaceVariant,
-                              size: 20,
+                    
+                    // Current device section
+                    currentDeviceAsync.when(
+                      data: (currentDevice) => Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Dispositivo Atual',
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.primary,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                'Nenhum outro dispositivo conectado. Você pode usar sua conta em até 3 dispositivos simultaneamente.',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                          ),
+                          const SizedBox(height: 8),
+                          DeviceListItem(
+                            device: currentDevice,
+                            isPrimary: true,
+                            onRevoke: null,
+                          ),
+                        ],
+                      ),
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
+                      error: (error, _) => _buildErrorWidget(theme, 'Erro ao carregar dispositivo atual'),
+                    ),
+                    
+                    const SizedBox(height: 20),
+                    
+                    // Other devices section
+                    userDevicesAsync.when(
+                      data: (devices) {
+                        final currentDevice = currentDeviceAsync.value;
+                        final otherDevices = devices
+                            .where((d) => currentDevice == null || d.uuid != currentDevice.uuid)
+                            .toList();
+                        
+                        if (otherDevices.isEmpty) {
+                          return _buildNoOtherDevicesInfo(theme);
+                        }
+                        
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Outros Dispositivos',
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
+                            const SizedBox(height: 8),
+                            ...otherDevices.map((device) => Padding(
+                              padding: const EdgeInsets.only(bottom: 8),
+                              child: DeviceListItem(
+                                device: device,
+                                isPrimary: false,
+                                onRevoke: () => _revokeDevice(context, ref, device),
+                              ),
+                            )),
                           ],
+                        );
+                      },
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
                         ),
                       ),
-                    ],
+                      error: (error, _) => _buildErrorWidget(theme, 'Erro ao carregar dispositivos'),
+                    ),
                   ],
                 ),
               ),
@@ -171,6 +132,58 @@ class DeviceManagementDialog extends ConsumerWidget {
             _buildActions(context, theme),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(ThemeData theme, String message) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline, color: theme.colorScheme.error),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.error,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoOtherDevicesInfo(ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: theme.colorScheme.onSurfaceVariant,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Nenhum outro dispositivo conectado. Você pode usar sua conta em até 3 dispositivos simultaneamente.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -201,27 +214,31 @@ class DeviceManagementDialog extends ConsumerWidget {
   }
 
   /// Device limit information
-  Widget _buildDeviceLimitInfo(ThemeData theme, dynamic deviceCountDynamic) {
-    final int deviceCount = (deviceCountDynamic is int) ? deviceCountDynamic : 0;
-    final isNearLimit = deviceCount >= 2;
-    final isAtLimit = deviceCount >= 3;
+  Widget _buildDeviceLimitInfo(ThemeData theme, int deviceCount, int maxDevices) {
+    final isUnlimited = maxDevices == -1;
+    final isNearLimit = !isUnlimited && deviceCount >= maxDevices - 1;
+    final isAtLimit = !isUnlimited && deviceCount >= maxDevices;
     
     Color statusColor;
     IconData statusIcon;
     String statusText;
 
-    if (isAtLimit) {
+    if (isUnlimited) {
+      statusColor = theme.colorScheme.primary;
+      statusIcon = Icons.all_inclusive;
+      statusText = 'Dispositivos ilimitados ($deviceCount conectados)';
+    } else if (isAtLimit) {
       statusColor = theme.colorScheme.error;
       statusIcon = Icons.warning;
-      statusText = 'Limite atingido ($deviceCount/3 dispositivos)';
+      statusText = 'Limite atingido ($deviceCount/$maxDevices dispositivos)';
     } else if (isNearLimit) {
       statusColor = theme.colorScheme.tertiary;
       statusIcon = Icons.info_outline;
-      statusText = 'Próximo do limite ($deviceCount/3 dispositivos)';
+      statusText = 'Próximo do limite ($deviceCount/$maxDevices dispositivos)';
     } else {
       statusColor = theme.colorScheme.primary;
       statusIcon = Icons.check_circle_outline;
-      statusText = 'Dentro do limite ($deviceCount/3 dispositivos)';
+      statusText = 'Dentro do limite ($deviceCount/$maxDevices dispositivos)';
     }
 
     return Container(
@@ -257,7 +274,9 @@ class DeviceManagementDialog extends ConsumerWidget {
                 Text(
                   isAtLimit
                       ? 'Revogue um dispositivo para adicionar outro.'
-                      : 'Você pode usar sua conta em até 3 dispositivos diferentes.',
+                      : isUnlimited
+                          ? 'Você tem acesso ilimitado a dispositivos.'
+                          : 'Você pode usar sua conta em até $maxDevices dispositivos diferentes.',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: statusColor,
                   ),
@@ -287,23 +306,47 @@ class DeviceManagementDialog extends ConsumerWidget {
   }
 
   /// Revoke device with confirmation
-  /// NOTE: Device management is currently disabled - feature in development
-  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, DeviceInfo device) async {
-    await showDialog<void>(
+  Future<void> _revokeDevice(BuildContext context, WidgetRef ref, DeviceEntity device) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Recurso em Desenvolvimento'),
-        content: const Text(
-          'O gerenciamento de dispositivos está sendo desenvolvido.\n\n'
-          'Esta funcionalidade estará disponível em breve.',
+        title: const Text('Revogar Dispositivo'),
+        content: Text(
+          'Deseja revogar o acesso do dispositivo "${device.name.isNotEmpty ? device.name : device.model}"?\n\n'
+          'O usuário precisará fazer login novamente neste dispositivo.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Revogar'),
           ),
         ],
       ),
     );
+    
+    if (confirmed == true && context.mounted) {
+      final actions = ref.read(deviceActionsProvider);
+      final success = await actions.revokeDevice(device.uuid);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              success
+                  ? 'Dispositivo revogado com sucesso'
+                  : 'Erro ao revogar dispositivo',
+            ),
+            backgroundColor: success ? null : Theme.of(context).colorScheme.error,
+          ),
+        );
+      }
+    }
   }
 }

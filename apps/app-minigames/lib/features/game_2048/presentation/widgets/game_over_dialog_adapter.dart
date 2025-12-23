@@ -22,11 +22,7 @@ class Game2048GameOverDialogAdapter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Build stats
     final stats = <shared.GameStat>[
-      shared.GameStat(
-        icon: '🎯',
-        label: 'Maior Peça',
-        value: '$highestTile',
-      ),
+      shared.GameStat(icon: '🎯', label: 'Maior Peça', value: '$highestTile'),
     ];
 
     return shared.GameOverDialog(
@@ -36,7 +32,7 @@ class Game2048GameOverDialogAdapter extends ConsumerWidget {
       isNewHighScore: isNewHighScore,
       stats: stats,
       newAchievements: const [],
-      onPlayAgain: () => ref.read(game2048NotifierProvider.notifier).newGame(),
+      onPlayAgain: () => ref.read(game2048Provider.notifier).restart(),
       onExit: () => context.go('/'),
       victoryColor: Colors.amber,
       defeatColor: Colors.orange,

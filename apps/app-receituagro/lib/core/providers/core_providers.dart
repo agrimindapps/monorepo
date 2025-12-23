@@ -17,7 +17,6 @@ import '../../features/sync/services/sync_coordinator.dart';
 import '../navigation/agricultural_navigation_extension.dart';
 import '../services/app_data_manager.dart';
 import '../services/cloud_functions_service.dart';
-import '../services/device_identity_service.dart';
 import '../services/diagnostico_integration_service.dart';
 import '../services/firebase_messaging_service.dart';
 import '../services/premium_service.dart';
@@ -243,8 +242,9 @@ final analyticsServiceProvider = Provider<ReceitaAgroAnalyticsService>((ref) {
 });
 
 /// Provider do serviço de device identity
-final deviceIdentityServiceProvider = Provider<DeviceIdentityService>((ref) {
-  return DeviceIdentityService.instance;
+/// Usa o DeviceIdentityService do core package
+final deviceIdentityServiceProvider = Provider<core.DeviceIdentityService>((ref) {
+  return core.DeviceIdentityService.instance;
 });
 
 /// Provider do serviço de remote config

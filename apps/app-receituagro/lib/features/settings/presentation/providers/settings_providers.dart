@@ -1,6 +1,6 @@
+import 'package:core/core.dart' show DeviceIdentityService;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../core/services/device_identity_service.dart';
 import '../../../../core/services/promotional_notification_manager.dart';
 import '../../../../core/services/receituagro_notification_service.dart';
 import '../../data/repositories/user_settings_repository_impl.dart';
@@ -28,6 +28,7 @@ UpdateUserSettingsUseCase updateUserSettingsUseCase(Ref ref) {
   return UpdateUserSettingsUseCase(ref.watch(userSettingsRepositoryProvider));
 }
 
+/// Provider for DeviceIdentityService from core package
 @riverpod
 DeviceIdentityService deviceIdentityService(Ref ref) {
   return DeviceIdentityService.instance;

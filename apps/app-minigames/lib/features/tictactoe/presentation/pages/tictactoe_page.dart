@@ -15,8 +15,16 @@ class TicTacToePage extends ConsumerWidget {
     final gameState = ref.watch(ticTacToeGameProvider);
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Jogo da Velha'),
+        title: const Text(
+          'Jogo da Velha',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart),
@@ -25,120 +33,215 @@ class TicTacToePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: gameState.when(
-        data: (state) => SafeArea(
-          child: Column(
-            children: [
-              // Game status and controls
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: GameControlsWidget(
-                  gameState: state,
-                  onGameModeChanged: (mode) {
-                    ref
-                        .read(ticTacToeGameProvider.notifier)
-                        .changeGameMode(mode);
-                  },
-                  onDifficultyChanged: (difficulty) {
-                    ref
-                        .read(ticTacToeGameProvider.notifier)
-                        .changeDifficulty(difficulty);
-                  },
-                  onRestart: () {
-                    ref
-                        .read(ticTacToeGameProvider.notifier)
-                        .restartGame();
-                  },
-                ),
-              ),
-
-              // Current player indicator
-              if (state.isInProgress)
-                Padding(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF6A11CB), // Purple
+              Color(0xFF2575FC), // Blue
+            ],
+          ),
+        ),
+        child: gameState.when(
+          data: (state) => SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Vez de: ${state.currentPlayer.symbol}',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: state.currentPlayer.color,
-                          fontWeight: FontWeight.bold,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Game Controls Card
+                        Card(
+                          elevation: 8,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          color: Colors.white.withValues(alpha: 0.9),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: GameControlsWidget(
+                              gameState: state,
+                              onGameModeChanged: (mode) {
+                                ref
+                                    .read(ticTacToeGameProvider.notifier)
+                                    .changeGameMode(mode);
+                              },
+                              onDifficultyChanged: (difficulty) {
+                                ref
+                                    .read(ticTacToeGameProvider.notifier)
+                                    .changeDifficulty(difficulty);
+                              },
+                              onRestart: () {
+                                ref
+                                    .read(ticTacToeGameProvider.notifier)
+                                    .restartGame();
+                              },
+                            ),
+                          ),
                         ),
-                  ),
-                ),
 
-              // Game result message
-              if (!state.isInProgress)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        state.result.message,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
+                        const SizedBox(height: 24),
+
+                        // Turn Indicator or Result
+                        if (state.isInProgress)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
                                 ),
-                      ),
-                      const SizedBox(height: 8),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          ref
-                              .read(ticTacToeGameProvider.notifier)
-                              .restartGame();
-                        },
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Jogar Novamente'),
-                      ),
-                    ],
-                  ),
-                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Vez de: ',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleLarge
+                                      ?.copyWith(
+                                        color: Colors.grey[800],
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                Text(
+                                  state.currentPlayer.symbol,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineMedium
+                                      ?.copyWith(
+                                        color: state.currentPlayer.color,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
 
-              // Game board
-              Expanded(
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 1,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: GameBoardWidget(
-                        gameState: state,
-                        onCellTapped: (row, col) {
-                          ref
-                              .read(ticTacToeGameProvider.notifier)
-                              .makeMove(row, col);
-                        },
-                      ),
+                        if (!state.isInProgress)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.2),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  state.result.message,
+                                  textAlign: TextAlign.center,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    ref
+                                        .read(ticTacToeGameProvider.notifier)
+                                        .restartGame();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 24,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.refresh),
+                                  label: const Text('Jogar Novamente'),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                        const SizedBox(height: 24),
+
+                        // Game Board
+                        AspectRatio(
+                          aspectRatio: 1,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: GameBoardWidget(
+                              gameState: state,
+                              onCellTapped: (row, col) {
+                                ref
+                                    .read(ticTacToeGameProvider.notifier)
+                                    .makeMove(row, col);
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-
-              const SizedBox(height: 16),
-            ],
+            ),
           ),
-        ),
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                'Erro: $error',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ref.invalidate(ticTacToeGameProvider);
-                },
-                child: const Text('Tentar Novamente'),
-              ),
-            ],
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: Colors.white),
+          ),
+          error: (error, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.white),
+                const SizedBox(height: 16),
+                Text(
+                  'Erro: $error',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    ref.invalidate(ticTacToeGameProvider);
+                  },
+                  child: const Text('Tentar Novamente'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

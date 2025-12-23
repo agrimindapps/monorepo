@@ -1,4 +1,6 @@
+import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 import '../gasometer_database.dart';
 
@@ -37,15 +39,19 @@ extension ReceiptEntityTypeExtension on ReceiptEntityType {
 
 /// Repository para gerenciar imagens de comprovantes no Drift
 ///
-/// Armazena imagens de recibos como BLOB para funcionamento offline-first.
+/// Armazena imagens de recibos como Base64 para sincronização com Firestore.
+/// Usa ImageProcessingService para compressão automática (max 600KB).
+///
 /// Responsabilidades:
 /// - CRUD de imagens de comprovantes
+/// - Processamento e compressão automática
 /// - Associação com abastecimentos, manutenções e despesas
-/// - Controle de status de upload
+/// - Controle de sincronização
 class ReceiptImagesDriftRepository {
   ReceiptImagesDriftRepository(this._db);
 
   final GasometerDatabase _db;
+  final _processingService = ImageProcessingService.instance;
 
   // =========================================================================
   // CREATE
@@ -53,11 +59,13 @@ class ReceiptImagesDriftRepository {
 
   /// Salva uma nova imagem de comprovante
   ///
+  /// A imagem é automaticamente processada e comprimida para max 600KB.
+  /// Usa configuração 'receipt' que preserva melhor a legibilidade.
+  ///
   /// [entityType] - Tipo da entidade (fuel_supply, maintenance, expense)
   /// [entityId] - ID da entidade
-  /// [imageBytes] - Bytes da imagem
+  /// [imageBytes] - Bytes da imagem original
   /// [fileName] - Nome original do arquivo
-  /// [mimeType] - Tipo MIME (image/jpeg, image/png)
   /// [userId] - ID do usuário
   Future<int> saveImage({
     required ReceiptEntityType entityType,
@@ -65,25 +73,74 @@ class ReceiptImagesDriftRepository {
     required Uint8List imageBytes,
     required String userId,
     String? fileName,
-    String mimeType = 'image/jpeg',
   }) async {
+    // Processar e comprimir imagem (usa config receipt para melhor legibilidade)
+    final processed = await _processingService.processImage(
+      imageBytes,
+      config: ImageProcessingConfig.receipt,
+    );
+
+    _log('Comprovante processado: ${processed.sizeBytes} bytes '
+        '(${processed.width}x${processed.height}), '
+        'economia: ${processed.savedPercent.toStringAsFixed(1)}%');
+
     final companion = ReceiptImagesCompanion(
       entityType: Value(entityType.value),
       entityId: Value(entityId),
-      imageData: Value(imageBytes),
+      imageBase64: Value(processed.base64DataUri),
       fileName: Value(fileName),
-      mimeType: Value(mimeType),
-      sizeBytes: Value(imageBytes.length),
+      mimeType: Value(processed.mimeType),
+      sizeBytes: Value(processed.sizeBytes),
+      width: Value(processed.width),
+      height: Value(processed.height),
+      sortOrder: const Value(0),
       userId: Value(userId),
       isDirty: const Value(true),
-      uploadStatus: const Value('pending'),
       createdAt: Value(DateTime.now()),
       updatedAt: Value(DateTime.now()),
     );
 
     final id = await _db.into(_db.receiptImages).insert(companion);
-    print(
-        '📷 [ReceiptImagesDriftRepository] Imagem salva: id=$id, entityType=${entityType.value}, entityId=$entityId, size=${imageBytes.length} bytes');
+    _log('Comprovante salvo: id=$id, entityType=${entityType.value}, '
+        'entityId=$entityId, size=${processed.sizeBytes} bytes');
+    return id;
+  }
+
+  /// Salva imagem já processada (Base64)
+  ///
+  /// Útil para sincronização quando a imagem já vem processada do Firestore.
+  Future<int> saveProcessedImage({
+    required ReceiptEntityType entityType,
+    required int entityId,
+    required String imageBase64,
+    required String userId,
+    String? fileName,
+    String mimeType = 'image/jpeg',
+    int? sizeBytes,
+    int? width,
+    int? height,
+    String? firebaseId,
+  }) async {
+    final companion = ReceiptImagesCompanion(
+      entityType: Value(entityType.value),
+      entityId: Value(entityId),
+      imageBase64: Value(imageBase64),
+      fileName: Value(fileName),
+      mimeType: Value(mimeType),
+      sizeBytes: Value(sizeBytes),
+      width: Value(width),
+      height: Value(height),
+      sortOrder: const Value(0),
+      userId: Value(userId),
+      firebaseId: Value(firebaseId),
+      isDirty: Value(firebaseId == null),
+      createdAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+      lastSyncAt: firebaseId != null ? Value(DateTime.now()) : const Value.absent(),
+    );
+
+    final id = await _db.into(_db.receiptImages).insert(companion);
+    _log('Comprovante processado salvo: id=$id, entityType=${entityType.value}');
     return id;
   }
 
@@ -111,6 +168,7 @@ class ReceiptImagesDriftRepository {
               i.entityId.equals(entityId) &
               i.isDeleted.equals(false))
           ..orderBy([
+            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .get();
@@ -122,14 +180,18 @@ class ReceiptImagesDriftRepository {
         .getSingleOrNull();
   }
 
-  /// Retorna imagens pendentes de upload
-  Future<List<ReceiptImage>> getPendingUploads() async {
+  /// Retorna uma imagem pelo Firebase ID
+  Future<ReceiptImage?> getImageByFirebaseId(String firebaseId) async {
     return (_db.select(_db.receiptImages)
-          ..where((i) =>
-              i.uploadStatus.equals('pending') & i.isDeleted.equals(false))
-          ..orderBy([
-            (i) => OrderingTerm.asc(i.createdAt),
-          ]))
+          ..where((i) => i.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+  }
+
+  /// Retorna imagens pendentes de sincronização
+  Future<List<ReceiptImage>> getDirtyImages() async {
+    return (_db.select(_db.receiptImages)
+          ..where((i) => i.isDirty.equals(true) & i.isDeleted.equals(false))
+          ..orderBy([(i) => OrderingTerm.asc(i.createdAt)]))
         .get();
   }
 
@@ -142,6 +204,7 @@ class ReceiptImagesDriftRepository {
               i.entityId.equals(entityId) &
               i.isDeleted.equals(false))
           ..orderBy([
+            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .watch();
@@ -151,28 +214,29 @@ class ReceiptImagesDriftRepository {
   // UPDATE
   // =========================================================================
 
-  /// Atualiza status de upload após envio ao Firebase Storage
-  Future<void> updateUploadStatus({
-    required int imageId,
-    required String status,
-    String? storageUrl,
-    String? firebaseId,
-  }) async {
-    final companion = ReceiptImagesCompanion(
-      uploadStatus: Value(status),
-      storageUrl: Value(storageUrl),
-      firebaseId: Value(firebaseId),
-      isDirty: Value(status != 'completed'),
-      lastSyncAt:
-          status == 'completed' ? Value(DateTime.now()) : const Value.absent(),
-      updatedAt: Value(DateTime.now()),
-    );
-
+  /// Atualiza ordem de exibição
+  Future<void> updateSortOrder(int imageId, int sortOrder) async {
     await (_db.update(_db.receiptImages)..where((i) => i.id.equals(imageId)))
-        .write(companion);
+        .write(ReceiptImagesCompanion(
+      sortOrder: Value(sortOrder),
+      isDirty: const Value(true),
+      updatedAt: Value(DateTime.now()),
+    ));
+  }
 
-    print(
-        '📷 [ReceiptImagesDriftRepository] Upload status atualizado: id=$imageId, status=$status');
+  /// Marca imagem como sincronizada
+  Future<void> markAsSynced({
+    required int imageId,
+    required String firebaseId,
+  }) async {
+    await (_db.update(_db.receiptImages)..where((i) => i.id.equals(imageId)))
+        .write(ReceiptImagesCompanion(
+      firebaseId: Value(firebaseId),
+      isDirty: const Value(false),
+      lastSyncAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+    ));
+    _log('Comprovante $imageId marcado como sincronizado: $firebaseId');
   }
 
   // =========================================================================
@@ -187,17 +251,14 @@ class ReceiptImagesDriftRepository {
       isDirty: const Value(true),
       updatedAt: Value(DateTime.now()),
     ));
-
-    print(
-        '📷 [ReceiptImagesDriftRepository] Imagem marcada como deletada: id=$imageId');
+    _log('Comprovante marcado como deletado: id=$imageId');
   }
 
   /// Remove permanentemente uma imagem
   Future<void> hardDeleteImage(int imageId) async {
     await (_db.delete(_db.receiptImages)..where((i) => i.id.equals(imageId)))
         .go();
-    print(
-        '📷 [ReceiptImagesDriftRepository] Imagem removida permanentemente: id=$imageId');
+    _log('Comprovante removido permanentemente: id=$imageId');
   }
 
   /// Remove todas as imagens de uma entidade
@@ -235,5 +296,11 @@ class ReceiptImagesDriftRepository {
   Future<bool> hasReceipt(ReceiptEntityType entityType, int entityId) async {
     final count = await countImagesForEntity(entityType, entityId);
     return count > 0;
+  }
+
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('📷 [ReceiptImagesDriftRepository] $message');
+    }
   }
 }

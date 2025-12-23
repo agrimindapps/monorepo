@@ -177,3 +177,19 @@ final plantImagesDriftRepositoryProvider = Provider<PlantImagesDriftRepository>(
     return PlantImagesDriftRepository(db);
   },
 );
+
+// ========== IMAGE STREAM PROVIDERS ==========
+
+/// Stream de imagens de uma planta
+final plantImagesStreamProvider = StreamProvider.autoDispose
+    .family<List<PlantImage>, int>((ref, plantId) {
+      final repo = ref.watch(plantImagesDriftRepositoryProvider);
+      return repo.watchImagesByPlantId(plantId);
+    });
+
+/// Stream da imagem primária de uma planta
+final plantPrimaryImageStreamProvider = StreamProvider.autoDispose
+    .family<PlantImage?, int>((ref, plantId) {
+      final repo = ref.watch(plantImagesDriftRepositoryProvider);
+      return repo.watchPrimaryImage(plantId);
+    });

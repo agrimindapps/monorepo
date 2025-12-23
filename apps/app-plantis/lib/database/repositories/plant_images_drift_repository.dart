@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
@@ -5,13 +6,17 @@ import '../plantis_database.dart';
 
 /// Repository para gerenciar imagens de plantas no Drift
 ///
-/// Armazena imagens como BLOB para funcionamento offline-first.
+/// Armazena imagens como Base64 para sincronização com Firestore.
+/// Usa ImageProcessingService para compressão automática (max 600KB).
+///
 /// Responsabilidades:
 /// - CRUD de imagens locais
+/// - Processamento e compressão automática
 /// - Gerenciamento de imagem primária
-/// - Controle de status de upload
+/// - Controle de sincronização
 class PlantImagesDriftRepository {
   final PlantisDatabase _db;
+  final _processingService = ImageProcessingService.instance;
 
   PlantImagesDriftRepository(this._db);
 
@@ -21,20 +26,32 @@ class PlantImagesDriftRepository {
 
   /// Salva uma nova imagem para uma planta
   ///
+  /// A imagem é automaticamente processada e comprimida para max 600KB.
+  ///
   /// [plantId] - ID local da planta
-  /// [imageBytes] - Bytes da imagem
+  /// [imageBytes] - Bytes da imagem original
   /// [fileName] - Nome original do arquivo
-  /// [mimeType] - Tipo MIME (image/jpeg, image/png)
   /// [isPrimary] - Se é a imagem principal
   /// [userId] - ID do usuário
+  /// [config] - Configuração de processamento (default: standard)
   Future<int> saveImage({
     required int plantId,
     required Uint8List imageBytes,
     String? fileName,
-    String mimeType = 'image/jpeg',
     bool isPrimary = false,
     String? userId,
+    ImageProcessingConfig config = ImageProcessingConfig.standard,
   }) async {
+    // Processar e comprimir imagem
+    final processed = await _processingService.processImage(
+      imageBytes,
+      config: config,
+    );
+
+    _log('Imagem processada: ${processed.sizeBytes} bytes '
+        '(${processed.width}x${processed.height}), '
+        'economia: ${processed.savedPercent.toStringAsFixed(1)}%');
+
     // Se for primária, remove flag de outras imagens
     if (isPrimary) {
       await _clearPrimaryFlag(plantId);
@@ -42,24 +59,64 @@ class PlantImagesDriftRepository {
 
     final companion = PlantImagesCompanion(
       plantId: Value(plantId),
-      imageData: Value(imageBytes),
+      imageBase64: Value(processed.base64DataUri),
       fileName: Value(fileName),
-      mimeType: Value(mimeType),
-      sizeBytes: Value(imageBytes.length),
+      mimeType: Value(processed.mimeType),
+      sizeBytes: Value(processed.sizeBytes),
+      width: Value(processed.width),
+      height: Value(processed.height),
       isPrimary: Value(isPrimary),
+      sortOrder: const Value(0),
       userId: Value(userId),
       isDirty: const Value(true),
-      uploadStatus: const Value('pending'),
       createdAt: Value(DateTime.now()),
       updatedAt: Value(DateTime.now()),
     );
 
     final id = await _db.into(_db.plantImages).insert(companion);
-    if (kDebugMode) {
-      debugPrint(
-        '📷 [PlantImagesDriftRepository] Imagem salva: id=$id, plantId=$plantId, size=${imageBytes.length} bytes',
-      );
+    _log('Imagem salva: id=$id, plantId=$plantId, size=${processed.sizeBytes} bytes');
+    return id;
+  }
+
+  /// Salva imagem já processada (Base64)
+  ///
+  /// Útil para sincronização quando a imagem já vem processada do Firestore.
+  Future<int> saveProcessedImage({
+    required int plantId,
+    required String imageBase64,
+    String? userId,
+    String? fileName,
+    String mimeType = 'image/jpeg',
+    int? sizeBytes,
+    int? width,
+    int? height,
+    bool isPrimary = false,
+    String? firebaseId,
+  }) async {
+    if (isPrimary) {
+      await _clearPrimaryFlag(plantId);
     }
+
+    final companion = PlantImagesCompanion(
+      plantId: Value(plantId),
+      imageBase64: Value(imageBase64),
+      fileName: Value(fileName),
+      mimeType: Value(mimeType),
+      sizeBytes: Value(sizeBytes),
+      width: Value(width),
+      height: Value(height),
+      isPrimary: Value(isPrimary),
+      sortOrder: const Value(0),
+      userId: Value(userId),
+      firebaseId: Value(firebaseId),
+      isDirty: Value(firebaseId == null),
+      createdAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+      lastSyncAt: firebaseId != null ? Value(DateTime.now()) : const Value.absent(),
+    );
+
+    final id = await _db.into(_db.plantImages).insert(companion);
+    _log('Imagem processada salva: id=$id, plantId=$plantId');
     return id;
   }
 
@@ -84,6 +141,7 @@ class PlantImagesDriftRepository {
           ..where((i) => i.plantId.equals(plantId) & i.isDeleted.equals(false))
           ..orderBy([
             (i) => OrderingTerm.desc(i.isPrimary),
+            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .get();
@@ -96,12 +154,17 @@ class PlantImagesDriftRepository {
     )..where((i) => i.id.equals(id))).getSingleOrNull();
   }
 
-  /// Retorna imagens pendentes de upload
-  Future<List<PlantImage>> getPendingUploads() async {
+  /// Retorna uma imagem pelo Firebase ID
+  Future<PlantImage?> getImageByFirebaseId(String firebaseId) async {
     return (_db.select(_db.plantImages)
-          ..where(
-            (i) => i.uploadStatus.equals('pending') & i.isDeleted.equals(false),
-          )
+          ..where((i) => i.firebaseId.equals(firebaseId)))
+        .getSingleOrNull();
+  }
+
+  /// Retorna imagens pendentes de sincronização
+  Future<List<PlantImage>> getDirtyImages() async {
+    return (_db.select(_db.plantImages)
+          ..where((i) => i.isDirty.equals(true) & i.isDeleted.equals(false))
           ..orderBy([(i) => OrderingTerm.asc(i.createdAt)]))
         .get();
   }
@@ -112,6 +175,7 @@ class PlantImagesDriftRepository {
           ..where((i) => i.plantId.equals(plantId) & i.isDeleted.equals(false))
           ..orderBy([
             (i) => OrderingTerm.desc(i.isPrimary),
+            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .watch();
@@ -136,47 +200,37 @@ class PlantImagesDriftRepository {
   Future<void> setPrimaryImage(int imageId, int plantId) async {
     await _clearPrimaryFlag(plantId);
 
-    await (_db.update(
-      _db.plantImages,
-    )..where((i) => i.id.equals(imageId))).write(
-      const PlantImagesCompanion(
-        isPrimary: Value(true),
-        updatedAt: Value(null), // Será atualizado pelo trigger
-      ),
-    );
-
-    // Atualizar updatedAt manualmente
     await (_db.update(_db.plantImages)..where((i) => i.id.equals(imageId)))
-        .write(PlantImagesCompanion(updatedAt: Value(DateTime.now())));
+        .write(PlantImagesCompanion(
+      isPrimary: const Value(true),
+      isDirty: const Value(true),
+      updatedAt: Value(DateTime.now()),
+    ));
   }
 
-  /// Atualiza status de upload após envio ao Firebase Storage
-  Future<void> updateUploadStatus({
-    required int imageId,
-    required String status,
-    String? storageUrl,
-    String? firebaseId,
-  }) async {
-    final companion = PlantImagesCompanion(
-      uploadStatus: Value(status),
-      storageUrl: Value(storageUrl),
-      firebaseId: Value(firebaseId),
-      isDirty: Value(status != 'completed'),
-      lastSyncAt: status == 'completed'
-          ? Value(DateTime.now())
-          : const Value.absent(),
+  /// Atualiza ordem de exibição
+  Future<void> updateSortOrder(int imageId, int sortOrder) async {
+    await (_db.update(_db.plantImages)..where((i) => i.id.equals(imageId)))
+        .write(PlantImagesCompanion(
+      sortOrder: Value(sortOrder),
+      isDirty: const Value(true),
       updatedAt: Value(DateTime.now()),
-    );
+    ));
+  }
 
-    await (_db.update(
-      _db.plantImages,
-    )..where((i) => i.id.equals(imageId))).write(companion);
-
-    if (kDebugMode) {
-      debugPrint(
-        '📷 [PlantImagesDriftRepository] Upload status atualizado: id=$imageId, status=$status',
-      );
-    }
+  /// Marca imagem como sincronizada
+  Future<void> markAsSynced({
+    required int imageId,
+    required String firebaseId,
+  }) async {
+    await (_db.update(_db.plantImages)..where((i) => i.id.equals(imageId)))
+        .write(PlantImagesCompanion(
+      firebaseId: Value(firebaseId),
+      isDirty: const Value(false),
+      lastSyncAt: Value(DateTime.now()),
+      updatedAt: Value(DateTime.now()),
+    ));
+    _log('Imagem $imageId marcada como sincronizada: $firebaseId');
   }
 
   // =========================================================================
@@ -194,12 +248,7 @@ class PlantImagesDriftRepository {
         updatedAt: Value(DateTime.now()),
       ),
     );
-
-    if (kDebugMode) {
-      debugPrint(
-        '📷 [PlantImagesDriftRepository] Imagem marcada como deletada: id=$imageId',
-      );
-    }
+    _log('Imagem marcada como deletada: id=$imageId');
   }
 
   /// Remove permanentemente uma imagem
@@ -207,11 +256,7 @@ class PlantImagesDriftRepository {
     await (_db.delete(
       _db.plantImages,
     )..where((i) => i.id.equals(imageId))).go();
-    if (kDebugMode) {
-      debugPrint(
-        '📷 [PlantImagesDriftRepository] Imagem removida permanentemente: id=$imageId',
-      );
-    }
+    _log('Imagem removida permanentemente: id=$imageId');
   }
 
   /// Remove todas as imagens de uma planta
@@ -235,7 +280,10 @@ class PlantImagesDriftRepository {
   Future<void> _clearPrimaryFlag(int plantId) async {
     await (_db.update(_db.plantImages)
           ..where((i) => i.plantId.equals(plantId) & i.isPrimary.equals(true)))
-        .write(const PlantImagesCompanion(isPrimary: Value(false)));
+        .write(const PlantImagesCompanion(
+      isPrimary: Value(false),
+      isDirty: Value(true),
+    ));
   }
 
   /// Conta imagens de uma planta
@@ -249,5 +297,11 @@ class PlantImagesDriftRepository {
       );
 
     return await query.map((row) => row.read(count)!).getSingle();
+  }
+
+  void _log(String message) {
+    if (kDebugMode) {
+      debugPrint('📷 [PlantImagesDriftRepository] $message');
+    }
   }
 }

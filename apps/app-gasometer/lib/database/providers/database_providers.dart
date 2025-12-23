@@ -143,6 +143,29 @@ final receiptImagesDriftRepositoryProvider = Provider<ReceiptImagesDriftReposito
   return ReceiptImagesDriftRepository(db);
 });
 
+// ========== IMAGE STREAM PROVIDERS ==========
+
+/// Stream de imagens de um veículo
+final vehicleImagesStreamProvider = StreamProvider.autoDispose
+    .family<List<VehicleImage>, int>((ref, vehicleId) {
+      final repo = ref.watch(vehicleImagesDriftRepositoryProvider);
+      return repo.watchImagesByVehicleId(vehicleId);
+    });
+
+/// Stream da imagem primária de um veículo
+final vehiclePrimaryImageStreamProvider = StreamProvider.autoDispose
+    .family<VehicleImage?, int>((ref, vehicleId) {
+      final repo = ref.watch(vehicleImagesDriftRepositoryProvider);
+      return repo.watchPrimaryImage(vehicleId);
+    });
+
+/// Stream de comprovantes de uma entidade (abastecimento, manutenção, despesa)
+final receiptImagesStreamProvider = StreamProvider.autoDispose
+    .family<List<ReceiptImage>, ({ReceiptEntityType type, int entityId})>((ref, params) {
+      final repo = ref.watch(receiptImagesDriftRepositoryProvider);
+      return repo.watchImagesByEntity(params.type, params.entityId);
+    });
+
 // ========== STREAM PROVIDERS ==========
 
 /// Stream de veículos ativos do usuário

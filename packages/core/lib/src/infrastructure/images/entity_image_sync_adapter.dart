@@ -197,7 +197,7 @@ class EntityImageSyncAdapter {
   /// 1. Upload de imagens locais pendentes
   /// 2. Download de imagens remotas novas/atualizadas
   /// 3. Resolução de conflitos
-  Future<SyncResult> fullSync({
+  Future<ImageSyncResult> fullSync({
     required String userId,
     required String moduleName,
     DateTime? lastSyncAt,
@@ -240,7 +240,7 @@ class EntityImageSyncAdapter {
       errors.add('Erro na sincronização: $e');
     }
 
-    return SyncResult(
+    return ImageSyncResult(
       uploaded: uploaded,
       downloaded: downloaded,
       conflicts: conflicts,
@@ -255,14 +255,14 @@ class EntityImageSyncAdapter {
   }
 }
 
-/// Resultado da sincronização
-class SyncResult {
+/// Resultado da sincronização de imagens
+class ImageSyncResult {
   final int uploaded;
   final int downloaded;
   final int conflicts;
   final List<String> errors;
 
-  const SyncResult({
+  const ImageSyncResult({
     required this.uploaded,
     required this.downloaded,
     required this.conflicts,
@@ -275,7 +275,7 @@ class SyncResult {
 
   @override
   String toString() {
-    return 'SyncResult(uploaded: $uploaded, downloaded: $downloaded, '
+    return 'ImageSyncResult(uploaded: $uploaded, downloaded: $downloaded, '
         'conflicts: $conflicts, errors: ${errors.length})';
   }
 }

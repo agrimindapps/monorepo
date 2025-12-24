@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../domain/entities/calculation_result.dart';
 
@@ -33,11 +34,31 @@ class CalculationResultCard extends StatelessWidget {
                   size: 24,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Resultado do Cálculo',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    'Resultado do Cálculo',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Copiar',
+                  icon: const Icon(Icons.copy),
+                  onPressed: () => _copyToClipboard(
+                    context,
+                    text: _buildResultText(),
+                    isShare: false,
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Compartilhar',
+                  icon: const Icon(Icons.share),
+                  onPressed: () => _copyToClipboard(
+                    context,
+                    text: _buildResultText(),
+                    isShare: true,
                   ),
                 ),
               ],
@@ -97,9 +118,53 @@ class CalculationResultCard extends StatelessWidget {
     );
   }
 
+  String _buildResultText() {
+    final buffer = StringBuffer();
+
+    if (result.summary != null) {
+      buffer.writeln(result.summary);
+      buffer.writeln();
+    }
+
+    for (final item in result.results) {
+      buffer.writeln('${item.label}: ${item.formattedValue}');
+    }
+
+    if (result.recommendations.isNotEmpty) {
+      buffer.writeln();
+      buffer.writeln('Recomendações:');
+      for (final rec in result.recommendations) {
+        buffer.writeln('- ${rec.title}: ${rec.message}');
+      }
+    }
+
+    return buffer.toString().trim();
+  }
+
+  Future<void> _copyToClipboard(
+    BuildContext context, {
+    required String text,
+    required bool isShare,
+  }) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!context.mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          isShare
+              ? 'Resultado copiado. Cole para compartilhar.'
+              : 'Resultado copiado para a área de transferência.',
+        ),
+      ),
+    );
+  }
+
   Widget _buildResultItem(BuildContext context, ResultItem item) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -115,7 +180,7 @@ class CalculationResultCard extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              '${item.value}${item.unit != null ? ' ${item.unit}' : ''}',
+              item.formattedValue,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: _getSeverityColor(theme, item.severity),

@@ -3,13 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/layout/responsive_shell.dart';
 import '../../features/cash_vs_installment_calculator/presentation/pages/cash_vs_installment_calculator_page.dart';
-import '../../features/construction_calculator/presentation/pages/concrete_calculator_page.dart';
 // Construction Calculators
-import '../../features/construction_calculator/presentation/pages/construction_calculator_selection_page.dart';
-import '../../features/construction_calculator/presentation/pages/cost_per_sqm_calculator_page.dart';
-import '../../features/construction_calculator/presentation/pages/flooring_calculator_page.dart';
-import '../../features/construction_calculator/presentation/pages/materials_quantity_calculator_page.dart';
-import '../../features/construction_calculator/presentation/pages/paint_consumption_calculator_page.dart';
 import '../../features/emergency_reserve_calculator/presentation/pages/emergency_reserve_calculator_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/net_salary_calculator/presentation/pages/net_salary_calculator_page.dart';
@@ -82,35 +76,6 @@ final appRouter = GoRouter(
               path: '/calculators/financial/unemployment-insurance',
               builder: (context, state) =>
                   const UnemploymentInsuranceCalculatorPage(),
-            ),
-
-            // Construction
-            GoRoute(
-              path: '/calculators/construction/selection',
-              builder: (context, state) =>
-                  const ConstructionCalculatorSelectionPage(),
-            ),
-            GoRoute(
-              path: '/calculators/construction/materials-quantity',
-              builder: (context, state) =>
-                  const MaterialsQuantityCalculatorPage(),
-            ),
-            GoRoute(
-              path: '/calculators/construction/cost-per-sqm',
-              builder: (context, state) => const CostPerSqmCalculatorPage(),
-            ),
-            GoRoute(
-              path: '/calculators/construction/paint-consumption',
-              builder: (context, state) =>
-                  const PaintConsumptionCalculatorPage(),
-            ),
-            GoRoute(
-              path: '/calculators/construction/flooring',
-              builder: (context, state) => const FlooringCalculatorPage(),
-            ),
-            GoRoute(
-              path: '/calculators/construction/concrete',
-              builder: (context, state) => const ConcreteCalculatorPage(),
             ),
           ],
         ),

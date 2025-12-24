@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/user_preferences_providers.dart';
 import '../../../../core/theme/theme_providers.dart';
-import '../../../../shared/widgets/intro_dialog.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -17,15 +16,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategory = 'Todos';
-
-  @override
-  void initState() {
-    super.initState();
-    // Show intro dialog on first launch
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      IntroDialog.showIfNeeded(context);
-    });
-  }
 
   @override
   void dispose() {

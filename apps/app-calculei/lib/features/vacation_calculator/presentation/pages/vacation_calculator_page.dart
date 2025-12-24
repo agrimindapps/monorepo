@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/data/calculator_content_repository.dart';
 import '../../../../shared/widgets/educational_tabs.dart';
@@ -31,11 +30,6 @@ class VacationCalculatorPage extends ConsumerWidget {
               ),
               subject: 'Cálculo de Férias',
             ),
-          IconButton(
-            icon: const Icon(Icons.history),
-            onPressed: () => _showHistory(context, ref),
-            tooltip: 'Histórico',
-          ),
         ],
       ),
       body: SafeArea(
@@ -168,108 +162,5 @@ class VacationCalculatorPage extends ConsumerWidget {
         );
       }
     }
-  }
-
-  void _showHistory(BuildContext context, WidgetRef ref) {
-    final historyAsync = ref.read(vacationHistoryProvider);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) {
-          return Column(
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  border: Border(
-                    bottom: BorderSide(
-                      color: Theme.of(context).dividerColor,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.history),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Histórico de Cálculos',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-              ),
-
-              // History List
-              Expanded(
-                child: historyAsync.when(
-                  data: (history) {
-                    if (history.isEmpty) {
-                      return const Center(
-                        child: Text('Nenhum cálculo no histórico'),
-                      );
-                    }
-
-                    return ListView.builder(
-                      controller: scrollController,
-                      itemCount: history.length,
-                      itemBuilder: (context, index) {
-                        final calc = history[index];
-                        final formatter = NumberFormat.currency(
-                          locale: 'pt_BR',
-                          symbol: 'R\$',
-                        );
-
-                        return ListTile(
-                          leading: CircleAvatar(
-                            child: Text('${calc.vacationDays}d'),
-                          ),
-                          title: Text(
-                            formatter.format(calc.netTotal),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          subtitle: Text(
-                            'Salário: ${formatter.format(calc.grossSalary)}\n'
-                            '${DateFormat('dd/MM/yyyy HH:mm').format(calc.calculatedAt)}',
-                          ),
-                          isThreeLine: true,
-                          onTap: () {
-                            // TODO: Show calculation details
-                            Navigator.pop(context);
-                          },
-                        );
-                      },
-                    );
-                  },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  error: (error, stack) => Center(
-                    child: Text('Erro: $error'),
-                  ),
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
   }
 }

@@ -54,8 +54,21 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
     });
   }
 
+  void _clear() {
+    setState(() {
+      _alcoholController.clear();
+      _gasolineController.clear();
+      _alcoholPrice = null;
+      _gasolinePrice = null;
+      _result = null;
+      _useAlcohol = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -67,13 +80,13 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildInfoCard(),
-                    const SizedBox(height: 24),
-                    _buildPriceInputs(),
-                    const SizedBox(height: 24),
-                    if (_result != null) _buildResult(),
+                    _buildInputCard(theme),
                     const SizedBox(height: 16),
-                    _buildExplanation(),
+                    if (_result != null) ...[
+                      _buildResultCard(theme),
+                      const SizedBox(height: 16),
+                    ],
+                    _buildInfoCard(theme),
                   ],
                 ),
               ),
@@ -154,299 +167,201 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
     );
   }
 
-  Widget _buildInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.info_outline, color: Colors.blue.shade700, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Informe os preços dos combustíveis para descobrir qual compensa mais',
-              style: TextStyle(
-                color: Colors.blue.shade900,
-                fontSize: 13,
+  Widget _buildInputCard(ThemeData theme) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Álcool field
+            TextField(
+              controller: _alcoholController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                labelText: 'Preço do Álcool',
+                prefixText: 'R\$ ',
+                hintText: '0,00',
+                prefixIcon: Icon(Icons.local_gas_station, color: Colors.green.shade700),
+                border: const OutlineInputBorder(),
               ),
+              onChanged: (value) {
+                setState(() {
+                  _alcoholPrice = double.tryParse(value.replaceAll(',', '.'));
+                });
+              },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPriceInputs() {
-    return Column(
-      children: [
-        // Alcohol input
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.green.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.local_gas_station, color: Colors.green.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Preço do Álcool',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green.shade900,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
+            const SizedBox(height: 16),
+            // Gasolina field
+            TextField(
+              controller: _gasolineController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+              ],
+              decoration: InputDecoration(
+                labelText: 'Preço da Gasolina',
+                prefixText: 'R\$ ',
+                hintText: '0,00',
+                prefixIcon: Icon(Icons.local_gas_station, color: Colors.orange.shade700),
+                border: const OutlineInputBorder(),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _alcoholController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                ],
-                decoration: InputDecoration(
-                  prefixText: 'R\$ ',
-                  hintText: '0,00',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.green.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.green.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.green.shade700, width: 2),
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _alcoholPrice = double.tryParse(value.replaceAll(',', '.'));
-                  });
-                  _calculate();
-                },
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        // Gasoline input
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.orange.shade50,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.orange.shade200),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.local_gas_station, color: Colors.orange.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Preço da Gasolina',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.orange.shade900,
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _gasolineController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-                ],
-                decoration: InputDecoration(
-                  prefixText: 'R\$ ',
-                  hintText: '0,00',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.orange.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.orange.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: Colors.orange.shade700, width: 2),
-                  ),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    _gasolinePrice = double.tryParse(value.replaceAll(',', '.'));
-                  });
-                  _calculate();
-                },
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildResult() {
-    final useAlcohol = _useAlcohol!;
-    final color = useAlcohol ? Colors.green : Colors.orange;
-    final icon = useAlcohol ? Icons.check_circle : Icons.info;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: color.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.shade300, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color.shade700, size: 48),
-          const SizedBox(height: 12),
-          Text(
-            _result!,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: color.shade900,
+              onChanged: (value) {
+                setState(() {
+                  _gasolinePrice = double.tryParse(value.replaceAll(',', '.'));
+                });
+              },
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          _buildCalculationDetails(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalculationDetails() {
-    if (_alcoholPrice == null || _gasolinePrice == null) return const SizedBox.shrink();
-
-    final ratio = (_alcoholPrice! / _gasolinePrice!) * 100;
-    final threshold = 70.0;
-
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Relação Álcool/Gasolina:'),
-              Text(
-                '${ratio.toStringAsFixed(1)}%',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Limite para compensar:'),
-              Text(
-                '${threshold.toStringAsFixed(0)}%',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildExplanation() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.lightbulb_outline, color: Colors.grey.shade700, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                'Como funciona?',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
-                  fontSize: 15,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'O álcool tem poder calorífico menor que a gasolina (rende cerca de 70%). '
-            'Por isso, só compensa abastecer com álcool quando o preço for no máximo 70% do preço da gasolina.',
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 13,
-              height: 1.5,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
+            const SizedBox(height: 20),
+            // Botões
+            Row(
               children: [
-                Icon(Icons.info, color: Colors.blue.shade600, size: 16),
-                const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    'Regra: Álcool ≤ 70% da Gasolina = Compensa',
-                    style: TextStyle(
-                      color: Colors.blue.shade900,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  child: OutlinedButton.icon(
+                    onPressed: _clear,
+                    icon: const Icon(Icons.clear),
+                    label: const Text('Limpar'),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    onPressed: _calculate,
+                    icon: const Icon(Icons.calculate),
+                    label: const Text('Calcular'),
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                   ),
                 ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResultCard(ThemeData theme) {
+    final useAlcohol = _useAlcohol!;
+    final color = useAlcohol ? Colors.green : Colors.orange;
+    final icon = useAlcohol ? Icons.check_circle : Icons.info;
+    
+    final ratio = (_alcoholPrice! / _gasolinePrice!) * 100;
+
+    return Card(
+      elevation: 4,
+      color: color.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Icon(icon, color: color.shade700, size: 56),
+            const SizedBox(height: 16),
+            Text(
+              _result!,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color.shade900,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Relação:',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      Text(
+                        '${ratio.toStringAsFixed(1)}%',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Limite:',
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      Text(
+                        '70%',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: color.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(ThemeData theme) {
+    return Card(
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Como funciona?',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'O álcool tem poder calorífico menor que a gasolina (rende cerca de 70%). '
+              'Por isso, só compensa abastecer com álcool quando o preço for no máximo 70% do preço da gasolina.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

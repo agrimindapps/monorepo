@@ -624,7 +624,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                   icon: Icons.attach_money,
                   label: 'Total Gasto',
                   value: currencyFormat.format(totalSpent),
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
               const SizedBox(width: 12),
@@ -633,7 +633,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                   icon: Icons.show_chart,
                   label: 'Média por Despesa',
                   value: currencyFormat.format(avgExpense),
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],
@@ -646,7 +646,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                   icon: Icons.arrow_upward,
                   label: 'Maior Despesa',
                   value: currencyFormat.format(maxExpense),
-                  color: Colors.orange,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -655,7 +655,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                   icon: Icons.arrow_downward,
                   label: 'Menor Despesa',
                   value: currencyFormat.format(minExpense),
-                  color: Colors.green,
+                  color: Theme.of(context).colorScheme.tertiary,
                 ),
               ),
             ],
@@ -675,7 +675,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -697,7 +697,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                   label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,

@@ -18,13 +18,14 @@ class DeviceCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isCurrentDevice ? GasometerColors.primary : Colors.grey[200]!,
+          color: isCurrentDevice ? GasometerColors.primary : theme.colorScheme.outlineVariant,
           width: isCurrentDevice ? 2 : 1,
         ),
         boxShadow: [
@@ -197,12 +198,13 @@ class DeviceCardWidget extends StatelessWidget {
   }
 
   Widget _buildDeviceInfo(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         children: [

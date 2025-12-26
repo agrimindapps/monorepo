@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -87,13 +89,10 @@ class ReceiptImagesDriftRepository {
     final companion = ReceiptImagesCompanion(
       entityType: Value(entityType.value),
       entityId: Value(entityId),
-      imageBase64: Value(processed.base64DataUri),
+      imageData: Value(processed.bytes),
       fileName: Value(fileName),
       mimeType: Value(processed.mimeType),
       sizeBytes: Value(processed.sizeBytes),
-      width: Value(processed.width),
-      height: Value(processed.height),
-      sortOrder: const Value(0),
       userId: Value(userId),
       isDirty: const Value(true),
       createdAt: Value(DateTime.now()),
@@ -121,16 +120,16 @@ class ReceiptImagesDriftRepository {
     int? height,
     String? firebaseId,
   }) async {
+    // Converter base64 para bytes
+    final bytes = base64Decode(imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), ''));
+    
     final companion = ReceiptImagesCompanion(
       entityType: Value(entityType.value),
       entityId: Value(entityId),
-      imageBase64: Value(imageBase64),
+      imageData: Value(bytes),
       fileName: Value(fileName),
       mimeType: Value(mimeType),
       sizeBytes: Value(sizeBytes),
-      width: Value(width),
-      height: Value(height),
-      sortOrder: const Value(0),
       userId: Value(userId),
       firebaseId: Value(firebaseId),
       isDirty: Value(firebaseId == null),
@@ -168,7 +167,6 @@ class ReceiptImagesDriftRepository {
               i.entityId.equals(entityId) &
               i.isDeleted.equals(false))
           ..orderBy([
-            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .get();
@@ -204,7 +202,6 @@ class ReceiptImagesDriftRepository {
               i.entityId.equals(entityId) &
               i.isDeleted.equals(false))
           ..orderBy([
-            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .watch();
@@ -213,16 +210,6 @@ class ReceiptImagesDriftRepository {
   // =========================================================================
   // UPDATE
   // =========================================================================
-
-  /// Atualiza ordem de exibição
-  Future<void> updateSortOrder(int imageId, int sortOrder) async {
-    await (_db.update(_db.receiptImages)..where((i) => i.id.equals(imageId)))
-        .write(ReceiptImagesCompanion(
-      sortOrder: Value(sortOrder),
-      isDirty: const Value(true),
-      updatedAt: Value(DateTime.now()),
-    ));
-  }
 
   /// Marca imagem como sincronizada
   Future<void> markAsSynced({

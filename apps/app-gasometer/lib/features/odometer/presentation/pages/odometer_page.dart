@@ -579,7 +579,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                   icon: Icons.format_list_numbered,
                   label: 'Total Registros',
                   value: totalRecords.toString(),
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -588,7 +588,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                   icon: Icons.route,
                   label: 'Km Percorridos',
                   value: '${kmTraveled.toStringAsFixed(0)} km',
-                  color: Colors.green,
+                  color: Theme.of(context).colorScheme.tertiary,
                 ),
               ),
             ],
@@ -601,7 +601,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                   icon: Icons.arrow_upward,
                   label: 'Maior Registro',
                   value: '${maxValue.toStringAsFixed(0)} km',
-                  color: Colors.orange,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -610,7 +610,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                   icon: Icons.arrow_downward,
                   label: 'Menor Registro',
                   value: '${minValue.toStringAsFixed(0)} km',
-                  color: Colors.purple,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
             ],
@@ -630,7 +630,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -652,7 +652,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
                   label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,

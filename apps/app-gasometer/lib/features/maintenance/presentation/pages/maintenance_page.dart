@@ -539,7 +539,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           }
         });
       },
-      backgroundColor: isEnabled ? null : Colors.grey,
+      backgroundColor: isEnabled ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
       tooltip: 'Adicionar manutenção',
       child: const Icon(Icons.add),
     );
@@ -624,19 +624,21 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             children: [
               Expanded(
                 child: _buildStatCard(
+                  context: context,
                   icon: Icons.attach_money,
                   label: 'Total Gasto',
                   value: currencyFormat.format(totalSpent),
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStatCard(
+                  context: context,
                   icon: Icons.show_chart,
                   label: 'Média/Manutenção',
                   value: currencyFormat.format(avgCost),
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],
@@ -646,19 +648,21 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             children: [
               Expanded(
                 child: _buildStatCard(
+                  context: context,
                   icon: Icons.arrow_upward,
                   label: 'Maior Custo',
                   value: currencyFormat.format(maxCost),
-                  color: Colors.orange,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStatCard(
+                  context: context,
                   icon: Icons.build_circle,
                   label: 'Total Serviços',
                   value: totalServices.toString(),
-                  color: Colors.green,
+                  color: Theme.of(context).colorScheme.tertiary,
                 ),
               ),
             ],
@@ -670,6 +674,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
 
   /// Card individual de estatística
   Widget _buildStatCard({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -678,7 +683,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -700,7 +705,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                   label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,

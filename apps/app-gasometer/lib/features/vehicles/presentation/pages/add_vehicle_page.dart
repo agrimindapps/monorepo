@@ -331,7 +331,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
     try {
       if (!mounted) return;
       final vehiclesNotifier = ref.read(vehiclesProvider.notifier);
-      final vehicleEntity = notifier.createVehicleEntity();
+      final vehicleEntity = await notifier.createVehicleEntity();
       final updatedMetadata = Map<String, dynamic>.from(vehicleEntity.metadata);
       updatedMetadata['observacoes'] = _observacoesController.text.trim();
 

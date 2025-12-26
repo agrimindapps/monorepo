@@ -46,7 +46,6 @@ class LocalImageStorageService {
       plantId: plantId,
       imageBytes: bytes,
       fileName: fileName,
-      mimeType: mimeType,
       isPrimary: isPrimary,
       userId: userId,
     );

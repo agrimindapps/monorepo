@@ -26,6 +26,8 @@ dependencies:
   # State Management (Riverpod 3.0 - inherited from core)
 
   # Code Generation (inherited from core)
+  freezed_annotation: ^3.1.0
+  meta: any
 
   # Utils
 
@@ -52,6 +54,11 @@ dev_dependencies:
   # Linting
 
   # Code Generation (inherited from core)
+  freezed: ^3.1.0
+  build_runner: ^2.4.0
+  drift_dev: ^2.20.0
+  riverpod_generator: ^3.0.0
+  json_serializable: ^6.7.1
 
   # Testing
   mocktail: ^1.0.0

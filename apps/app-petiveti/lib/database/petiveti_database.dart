@@ -89,8 +89,9 @@ class PetivetiDatabase extends _$PetivetiDatabase with BaseDriftDatabase {
   /// v1: Schema inicial
   /// v2: Adicionados campos de sync (firebaseId, isDirty, lastSyncAt, version)
   /// v3: Adicionada tabela AnimalImages (imagens em Base64)
+  /// v4: Migrado imagens para Uint8List (imageData/thumbnailData), removido sortOrder
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   /// Factory constructor para injeção de dependência via Riverpod
   ///

@@ -17,6 +17,9 @@ class FuelStatisticsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Row(
       children: [
         Expanded(
@@ -24,7 +27,7 @@ class FuelStatisticsRow extends StatelessWidget {
             title: 'Total de Litros',
             value: '${statistics.totalLiters.toStringAsFixed(1)} L',
             icon: Icons.water_drop,
-            color: Colors.blue,
+            color: colorScheme.primary,
           ),
         ),
         const SizedBox(width: 16),
@@ -33,7 +36,7 @@ class FuelStatisticsRow extends StatelessWidget {
             title: 'Gasto Total',
             value: 'R\$ ${statistics.totalCost.toStringAsFixed(2)}',
             icon: Icons.attach_money,
-            color: Colors.green,
+            color: colorScheme.tertiary,
           ),
         ),
         const SizedBox(width: 16),
@@ -42,7 +45,7 @@ class FuelStatisticsRow extends StatelessWidget {
             title: 'Preço Médio',
             value: 'R\$ ${statistics.averagePrice.toStringAsFixed(2)}/L',
             icon: Icons.trending_up,
-            color: Colors.orange,
+            color: colorScheme.secondary,
           ),
         ),
       ],

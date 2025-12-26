@@ -55,14 +55,6 @@ class ToolsPage extends StatelessWidget {
               },
             ),
             _ToolCard(
-              icon: Icons.bar_chart,
-              title: 'Estatísticas',
-              description: 'Análises e gráficos',
-              onTap: () {
-                context.go('/reports');
-              },
-            ),
-            _ToolCard(
               icon: Icons.local_gas_station,
               title: 'Postos\nPróximos',
               description: 'Encontre postos',

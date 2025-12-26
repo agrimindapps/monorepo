@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
@@ -29,7 +31,7 @@ class AnimalImagesRepository {
     return (_db.select(_db.animalImages)
       ..where((t) => t.animalId.equals(animalId))
       ..where((t) => t.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .get();
   }
   
@@ -38,7 +40,7 @@ class AnimalImagesRepository {
     return (_db.select(_db.animalImages)
       ..where((t) => t.animalId.equals(animalId))
       ..where((t) => t.isDeleted.equals(false))
-      ..orderBy([(t) => OrderingTerm.asc(t.sortOrder)]))
+      ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
         .watch();
   }
   
@@ -102,13 +104,13 @@ class AnimalImagesRepository {
     String? caption,
   }) async {
     // Processa a imagem usando o serviço do core
-    final processed = await ImageProcessingService.processImage(
+    final processed = await ImageProcessingService.instance.processImage(
       imageBytes,
       config: ImageProcessingConfig.standard,
     );
     
     // Gera thumbnail
-    final thumbnail = await ImageProcessingService.processImage(
+    final thumbnail = await ImageProcessingService.instance.processImage(
       imageBytes,
       config: ImageProcessingConfig.thumbnail,
     );
@@ -118,23 +120,17 @@ class AnimalImagesRepository {
       await _clearPrimaryFlag(animalId);
     }
     
-    // Calcula próximo sortOrder
-    final maxOrder = await _getMaxSortOrder(animalId);
-    
-    final companion = AnimalImagesCompanion(
-      animalId: Value(animalId),
+    final companion = AnimalImagesCompanion.insert(
+      animalId: animalId,
       userId: Value(userId),
-      imageBase64: Value(processed.base64DataUri),
-      thumbnailBase64: Value(thumbnail.base64DataUri),
+      imageData: processed.bytes,
+      thumbnailData: Value(thumbnail.bytes),
       fileName: Value(fileName),
       mimeType: Value(processed.mimeType),
       sizeBytes: Value(processed.sizeBytes),
-      width: Value(processed.width),
-      height: Value(processed.height),
       isPrimary: Value(isPrimary),
-      sortOrder: Value(maxOrder + 1),
       caption: Value(caption),
-      isDirty: const Value(true),
+      isDirty: Value(true),
       createdAt: Value(DateTime.now()),
     );
     
@@ -154,7 +150,6 @@ class AnimalImagesRepository {
     int? width,
     int? height,
     bool isPrimary = false,
-    int sortOrder = 0,
     String? caption,
     DateTime? lastSyncAt,
     int version = 1,
@@ -163,21 +158,24 @@ class AnimalImagesRepository {
       await _clearPrimaryFlag(animalId);
     }
     
-    final companion = AnimalImagesCompanion(
-      animalId: Value(animalId),
+    // Converter base64 para bytes
+    final imageBytes = base64Decode(imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), ''));
+    final thumbnailBytes = thumbnailBase64 != null 
+        ? base64Decode(thumbnailBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), ''))
+        : null;
+    
+    final companion = AnimalImagesCompanion.insert(
+      animalId: animalId,
       firebaseId: Value(firebaseId),
       userId: Value(userId),
-      imageBase64: Value(imageBase64),
-      thumbnailBase64: Value(thumbnailBase64),
+      imageData: imageBytes,
+      thumbnailData: Value(thumbnailBytes),
       fileName: Value(fileName),
       mimeType: Value(mimeType),
       sizeBytes: Value(sizeBytes),
-      width: Value(width),
-      height: Value(height),
       isPrimary: Value(isPrimary),
-      sortOrder: Value(sortOrder),
       caption: Value(caption),
-      isDirty: const Value(false),
+      isDirty: Value(false),
       lastSyncAt: Value(lastSyncAt),
       version: Value(version),
       createdAt: Value(DateTime.now()),
@@ -281,16 +279,5 @@ class AnimalImagesRepository {
         .write(const AnimalImagesCompanion(
           isPrimary: Value(false),
         ));
-  }
-  
-  /// Retorna o maior sortOrder para um animal
-  Future<int> _getMaxSortOrder(int animalId) async {
-    final result = await (_db.select(_db.animalImages)
-      ..where((t) => t.animalId.equals(animalId))
-      ..orderBy([(t) => OrderingTerm.desc(t.sortOrder)])
-      ..limit(1))
-        .getSingleOrNull();
-    
-    return result?.sortOrder ?? -1;
   }
 }

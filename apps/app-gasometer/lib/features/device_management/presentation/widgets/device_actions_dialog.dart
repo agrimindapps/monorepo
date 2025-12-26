@@ -103,12 +103,13 @@ class DeviceActionsDialog extends StatelessWidget {
   Widget _buildDeviceDetails(BuildContext context) {
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         children: [

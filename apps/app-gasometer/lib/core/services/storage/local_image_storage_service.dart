@@ -38,7 +38,8 @@ class LocalImageStorageService {
     bool isPrimary = false,
   }) async {
     debugPrint(
-        '📷 [LocalImageStorageService] Salvando imagem para veículo $vehicleId');
+      '📷 [LocalImageStorageService] Salvando imagem para veículo $vehicleId',
+    );
 
     // Extrair dados base64
     final mimeType = _extractMimeType(base64Image);
@@ -47,14 +48,14 @@ class LocalImageStorageService {
     // Converter para bytes
     final bytes = base64Decode(pureBase64);
     debugPrint(
-        '📷 [LocalImageStorageService] Imagem decodificada: ${bytes.length} bytes, mimeType: $mimeType');
+      '📷 [LocalImageStorageService] Imagem decodificada: ${bytes.length} bytes, mimeType: $mimeType',
+    );
 
     // Salvar no Drift
     final imageId = await _vehicleImagesRepository.saveImage(
       vehicleId: vehicleId,
       imageBytes: bytes,
       fileName: fileName,
-      mimeType: mimeType,
       isPrimary: isPrimary,
       userId: userId,
     );
@@ -81,16 +82,24 @@ class LocalImageStorageService {
 
   /// Carrega todas as imagens de um veículo como base64
   Future<List<String>> getAllVehicleImagesAsBase64(int vehicleId) async {
-    final images = await _vehicleImagesRepository.getImagesByVehicleId(vehicleId);
+    final images = await _vehicleImagesRepository.getImagesByVehicleId(
+      vehicleId,
+    );
     return images
-        .map((VehicleImage img) => _bytesToBase64DataUrl(img.imageData, img.mimeType))
+        .map(
+          (VehicleImage img) =>
+              _bytesToBase64DataUrl(img.imageData, img.mimeType),
+        )
         .toList();
   }
 
   /// Stream de imagens de um veículo (bytes)
   Stream<List<Uint8List>> watchVehicleImages(int vehicleId) {
-    return _vehicleImagesRepository.watchImagesByVehicleId(vehicleId).map(
-          (List<VehicleImage> images) => images.map((VehicleImage img) => img.imageData).toList(),
+    return _vehicleImagesRepository
+        .watchImagesByVehicleId(vehicleId)
+        .map(
+          (List<VehicleImage> images) =>
+              images.map((VehicleImage img) => img.imageData).toList(),
         );
   }
 
@@ -119,7 +128,8 @@ class LocalImageStorageService {
     String? fileName,
   }) async {
     debugPrint(
-        '📷 [LocalImageStorageService] Salvando comprovante para ${entityType.value} $entityId');
+      '📷 [LocalImageStorageService] Salvando comprovante para ${entityType.value} $entityId',
+    );
 
     // Extrair dados base64
     final mimeType = _extractMimeType(base64Image);
@@ -128,7 +138,8 @@ class LocalImageStorageService {
     // Converter para bytes
     final bytes = base64Decode(pureBase64);
     debugPrint(
-        '📷 [LocalImageStorageService] Comprovante decodificado: ${bytes.length} bytes, mimeType: $mimeType');
+      '📷 [LocalImageStorageService] Comprovante decodificado: ${bytes.length} bytes, mimeType: $mimeType',
+    );
 
     // Salvar no Drift
     final imageId = await _receiptImagesRepository.saveImage(
@@ -136,20 +147,24 @@ class LocalImageStorageService {
       entityId: entityId,
       imageBytes: bytes,
       fileName: fileName,
-      mimeType: mimeType,
       userId: userId,
     );
 
     debugPrint(
-        '📷 [LocalImageStorageService] Comprovante salvo com id=$imageId');
+      '📷 [LocalImageStorageService] Comprovante salvo com id=$imageId',
+    );
     return imageId;
   }
 
   /// Carrega a imagem de comprovante de uma entidade como base64
   Future<String?> getReceiptImageAsBase64(
-      ReceiptEntityType entityType, int entityId) async {
-    final image =
-        await _receiptImagesRepository.getImageByEntity(entityType, entityId);
+    ReceiptEntityType entityType,
+    int entityId,
+  ) async {
+    final image = await _receiptImagesRepository.getImageByEntity(
+      entityType,
+      entityId,
+    );
     if (image == null) return null;
 
     return _bytesToBase64DataUrl(image.imageData, image.mimeType);
@@ -165,11 +180,14 @@ class LocalImageStorageService {
 
   /// Stream de imagens de comprovante de uma entidade
   Stream<List<Uint8List>> watchReceiptImages(
-      ReceiptEntityType entityType, int entityId) {
+    ReceiptEntityType entityType,
+    int entityId,
+  ) {
     return _receiptImagesRepository
         .watchImagesByEntity(entityType, entityId)
         .map(
-          (List<ReceiptImage> images) => images.map((ReceiptImage img) => img.imageData).toList(),
+          (List<ReceiptImage> images) =>
+              images.map((ReceiptImage img) => img.imageData).toList(),
         );
   }
 
@@ -181,20 +199,6 @@ class LocalImageStorageService {
   /// Verifica se uma entidade tem comprovante
   Future<bool> hasReceipt(ReceiptEntityType entityType, int entityId) async {
     return await _receiptImagesRepository.hasReceipt(entityType, entityId);
-  }
-
-  // =========================================================================
-  // PENDING UPLOADS
-  // =========================================================================
-
-  /// Retorna todas as imagens de veículos pendentes de upload
-  Future<List<dynamic>> getVehiclePendingUploads() async {
-    return await _vehicleImagesRepository.getPendingUploads();
-  }
-
-  /// Retorna todas as imagens de comprovantes pendentes de upload
-  Future<List<dynamic>> getReceiptPendingUploads() async {
-    return await _receiptImagesRepository.getPendingUploads();
   }
 
   // =========================================================================
@@ -226,10 +230,15 @@ class LocalImageStorageService {
 }
 
 /// Provider para LocalImageStorageService
-final localImageStorageServiceProvider =
-    Provider<LocalImageStorageService>((ref) {
-  final vehicleImagesRepository = ref.watch(vehicleImagesDriftRepositoryProvider);
-  final receiptImagesRepository = ref.watch(receiptImagesDriftRepositoryProvider);
+final localImageStorageServiceProvider = Provider<LocalImageStorageService>((
+  ref,
+) {
+  final vehicleImagesRepository = ref.watch(
+    vehicleImagesDriftRepositoryProvider,
+  );
+  final receiptImagesRepository = ref.watch(
+    receiptImagesDriftRepositoryProvider,
+  );
   return LocalImageStorageService(
     vehicleImagesRepository,
     receiptImagesRepository,

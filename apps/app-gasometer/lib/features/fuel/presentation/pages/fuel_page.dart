@@ -734,7 +734,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   icon: Icons.attach_money,
                   label: 'Total Gasto',
                   value: currencyFormat.format(totalSpent),
-                  color: Colors.red,
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
               const SizedBox(width: 12),
@@ -743,7 +743,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   icon: Icons.local_gas_station,
                   label: 'Total Litros',
                   value: '${totalLiters.toStringAsFixed(1)} L',
-                  color: Colors.blue,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],
@@ -756,7 +756,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   icon: Icons.trending_up,
                   label: 'Média/Litro',
                   value: currencyFormat.format(avgPricePerLiter),
-                  color: Colors.orange,
+                  color: Theme.of(context).colorScheme.secondary,
                 ),
               ),
               const SizedBox(width: 12),
@@ -765,7 +765,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   icon: Icons.route,
                   label: 'Km Rodados',
                   value: '${kmDriven.toStringAsFixed(0)} km',
-                  color: Colors.green,
+                  color: Theme.of(context).colorScheme.tertiary,
                 ),
               ),
             ],
@@ -785,7 +785,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -807,7 +807,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.w500,
                   ),
                   maxLines: 1,

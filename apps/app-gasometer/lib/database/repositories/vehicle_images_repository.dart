@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
@@ -59,14 +61,11 @@ class VehicleImagesDriftRepository {
 
     final companion = VehicleImagesCompanion(
       vehicleId: Value(vehicleId),
-      imageBase64: Value(processed.base64DataUri),
+      imageData: Value(processed.bytes),
       fileName: Value(fileName),
       mimeType: Value(processed.mimeType),
       sizeBytes: Value(processed.sizeBytes),
-      width: Value(processed.width),
-      height: Value(processed.height),
       isPrimary: Value(isPrimary),
-      sortOrder: const Value(0),
       userId: Value(userId),
       isDirty: const Value(true),
       createdAt: Value(DateTime.now()),
@@ -97,16 +96,16 @@ class VehicleImagesDriftRepository {
       await _clearPrimaryFlag(vehicleId);
     }
 
+    // Converter base64 para bytes
+    final bytes = base64Decode(imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), ''));
+
     final companion = VehicleImagesCompanion(
       vehicleId: Value(vehicleId),
-      imageBase64: Value(imageBase64),
+      imageData: Value(bytes),
       fileName: Value(fileName),
       mimeType: Value(mimeType),
       sizeBytes: Value(sizeBytes),
-      width: Value(width),
-      height: Value(height),
       isPrimary: Value(isPrimary),
-      sortOrder: const Value(0),
       userId: Value(userId),
       firebaseId: Value(firebaseId),
       isDirty: Value(firebaseId == null), // Dirty se não tem firebaseId
@@ -141,7 +140,6 @@ class VehicleImagesDriftRepository {
               (i) => i.vehicleId.equals(vehicleId) & i.isDeleted.equals(false))
           ..orderBy([
             (i) => OrderingTerm.desc(i.isPrimary),
-            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .get();
@@ -175,7 +173,6 @@ class VehicleImagesDriftRepository {
               (i) => i.vehicleId.equals(vehicleId) & i.isDeleted.equals(false))
           ..orderBy([
             (i) => OrderingTerm.desc(i.isPrimary),
-            (i) => OrderingTerm.asc(i.sortOrder),
             (i) => OrderingTerm.desc(i.createdAt),
           ]))
         .watch();
@@ -202,16 +199,6 @@ class VehicleImagesDriftRepository {
     await (_db.update(_db.vehicleImages)..where((i) => i.id.equals(imageId)))
         .write(VehicleImagesCompanion(
       isPrimary: const Value(true),
-      isDirty: const Value(true),
-      updatedAt: Value(DateTime.now()),
-    ));
-  }
-
-  /// Atualiza ordem de exibição
-  Future<void> updateSortOrder(int imageId, int sortOrder) async {
-    await (_db.update(_db.vehicleImages)..where((i) => i.id.equals(imageId)))
-        .write(VehicleImagesCompanion(
-      sortOrder: Value(sortOrder),
       isDirty: const Value(true),
       updatedAt: Value(DateTime.now()),
     ));

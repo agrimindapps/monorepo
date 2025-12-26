@@ -5,11 +5,19 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../expenses/domain/entities/expense_entity.dart';
+import '../../../expenses/presentation/notifiers/expenses_notifier.dart';
+import '../../../expenses/presentation/state/expenses_state.dart';
+import '../../../fuel/domain/entities/fuel_record_entity.dart';
+import '../../../fuel/presentation/providers/fuel_riverpod_notifier.dart';
+import '../../../maintenance/domain/entities/maintenance_entity.dart';
+import '../../../maintenance/presentation/notifiers/maintenances_notifier.dart';
+import '../../../maintenance/presentation/notifiers/maintenances_state.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/models/timeline_entry.dart';
 import '../providers/timeline_providers.dart';
 
-/// Timeline page showing all records in chronological order
+/// Timeline page showing all records in chronological order and statistics
 class TimelinePage extends ConsumerStatefulWidget {
   const TimelinePage({super.key});
 
@@ -17,8 +25,22 @@ class TimelinePage extends ConsumerStatefulWidget {
   ConsumerState<TimelinePage> createState() => _TimelinePageState();
 }
 
-class _TimelinePageState extends ConsumerState<TimelinePage> {
+class _TimelinePageState extends ConsumerState<TimelinePage>
+    with SingleTickerProviderStateMixin {
   String? _selectedVehicleId;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,42 +48,75 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
         ? ref.watch(timelineProvider)
         : ref.watch(filteredTimelineProvider(vehicleId: _selectedVehicleId));
 
+    final vehiclesAsync = ref.watch(vehiclesProvider);
+    final fuelStateAsync = ref.watch(fuelRiverpodProvider);
+    final expensesState = ref.watch(expensesProvider);
+    final maintenancesState = ref.watch(maintenancesProvider);
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
             _buildHeader(context),
-            _buildVehicleSelector(),
+            if (vehiclesAsync.value?.isNotEmpty ?? false)
+              _buildVehicleSelector(),
+            _buildTabBar(),
             Expanded(
-              child: timelineAsync.when(
-        data: (entries) {
-          if (entries.isEmpty) {
-            return _buildEmptyState(context);
-          }
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  // Tab 1: Timeline
+                  timelineAsync.when(
+                    data: (entries) {
+                      if (entries.isEmpty) {
+                        return _buildEmptyState(context);
+                      }
 
-          // Group entries by date
-          final groupedEntries = _groupEntriesByDate(entries);
+                      final groupedEntries = _groupEntriesByDate(entries);
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.invalidate(timelineProvider);
-            },
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: groupedEntries.length,
-              itemBuilder: (context, index) {
-                final dateGroup = groupedEntries[index];
-                return _TimelineDayGroup(
-                  date: dateGroup.date,
-                  entries: dateGroup.entries,
-                  isLast: index == groupedEntries.length - 1,
-                );
-              },
-            ),
-          );
-        },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, stack) => _buildErrorState(context, error),
+                      return RefreshIndicator(
+                        onRefresh: () async {
+                          ref.invalidate(timelineProvider);
+                        },
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          itemCount: groupedEntries.length,
+                          itemBuilder: (context, index) {
+                            final dateGroup = groupedEntries[index];
+                            return _TimelineDayGroup(
+                              date: dateGroup.date,
+                              entries: dateGroup.entries,
+                              isLast: index == groupedEntries.length - 1,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (error, stack) => _buildErrorState(context, error),
+                  ),
+                  // Tab 2: Estatísticas
+                  fuelStateAsync.when(
+                    data: (fuelState) => _buildStatisticsTab(
+                      context,
+                      fuelState,
+                      expensesState,
+                      maintenancesState,
+                    ),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (_, __) => _buildStatisticsTab(
+                      context,
+                      null,
+                      expensesState,
+                      maintenancesState,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -96,11 +151,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(9),
               ),
-              child: const Icon(
-                Icons.timeline,
-                color: Colors.white,
-                size: 19,
-              ),
+              child: const Icon(Icons.timeline, color: Colors.white, size: 19),
             ),
             const SizedBox(width: 13),
             const Expanded(
@@ -150,6 +201,329 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     );
   }
 
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      height: 48,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelColor: Theme.of(context).colorScheme.onPrimary,
+        unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        labelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+        unselectedLabelStyle: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        dividerColor: Colors.transparent,
+        padding: const EdgeInsets.all(4),
+        tabs: const [
+          Tab(
+            height: 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.timeline, size: 18),
+                SizedBox(width: 6),
+                Text('Timeline'),
+              ],
+            ),
+          ),
+          Tab(
+            height: 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.bar_chart, size: 18),
+                SizedBox(width: 6),
+                Text('Estatísticas'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatisticsTab(
+    BuildContext context,
+    FuelState? fuelState,
+    ExpensesState expensesState,
+    MaintenancesState maintenancesState,
+  ) {
+    // Filtrar dados pelo veículo selecionado
+    final fuelRecords =
+        fuelState?.fuelRecords
+            .where(
+              (r) =>
+                  _selectedVehicleId == null ||
+                  r.vehicleId == _selectedVehicleId,
+            )
+            .toList() ??
+        [];
+
+    final expenses = expensesState.expenses
+        .where(
+          (ExpenseEntity e) =>
+              _selectedVehicleId == null || e.vehicleId == _selectedVehicleId,
+        )
+        .toList();
+
+    final maintenances = maintenancesState.maintenances
+        .where(
+          (MaintenanceEntity m) =>
+              _selectedVehicleId == null || m.vehicleId == _selectedVehicleId,
+        )
+        .toList();
+
+    // Calcular totais
+    final fuelCost = fuelRecords.fold<double>(
+      0.0,
+      (double total, FuelRecordEntity r) => total + r.totalPrice,
+    );
+    final expensesCost = expenses.fold<double>(
+      0.0,
+      (double total, ExpenseEntity e) => total + e.amount,
+    );
+    final maintenanceCost = maintenances.fold<double>(
+      0.0,
+      (double total, MaintenanceEntity m) => total + m.cost,
+    );
+
+    final totalCost = fuelCost + expensesCost + maintenanceCost;
+
+    if (fuelRecords.isEmpty && expenses.isEmpty && maintenances.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.bar_chart,
+              size: 64,
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.5),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Sem dados para exibir',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Adicione registros para visualizar estatísticas',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final currencyFormat = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Estatísticas',
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  title: 'Gasto Total',
+                  value: currencyFormat.format(totalCost),
+                  icon: Icons.attach_money,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  title: 'Combustível',
+                  value: currencyFormat.format(fuelCost),
+                  icon: Icons.local_gas_station,
+                  color: Theme.of(context).colorScheme.tertiary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  title: 'Despesas',
+                  value: currencyFormat.format(expensesCost),
+                  icon: Icons.receipt_long,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  context,
+                  title: 'Manutenção',
+                  value: currencyFormat.format(maintenanceCost),
+                  icon: Icons.build,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Quantidade de Registros',
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildCountCard(
+                  context,
+                  label: 'Abastecimentos',
+                  count: fuelRecords.length,
+                  icon: Icons.local_gas_station,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCountCard(
+                  context,
+                  label: 'Despesas',
+                  count: expenses.length,
+                  icon: Icons.receipt_long,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildCountCard(
+                  context,
+                  label: 'Manutenções',
+                  count: maintenances.length,
+                  icon: Icons.build,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                const Spacer(),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCountCard(
+    BuildContext context, {
+    required String label,
+    required int count,
+    required IconData icon,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Icon(icon, size: 24, color: Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(
+              count.toString(),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
@@ -158,7 +532,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
           Icon(
             Icons.timeline,
             size: 64,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -173,8 +547,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               'para começar a acompanhar seu histórico.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                  ),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
             ),
           ),
         ],
@@ -204,8 +580,8 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
               error.toString(),
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
-                  ),
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
           ),
         ],
@@ -229,10 +605,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
 
     // Convert to list and sort by date (newest first)
     final result = grouped.entries.map((e) {
-      return _DateGroup(
-        date: DateTime.parse(e.key),
-        entries: e.value,
-      );
+      return _DateGroup(date: DateTime.parse(e.key), entries: e.value);
     }).toList();
 
     result.sort((a, b) => b.date.compareTo(a.date));
@@ -287,9 +660,9 @@ class _TimelineDayGroup extends StatelessWidget {
           child: Text(
             dateLabel,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
         ),
         // Entries for this day
@@ -310,10 +683,7 @@ class _TimelineDayGroup extends StatelessWidget {
 
 /// Individual timeline entry item with circle and line
 class _TimelineEntryItem extends StatelessWidget {
-  const _TimelineEntryItem({
-    required this.entry,
-    required this.showLine,
-  });
+  const _TimelineEntryItem({required this.entry, required this.showLine});
 
   final TimelineEntry entry;
   final bool showLine;
@@ -340,7 +710,7 @@ class _TimelineEntryItem extends StatelessWidget {
                     color: entry.color,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: entry.color.withOpacity(0.3),
+                      color: entry.color.withValues(alpha: 0.3),
                       width: 3,
                     ),
                   ),
@@ -351,7 +721,7 @@ class _TimelineEntryItem extends StatelessWidget {
                     child: Container(
                       width: 2,
                       margin: const EdgeInsets.only(top: 4),
-                      color: Colors.grey.withOpacity(0.3),
+                      color: Colors.grey.withValues(alpha: 0.3),
                     ),
                   ),
               ],
@@ -365,9 +735,7 @@ class _TimelineEntryItem extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.grey.withOpacity(0.2),
-                ),
+                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -380,16 +748,16 @@ class _TimelineEntryItem extends StatelessWidget {
                       Text(
                         entry.typeName,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: entry.color,
-                            ),
+                          fontWeight: FontWeight.w600,
+                          color: entry.color,
+                        ),
                       ),
                       const Spacer(),
                       Text(
                         timeFormat.format(entry.date),
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.grey,
-                            ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.labelSmall?.copyWith(color: Colors.grey),
                       ),
                     ],
                   ),
@@ -398,7 +766,11 @@ class _TimelineEntryItem extends StatelessWidget {
                   Row(
                     children: [
                       if (entry.odometer != null) ...[
-                        Icon(Icons.speed, size: 14, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.speed,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${entry.odometer!.toStringAsFixed(0)} km',
@@ -416,9 +788,12 @@ class _TimelineEntryItem extends StatelessWidget {
                         ),
                       if (entry.amount != null) ...[
                         Text(
-                          NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$')
-                              .format(entry.amount),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          NumberFormat.currency(
+                            locale: 'pt_BR',
+                            symbol: 'R\$',
+                          ).format(entry.amount),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: entry.color,
                               ),

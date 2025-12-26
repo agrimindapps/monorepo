@@ -166,10 +166,11 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
     IconData icon,
     Color color,
   ) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
@@ -295,13 +296,14 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
   }
 
   Widget _buildFooter(VehicleDeviceState state) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

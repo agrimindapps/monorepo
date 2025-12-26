@@ -49,14 +49,13 @@ class AnimalImages extends Table {
   
   // ========== DADOS DA IMAGEM ==========
   
-  /// Imagem principal em Base64 DataURI
-  /// Formato: data:image/jpeg;base64,/9j/4AAQ...
-  /// Tamanho máximo: 600KB após compressão
-  TextColumn get imageBase64 => text()();
+  /// Imagem principal em bytes (Uint8List)
+  /// Comprimida para máximo 600KB
+  BlobColumn get imageData => blob()();
   
-  /// Thumbnail em Base64 DataURI (150x150, ~30KB)
+  /// Thumbnail em bytes (150x150, ~30KB)
   /// Usado para listagens e grids com muitas imagens
-  TextColumn get thumbnailBase64 => text().nullable()();
+  BlobColumn get thumbnailData => blob().nullable()();
   
   /// Nome original do arquivo
   TextColumn get fileName => text().nullable()();
@@ -67,19 +66,10 @@ class AnimalImages extends Table {
   /// Tamanho em bytes (da imagem original antes de comprimir)
   IntColumn get sizeBytes => integer().nullable()();
   
-  /// Largura da imagem em pixels
-  IntColumn get width => integer().nullable()();
-  
-  /// Altura da imagem em pixels
-  IntColumn get height => integer().nullable()();
-  
   // ========== METADADOS ==========
   
   /// Se é a imagem principal do animal
   BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
-  
-  /// Ordem de exibição (0 = primeira)
-  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   
   /// Descrição/legenda da imagem
   TextColumn get caption => text().nullable()();

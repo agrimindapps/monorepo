@@ -181,8 +181,8 @@ class ExpenseFormView extends ConsumerWidget {
   }
 
   Widget _buildFormSummary(BuildContext context, ExpenseFormState state) {
+    final theme = Theme.of(context);
     return Card(
-      color: Colors.white,
       child: Padding(
         padding: GasometerDesignTokens.paddingAll(
           GasometerDesignTokens.spacingLg,
@@ -194,7 +194,7 @@ class ExpenseFormView extends ConsumerWidget {
               children: [
                 Icon(
                   Icons.summarize,
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                   size: GasometerDesignTokens.iconSizeSm,
                 ),
                 const SizedBox(width: GasometerDesignTokens.spacingSm),
@@ -291,23 +291,25 @@ class ExpenseFormView extends ConsumerWidget {
                       vertical: GasometerDesignTokens.spacingXs,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.2),
+                      color: theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.trending_up,
                           size: 14,
-                          color: Colors.blue,
+                          color: theme.colorScheme.onPrimaryContainer,
                         ),
                         const SizedBox(width: GasometerDesignTokens.spacingXs),
                         Text(
                           'Alto valor',
                           style: Theme.of(
                             context,
-                          ).textTheme.labelSmall?.copyWith(color: Colors.blue),
+                          ).textTheme.labelSmall?.copyWith(
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
                         ),
                       ],
                     ),

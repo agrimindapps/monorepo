@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 // import '../sync/adapters/calculation_history_drift_sync_adapter.dart';

@@ -13,6 +13,9 @@ class ExpensesStatisticsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -44,28 +47,28 @@ class ExpensesStatisticsRow extends StatelessWidget {
                   'Total Gasto',
                   _formatCurrency((statistics['totalAmount'] as num?)?.toDouble() ?? 0.0),
                   Icons.attach_money,
-                  Colors.blue,
+                  colorScheme.primary,
                 ),
                 _buildStatCard(
                   context,
                   'Média Mensal',
                   _formatCurrency((statistics['monthlyAverage'] as num?)?.toDouble() ?? 0.0),
                   Icons.trending_up,
-                  Colors.green,
+                  colorScheme.tertiary,
                 ),
                 _buildStatCard(
                   context,
                   'Total Registros',
                   (statistics['totalRecords'] ?? 0).toString(),
                   Icons.receipt_long,
-                  Colors.orange,
+                  colorScheme.secondary,
                 ),
                 _buildStatCard(
                   context,
                   'Maior Despesa',
                   _formatCurrency((statistics['highestAmount'] as num?)?.toDouble() ?? 0.0),
                   Icons.trending_up,
-                  Colors.red,
+                  colorScheme.error,
                 ),
               ],
             );
@@ -233,19 +236,26 @@ class ExpensesStatisticsRow extends StatelessWidget {
   }
 
   Widget _buildMonthlyComparison(BuildContext context, double thisMonth, double lastMonth) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final difference = thisMonth - lastMonth;
     final percentChange = lastMonth != 0 ? (difference / lastMonth * 100) : 0.0;
     final isIncrease = difference > 0;
     final isDecrease = difference < 0;
     
+    // Cores para aumento/diminuição usando color scheme
+    final increaseColor = colorScheme.error;
+    final decreaseColor = colorScheme.tertiary;
+    final neutralColor = colorScheme.onSurface.withValues(alpha: 0.6);
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isIncrease 
-            ? Colors.red.withValues(alpha: 0.1)
+            ? increaseColor.withValues(alpha: 0.1)
             : isDecrease 
-                ? Colors.green.withValues(alpha: 0.1)
-                : Theme.of(context).colorScheme.surface.withValues(alpha: 0.5),
+                ? decreaseColor.withValues(alpha: 0.1)
+                : colorScheme.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -257,10 +267,10 @@ class ExpensesStatisticsRow extends StatelessWidget {
                     ? Icons.trending_down
                     : Icons.trending_flat,
             color: isIncrease 
-                ? Colors.red
+                ? increaseColor
                 : isDecrease 
-                    ? Colors.green
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ? decreaseColor
+                    : neutralColor,
             size: 20,
           ),
           const SizedBox(width: 8),
@@ -285,9 +295,9 @@ class ExpensesStatisticsRow extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: isIncrease 
-                        ? Colors.red
+                        ? increaseColor
                         : isDecrease 
-                            ? Colors.green
+                            ? decreaseColor
                             : Theme.of(context).colorScheme.onSurface,
                   ),
                 ),

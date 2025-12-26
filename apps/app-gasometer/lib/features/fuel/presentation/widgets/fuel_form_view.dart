@@ -282,11 +282,11 @@ class FuelFormView extends ConsumerWidget {
       decoration: InputDecoration(
         prefixText: 'R\$ ',
         filled: true,
-        fillColor: Colors.grey.shade100,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       textStyle: TextStyle(
         fontWeight: GasometerDesignTokens.fontWeightBold,
-        color: Colors.grey.shade800,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }

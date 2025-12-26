@@ -1,13 +1,15 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 
-part 'theme_notifier.g.dart';
+/// Theme provider for Gasometer app
+/// Using manual provider definition (no code generation needed)
+final gasometerThemeProvider = NotifierProvider<GasometerThemeNotifier, ThemeMode>(
+  GasometerThemeNotifier.new,
+);
 
-@Riverpod(keepAlive: true)
-class GasometerThemeNotifier extends _$GasometerThemeNotifier {
+class GasometerThemeNotifier extends Notifier<ThemeMode> {
   static const String _themeKey = 'theme_mode';
 
   @override

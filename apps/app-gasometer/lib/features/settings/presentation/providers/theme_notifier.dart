@@ -6,7 +6,7 @@ import '../../../../core/providers/dependency_providers.dart';
 
 part 'theme_notifier.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class GasometerThemeNotifier extends _$GasometerThemeNotifier {
   static const String _themeKey = 'theme_mode';
 

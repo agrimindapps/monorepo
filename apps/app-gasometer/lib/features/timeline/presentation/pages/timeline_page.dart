@@ -218,10 +218,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
         indicatorSize: TabBarIndicatorSize.tab,
         labelColor: Theme.of(context).colorScheme.onPrimary,
         unselectedLabelColor: Theme.of(context).colorScheme.onSurfaceVariant,
-        labelStyle: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-        ),
+        labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w500,

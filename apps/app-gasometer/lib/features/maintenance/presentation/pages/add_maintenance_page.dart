@@ -375,14 +375,31 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
   Widget _buildReceiptImageSection(bool isReadOnly) {
     final notifier = ref.read(maintenanceFormProvider.notifier);
     final formState = ref.watch(maintenanceFormProvider);
+    
+    // Em modo de visualização, mostrar apenas se tiver imagem
+    if (isReadOnly) {
+      if (!formState.hasReceiptImage) {
+        return const SizedBox.shrink();
+      }
+      return FormSectionHeader(
+        title: 'Comprovante',
+        icon: Icons.receipt_long,
+        child: ReadOnlyField(
+          label: 'Comprovante anexado',
+          value: 'Imagem do comprovante',
+          icon: Icons.image,
+        ),
+      );
+    }
+    
     return OptionalReceiptSection(
       imagePath: formState.receiptImagePath,
       hasImage: formState.hasReceiptImage,
       isUploading: formState.isUploadingImage,
       uploadError: formState.imageUploadError,
-      onCameraSelected: isReadOnly ? null : () => notifier.captureReceiptImage(),
-      onGallerySelected: isReadOnly ? null : () => notifier.selectReceiptImageFromGallery(),
-      onImageRemoved: isReadOnly ? null : () => notifier.removeReceiptImage(),
+      onCameraSelected: () => notifier.captureReceiptImage(),
+      onGallerySelected: () => notifier.selectReceiptImageFromGallery(),
+      onImageRemoved: () => notifier.removeReceiptImage(),
       title: 'Comprovante',
       description: 'Anexe uma foto do comprovante da manutenção (opcional)',
     );

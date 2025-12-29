@@ -161,20 +161,34 @@ class ExpenseFormView extends ConsumerWidget {
           // ),
 
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          OptionalReceiptSection(
-            imagePath: state.receiptImagePath,
-            hasImage: state.hasReceiptImage,
-            isUploading: state.isUploadingImage,
-            uploadError: state.imageUploadError,
-            onCameraSelected: () => notifier.captureReceiptImage(),
-            onGallerySelected: () => notifier.selectReceiptImageFromGallery(),
-            onImageRemoved: () => notifier.removeReceiptImage(),
-            title: 'Comprovante da Despesa',
-            description: 'Anexe uma foto do comprovante da despesa (opcional)',
-          ),
+          if (isReadOnly)
+            // Em modo de visualização, mostrar apenas se tiver imagem
+            state.hasReceiptImage
+                ? FormSectionHeader(
+                    title: 'Comprovante da Despesa',
+                    icon: Icons.receipt_long,
+                    child: ReadOnlyField(
+                      label: 'Comprovante anexado',
+                      value: 'Imagem do comprovante',
+                      icon: Icons.image,
+                    ),
+                  )
+                : const SizedBox.shrink()
+          else
+            OptionalReceiptSection(
+              imagePath: state.receiptImagePath,
+              hasImage: state.hasReceiptImage,
+              isUploading: state.isUploadingImage,
+              uploadError: state.imageUploadError,
+              onCameraSelected: () => notifier.captureReceiptImage(),
+              onGallerySelected: () => notifier.selectReceiptImageFromGallery(),
+              onImageRemoved: () => notifier.removeReceiptImage(),
+              title: 'Comprovante da Despesa',
+              description: 'Anexe uma foto do comprovante da despesa (opcional)',
+            ),
 
           const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),
-          if (state.hasMinimumData) _buildFormSummary(context, state),
+          if (state.hasMinimumData && !isReadOnly) _buildFormSummary(context, state),
         ],
       ),
     );

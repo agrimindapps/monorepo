@@ -268,7 +268,17 @@ class FuelFormView extends ConsumerWidget {
     final state = ref.watch(fuelFormProvider(vehicleId));
     final formatter = FuelFormatterService();
     final totalPrice = state.formModel.totalPrice;
-    final formattedTotal = totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : '';
+    final formattedTotal = totalPrice > 0 ? formatter.formatTotalPrice(totalPrice) : 'R\$ 0,00';
+
+    if (isReadOnly) {
+      return ReadOnlyField(
+        label: FuelConstants.totalPriceLabel,
+        value: formattedTotal,
+        icon: Icons.attach_money,
+        isHighlighted: true,
+        highlightColor: Colors.green,
+      );
+    }
 
     return ValidatedTextField(
       key: ValueKey('total_price_$formattedTotal'), // Force rebuild when value changes
@@ -332,6 +342,22 @@ class FuelFormView extends ConsumerWidget {
   Widget _buildReceiptImageSection(BuildContext context, WidgetRef ref) {
     final state = ref.watch(fuelFormProvider(vehicleId));
     final notifier = ref.read(fuelFormProvider(vehicleId).notifier);
+
+    // Em modo de visualização, mostrar apenas se tiver imagem
+    if (isReadOnly) {
+      if (!state.hasReceiptImage) {
+        return const SizedBox.shrink();
+      }
+      return FormSectionHeader(
+        title: 'Comprovante',
+        icon: Icons.receipt_long,
+        child: ReadOnlyField(
+          label: 'Comprovante anexado',
+          value: 'Imagem do comprovante',
+          icon: Icons.image,
+        ),
+      );
+    }
 
     return OptionalReceiptSection(
       imagePath: state.receiptImagePath,

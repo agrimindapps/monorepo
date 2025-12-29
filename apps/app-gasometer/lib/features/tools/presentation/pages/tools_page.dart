@@ -39,22 +39,6 @@ class ToolsPage extends StatelessWidget {
               },
             ),
             _ToolCard(
-              icon: Icons.attach_money,
-              title: 'Custo por\nKm',
-              description: 'Quanto gasta por km',
-              onTap: () {
-                context.push('/tools/cost-per-km');
-              },
-            ),
-            _ToolCard(
-              icon: Icons.speed,
-              title: 'Autonomia',
-              description: 'Quantos km pode rodar',
-              onTap: () {
-                context.push('/tools/range-calculator');
-              },
-            ),
-            _ToolCard(
               icon: Icons.local_gas_station,
               title: 'Postos\nPróximos',
               description: 'Encontre postos',

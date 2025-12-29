@@ -23,11 +23,9 @@ import '../../features/promo/presentation/pages/promo_page.dart';
 import '../../features/reports/presentation/pages/reports_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/timeline/presentation/pages/timeline_page.dart';
-import '../../features/tools/presentation/pages/cost_per_km_calculator_page.dart';
 import '../../features/tools/presentation/pages/dashboard_indicator_detail_page.dart';
 import '../../features/tools/presentation/pages/dashboard_indicators_page.dart';
 import '../../features/tools/presentation/pages/flex_calculator_page.dart';
-import '../../features/tools/presentation/pages/range_calculator_page.dart';
 import '../../features/tools/presentation/pages/tools_page.dart';
 import '../../features/vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
@@ -174,18 +172,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     },
                   ),
                 ],
-              ),
-              // Cost per Km Calculator
-              GoRoute(
-                path: '/tools/cost-per-km',
-                name: 'cost-per-km',
-                builder: (context, state) => const CostPerKmCalculatorPage(),
-              ),
-              // Range Calculator
-              GoRoute(
-                path: '/tools/range-calculator',
-                name: 'range-calculator',
-                builder: (context, state) => const RangeCalculatorPage(),
               ),
             ],
           ),

@@ -369,71 +369,51 @@ class CrudFormDialog extends StatelessWidget {
     );
   }
 
-  /// Botões para modo VIEW: [Fechar] ou [Excluir] [Editar]
+  /// Botões para modo VIEW: [Cancelar] [Editar]
   Widget _buildViewButtons(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (showDeleteButton && onDelete != null) {
-      return Row(
-        children: [
-          // Botão de excluir (vermelho, outline)
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline, size: 18),
-              label: const Text('Excluir'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: theme.colorScheme.error,
-                side: BorderSide(color: theme.colorScheme.error),
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+    return Row(
+      children: [
+        // Botão de cancelar/fechar (outline)
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onCancel ?? () => Navigator.of(context).pop(),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: theme.colorScheme.onSurface,
+              side: BorderSide(color: theme.colorScheme.outline),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          // Botão de editar (primário)
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: onModeChange != null
-                  ? () => onModeChange!(CrudDialogMode.edit)
-                  : null,
-              icon: const Icon(Icons.edit_outlined, size: 18),
-              label: const Text('Editar'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                elevation: 0,
-              ),
+            child: const Text(
+              'Cancelar',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
             ),
           ),
-        ],
-      );
-    }
-
-    // Apenas botão de fechar centralizado
-    return Center(
-      child: ElevatedButton(
-        onPressed: onCancel ?? () => Navigator.of(context).pop(),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
-          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 48),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+        ),
+        const SizedBox(width: 12),
+        // Botão de editar (primário)
+        Expanded(
+          child: ElevatedButton.icon(
+            onPressed: onModeChange != null
+                ? () => onModeChange!(CrudDialogMode.edit)
+                : null,
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: const Text('Editar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              elevation: 0,
+            ),
           ),
-          elevation: 0,
         ),
-        child: const Text(
-          'Fechar',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-        ),
-      ),
+      ],
     );
   }
 

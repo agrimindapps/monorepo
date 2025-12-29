@@ -41,7 +41,7 @@ class FuelRecordItem extends StatelessWidget {
                         day,
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           height: 1.0,
                         ),
                       ),
@@ -85,7 +85,12 @@ class FuelRecordItem extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          const Text('•', style: TextStyle(color: Colors.grey)),
+                          Text(
+                            '•',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
@@ -103,13 +108,13 @@ class FuelRecordItem extends StatelessWidget {
                             Icon(
                               Icons.check_circle,
                               size: 12,
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               'Tanque cheio',
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).primaryColor,
+                                color: Theme.of(context).colorScheme.primary,
                                 fontSize: 11,
                               ),
                             ),
@@ -128,7 +133,7 @@ class FuelRecordItem extends StatelessWidget {
                       'R\$ ${record.totalPrice.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],

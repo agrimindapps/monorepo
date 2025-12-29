@@ -19,6 +19,7 @@ class RecentRecordsCard extends StatelessWidget {
     required this.isEmpty,
     required this.emptyMessage,
     this.onAddFirst,
+    this.onAdd,
     super.key,
   });
 
@@ -30,6 +31,7 @@ class RecentRecordsCard extends StatelessWidget {
   final bool isEmpty;
   final String emptyMessage;
   final VoidCallback? onAddFirst;
+  final VoidCallback? onAdd;
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +79,7 @@ class RecentRecordsCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: iconColor.withValues(alpha: 0.1),
+                      color: iconColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -103,6 +105,30 @@ class RecentRecordsCard extends StatelessWidget {
             ),
           ),
 
+          // Add button (if onAdd is provided)
+          if (onAdd != null) ...[
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onAdd,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.add,
+                    color: iconColor,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+
           // View All button (always visible)
           SemanticButton.icon(
             semanticLabel: 'Ver todos os registros de $title',
@@ -113,7 +139,7 @@ class RecentRecordsCard extends StatelessWidget {
                 Text(
                   'Ver Todos',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).primaryColor,
+                    color: iconColor,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -121,7 +147,7 @@ class RecentRecordsCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 12,
-                  color: Theme.of(context).primaryColor,
+                  color: iconColor,
                 ),
               ],
             ),
@@ -144,7 +170,7 @@ class RecentRecordsCard extends StatelessWidget {
             Icon(
               icon,
               size: 48,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+              color: iconColor.withValues(alpha: 0.4),
             ),
             const SizedBox(height: GasometerDesignTokens.spacingLg),
             Text(

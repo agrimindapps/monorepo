@@ -1,12 +1,17 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../expenses/domain/entities/expense_entity.dart';
+import '../../../expenses/presentation/pages/expense_form_page.dart';
 import '../../../fuel/domain/entities/fuel_record_entity.dart';
+import '../../../fuel/presentation/pages/fuel_form_page.dart';
 import '../../../maintenance/domain/entities/maintenance_entity.dart';
+import '../../../maintenance/presentation/pages/add_maintenance_page.dart';
 import '../../../odometer/domain/entities/odometer_entity.dart';
+import '../../../odometer/presentation/pages/odometer_form_page.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../providers/activities_providers.dart';
 import '../widgets/expense_record_item.dart';
@@ -33,6 +38,87 @@ class ActivitiesPage extends ConsumerStatefulWidget {
 
 class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
   String? _selectedVehicleId;
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tenta carregar o veículo selecionado do SharedPreferences no init
+    _loadSavedVehicle();
+  }
+
+  Future<void> _loadSavedVehicle() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedVehicleId = prefs.getString('selected_vehicle_id');
+      if (mounted && savedVehicleId != null) {
+        setState(() {
+          _selectedVehicleId = savedVehicleId;
+          _isInitialized = true;
+        });
+      } else if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
+    }
+  }
+
+  /// Abre dialog de adição para o tipo especificado
+  Future<void> _openAddDialog(String type) async {
+    if (_selectedVehicleId == null) return;
+    
+    bool? result;
+    
+    switch (type) {
+      case 'odometer':
+        result = await showDialog<bool>(
+          context: context,
+          builder: (context) => OdometerFormPage(
+            vehicleId: _selectedVehicleId,
+            initialMode: CrudDialogMode.create,
+          ),
+        );
+        break;
+      case 'fuel':
+        result = await showDialog<bool>(
+          context: context,
+          builder: (context) => FuelFormPage(
+            vehicleId: _selectedVehicleId,
+            initialMode: CrudDialogMode.create,
+          ),
+        );
+        break;
+      case 'expenses':
+        result = await showDialog<bool>(
+          context: context,
+          builder: (context) => ExpenseFormPage(
+            vehicleId: _selectedVehicleId,
+            initialMode: CrudDialogMode.create,
+          ),
+        );
+        break;
+      case 'maintenance':
+        result = await showDialog<bool>(
+          context: context,
+          builder: (context) => AddMaintenancePage(
+            vehicleId: _selectedVehicleId,
+          ),
+        );
+        break;
+    }
+    
+    if (result == true && mounted && _selectedVehicleId != null) {
+      // Invalida o provider para recarregar os dados
+      ref.invalidate(activitiesProvider(_selectedVehicleId!));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +137,17 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
           Expanded(
             child: vehiclesAsync.when(
               data: (vehicles) {
+                // Auto-seleciona o primeiro veículo se não houver seleção
+                if (_selectedVehicleId == null && vehicles.isNotEmpty && _isInitialized) {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted && _selectedVehicleId == null) {
+                      final firstVehicle = vehicles.first;
+                      setState(() {
+                        _selectedVehicleId = firstVehicle.id;
+                      });
+                    }
+                  });
+                }
                 // Sempre mostra os cards, mesmo sem veículos
                 return _buildCardsContent(context, hasVehicles: vehicles.isNotEmpty);
               },
@@ -90,11 +187,11 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -169,7 +266,8 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
   }
 
   Widget _buildCardsContent(BuildContext context, {required bool hasVehicles}) {
-    final primaryColor = Theme.of(context).primaryColor;
+    // Usar colorScheme.primary para garantir contraste em ambos os temas
+    final cardIconColor = Theme.of(context).colorScheme.primary;
 
     // Se não há veículos, mostra os cards vazios com mensagem apropriada
     if (!hasVehicles) {
@@ -181,7 +279,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Odômetro',
               icon: Icons.speed,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () => context.push('/vehicles/add'),
               isEmpty: true,
@@ -192,7 +290,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Abastecimentos',
               icon: Icons.local_gas_station,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () => context.push('/vehicles/add'),
               isEmpty: true,
@@ -203,7 +301,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Despesas',
               icon: Icons.attach_money,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () => context.push('/vehicles/add'),
               isEmpty: true,
@@ -214,7 +312,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Manutenções',
               icon: Icons.build,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () => context.push('/vehicles/add'),
               isEmpty: true,
@@ -235,7 +333,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Odômetro',
               icon: Icons.speed,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () {},
               isEmpty: true,
@@ -247,7 +345,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Abastecimentos',
               icon: Icons.local_gas_station,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () {},
               isEmpty: true,
@@ -259,7 +357,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Despesas',
               icon: Icons.attach_money,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () {},
               isEmpty: true,
@@ -271,7 +369,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
             RecentRecordsCard(
               title: 'Manutenções',
               icon: Icons.build,
-              iconColor: primaryColor,
+              iconColor: cardIconColor,
               recordItems: const [],
               onViewAll: () {},
               isEmpty: true,
@@ -296,7 +394,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
               RecentRecordsCard(
                 title: 'Odômetro',
                 icon: Icons.speed,
-                iconColor: primaryColor,
+                iconColor: cardIconColor,
                 recordItems: activities.odometerRecords
                     .map((OdometerEntity record) => OdometerRecordItem(
                           record: record,
@@ -304,6 +402,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
                         ))
                     .toList(),
                 onViewAll: () => context.push('/odometer'),
+                onAdd: () => _openAddDialog('odometer'),
                 isEmpty: activities.odometerRecords.isEmpty,
                 emptyMessage: 'Nenhuma leitura de odômetro registrada',
               ),
@@ -312,7 +411,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
               RecentRecordsCard(
                 title: 'Abastecimentos',
                 icon: Icons.local_gas_station,
-                iconColor: primaryColor,
+                iconColor: cardIconColor,
                 recordItems: activities.fuelRecords
                     .map((FuelRecordEntity record) => FuelRecordItem(
                           record: record,
@@ -320,6 +419,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
                         ))
                     .toList(),
                 onViewAll: () => context.push('/fuel'),
+                onAdd: () => _openAddDialog('fuel'),
                 isEmpty: activities.fuelRecords.isEmpty,
                 emptyMessage: 'Nenhum abastecimento registrado',
               ),
@@ -328,7 +428,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
               RecentRecordsCard(
                 title: 'Despesas',
                 icon: Icons.attach_money,
-                iconColor: primaryColor,
+                iconColor: cardIconColor,
                 recordItems: activities.expenses
                     .map((ExpenseEntity record) => ExpenseRecordItem(
                           record: record,
@@ -336,6 +436,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
                         ))
                     .toList(),
                 onViewAll: () => context.push('/expenses'),
+                onAdd: () => _openAddDialog('expenses'),
                 isEmpty: activities.expenses.isEmpty,
                 emptyMessage: 'Nenhuma despesa registrada',
               ),
@@ -344,7 +445,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
               RecentRecordsCard(
                 title: 'Manutenções',
                 icon: Icons.build,
-                iconColor: primaryColor,
+                iconColor: cardIconColor,
                 recordItems: activities.maintenanceRecords
                     .map((MaintenanceEntity record) => MaintenanceRecordItem(
                           record: record,
@@ -352,6 +453,7 @@ class _ActivitiesPageState extends ConsumerState<ActivitiesPage> {
                         ))
                     .toList(),
                 onViewAll: () => context.push('/maintenance'),
+                onAdd: () => _openAddDialog('maintenance'),
                 isEmpty: activities.maintenanceRecords.isEmpty,
                 emptyMessage: 'Nenhuma manutenção registrada',
               ),

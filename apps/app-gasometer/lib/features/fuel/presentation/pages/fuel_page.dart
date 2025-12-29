@@ -192,11 +192,11 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -358,13 +358,13 @@ class _FuelPageState extends ConsumerState<FuelPage> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Theme.of(context).cardColor,
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
                   color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
               child: Center(
@@ -372,8 +372,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                   formattedMonth,
                   style: TextStyle(
                     color: isSelected
-                        ? Colors.white
-                        : Theme.of(context).textTheme.bodyMedium?.color,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: isSelected
                         ? FontWeight.w600
                         : FontWeight.normal,
@@ -484,7 +484,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                         style: Theme.of(context).textTheme.headlineMedium
                             ?.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).colorScheme.primary,
                               height: 1.0,
                             ),
                       ),
@@ -528,7 +528,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(width: 8),
-                          const Text('•', style: TextStyle(color: Colors.grey)),
+                          Text('•', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           const SizedBox(width: 8),
                           Text(
                             'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
@@ -559,7 +559,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                             Icon(
                               Icons.check_circle,
                               size: 14,
-                              color: Theme.of(context).primaryColor,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ],
                         ],
@@ -597,17 +597,17 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(
+                              Icon(
                                 Icons.eco,
                                 size: 14,
-                                color: Colors.green,
+                                color: Theme.of(context).colorScheme.tertiary,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${record.consumption!.toStringAsFixed(1)} km/l',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Colors.green,
+                                      color: Theme.of(context).colorScheme.tertiary,
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),
@@ -628,7 +628,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                       'R\$ ${record.totalPrice.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                   ],
@@ -708,15 +708,15 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Theme.of(context).primaryColor.withValues(alpha: 0.1),
-            Theme.of(context).primaryColor.withValues(alpha: 0.05),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -727,7 +727,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
             children: [
               Icon(
                 Icons.analytics,
-                color: Theme.of(context).primaryColor,
+                color: Theme.of(context).colorScheme.primary,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -736,7 +736,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).primaryColor,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ],

@@ -46,11 +46,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -241,7 +241,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             Icon(
               icon,
               color: isSelected
-                  ? Theme.of(context).primaryColor
+                  ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).textTheme.bodyMedium?.color,
             ),
             const SizedBox(width: 12),
@@ -256,7 +256,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           ? FontWeight.bold
                           : FontWeight.normal,
                       color: isSelected
-                          ? Theme.of(context).primaryColor
+                          ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
@@ -265,7 +265,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               ),
             ),
             if (isSelected)
-              Icon(Icons.check, color: Theme.of(context).primaryColor),
+              Icon(Icons.check, color: Theme.of(context).colorScheme.primary),
           ],
         ),
       ),
@@ -308,7 +308,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }

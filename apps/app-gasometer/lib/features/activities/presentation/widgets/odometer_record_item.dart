@@ -42,7 +42,7 @@ class OdometerRecordItem extends StatelessWidget {
                         day,
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           height: 1.0,
                         ),
                       ),
@@ -119,10 +119,10 @@ class OdometerRecordItem extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: Colors.purple.withValues(alpha: 0.1),
+                        color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.purple.withValues(alpha: 0.3),
+                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -132,13 +132,13 @@ class OdometerRecordItem extends StatelessWidget {
                           Icon(
                             Icons.speed,
                             size: 12,
-                            color: Colors.purple,
+                            color: Theme.of(context).colorScheme.secondary,
                           ),
                           const SizedBox(width: 4),
                           Text(
                             'Km',
                             style: TextStyle(
-                              color: Colors.purple,
+                              color: Theme.of(context).colorScheme.secondary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),

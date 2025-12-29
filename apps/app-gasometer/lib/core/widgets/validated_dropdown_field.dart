@@ -578,16 +578,21 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
           child: InkWell(
             onTap: widget.enabled ? _toggleDropdown : null,
             borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
-            child: Container(
+            child: Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Container(
               padding: GasometerDesignTokens.paddingHorizontal(GasometerDesignTokens.spacingLg)
                   .add(GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingLg)),
               decoration: BoxDecoration(
                 color: widget.enabled
-                    ? GasometerDesignTokens.colorSurface
-                    : GasometerDesignTokens.colorNeutral100,
+                    ? (isDark 
+                        ? Theme.of(context).colorScheme.surfaceContainerHighest
+                        : GasometerDesignTokens.colorSurface)
+                    : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusInput),
                 border: Border.all(
-                  color: borderColor ?? GasometerDesignTokens.colorNeutral300,
+                  color: borderColor ?? Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
                   width: borderColor != null ? 2 : 1,
                 ),
               ),
@@ -597,8 +602,8 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                     Icon(
                       widget.prefixIcon,
                       color: widget.enabled
-                          ? GasometerDesignTokens.colorTextSecondary
-                          : GasometerDesignTokens.colorNeutral400,
+                          ? Theme.of(context).colorScheme.onSurfaceVariant
+                          : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                       size: GasometerDesignTokens.iconSizeSm,
                     ),
                     const SizedBox(width: GasometerDesignTokens.spacingMd),
@@ -608,16 +613,16 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                         ? DefaultTextStyle(
                             style: TextStyle(
                               color: widget.enabled
-                                  ? GasometerDesignTokens.colorTextPrimary
-                                  : GasometerDesignTokens.colorTextSecondary,
+                                  ? Theme.of(context).colorScheme.onSurface
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
                               fontSize: GasometerDesignTokens.fontSizeBody,
                             ),
                             child: selectedItem.child,
                           )
                         : Text(
                             widget.hint ?? 'Selecione uma opção',
-                            style: const TextStyle(
-                              color: GasometerDesignTokens.colorTextSecondary,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontSize: GasometerDesignTokens.fontSizeBody,
                             ),
                           ),
@@ -634,14 +639,16 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                       Icon(
                         _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                         color: widget.enabled
-                            ? GasometerDesignTokens.colorTextSecondary
-                            : GasometerDesignTokens.colorNeutral400,
+                            ? Theme.of(context).colorScheme.onSurfaceVariant
+                            : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                         size: GasometerDesignTokens.iconSizeSm,
                       ),
                     ],
                   ),
                 ],
               ),
+            );
+              },
             ),
           ),
         ),

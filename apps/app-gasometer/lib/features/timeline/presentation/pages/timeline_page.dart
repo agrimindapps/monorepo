@@ -132,11 +132,11 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
         margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: Theme.of(context).primaryColor,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.2),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -718,7 +718,7 @@ class _TimelineEntryItem extends StatelessWidget {
                     child: Container(
                       width: 2,
                       margin: const EdgeInsets.only(top: 4),
-                      color: Colors.grey.withValues(alpha: 0.3),
+                      color: Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
               ],
@@ -732,7 +732,7 @@ class _TimelineEntryItem extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -754,7 +754,7 @@ class _TimelineEntryItem extends StatelessWidget {
                         timeFormat.format(entry.date),
                         style: Theme.of(
                           context,
-                        ).textTheme.labelSmall?.copyWith(color: Colors.grey),
+                        ).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -766,7 +766,7 @@ class _TimelineEntryItem extends StatelessWidget {
                         Icon(
                           Icons.speed,
                           size: 14,
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -780,7 +780,7 @@ class _TimelineEntryItem extends StatelessWidget {
                           child: Container(
                             width: 1,
                             height: 12,
-                            color: Colors.grey.shade300,
+                            color: Theme.of(context).colorScheme.outlineVariant,
                           ),
                         ),
                       if (entry.amount != null) ...[

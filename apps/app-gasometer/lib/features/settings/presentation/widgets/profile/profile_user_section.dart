@@ -36,7 +36,7 @@ class ProfileUserSection extends ConsumerWidget {
                       border: Border.all(
                         color: isAuthenticated
                             ? SettingsDesignTokens.primaryColor
-                            : Colors.grey.shade400,
+                            : Theme.of(context).colorScheme.onSurfaceVariant,
                         width: 3,
                       ),
                       boxShadow: [
@@ -45,7 +45,7 @@ class ProfileUserSection extends ConsumerWidget {
                               ? SettingsDesignTokens.primaryColor.withValues(
                                   alpha: 0.3,
                                 )
-                              : Colors.grey.withValues(alpha: 0.3),
+                              : Theme.of(context).colorScheme.outlineVariant,
                           blurRadius: 8,
                           offset: const Offset(0, 4),
                         ),
@@ -55,7 +55,7 @@ class ProfileUserSection extends ConsumerWidget {
                       radius: 32,
                       backgroundColor: isAuthenticated
                           ? SettingsDesignTokens.primaryColor
-                          : Colors.grey.shade400,
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                       child: Text(
                         _getInitials(_getUserDisplayTitle(user)),
                         style: const TextStyle(

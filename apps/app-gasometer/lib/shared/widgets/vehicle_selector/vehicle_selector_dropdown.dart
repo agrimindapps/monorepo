@@ -35,6 +35,8 @@ class VehicleSelectorDropdown extends StatelessWidget {
             orElse: () => vehicles.first,
           )
         : null;
+    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Semantics(
       label: selectedVehicle != null
@@ -47,29 +49,14 @@ class VehicleSelectorDropdown extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: selectedVehicle != null
-                  ? Theme.of(
-                      context,
-                    ).colorScheme.primary.withValues(alpha: 0.5)
-                  : Theme.of(
-                      context,
-                    ).colorScheme.outline.withValues(alpha: 0.3),
-              width: selectedVehicle != null ? 2.0 : 1.5,
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: isDark ? 0.6 : 0.5)
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: isDark ? 0.4 : 0.3),
+              width: selectedVehicle != null ? 2.0 : 1.0,
             ),
             borderRadius: BorderRadius.circular(15),
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: selectedVehicle != null
-                    ? Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.1)
-                    : Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.05),
-                blurRadius: selectedVehicle != null ? 8 : 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+            color: isDark
+                ? Theme.of(context).colorScheme.surfaceContainerHigh
+                : Theme.of(context).colorScheme.surface,
           ),
           child: Material(
             color: Colors.transparent,
@@ -162,9 +149,11 @@ class VehicleSelectorDropdown extends StatelessWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: AppFontSizes.medium,
                 ),
-                dropdownColor: Theme.of(context).colorScheme.surface,
+                dropdownColor: isDark
+                    ? Theme.of(context).colorScheme.surfaceContainerHigh
+                    : Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(AppRadius.large),
-                elevation: 8,
+                elevation: isDark ? 4 : 8,
                 itemHeight: 80,
                 menuMaxHeight: 400,
               ),

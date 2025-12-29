@@ -240,8 +240,10 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
             filled: true,
             fillColor:
                 widget.enabled
-                    ? theme.colorScheme.surface
-                    : UnifiedDesignTokens.colorSurfaceVariant,
+                    ? (theme.brightness == Brightness.dark
+                        ? theme.colorScheme.surfaceContainerHighest
+                        : theme.colorScheme.surface)
+                    : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: UnifiedDesignTokens.spacingLG,
               vertical: UnifiedDesignTokens.spacingMD,

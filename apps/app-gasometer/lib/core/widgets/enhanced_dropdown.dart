@@ -121,7 +121,9 @@ class _EnhancedDropdownState<T> extends State<EnhancedDropdown<T>> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: widget.enabled
-              ? Theme.of(context).colorScheme.surface
+              ? (Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerHighest
+                  : Theme.of(context).colorScheme.surface)
               : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(

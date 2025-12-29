@@ -36,7 +36,7 @@ class DeviceActionsDialog extends StatelessWidget {
                   '${device.platform} ${device.systemVersion}',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontWeight: FontWeight.normal,
                   ),
                 ),
@@ -153,8 +153,8 @@ class DeviceActionsDialog extends StatelessWidget {
           width: 120,
           child: Text(
             label,
-            style: TextStyle(
-              color: Colors.grey[600],
+            style: const TextStyle(
+              color: Colors.grey,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -309,7 +309,7 @@ class DeviceActionsDialog extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 12),
         ),
         onTap: onTap,
         shape: RoundedRectangleBorder(
@@ -399,7 +399,7 @@ class DeviceActionsDialog extends StatelessWidget {
           const SizedBox(height: 2),
           SelectableText(
             value,
-            style: TextStyle(color: Colors.grey[700], fontFamily: 'monospace'),
+            style: const TextStyle(color: Colors.grey, fontFamily: 'monospace'),
           ),
         ],
       ),

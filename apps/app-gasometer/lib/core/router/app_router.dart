@@ -237,7 +237,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'add',
                     name: 'add-fuel',
-                    builder: (context, state) => const AddFuelPage(),
+                    builder: (context, state) {
+                      final vehicleId = state.uri.queryParameters['vehicleId'];
+                      return AddFuelPage(vehicleId: vehicleId);
+                    },
                   ),
                 ],
               ),
@@ -255,7 +258,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'add',
                     name: 'add-maintenance',
-                    builder: (context, state) => const AddMaintenancePage(),
+                    builder: (context, state) {
+                      final vehicleId = state.uri.queryParameters['vehicleId'];
+                      return AddMaintenancePage(vehicleId: vehicleId);
+                    },
                   ),
                 ],
               ),
@@ -273,7 +279,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'add',
                     name: 'add-expense',
-                    builder: (context, state) => const AddExpensePage(),
+                    builder: (context, state) {
+                      final vehicleId = state.uri.queryParameters['vehicleId'];
+                      return AddExpensePage(vehicleId: vehicleId);
+                    },
                   ),
                 ],
               ),
@@ -291,7 +300,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'add',
                     name: 'add-odometer',
-                    builder: (context, state) => const AddOdometerPage(),
+                    builder: (context, state) {
+                      final vehicleId = state.uri.queryParameters['vehicleId'];
+                      return AddOdometerPage(vehicleId: vehicleId);
+                    },
                   ),
                 ],
               ),

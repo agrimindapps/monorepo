@@ -109,7 +109,7 @@ class DeviceCardWidget extends StatelessWidget {
                 '${device.platform} ${device.systemVersion}',
                 style: Theme.of(
                   context,
-                ).textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                ).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
             ],
           ),
@@ -236,7 +236,7 @@ class DeviceCardWidget extends StatelessWidget {
   ) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
+        Icon(icon, size: 16, color: Theme.of(context).colorScheme.onSurfaceVariant),
         const SizedBox(width: 8),
         Text(
           label,
@@ -274,7 +274,7 @@ class DeviceCardWidget extends StatelessWidget {
                 'Primeiro acesso',
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               Text(
                 dateFormat.format(device.firstLoginAt),
@@ -293,7 +293,7 @@ class DeviceCardWidget extends StatelessWidget {
                 'Última atividade',
                 style: Theme.of(
                   context,
-                ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
+                ).textTheme.bodySmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               ),
               Text(
                 dateFormat.format(device.lastActiveAt),

@@ -41,7 +41,7 @@ class MaintenanceRecordItem extends StatelessWidget {
                         day,
                         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                          color: Theme.of(context).colorScheme.primary,
                           height: 1.0,
                         ),
                       ),
@@ -116,7 +116,7 @@ class MaintenanceRecordItem extends StatelessWidget {
                       'R\$ ${record.cost.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+                        color: Theme.of(context).colorScheme.error,
                       ),
                     ),
                   ],

@@ -247,7 +247,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 5),
-        Container(width: 50, height: 4, color: Theme.of(context).primaryColor),
+        Container(width: 50, height: 4, color: Theme.of(context).colorScheme.primary),
       ],
     );
   }

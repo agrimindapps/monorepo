@@ -247,7 +247,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 5),
-        Container(width: 50, height: 4, color: Theme.of(context).primaryColor),
+        Container(width: 50, height: 4, color: Theme.of(context).colorScheme.primary),
       ],
     );
   }
@@ -299,7 +299,7 @@ class _WebLoginPageState extends ConsumerState<WebLoginPage>
           width: 60,
           height: 3,
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor,
+            color: Theme.of(context).colorScheme.primary,
             borderRadius: BorderRadius.circular(2),
           ),
         ),

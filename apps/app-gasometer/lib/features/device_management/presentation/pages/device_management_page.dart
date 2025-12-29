@@ -195,7 +195,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
           Text(
             label,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             textAlign: TextAlign.center,
           ),
@@ -268,7 +268,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
               Icon(
                 Icons.devices_other,
                 size: 64,
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.outlineVariant,
               ),
               const SizedBox(height: 16),
               Text(
@@ -312,7 +312,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
             children: [
               Icon(
                 Icons.info_outline,
-                color: Colors.grey[600],
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 size: 20,
               ),
               const SizedBox(width: 8),
@@ -320,7 +320,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
                 'Informações Importantes',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -332,7 +332,7 @@ class _DeviceManagementPageState extends ConsumerState<DeviceManagementPage> {
             '• Use "Desconectar Outros" para maior segurança\n'
             '• Seus dados são sincronizados entre todos os dispositivos',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               height: 1.5,
             ),
           ),

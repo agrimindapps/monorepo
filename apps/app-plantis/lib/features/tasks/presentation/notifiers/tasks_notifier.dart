@@ -301,6 +301,7 @@ class TasksNotifier extends _$TasksNotifier {
       return false;
     } catch (e) {
       debugPrint('❌ TasksNotifier.completeTask error: $e');
+      _updateState((current) => current.copyWith(errorMessage: 'Erro inesperado: $e'));
       return false;
     }
   }

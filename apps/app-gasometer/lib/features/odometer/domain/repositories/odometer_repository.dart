@@ -28,6 +28,12 @@ abstract class OdometerRepository {
     String vehicleId,
   );
 
+  /// Busca últimas N leituras de um veículo (mais recentes primeiro)
+  Future<Either<Failure, List<OdometerEntity>>> getRecentOdometerRecords(
+    String vehicleId, {
+    int limit = 3,
+  });
+
   /// Busca última leitura de um veículo
   Future<Either<Failure, OdometerEntity?>> getLastOdometerReading(
     String vehicleId,

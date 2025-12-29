@@ -59,7 +59,7 @@ class LocalImageStorageService {
     final image = await _repository.getPrimaryImage(plantId);
     if (image == null) return null;
 
-    return _bytesToBase64DataUrl(image.imageData, image.mimeType);
+    return image.imageBase64;
   }
 
   /// Carrega uma imagem por ID como base64
@@ -67,22 +67,26 @@ class LocalImageStorageService {
     final image = await _repository.getImageById(imageId);
     if (image == null) return null;
 
-    return _bytesToBase64DataUrl(image.imageData, image.mimeType);
+    return image.imageBase64;
   }
 
   /// Carrega todas as imagens de uma planta como base64
   Future<List<String>> getAllImagesAsBase64(int plantId) async {
     final images = await _repository.getImagesByPlantId(plantId);
     return images
-        .map((img) => _bytesToBase64DataUrl(img.imageData, img.mimeType))
+        .map((img) => img.imageBase64)
+        .whereType<String>()
         .toList();
   }
 
-  /// Stream de imagens de uma planta (bytes)
-  Stream<List<Uint8List>> watchPlantImages(int plantId) {
+  /// Stream de imagens de uma planta (base64)
+  Stream<List<String>> watchPlantImages(int plantId) {
     return _repository
         .watchImagesByPlantId(plantId)
-        .map((images) => images.map((img) => img.imageData).toList());
+        .map((images) => images
+            .map((img) => img.imageBase64)
+            .whereType<String>()
+            .toList());
   }
 
   /// Define imagem como primária
@@ -110,12 +114,6 @@ class LocalImageStorageService {
       return base64.split(',').last;
     }
     return base64;
-  }
-
-  /// Converte bytes para data URL base64
-  String _bytesToBase64DataUrl(Uint8List bytes, String mimeType) {
-    final base64String = base64Encode(bytes);
-    return 'data:$mimeType;base64,$base64String';
   }
 }
 

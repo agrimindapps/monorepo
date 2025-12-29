@@ -61,7 +61,7 @@ class VehicleImagesDriftRepository {
 
     final companion = VehicleImagesCompanion(
       vehicleId: Value(vehicleId),
-      imageData: Value(processed.bytes),
+      imageBase64: Value(base64Encode(processed.bytes)),
       fileName: Value(fileName),
       mimeType: Value(processed.mimeType),
       sizeBytes: Value(processed.sizeBytes),
@@ -96,12 +96,11 @@ class VehicleImagesDriftRepository {
       await _clearPrimaryFlag(vehicleId);
     }
 
-    // Converter base64 para bytes
-    final bytes = base64Decode(imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), ''));
+    final cleanedBase64 = imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), '');
 
     final companion = VehicleImagesCompanion(
       vehicleId: Value(vehicleId),
-      imageData: Value(bytes),
+      imageBase64: Value(cleanedBase64),
       fileName: Value(fileName),
       mimeType: Value(mimeType),
       sizeBytes: Value(sizeBytes),

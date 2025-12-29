@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
@@ -8,6 +7,7 @@ import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
+import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/fuel_record_entity.dart';
@@ -33,63 +33,98 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     final isSyncing = ref.watch(fuelIsSyncingProvider);
     final vehiclesAsync = ref.watch(vehiclesProvider);
 
-    return SafeArea(
-      child: Column(
-        children: [
-          _buildHeader(context),
-          if (!isOnline || pendingCount > 0)
-            _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
-          _buildVehicleSelector(context),
-          if (_selectedVehicleId != null &&
-              (vehiclesAsync.value?.isNotEmpty ?? false))
-            fuelStateAsync.when(
-              data: (state) => _buildMonthSelector(state),
-              loading: () => const SizedBox(height: 66),
-              error: (_, __) => const SizedBox.shrink(),
-            ),
-          Expanded(
-            child: vehiclesAsync.when(
-              data: (vehicles) {
-                if (_selectedVehicleId == null) {
-                  return _buildSelectVehicleState();
-                }
-                return fuelStateAsync.when(
-                  data: (fuelState) => _buildContent(context, fuelState),
-                  loading: () => const StandardLoadingView(
-                    message: 'Carregando abastecimentos...',
-                    showProgress: true,
-                  ),
-                  error: (error, stack) => EnhancedEmptyState(
-                    title: 'Erro ao carregar',
-                    description: error.toString(),
-                    icon: Icons.error_outline,
-                    actionLabel: 'Tentar novamente',
-                    onAction: () {
-                      ref
-                          .read(fuelRiverpodProvider.notifier)
-                          .loadFuelRecords();
-                    },
-                  ),
-                );
-              },
-              loading: () => const StandardLoadingView(
-                message: 'Carregando veículos...',
-                showProgress: true,
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+
+            if (!isOnline || pendingCount > 0)
+              _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
+
+            _buildVehicleSelector(context),
+
+            if (_selectedVehicleId != null &&
+                (vehiclesAsync.value?.isNotEmpty ?? false))
+              fuelStateAsync.when(
+                data: (state) => _buildMonthSelector(state),
+                loading: () => const SizedBox(height: 66),
+                error: (_, __) => const SizedBox.shrink(),
               ),
-              error: (error, _) => EnhancedEmptyState(
-                title: 'Erro ao carregar veículos',
-                description: error.toString(),
-                icon: Icons.error_outline,
-                actionLabel: 'Tentar novamente',
-                onAction: () {
-                  ref.read(vehiclesProvider.notifier).refresh();
+
+            Expanded(
+              child: vehiclesAsync.when(
+                data: (vehicles) {
+                  if (_selectedVehicleId == null) {
+                    return _buildSelectVehicleState();
+                  }
+                  return fuelStateAsync.when(
+                    data: (fuelState) => _buildContent(context, fuelState),
+                    loading: () => const StandardLoadingView(
+                      message: 'Carregando abastecimentos...',
+                      showProgress: true,
+                    ),
+                    error: (error, stack) => EnhancedEmptyState(
+                      title: 'Erro ao carregar',
+                      description: error.toString(),
+                      icon: Icons.error_outline,
+                      actionLabel: 'Tentar novamente',
+                      onAction: () {
+                        ref
+                            .read(fuelRiverpodProvider.notifier)
+                            .loadFuelRecords();
+                      },
+                    ),
+                  );
                 },
+                loading: () => const StandardLoadingView(
+                  message: 'Carregando veículos...',
+                  showProgress: true,
+                ),
+                error: (error, _) => EnhancedEmptyState(
+                  title: 'Erro ao carregar veículos',
+                  description: error.toString(),
+                  icon: Icons.error_outline,
+                  actionLabel: 'Tentar novamente',
+                  onAction: () {
+                    ref.read(vehiclesProvider.notifier).refresh();
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      floatingActionButton: AdaptiveFloatingActionButton(
+        onPressed: _addFuel,
+        tooltip: 'Adicionar abastecimento',
+        child: const Icon(Icons.add),
       ),
     );
+  }
+
+  /// Adicionar novo abastecimento
+  void _addFuel() {
+    if (_selectedVehicleId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione um veículo primeiro'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    showDialog<bool>(
+      context: context,
+      builder: (context) => FuelFormPage(
+        vehicleId: _selectedVehicleId,
+        initialMode: CrudDialogMode.create,
+      ),
+    ).then((result) {
+      if (result == true) {
+        ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
+      }
+    });
   }
 
   Widget _buildOfflineIndicator(
@@ -170,6 +205,13 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         ),
         child: Row(
           children: [
+            // Botão de voltar
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => context.pop(),
+              tooltip: 'Voltar',
+            ),
+            const SizedBox(width: 4),
             Semantics(
               label: 'Seção de abastecimentos',
               hint: 'Página principal para gerenciar abastecimentos',
@@ -222,9 +264,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                 color: Colors.white,
                 size: 24,
               ),
-              tooltip: _showMonthlyStats 
-                ? 'Ocultar estatísticas' 
-                : 'Mostrar estatísticas',
+              tooltip: _showMonthlyStats
+                  ? 'Ocultar estatísticas'
+                  : 'Mostrar estatísticas',
               onPressed: () {
                 setState(() {
                   _showMonthlyStats = !_showMonthlyStats;
@@ -271,11 +313,12 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final now = DateTime.now();
         final currentMonth = DateTime(now.year, now.month);
-        
+
         // Verifica se o mês atual existe nos dados
-        final hasCurrentMonth = months.any((m) => 
-          m.year == currentMonth.year && m.month == currentMonth.month);
-        
+        final hasCurrentMonth = months.any(
+          (m) => m.year == currentMonth.year && m.month == currentMonth.month,
+        );
+
         if (hasCurrentMonth) {
           ref.read(fuelRiverpodProvider.notifier).selectMonth(currentMonth);
         } else {
@@ -294,7 +337,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
         itemCount: months.length,
         itemBuilder: (context, index) {
           final month = months[index];
-          final isSelected = selectedMonth != null &&
+          final isSelected =
+              selectedMonth != null &&
               month.year == selectedMonth.year &&
               month.month == selectedMonth.month;
 
@@ -330,8 +374,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                     color: isSelected
                         ? Colors.white
                         : Theme.of(context).textTheme.bodyMedium?.color,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                   ),
                 ),
               ),
@@ -377,11 +422,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     // Layout com estatísticas fixas + lista scrollable
     return Column(
       children: [
-        if (_showMonthlyStats)
-          _buildMonthlyStatsPanel(records),
-        Expanded(
-          child: _buildFuelRecordsList(records),
-        ),
+        if (_showMonthlyStats) _buildMonthlyStatsPanel(records),
+        Expanded(child: _buildFuelRecordsList(records)),
       ],
     );
   }
@@ -439,7 +481,8 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                     children: [
                       Text(
                         day,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).primaryColor,
                               height: 1.0,
@@ -448,14 +491,14 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                       Text(
                         weekday,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Vertical Divider
                 VerticalDivider(
                   color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
@@ -473,9 +516,11 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                       Row(
                         children: [
                           Icon(
-                            Icons.local_gas_station, 
-                            size: 14, 
-                            color: Theme.of(context).colorScheme.onSurfaceVariant
+                            Icons.local_gas_station,
+                            size: 14,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -483,10 +528,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            '•',
-                            style: TextStyle(color: Theme.of(context).disabledColor),
-                          ),
+                          const Text('•', style: TextStyle(color: Colors.grey)),
                           const SizedBox(width: 8),
                           Text(
                             'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
@@ -494,16 +536,18 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                           ),
                         ],
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       // Row 2: Odometer
                       Row(
                         children: [
                           Icon(
-                            Icons.speed, 
-                            size: 14, 
-                            color: Theme.of(context).colorScheme.onSurfaceVariant
+                            Icons.speed,
+                            size: 14,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -513,51 +557,59 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                           if (record.fullTank) ...[
                             const SizedBox(width: 8),
                             Icon(
-                              Icons.check_circle, 
-                              size: 14, 
-                              color: Theme.of(context).primaryColor
+                              Icons.check_circle,
+                              size: 14,
+                              color: Theme.of(context).primaryColor,
                             ),
                           ],
                         ],
                       ),
 
                       // Row 3: Stats (Distance & Consumption)
-                      if (record.distanceTraveled != null && record.distanceTraveled! > 0) ...[
+                      if (record.distanceTraveled != null &&
+                          record.distanceTraveled! > 0) ...[
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Icon(
-                              Icons.route, 
-                              size: 14, 
-                              color: Theme.of(context).colorScheme.secondary
+                              Icons.route,
+                              size: 14,
+                              color: Theme.of(context).colorScheme.secondary,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               '+${record.distanceTraveled!.toStringAsFixed(0)} km',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context).colorScheme.secondary,
-                                fontWeight: FontWeight.w500,
-                              ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                             ),
-                            if (record.consumption != null && record.consumption! > 0) ...[
+                            if (record.consumption != null &&
+                                record.consumption! > 0) ...[
                               const SizedBox(width: 8),
                               Text(
                                 '•',
-                                style: TextStyle(color: Theme.of(context).disabledColor),
+                                style: TextStyle(
+                                  color: Theme.of(context).disabledColor,
+                                ),
                               ),
                               const SizedBox(width: 8),
-                              Icon(
-                                Icons.eco, 
-                                size: 14, 
-                                color: Colors.green
+                              const Icon(
+                                Icons.eco,
+                                size: 14,
+                                color: Colors.green,
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 '${record.consumption!.toStringAsFixed(1)} km/l',
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                               ),
                             ],
                           ],
@@ -575,9 +627,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                     Text(
                       'R\$ ${record.totalPrice.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).primaryColor,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor,
+                      ),
                     ),
                   ],
                 ),
@@ -605,40 +657,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     });
   }
 
-  Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesProvider);
-    final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
-    final isEnabled = hasVehicles && _selectedVehicleId != null;
-
-    return FloatingActionButton(
-      onPressed: () {
-        if (_selectedVehicleId == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Selecione um veículo primeiro'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          return;
-        }
-        showDialog<bool>(
-          context: context,
-          builder: (context) => FuelFormPage(
-            vehicleId: _selectedVehicleId,
-            initialMode: CrudDialogMode.create,
-          ),
-        ).then((result) {
-          if (result == true) {
-            ref.read(fuelRiverpodProvider.notifier).loadFuelRecords();
-          }
-        });
-      },
-      backgroundColor: isEnabled ? null : Colors.grey,
-      tooltip: 'Adicionar abastecimento',
-      child: const Icon(Icons.add),
-    );
-  }
-
   Widget _buildSelectVehicleState() {
     return const EnhancedEmptyState(
       title: 'Selecione um veículo',
@@ -660,25 +678,23 @@ class _FuelPageState extends ConsumerState<FuelPage> {
 
     // Cálculos
     final totalSpent = records.fold<double>(
-      0.0, 
-      (sum, r) => sum + r.totalPrice,
+      0.0,
+      (total, r) => total + r.totalPrice,
     );
-    
+
     final totalLiters = records.fold<double>(
-      0.0, 
-      (sum, r) => sum + r.liters,
+      0.0,
+      (total, r) => total + r.liters,
     );
-    
-    final avgPricePerLiter = totalLiters > 0 
-      ? totalSpent / totalLiters 
-      : 0.0;
-    
+
+    final avgPricePerLiter = totalLiters > 0 ? totalSpent / totalLiters : 0.0;
+
     // Km rodados no período (diferença entre maior e menor odômetro)
     final odometers = records.map((r) => r.odometer).toList();
     odometers.sort();
-    final kmDriven = odometers.isNotEmpty 
-      ? (odometers.last - odometers.first) 
-      : 0.0;
+    final kmDriven = odometers.isNotEmpty
+        ? (odometers.last - odometers.first)
+        : 0.0;
 
     final currencyFormat = NumberFormat.currency(
       locale: 'pt_BR',

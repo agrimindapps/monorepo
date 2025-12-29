@@ -351,6 +351,23 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
   }
 
   @override
+  Future<List<ExpenseEntity>> getRecentExpenses(
+    String vehicleId, {
+    int limit = 3,
+  }) async {
+    try {
+      final vehicleIdInt = int.parse(vehicleId);
+      final dataList = await _dataSource.findByVehicleId(vehicleIdInt);
+
+      // Ordenar por data DESC e aplicar limite
+      dataList.sort((a, b) => b.date.compareTo(a.date));
+      return dataList.take(limit).map<ExpenseEntity>(_toEntity).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  @override
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type) async {
     try {
       // Buscar todos os registros e filtrar por tipo
@@ -409,7 +426,7 @@ class ExpensesRepositoryDriftImpl implements IExpensesRepository {
       final totalExpenses = allData.length;
       final totalAmount = allData.fold<double>(
         0.0,
-        (sum, data) => sum + data.amount,
+        (total, data) => total + data.amount,
       );
 
       // Estatísticas por categoria

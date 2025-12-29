@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/notifiers/auth_notifier.dart';
+import '../../features/activities/presentation/pages/activities_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/expenses/presentation/pages/add_expense_page.dart';
@@ -31,7 +32,6 @@ import '../../features/tools/presentation/pages/tools_page.dart';
 import '../../features/vehicles/presentation/pages/add_vehicle_page.dart';
 import '../../features/vehicles/presentation/pages/vehicles_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
-import '../../shared/widgets/page_with_bottom_nav.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/login';
@@ -128,14 +128,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Branch 2: Add (Placeholder - will show bottom sheet)
+          // Branch 2: Activities (Recent records from all categories)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add',
-                // This will be intercepted by navigation logic to show bottom sheet
-                redirect: (context, state) => '/timeline',
+                path: '/activities',
+                name: 'activities',
+                builder: (context, state) => const ActivitiesPage(),
               ),
             ],
           ),
@@ -226,57 +225,81 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+
+          // Branch 5: Fuel
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/fuel',
+                name: 'fuel',
+                builder: (context, state) => const FuelPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-fuel',
+                    builder: (context, state) => const AddFuelPage(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Branch 6: Maintenance
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/maintenance',
+                name: 'maintenance',
+                builder: (context, state) => const MaintenancePage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-maintenance',
+                    builder: (context, state) => const AddMaintenancePage(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Branch 7: Expenses
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/expenses',
+                name: 'expenses',
+                builder: (context, state) => const ExpensesPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-expense',
+                    builder: (context, state) => const AddExpensePage(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Branch 8: Odometer
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/odometer',
+                name: 'odometer',
+                builder: (context, state) => const OdometerPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'add-odometer',
+                    builder: (context, state) => const AddOdometerPage(),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ],
       ),
-      // Standalone routes for list pages and forms (with bottom navigation)
-      GoRoute(
-        path: '/fuel',
-        name: 'fuel',
-        builder: (context, state) => const PageWithBottomNav(
-          child: FuelPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/fuel/add',
-        name: 'add-fuel',
-        builder: (context, state) => const AddFuelPage(),
-      ),
-      GoRoute(
-        path: '/maintenance',
-        name: 'maintenance',
-        builder: (context, state) => const PageWithBottomNav(
-          child: MaintenancePage(),
-        ),
-      ),
-      GoRoute(
-        path: '/maintenance/add',
-        name: 'add-maintenance',
-        builder: (context, state) => const AddMaintenancePage(),
-      ),
-      GoRoute(
-        path: '/expenses',
-        name: 'expenses',
-        builder: (context, state) => const PageWithBottomNav(
-          child: ExpensesPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/expenses/add',
-        name: 'add-expense',
-        builder: (context, state) => const AddExpensePage(),
-      ),
-      GoRoute(
-        path: '/odometer',
-        name: 'odometer',
-        builder: (context, state) => const PageWithBottomNav(
-          child: OdometerPage(),
-        ),
-      ),
-      GoRoute(
-        path: '/odometer/add',
-        name: 'add-odometer',
-        builder: (context, state) => const AddOdometerPage(),
-      ),
+      // Auth routes
       GoRoute(
         path: '/login',
         name: 'login',

@@ -25,6 +25,9 @@ abstract class IExpensesRepository {
   /// Get expenses by vehicle
   Future<List<ExpenseEntity>> getExpensesByVehicle(String vehicleId);
 
+  /// Get recent expenses for a vehicle (last N records)
+  Future<List<ExpenseEntity>> getRecentExpenses(String vehicleId, {int limit = 3});
+
   /// Get expenses by type
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type);
 

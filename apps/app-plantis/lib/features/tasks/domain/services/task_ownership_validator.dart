@@ -46,9 +46,9 @@ class TaskOwnershipValidator implements ITaskOwnershipValidator {
 
     if (task.userId == null) {
       debugPrint(
-        '🚫 Access denied: Task has null userId (potential security risk)',
+        '⚠️ Access allowed: Task has null userId (legacy/local task)',
       );
-      return false;
+      return true;
     }
 
     if (task.userId == currentUser.id) {

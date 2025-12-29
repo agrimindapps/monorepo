@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
@@ -14,6 +15,11 @@ import '../../domain/entities/expense_entity.dart';
 import '../notifiers/expenses_notifier.dart';
 import '../state/expenses_state.dart';
 import 'expense_form_page.dart';
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -87,6 +93,13 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         ),
         child: Row(
           children: [
+            // Botão de voltar
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => context.pop(),
+              tooltip: 'Voltar',
+            ),
+            const SizedBox(width: 4),
             Semantics(
               label: 'Seção de despesas',
               hint: 'Página principal para gerenciar despesas do veículo',

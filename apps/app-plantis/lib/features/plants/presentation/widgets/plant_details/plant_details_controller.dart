@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../core/localization/app_strings.dart';
@@ -283,6 +282,22 @@ class PlantDetailsController {
   /// ```
   void duplicatePlant(Plant plant) {
     onShowSnackBar?.call(AppStrings.duplicateFeatureInDevelopment, 'info');
+  }
+
+  /// Updates the plant image
+  ///
+  /// This method updates the plant's image with a new base64 encoded image.
+  ///
+  /// Parameters:
+  /// - [plant]: The plant entity to update
+  /// - [base64Image]: The new image in base64 format
+  ///
+  /// Example:
+  /// ```dart
+  /// controller.updatePlantImage(plant, 'base64string...');
+  /// ```
+  void updatePlantImage(Plant plant, String base64Image) {
+    provider.updatePlantImage(plant.id, base64Image);
   }
 
   /// Displays an error message to the user

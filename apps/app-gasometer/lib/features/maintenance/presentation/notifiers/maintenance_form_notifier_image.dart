@@ -42,9 +42,7 @@ extension MaintenanceFormNotifierImage on MaintenanceFormNotifier {
     result.fold(
       (failure) {
         if (failure is! CancellationFailure) {
-          state = state.copyWith(
-            imageUploadError: () => failure.message,
-          );
+          state = state.copyWith(imageUploadError: () => failure.message);
         }
       },
       (imageResult) {
@@ -71,9 +69,7 @@ extension MaintenanceFormNotifierImage on MaintenanceFormNotifier {
     result.fold(
       (failure) {
         if (failure is! CancellationFailure) {
-          state = state.copyWith(
-            imageUploadError: () => failure.message,
-          );
+          state = state.copyWith(imageUploadError: () => failure.message);
         }
       },
       (imageResult) {
@@ -97,9 +93,7 @@ extension MaintenanceFormNotifierImage on MaintenanceFormNotifier {
 
     result.fold(
       (failure) {
-        state = state.copyWith(
-          imageUploadError: () => failure.message,
-        );
+        state = state.copyWith(imageUploadError: () => failure.message);
       },
       (_) {
         state = state
@@ -129,7 +123,9 @@ extension MaintenanceFormNotifierImage on MaintenanceFormNotifier {
 
     result.fold(
       (failure) {
-        debugPrint('[MAINTENANCE FORM] Failed to sync image: ${failure.message}');
+        debugPrint(
+          '[MAINTENANCE FORM] Failed to sync image: ${failure.message}',
+        );
         state = state.copyWith(isUploadingImage: false);
       },
       (downloadUrl) {

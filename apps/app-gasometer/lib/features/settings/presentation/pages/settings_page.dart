@@ -201,7 +201,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
             child: const Text('Fechar'),
           ),
         ],
@@ -224,8 +224,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return InkWell(
       onTap: () {
         // ✅ CRÍTICO: Fechar dialog ANTES de mudar tema
-        // Isso previne problemas de navegação quando o app rebuilda
-        Navigator.of(context).pop();
+        // rootNavigator: true garante que fecha o dialog correto mesmo com rebuilds simultâneos
+        Navigator.of(context, rootNavigator: true).pop();
 
         // ✅ Aguardar um frame antes de mudar tema
         // Garante que o dialog foi completamente removido da árvore

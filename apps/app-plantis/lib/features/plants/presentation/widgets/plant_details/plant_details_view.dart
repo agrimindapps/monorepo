@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/localization/app_strings.dart';
@@ -15,6 +18,7 @@ import 'plant_care_section.dart';
 import 'plant_details_controller.dart';
 import 'plant_details_error_widgets.dart';
 import 'plant_details_invalid_state_widget.dart';
+import 'plant_hero_gallery.dart';
 import 'plant_info_section.dart';
 import 'plant_notes_section.dart';
 import 'plant_tasks_section.dart';
@@ -518,48 +522,72 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
   Widget _buildPlantImageSection(BuildContext context, Plant plant) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-      child: Center(
-        child: Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: PlantisColors.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(60),
-            border: Border.all(
-              color: PlantisColors.primary.withValues(alpha: 0.3),
-              width: 2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: PlantisColors.primary.withValues(alpha: 0.2),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: plant.hasImage
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(58),
-                  child: Image.network(
-                    plant.primaryImageUrl!,
-                    width: 116,
-                    height: 116,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildPlaceholderIcon(),
-                  ),
-                )
-              : _buildPlaceholderIcon(),
-        ),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      child: PlantHeroGallery(
+        plant: plant,
+        onAddPhoto: () => _handleImageSelection(plant),
       ),
     );
   }
 
-  Widget _buildPlaceholderIcon() {
-    return const Center(
-      child: Icon(Icons.eco, color: PlantisColors.primary, size: 48),
-    );
+  Future<void> _handleImageSelection(Plant plant) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      
+      // Show modal bottom sheet to choose between camera and gallery
+      final ImageSource? source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Galeria'),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.camera_alt),
+                  title: const Text('Câmera'),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        final bytes = await image.readAsBytes();
+        final base64Image = base64Encode(bytes);
+        
+        // Add data URI prefix if needed, but usually just base64 string is fine 
+        // if the widget handles it. UnifiedImageWidget handles both.
+        // Let's stick to standard base64 string.
+        
+        if (mounted) {
+          _controller?.updatePlantImage(plant, base64Image);
+          _showSnackBarWithColor(
+            'Imagem atualizada com sucesso!', 
+            backgroundColor: Colors.green,
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('Erro ao selecionar imagem: $e', 'error');
+      }
+    }
   }
 
   Widget _buildTabBar(BuildContext context) {

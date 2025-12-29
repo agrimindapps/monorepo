@@ -179,6 +179,60 @@ class PlantDetailsNotifier extends _$PlantDetailsNotifier {
     }
   }
 
+  Future<void> updatePlantImage(String plantId, String imageBase64) async {
+    if (state.plant == null || state.plant!.id != plantId) return;
+
+    state = state.copyWith(isLoading: true, errorMessage: null);
+
+    try {
+      final updatedPlant = state.plant!.copyWith(
+        imageBase64: imageBase64,
+        // Clear imageUrls if we are setting a new local image, 
+        // or keep them if we want to support mixed (logic depends on requirement, 
+        // usually new local image replaces old main image)
+        // For now, let's assume replacing the main image means updating imageBase64
+        // and potentially clearing old URLs if they are no longer valid or just keeping them as history?
+        // The UI usually shows imageBase64 if present.
+      );
+
+      final params = UpdatePlantParams(
+        id: plantId,
+        name: updatedPlant.name,
+        species: updatedPlant.species,
+        spaceId: updatedPlant.spaceId,
+        imageBase64: imageBase64,
+        imageUrls: updatedPlant.imageUrls,
+        plantingDate: updatedPlant.plantingDate,
+        notes: updatedPlant.notes,
+        config: updatedPlant.config,
+        isFavorited: updatedPlant.isFavorited,
+      );
+
+      final result = await _updatePlantUseCase(params);
+
+      result.fold(
+        (failure) {
+          state = state.copyWith(
+            errorMessage: _getErrorMessage(failure),
+            isLoading: false,
+          );
+        },
+        (plant) {
+          state = state.copyWith(
+            plant: plant,
+            errorMessage: null,
+            isLoading: false,
+          );
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Erro inesperado ao atualizar imagem: $e',
+        isLoading: false,
+      );
+    }
+  }
+
   Future<void> refresh(String plantId) async {
     await loadPlant(plantId);
   }
@@ -239,6 +293,7 @@ class PlantDetailsProvider {
   Future<void> loadPlant(String plantId) => _notifier.loadPlant(plantId);
   Future<void> reloadPlant(String plantId) => _notifier.reloadPlant(plantId);
   Future<bool> deletePlant() => _notifier.deletePlant();
+  Future<void> updatePlantImage(String plantId, String imageBase64) => _notifier.updatePlantImage(plantId, imageBase64);
   void clearError() => _notifier.clearError();
 }
 

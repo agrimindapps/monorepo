@@ -301,8 +301,8 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       width: widget.width,
       height: widget.height,
       fit: widget.fit,
-      cacheWidth: widget.width.round(),
-      cacheHeight: widget.height.round(),
+      cacheWidth: widget.width.isFinite ? widget.width.round() : null,
+      cacheHeight: widget.height.isFinite ? widget.height.round() : null,
       gaplessPlayback: true,
       errorBuilder: (context, error, stackTrace) => _buildErrorWidget(),
     );
@@ -320,10 +320,12 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       fit: widget.fit,
       placeholder: (context, url) => _buildPlaceholder(),
       errorWidget: (context, url, error) => _buildErrorWidget(),
-      memCacheWidth: widget.width.round(),
-      memCacheHeight: widget.height.round(),
-      maxWidthDiskCache: (widget.width * 2).round(),
-      maxHeightDiskCache: (widget.height * 2).round(),
+      memCacheWidth: widget.width.isFinite ? widget.width.round() : null,
+      memCacheHeight: widget.height.isFinite ? widget.height.round() : null,
+      maxWidthDiskCache:
+          widget.width.isFinite ? (widget.width * 2).round() : null,
+      maxHeightDiskCache:
+          widget.height.isFinite ? (widget.height * 2).round() : null,
       fadeInDuration: const Duration(milliseconds: 300),
       fadeOutDuration: const Duration(milliseconds: 100),
       useOldImageOnUrlChange: true,
@@ -338,11 +340,25 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
     return _buildDefaultPlaceholder();
   }
 
+  double _calculateIconSize() {
+    if (widget.width.isInfinite && widget.height.isInfinite) {
+      return 48.0;
+    }
+    if (widget.width.isInfinite) {
+      return widget.height / 4;
+    }
+    if (widget.height.isInfinite) {
+      return widget.width / 4;
+    }
+    return (widget.width + widget.height) / 8;
+  }
+
   Widget _buildDefaultPlaceholder() {
     final theme = Theme.of(context);
     final iconData =
         widget.placeholderIcon ??
         (widget.isPlantImage ? Icons.eco : Icons.image);
+    final iconSize = _calculateIconSize();
 
     if (widget.isPlantImage) {
       return Container(
@@ -362,7 +378,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
         ),
         child: Icon(
           iconData,
-          size: (widget.width + widget.height) / 8,
+          size: iconSize,
           color: theme.colorScheme.primary,
         ),
       );
@@ -378,7 +394,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       ),
       child: Icon(
         iconData,
-        size: (widget.width + widget.height) / 8,
+        size: iconSize,
         color: theme.colorScheme.primary.withValues(alpha: 0.5),
       ),
     );
@@ -390,6 +406,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
     }
 
     final theme = Theme.of(context);
+    final iconSize = _calculateIconSize();
 
     return Container(
       width: widget.width,
@@ -400,7 +417,7 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
       ),
       child: Icon(
         Icons.error_outline,
-        size: (widget.width + widget.height) / 8,
+        size: iconSize,
         color: theme.colorScheme.error,
       ),
     );

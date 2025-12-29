@@ -137,7 +137,7 @@ class _SidebarHeader extends StatelessWidget {
   }
 }
 
-/// Navigation section with clean hierarchy following Alphabank pattern  
+/// Navigation section with clean hierarchy following Alphabank pattern
 class _SidebarNavigationItems extends StatelessWidget {
   
   const _SidebarNavigationItems({required this.isCollapsed});
@@ -149,7 +149,7 @@ class _SidebarNavigationItems extends StatelessWidget {
     
     return ListView(
       padding: EdgeInsets.symmetric(
-        horizontal: isCollapsed ? 8 : 16, 
+        horizontal: isCollapsed ? 8 : 16,
         vertical: 8,
       ),
       children: [
@@ -176,6 +176,28 @@ class _SidebarNavigationItems extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         _SidebarNavigationItem(
+          icon: Icons.build_outlined,
+          activeIcon: Icons.build,
+          label: 'Ferramentas',
+          route: '/tools',
+          isActive: currentLocation.startsWith('/tools') || currentLocation.startsWith('/reports'),
+          isCollapsed: isCollapsed,
+        ),
+        // Seção de Ações
+        if (!isCollapsed) ...[
+          Padding(
+            padding: const EdgeInsets.only(left: 8, bottom: 16, top: 24),
+            child: Text(
+              'Ações',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+        ],
+        _SidebarNavigationItem(
           icon: Icons.directions_car_outlined,
           activeIcon: Icons.directions_car,
           label: 'Veículos',
@@ -185,11 +207,38 @@ class _SidebarNavigationItems extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         _SidebarNavigationItem(
+          icon: Icons.local_gas_station_outlined,
+          activeIcon: Icons.local_gas_station,
+          label: 'Abastecimento',
+          route: '/fuel',
+          isActive: currentLocation.startsWith('/fuel'),
+          isCollapsed: isCollapsed,
+        ),
+        const SizedBox(height: 4),
+        _SidebarNavigationItem(
           icon: Icons.build_outlined,
           activeIcon: Icons.build,
-          label: 'Ferramentas',
-          route: '/tools',
-          isActive: currentLocation.startsWith('/tools') || currentLocation.startsWith('/reports'),
+          label: 'Manutenção',
+          route: '/maintenance',
+          isActive: currentLocation.startsWith('/maintenance'),
+          isCollapsed: isCollapsed,
+        ),
+        const SizedBox(height: 4),
+        _SidebarNavigationItem(
+          icon: Icons.attach_money_outlined,
+          activeIcon: Icons.attach_money,
+          label: 'Despesa',
+          route: '/expenses',
+          isActive: currentLocation.startsWith('/expenses'),
+          isCollapsed: isCollapsed,
+        ),
+        const SizedBox(height: 4),
+        _SidebarNavigationItem(
+          icon: Icons.speed_outlined,
+          activeIcon: Icons.speed,
+          label: 'Odômetro',
+          route: '/odometer',
+          isActive: currentLocation.startsWith('/odometer'),
           isCollapsed: isCollapsed,
         ),
       ],

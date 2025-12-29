@@ -69,7 +69,7 @@ class LocalImageStorageService {
     final image = await _vehicleImagesRepository.getPrimaryImage(vehicleId);
     if (image == null) return null;
 
-    return _bytesToBase64DataUrl(image.imageData, image.mimeType);
+    return 'data:${image.mimeType};base64,${image.imageBase64}';
   }
 
   /// Carrega uma imagem de veículo por ID como base64
@@ -77,7 +77,7 @@ class LocalImageStorageService {
     final image = await _vehicleImagesRepository.getImageById(imageId);
     if (image == null) return null;
 
-    return _bytesToBase64DataUrl(image.imageData, image.mimeType);
+    return 'data:${image.mimeType};base64,${image.imageBase64}';
   }
 
   /// Carrega todas as imagens de um veículo como base64
@@ -88,7 +88,7 @@ class LocalImageStorageService {
     return images
         .map(
           (VehicleImage img) =>
-              _bytesToBase64DataUrl(img.imageData, img.mimeType),
+              'data:${img.mimeType};base64,${img.imageBase64}',
         )
         .toList();
   }
@@ -99,7 +99,7 @@ class LocalImageStorageService {
         .watchImagesByVehicleId(vehicleId)
         .map(
           (List<VehicleImage> images) =>
-              images.map((VehicleImage img) => img.imageData).toList(),
+              images.map((VehicleImage img) => base64Decode(img.imageBase64)).toList(),
         );
   }
 
@@ -167,7 +167,7 @@ class LocalImageStorageService {
     );
     if (image == null) return null;
 
-    return _bytesToBase64DataUrl(image.imageData, image.mimeType);
+    return 'data:${image.mimeType};base64,${image.imageBase64}';
   }
 
   /// Carrega uma imagem de comprovante por ID como base64
@@ -175,7 +175,7 @@ class LocalImageStorageService {
     final image = await _receiptImagesRepository.getImageById(imageId);
     if (image == null) return null;
 
-    return _bytesToBase64DataUrl(image.imageData, image.mimeType);
+    return 'data:${image.mimeType};base64,${image.imageBase64}';
   }
 
   /// Stream de imagens de comprovante de uma entidade
@@ -187,7 +187,7 @@ class LocalImageStorageService {
         .watchImagesByEntity(entityType, entityId)
         .map(
           (List<ReceiptImage> images) =>
-              images.map((ReceiptImage img) => img.imageData).toList(),
+              images.map((ReceiptImage img) => base64Decode(img.imageBase64)).toList(),
         );
   }
 
@@ -222,11 +222,6 @@ class LocalImageStorageService {
     return base64;
   }
 
-  /// Converte bytes para data URL base64
-  String _bytesToBase64DataUrl(Uint8List bytes, String mimeType) {
-    final base64String = base64Encode(bytes);
-    return 'data:$mimeType;base64,$base64String';
-  }
 }
 
 /// Provider para LocalImageStorageService

@@ -617,13 +617,20 @@ class TasksRepositoryImpl implements TasksRepository {
       final taskResult = await getTaskById(id);
 
       return taskResult.fold((failure) => Left(failure), (task) async {
-        final completedTask = task.copyWithTaskData(
+        var completedTask = task.copyWithTaskData(
           status: TaskStatus.completed,
           completedAt: DateTime.now(),
           completionNotes: notes,
           // Se o usuário informou uma próxima data, usa ela
           nextDueDate: nextDueDate,
         );
+
+        // Se a tarefa não tem userId e temos um usuário logado, atribui
+        // Isso corrige tarefas legadas/locais ao serem completadas
+        final currentUserId = await _currentUserId;
+        if (completedTask.userId == null && currentUserId != null) {
+          completedTask = completedTask.withUserId(currentUserId);
+        }
 
         // Atualiza a tarefa atual como concluída
         final updateResult = await updateTask(completedTask);

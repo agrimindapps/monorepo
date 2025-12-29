@@ -19,10 +19,14 @@ class GasOMeterApp extends ConsumerStatefulWidget {
 
 class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     with WidgetsBindingObserver {
+  late final GoRouter _router;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Initialize router once, cache it to prevent rebuilds
+    _router = ref.read(appRouterProvider);
 
     // Start auto-sync when app initializes
     try {
@@ -113,7 +117,6 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
   @override
   Widget build(BuildContext context) {
-    final GoRouter router = ref.watch(appRouterProvider);
     final ThemeMode themeMode = ref.watch(gasometerThemeProvider);
 
     return MaterialApp.router(
@@ -121,7 +124,7 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
       theme: GasometerTheme.lightTheme,
       darkTheme: GasometerTheme.darkTheme,
       themeMode: themeMode,
-      routerConfig: router,
+      routerConfig: _router,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,

@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/constants/responsive_constants.dart';
 import '../../core/widgets/responsive_content_area.dart';
-import 'add_options_bottom_sheet.dart';
 import 'responsive_sidebar.dart';
 
 /// Main adaptive navigation shell that changes layout based on screen size
@@ -99,7 +98,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
       body: Row(
         children: [
           NavigationRail(
-            selectedIndex: widget.navigationShell.currentIndex,
+            selectedIndex: _getNavigationIndex(widget.navigationShell.currentIndex),
             onDestinationSelected: _onNavigationSelected,
             labelType: NavigationRailLabelType.selected,
             backgroundColor: Theme.of(context).colorScheme.surface, // Theme-aware surface
@@ -156,7 +155,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
     return Scaffold(
       body: widget.navigationShell,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: widget.navigationShell.currentIndex,
+        selectedIndex: _getNavigationIndex(widget.navigationShell.currentIndex),
         onDestinationSelected: _onNavigationSelected,
         destinations: _getNavigationDestinations(),
       ),
@@ -165,28 +164,80 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   
   /// Handle navigation selection
   void _onNavigationSelected(int index) {
-    // Index 2 is the "Add" button - show bottom sheet instead of navigating
-    if (index == 2) {
-      _showAddOptionsBottomSheet();
-      return;
-    }
+    // Mapeia índice da navegação para índice do branch correto
+    final branchIndex = _getBranchIndex(index);
 
     widget.navigationShell.goBranch(
-      index,
-      initialLocation: index == widget.navigationShell.currentIndex,
+      branchIndex,
+      initialLocation: branchIndex == widget.navigationShell.currentIndex,
     );
   }
 
-  /// Show bottom sheet with add options
-  void _showAddOptionsBottomSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AddOptionsBottomSheet(),
-    );
+  /// Mapeia índice da navegação para índice do branch do router
+  int _getBranchIndex(int navigationIndex) {
+    if (ResponsiveLayout.isMobile(context)) {
+      // Mobile: Timeline(0), Vehicles(1), Add(2-interceptado), Tools(3), Settings(4)
+      // Branches: Timeline(0), Vehicles(1), Add(2), Tools(3), Settings(4), Fuel(5), Maintenance(6), Expenses(7), Odometer(8)
+      switch (navigationIndex) {
+        case 0: return 0; // Timeline
+        case 1: return 1; // Vehicles
+        case 2: return 2; // Add (não deve chegar aqui, interceptado antes)
+        case 3: return 3; // Tools
+        case 4: return 4; // Settings
+        default: return 0;
+      }
+    } else {
+      // Desktop/Tablet: usa o índice direto do navigation rail
+      // Rail: Timeline(0), Tools(1), Vehicles(2), Fuel(3), Maintenance(4), Expenses(5), Odometer(6), Settings(7)
+      // Branches: Timeline(0), Vehicles(1), Add(2), Tools(3), Settings(4), Fuel(5), Maintenance(6), Expenses(7), Odometer(8)
+      switch (navigationIndex) {
+        case 0: return 0; // Timeline
+        case 1: return 3; // Tools
+        case 2: return 1; // Vehicles
+        case 3: return 5; // Fuel
+        case 4: return 6; // Maintenance
+        case 5: return 7; // Expenses
+        case 6: return 8; // Odometer
+        case 7: return 4; // Settings
+        default: return 0;
+      }
+    }
   }
-  
+
+  /// Mapeia índice do branch para índice da navegação (inverso)
+  int _getNavigationIndex(int branchIndex) {
+    if (ResponsiveLayout.isMobile(context)) {
+      // Branches → Mobile Navigation
+      switch (branchIndex) {
+        case 0: return 0; // Timeline
+        case 1: return 1; // Vehicles
+        case 3: return 3; // Tools
+        case 4: return 4; // Settings
+        // Branches que não estão na bottom nav retornam 0 (Timeline)
+        case 2: return 2; // Add
+        case 5: return 0; // Fuel → Timeline
+        case 6: return 0; // Maintenance → Timeline
+        case 7: return 0; // Expenses → Timeline
+        case 8: return 0; // Odometer → Timeline
+        default: return 0;
+      }
+    } else {
+      // Branches → Desktop/Tablet Rail
+      switch (branchIndex) {
+        case 0: return 0; // Timeline
+        case 3: return 1; // Tools
+        case 1: return 2; // Vehicles
+        case 5: return 3; // Fuel
+        case 6: return 4; // Maintenance
+        case 7: return 5; // Expenses
+        case 8: return 6; // Odometer
+        case 4: return 7; // Settings
+        case 2: return 0; // Add → Timeline (não deve acontecer)
+        default: return 0;
+      }
+    }
+  }
+
   /// Get navigation destinations for rail layout
   List<NavigationRailDestination> _getNavigationRailDestinations() {
     return const [
@@ -196,19 +247,34 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         label: Text('Timeline'),
       ),
       NavigationRailDestination(
+        icon: Icon(Icons.build_outlined),
+        selectedIcon: Icon(Icons.build),
+        label: Text('Ferramentas'),
+      ),
+      NavigationRailDestination(
         icon: Icon(Icons.directions_car_outlined),
         selectedIcon: Icon(Icons.directions_car),
         label: Text('Veículos'),
       ),
       NavigationRailDestination(
-        icon: Icon(Icons.add_circle_outline),
-        selectedIcon: Icon(Icons.add_circle),
-        label: Text('Adicionar'),
+        icon: Icon(Icons.local_gas_station_outlined),
+        selectedIcon: Icon(Icons.local_gas_station),
+        label: Text('Abastecimento'),
       ),
       NavigationRailDestination(
         icon: Icon(Icons.build_outlined),
         selectedIcon: Icon(Icons.build),
-        label: Text('Ferramentas'),
+        label: Text('Manutenção'),
+      ),
+      NavigationRailDestination(
+        icon: Icon(Icons.attach_money_outlined),
+        selectedIcon: Icon(Icons.attach_money),
+        label: Text('Despesa'),
+      ),
+      NavigationRailDestination(
+        icon: Icon(Icons.speed_outlined),
+        selectedIcon: Icon(Icons.speed),
+        label: Text('Odômetro'),
       ),
       NavigationRailDestination(
         icon: Icon(Icons.settings_outlined),
@@ -218,7 +284,7 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
     ];
   }
   
-  /// Get navigation destinations for NavigationBar
+  /// Get navigation destinations for NavigationBar (Mobile)
   List<NavigationDestination> _getNavigationDestinations() {
     return const [
       NavigationDestination(
@@ -232,9 +298,9 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         label: 'Veículos',
       ),
       NavigationDestination(
-        icon: Icon(Icons.add_circle_outline),
-        selectedIcon: Icon(Icons.add_circle),
-        label: 'Adicionar',
+        icon: Icon(Icons.grid_view_outlined),
+        selectedIcon: Icon(Icons.grid_view),
+        label: 'Atividades',
       ),
       NavigationDestination(
         icon: Icon(Icons.build_outlined),
@@ -287,8 +353,14 @@ class NavigationUtils {
         return 'Timeline';
       case '/vehicles':
         return 'Veículos';
-      case '/add':
-        return 'Adicionar';
+      case '/fuel':
+        return 'Abastecimento';
+      case '/maintenance':
+        return 'Manutenção';
+      case '/expenses':
+        return 'Despesa';
+      case '/odometer':
+        return 'Odômetro';
       case '/tools':
         return 'Ferramentas';
       case '/reports':
@@ -308,8 +380,14 @@ class NavigationUtils {
         return selected ? Icons.timeline : Icons.timeline_outlined;
       case '/vehicles':
         return selected ? Icons.directions_car : Icons.directions_car_outlined;
-      case '/add':
-        return selected ? Icons.add_circle : Icons.add_circle_outline;
+      case '/fuel':
+        return selected ? Icons.local_gas_station : Icons.local_gas_station_outlined;
+      case '/maintenance':
+        return selected ? Icons.build : Icons.build_outlined;
+      case '/expenses':
+        return selected ? Icons.attach_money : Icons.attach_money_outlined;
+      case '/odometer':
+        return selected ? Icons.speed : Icons.speed_outlined;
       case '/tools':
         return selected ? Icons.build : Icons.build_outlined;
       case '/reports':

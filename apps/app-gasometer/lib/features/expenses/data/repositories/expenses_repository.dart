@@ -128,6 +128,31 @@ class ExpensesRepository implements IExpensesRepository {
   }
 
   @override
+  Future<List<ExpenseEntity>> getRecentExpenses(
+    String vehicleId, {
+    int limit = 3,
+  }) async {
+    try {
+      final result = await UnifiedSyncManager.instance.findAll<ExpenseEntity>(
+        _appName,
+      );
+
+      return result.fold((failure) => <ExpenseEntity>[], (allExpenses) {
+        // Filtrar por vehicleId, ordenar por data DESC e aplicar limite
+        final filteredExpenses =
+            allExpenses
+                .where((expense) => expense.vehicleId == vehicleId)
+                .toList()
+              ..sort((a, b) => b.date.compareTo(a.date));
+
+        return filteredExpenses.take(limit).toList();
+      });
+    } catch (e) {
+      return <ExpenseEntity>[];
+    }
+  }
+
+  @override
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type) async {
     try {
       final result = await UnifiedSyncManager.instance.findAll<ExpenseEntity>(

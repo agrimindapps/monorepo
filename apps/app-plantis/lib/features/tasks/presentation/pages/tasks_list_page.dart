@@ -659,7 +659,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
 
     if (result != null && context.mounted) {
       try {
-        await ref
+        final success = await ref
             .read(tasksNotifierProvider.notifier)
             .completeTask(
               task.id,
@@ -668,13 +668,27 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
             );
 
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Tarefa "${task.title}" concluída com sucesso!'),
-              backgroundColor: Colors.green,
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          if (success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Tarefa "${task.title}" concluída com sucesso!'),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          } else {
+            // Se falhou, verifica se tem mensagem de erro no estado
+            final state = ref.read(tasksNotifierProvider).asData?.value;
+            final errorMessage = state?.errorMessage ?? 'Erro ao concluir tarefa. Tente novamente.';
+            
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
         }
       } catch (e) {
         if (context.mounted) {

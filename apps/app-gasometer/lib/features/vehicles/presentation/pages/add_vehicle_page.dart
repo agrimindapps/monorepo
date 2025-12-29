@@ -19,13 +19,10 @@ import '../widgets/form_sections/vehicle_photo_section.dart';
 import '../widgets/form_sections/vehicle_technical_section.dart';
 
 class AddVehiclePage extends ConsumerStatefulWidget {
-  const AddVehiclePage({
-    super.key,
-    this.vehicle,
-    this.initialMode,
-  });
-  
+  const AddVehiclePage({super.key, this.vehicle, this.initialMode});
+
   final VehicleEntity? vehicle;
+
   /// Modo inicial do dialog. Se não fornecido:
   /// - Se vehicle == null: DialogMode.create
   /// - Se vehicle != null: DialogMode.view
@@ -42,7 +39,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   final Map<String, GlobalKey> _fieldKeys = {};
   final Map<String, FocusNode> _focusNodes = {};
   bool _isInitialized = false;
-  
+
   /// Modo atual do dialog
   late DialogMode _currentMode;
 
@@ -56,10 +53,10 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   void initState() {
     super.initState();
     _currentMode = _initialMode;
-    
+
     // Inicializa field keys e focus nodes IMEDIATAMENTE
     _initializeFieldKeysAndFocusNodes();
-    
+
     // Inicializa o form notifier após o primeiro frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -68,7 +65,18 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
   }
 
   void _initializeFieldKeysAndFocusNodes() {
-    final fields = ['marca', 'modelo', 'ano', 'cor', 'odometro', 'placa', 'chassi', 'renavam', 'observacoes', 'combustivel'];
+    final fields = [
+      'marca',
+      'modelo',
+      'ano',
+      'cor',
+      'odometro',
+      'placa',
+      'chassi',
+      'renavam',
+      'observacoes',
+      'combustivel',
+    ];
     for (final field in fields) {
       _fieldKeys[field] = GlobalKey();
       _focusNodes[field] = FocusNode();
@@ -233,7 +241,7 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
 
     return FormDialog(
       title: _currentMode.titleFor('Veículo'),
-      subtitle: isViewMode 
+      subtitle: isViewMode
           ? '${widget.vehicle?.brand ?? ''} ${widget.vehicle?.model ?? ''}'
           : 'Preencha os dados do veículo',
       headerIcon: Icons.directions_car,
@@ -264,10 +272,12 @@ class _AddVehiclePageState extends ConsumerState<AddVehiclePage>
               modelFocusNode: _focusNodes['modelo']!,
               yearFocusNode: _focusNodes['ano']!,
               colorFocusNode: _focusNodes['cor']!,
-              onYearChanged: isEditable ? (value) {
-                notifier.yearController.text = value?.toString() ?? '';
-                notifier.markAsChanged();
-              } : null,
+              onYearChanged: isEditable
+                  ? (value) {
+                      notifier.yearController.text = value?.toString() ?? '';
+                      notifier.markAsChanged();
+                    }
+                  : null,
               isReadOnly: isViewMode,
             ),
             const SizedBox(height: GasometerDesignTokens.spacingSectionSpacing),

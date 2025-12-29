@@ -61,7 +61,7 @@ class PlantImagesDriftRepository {
 
     final companion = PlantImagesCompanion(
       plantId: Value(plantId),
-      imageData: Value(processed.bytes),
+      imageBase64: Value(base64Encode(processed.bytes)),
       fileName: Value(fileName),
       mimeType: Value(processed.mimeType),
       sizeBytes: Value(processed.sizeBytes),
@@ -96,12 +96,12 @@ class PlantImagesDriftRepository {
       await _clearPrimaryFlag(plantId);
     }
 
-    // Converter base64 para bytes
-    final bytes = base64Decode(imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), ''));
+    // Remover prefixo data URI se existir, mantendo apenas base64 puro
+    final pureBase64 = imageBase64.replaceAll(RegExp(r'^data:image\/[^;]+;base64,'), '');
 
     final companion = PlantImagesCompanion(
       plantId: Value(plantId),
-      imageData: Value(bytes),
+      imageBase64: Value(pureBase64),
       fileName: Value(fileName),
       mimeType: Value(mimeType),
       sizeBytes: Value(sizeBytes),

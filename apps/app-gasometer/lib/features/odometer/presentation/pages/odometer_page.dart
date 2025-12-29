@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
@@ -14,6 +15,11 @@ import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_notifier.dart';
 import '../providers/odometer_state.dart';
 import 'odometer_form_page.dart';
+import 'package:core/core.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+
 
 class OdometerPage extends ConsumerStatefulWidget {
   const OdometerPage({super.key});
@@ -87,6 +93,13 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         ),
         child: Row(
           children: [
+            // Botão de voltar
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => context.pop(),
+              tooltip: 'Voltar',
+            ),
+            const SizedBox(width: 4),
             Semantics(
               label: 'Seção de odômetro',
               hint:

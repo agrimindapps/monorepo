@@ -5,9 +5,11 @@ import 'package:intl/intl.dart';
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
+import '../../../../core/widgets/responsive_content_area.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
+import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/maintenance_entity.dart';
@@ -31,40 +33,80 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     final vehiclesAsync = ref.watch(vehiclesProvider);
     final maintenanceState = ref.watch(maintenancesProvider);
 
-    return SafeArea(
-      child: Column(
-        children: [
-          _buildHeader(context),
-          _buildVehicleSelector(context),
-          if (_selectedVehicleId != null &&
-              (vehiclesAsync.value?.isNotEmpty ?? false))
-            _buildMonthSelector(maintenanceState),
-          Expanded(
-            child: vehiclesAsync.when(
-              data: (vehicles) {
-                if (_selectedVehicleId == null) {
-                  return _buildSelectVehicleState();
-                }
-                return _buildContent(context, maintenanceState);
-              },
-              loading: () => const StandardLoadingView(
-                message: 'Carregando veículos...',
-                showProgress: true,
-              ),
-              error: (error, _) => EnhancedEmptyState(
-                title: 'Erro ao carregar veículos',
-                description: error.toString(),
-                icon: Icons.error_outline,
-                actionLabel: 'Tentar novamente',
-                onAction: () {
-                  ref.read(vehiclesProvider.notifier).refresh();
-                },
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header (sempre visível - mobile e desktop)
+            _buildHeader(context),
+
+            Expanded(
+              child: ResponsiveContentArea(
+                child: Column(
+                  children: [
+                    _buildVehicleSelector(context),
+
+                    if (_selectedVehicleId != null &&
+                        (vehiclesAsync.value?.isNotEmpty ?? false))
+                      _buildMonthSelector(maintenanceState),
+
+                    Expanded(
+                      child: vehiclesAsync.when(
+                        data: (vehicles) {
+                          if (_selectedVehicleId == null) {
+                            return _buildSelectVehicleState();
+                          }
+                          return _buildContent(context, maintenanceState);
+                        },
+                        loading: () => const StandardLoadingView(
+                          message: 'Carregando veículos...',
+                          showProgress: true,
+                        ),
+                        error: (error, _) => EnhancedEmptyState(
+                          title: 'Erro ao carregar veículos',
+                          description: error.toString(),
+                          icon: Icons.error_outline,
+                          actionLabel: 'Tentar novamente',
+                          onAction: () {
+                            ref.read(vehiclesProvider.notifier).refresh();
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      floatingActionButton: AdaptiveFloatingActionButton(
+        onPressed: _addMaintenance,
+        tooltip: 'Adicionar manutenção',
+        child: const Icon(Icons.add),
       ),
     );
+  }
+
+  /// Adicionar nova manutenção
+  void _addMaintenance() {
+    if (_selectedVehicleId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione um veículo primeiro'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    showDialog<bool>(
+      context: context,
+      builder: (context) => AddMaintenancePage(vehicleId: _selectedVehicleId!),
+    ).then((result) {
+      if (result == true) {
+        ref.read(maintenancesProvider.notifier).loadMaintenances();
+      }
+    });
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -87,6 +129,13 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         ),
         child: Row(
           children: [
+            // Botão de voltar
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => context.pop(),
+              tooltip: 'Voltar',
+            ),
+            const SizedBox(width: 4),
             Semantics(
               label: 'Seção de manutenções',
               hint: 'Página principal para gerenciar manutenções',
@@ -509,40 +558,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
             .loadMaintenancesByVehicle(_selectedVehicleId!);
       }
     });
-  }
-
-  Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesProvider);
-    final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
-    final isEnabled = hasVehicles && _selectedVehicleId != null;
-
-    return FloatingActionButton(
-      onPressed: () {
-        if (_selectedVehicleId == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Selecione um veículo primeiro'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          return;
-        }
-        showDialog<bool>(
-          context: context,
-          builder: (context) =>
-              AddMaintenancePage(vehicleId: _selectedVehicleId),
-        ).then((result) {
-          if (result == true && _selectedVehicleId != null) {
-            ref
-                .read(maintenancesProvider.notifier)
-                .loadMaintenancesByVehicle(_selectedVehicleId!);
-          }
-        });
-      },
-      backgroundColor: isEnabled ? null : Theme.of(context).colorScheme.surfaceContainerHighest,
-      tooltip: 'Adicionar manutenção',
-      child: const Icon(Icons.add),
-    );
   }
 
   Widget _buildSelectVehicleState() {

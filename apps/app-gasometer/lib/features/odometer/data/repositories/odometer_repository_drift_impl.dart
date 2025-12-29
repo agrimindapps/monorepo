@@ -342,6 +342,21 @@ class OdometerRepositoryDriftImpl implements OdometerRepository {
   }
 
   @override
+  Future<Either<Failure, List<OdometerEntity>>> getRecentOdometerRecords(
+    String vehicleId, {
+    int limit = 3,
+  }) async {
+    try {
+      final vehicleIdInt = int.parse(vehicleId);
+      final dataList = await _dataSource.findRecent(vehicleIdInt, limit: limit);
+      final entities = dataList.map(_toEntity).toList();
+      return Right(entities);
+    } catch (e) {
+      return Left(CacheFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, OdometerEntity?>> getLastOdometerReading(
     String vehicleId,
   ) async {

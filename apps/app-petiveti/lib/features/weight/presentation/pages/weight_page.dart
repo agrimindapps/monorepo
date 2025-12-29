@@ -45,6 +45,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               icon: Icons.monitor_weight,
               title: 'Controle de Peso',
               subtitle: 'Acompanhe o peso dos pets',
+              showBackButton: true,
               actions: [
                 _buildMoreOptionsPopup(weightsState),
               ],

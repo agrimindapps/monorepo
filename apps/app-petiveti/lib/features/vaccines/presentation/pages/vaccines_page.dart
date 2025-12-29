@@ -58,6 +58,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
               icon: Icons.vaccines,
               title: 'Vacinas',
               subtitle: 'Controle de vacinação dos pets',
+              showBackButton: true,
               actions: [
                 _buildHeaderAction(
                   icon: _showCalendarView ? Icons.list : Icons.calendar_view_month,

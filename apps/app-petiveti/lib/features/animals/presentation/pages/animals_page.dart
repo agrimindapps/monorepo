@@ -2,7 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/constants/animals_constants.dart';
-import '../widgets/animals_app_bar.dart';
+import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../widgets/animals_body.dart';
 import '../widgets/animals_error_handler.dart';
 import '../widgets/animals_list_controller.dart';
@@ -42,19 +42,45 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
     super.build(context); // Required for AutomaticKeepAliveClientMixin
     
     return Scaffold(
-      appBar: const AnimalsAppBar(),
-      body: Stack(
-        children: [
-          AnimalsBody(
-            onAddAnimal: _listController.addAnimal,
-            onViewAnimalDetails: _listController.viewAnimalDetails,
-            onEditAnimal: _listController.editAnimal,
-            onDeleteAnimal: _listController.deleteAnimal,
-          ),
-          AnimalsErrorHandler(
-            coordinator: _coordinator,
-          ),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            PetivetiPageHeader(
+              icon: Icons.pets,
+              title: AnimalsConstants.myPets,
+              subtitle: 'Gerencie seus animais de estimação',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.search, color: Colors.white),
+                  onPressed: () {
+                    // TODO: Implementar busca
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.filter_list, color: Colors.white),
+                  onPressed: () {
+                    // TODO: Implementar filtros
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: Stack(
+                children: [
+                  AnimalsBody(
+                    onAddAnimal: _listController.addAnimal,
+                    onViewAnimalDetails: _listController.viewAnimalDetails,
+                    onEditAnimal: _listController.editAnimal,
+                    onDeleteAnimal: _listController.deleteAnimal,
+                  ),
+                  AnimalsErrorHandler(
+                    coordinator: _coordinator,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: Semantics(
         label: AnimalsConstants.addNewPetSemantic,

@@ -181,6 +181,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
                   ? MedicationsConstants.petMedicationsTitle
                   : MedicationsConstants.allMedicationsTitle,
               subtitle: 'Controle de medicamentos',
+              showBackButton: true,
               actions: [
                 _buildHeaderAction(
                   icon: Icons.refresh,

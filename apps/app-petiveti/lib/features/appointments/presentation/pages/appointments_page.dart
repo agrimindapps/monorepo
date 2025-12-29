@@ -94,7 +94,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
                 icon: Icons.calendar_month,
                 title: 'Consultas',
                 subtitle: 'Agendamentos veterinários',
-                showBackButton: false,
+                showBackButton: true,
                 actions: [
                   _buildHeaderAction(
                     icon: Icons.refresh,

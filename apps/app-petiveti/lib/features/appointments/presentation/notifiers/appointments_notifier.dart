@@ -71,6 +71,8 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
 
     final result = await _getAppointments(GetAppointmentsParams(animalId: animalId));
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,
@@ -89,6 +91,8 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
       GetUpcomingAppointmentsParams(animalId: animalId),
     );
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(errorMessage: failure.message),
       (upcomingAppointments) => state = state.copyWith(
@@ -102,6 +106,8 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _getAppointmentById(GetAppointmentByIdParams(id: id));
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(
@@ -120,6 +126,8 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _addAppointment(AddAppointmentParams(appointment: appointment));
+
+    if (!ref.mounted) return false;
 
     return result.fold(
       (failure) {
@@ -144,6 +152,8 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _updateAppointment(UpdateAppointmentParams(appointment: appointment));
+
+    if (!ref.mounted) return false;
 
     return result.fold(
       (failure) {
@@ -173,6 +183,8 @@ class AppointmentsNotifier extends _$AppointmentsNotifier {
     state = state.copyWith(isLoading: true, clearError: true);
 
     final result = await _deleteAppointment(DeleteAppointmentParams(id: id));
+
+    if (!ref.mounted) return false;
 
     return result.fold(
       (failure) {

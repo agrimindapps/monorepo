@@ -41,25 +41,30 @@ class _WeightPageState extends ConsumerState<WeightPage> {
       body: SafeArea(
         child: Column(
           children: [
-            PetivetiPageHeader(
-              icon: Icons.monitor_weight,
-              title: 'Controle de Peso',
-              subtitle: 'Acompanhe o peso dos pets',
-              showBackButton: true,
-              actions: [
-                _buildMoreOptionsPopup(weightsState),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: PetivetiPageHeader(
+                icon: Icons.monitor_weight,
+                title: 'Controle de Peso',
+                subtitle: 'Acompanhe o peso dos pets',
+                showBackButton: true,
+                actions: [
+                  _buildMoreOptionsPopup(weightsState),
+                ],
+              ),
             ),
             _buildAnimalSelector(),
             Expanded(child: _buildBody(context, weightsState, animalsState)),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddWeight(context),
-        tooltip: 'Adicionar Registro de Peso',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedAnimalId != null
+          ? FloatingActionButton(
+              onPressed: () => _navigateToAddWeight(context),
+              tooltip: 'Adicionar Registro de Peso',
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 

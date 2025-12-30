@@ -181,6 +181,8 @@ class AnimalsNotifier extends _$AnimalsNotifier with OptimisticDeleteMixin<Anima
     final getAnimals = ref.read(getAnimalsProvider);
     final result = await getAnimals(const local.NoParams());
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) {
         // logger.logError(
@@ -220,6 +222,8 @@ class AnimalsNotifier extends _$AnimalsNotifier with OptimisticDeleteMixin<Anima
     final addAnimal = ref.read(addAnimalProvider);
     final result = await addAnimal(animal);
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
@@ -249,6 +253,8 @@ class AnimalsNotifier extends _$AnimalsNotifier with OptimisticDeleteMixin<Anima
     final updateAnimal = ref.read(updateAnimalProvider);
     final result = await updateAnimal(animal);
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
@@ -262,6 +268,8 @@ class AnimalsNotifier extends _$AnimalsNotifier with OptimisticDeleteMixin<Anima
   Future<void> deleteAnimal(String id) async {
     final deleteAnimal = ref.read(deleteAnimalProvider);
     final result = await deleteAnimal(id);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),

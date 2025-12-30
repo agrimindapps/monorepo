@@ -154,6 +154,8 @@ class WeightsNotifier extends _$WeightsNotifier {
     final getWeights = ref.read(getWeightsProvider);
     final result = await getWeights(const local.NoParams());
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) =>
           state = state.copyWith(isLoading: false, error: failure.message),
@@ -175,6 +177,8 @@ class WeightsNotifier extends _$WeightsNotifier {
 
     final getWeightsByAnimalId = ref.read(getWeightsByAnimalIdProvider);
     final result = await getWeightsByAnimalId(animalId);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) =>
@@ -198,6 +202,8 @@ class WeightsNotifier extends _$WeightsNotifier {
   Future<void> addWeight(Weight weight) async {
     final addWeight = ref.read(addWeightProvider);
     final result = await addWeight(weight);
+
+    if (!ref.mounted) return;
 
     result.fold((failure) => state = state.copyWith(error: failure.message), (
       _,
@@ -226,6 +232,8 @@ class WeightsNotifier extends _$WeightsNotifier {
   Future<void> updateWeight(Weight weight) async {
     final updateWeight = ref.read(updateWeightProvider);
     final result = await updateWeight(weight);
+
+    if (!ref.mounted) return;
 
     result.fold((failure) => state = state.copyWith(error: failure.message), (
       _,
@@ -256,6 +264,8 @@ class WeightsNotifier extends _$WeightsNotifier {
   Future<void> deleteWeight(String id) async {
     final deleteWeight = ref.read(deleteWeightProvider);
     final result = await deleteWeight(id);
+
+    if (!ref.mounted) return;
 
     result.fold((failure) => state = state.copyWith(error: failure.message), (
       _,

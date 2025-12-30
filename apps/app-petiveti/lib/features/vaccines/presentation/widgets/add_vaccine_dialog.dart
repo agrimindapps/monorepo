@@ -148,6 +148,11 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
   }
 
   Widget _buildAnimalSection(List<Animal> animals) {
+    // Se já temos um animal pré-selecionado, não mostrar o seletor
+    if (widget.initialAnimalId != null && !_isEditing) {
+      return const SizedBox.shrink();
+    }
+    
     if (animals.isEmpty) return const SizedBox.shrink();
 
     return FormSectionWidget(

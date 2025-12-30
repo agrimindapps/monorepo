@@ -53,18 +53,21 @@ class _RemindersPageState extends ConsumerState<RemindersPage>
       body: SafeArea(
         child: Column(
           children: [
-            PetivetiPageHeader(
-              icon: RemindersIcons.listIcon,
-              title: RemindersConstants.pageTitle,
-              subtitle: 'Gerencie seus lembretes',
-              showBackButton: false,
-              actions: [
-                _buildHeaderAction(
-                  icon: RemindersIcons.refreshIcon,
-                  onTap: _loadReminders,
-                  tooltip: RemindersConstants.refreshLabel,
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: PetivetiPageHeader(
+                icon: RemindersIcons.listIcon,
+                title: RemindersConstants.pageTitle,
+                subtitle: 'Gerencie seus lembretes',
+                showBackButton: false,
+                actions: [
+                  _buildHeaderAction(
+                    icon: RemindersIcons.refreshIcon,
+                    onTap: _loadReminders,
+                    tooltip: RemindersConstants.refreshLabel,
+                  ),
+                ],
+              ),
             ),
             _buildTabBar(state),
             Expanded(

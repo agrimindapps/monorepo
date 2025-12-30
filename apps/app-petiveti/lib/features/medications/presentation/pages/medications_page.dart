@@ -74,11 +74,13 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddMedication(context),
-        tooltip: 'Adicionar medicamento',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: (_selectedAnimalId != null || widget.animalId != null)
+          ? FloatingActionButton(
+              onPressed: () => _navigateToAddMedication(context),
+              tooltip: 'Adicionar medicamento',
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 

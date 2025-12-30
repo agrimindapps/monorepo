@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../shared/widgets/petiveti_page_header.dart';
+
 /// Página de Ferramentas que agrupa calculadoras, lembretes e outras utilidades
 class ToolsPage extends StatelessWidget {
   const ToolsPage({super.key});
@@ -8,108 +10,121 @@ class ToolsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ferramentas'),
-        elevation: 0,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // Lembretes como primeiro item destacado
-          _buildHighlightedTool(
-            context,
-            title: 'Lembretes',
-            subtitle: 'Gerencie lembretes de vacinas, medicamentos e consultas',
-            icon: Icons.notifications_active,
-            color: Colors.orange,
-            route: '/reminders',
-          ),
-          const SizedBox(height: 24),
-          
-          _buildSection(
-            context,
-            title: 'Calculadoras',
-            icon: Icons.calculate,
-            color: Colors.blue,
-            tools: [
-              _ToolItem(
-                title: 'Calculadora de Calorias',
-                subtitle: 'Calcule as necessidades calóricas do seu pet',
-                icon: Icons.restaurant,
-                route: '/calculators/calorie',
+      body: SafeArea(
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: PetivetiPageHeader(
+                icon: Icons.build_circle,
+                title: 'Ferramentas',
+                subtitle: 'Calculadoras e utilidades',
+                showBackButton: false,
               ),
-              _ToolItem(
-                title: 'Peso Ideal',
-                subtitle: 'Descubra o peso ideal para seu pet',
-                icon: Icons.monitor_weight,
-                route: '/calculators/ideal-weight',
+            ),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  // Lembretes como primeiro item destacado
+                  _buildHighlightedTool(
+                    context,
+                    title: 'Lembretes',
+                    subtitle: 'Gerencie lembretes de vacinas, medicamentos e consultas',
+                    icon: Icons.notifications_active,
+                    color: Colors.orange,
+                    route: '/reminders',
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  _buildSection(
+                    context,
+                    title: 'Calculadoras',
+                    icon: Icons.calculate,
+                    color: Colors.blue,
+                    tools: [
+                      _ToolItem(
+                        title: 'Calculadora de Calorias',
+                        subtitle: 'Calcule as necessidades calóricas do seu pet',
+                        icon: Icons.restaurant,
+                        route: '/calculators/calorie',
+                      ),
+                      _ToolItem(
+                        title: 'Peso Ideal',
+                        subtitle: 'Descubra o peso ideal para seu pet',
+                        icon: Icons.monitor_weight,
+                        route: '/calculators/ideal-weight',
+                      ),
+                      _ToolItem(
+                        title: 'Exercícios',
+                        subtitle: 'Planeje exercícios adequados',
+                        icon: Icons.directions_run,
+                        route: '/calculators/exercise',
+                      ),
+                      _ToolItem(
+                        title: 'Idade do Pet',
+                        subtitle: 'Converta a idade do seu pet',
+                        icon: Icons.cake,
+                        route: '/calculators/animal-age',
+                      ),
+                      _ToolItem(
+                        title: 'Condição Corporal',
+                        subtitle: 'Avalie a condição física',
+                        icon: Icons.assignment,
+                        route: '/calculators/body-condition',
+                      ),
+                      _ToolItem(
+                        title: 'Hidratação',
+                        subtitle: 'Calcule necessidades de água',
+                        icon: Icons.water_drop,
+                        route: '/calculators/hydration',
+                      ),
+                      _ToolItem(
+                        title: 'Gestação',
+                        subtitle: 'Acompanhe a gestação',
+                        icon: Icons.pregnant_woman,
+                        route: '/calculators/pregnancy',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSection(
+                    context,
+                    title: 'Calculadoras Veterinárias',
+                    icon: Icons.medical_services,
+                    color: Colors.red,
+                    tools: [
+                      _ToolItem(
+                        title: 'Dosagem de Medicamentos',
+                        subtitle: 'Calcule dosagens precisas',
+                        icon: Icons.medication,
+                        route: '/calculators/medication-dosage',
+                      ),
+                      _ToolItem(
+                        title: 'Fluidoterapia',
+                        subtitle: 'Calcule necessidades de fluidos',
+                        icon: Icons.water,
+                        route: '/calculators/fluid-therapy',
+                      ),
+                      _ToolItem(
+                        title: 'Anestesia',
+                        subtitle: 'Cálculos para procedimentos',
+                        icon: Icons.healing,
+                        route: '/calculators/anesthesia',
+                      ),
+                      _ToolItem(
+                        title: 'Insulina para Diabetes',
+                        subtitle: 'Calcule doses de insulina',
+                        icon: Icons.bloodtype,
+                        route: '/calculators/diabetes-insulin',
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              _ToolItem(
-                title: 'Exercícios',
-                subtitle: 'Planeje exercícios adequados',
-                icon: Icons.directions_run,
-                route: '/calculators/exercise',
-              ),
-              _ToolItem(
-                title: 'Idade do Pet',
-                subtitle: 'Converta a idade do seu pet',
-                icon: Icons.cake,
-                route: '/calculators/animal-age',
-              ),
-              _ToolItem(
-                title: 'Condição Corporal',
-                subtitle: 'Avalie a condição física',
-                icon: Icons.assignment,
-                route: '/calculators/body-condition',
-              ),
-              _ToolItem(
-                title: 'Hidratação',
-                subtitle: 'Calcule necessidades de água',
-                icon: Icons.water_drop,
-                route: '/calculators/hydration',
-              ),
-              _ToolItem(
-                title: 'Gestação',
-                subtitle: 'Acompanhe a gestação',
-                icon: Icons.pregnant_woman,
-                route: '/calculators/pregnancy',
-              ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          _buildSection(
-            context,
-            title: 'Calculadoras Veterinárias',
-            icon: Icons.medical_services,
-            color: Colors.red,
-            tools: [
-              _ToolItem(
-                title: 'Dosagem de Medicamentos',
-                subtitle: 'Calcule dosagens precisas',
-                icon: Icons.medication,
-                route: '/calculators/medication-dosage',
-              ),
-              _ToolItem(
-                title: 'Fluidoterapia',
-                subtitle: 'Calcule necessidades de fluidos',
-                icon: Icons.water,
-                route: '/calculators/fluid-therapy',
-              ),
-              _ToolItem(
-                title: 'Anestesia',
-                subtitle: 'Cálculos para procedimentos',
-                icon: Icons.healing,
-                route: '/calculators/anesthesia',
-              ),
-              _ToolItem(
-                title: 'Insulina para Diabetes',
-                subtitle: 'Calcule doses de insulina',
-                icon: Icons.bloodtype,
-                route: '/calculators/diabetes-insulin',
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

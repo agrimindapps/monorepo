@@ -199,6 +199,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
       final result = await _getMedications(const local.NoParams());
 
+      if (!ref.mounted) return;
+
       result.fold(
         (failure) => state = state.copyWith(
           isLoading: false,
@@ -219,6 +221,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
       final result = await _getMedicationsByAnimalId(animalId);
 
+      if (!ref.mounted) return;
+
       result.fold(
         (failure) => state = state.copyWith(
           isLoading: false,
@@ -236,6 +240,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
   Future<void> loadActiveMedications() async {
     final result = await _getActiveMedications(const local.NoParams());
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (activeMedications) => state = state.copyWith(
@@ -248,6 +254,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
   Future<void> loadExpiringMedications() async {
     final result = await _getExpiringSoonMedications(const local.NoParams());
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (expiringMedications) => state = state.copyWith(
@@ -259,6 +267,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
   Future<void> addMedication(Medication medication) async {
     final result = await _addMedication(medication);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -276,6 +286,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
   Future<void> updateMedication(Medication medication) async {
     final result = await _updateMedication(medication);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -296,6 +308,8 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
   Future<void> deleteMedication(String id) async {
     final result = await _deleteMedication(id);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),

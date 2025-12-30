@@ -45,24 +45,27 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
       body: SafeArea(
         child: Column(
           children: [
-            PetivetiPageHeader(
-              icon: Icons.pets,
-              title: AnimalsConstants.myPets,
-              subtitle: 'Gerencie seus animais de estimação',
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.search, color: Colors.white),
-                  onPressed: () {
-                    // TODO: Implementar busca
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.filter_list, color: Colors.white),
-                  onPressed: () {
-                    // TODO: Implementar filtros
-                  },
-                ),
-              ],
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: PetivetiPageHeader(
+                icon: Icons.pets,
+                title: AnimalsConstants.myPets,
+                subtitle: 'Gerencie seus animais de estimação',
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.search, color: Colors.white),
+                    onPressed: () {
+                      // TODO: Implementar busca
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.filter_list, color: Colors.white),
+                    onPressed: () {
+                      // TODO: Implementar filtros
+                    },
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: Stack(

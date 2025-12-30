@@ -24,12 +24,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const PetivetiPageHeader(
-              icon: Icons.settings,
-              title: 'Configurações',
-              subtitle: 'Gerencie suas preferências',
-              semanticLabel: 'Seção de configurações',
-              semanticHint: 'Página principal para gerenciar preferências',
+            const Padding(
+              padding: EdgeInsets.all(8),
+              child: PetivetiPageHeader(
+                icon: Icons.settings,
+                title: 'Configurações',
+                subtitle: 'Gerencie suas preferências',
+                semanticLabel: 'Seção de configurações',
+                semanticHint: 'Página principal para gerenciar preferências',
+              ),
             ),
             Expanded(child: _buildContent(context)),
           ],

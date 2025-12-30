@@ -45,11 +45,13 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddVaccine(context),
-        tooltip: 'Adicionar Vacina',
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: _selectedAnimalId != null
+          ? FloatingActionButton(
+              onPressed: () => _navigateToAddVaccine(context),
+              tooltip: 'Adicionar Vacina',
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 

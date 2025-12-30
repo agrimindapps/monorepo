@@ -142,6 +142,11 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
   }
 
   Widget _buildAnimalSection(List<Animal> animals) {
+    // Se já temos um animal pré-selecionado, não mostrar o seletor
+    if (widget.initialAnimalId != null && !_isEditing) {
+      return const SizedBox.shrink();
+    }
+    
     return FormSectionWidget(
       title: 'Animal',
       icon: Icons.pets,

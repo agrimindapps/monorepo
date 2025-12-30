@@ -160,6 +160,8 @@ class RemindersNotifier extends _$RemindersNotifier {
     final todayResult = await _getTodayReminders(userId);
     final overdueResult = await _getOverdueReminders(userId);
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(
         isLoading: false,
@@ -193,6 +195,8 @@ class RemindersNotifier extends _$RemindersNotifier {
   Future<bool> addReminder(Reminder reminder) async {
     final result = await _addReminder(reminder);
 
+    if (!ref.mounted) return false;
+
     return result.fold(
       (failure) {
         state = state.copyWith(error: failure.message);
@@ -208,6 +212,8 @@ class RemindersNotifier extends _$RemindersNotifier {
   Future<bool> updateReminder(Reminder reminder) async {
     final result = await _updateReminder(reminder);
 
+    if (!ref.mounted) return false;
+
     return result.fold(
       (failure) {
         state = state.copyWith(error: failure.message);
@@ -222,6 +228,8 @@ class RemindersNotifier extends _$RemindersNotifier {
 
   Future<bool> completeReminder(String reminderId, String userId) async {
     final result = await _completeReminder(reminderId);
+
+    if (!ref.mounted) return false;
 
     return result.fold(
       (failure) {
@@ -243,6 +251,8 @@ class RemindersNotifier extends _$RemindersNotifier {
 
     final result = await _snoozeReminder(params);
 
+    if (!ref.mounted) return false;
+
     return result.fold(
       (failure) {
         state = state.copyWith(error: failure.message);
@@ -257,6 +267,8 @@ class RemindersNotifier extends _$RemindersNotifier {
 
   Future<bool> deleteReminder(String reminderId, String userId) async {
     final result = await _deleteReminder(reminderId);
+
+    if (!ref.mounted) return false;
 
     return result.fold(
       (failure) {

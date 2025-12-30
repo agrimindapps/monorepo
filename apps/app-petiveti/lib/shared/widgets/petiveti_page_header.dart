@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /// PetiVeti Page Header - Reusable header component for internal pages
 ///
@@ -16,6 +17,9 @@ class PetivetiPageHeader extends StatelessWidget {
   final List<Widget>? actions;
   final String? semanticLabel;
   final String? semanticHint;
+  /// Rota de fallback para navegação quando não há página anterior
+  /// Por padrão vai para /activities
+  final String fallbackRoute;
 
   const PetivetiPageHeader({
     super.key,
@@ -27,6 +31,7 @@ class PetivetiPageHeader extends StatelessWidget {
     this.actions,
     this.semanticLabel,
     this.semanticHint,
+    this.fallbackRoute = '/activities',
   });
 
   @override
@@ -111,7 +116,15 @@ class PetivetiPageHeader extends StatelessWidget {
       hint: 'Retornar para a página anterior',
       button: true,
       child: InkWell(
-        onTap: onBackPressed ?? () => Navigator.of(context).pop(),
+        onTap: onBackPressed ?? () {
+          // Tenta usar o Navigator.pop se houver histórico
+          // Caso contrário, usa GoRouter para ir para a rota de fallback
+          if (Navigator.of(context).canPop()) {
+            Navigator.of(context).pop();
+          } else {
+            context.go(fallbackRoute);
+          }
+        },
         borderRadius: BorderRadius.circular(9),
         child: Container(
           padding: const EdgeInsets.all(8),

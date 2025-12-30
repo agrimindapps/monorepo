@@ -247,6 +247,9 @@ class VaccinesNotifier extends _$VaccinesNotifier {
         getUpcomingVaccines(GetUpcomingVaccinesParams.all()),
       ]);
 
+      // Verificar se o provider ainda está montado após a operação assíncrona
+      if (!ref.mounted) return;
+
       final vaccinesResult = results[0];
       final overdueResult = results[1];
       final upcomingResult = results[2];
@@ -282,6 +285,7 @@ class VaccinesNotifier extends _$VaccinesNotifier {
         },
       );
     } catch (e) {
+      if (!ref.mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -291,6 +295,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
 
     final getVaccinesByAnimal = ref.read(getVaccinesByAnimalProvider);
     final result = await getVaccinesByAnimal(animalId);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(isLoading: false, error: failure.message),
@@ -305,6 +311,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   Future<void> addVaccine(Vaccine vaccine) async {
     final addVaccine = ref.read(addVaccineProvider);
     final result = await addVaccine(vaccine);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -337,6 +345,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
     final updateVaccine = ref.read(updateVaccineProvider);
     final result = await updateVaccine(vaccine);
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
@@ -356,6 +366,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
     final deleteVaccine = ref.read(deleteVaccineProvider);
     final result = await deleteVaccine(id);
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
@@ -371,6 +383,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
   Future<void> markAsCompleted(String id) async {
     final markVaccineCompleted = ref.read(markVaccineCompletedProvider);
     final result = await markVaccineCompleted(id);
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
@@ -392,6 +406,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
     final params = ScheduleVaccineReminderParams(vaccineId: vaccineId, reminderDate: reminderDate);
     final result = await scheduleVaccineReminder(params);
 
+    if (!ref.mounted) return;
+
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (updatedVaccine) {
@@ -411,6 +427,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
     final getVaccineById = ref.read(getVaccineByIdProvider);
     final result = await getVaccineById(id);
 
+    if (!ref.mounted) return null;
+
     return result.fold(
       (failure) {
         state = state.copyWith(error: failure.message);
@@ -429,6 +447,8 @@ class VaccinesNotifier extends _$VaccinesNotifier {
 
     final searchVaccines = ref.read(searchVaccinesProvider);
     final result = await searchVaccines(SearchVaccinesParams.global(query));
+
+    if (!ref.mounted) return;
 
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),

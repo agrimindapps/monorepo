@@ -84,13 +84,6 @@ class HomeFeatureGrid extends StatelessWidget {
         route: '/weight',
         color: Theme.of(context).colorScheme.surfaceTint,
       ),
-      FeatureCard(
-        icon: Icons.calculate,
-        title: 'Calculadoras',
-        subtitle: 'Ferramentas veterinárias',
-        route: '/calculators',
-        color: Theme.of(context).colorScheme.inversePrimary,
-      ),
     ];
   }
 }

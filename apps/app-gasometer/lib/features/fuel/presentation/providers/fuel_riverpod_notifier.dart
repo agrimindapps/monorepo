@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
@@ -165,6 +166,9 @@ class FuelRiverpod extends _$FuelRiverpod {
   late FuelSyncService _syncService;
   late FuelCalculationService _calculationService;
   late FuelConnectivityService _connectivityService;
+  
+  // Analytics Service
+  late GasometerAnalyticsService _analyticsService;
 
   // Use cases
   late GetAverageConsumption _getAverageConsumption;
@@ -183,6 +187,7 @@ class FuelRiverpod extends _$FuelRiverpod {
     _syncService = ref.watch(fuelSyncServiceProvider);
     _calculationService = ref.watch(fuelCalculationServiceProvider);
     _connectivityService = ref.watch(fuelConnectivityServiceProvider);
+    _analyticsService = ref.watch(fuelAnalyticsServiceProvider);
 
     // Initialize use cases for analytics via Bridge Providers
     _getAverageConsumption = ref.watch(getAverageConsumptionProvider);

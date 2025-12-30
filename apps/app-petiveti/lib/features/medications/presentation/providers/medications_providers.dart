@@ -138,6 +138,7 @@ class MedicationsState {
   final List<Medication> expiringMedications;
   final bool isLoading;
   final String? error;
+  final DateTime? selectedMonth;
 
   const MedicationsState({
     this.medications = const [],
@@ -145,6 +146,7 @@ class MedicationsState {
     this.expiringMedications = const [],
     this.isLoading = false,
     this.error,
+    this.selectedMonth,
   });
 
   MedicationsState copyWith({
@@ -153,6 +155,7 @@ class MedicationsState {
     List<Medication>? expiringMedications,
     bool? isLoading,
     String? error,
+    DateTime? selectedMonth,
   }) {
     return MedicationsState(
       medications: medications ?? this.medications,
@@ -160,6 +163,7 @@ class MedicationsState {
       expiringMedications: expiringMedications ?? this.expiringMedications,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      selectedMonth: selectedMonth ?? this.selectedMonth,
     );
   }
 }
@@ -356,6 +360,14 @@ class MedicationsNotifier extends _$MedicationsNotifier with PerformanceMonitori
 
   void clearAnimalFilter() {
     loadMedications();
+  }
+
+  void selectMonth(DateTime month) {
+    state = state.copyWith(selectedMonth: month);
+  }
+
+  void clearMonthFilter() {
+    state = state.copyWith(selectedMonth: null);
   }
 }
 

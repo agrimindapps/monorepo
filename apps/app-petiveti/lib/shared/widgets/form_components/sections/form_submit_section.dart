@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-
 /// **Form Submit Section Component**
 ///
 /// Componente reutilizável para seções de envio de formulários.
@@ -193,9 +191,9 @@ class FormSubmitSection extends StatelessWidget {
           icon: _buildSubmitIcon(),
           label: Text(text),
           style: OutlinedButton.styleFrom(
-            foregroundColor: buttonColor ?? AppColors.primary,
+            foregroundColor: buttonColor ?? Theme.of(context).colorScheme.primary,
             side: BorderSide(
-              color: buttonColor ?? AppColors.primary,
+              color: buttonColor ?? Theme.of(context).colorScheme.primary,
             ),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -209,8 +207,8 @@ class FormSubmitSection extends StatelessWidget {
     return OutlinedButton(
       onPressed: isLoading ? null : (onCancel ?? () => Navigator.of(context).pop()),
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.textSecondary,
-        side: const BorderSide(color: AppColors.border),
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+        side: BorderSide(color: Theme.of(context).colorScheme.outline),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
@@ -297,6 +295,7 @@ extension FormSubmitSectionVariants on FormSubmitSection {
 
   /// Seção para deletar
   static Widget delete({
+    required BuildContext context,
     required VoidCallback? onSubmit,
     VoidCallback? onCancel,
     bool isLoading = false,
@@ -311,7 +310,7 @@ extension FormSubmitSectionVariants on FormSubmitSection {
           ? 'Removendo...'
           : 'Remover ${itemName ?? ''}',
       submitIcon: Icons.delete,
-      buttonColor: AppColors.error,
+      buttonColor: Theme.of(context).colorScheme.error,
       enabled: enabled,
       style: SubmitButtonStyle.filled,
     );
@@ -361,6 +360,7 @@ extension FormSubmitSectionVariants on FormSubmitSection {
 
   /// Seção para ações emergenciais
   static Widget emergency({
+    required BuildContext context,
     required VoidCallback? onSubmit,
     VoidCallback? onCancel,
     bool isLoading = false,
@@ -375,7 +375,7 @@ extension FormSubmitSectionVariants on FormSubmitSection {
           ? 'Processando...'
           : actionName ?? 'Solicitar Emergência',
       submitIcon: Icons.emergency,
-      buttonColor: AppColors.error,
+      buttonColor: Theme.of(context).colorScheme.error,
       enabled: enabled,
       style: SubmitButtonStyle.filled,
     );

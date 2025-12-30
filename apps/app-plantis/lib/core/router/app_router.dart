@@ -56,9 +56,15 @@ class AppRouter {
     final authState = ref.watch(authProvider);
     const initialLocation = kIsWeb ? promotional : login;
 
+    // 📊 Analytics Route Observer para tracking automático de telas
+    final analyticsObserver = ref.read(
+      analyticsRouteObserverFamilyProvider('plantis_'),
+    );
+
     return GoRouter(
       navigatorKey: NavigationService.navigatorKey,
       initialLocation: initialLocation,
+      observers: [analyticsObserver],
       redirect: (context, state) {
         final authStateValue = authState.value;
         final isAuthenticated = authStateValue?.isAuthenticated ?? false;

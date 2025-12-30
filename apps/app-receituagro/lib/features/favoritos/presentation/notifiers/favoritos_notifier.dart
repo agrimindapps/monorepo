@@ -1,5 +1,8 @@
+import 'package:core/core.dart' hide analyticsServiceProvider;
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../data/repositories/favoritos_repository_simplified.dart';
 import '../../data/services/favoritos_error_message_service.dart';
 import '../../domain/entities/favorito_entity.dart';
@@ -213,6 +216,9 @@ class FavoritosNotifier extends _$FavoritosNotifier {
     try {
       _setLoading(true);
 
+      // Verifica se já é favorito antes do toggle
+      final wasFavorite = state.findFavorito(tipo, id) != null;
+
       final eitherResult = await _repository.toggleFavorito(tipo, id);
 
       // Unwrap Either<Failure, bool>
@@ -223,6 +229,9 @@ class FavoritosNotifier extends _$FavoritosNotifier {
 
       if (result) {
         await loadAllFavoritos(); // Recarrega após toggle
+        
+        // 📊 Analytics: Track favorito toggle
+        _trackFavoritoToggle(tipo, id, !wasFavorite);
       }
 
       return result;
@@ -231,6 +240,28 @@ class FavoritosNotifier extends _$FavoritosNotifier {
       return false;
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// 📊 Track favorito toggle event to Firebase Analytics
+  void _trackFavoritoToggle(String tipo, String id, bool isAdded) {
+    try {
+      final analyticsService = ref.read(analyticsServiceProvider);
+      final eventName = isAdded ? 'favorito_added' : 'favorito_removed';
+      analyticsService.logEvent(
+        eventName,
+        {
+          'tipo': tipo,
+          'item_id': id,
+        },
+      );
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] $eventName tracked: $tipo/$id');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking favorito toggle: $e');
+      }
     }
   }
 

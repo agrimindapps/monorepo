@@ -1,18 +1,15 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/vaccine.dart';
 import '../providers/vaccines_provider.dart';
 import '../widgets/add_vaccine_dialog.dart';
-import '../widgets/vaccine_calendar_widget.dart';
 import '../widgets/vaccine_card.dart';
-import '../widgets/vaccine_dashboard_cards.dart';
-import '../widgets/vaccine_history_visualization.dart';
-import '../widgets/vaccine_reminder_management.dart';
-import '../widgets/vaccine_scheduling_interface.dart';
 
+/// Página de vacinas simplificada seguindo padrão Odometer
 class VaccinesPage extends ConsumerStatefulWidget {
   const VaccinesPage({super.key});
 
@@ -20,30 +17,16 @@ class VaccinesPage extends ConsumerStatefulWidget {
   ConsumerState<VaccinesPage> createState() => _VaccinesPageState();
 }
 
-class _VaccinesPageState extends ConsumerState<VaccinesPage>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
-  bool _showCalendarView = false;
+class _VaccinesPageState extends ConsumerState<VaccinesPage> {
   String? _selectedAnimalId;
+  bool _showStats = false;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(
-      length: 5,
-      vsync: this,
-    ); // Added dashboard tab
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(vaccinesProvider.notifier).loadVaccines();
     });
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
@@ -54,28 +37,11 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
       body: SafeArea(
         child: Column(
           children: [
-            PetivetiPageHeader(
-              icon: Icons.vaccines,
-              title: 'Vacinas',
-              subtitle: 'Controle de vacinação dos pets',
-              showBackButton: true,
-              actions: [
-                _buildHeaderAction(
-                  icon: _showCalendarView ? Icons.list : Icons.calendar_view_month,
-                  onTap: () => setState(() => _showCalendarView = !_showCalendarView),
-                  tooltip: _showCalendarView ? 'Ver Lista' : 'Ver Calendário',
-                ),
-                _buildHeaderAction(
-                  icon: Icons.search,
-                  onTap: () => _showSearchDialog(context),
-                  tooltip: 'Buscar',
-                ),
-                _buildHeaderPopupMenu(),
-              ],
-            ),
+            _buildHeader(context),
             _buildAnimalSelector(),
-            _buildTabBar(vaccinesState),
-            Expanded(child: _buildBody(context, vaccinesState)),
+            if (_selectedAnimalId != null && vaccinesState.vaccines.isNotEmpty)
+              _buildMonthSelector(vaccinesState.vaccines),
+            Expanded(child: _buildContent(context, vaccinesState)),
           ],
         ),
       ),
@@ -83,6 +49,30 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
         onPressed: () => _navigateToAddVaccine(context),
         tooltip: 'Adicionar Vacina',
         child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: PetivetiPageHeader(
+        icon: Icons.vaccines,
+        title: 'Vacinas',
+        subtitle: 'Controle de vacinação dos pets',
+        showBackButton: true,
+        actions: [
+          _buildHeaderAction(
+            icon: _showStats ? Icons.analytics : Icons.analytics_outlined,
+            onTap: () => setState(() => _showStats = !_showStats),
+            tooltip: _showStats ? 'Ocultar estatísticas' : 'Mostrar estatísticas',
+          ),
+          _buildHeaderAction(
+            icon: Icons.refresh,
+            onTap: () => ref.read(vaccinesProvider.notifier).loadVaccines(),
+            tooltip: 'Atualizar',
+          ),
+        ],
       ),
     );
   }
@@ -109,101 +99,102 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
     );
   }
 
-  Widget _buildHeaderPopupMenu() {
-    return PopupMenuButton<String>(
-      icon: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(9),
-        ),
-        child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
+  Widget _buildAnimalSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: EnhancedAnimalSelector(
+        selectedAnimalId: _selectedAnimalId,
+        onAnimalChanged: (animalId) {
+          setState(() => _selectedAnimalId = animalId);
+          if (animalId != null) {
+            ref.read(vaccinesProvider.notifier).filterByAnimal(animalId);
+          } else {
+            ref.read(vaccinesProvider.notifier).clearAnimalFilter();
+          }
+        },
+        hintText: 'Selecione um pet',
       ),
-      onSelected: (action) {
-        switch (action) {
-          case 'filter':
-            _showFilterMenu(context);
-            break;
-          case 'history':
-            _navigateToHistory(context);
-            break;
-          case 'reminders':
-            _navigateToReminders(context);
-            break;
-          case 'schedule':
-            _navigateToAdvancedScheduling(context);
-            break;
+    );
+  }
+
+  Widget _buildMonthSelector(List<Vaccine> vaccines) {
+    final months = _getMonths(vaccines);
+    final selectedMonth = ref.watch(vaccinesProvider).selectedMonth;
+
+    if (months.isEmpty) return const SizedBox.shrink();
+
+    // Auto-select current month if none selected
+    if (selectedMonth == null && months.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final now = DateTime.now();
+        final currentMonth = DateTime(now.year, now.month);
+        final hasCurrentMonth = months.any((m) =>
+            m.year == currentMonth.year && m.month == currentMonth.month);
+        
+        if (hasCurrentMonth) {
+          ref.read(vaccinesProvider.notifier).selectMonth(currentMonth);
+        } else {
+          ref.read(vaccinesProvider.notifier).selectMonth(months.first);
         }
-      },
-      itemBuilder: (context) => [
-        const PopupMenuItem(
-          value: 'filter',
-          child: ListTile(
-            leading: Icon(Icons.filter_list),
-            title: Text('Filtros'),
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'history',
-          child: ListTile(
-            leading: Icon(Icons.history),
-            title: Text('Histórico Completo'),
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'reminders',
-          child: ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('Gerenciar Lembretes'),
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'schedule',
-          child: ListTile(
-            leading: Icon(Icons.schedule_send),
-            title: Text('Agendamento Avançado'),
-          ),
-        ),
-      ],
-    );
-  }
+      });
+    }
 
-  Widget _buildTabBar(VaccinesState vaccinesState) {
     return Container(
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
-        tabs: [
-          const Tab(icon: Icon(Icons.dashboard), text: 'Painel'),
-          Tab(
-            icon: const Icon(Icons.list),
-            text: 'Todas (${vaccinesState.totalVaccines})',
-          ),
-          Tab(
-            icon: const Icon(Icons.warning),
-            text: 'Vencidas (${vaccinesState.overdueCount})',
-          ),
-          Tab(
-            icon: const Icon(Icons.schedule),
-            text: 'Pendentes (${vaccinesState.pendingCount})',
-          ),
-          Tab(
-            icon: const Icon(Icons.check_circle),
-            text: 'Concluídas (${vaccinesState.completedCount})',
-          ),
-        ],
+      height: 50,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: months.length,
+        itemBuilder: (context, index) {
+          final month = months[index];
+          final isSelected = selectedMonth != null &&
+              month.year == selectedMonth.year &&
+              month.month == selectedMonth.month;
+
+          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
+          final formattedMonth =
+              monthName[0].toUpperCase() + monthName.substring(1);
+
+          return GestureDetector(
+            onTap: () {
+              if (!isSelected) {
+                ref.read(vaccinesProvider.notifier).selectMonth(month);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  formattedMonth,
+                  style: TextStyle(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, VaccinesState state) {
+  Widget _buildContent(BuildContext context, VaccinesState state) {
     if (state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -213,92 +204,263 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
-            const SizedBox(height: 16),
-            Text(
-              'Erro ao carregar vacinas',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              state.error!,
-              style: TextStyle(color: Colors.red[700]),
-              textAlign: TextAlign.center,
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
-            FilledButton(
+            Text(state.error!, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
               onPressed: () {
                 ref.read(vaccinesProvider.notifier).clearError();
                 ref.read(vaccinesProvider.notifier).loadVaccines();
               },
-              child: const Text('Tentar Novamente'),
+              child: const Text('Tentar novamente'),
             ),
           ],
         ),
       );
     }
 
-    if (_showCalendarView) {
-      return VaccineCalendarWidget(
-        onVaccineSelected: (vaccine) => _showVaccineDetails(context, vaccine),
+    if (_selectedAnimalId == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.pets, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Selecione um pet', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text('Escolha um pet acima para ver suas vacinas'),
+          ],
+        ),
       );
     }
 
-    return TabBarView(
-      controller: _tabController,
+    final filteredVaccines = _getFilteredVaccines(state.vaccines);
+
+    if (filteredVaccines.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    return Column(
       children: [
-        _buildDashboardTab(context, state),
-        _buildVaccinesList(context, state.filteredVaccines),
-        _buildVaccinesList(
-          context,
-          state.vaccines.where((v) => v.isOverdue).toList(),
-        ),
-        _buildVaccinesList(
-          context,
-          state.vaccines.where((v) => v.isPending).toList(),
-        ),
-        _buildVaccinesList(
-          context,
-          state.vaccines.where((v) => v.isCompleted).toList(),
-        ),
+        if (_showStats) _buildStatsPanel(filteredVaccines),
+        Expanded(child: _buildVaccinesList(filteredVaccines)),
       ],
     );
   }
 
-  Widget _buildDashboardTab(BuildContext context, VaccinesState state) {
-    return const SingleChildScrollView(
+  List<Vaccine> _getFilteredVaccines(List<Vaccine> vaccines) {
+    final selectedMonth = ref.watch(vaccinesProvider).selectedMonth;
+    if (selectedMonth == null) return vaccines;
+
+    return vaccines.where((v) {
+      final date = v.date;
+      return date.year == selectedMonth.year &&
+          date.month == selectedMonth.month;
+    }).toList();
+  }
+
+  Widget _buildStatsPanel(List<Vaccine> vaccines) {
+    final total = vaccines.length;
+    final overdue = vaccines.where((v) => v.isOverdue).length;
+    final pending = vaccines.where((v) => v.isPending).length;
+    final completed = vaccines.where((v) => v.isCompleted).length;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: 8),
-          VaccineDashboardCards(),
-          SizedBox(height: 8),
-          VaccineTimeline(),
-          SizedBox(height: 16),
+          Row(
+            children: [
+              Icon(
+                Icons.analytics,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Estatísticas',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.vaccines,
+                  label: 'Total',
+                  value: total.toString(),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.warning,
+                  label: 'Vencidas',
+                  value: overdue.toString(),
+                  color: Colors.red,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.schedule,
+                  label: 'Pendentes',
+                  value: pending.toString(),
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.check_circle,
+                  label: 'Concluídas',
+                  value: completed.toString(),
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildVaccinesList(BuildContext context, List<Vaccine> vaccines) {
-    if (vaccines.isEmpty) {
-      return _buildEmptyState(context);
-    }
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildVaccinesList(List<Vaccine> vaccines) {
     return RefreshIndicator(
       onRefresh: () async {
         await ref.read(vaccinesProvider.notifier).loadVaccines();
       },
       child: ListView.builder(
+        padding: const EdgeInsets.all(16),
         itemCount: vaccines.length,
         itemBuilder: (context, index) {
           final vaccine = vaccines[index];
-          return VaccineCard(
-            vaccine: vaccine,
-            onTap: () => _showVaccineDetails(context, vaccine),
-            onEdit: () => _navigateToEditVaccine(context, vaccine),
-            onDelete: () => _deleteVaccine(context, vaccine.id),
-            showAnimalInfo: true,
+          return Dismissible(
+            key: ValueKey(vaccine.id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Excluir',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onError,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            confirmDismiss: (direction) => _confirmDeleteVaccine(vaccine),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: VaccineCard(
+                vaccine: vaccine,
+                onTap: () => _showVaccineDetails(context, vaccine),
+                onEdit: () => _navigateToEditVaccine(context, vaccine),
+                onDelete: () => _confirmDeleteVaccine(vaccine),
+                showAnimalInfo: false,
+              ),
+            ),
           );
         },
       ),
@@ -326,67 +488,39 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
           ),
           const SizedBox(height: 8),
           Text(
-            'Adicione vacinas para acompanhar o histórico de vacinação dos seus pets',
+            'Adicione vacinas para acompanhar o histórico de vacinação',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurface.withAlpha(127),
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
-          FilledButton.icon(
-            onPressed: () => _navigateToAddVaccine(context),
-            icon: const Icon(Icons.add),
-            label: const Text('Adicionar Primeira Vacina'),
-          ),
         ],
       ),
     );
   }
 
-  void _showSearchDialog(BuildContext context) {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Buscar Vacinas'),
-        content: TextField(
-          controller: _searchController,
-          decoration: const InputDecoration(
-            hintText: 'Digite o nome da vacina ou veterinário...',
-            prefixIcon: Icon(Icons.search),
-          ),
-          autofocus: true,
-          onSubmitted: (value) {
-            Navigator.pop(context);
-            ref.read(vaccinesProvider.notifier).searchVaccines(value);
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _searchController.clear();
-              Navigator.pop(context);
-              ref.read(vaccinesProvider.notifier).clearSearch();
-            },
-            child: const Text('Limpar'),
-          ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref
-                  .read(vaccinesProvider.notifier)
-                  .searchVaccines(_searchController.text);
-            },
-            child: const Text('Buscar'),
-          ),
-        ],
-      ),
-    );
+  List<DateTime> _getMonths(List<Vaccine> vaccines) {
+    if (vaccines.isEmpty) return [];
+    
+    final dates = vaccines.map((v) => v.date).toList();
+    final uniqueMonths = <DateTime>{};
+    
+    for (final date in dates) {
+      uniqueMonths.add(DateTime(date.year, date.month));
+    }
+    
+    final sortedMonths = uniqueMonths.toList()
+      ..sort((a, b) => b.compareTo(a)); // Most recent first
+    
+    return sortedMonths;
   }
 
   void _navigateToAddVaccine(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => const AddVaccineDialog(),
+      builder: (context) => AddVaccineDialog(
+        initialAnimalId: _selectedAnimalId,
+      ),
     );
   }
 
@@ -434,7 +568,7 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
                       },
                       onDelete: () {
                         Navigator.pop(context);
-                        _deleteVaccine(context, vaccine.id);
+                        _confirmDeleteVaccine(vaccine);
                       },
                     ),
                   ],
@@ -447,124 +581,35 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage>
     );
   }
 
-  void _deleteVaccine(BuildContext context, String vaccineId) {
-    showDialog<void>(
+  Future<bool> _confirmDeleteVaccine(Vaccine vaccine) async {
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Excluir Vacina'),
-        content: const Text(
-          'Tem certeza que deseja excluir esta vacina? Esta ação não pode ser desfeita.',
-        ),
+        content: Text('Tem certeza que deseja excluir "${vaccine.name}"?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context).pop(false),
             child: const Text('Cancelar'),
           ),
-          FilledButton(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(vaccinesProvider.notifier).deleteVaccine(vaccineId);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Vacina excluída com sucesso'),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Excluir'),
           ),
         ],
       ),
     );
-  }
 
-  void _showFilterMenu(BuildContext context) {
-    final vaccinesState = ref.watch(vaccinesProvider);
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Filtros'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: VaccinesFilter.values
-              .map(
-                (filter) => RadioListTile<VaccinesFilter>.adaptive(
-                  title: Text(filter.displayName),
-                  value: filter,
-                  groupValue: vaccinesState.filter, // ignore: deprecated_member_use
-                  onChanged: (value) { // ignore: deprecated_member_use
-                    if (value != null) {
-                      ref.read(vaccinesProvider.notifier).setFilter(value);
-                    }
-                    Navigator.pop(context);
-                  },
-                ),
-              )
-              .toList(),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _navigateToHistory(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => Scaffold(
-          appBar: AppBar(title: const Text('Histórico de Vacinas')),
-          body: const VaccineHistoryVisualization(showAnalytics: true),
-        ),
-      ),
-    );
-  }
-
-  void _navigateToReminders(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => const VaccineReminderManagement(),
-      ),
-    );
-  }
-
-  Widget _buildAnimalSelector() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      child: EnhancedAnimalSelector(
-        selectedAnimalId: _selectedAnimalId,
-        onAnimalChanged: (animalId) {
-          setState(() {
-            _selectedAnimalId = animalId;
-          });
-          if (animalId != null) {
-            ref.read(vaccinesProvider.notifier).filterByAnimal(animalId);
-          } else {
-            ref.read(vaccinesProvider.notifier).clearAnimalFilter();
-          }
-        },
-        hintText: 'Selecione um pet',
-      ),
-    );
-  }
-
-  void _navigateToAdvancedScheduling(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute<void>(
-        builder: (context) => VaccineSchedulingInterface(
-          onScheduled: () {
-            ref.read(vaccinesProvider.notifier).loadVaccines();
-          },
-        ),
-      ),
-    );
+    if (confirmed == true) {
+      await ref.read(vaccinesProvider.notifier).deleteVaccine(vaccine.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vacina excluída com sucesso')),
+        );
+      }
+      return true;
+    }
+    return false;
   }
 }

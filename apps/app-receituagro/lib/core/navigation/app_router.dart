@@ -1,3 +1,5 @@
+import 'package:core/core.dart' hide SubscriptionPage, analyticsServiceProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -17,9 +19,15 @@ import '../../features/subscription/presentation/pages/subscription_page.dart';
 import 'widgets/scaffold_with_navbar.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  // 📊 Analytics Route Observer para tracking automático de telas
+  final analyticsObserver = ref.read(
+    analyticsRouteObserverFamilyProvider('receituagro_'),
+  );
+
   return GoRouter(
     initialLocation: '/home-defensivos',
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
+    observers: [analyticsObserver],
     routes: [
       GoRoute(
         path: '/',

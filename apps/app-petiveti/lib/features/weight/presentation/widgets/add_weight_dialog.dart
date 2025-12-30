@@ -156,7 +156,6 @@ class _AddWeightDialogState extends ConsumerState<AddWeightDialog> {
           decoration: InputDecoration(
             labelText: 'Peso *',
             hintText: 'Ex: 5.5',
-            prefixIcon: const Icon(Icons.monitor_weight),
             suffixText: 'kg',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-
 /// **Notes Field Component**
 ///
 /// Componente reutilizável para campos de observações/notas em formulários.
@@ -94,18 +92,18 @@ class NotesField extends StatelessWidget {
             children: [
               Text(
                 label!,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.textPrimary,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               if (isRequired) ...[
                 const SizedBox(width: 4),
-                const Text(
+                Text(
                   '*',
                   style: TextStyle(
-                    color: AppColors.error,
+                    color: Theme.of(context).colorScheme.error,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -127,43 +125,13 @@ class NotesField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: placeholder ?? _getDefaultPlaceholder(),
             helperText: helperText,
-            prefixIcon: icon != null
-                ? Icon(
-                    icon,
-                    color: enabled ? AppColors.primary : AppColors.textSecondary,
-                  )
-                : const Icon(
-                    Icons.notes,
-                    color: AppColors.primary,
-                  ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.primary, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.error),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: AppColors.error, width: 2),
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
             ),
             alignLabelWithHint: true,
-            helperStyle: const TextStyle(
+            helperStyle: TextStyle(
               fontSize: 12,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             counterText: maxLength != null ? '' : null,
           ),
@@ -221,10 +189,10 @@ class NotesField extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 12,
                   color: isOverLimit
-                      ? AppColors.error
+                      ? Theme.of(context).colorScheme.error
                       : isNearLimit
-                          ? AppColors.warning
-                          : AppColors.textSecondary,
+                          ? const Color(0xFFFFA726) // Orange warning color
+                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                   fontWeight: isNearLimit ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),

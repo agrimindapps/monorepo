@@ -1,9 +1,11 @@
 import 'package:core/core.dart' as core;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide connectivityServiceProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
 import '../../../vehicles/domain/usecases/get_vehicle_by_id.dart';
@@ -41,6 +43,7 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
   late final GetVehicleById _getVehicleById;
   late final AddMaintenanceRecord _addMaintenanceRecord;
   late final UpdateMaintenanceRecord _updateMaintenanceRecord;
+  late final GasometerAnalyticsService _analyticsService;
 
   // Expose controllers for UI binding
   TextEditingController get titleController => _controllerManager.titleController;
@@ -55,6 +58,9 @@ class MaintenanceFormNotifier extends _$MaintenanceFormNotifier {
 
   @override
   MaintenanceFormState build() {
+    // Initialize analytics service
+    _analyticsService = ref.watch(gasometerAnalyticsServiceProvider);
+    
     // Initialize handlers
     _controllerManager = MaintenanceFormControllerManager();
     _controllerManager.initialize();

@@ -4,6 +4,8 @@ import 'package:collection/collection.dart';
 import 'package:core/core.dart' as core;
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/premium_status.dart';
 import '../../domain/repositories/premium_repository.dart';
@@ -123,6 +125,7 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
   RevokeLocalLicense? _revokeLocalLicense;
   PremiumRepository? _premiumRepository;
   StreamSubscription<PremiumStatus>? _statusSubscription;
+  GasometerAnalyticsService? _analyticsService;
 
   @override
   Future<PremiumNotifierState> build() async {
@@ -137,6 +140,8 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     _generateLocalLicense = ref.read(generateLocalLicenseProvider);
     _revokeLocalLicense = ref.read(revokeLocalLicenseProvider);
     _premiumRepository = ref.read(premiumRepositoryProvider);
+    _analyticsService = ref.read(gasometerAnalyticsServiceProvider);
+    
     final result = await _checkPremiumStatus!(const NoParams());
     final premiumStatus = result.fold(
       (failure) => PremiumStatus.free,
@@ -154,6 +159,34 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
     });
 
     return PremiumNotifierState(premiumStatus: premiumStatus);
+  }
+
+  /// 📊 Track premium feature attempted (when user tries a premium feature)
+  void trackPremiumFeatureAttempted(String featureName) {
+    try {
+      _analyticsService?.logPremiumFeatureAttempted(featureName);
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Premium feature attempted: $featureName');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking premium feature: $e');
+      }
+    }
+  }
+
+  /// 📊 Track subscription purchased
+  void _trackSubscriptionPurchased(String productId, double price) {
+    try {
+      _analyticsService?.logSubscriptionPurchased(productId, price);
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Subscription purchased: $productId');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking subscription: $e');
+      }
+    }
   }
 
   /// Força uma verificação do status premium
@@ -268,6 +301,18 @@ class PremiumNotifier extends core.AsyncNotifier<PremiumNotifierState> {
                   successMessage: 'Compra realizada com sucesso!',
                 ),
           );
+          // 📊 Analytics: Track subscription purchased
+          core.ProductInfo? product;
+          if (state.value != null) {
+            for (final p in state.value!.availableProducts) {
+              if (p.productId == productId) {
+                product = p;
+                break;
+              }
+            }
+          }
+          _trackSubscriptionPurchased(productId, product?.price ?? 0.0);
+          
           refreshPremiumStatus();
           return true;
         },

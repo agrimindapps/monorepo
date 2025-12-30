@@ -67,8 +67,9 @@ extension MaintenanceFormNotifierPersistence on MaintenanceFormNotifier {
       );
 
       final Either<Failure, MaintenanceEntity> result;
+      final isNewRecord = state.id.isEmpty;
 
-      if (state.id.isEmpty) {
+      if (isNewRecord) {
         result = await _addMaintenanceRecord(
           AddMaintenanceRecordParams(maintenance: maintenanceEntity),
         );
@@ -79,13 +80,41 @@ extension MaintenanceFormNotifierPersistence on MaintenanceFormNotifier {
       }
 
       state = state.copyWith(isLoading: false);
-      return result.fold((failure) => Left(failure), (entity) => Right(entity));
+      
+      return result.fold(
+        (failure) => Left(failure),
+        (entity) {
+          // 📊 Analytics: Track maintenance only for new records
+          if (isNewRecord) {
+            _trackMaintenance(entity);
+          }
+          return Right(entity);
+        },
+      );
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         errorMessage: () => 'Erro ao salvar: ${e.toString()}',
       );
       return Left(UnexpectedFailure('Erro ao salvar: ${e.toString()}'));
+    }
+  }
+
+  /// 📊 Track maintenance event to Firebase Analytics
+  void _trackMaintenance(MaintenanceEntity entity) {
+    try {
+      _analyticsService.logMaintenance(
+        maintenanceType: entity.type.displayName,
+        cost: entity.cost,
+        odometer: entity.odometer.toInt(),
+      );
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Maintenance tracked: ${entity.type.displayName}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking maintenance: $e');
+      }
     }
   }
 

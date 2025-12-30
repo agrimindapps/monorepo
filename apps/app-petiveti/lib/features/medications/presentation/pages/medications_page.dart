@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-import '../../../../shared/constants/medications_constants.dart';
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/medication.dart';
@@ -9,145 +9,42 @@ import '../providers/medications_provider.dart';
 import '../widgets/add_medication_dialog.dart';
 import '../widgets/empty_medications_state.dart';
 import '../widgets/medication_card.dart';
-import '../widgets/medication_filters.dart';
-import '../widgets/medication_stats.dart';
 
-/// **Medications Management Page**
-///
-/// A comprehensive page for managing pet medications with advanced filtering,
-/// search capabilities, and organized tabbed navigation.
-///
-/// ## Key Features:
-/// - **Multi-tab Organization**: Active, Expired, All, and Statistics views
-/// - **Real-time Search**: Live filtering as user types
-/// - **Performance Optimized**: Uses provider caching and keep-alive for smooth scrolling
-/// - **Accessibility**: Full semantic labels and screen reader support
-/// - **Error Handling**: Graceful error states with retry mechanisms
-///
-/// ## Architecture:
-/// - Follows Clean Architecture principles with proper separation of concerns
-/// - Uses Riverpod for state management and provider caching
-/// - Implements custom widgets for reusable components
-/// - Optimized ListView with SliverFixedExtentList for large datasets
-///
-/// ## API Integration:
-/// The page integrates with the medication repository to provide:
-/// - Real-time medication data sync
-/// - Offline-first approach with local storage fallback
-/// - Automatic data refresh on tab switches
-/// - Batch operations for better performance
-///
-/// ## Usage:
-/// ```dart
-/// Navigator.push(context, MaterialPageRoute(
-///   builder: (context) => MedicationsPage(animalId: 'specific-animal-id')
-/// ));
-/// ```
-///
-/// @author PetiVeti Development Team
-/// @since 1.0.0
-/// @version 1.2.0 - Added performance optimizations and caching
+/// Página de medicamentos simplificada seguindo padrão Odometer
 class MedicationsPage extends ConsumerStatefulWidget {
-  /// Optional animal ID to filter medications for a specific pet.
-  /// If null, shows medications for all animals.
   final String? animalId;
 
-  /// Creates a medications page instance.
-  ///
-  /// The [animalId] parameter is optional and when provided,
-  /// filters the medications to show only those for the specified animal.
   const MedicationsPage({super.key, this.animalId});
 
   @override
   ConsumerState<MedicationsPage> createState() => _MedicationsPageState();
 }
 
-/// **Private State Management Class**
-///
-/// Handles the internal state and lifecycle management for the MedicationsPage.
-///
-/// ## Performance Optimizations:
-/// - **Provider Caching**: Caches frequently used providers to avoid repeated lookups
-/// - **Keep Alive**: Maintains widget state when navigating between tabs
-/// - **Optimized Tab Controller**: Prevents unnecessary rebuilds during tab switches
-/// - **Batch Loading**: Loads initial data efficiently after widget mount
-///
-/// ## State Management:
-/// - Manages tab navigation state with TabController
-/// - Handles search functionality with TextEditingController
-/// - Caches Riverpod providers for improved performance
-/// - Implements proper lifecycle management and cleanup
-class _MedicationsPageState extends ConsumerState<MedicationsPage>
-    with TickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  late TabController _tabController;
-  final TextEditingController _searchController = TextEditingController();
+class _MedicationsPageState extends ConsumerState<MedicationsPage> {
   String? _selectedAnimalId;
+  bool _showStats = false;
 
   @override
   void initState() {
     super.initState();
-
-    _tabController = TabController(
-      length: MedicationsConstants.tabCount,
-      vsync: this,
-    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _loadInitialData();
-      }
+      if (mounted) _loadInitialData();
     });
   }
 
-  @override
-  bool get wantKeepAlive => true; // Keep page alive for better performance
-
-  /// **Optimized Initial Data Loading**
-  ///
-  /// Performs intelligent batch loading of medication data with comprehensive
-  /// error handling and performance optimizations.
-  ///
-  /// ## Loading Strategy:
-  /// 1. **Primary Load**: Main medication data (with 10s timeout)
-  /// 2. **Secondary Parallel Loads**: Active and expiring medications
-  /// 3. **Error Recovery**: Graceful fallbacks for failed secondary loads
-  /// 4. **Animal-Specific**: Filters by animalId when provided
-  ///
-  /// ## Performance Features:
-  /// - Timeout protection to prevent UI blocking
-  /// - Parallel execution of secondary loads
-  /// - Graceful error handling with catchError
-  /// - Optimized provider caching
-  ///
-  /// ## Error Handling:
-  /// - Primary load failures are propagated to UI
-  /// - Secondary load failures are silently handled (non-critical)
-  /// - Network timeout protection with custom error messages
-  ///
-  /// @throws Exception when primary data load fails or times out
   Future<void> _loadInitialData() async {
     try {
       final notifier = ref.read(medicationsProvider.notifier);
-      final primaryLoad = widget.animalId != null
-          ? notifier.loadMedicationsByAnimalId(widget.animalId!)
-          : notifier.loadMedications();
-
-      await primaryLoad.timeout(
-        MedicationsConstants.loadingTimeout,
-        onTimeout: () => throw Exception('Timeout loading medications'),
-      );
-      final secondaryLoads = await Future.wait([
-        notifier.loadActiveMedications().catchError((e) => null),
-        notifier.loadExpiringMedications().catchError((e) => null),
-      ]);
-      if (secondaryLoads.contains(null)) {
-        debugPrint('Some secondary medication loads failed');
+      if (widget.animalId != null) {
+        await notifier.loadMedicationsByAnimalId(widget.animalId!);
+      } else {
+        await notifier.loadMedications();
       }
     } catch (e) {
-      debugPrint('Failed to load initial medication data: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao carregar medicamentos: ${e.toString()}'),
+            content: Text('Erro ao carregar medicamentos: $e'),
             action: SnackBarAction(
               label: 'Tentar novamente',
               onPressed: _loadInitialData,
@@ -159,82 +56,52 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final medicationsState = ref.watch(medicationsProvider);
-    final filteredMedications = ref.watch(filteredMedicationsProvider);
+    final medications = medicationsState.medications;
 
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            PetivetiPageHeader(
-              icon: Icons.medication,
-              title: widget.animalId != null
-                  ? MedicationsConstants.petMedicationsTitle
-                  : MedicationsConstants.allMedicationsTitle,
-              subtitle: 'Controle de medicamentos',
-              showBackButton: true,
-              actions: [
-                _buildHeaderAction(
-                  icon: Icons.refresh,
-                  onTap: _refreshMedications,
-                  tooltip: 'Atualizar',
-                ),
-                _buildHeaderAction(
-                  icon: Icons.add,
-                  onTap: () => _navigateToAddMedication(context),
-                  tooltip: 'Adicionar',
-                ),
-              ],
-            ),
+            _buildHeader(context),
             if (widget.animalId == null) _buildAnimalSelector(),
-            _buildTabBar(medicationsState),
-            _buildSearchAndFilters(),
+            if (_selectedAnimalId != null && medications.isNotEmpty)
+              _buildMonthSelector(medications),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildMedicationsList(
-                    medications: filteredMedications,
-                    isLoading: medicationsState.isLoading,
-                    error: medicationsState.error,
-                  ),
-                  _buildMedicationsList(
-                    medications: medicationsState.activeMedications,
-                    isLoading: medicationsState.isLoading,
-                    error: medicationsState.error,
-                    emptyMessage: MedicationsConstants.noActiveMedications,
-                  ),
-                  _buildMedicationsList(
-                    medications: medicationsState.expiringMedications,
-                    isLoading: medicationsState.isLoading,
-                    error: medicationsState.error,
-                    emptyMessage: MedicationsConstants.noExpiringMedications,
-                  ),
-                  const MedicationStats(),
-                ],
-              ),
+              child: _buildContent(context, medicationsState, medications),
             ),
           ],
         ),
       ),
-      floatingActionButton: Semantics(
-        label: 'Adicionar novo medicamento',
-        hint: 'Botão flutuante para cadastrar um novo medicamento',
-        button: true,
-        child: FloatingActionButton(
-          onPressed: () => _navigateToAddMedication(context),
-          tooltip: MedicationsConstants.addMedicationTooltip,
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _navigateToAddMedication(context),
+        tooltip: 'Adicionar medicamento',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: PetivetiPageHeader(
+        icon: Icons.medication,
+        title: 'Medicamentos',
+        subtitle: 'Controle de medicamentos dos pets',
+        showBackButton: true,
+        actions: [
+          _buildHeaderAction(
+            icon: _showStats ? Icons.analytics : Icons.analytics_outlined,
+            onTap: () => setState(() => _showStats = !_showStats),
+            tooltip: _showStats ? 'Ocultar estatísticas' : 'Mostrar estatísticas',
+          ),
+          _buildHeaderAction(
+            icon: Icons.refresh,
+            onTap: _refreshMedications,
+            tooltip: 'Atualizar',
+          ),
+        ],
       ),
     );
   }
@@ -267,9 +134,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
       child: EnhancedAnimalSelector(
         selectedAnimalId: _selectedAnimalId,
         onAnimalChanged: (animalId) {
-          setState(() {
-            _selectedAnimalId = animalId;
-          });
+          setState(() => _selectedAnimalId = animalId);
           if (animalId != null) {
             ref.read(medicationsProvider.notifier).filterByAnimal(animalId);
           } else {
@@ -281,218 +146,389 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     );
   }
 
-  Widget _buildTabBar(MedicationsState medicationsState) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
-        tabs: [
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.medication, size: MedicationsConstants.tabIconSize),
-                const SizedBox(width: 8),
-                Text('Todos (${medicationsState.medications.length})'),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.play_circle_filled, size: MedicationsConstants.tabIconSize),
-                const SizedBox(width: 8),
-                Text('Ativos (${medicationsState.activeMedications.length})'),
-              ],
-            ),
-          ),
-          Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.warning, size: MedicationsConstants.tabIconSize),
-                const SizedBox(width: 8),
-                Text('Vencendo (${medicationsState.expiringMedications.length})'),
-              ],
-            ),
-          ),
-          const Tab(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.analytics, size: MedicationsConstants.tabIconSize),
-                SizedBox(width: 8),
-                Text('Estatísticas'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildMonthSelector(List<Medication> medications) {
+    final months = _getMonths(medications);
+    final selectedMonth = ref.watch(medicationsProvider).selectedMonth;
 
-  Widget _buildSearchAndFilters() {
-    return Padding(
-      padding: const EdgeInsets.all(MedicationsConstants.pageContentPadding),
-      child: Column(
-        children: [
-          Semantics(
-            label: 'Campo de busca de medicamentos',
-            hint: 'Digite o nome do medicamento que você está procurando',
-            textField: true,
-            child: TextField(
-              controller: _searchController,
-              decoration: const InputDecoration(
-                hintText: MedicationsConstants.searchHintText,
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
-              ),
-              onChanged: (value) {
-                ref.read(medicationSearchQueryProvider.notifier).set(value);
-              },
-            ),
-          ),
-          const SizedBox(height: MedicationsConstants.searchFiltersSpacing),
-          const MedicationFilters(),
-        ],
-      ),
-    );
-  }
+    if (months.isEmpty) return const SizedBox.shrink();
 
-  Widget _buildMedicationsList({
-    required List<Medication> medications,
-    required bool isLoading,
-    String? error,
-    String? emptyMessage,
-  }) {
-    if (isLoading) {
-      return Semantics(
-        label: 'Carregando medicamentos',
-        hint: 'Aguarde enquanto carregamos a lista de medicamentos',
-        liveRegion: true,
-        child: const Center(child: CircularProgressIndicator()),
-      );
+    // Auto-select current month if none selected
+    if (selectedMonth == null && months.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final now = DateTime.now();
+        final currentMonth = DateTime(now.year, now.month);
+        final hasCurrentMonth = months.any((m) =>
+            m.year == currentMonth.year && m.month == currentMonth.month);
+        
+        if (hasCurrentMonth) {
+          ref.read(medicationsProvider.notifier).selectMonth(currentMonth);
+        } else {
+          ref.read(medicationsProvider.notifier).selectMonth(months.first);
+        }
+      });
     }
 
-    if (error != null) {
-      return Semantics(
-        label: 'Erro ao carregar medicamentos',
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Semantics(
-                label: 'Ícone de erro',
-                child: Icon(
-                  Icons.error_outline,
-                  size: MedicationsConstants.errorIconSize,
-                  color: Theme.of(context).colorScheme.error,
+    return Container(
+      height: 50,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: months.length,
+        itemBuilder: (context, index) {
+          final month = months[index];
+          final isSelected = selectedMonth != null &&
+              month.year == selectedMonth.year &&
+              month.month == selectedMonth.month;
+
+          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
+          final formattedMonth =
+              monthName[0].toUpperCase() + monthName.substring(1);
+
+          return GestureDetector(
+            onTap: () {
+              if (!isSelected) {
+                ref.read(medicationsProvider.notifier).selectMonth(month);
+              }
+            },
+            child: Container(
+              margin: const EdgeInsets.only(right: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
-              const SizedBox(height: MedicationsConstants.errorContentSpacing),
-              Text(
-                error,
-                style: const TextStyle(
-                  fontSize: MedicationsConstants.errorTextSize,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: MedicationsConstants.errorContentSpacing),
-              Semantics(
-                label: 'Tentar carregar medicamentos novamente',
-                hint: 'Toque para tentar recarregar a lista de medicamentos',
-                button: true,
-                child: ElevatedButton(
-                  onPressed: _refreshMedications,
-                  child: const Text(MedicationsConstants.retryButtonText),
+              child: Center(
+                child: Text(
+                  formattedMonth,
+                  style: TextStyle(
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    MedicationsState state,
+    List<Medication> medications,
+  ) {
+    if (state.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(state.error!, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshMedications,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
         ),
       );
     }
 
-    if (medications.isEmpty) {
+    if (_selectedAnimalId == null && widget.animalId == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.pets, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Selecione um pet', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text('Escolha um pet acima para ver seus medicamentos'),
+          ],
+        ),
+      );
+    }
+
+    final filteredMedications = _getFilteredMedications(medications);
+
+    if (filteredMedications.isEmpty) {
       return EmptyMedicationsState(
-        message: emptyMessage ?? MedicationsConstants.noMedicationsFound,
+        message: 'Nenhum medicamento encontrado',
         onAddPressed: () => _navigateToAddMedication(context),
       );
     }
 
-    return Semantics(
-      label: 'Lista de medicamentos',
-      hint: 'Arraste para baixo para atualizar a lista',
-      child: RefreshIndicator(
-        onRefresh: _refreshMedications,
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(
-                MedicationsConstants.pageContentPadding,
-              ),
-              sliver: SliverFixedExtentList(
-                itemExtent: MedicationsConstants
-                    .medicationCardHeight, // Fixed height for optimal performance
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final medication = medications[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: RepaintBoundary(
-                        child: MedicationCard(
-                          key: ValueKey(
-                            medication.id,
-                          ), // Stable key for performance
-                          medication: medication,
-                          onTap: () =>
-                              _navigateToMedicationDetails(context, medication),
-                          onEdit: () =>
-                              _navigateToEditMedication(context, medication),
-                          onDelete: () =>
-                              _confirmDeleteMedication(context, medication),
-                        ),
-                      ),
-                    );
-                  },
-                  childCount: medications.length,
-                  addAutomaticKeepAlives: true,
-                  addRepaintBoundaries: true,
-                  addSemanticIndexes:
-                      false, // Disable for better performance in large lists
-                ),
-              ),
-            ),
+    return Column(
+      children: [
+        if (_showStats) _buildStatsPanel(filteredMedications),
+        Expanded(child: _buildMedicationsList(filteredMedications)),
+      ],
+    );
+  }
+
+  List<Medication> _getFilteredMedications(List<Medication> medications) {
+    final selectedMonth = ref.watch(medicationsProvider).selectedMonth;
+    if (selectedMonth == null) return medications;
+
+    return medications.where((m) {
+      final startDate = m.startDate;
+      return startDate.year == selectedMonth.year &&
+          startDate.month == selectedMonth.month;
+    }).toList();
+  }
+
+  Widget _buildStatsPanel(List<Medication> medications) {
+    final total = medications.length;
+    final active = medications.where((m) => m.isActive).length;
+    final expiring = medications.where((m) {
+      if (m.endDate == null) return false;
+      final daysUntilEnd = m.endDate!.difference(DateTime.now()).inDays;
+      return daysUntilEnd <= 7 && daysUntilEnd >= 0;
+    }).length;
+    final completed = medications.where((m) => !m.isActive).length;
+
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
           ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
         ),
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.analytics,
+                color: Theme.of(context).colorScheme.primary,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Estatísticas',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.medication,
+                  label: 'Total',
+                  value: total.toString(),
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.play_circle_filled,
+                  label: 'Ativos',
+                  value: active.toString(),
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.warning,
+                  label: 'Vencendo',
+                  value: expiring.toString(),
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildStatCard(
+                  icon: Icons.check_circle,
+                  label: 'Concluídos',
+                  value: completed.toString(),
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
+  }
+
+  Widget _buildStatCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMedicationsList(List<Medication> medications) {
+    return RefreshIndicator(
+      onRefresh: _refreshMedications,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: medications.length,
+        itemBuilder: (context, index) {
+          final medication = medications[index];
+          return Dismissible(
+            key: ValueKey(medication.id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Excluir',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onError,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            confirmDismiss: (direction) => _confirmDeleteMedication(medication),
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: MedicationCard(
+                medication: medication,
+                onTap: () => _navigateToMedicationDetails(context, medication),
+                onEdit: () => _navigateToEditMedication(context, medication),
+                onDelete: () => _confirmDeleteMedication(medication),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<DateTime> _getMonths(List<Medication> medications) {
+    if (medications.isEmpty) return [];
+    
+    final dates = medications.map((m) => m.startDate).toList();
+    final uniqueMonths = <DateTime>{};
+    
+    for (final date in dates) {
+      uniqueMonths.add(DateTime(date.year, date.month));
+    }
+    
+    final sortedMonths = uniqueMonths.toList()
+      ..sort((a, b) => b.compareTo(a)); // Most recent first
+    
+    return sortedMonths;
   }
 
   Future<void> _refreshMedications() async {
     try {
       final notifier = ref.read(medicationsProvider.notifier);
-      final primaryRefresh = widget.animalId != null
-          ? notifier.loadMedicationsByAnimalId(widget.animalId!)
-          : notifier.loadMedications();
-
-      await primaryRefresh.timeout(MedicationsConstants.loadingTimeout);
-      await Future.wait([
-        notifier.loadActiveMedications().catchError((e) => null),
-        notifier.loadExpiringMedications().catchError((e) => null),
-      ]);
+      if (widget.animalId != null) {
+        await notifier.loadMedicationsByAnimalId(widget.animalId!);
+      } else {
+        await notifier.loadMedications();
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar: ${e.toString()}')),
+          SnackBar(content: Text('Erro ao atualizar: $e')),
         );
       }
     }
@@ -502,15 +538,12 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     showDialog<void>(
       context: context,
       builder: (context) => AddMedicationDialog(
-        initialAnimalId: widget.animalId,
+        initialAnimalId: widget.animalId ?? _selectedAnimalId,
       ),
     );
   }
 
-  void _navigateToMedicationDetails(
-    BuildContext context,
-    Medication medication,
-  ) {
+  void _navigateToMedicationDetails(BuildContext context, Medication medication) {
     Navigator.of(context).pushNamed(
       '/medications/details',
       arguments: {'medicationId': medication.id},
@@ -524,10 +557,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     );
   }
 
-  Future<void> _confirmDeleteMedication(
-    BuildContext context,
-    Medication medication,
-  ) async {
+  Future<bool> _confirmDeleteMedication(Medication medication) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -548,16 +578,14 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage>
     );
 
     if (confirmed == true) {
-      await ref
-          .read(medicationsProvider.notifier)
-          .deleteMedication(medication.id);
-
+      await ref.read(medicationsProvider.notifier).deleteMedication(medication.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Medicamento excluído com sucesso')),
         );
       }
+      return true;
     }
+    return false;
   }
-
 }

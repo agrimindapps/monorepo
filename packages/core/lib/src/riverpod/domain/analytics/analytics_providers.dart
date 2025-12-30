@@ -19,6 +19,8 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../infrastructure/services/firebase_analytics_service.dart';
 import '../../../infrastructure/services/firebase_crashlytics_service.dart';
+import '../../../shared/services/analytics_route_observer.dart';
+import '../../../shared/services/navigation_analytics_service.dart';
 import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
 import '../premium/subscription_providers.dart';
 
@@ -33,6 +35,52 @@ final analyticsServiceProvider = Provider<FirebaseAnalyticsService>((ref) {
 /// Provider para Firebase Analytics instance
 final firebaseAnalyticsProvider = Provider<FirebaseAnalytics>((ref) {
   return FirebaseAnalytics.instance;
+});
+
+/// Provider para NavigationAnalyticsService (tracking detalhado de navegação)
+final navigationAnalyticsServiceProvider = Provider<NavigationAnalyticsService>((ref) {
+  final analyticsService = ref.watch(analyticsServiceProvider);
+  return NavigationAnalyticsService(analyticsService);
+});
+
+/// Provider para AnalyticsRouteObserver (tracking automático de telas)
+/// 
+/// Use este provider no GoRouter do seu app:
+/// ```dart
+/// final router = GoRouter(
+///   observers: [ref.read(analyticsRouteObserverProvider)],
+///   routes: [...],
+/// );
+/// ```
+final analyticsRouteObserverProvider = Provider<AnalyticsRouteObserver>((ref) {
+  final analyticsService = ref.watch(analyticsServiceProvider);
+  final navigationAnalytics = ref.watch(navigationAnalyticsServiceProvider);
+  final isDebugMode = kDebugMode;
+  
+  return AnalyticsRouteObserver(
+    analyticsRepository: analyticsService,
+    navigationAnalytics: navigationAnalytics,
+    enableDebugLogging: isDebugMode,
+  );
+});
+
+/// Provider factory para criar observer com prefixo de app específico
+/// 
+/// Use para apps que precisam de prefixo nos nomes de telas:
+/// ```dart
+/// final observer = ref.read(analyticsRouteObserverFamilyProvider('gasometer_'));
+/// ```
+final analyticsRouteObserverFamilyProvider = Provider.family<AnalyticsRouteObserver, String?>((ref, appPrefix) {
+  final analyticsService = ref.watch(analyticsServiceProvider);
+  final navigationAnalytics = ref.watch(navigationAnalyticsServiceProvider);
+  final isDebugMode = kDebugMode;
+  
+  return AnalyticsRouteObserver(
+    analyticsRepository: analyticsService,
+    navigationAnalytics: navigationAnalytics,
+    enableDebugLogging: isDebugMode,
+    appPrefix: appPrefix,
+  );
 });
 
 /// Provider para estado de analytics

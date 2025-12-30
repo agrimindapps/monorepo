@@ -45,9 +45,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   // Inicializa com o estado atual
   authStateNotifier.value = ref.read(authProvider).isAuthenticated;
 
+  // Analytics Route Observer para tracking automático de telas
+  final analyticsObserver = ref.read(
+    analyticsRouteObserverFamilyProvider('gasometer_'),
+  );
+
   return GoRouter(
     initialLocation: initialRoute,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
+    observers: [analyticsObserver],
     refreshListenable: authStateNotifier,
     redirect: (context, state) {
       // Rotas de autenticação (login/promo)

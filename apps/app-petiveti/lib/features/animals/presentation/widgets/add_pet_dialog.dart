@@ -127,7 +127,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             labelText: 'Nome do Pet *',
             hintText: 'Ex: Rex, Mimi, Bob...',
             border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.pets, color: AppColors.secondary),
           ),
           textCapitalization: TextCapitalization.words,
           validator: (value) {
@@ -150,7 +149,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Espécie *',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.category),
                 ),
                 items: AnimalSpecies.values.map((species) {
                   return DropdownMenuItem(
@@ -178,7 +176,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Gênero *',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.wc),
                 ),
                 items: AnimalGender.values.map((gender) {
                   return DropdownMenuItem(
@@ -255,7 +252,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                       labelText: 'Raça *',
                       hintText: 'Digite para buscar...',
                       border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.pets),
                     ),
                     textCapitalization: TextCapitalization.words,
                     onChanged: (value) {
@@ -307,7 +303,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                   labelText: 'Cor *',
                   hintText: 'Ex: Marrom, Preto...',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.color_lens),
                 ),
                 textCapitalization: TextCapitalization.words,
                 validator: (value) {
@@ -327,7 +322,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             labelText: 'Peso (kg) *',
             hintText: 'Ex: 15.5',
             border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.monitor_weight),
             suffixText: 'kg',
           ),
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
@@ -393,7 +387,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                   labelText: 'Microchip',
                   hintText: 'Número do microchip',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.memory),
                 ),
               ),
             ),
@@ -405,7 +398,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
                 decoration: const InputDecoration(
                   labelText: 'Tipo Sanguíneo',
                   border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.bloodtype),
                 ),
                 items: bloodTypeOptions.map((type) {
                   return DropdownMenuItem(
@@ -509,7 +501,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
               decoration: InputDecoration(
                 hintText: 'Digite para adicionar alergia...',
                 border: const OutlineInputBorder(),
-                prefixIcon: const Icon(Icons.add),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.add_circle),
                   onPressed: () {
@@ -580,7 +571,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             labelText: 'Veterinário Preferencial',
             hintText: 'Nome ou clínica veterinária',
             border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.person),
           ),
           textCapitalization: TextCapitalization.words,
         ),
@@ -591,7 +581,6 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             labelText: 'Plano de Saúde Pet',
             hintText: 'Operadora / número do plano',
             border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.health_and_safety),
           ),
         ),
       ],

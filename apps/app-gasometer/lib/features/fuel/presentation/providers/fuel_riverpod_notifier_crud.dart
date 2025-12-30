@@ -34,6 +34,9 @@ extension FuelRiverpodCrud on FuelRiverpod {
           );
         }
 
+        // 📊 Analytics: Track fuel refill (mesmo offline)
+        _trackFuelRefill(record);
+
         return true;
       },
       (addedRecord) async {
@@ -55,9 +58,31 @@ extension FuelRiverpodCrud on FuelRiverpod {
           );
         }
 
+        // 📊 Analytics: Track fuel refill
+        _trackFuelRefill(addedRecord);
+
         return true;
       },
     );
+  }
+
+  /// 📊 Track fuel refill event to Firebase Analytics
+  void _trackFuelRefill(FuelRecordEntity record) {
+    try {
+      _analyticsService.logFuelRefill(
+        fuelType: record.fuelType.displayName,
+        liters: record.liters,
+        totalCost: record.totalPrice,
+        fullTank: record.fullTank,
+      );
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Fuel refill tracked: ${record.fuelType.displayName}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking fuel refill: $e');
+      }
+    }
   }
 
   Future<bool> updateFuelRecord(FuelRecordEntity record) async {

@@ -40,6 +40,11 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     // ✅ NOVO: Sincronizar imagens pendentes ao abrir o app
     _syncPendingImages();
 
+    // 📊 Analytics: Start initial session tracking
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startSessionTracking();
+    });
+
     // 🧪 AUTO-LOGIN PARA TESTES (APENAS LOCALHOST)
     if (kDebugMode && _isLocalhost()) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -50,6 +55,8 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
 
   @override
   void dispose() {
+    // 📊 Analytics: End session on dispose
+    _endSessionTracking();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -68,6 +75,8 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
           // App going to background - pause auto-sync
           if (mounted) {
             main.autoSyncService.pause();
+            // 📊 Analytics: End session tracking
+            _endSessionTracking();
           }
           break;
         case AppLifecycleState.resumed:
@@ -76,6 +85,8 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
             main.autoSyncService.resume();
             // ✅ NOVO: Sincronizar imagens pendentes ao voltar ao app
             _syncPendingImages();
+            // 📊 Analytics: Start session tracking
+            _startSessionTracking();
           }
           break;
         case AppLifecycleState.detached:
@@ -86,6 +97,37 @@ class _GasOMeterAppState extends ConsumerState<GasOMeterApp>
     } catch (e) {
       if (kDebugMode) {
         SecureLogger.warning('Error handling lifecycle state change', error: e);
+      }
+    }
+  }
+
+  /// 📊 Inicia tracking de sessão para analytics
+  void _startSessionTracking() {
+    try {
+      ref.read(sessionTrackingProvider.notifier).startSession();
+      ref.read(engagementMetricsProvider.notifier).startNewSession();
+      if (kDebugMode) {
+        SecureLogger.info('📊 [Analytics] Session started');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to start session tracking', error: e);
+      }
+    }
+  }
+
+  /// 📊 Finaliza tracking de sessão para analytics
+  void _endSessionTracking() {
+    try {
+      final sessionDuration = ref.read(currentSessionDurationProvider);
+      ref.read(sessionTrackingProvider.notifier).endSession();
+      ref.read(engagementMetricsProvider.notifier).addSessionTime(sessionDuration);
+      if (kDebugMode) {
+        SecureLogger.info('📊 [Analytics] Session ended (${sessionDuration.inSeconds}s)');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to end session tracking', error: e);
       }
     }
   }

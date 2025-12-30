@@ -133,6 +133,15 @@ class GasometerAnalyticsService {
     });
   }
 
+  /// Eventos de compra de assinatura
+  Future<void> logSubscriptionPurchased(String productId, double price) async {
+    await _enhanced.logPurchaseEvent(
+      productId: productId,
+      value: price,
+      currency: 'BRL',
+    );
+  }
+
   /// Eventos de exportação
   Future<void> logDataExport(String exportType) async {
     await logEvent('data_exported', {

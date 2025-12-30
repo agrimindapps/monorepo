@@ -207,6 +207,7 @@ export 'src/shared/services/cache_management_service.dart' hide CacheConfig;
 export 'src/shared/services/dio_service.dart';
 export 'src/shared/services/enhanced_navigation_service.dart';
 export 'src/shared/services/firebase_id_service.dart';
+export 'src/shared/services/analytics_route_observer.dart';
 export 'src/shared/services/navigation_analytics_service.dart';
 export 'src/shared/services/navigation_configuration_service.dart';
 export 'src/shared/services/navigation_service.dart';

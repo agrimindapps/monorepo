@@ -2,6 +2,8 @@ import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../domain/usecases/compare_reports.dart';
 import '../../domain/usecases/export_report.dart';
 import '../../domain/usecases/generate_custom_report.dart';
@@ -11,6 +13,11 @@ import '../../domain/usecases/get_reports_analytics.dart';
 import 'reports_state.dart';
 
 part 'reports_notifier.g.dart';
+
+@riverpod
+GasometerAnalyticsService reportsAnalyticsService(Ref ref) {
+  return ref.watch(gasometerAnalyticsServiceProvider);
+}
 
 @riverpod
 GenerateMonthlyReport generateMonthlyReport(Ref ref) {
@@ -64,9 +71,26 @@ ExportReportToCSV exportReportToCSV(Ref ref) {
 
 @riverpod
 class ReportsNotifier extends _$ReportsNotifier {
+  late final GasometerAnalyticsService _analyticsService;
+  
   @override
   ReportsState build() {
+    _analyticsService = ref.watch(reportsAnalyticsServiceProvider);
     return const ReportsState();
+  }
+
+  /// 📊 Track report viewed event to Firebase Analytics
+  void _trackReportViewed(String reportType) {
+    try {
+      _analyticsService.logReportViewed(reportType);
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Report viewed tracked: $reportType');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking report viewed: $e');
+      }
+    }
   }
 
   void setSelectedVehicle(String vehicleId) {
@@ -100,6 +124,8 @@ class ReportsNotifier extends _$ReportsNotifier {
           isLoading: false,
           errorMessage: null,
         );
+        // 📊 Analytics: Track monthly report viewed
+        _trackReportViewed('monthly');
         if (kDebugMode) {
           debugPrint('[REPORTS] Monthly report generated for vehicle ${id.substring(0, 8)}...');
         }
@@ -132,6 +158,8 @@ class ReportsNotifier extends _$ReportsNotifier {
           isLoading: false,
           errorMessage: null,
         );
+        // 📊 Analytics: Track yearly report viewed
+        _trackReportViewed('yearly');
         if (kDebugMode) {
           debugPrint('[REPORTS] Yearly report generated for vehicle ${id.substring(0, 8)}...');
         }
@@ -171,6 +199,8 @@ class ReportsNotifier extends _$ReportsNotifier {
           isLoading: false,
           errorMessage: null,
         );
+        // 📊 Analytics: Track custom report viewed
+        _trackReportViewed('custom');
         if (kDebugMode) {
           debugPrint('[REPORTS] Custom report generated for vehicle ${id.substring(0, 8)}...');
         }

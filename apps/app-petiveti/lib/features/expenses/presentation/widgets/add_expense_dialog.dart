@@ -189,7 +189,6 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
             labelText: 'Descrição *',
             hintText: 'Ex: Consulta veterinária, vacina antirrábica...',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.description),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
@@ -208,7 +207,6 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
             labelText: 'Veterinário/Local',
             hintText: 'Nome do veterinário ou clínica',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.local_hospital),
           ),
         ),
       ],
@@ -230,7 +228,6 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
             labelText: 'Valor *',
             hintText: '0,00',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.attach_money),
             suffixText: 'R\$',
           ),
           validator: (value) {
@@ -293,7 +290,6 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              prefixIcon: const Icon(Icons.receipt),
             ),
           ),
         ],
@@ -321,7 +317,6 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              prefixIcon: const Icon(Icons.repeat),
             ),
             items: RecurrenceType.values
                 .map(

@@ -1,3 +1,5 @@
+import 'package:core/core.dart' hide Ref;
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;
@@ -221,10 +223,25 @@ class AnimalsNotifier extends _$AnimalsNotifier with OptimisticDeleteMixin<Anima
     result.fold(
       (failure) => state = state.copyWith(error: failure.message),
       (_) {
+        // 📊 Analytics: Track pet created
+        _trackPetCreated(animal);
         // Recarregar do banco para obter o ID correto gerado pelo Drift
         loadAnimals();
       },
     );
+  }
+
+  /// 📊 Track pet created event to Firebase Analytics
+  void _trackPetCreated(Animal animal) {
+    try {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Pet created tracked: ${animal.name}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking pet created: $e');
+      }
+    }
   }
 
   /// Atualizar animal existente

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-
 /// **Date Time Picker Field Component**
 ///
 /// Componente reutilizável para seleção de data, hora ou data/hora em formulários.
@@ -216,10 +214,10 @@ class DateTimePickerField extends StatelessWidget {
         if (label != null) ...[
           Text(
             label!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 8),
@@ -232,9 +230,9 @@ class DateTimePickerField extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             helperText!,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
-              color: AppColors.textSecondary,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -249,34 +247,22 @@ class DateTimePickerField extends StatelessWidget {
       child: InputDecorator(
         decoration: InputDecoration(
           hintText: hint,
-          prefixIcon: Icon(
-            icon,
-            color: enabled ? AppColors.primary : AppColors.textSecondary,
-          ),
           suffixIcon: enabled
-              ? const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary)
+              ? Icon(
+                  Icons.arrow_drop_down, 
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                )
               : null,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppColors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-          ),
-          disabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppColors.border.withValues(alpha: 0.5)),
           ),
         ),
         child: Text(
           _getDisplayText(),
           style: TextStyle(
-            color: enabled ? AppColors.textPrimary : AppColors.textSecondary,
+            color: enabled 
+                ? Theme.of(context).colorScheme.onSurface
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
             fontSize: 16,
           ),
         ),
@@ -294,10 +280,6 @@ class DateTimePickerField extends StatelessWidget {
             child: InputDecorator(
               decoration: InputDecoration(
                 labelText: 'Data de Início',
-                prefixIcon: Icon(
-                  Icons.calendar_today,
-                  color: enabled ? AppColors.primary : AppColors.textSecondary,
-                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -305,7 +287,9 @@ class DateTimePickerField extends StatelessWidget {
               child: Text(
                 startValue != null ? _formatDate(startValue!) : 'Selecionar',
                 style: TextStyle(
-                  color: enabled ? AppColors.textPrimary : AppColors.textSecondary,
+                  color: enabled 
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                 ),
               ),
             ),
@@ -319,10 +303,6 @@ class DateTimePickerField extends StatelessWidget {
             child: InputDecorator(
               decoration: InputDecoration(
                 labelText: 'Data de Fim',
-                prefixIcon: Icon(
-                  Icons.calendar_today,
-                  color: enabled ? AppColors.primary : AppColors.textSecondary,
-                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -330,7 +310,9 @@ class DateTimePickerField extends StatelessWidget {
               child: Text(
                 endValue != null ? _formatDate(endValue!) : 'Selecionar',
                 style: TextStyle(
-                  color: enabled ? AppColors.textPrimary : AppColors.textSecondary,
+                  color: enabled 
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                 ),
               ),
             ),

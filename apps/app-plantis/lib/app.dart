@@ -33,10 +33,12 @@ class PlantisApp extends ConsumerStatefulWidget {
   ConsumerState<PlantisApp> createState() => _PlantisAppState();
 }
 
-class _PlantisAppState extends ConsumerState<PlantisApp> {
+class _PlantisAppState extends ConsumerState<PlantisApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // 🧪 AUTO-LOGIN PARA TESTES (APENAS LOCALHOST)
     if (kDebugMode && _isLocalhost()) {
@@ -44,6 +46,11 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
         _performTestAutoLogin();
       });
     }
+
+    // 📊 Analytics: Start initial session tracking
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startSessionTracking();
+    });
 
     // Mark first frame rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -55,6 +62,74 @@ class _PlantisAppState extends ConsumerState<PlantisApp> {
         performance.markAppInteractive();
       });
     });
+  }
+
+  @override
+  void dispose() {
+    // 📊 Analytics: End session on dispose
+    _endSessionTracking();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (!mounted) return;
+
+    try {
+      switch (state) {
+        case AppLifecycleState.paused:
+        case AppLifecycleState.inactive:
+          // 📊 Analytics: End session tracking
+          _endSessionTracking();
+          break;
+        case AppLifecycleState.resumed:
+          // 📊 Analytics: Start session tracking
+          _startSessionTracking();
+          break;
+        case AppLifecycleState.detached:
+        case AppLifecycleState.hidden:
+          // No action needed
+          break;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Error handling lifecycle state change', error: e);
+      }
+    }
+  }
+
+  /// 📊 Inicia tracking de sessão para analytics
+  void _startSessionTracking() {
+    try {
+      ref.read(sessionTrackingProvider.notifier).startSession();
+      ref.read(engagementMetricsProvider.notifier).startNewSession();
+      if (kDebugMode) {
+        SecureLogger.info('📊 [Analytics] Session started');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to start session tracking', error: e);
+      }
+    }
+  }
+
+  /// 📊 Finaliza tracking de sessão para analytics
+  void _endSessionTracking() {
+    try {
+      final sessionDuration = ref.read(currentSessionDurationProvider);
+      ref.read(sessionTrackingProvider.notifier).endSession();
+      ref.read(engagementMetricsProvider.notifier).addSessionTime(sessionDuration);
+      if (kDebugMode) {
+        SecureLogger.info('📊 [Analytics] Session ended (${sessionDuration.inSeconds}s)');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        SecureLogger.warning('Failed to end session tracking', error: e);
+      }
+    }
   }
 
   /// 🧪 AUTO-LOGIN PARA TESTES

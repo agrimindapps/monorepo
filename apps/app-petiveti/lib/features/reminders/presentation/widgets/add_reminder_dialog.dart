@@ -167,7 +167,6 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
             labelText: 'Título do Lembrete *',
             hintText: 'Ex: Vacina da raiva, Consulta veterinária',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.title),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) return 'Título é obrigatório';
@@ -186,7 +185,6 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
             labelText: 'Descrição *',
             hintText: 'Detalhes sobre o lembrete',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.description),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -282,7 +280,6 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              prefixIcon: const Icon(Icons.repeat),
             ),
             keyboardType: TextInputType.number,
             validator: _isRecurring

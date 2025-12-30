@@ -158,7 +158,6 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           initialValue: _selectedAnimal,
           decoration: InputDecoration(
             hintText: 'Selecione um animal',
-            prefixIcon: const Icon(Icons.pets),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           items: animals.map((animal) {
@@ -184,7 +183,6 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           decoration: InputDecoration(
             labelText: 'Nome da Vacina *',
             hintText: 'Ex: V10 (Múltipla)',
-            prefixIcon: const Icon(Icons.vaccines),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             suffixIcon: PopupMenuButton<String>(
               icon: const Icon(Icons.arrow_drop_down),
@@ -207,7 +205,6 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           decoration: InputDecoration(
             labelText: 'Veterinário *',
             hintText: 'Dr. João Silva',
-            prefixIcon: const Icon(Icons.medical_services),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
           validator: (value) {
@@ -307,7 +304,6 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           decoration: InputDecoration(
             labelText: 'Lote',
             hintText: 'Ex: 123456',
-            prefixIcon: const Icon(Icons.numbers),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -317,7 +313,6 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           decoration: InputDecoration(
             labelText: 'Fabricante',
             hintText: 'Ex: Laboratório ABC',
-            prefixIcon: const Icon(Icons.business),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
@@ -327,7 +322,6 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           decoration: InputDecoration(
             labelText: 'Dosagem',
             hintText: 'Ex: 1ml subcutâneo',
-            prefixIcon: const Icon(Icons.medical_information),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),

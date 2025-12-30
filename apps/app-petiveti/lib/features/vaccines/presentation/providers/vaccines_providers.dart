@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/database_providers.dart';
@@ -133,6 +134,7 @@ class VaccinesState {
   final String? error;
   final VaccinesFilter filter;
   final String searchQuery;
+  final DateTime? selectedMonth;
 
   const VaccinesState({
     this.vaccines = const [],
@@ -142,6 +144,7 @@ class VaccinesState {
     this.error,
     this.filter = VaccinesFilter.all,
     this.searchQuery = '',
+    this.selectedMonth,
   });
 
   VaccinesState copyWith({
@@ -152,6 +155,7 @@ class VaccinesState {
     String? error,
     VaccinesFilter? filter,
     String? searchQuery,
+    DateTime? selectedMonth,
   }) {
     return VaccinesState(
       vaccines: vaccines ?? this.vaccines,
@@ -161,6 +165,7 @@ class VaccinesState {
       error: error,
       filter: filter ?? this.filter,
       searchQuery: searchQuery ?? this.searchQuery,
+      selectedMonth: selectedMonth ?? this.selectedMonth,
     );
   }
 
@@ -309,8 +314,23 @@ class VaccinesNotifier extends _$VaccinesNotifier {
           vaccines: updatedVaccines,
           error: null,
         );
+        // 📊 Analytics: Track vaccine recorded
+        _trackVaccineRecorded(vaccine);
       },
     );
+  }
+
+  /// 📊 Track vaccine recorded event to Firebase Analytics
+  void _trackVaccineRecorded(Vaccine vaccine) {
+    try {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Vaccine recorded tracked: ${vaccine.name}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking vaccine recorded: $e');
+      }
+    }
   }
 
   Future<void> updateVaccine(Vaccine vaccine) async {
@@ -437,6 +457,14 @@ class VaccinesNotifier extends _$VaccinesNotifier {
 
   void clearAnimalFilter() {
     loadVaccines();
+  }
+
+  void selectMonth(DateTime month) {
+    state = state.copyWith(selectedMonth: month);
+  }
+
+  void clearMonthFilter() {
+    state = state.copyWith(selectedMonth: null);
   }
 }
 

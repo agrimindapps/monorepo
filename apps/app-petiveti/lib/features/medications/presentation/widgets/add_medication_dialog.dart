@@ -165,7 +165,6 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Nome do Medicamento *',
             hintText: 'Ex: Amoxicilina',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.medication),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) return 'Nome é obrigatório';
@@ -203,7 +202,6 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Dosagem *',
             hintText: 'Ex: 250mg, 1 comprimido',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.colorize),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) return 'Dosagem é obrigatória';
@@ -217,7 +215,6 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Frequência *',
             hintText: 'Ex: 2x ao dia, A cada 8 horas',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.schedule),
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
@@ -233,7 +230,6 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Duração (opcional)',
             hintText: 'Ex: 7 dias, 2 semanas',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.timer),
           ),
         ),
       ],
@@ -294,7 +290,6 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Prescrito por (opcional)',
             hintText: 'Nome do veterinário',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            prefixIcon: const Icon(Icons.person),
           ),
         ),
         const SizedBox(height: 16),

@@ -201,7 +201,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     controller: _veterinarianController,
                     decoration: const InputDecoration(
                       labelText: 'Veterinário',
-                      prefixIcon: Icon(Icons.person),
                       border: OutlineInputBorder(),
                     ),
                     validator: (value) {
@@ -217,7 +216,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     controller: _reasonController,
                     decoration: const InputDecoration(
                       labelText: 'Motivo da Consulta',
-                      prefixIcon: Icon(Icons.medical_services),
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 2,
@@ -235,7 +233,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                       initialValue: _selectedStatus,
                       decoration: const InputDecoration(
                         labelText: 'Status',
-                        prefixIcon: Icon(Icons.flag),
                         border: OutlineInputBorder(),
                       ),
                       items: AppointmentStatus.values.map((status) {
@@ -258,7 +255,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     controller: _diagnosisController,
                     decoration: const InputDecoration(
                       labelText: 'Diagnóstico (opcional)',
-                      prefixIcon: Icon(Icons.assignment),
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 2,
@@ -269,7 +265,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     controller: _notesController,
                     decoration: const InputDecoration(
                       labelText: 'Observações (opcional)',
-                      prefixIcon: Icon(Icons.note),
                       border: OutlineInputBorder(),
                     ),
                     maxLines: 3,
@@ -280,7 +275,6 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     controller: _costController,
                     decoration: const InputDecoration(
                       labelText: 'Valor (opcional)',
-                      prefixIcon: Icon(Icons.attach_money),
                       border: OutlineInputBorder(),
                       prefixText: 'R\$ ',
                     ),

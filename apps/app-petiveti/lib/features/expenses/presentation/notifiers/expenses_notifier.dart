@@ -21,6 +21,8 @@ class ExpensesState {
   final ExpenseSummary? summary;
   final bool isLoading;
   final String? error;
+  final DateTime? selectedMonth;
+  final String? selectedAnimalId;
 
   const ExpensesState({
     this.expenses = const [],
@@ -29,6 +31,8 @@ class ExpensesState {
     this.summary,
     this.isLoading = false,
     this.error,
+    this.selectedMonth,
+    this.selectedAnimalId,
   });
 
   ExpensesState copyWith({
@@ -38,6 +42,8 @@ class ExpensesState {
     ExpenseSummary? summary,
     bool? isLoading,
     String? error,
+    DateTime? selectedMonth,
+    String? selectedAnimalId,
   }) {
     return ExpensesState(
       expenses: expenses ?? this.expenses,
@@ -46,6 +52,8 @@ class ExpensesState {
       summary: summary ?? this.summary,
       isLoading: isLoading ?? this.isLoading,
       error: error,
+      selectedMonth: selectedMonth ?? this.selectedMonth,
+      selectedAnimalId: selectedAnimalId ?? this.selectedAnimalId,
     );
   }
 
@@ -218,6 +226,25 @@ class ExpensesNotifier extends _$ExpensesNotifier {
 
   double getCategoryAmount(ExpenseCategory category) {
     return state.categoryAmounts[category] ?? 0;
+  }
+
+  void selectMonth(DateTime month) {
+    state = state.copyWith(selectedMonth: month);
+  }
+
+  void clearMonthFilter() {
+    state = state.copyWith(selectedMonth: null);
+  }
+
+  void filterByAnimal(String animalId) {
+    state = state.copyWith(selectedAnimalId: animalId);
+    // Filter expenses by animal
+    final filtered = state.expenses.where((e) => e.animalId == animalId).toList();
+    _processExpensesData(filtered);
+  }
+
+  void clearAnimalFilter() {
+    state = state.copyWith(selectedAnimalId: null);
   }
 }
 

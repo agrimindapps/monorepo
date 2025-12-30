@@ -7,6 +7,8 @@ import 'package:flutter/material.dart' hide FormState;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/error/app_error.dart' as local_error;
+import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/validation/input_sanitizer.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
 import '../../domain/entities/fuel_type_mapper.dart';
@@ -77,9 +79,13 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
   final TextEditingController chassisController = TextEditingController();
   final TextEditingController renavamController = TextEditingController();
   final TextEditingController odometerController = TextEditingController();
+  
+  late final GasometerAnalyticsService _analyticsService;
 
   @override
   VehicleFormState build() {
+    _analyticsService = ref.watch(gasometerAnalyticsServiceProvider);
+    
     ref.onDispose(() {
       brandController.dispose();
       modelController.dispose();
@@ -414,6 +420,7 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
     try {
       final vehicle = await buildVehicleEntity();
       final notifier = ref.read(vehiclesProvider.notifier);
+      final isNewVehicle = !state.isEditing;
 
       if (state.isEditing) {
         await notifier.updateVehicle(vehicle);
@@ -422,6 +429,11 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
       }
 
       state = state.copyWith(isLoading: false, hasChanges: false);
+
+      // 📊 Analytics: Track vehicle creation only for new vehicles
+      if (isNewVehicle) {
+        _trackVehicleCreated(vehicle);
+      }
 
       return true;
     } catch (e) {
@@ -434,6 +446,21 @@ class VehicleFormNotifier extends _$VehicleFormNotifier {
       state = state.copyWith(isLoading: false, error: error);
 
       return false;
+    }
+  }
+
+  /// 📊 Track vehicle created event to Firebase Analytics
+  void _trackVehicleCreated(VehicleEntity vehicle) {
+    try {
+      final vehicleType = '${vehicle.brand} ${vehicle.model}';
+      _analyticsService.logVehicleCreated(vehicleType);
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Vehicle created tracked: $vehicleType');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking vehicle created: $e');
+      }
     }
   }
 

@@ -106,9 +106,9 @@ class _MainBottomNavigationState extends ConsumerState<MainBottomNavigation> {
           height: 65,
           destinations: const [
             NavigationDestination(
-              selectedIcon: Icon(Icons.home),
-              icon: Icon(Icons.home_outlined),
-              label: 'Início',
+              selectedIcon: Icon(Icons.timeline),
+              icon: Icon(Icons.timeline_outlined),
+              label: 'Timeline',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.pets),
@@ -116,14 +116,14 @@ class _MainBottomNavigationState extends ConsumerState<MainBottomNavigation> {
               label: 'Pets',
             ),
             NavigationDestination(
-              selectedIcon: Icon(Icons.calculate),
-              icon: Icon(Icons.calculate_outlined),
-              label: 'Cálculos',
+              selectedIcon: Icon(Icons.assignment),
+              icon: Icon(Icons.assignment_outlined),
+              label: 'Atividades',
             ),
             NavigationDestination(
-              selectedIcon: Icon(Icons.notifications),
-              icon: Icon(Icons.notifications_outlined),
-              label: 'Lembretes',
+              selectedIcon: Icon(Icons.build),
+              icon: Icon(Icons.build_outlined),
+              label: 'Ferramentas',
             ),
             NavigationDestination(
               selectedIcon: Icon(Icons.settings),

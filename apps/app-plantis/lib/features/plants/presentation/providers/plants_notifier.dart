@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/providers/analytics_notifier.dart';
 import '../../domain/entities/plant.dart';
 import '../../domain/services/plants_cache_manager.dart';
 import '../../domain/services/plants_care_service.dart';
@@ -268,6 +269,10 @@ class PlantsNotifier extends _$PlantsNotifier {
         plants: _applyFilters(result.updatedPlants!),
         isLoading: false,
       );
+      
+      // 📊 Analytics: Track plant created
+      _trackPlantCreated(params.name, params.species);
+      
       return true;
     } else if (result.error != null) {
       state = state.copyWith(error: result.error, isLoading: false);
@@ -275,6 +280,25 @@ class PlantsNotifier extends _$PlantsNotifier {
     }
 
     return false;
+  }
+
+  /// 📊 Track plant created event to Firebase Analytics
+  void _trackPlantCreated(String plantName, String? species) {
+    try {
+      ref.read(analyticsProvider.notifier).logPlantCreated(
+        additionalData: {
+          'plant_name': plantName,
+          'plant_species': species ?? 'unknown',
+        },
+      );
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Plant created tracked: $plantName');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking plant created: $e');
+      }
+    }
   }
 
   Future<bool> updatePlant(UpdatePlantParams params) async {

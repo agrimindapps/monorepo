@@ -176,14 +176,14 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   int _getBranchIndex(int navigationIndex) {
     if (ResponsiveLayout.isMobile(context)) {
       // Mobile: 5 itens mapeados para branches específicos
-      // Nav: Home(0), Animals(1), Calculators(2), Reminders(3), Settings(4)
-      // Branches: Home(0), Animals(1), Appointments(2), Vaccines(3), Medications(4),
-      //           Weight(5), Reminders(6), Calculators(7), Expenses(8), Settings(9)
+      // Nav: Timeline(0), Animals(1), Activities(2), Tools(3), Settings(4)
+      // Branches: Timeline(0), Animals(1), Appointments(2), Vaccines(3), Medications(4),
+      //           Weight(5), Activities(6), Tools(7), Expenses(8), Settings(9)
       const mobileMapping = {
-        0: 0, // Home
+        0: 0, // Timeline (novo)
         1: 1, // Animals
-        2: 7, // Calculators
-        3: 6, // Reminders
+        2: 6, // Activities (era Home/Reminders branch 6)
+        3: 7, // Tools (inclui Reminders)
         4: 9, // Settings
       };
       return mobileMapping[navigationIndex] ?? 0;
@@ -198,17 +198,17 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
     if (ResponsiveLayout.isMobile(context)) {
       // Branches → Mobile Navigation (reverse mapping)
       const branchToMobile = {
-        0: 0, // Home
+        0: 0, // Timeline (novo)
         1: 1, // Animals
-        7: 2, // Calculators
-        6: 3, // Reminders
+        6: 2, // Activities (era Reminders)
+        7: 3, // Tools
         9: 4, // Settings
-        // Branches não em mobile → fallback para Home
-        2: 0, // Appointments → Home
-        3: 0, // Vaccines → Home
-        4: 0, // Medications → Home
-        5: 0, // Weight → Home
-        8: 0, // Expenses → Home
+        // Branches não em mobile → fallback para Timeline
+        2: 0, // Appointments → Timeline
+        3: 0, // Vaccines → Timeline
+        4: 0, // Medications → Timeline
+        5: 0, // Weight → Timeline
+        8: 0, // Expenses → Timeline
       };
       return branchToMobile[branchIndex] ?? 0;
     } else {
@@ -220,11 +220,11 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   /// Get navigation destinations for rail layout (tablet/desktop)
   List<NavigationRailDestination> _getNavigationRailDestinations() {
     return const [
-      // Branch 0: Home
+      // Branch 0: Timeline
       NavigationRailDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: Text('Início'),
+        icon: Icon(Icons.timeline_outlined),
+        selectedIcon: Icon(Icons.timeline),
+        label: Text('Timeline'),
       ),
       // Branch 1: Animals
       NavigationRailDestination(
@@ -256,17 +256,17 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         selectedIcon: Icon(Icons.monitor_weight),
         label: Text('Peso'),
       ),
-      // Branch 6: Reminders
+      // Branch 6: Activities (era Reminders)
       NavigationRailDestination(
-        icon: Icon(Icons.notifications_outlined),
-        selectedIcon: Icon(Icons.notifications),
-        label: Text('Lembretes'),
+        icon: Icon(Icons.dashboard_outlined),
+        selectedIcon: Icon(Icons.dashboard),
+        label: Text('Atividades'),
       ),
-      // Branch 7: Calculators
+      // Branch 7: Tools
       NavigationRailDestination(
-        icon: Icon(Icons.calculate_outlined),
-        selectedIcon: Icon(Icons.calculate),
-        label: Text('Cálculos'),
+        icon: Icon(Icons.handyman_outlined),
+        selectedIcon: Icon(Icons.handyman),
+        label: Text('Ferramentas'),
       ),
       // Branch 8: Expenses
       NavigationRailDestination(
@@ -286,11 +286,11 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   /// Get navigation destinations for NavigationBar (Mobile - 5 itens)
   List<NavigationDestination> _getMobileNavigationDestinations() {
     return const [
-      // Mobile 0 → Branch 0: Home
+      // Mobile 0 → Branch 0: Timeline
       NavigationDestination(
-        icon: Icon(Icons.home_outlined),
-        selectedIcon: Icon(Icons.home),
-        label: 'Início',
+        icon: Icon(Icons.timeline_outlined),
+        selectedIcon: Icon(Icons.timeline),
+        label: 'Timeline',
       ),
       // Mobile 1 → Branch 1: Animals
       NavigationDestination(
@@ -298,17 +298,17 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         selectedIcon: Icon(Icons.pets),
         label: 'Pets',
       ),
-      // Mobile 2 → Branch 7: Calculators
+      // Mobile 2 → Branch 6: Activities
       NavigationDestination(
-        icon: Icon(Icons.calculate_outlined),
-        selectedIcon: Icon(Icons.calculate),
-        label: 'Cálculos',
+        icon: Icon(Icons.dashboard_outlined),
+        selectedIcon: Icon(Icons.dashboard),
+        label: 'Atividades',
       ),
-      // Mobile 3 → Branch 6: Reminders
+      // Mobile 3 → Branch 7: Tools
       NavigationDestination(
-        icon: Icon(Icons.notifications_outlined),
-        selectedIcon: Icon(Icons.notifications),
-        label: 'Lembretes',
+        icon: Icon(Icons.handyman_outlined),
+        selectedIcon: Icon(Icons.handyman),
+        label: 'Ferramentas',
       ),
       // Mobile 4 → Branch 9: Settings
       NavigationDestination(
@@ -352,7 +352,9 @@ class NavigationUtils {
   static String getLabelByRoute(String route) {
     switch (route) {
       case '/':
-        return 'Início';
+        return 'Timeline';
+      case '/activities':
+        return 'Atividades';
       case '/animals':
         return 'Pets';
       case '/appointments':
@@ -365,6 +367,8 @@ class NavigationUtils {
         return 'Peso';
       case '/reminders':
         return 'Lembretes';
+      case '/tools':
+        return 'Ferramentas';
       case '/calculators':
         return 'Cálculos';
       case '/expenses':
@@ -384,7 +388,9 @@ class NavigationUtils {
   static IconData getIconByRoute(String route, {bool selected = false}) {
     switch (route) {
       case '/':
-        return selected ? Icons.home : Icons.home_outlined;
+        return selected ? Icons.timeline : Icons.timeline_outlined;
+      case '/activities':
+        return selected ? Icons.dashboard : Icons.dashboard_outlined;
       case '/animals':
         return selected ? Icons.pets : Icons.pets_outlined;
       case '/appointments':
@@ -397,6 +403,8 @@ class NavigationUtils {
         return selected ? Icons.monitor_weight : Icons.monitor_weight_outlined;
       case '/reminders':
         return selected ? Icons.notifications : Icons.notifications_outlined;
+      case '/tools':
+        return selected ? Icons.handyman : Icons.handyman_outlined;
       case '/calculators':
         return selected ? Icons.calculate : Icons.calculate_outlined;
       case '/expenses':

@@ -7,6 +7,7 @@ import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart' as deps;
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../domain/services/fuel_calculation_service.dart';
 import '../../domain/services/fuel_connectivity_service.dart';
 import '../../domain/services/fuel_crud_service.dart';
@@ -53,6 +54,12 @@ FuelCalculationService fuelCalculationService(Ref ref) {
 @riverpod
 FuelConnectivityService fuelConnectivityService(Ref ref) {
   return FuelConnectivityService(ref.watch(deps.connectivityServiceProvider));
+}
+
+/// Bridge provider for GasometerAnalyticsService
+@riverpod
+GasometerAnalyticsService fuelAnalyticsService(Ref ref) {
+  return ref.watch(deps.gasometerAnalyticsServiceProvider);
 }
 
 // --- Bridge Providers for Use Cases ---

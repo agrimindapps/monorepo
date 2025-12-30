@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/auth/auth_state_notifier.dart';
+import '../../../../core/providers/analytics_notifier.dart';
 import '../../domain/entities/task.dart' as task_entity;
 import '../../domain/services/task_filter_service.dart';
 import '../../domain/services/task_ownership_validator.dart';
@@ -100,6 +101,8 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
         (failure) {
           if (_isNetworkFailure(failure)) {
             _completeTaskOptimistically(task, notes);
+            // 📊 Analytics: Track task completed (even offline)
+            _trackTaskCompleted(task);
             return true;
           } else {
             _updateState(
@@ -110,6 +113,8 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
         },
         (completedTask) {
           _updateTaskInState(completedTask);
+          // 📊 Analytics: Track task completed
+          _trackTaskCompleted(completedTask);
           return true;
         },
       );
@@ -119,6 +124,26 @@ class TasksCrudNotifier extends _$TasksCrudNotifier {
     } catch (e) {
       debugPrint('❌ TasksCrudNotifier.completeTask error: $e');
       return false;
+    }
+  }
+
+  /// 📊 Track task completed event to Firebase Analytics
+  void _trackTaskCompleted(task_entity.Task task) {
+    try {
+      ref.read(analyticsProvider.notifier).logTaskCompleted(
+        task.type.name,
+        additionalData: {
+          'task_id': task.id,
+          'plant_id': task.plantId,
+        },
+      );
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Task completed tracked: ${task.type.name}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking task completed: $e');
+      }
     }
   }
 

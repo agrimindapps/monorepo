@@ -1,9 +1,11 @@
 import 'package:core/core.dart' as core;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide connectivityServiceProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
+import '../../../../core/services/analytics/gasometer_analytics_service.dart';
 import '../../../../core/services/storage/firebase_storage_service.dart' as local_storage;
 import '../../../../core/validation/input_sanitizer.dart';
 import '../../../../features/receipt/domain/services/receipt_image_service.dart';
@@ -33,6 +35,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
   late final GetVehicleById _getVehicleById;
   late final AddExpenseUseCase _addExpense;
   late final UpdateExpenseUseCase _updateExpense;
+  late final GasometerAnalyticsService _analyticsService;
 
   TextEditingController get descriptionController =>
       _controllerManager.descriptionController;
@@ -51,6 +54,7 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
     _controllerManager.initialize();
     _validatorHandler = ExpenseFormValidatorHandler();
     _datePickerHelper = const ExpenseDatePickerHelper();
+    _analyticsService = ref.watch(gasometerAnalyticsServiceProvider);
     
     final compressionService = core.ImageCompressionService();
     final storageService = local_storage.FirebaseStorageService();
@@ -314,10 +318,22 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
 
       state = state.copyWith(isLoading: true, errorMessage: () => null);
       final expenseEntity = _buildExpenseEntity();
-      final result = state.id.isEmpty
+      final isNewRecord = state.id.isEmpty;
+      final result = isNewRecord
           ? await _addExpense(expenseEntity)
           : await _updateExpense(expenseEntity);
       state = state.copyWith(isLoading: false);
+      
+      // 📊 Analytics: Track expense only for new records
+      if (isNewRecord) {
+        result.fold(
+          (_) {}, // Error - don't track
+          (entity) {
+            if (entity != null) _trackExpense(entity);
+          },
+        );
+      }
+      
       return result;
     } catch (e) {
       state = state.copyWith(
@@ -325,6 +341,23 @@ class ExpenseFormNotifier extends _$ExpenseFormNotifier {
         errorMessage: () => 'Erro ao salvar: ${e.toString()}',
       );
       return Left(UnexpectedFailure('Erro ao salvar: ${e.toString()}'));
+    }
+  }
+
+  /// 📊 Track expense event to Firebase Analytics
+  void _trackExpense(ExpenseEntity entity) {
+    try {
+      _analyticsService.logExpense(
+        expenseType: entity.type.displayName,
+        amount: entity.amount,
+      );
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Expense tracked: ${entity.type.displayName}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('📊 [Analytics] Error tracking expense: $e');
+      }
     }
   }
 

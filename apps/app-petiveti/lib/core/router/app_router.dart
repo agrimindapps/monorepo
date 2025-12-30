@@ -14,7 +14,6 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/calculators/presentation/pages/anesthesia_page.dart';
 import '../../features/calculators/presentation/pages/animal_age_page.dart';
 import '../../features/calculators/presentation/pages/body_condition_page.dart';
-import '../../features/calculators/presentation/pages/calculators_main_page.dart';
 import '../../features/calculators/presentation/pages/calorie_page.dart';
 import '../../features/calculators/presentation/pages/diabetes_insulin_page.dart';
 import '../../features/calculators/presentation/pages/exercise_page.dart';
@@ -40,12 +39,19 @@ import '../../features/reminders/presentation/widgets/add_reminder_dialog.dart';
 import '../../features/settings/presentation/pages/notifications_settings_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/subscription/presentation/pages/premium_subscription_page.dart';
+import '../../features/timeline/presentation/pages/timeline_page.dart';
+import '../../features/tools/presentation/pages/tools_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
 import '../../shared/widgets/adaptive_main_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/splash';
+
+  // 📊 Analytics Route Observer para tracking automático de telas
+  final analyticsObserver = ref.read(
+    analyticsRouteObserverFamilyProvider('petiveti_'),
+  );
 
   // Cria um notifier para mudanças de autenticação
   final authStateNotifier = ValueNotifier<bool>(false);
@@ -65,8 +71,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     initialLocation: initialRoute,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     refreshListenable: authStateNotifier,
+    observers: [analyticsObserver],
     redirect: (context, state) {
       final isOnSplash = state.matchedLocation == '/splash';
 
@@ -111,13 +118,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return AdaptiveMainNavigation(navigationShell: navigationShell);
         },
         branches: [
-          // Branch 0: Home
+          // Branch 0: Timeline (novo)
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/',
-                name: 'home',
-                builder: (context, state) => const HomePage(),
+                name: 'timeline',
+                builder: (context, state) => const TimelinePage(),
               ),
             ],
           ),
@@ -297,106 +304,80 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             ],
           ),
 
-          // Branch 6: Reminders
+          // Branch 6: Activities (antiga Home)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/reminders',
-                name: 'reminders',
-                builder: (context, state) =>
-                    const RemindersPage(userId: 'temp_user_id'),
-                routes: [
-                  GoRoute(
-                    path: '/add',
-                    name: 'add-reminder',
-                    builder: (context, state) {
-                      final args = state.extra as Map<String, dynamic>? ?? {};
-                      return AddReminderDialog(
-                        initialAnimalId: args['animalId'] as String?,
-                        userId: 'temp_user_id',
-                      );
-                    },
-                  ),
-                  GoRoute(
-                    path: '/edit',
-                    name: 'edit-reminder',
-                    builder: (context, state) {
-                      final args = state.extra as Map<String, dynamic>? ?? {};
-                      return AddReminderDialog(
-                        reminder: args['reminder'] as Reminder?,
-                        userId: 'temp_user_id',
-                      );
-                    },
-                  ),
-                ],
+                path: '/activities',
+                name: 'activities',
+                builder: (context, state) => const HomePage(),
               ),
             ],
           ),
 
-          // Branch 7: Calculators
+          // Branch 7: Tools (Ferramentas - inclui Reminders)
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/calculators',
-                name: 'calculators',
-                builder: (context, state) => const CalculatorsMainPage(),
-                routes: [
-                  GoRoute(
-                    path: '/body-condition',
-                    name: 'body-condition-calculator',
-                    builder: (context, state) => const BodyConditionPage(),
-                  ),
-                  GoRoute(
-                    path: '/calorie',
-                    name: 'calorie-calculator',
-                    builder: (context, state) => const CaloriePage(),
-                  ),
-                  GoRoute(
-                    path: '/medication-dosage',
-                    name: 'medication-dosage-calculator',
-                    builder: (context, state) => const MedicationDosagePage(),
-                  ),
-                  GoRoute(
-                    path: '/animal-age',
-                    name: 'animal-age-calculator',
-                    builder: (context, state) => const AnimalAgePage(),
-                  ),
-                  GoRoute(
-                    path: '/anesthesia',
-                    name: 'anesthesia-calculator',
-                    builder: (context, state) => const AnesthesiaPage(),
-                  ),
-                  GoRoute(
-                    path: '/ideal-weight',
-                    name: 'ideal-weight-calculator',
-                    builder: (context, state) => const IdealWeightPage(),
-                  ),
-                  GoRoute(
-                    path: '/fluid-therapy',
-                    name: 'fluid-therapy-calculator',
-                    builder: (context, state) => const FluidTherapyPage(),
-                  ),
-                  GoRoute(
-                    path: '/hydration',
-                    name: 'hydration-calculator',
-                    builder: (context, state) => const HydrationPage(),
-                  ),
-                  GoRoute(
-                    path: '/pregnancy',
-                    name: 'pregnancy-calculator',
-                    builder: (context, state) => const PregnancyPage(),
-                  ),
-                  GoRoute(
-                    path: '/exercise',
-                    name: 'exercise-calculator',
-                    builder: (context, state) => const ExercisePage(),
-                  ),
-                  GoRoute(
-                    path: '/diabetes-insulin',
-                    name: 'diabetes-insulin-calculator',
-                    builder: (context, state) => const DiabetesInsulinPage(),
-                  ),
-                ],
+                path: '/tools',
+                name: 'tools',
+                builder: (context, state) => const ToolsPage(),
+              ),
+              // Calculators como sub-rotas de tools
+              GoRoute(
+                path: '/calculators/body-condition',
+                name: 'body-condition-calculator',
+                builder: (context, state) => const BodyConditionPage(),
+              ),
+              GoRoute(
+                path: '/calculators/calorie',
+                name: 'calorie-calculator',
+                builder: (context, state) => const CaloriePage(),
+              ),
+              GoRoute(
+                path: '/calculators/medication-dosage',
+                name: 'medication-dosage-calculator',
+                builder: (context, state) => const MedicationDosagePage(),
+              ),
+              GoRoute(
+                path: '/calculators/animal-age',
+                name: 'animal-age-calculator',
+                builder: (context, state) => const AnimalAgePage(),
+              ),
+              GoRoute(
+                path: '/calculators/anesthesia',
+                name: 'anesthesia-calculator',
+                builder: (context, state) => const AnesthesiaPage(),
+              ),
+              GoRoute(
+                path: '/calculators/ideal-weight',
+                name: 'ideal-weight-calculator',
+                builder: (context, state) => const IdealWeightPage(),
+              ),
+              GoRoute(
+                path: '/calculators/fluid-therapy',
+                name: 'fluid-therapy-calculator',
+                builder: (context, state) => const FluidTherapyPage(),
+              ),
+              GoRoute(
+                path: '/calculators/hydration',
+                name: 'hydration-calculator',
+                builder: (context, state) => const HydrationPage(),
+              ),
+              GoRoute(
+                path: '/calculators/pregnancy',
+                name: 'pregnancy-calculator',
+                builder: (context, state) => const PregnancyPage(),
+              ),
+              GoRoute(
+                path: '/calculators/exercise',
+                name: 'exercise-calculator',
+                builder: (context, state) => const ExercisePage(),
+              ),
+              GoRoute(
+                path: '/calculators/diabetes-insulin',
+                name: 'diabetes-insulin-calculator',
+                builder: (context, state) => const DiabetesInsulinPage(),
               ),
             ],
           ),
@@ -460,6 +441,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const NotificationsSettingsPage(),
               ),
             ],
+          ),
+        ],
+      ),
+
+      // Rotas globais (acessíveis de qualquer lugar)
+      GoRoute(
+        path: '/reminders',
+        name: 'reminders',
+        builder: (context, state) => const RemindersPage(userId: 'temp_user_id'),
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: 'add-reminder',
+            builder: (context, state) {
+              final args = state.extra as Map<String, dynamic>? ?? {};
+              return AddReminderDialog(
+                initialAnimalId: args['animalId'] as String?,
+                userId: 'temp_user_id',
+              );
+            },
+          ),
+          GoRoute(
+            path: 'edit',
+            name: 'edit-reminder',
+            builder: (context, state) {
+              final args = state.extra as Map<String, dynamic>? ?? {};
+              return AddReminderDialog(
+                reminder: args['reminder'] as Reminder?,
+                userId: 'temp_user_id',
+              );
+            },
           ),
         ],
       ),

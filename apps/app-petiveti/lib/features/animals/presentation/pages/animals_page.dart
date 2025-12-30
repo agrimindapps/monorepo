@@ -89,7 +89,7 @@ class _AnimalsPageState extends ConsumerState<AnimalsPage>
         child: FloatingActionButton(
           onPressed: _listController.addAnimal,
           tooltip: AnimalsConstants.addPetTooltip,
-          child: const Icon(Icons.pets),
+          child: const Icon(Icons.add),
         ),
       ),
     );

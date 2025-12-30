@@ -1,12 +1,11 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../../../../core/providers/app_state_providers.dart';
+import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/appointment.dart';
 import '../providers/appointments_providers.dart';
 import '../widgets/appointment_card.dart';
-import '../widgets/appointments_auto_reload_manager.dart';
 import '../widgets/empty_appointments_state.dart';
 
 class AppointmentsPage extends ConsumerStatefulWidget {
@@ -22,6 +21,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   final Map<String, AnimationController> _slideAnimations = {};
   final Map<String, AnimationController> _fadeAnimations = {};
   String? _itemBeingDeleted;
+  String? _selectedAnimalId;
 
   @override
   void initState() {
@@ -40,11 +40,10 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   }
 
   void _loadAppointments() {
-    final selectedAnimalId = ref.read(selectedAnimalIdProvider);
-    if (selectedAnimalId != null) {
+    if (_selectedAnimalId != null) {
       ref
           .read(appointmentsProvider.notifier)
-          .loadAppointments(selectedAnimalId);
+          .loadAppointments(_selectedAnimalId!);
     }
   }
 
@@ -71,62 +70,66 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
   @override
   Widget build(BuildContext context) {
     final appointmentState = ref.watch(appointmentsProvider);
-    final selectedAnimalId = ref.watch(selectedAnimalIdProvider);
     final appointments = ref.watch(appointmentsListProvider);
 
-    return AppointmentsAutoReloadManager(
-      selectedAnimalId: selectedAnimalId,
-      onReloadStart: () {},
-      onReloadComplete: () {},
-      onReloadError: (error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao carregar consultas: $error'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      },
-      child: Scaffold(
-        body: SafeArea(
-          child: Column(
-            children: [
-              PetivetiPageHeader(
-                icon: Icons.calendar_month,
-                title: 'Consultas',
-                subtitle: 'Agendamentos veterinários',
-                showBackButton: true,
-                actions: [
-                  _buildHeaderAction(
-                    icon: Icons.refresh,
-                    onTap: _loadAppointments,
-                    tooltip: 'Atualizar',
-                  ),
-                ],
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            _buildAnimalSelector(),
+            Expanded(
+              child: _buildContent(
+                context,
+                appointmentState,
+                appointments,
+                _selectedAnimalId,
               ),
-              if (selectedAnimalId != null)
-                _buildSelectedAnimalBanner(selectedAnimalId),
-              Expanded(
-                child: _buildContent(
-                  context,
-                  appointmentState,
-                  appointments,
-                  selectedAnimalId,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        floatingActionButton: selectedAnimalId != null
-            ? Semantics(
-                label: 'Adicionar nova consulta',
-                hint:
-                    'Toque para agendar uma nova consulta para o animal selecionado',
-                child: FloatingActionButton(
-                  onPressed: () => context.push('/appointments/add'),
-                  child: const Icon(Icons.add),
-                ),
-              )
-            : null,
+      ),
+      floatingActionButton: _selectedAnimalId != null
+          ? FloatingActionButton(
+              onPressed: () => context.push('/appointments/add'),
+              tooltip: 'Adicionar Consulta',
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: PetivetiPageHeader(
+        icon: Icons.calendar_month,
+        title: 'Consultas',
+        subtitle: 'Agendamentos veterinários',
+        showBackButton: true,
+        actions: [
+          _buildHeaderAction(
+            icon: Icons.refresh,
+            onTap: _loadAppointments,
+            tooltip: 'Atualizar',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnimalSelector() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      child: EnhancedAnimalSelector(
+        selectedAnimalId: _selectedAnimalId,
+        onAnimalChanged: (animalId) {
+          setState(() => _selectedAnimalId = animalId);
+          if (animalId != null) {
+            ref.read(appointmentsProvider.notifier).loadAppointments(animalId);
+          }
+        },
+        hintText: 'Selecione um pet',
       ),
     );
   }
@@ -153,55 +156,6 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
     );
   }
 
-  Widget _buildSelectedAnimalBanner(String selectedAnimalId) {
-    return Semantics(
-      label: 'Animal selecionado para consultas',
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Semantics(
-              label: 'Avatar do animal selecionado',
-              child: CircleAvatar(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Text(
-                  'A',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Animal Selecionado',
-                    style: Theme.of(context).textTheme.titleMedium
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    'ID: $selectedAnimalId',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildContent(
     BuildContext context,
     AppointmentState state,
@@ -209,78 +163,42 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
     String? animalId,
   ) {
     if (animalId == null) {
-      return Semantics(
-        label: 'Nenhum animal selecionado',
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.pets,
-                size: 64,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Selecione um animal primeiro',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Acesse a página de animais para selecionar um pet',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.pets, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Selecione um pet', style: TextStyle(fontSize: 18)),
+            SizedBox(height: 8),
+            Text('Escolha um pet acima para ver suas consultas'),
+          ],
         ),
       );
     }
 
     if (state.isLoading) {
-      return Semantics(
-        label: 'Carregando consultas',
-        child: const Center(child: CircularProgressIndicator()),
-      );
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (state.errorMessage != null) {
-      return Semantics(
-        label: 'Erro ao carregar consultas',
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Theme.of(context).colorScheme.error,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Erro ao carregar consultas',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                state.errorMessage!,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-              const SizedBox(height: 16),
-              Semantics(
-                label: 'Tentar carregar consultas novamente',
-                child: ElevatedButton(
-                  onPressed: _loadAppointments,
-                  child: const Text('Tentar Novamente'),
-                ),
-              ),
-            ],
-          ),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            const SizedBox(height: 16),
+            Text(state.errorMessage!, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _loadAppointments,
+              child: const Text('Tentar novamente'),
+            ),
+          ],
         ),
       );
     }
@@ -289,61 +207,61 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
       return const EmptyAppointmentsState();
     }
 
-    return Semantics(
-      label: 'Lista de consultas do animal',
-      child: RefreshIndicator(
-        onRefresh: () async => _loadAppointments(),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: appointments.length,
-          itemExtent: 120, // Fixed height for better performance
-          cacheExtent: 1000, // Cache more items for smoother scrolling
-          itemBuilder: (context, index) {
-            final appointment = appointments[index];
-            final slideController = _getSlideController(appointment.id);
-            final fadeController = _getFadeController(appointment.id);
-            final isBeingDeleted = _itemBeingDeleted == appointment.id;
+    return RefreshIndicator(
+      onRefresh: () async => _loadAppointments(),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: appointments.length,
+        itemBuilder: (context, index) {
+          final appointment = appointments[index];
+          final slideController = _getSlideController(appointment.id);
+          final fadeController = _getFadeController(appointment.id);
+          final isBeingDeleted = _itemBeingDeleted == appointment.id;
 
-            return Dismissible(
-              key: ValueKey(appointment.id),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.only(right: 20),
+          return Dismissible(
+            key: ValueKey(appointment.id),
+            direction: DismissDirection.endToStart,
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.error,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(
-                      Icons.delete,
-                      color: Theme.of(context).colorScheme.onError,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Excluir',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onError,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+                borderRadius: BorderRadius.circular(12),
               ),
-              confirmDismiss: (direction) async {
-                return await _showDeleteDialogForDismiss(context, appointment);
-              },
-              onDismissed: (direction) {},
-              child: SlideTransition(
-                position:
-                    Tween<Offset>(
-                      begin: const Offset(1, 0),
-                      end: Offset.zero,
-                    ).animate(
-                      CurvedAnimation(
-                        parent: slideController,
-                        curve: Curves.easeOutCubic,
-                      ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Icon(
+                    Icons.delete,
+                    color: Theme.of(context).colorScheme.onError,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Excluir',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onError,
+                      fontWeight: FontWeight.bold,
                     ),
+                  ),
+                ],
+              ),
+            ),
+            confirmDismiss: (direction) async {
+              return await _showDeleteDialogForDismiss(context, appointment);
+            },
+            onDismissed: (direction) {},
+            child: SlideTransition(
+              position:
+                  Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: slideController,
+                      curve: Curves.easeOutCubic,
+                    ),
+                  ),
                 child: FadeTransition(
                   opacity: fadeController,
                   child: AnimatedContainer(
@@ -427,8 +345,7 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
             );
           },
         ),
-      ),
-    );
+      );
   }
 
   Future<bool?> _showDeleteDialogForDismiss(

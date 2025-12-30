@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/ui_components.dart';
 import '../../domain/entities/animal.dart';
 import '../providers/animals_providers.dart';
@@ -112,12 +113,22 @@ class _AnimalsBodyState extends ConsumerState<AnimalsBody> {
           }
           
           final animal = filteredAnimals[index];
-          return AnimalCard(
-            key: ValueKey(animal.id), // Performance: stable keys
-            animal: animal,
-            onTap: () => widget.onViewAnimalDetails(animal),
-            onEdit: () => widget.onEditAnimal(animal),
-            onDelete: () => widget.onDeleteAnimal(animal),
+          return SwipeToDeleteWrapper(
+            itemKey: 'animal_${animal.id}',
+            deletedMessage: '${animal.name} foi excluído',
+            onDelete: () async {
+              await ref.read(animalsProvider.notifier).deleteAnimalOptimistic(animal);
+            },
+            onRestore: () async {
+              await ref.read(animalsProvider.notifier).restoreAnimal(animal.id);
+            },
+            child: AnimalCard(
+              key: ValueKey(animal.id), // Performance: stable keys
+              animal: animal,
+              onTap: () => widget.onViewAnimalDetails(animal),
+              onEdit: () => widget.onEditAnimal(animal),
+              onDelete: () => widget.onDeleteAnimal(animal),
+            ),
           );
         },
         ),

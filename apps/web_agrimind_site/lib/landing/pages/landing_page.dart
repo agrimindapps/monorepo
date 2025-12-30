@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../widgets/nav_bar.dart';
 import '../widgets/hero_section.dart';
 import '../widgets/about_section.dart';
+import '../widgets/receituagro_section.dart';
+import '../widgets/plantis_section.dart';
+import '../widgets/gasometer_section.dart';
 import '../widgets/apps_section.dart';
 import '../widgets/testimonials_section.dart';
 import '../widgets/footer_section.dart';
@@ -59,6 +62,9 @@ class _LandingPageState extends State<LandingPage> {
                     onCtaTap: () => _scrollToSection(_appsKey),
                   ),
                   AboutSection(key: _aboutKey),
+                  const ReceituAgroSection(),
+                  const PlantisSection(),
+                  const GasometerSection(),
                   AppsSection(key: _appsKey),
                   const TestimonialsSection(),
                   FooterSection(key: _contactKey),

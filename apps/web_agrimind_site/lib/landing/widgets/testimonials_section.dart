@@ -7,6 +7,7 @@ class TestimonialsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 20),
       color: const Color(0xFF181818), // Slightly lighter dark for contrast
       child: Column(
@@ -84,7 +85,7 @@ class _TestimonialCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 15,
             offset: const Offset(0, 5),
           ),
@@ -118,7 +119,7 @@ class _TestimonialCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                backgroundColor: const Color(0xFF3ECF8E).withOpacity(0.2),
+                backgroundColor: const Color(0xFF3ECF8E).withValues(alpha: 0.2),
                 child: Text(
                   name[0],
                   style: const TextStyle(

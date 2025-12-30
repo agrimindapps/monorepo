@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/interfaces/usecase.dart' as local;
+import '../../../../core/mixins/optimistic_delete_mixin.dart';
 import '../../../../core/providers/app_state_providers.dart';
 import '../../../../core/providers/database_providers.dart';
 import '../../../../database/providers/unified_sync_manager_provider.dart';
@@ -150,8 +151,13 @@ class AnimalsState {
 /// - Fácil testar cada componente isoladamente
 /// - Fácil adicionar novos filtros sem modificar este notifier
 /// - Padrão consistente com Clean Architecture
+///
+/// Agora com suporte a Swipe-to-Delete otimista:
+/// - Remove da UI imediatamente (melhor UX)
+/// - Permite undo por 5 segundos
+/// - Delete permanente após timeout
 @riverpod
-class AnimalsNotifier extends _$AnimalsNotifier {
+class AnimalsNotifier extends _$AnimalsNotifier with OptimisticDeleteMixin<Animal> {
   @override
   AnimalsState build() {
     return const AnimalsState();
@@ -266,6 +272,56 @@ class AnimalsNotifier extends _$AnimalsNotifier {
   /// Limpar error
   void clearError() {
     state = state.copyWith(error: null);
+  }
+
+  // ============================================================================
+  // OPTIMISTIC DELETE MIXIN IMPLEMENTATION
+  // ============================================================================
+
+  @override
+  String getItemId(Animal item) => item.id;
+
+  @override
+  Future<void> performDelete(String id) async {
+    final deleteAnimal = ref.read(deleteAnimalProvider);
+    final result = await deleteAnimal(id);
+
+    result.fold(
+      (failure) {
+        // Log erro mas não propaga - item já foi removido da UI
+        state = state.copyWith(error: failure.message);
+      },
+      (_) {
+        // Sucesso - delete permanente confirmado
+      },
+    );
+  }
+
+  @override
+  Future<void> performRestore(Animal item) async {
+    // Re-adiciona o animal à lista
+    final updatedList = [...state.animals, item];
+    state = state.copyWith(animals: updatedList);
+  }
+
+  /// Remove animal otimisticamente (para uso com SwipeToDeleteWrapper)
+  ///
+  /// Este método remove o animal da UI imediatamente e agenda o delete
+  /// permanente após 5 segundos. O usuário pode desfazer durante esse período.
+  Future<void> deleteAnimalOptimistic(Animal animal) async {
+    // Remove da UI imediatamente
+    final updatedList = state.animals.where((a) => a.id != animal.id).toList();
+    state = state.copyWith(animals: updatedList);
+
+    // Agenda delete permanente com possibilidade de undo
+    await removeOptimistic(animal);
+  }
+
+  /// Restaura um animal que foi removido otimisticamente
+  ///
+  /// Chamado quando o usuário clica em "DESFAZER" no SnackBar.
+  Future<void> restoreAnimal(String id) async {
+    await restoreItem(id);
   }
 }
 

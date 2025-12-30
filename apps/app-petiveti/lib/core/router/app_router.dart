@@ -42,7 +42,7 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/subscription/presentation/pages/premium_subscription_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
-import '../navigation/bottom_navigation.dart';
+import '../../shared/widgets/adaptive_main_navigation.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   const initialRoute = kIsWeb ? '/promo' : '/splash';
@@ -73,7 +73,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (isOnSplash) {
         return null; // Permitir acesso à splash sempre
       }
-      
+
       // Rotas públicas que não precisam de autenticação
       const publicRoutes = [
         '/login',
@@ -84,19 +84,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         '/account-deletion-policy',
         '/account-deletion',
       ];
-      
+
       final isAuthenticated = authStateNotifier.value;
       final currentLocation = state.matchedLocation;
       final isOnPublicRoute = publicRoutes.any((route) => currentLocation.startsWith(route));
-      
+
       debugPrint('🔀 Redirect check: location=$currentLocation, isAuth=$isAuthenticated, isPublic=$isOnPublicRoute');
-      
+
       // Se autenticado e está em página pública (login/promo), redireciona para home
       if (isAuthenticated && isOnPublicRoute) {
         debugPrint('➡️ Redirecting to / (home)');
         return '/';
       }
-      
+
       // Se não autenticado e não está em página pública, redireciona para promo
       if (!isAuthenticated && !isOnPublicRoute) {
         debugPrint('➡️ Redirecting to /promo');
@@ -106,356 +106,405 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       return null; // No redirect needed
     },
     routes: [
-      ShellRoute(
-        builder: (context, state, child) {
-          return BottomNavShell(state: state, child: child);
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
+          return AdaptiveMainNavigation(navigationShell: navigationShell);
         },
-        routes: [
-          GoRoute(
-            path: '/',
-            name: 'home',
-            builder: (context, state) => const HomePage(),
-          ),
-          GoRoute(
-            path: '/animals',
-            name: 'animals',
-            builder: (context, state) => const AnimalsPage(),
+        branches: [
+          // Branch 0: Home
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-animal',
-                builder: (context, state) => const Scaffold(
-                  body: Center(child: Text('Add Animal Page - Coming Soon')),
-                ),
+                path: '/',
+                name: 'home',
+                builder: (context, state) => const HomePage(),
               ),
             ],
           ),
-          GoRoute(
-            path: '/appointments',
-            name: 'appointments',
-            builder: (context, state) => const AppointmentsPage(),
+
+          // Branch 1: Animals
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-appointment',
-                builder: (context, state) => const AddAppointmentForm(),
-              ),
-              GoRoute(
-                path: '/:id',
-                name: 'appointment-details',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return AppointmentDetailsPage(appointmentId: id);
-                },
+                path: '/animals',
+                name: 'animals',
+                builder: (context, state) => const AnimalsPage(),
                 routes: [
                   GoRoute(
-                    path: '/edit',
-                    name: 'edit-appointment',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return Scaffold(
-                        body: Center(
-                          child: Text('Edit Appointment: $id - Coming Soon'),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/vaccines',
-            name: 'vaccines',
-            builder: (context, state) => const VaccinesPage(),
-            routes: [
-              GoRoute(
-                path: '/add',
-                name: 'add-vaccine',
-                builder: (context, state) => const Scaffold(
-                  body: Center(child: Text('Add Vaccine Page - Coming Soon')),
-                ),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/medications',
-            name: 'medications',
-            builder: (context, state) => const MedicationsPage(),
-            routes: [
-              GoRoute(
-                path: '/add',
-                name: 'add-medication',
-                builder: (context, state) {
-                  final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddMedicationDialog(
-                    initialAnimalId: args['animalId'] as String?,
-                  );
-                },
-              ),
-              GoRoute(
-                path: '/edit',
-                name: 'new-medication',
-                builder: (context, state) {
-                  final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddMedicationDialog(
-                    medication: args['medication'] as Medication?,
-                  );
-                },
-              ),
-              GoRoute(
-                path: '/:id',
-                name: 'medication-details',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return Scaffold(
-                    body: Center(
-                      child: Text('Medication Details: $id - Coming Soon'),
+                    path: '/add',
+                    name: 'add-animal',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(child: Text('Add Animal Page - Coming Soon')),
                     ),
-                  );
-                },
-                routes: [
-                  GoRoute(
-                    path: '/edit',
-                    name: 'edit-medication',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return Scaffold(
-                        body: Center(
-                          child: Text('Edit Medication: $id - Coming Soon'),
-                        ),
-                      );
-                    },
                   ),
                 ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/weight',
-            name: 'weight',
-            builder: (context, state) => const WeightPage(),
+
+          // Branch 2: Appointments
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/add',
-                name: 'add-weight',
-                builder: (context, state) => const Scaffold(
-                  body: Center(
-                    child: Text('Add Weight Record Page - Coming Soon'),
+                path: '/appointments',
+                name: 'appointments',
+                builder: (context, state) => const AppointmentsPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-appointment',
+                    builder: (context, state) => const AddAppointmentForm(),
                   ),
-                ),
+                  GoRoute(
+                    path: '/:id',
+                    name: 'appointment-details',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return AppointmentDetailsPage(appointmentId: id);
+                    },
+                    routes: [
+                      GoRoute(
+                        path: '/edit',
+                        name: 'edit-appointment',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return Scaffold(
+                            body: Center(
+                              child: Text('Edit Appointment: $id - Coming Soon'),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
               ),
+            ],
+          ),
+
+          // Branch 3: Vaccines
+          StatefulShellBranch(
+            routes: [
               GoRoute(
-                path: '/history/:animalId',
-                name: 'weight-history',
-                builder: (context, state) {
-                  final animalId = state.pathParameters['animalId']!;
-                  return Scaffold(
-                    body: Center(
-                      child: Text(
-                        'Weight History for Animal: $animalId - Coming Soon',
+                path: '/vaccines',
+                name: 'vaccines',
+                builder: (context, state) => const VaccinesPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-vaccine',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(child: Text('Add Vaccine Page - Coming Soon')),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Branch 4: Medications
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/medications',
+                name: 'medications',
+                builder: (context, state) => const MedicationsPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-medication',
+                    builder: (context, state) {
+                      final args = state.extra as Map<String, dynamic>? ?? {};
+                      return AddMedicationDialog(
+                        initialAnimalId: args['animalId'] as String?,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: '/edit',
+                    name: 'new-medication',
+                    builder: (context, state) {
+                      final args = state.extra as Map<String, dynamic>? ?? {};
+                      return AddMedicationDialog(
+                        medication: args['medication'] as Medication?,
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: '/:id',
+                    name: 'medication-details',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return Scaffold(
+                        body: Center(
+                          child: Text('Medication Details: $id - Coming Soon'),
+                        ),
+                      );
+                    },
+                    routes: [
+                      GoRoute(
+                        path: '/edit',
+                        name: 'edit-medication',
+                        builder: (context, state) {
+                          final id = state.pathParameters['id']!;
+                          return Scaffold(
+                            body: Center(
+                              child: Text('Edit Medication: $id - Coming Soon'),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          // Branch 5: Weight
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/weight',
+                name: 'weight',
+                builder: (context, state) => const WeightPage(),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-weight',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(
+                        child: Text('Add Weight Record Page - Coming Soon'),
                       ),
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/reminders',
-            name: 'reminders',
-            builder: (context, state) =>
-                const RemindersPage(userId: 'temp_user_id'),
-            routes: [
-              GoRoute(
-                path: '/add',
-                name: 'add-reminder',
-                builder: (context, state) {
-                  final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddReminderDialog(
-                    initialAnimalId: args['animalId'] as String?,
-                    userId: 'temp_user_id',
-                  );
-                },
-              ),
-              GoRoute(
-                path: '/edit',
-                name: 'edit-reminder',
-                builder: (context, state) {
-                  final args = state.extra as Map<String, dynamic>? ?? {};
-                  return AddReminderDialog(
-                    reminder: args['reminder'] as Reminder?,
-                    userId: 'temp_user_id',
-                  );
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: '/expenses',
-            name: 'expenses',
-            builder: (context, state) =>
-                const ExpensesPage(userId: 'temp_user_id'),
-            routes: [
-              GoRoute(
-                path: '/add',
-                name: 'add-expense',
-                builder: (context, state) => const Scaffold(
-                  body: Center(child: Text('Add Expense Page - Coming Soon')),
-                ),
-              ),
-              GoRoute(
-                path: '/summary',
-                name: 'expenses-summary',
-                builder: (context, state) => const Scaffold(
-                  body: Center(
-                    child: Text('Expenses Summary Page - Coming Soon'),
                   ),
-                ),
+                  GoRoute(
+                    path: '/history/:animalId',
+                    name: 'weight-history',
+                    builder: (context, state) {
+                      final animalId = state.pathParameters['animalId']!;
+                      return Scaffold(
+                        body: Center(
+                          child: Text(
+                            'Weight History for Animal: $animalId - Coming Soon',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/calculators',
-            name: 'calculators',
-            builder: (context, state) => const CalculatorsMainPage(),
+
+          // Branch 6: Reminders
+          StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/body-condition',
-                name: 'body-condition-calculator',
-                builder: (context, state) => const BodyConditionPage(),
-              ),
-              GoRoute(
-                path: '/calorie',
-                name: 'calorie-calculator',
-                builder: (context, state) => const CaloriePage(),
-              ),
-              GoRoute(
-                path: '/medication-dosage',
-                name: 'medication-dosage-calculator',
-                builder: (context, state) => const MedicationDosagePage(),
-              ),
-              GoRoute(
-                path: '/animal-age',
-                name: 'animal-age-calculator',
-                builder: (context, state) => const AnimalAgePage(),
-              ),
-              GoRoute(
-                path: '/anesthesia',
-                name: 'anesthesia-calculator',
-                builder: (context, state) => const AnesthesiaPage(),
-              ),
-              GoRoute(
-                path: '/ideal-weight',
-                name: 'ideal-weight-calculator',
-                builder: (context, state) => const IdealWeightPage(),
-              ),
-              GoRoute(
-                path: '/fluid-therapy',
-                name: 'fluid-therapy-calculator',
-                builder: (context, state) => const FluidTherapyPage(),
-              ),
-              GoRoute(
-                path: '/hydration',
-                name: 'hydration-calculator',
-                builder: (context, state) => const HydrationPage(),
-              ),
-              GoRoute(
-                path: '/pregnancy',
-                name: 'pregnancy-calculator',
-                builder: (context, state) => const PregnancyPage(),
-              ),
-              GoRoute(
-                path: '/exercise',
-                name: 'exercise-calculator',
-                builder: (context, state) => const ExercisePage(),
-              ),
-              GoRoute(
-                path: '/diabetes-insulin',
-                name: 'diabetes-insulin-calculator',
-                builder: (context, state) => const DiabetesInsulinPage(),
+                path: '/reminders',
+                name: 'reminders',
+                builder: (context, state) =>
+                    const RemindersPage(userId: 'temp_user_id'),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-reminder',
+                    builder: (context, state) {
+                      final args = state.extra as Map<String, dynamic>? ?? {};
+                      return AddReminderDialog(
+                        initialAnimalId: args['animalId'] as String?,
+                        userId: 'temp_user_id',
+                      );
+                    },
+                  ),
+                  GoRoute(
+                    path: '/edit',
+                    name: 'edit-reminder',
+                    builder: (context, state) {
+                      final args = state.extra as Map<String, dynamic>? ?? {};
+                      return AddReminderDialog(
+                        reminder: args['reminder'] as Reminder?,
+                        userId: 'temp_user_id',
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
-          GoRoute(
-            path: '/profile',
-            name: 'profile',
-            builder: (context, state) => const ProfilePage(),
+
+          // Branch 7: Calculators
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/calculators',
+                name: 'calculators',
+                builder: (context, state) => const CalculatorsMainPage(),
+                routes: [
+                  GoRoute(
+                    path: '/body-condition',
+                    name: 'body-condition-calculator',
+                    builder: (context, state) => const BodyConditionPage(),
+                  ),
+                  GoRoute(
+                    path: '/calorie',
+                    name: 'calorie-calculator',
+                    builder: (context, state) => const CaloriePage(),
+                  ),
+                  GoRoute(
+                    path: '/medication-dosage',
+                    name: 'medication-dosage-calculator',
+                    builder: (context, state) => const MedicationDosagePage(),
+                  ),
+                  GoRoute(
+                    path: '/animal-age',
+                    name: 'animal-age-calculator',
+                    builder: (context, state) => const AnimalAgePage(),
+                  ),
+                  GoRoute(
+                    path: '/anesthesia',
+                    name: 'anesthesia-calculator',
+                    builder: (context, state) => const AnesthesiaPage(),
+                  ),
+                  GoRoute(
+                    path: '/ideal-weight',
+                    name: 'ideal-weight-calculator',
+                    builder: (context, state) => const IdealWeightPage(),
+                  ),
+                  GoRoute(
+                    path: '/fluid-therapy',
+                    name: 'fluid-therapy-calculator',
+                    builder: (context, state) => const FluidTherapyPage(),
+                  ),
+                  GoRoute(
+                    path: '/hydration',
+                    name: 'hydration-calculator',
+                    builder: (context, state) => const HydrationPage(),
+                  ),
+                  GoRoute(
+                    path: '/pregnancy',
+                    name: 'pregnancy-calculator',
+                    builder: (context, state) => const PregnancyPage(),
+                  ),
+                  GoRoute(
+                    path: '/exercise',
+                    name: 'exercise-calculator',
+                    builder: (context, state) => const ExercisePage(),
+                  ),
+                  GoRoute(
+                    path: '/diabetes-insulin',
+                    name: 'diabetes-insulin-calculator',
+                    builder: (context, state) => const DiabetesInsulinPage(),
+                  ),
+                ],
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/account-profile',
-            name: 'account-profile',
-            builder: (context, state) => const AccountProfilePage(),
+
+          // Branch 8: Expenses
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/expenses',
+                name: 'expenses',
+                builder: (context, state) =>
+                    const ExpensesPage(userId: 'temp_user_id'),
+                routes: [
+                  GoRoute(
+                    path: '/add',
+                    name: 'add-expense',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(child: Text('Add Expense Page - Coming Soon')),
+                    ),
+                  ),
+                  GoRoute(
+                    path: '/summary',
+                    name: 'expenses-summary',
+                    builder: (context, state) => const Scaffold(
+                      body: Center(
+                        child: Text('Expenses Summary Page - Coming Soon'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          GoRoute(
-            path: '/subscription',
-            name: 'subscription',
-            builder: (context, state) => const PremiumSubscriptionPage(),
-          ),
-          // Settings pages - dentro do ShellRoute para mostrar bottom nav
-          GoRoute(
-            path: '/settings',
-            name: 'settings',
-            builder: (context, state) => const SettingsPage(),
-          ),
-          GoRoute(
-            path: '/notifications-settings',
-            name: 'notifications-settings',
-            builder: (context, state) => const NotificationsSettingsPage(),
+
+          // Branch 9: Settings (+ Profile, Subscription, Notifications)
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/settings',
+                name: 'settings',
+                builder: (context, state) => const SettingsPage(),
+              ),
+              GoRoute(
+                path: '/profile',
+                name: 'profile',
+                builder: (context, state) => const ProfilePage(),
+              ),
+              GoRoute(
+                path: '/account-profile',
+                name: 'account-profile',
+                builder: (context, state) => const AccountProfilePage(),
+              ),
+              GoRoute(
+                path: '/subscription',
+                name: 'subscription',
+                builder: (context, state) => const PremiumSubscriptionPage(),
+              ),
+              GoRoute(
+                path: '/notifications-settings',
+                name: 'notifications-settings',
+                builder: (context, state) => const NotificationsSettingsPage(),
+              ),
+            ],
           ),
         ],
       ),
+
+      // Rotas públicas (fora do shell)
       GoRoute(
         path: '/promo',
         name: 'promo',
         builder: (context, state) => const PromoPage(),
       ),
-
       GoRoute(
         path: '/splash',
         name: 'splash',
         builder: (context, state) => const SplashPage(),
       ),
-
       GoRoute(
         path: '/login',
         name: 'login',
         builder: (context, state) => const LoginPage(),
       ),
-
       GoRoute(
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
       ),
-
-      // Legal pages
       GoRoute(
         path: '/privacy-policy',
         name: 'privacy-policy',
         builder: (context, state) => const PrivacyPolicyPage(),
       ),
-
       GoRoute(
         path: '/terms-of-service',
         name: 'terms-of-service',
         builder: (context, state) => const TermsOfServicePage(),
       ),
-
       GoRoute(
         path: '/account-deletion-policy',
         name: 'account-deletion-policy',
         builder: (context, state) => const AccountDeletionPolicyPage(),
       ),
-
-      // Página de exclusão de conta (funcional)
       GoRoute(
         path: '/account-deletion',
         name: 'account-deletion',
         builder: (context, state) => const AccountDeletionPage(),
       ),
-
-
     ],
     errorBuilder: (context, state) => Scaffold(
       body: Center(

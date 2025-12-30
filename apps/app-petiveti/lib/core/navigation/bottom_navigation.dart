@@ -1,3 +1,12 @@
+/// DEPRECATED: Este arquivo foi substituído por AdaptiveMainNavigation
+/// A navegação agora é gerenciada por StatefulShellRoute e AdaptiveMainNavigation
+/// que suporta layouts adaptativos (mobile/tablet/desktop).
+///
+/// Para uso futuro, consulte:
+/// - lib/shared/widgets/adaptive_main_navigation.dart
+/// - lib/core/router/app_router.dart (StatefulShellRoute)
+library;
+
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -5,9 +14,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 part 'bottom_navigation.g.dart';
 
 /// Enum para as tabs da navegação principal
+/// DEPRECATED: Mantido apenas para compatibilidade temporária
+@Deprecated('Use AdaptiveMainNavigation em vez disso')
 enum MainTab { home, animals, calculators, reminders, settings }
 
 /// Provider para gerenciar o estado da tab atual
+/// DEPRECATED: O estado de navegação agora é gerenciado pelo StatefulNavigationShell
+@Deprecated('O estado de navegação é gerenciado pelo GoRouter StatefulShellRoute')
 @riverpod
 class CurrentTab extends _$CurrentTab {
   @override
@@ -18,6 +31,8 @@ class CurrentTab extends _$CurrentTab {
 
 /// Widget de navegação inferior principal do app
 /// Usa o NavigationBar do Material 3 para consistência visual
+/// DEPRECATED: Substituído por AdaptiveMainNavigation
+@Deprecated('Use AdaptiveMainNavigation que suporta layouts adaptativos')
 class MainBottomNavigation extends ConsumerStatefulWidget {
   final Widget child;
 
@@ -123,6 +138,8 @@ class _MainBottomNavigationState extends ConsumerState<MainBottomNavigation> {
 }
 
 /// Shell customizado para navegação com bottom bar
+/// DEPRECATED: Substituído por AdaptiveMainNavigation gerenciado pelo GoRouter
+@Deprecated('Use StatefulShellRoute com AdaptiveMainNavigation no app_router.dart')
 class BottomNavShell extends ConsumerWidget {
   final Widget child;
   final GoRouterState state;

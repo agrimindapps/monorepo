@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../pages/privacy_policy_page.dart';
+import '../pages/terms_of_use_page.dart';
 
 class FooterSection extends StatelessWidget {
   const FooterSection({super.key});
@@ -111,8 +113,26 @@ class FooterSection extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 24),
-                        const _FooterLink(text: 'Termos de Uso'),
-                        const _FooterLink(text: 'Privacidade'),
+                        _FooterLink(
+                          text: 'Termos de Uso',
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const TermsOfUsePage(),
+                              ),
+                            );
+                          },
+                        ),
+                        _FooterLink(
+                          text: 'Privacidade',
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const PrivacyPolicyPage(),
+                              ),
+                            );
+                          },
+                        ),
                         const _FooterLink(text: 'Cookies'),
                       ],
                     ),
@@ -159,18 +179,28 @@ class _SocialIcon extends StatelessWidget {
 
 class _FooterLink extends StatelessWidget {
   final String text;
+  final VoidCallback? onTap;
 
-  const _FooterLink({required this.text});
+  const _FooterLink({required this.text, this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: Text(
-        text,
-        style: GoogleFonts.inter(
-          color: Colors.grey.shade400,
-          fontSize: 14,
+      child: InkWell(
+        onTap: onTap,
+        hoverColor: Colors.transparent,
+        child: MouseRegion(
+          cursor: onTap != null ? SystemMouseCursors.click : SystemMouseCursors.basic,
+          child: Text(
+            text,
+            style: GoogleFonts.inter(
+              color: Colors.grey.shade400,
+              fontSize: 14,
+              decoration: onTap != null ? TextDecoration.underline : TextDecoration.none,
+              decorationColor: Colors.grey.shade400,
+            ),
+          ),
         ),
       ),
     );

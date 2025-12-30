@@ -151,6 +151,56 @@ class AppTheme {
         type: BottomNavigationBarType.fixed,
         elevation: 8,
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        indicatorColor: AppColors.primary.withOpacity(0.12),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            );
+          }
+          return const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 12,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(
+              color: AppColors.primary,
+              size: 24,
+            );
+          }
+          return const IconThemeData(
+            color: AppColors.textSecondary,
+            size: 24,
+          );
+        }),
+      ),
+      navigationRailTheme: const NavigationRailThemeData(
+        backgroundColor: AppColors.surface,
+        indicatorColor: Color.fromRGBO(106, 27, 154, 0.12), // AppColors.primary with 0.12 opacity
+        selectedIconTheme: IconThemeData(
+          color: AppColors.primary,
+          size: 24,
+        ),
+        selectedLabelTextStyle: TextStyle(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+        unselectedIconTheme: IconThemeData(
+          color: AppColors.textSecondary,
+          size: 24,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: AppColors.textSecondary,
+          fontSize: 12,
+        ),
+      ),
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
@@ -254,6 +304,56 @@ class AppTheme {
         hintStyle: TextStyle(color: Colors.grey[500]),
         prefixIconColor: AppColors.secondaryLight,
         suffixIconColor: Colors.grey[400],
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: darkSurface,
+        indicatorColor: AppColors.primaryLight.withValues(alpha: 0.15),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.primaryLight,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            );
+          }
+          return TextStyle(
+            color: Colors.grey[400],
+            fontSize: 12,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(
+              color: AppColors.primaryLight,
+              size: 24,
+            );
+          }
+          return IconThemeData(
+            color: Colors.grey[400],
+            size: 24,
+          );
+        }),
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: darkSurface,
+        indicatorColor: AppColors.primaryLight.withValues(alpha: 0.15),
+        selectedIconTheme: const IconThemeData(
+          color: AppColors.primaryLight,
+          size: 24,
+        ),
+        selectedLabelTextStyle: const TextStyle(
+          color: AppColors.primaryLight,
+          fontWeight: FontWeight.w600,
+          fontSize: 12,
+        ),
+        unselectedIconTheme: IconThemeData(
+          color: Colors.grey[400],
+          size: 24,
+        ),
+        unselectedLabelTextStyle: TextStyle(
+          color: Colors.grey[400],
+          fontSize: 12,
+        ),
       ),
     );
   }

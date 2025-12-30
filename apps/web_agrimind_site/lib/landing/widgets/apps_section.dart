@@ -8,6 +8,7 @@ class AppsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 20),
       color: const Color(0xFF121212),
       child: Column(
@@ -23,7 +24,7 @@ class AppsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Soluções para cada necessidade',
+            'Mais soluções para você',
             style: GoogleFonts.poppins(
               fontSize: 36,
               fontWeight: FontWeight.bold,
@@ -37,36 +38,52 @@ class AppsSection extends StatelessWidget {
             alignment: WrapAlignment.center,
             children: [
               _AppCard(
-                title: 'ReceituAgro',
-                description: 'Diagnóstico fitossanitário e prescrição agrícola completa na palma da sua mão.',
-                icon: Icons.assignment_turned_in,
-                color: Colors.green,
-                url: 'https://receituagro.agrimind.com.br',
-                features: ['Diagnóstico Preciso', 'Receituário Digital', 'Base de Dados Offline'],
-              ),
-              _AppCard(
                 title: 'Petiveti',
                 description: 'Gestão completa para a saúde e bem-estar do seu pet.',
-                icon: Icons.pets,
+                iconAsset: 'assets/imagens/app_icons/petiveti.png',
                 color: Colors.orange,
                 url: 'https://petiveti.agrimind.com.br',
                 features: ['Carteira de Vacinação', 'Lembretes', 'Histórico Médico'],
               ),
               _AppCard(
-                title: 'Plantis',
-                description: 'Seu assistente pessoal para o cuidado com plantas ornamentais e hortas.',
-                icon: Icons.local_florist,
-                color: Colors.teal,
-                url: 'https://plantis.agrimind.com.br',
-                features: ['Identificação de Plantas', 'Guia de Cultivo', 'Lembretes de Rega'],
+                title: 'Nebulalist',
+                description: 'Gerenciador de listas inteligente com templates e compartilhamento.',
+                iconAsset: 'assets/imagens/app_icons/nebulalist.png',
+                color: Colors.purple,
+                url: 'https://nebulalist.agrimind.com.br',
+                features: ['Templates Personalizados', 'Compartilhamento', 'Modo Offline'],
               ),
               _AppCard(
-                title: 'Gasometer',
-                description: 'Controle de abastecimento e manutenção de veículos e máquinas.',
-                icon: Icons.local_gas_station,
-                color: Colors.blue,
-                url: 'https://gasometer.agrimind.com.br',
-                features: ['Média de Consumo', 'Gestão de Frota', 'Relatórios de Custos'],
+                title: 'Taskolist',
+                description: 'Organize suas tarefas e projetos de forma simples e eficiente.',
+                iconAsset: 'assets/imagens/app_icons/taskolist.png',
+                color: Colors.indigo,
+                url: 'https://taskolist.agrimind.com.br',
+                features: ['Gestão de Tarefas', 'Notificações', 'Produtividade'],
+              ),
+              _AppCard(
+                title: 'AgriHurbi',
+                description: 'Gestão agrícola completa para produtores rurais.',
+                iconAsset: 'assets/imagens/app_icons/agrihurbi.png',
+                color: Colors.lightGreen,
+                url: 'https://agrihurbi.agrimind.com.br',
+                features: ['Gestão de Safras', 'Controle de Custos', 'Relatórios'],
+              ),
+              _AppCard(
+                title: 'Nutrituti',
+                description: 'Acompanhamento nutricional e planejamento de refeições.',
+                iconAsset: 'assets/imagens/app_icons/nutrituti.png',
+                color: Colors.pink,
+                url: 'https://nutrituti.agrimind.com.br',
+                features: ['Cálculo Nutricional', 'Plano Alimentar', 'Receitas Saudáveis'],
+              ),
+              _AppCard(
+                title: 'Termos Técnicos',
+                description: 'Dicionário especializado de termos técnicos e científicos.',
+                iconAsset: 'assets/imagens/app_icons/termostecnicos.png',
+                color: Colors.amber,
+                url: 'https://termostecnicos.agrimind.com.br',
+                features: ['Busca Rápida', 'Offline', 'Múltiplas Áreas'],
               ),
             ],
           ),
@@ -79,7 +96,7 @@ class AppsSection extends StatelessWidget {
 class _AppCard extends StatelessWidget {
   final String title;
   final String description;
-  final IconData icon;
+  final String? iconAsset;
   final Color color;
   final String url;
   final List<String> features;
@@ -87,7 +104,7 @@ class _AppCard extends StatelessWidget {
   const _AppCard({
     required this.title,
     required this.description,
-    required this.icon,
+    this.iconAsset,
     required this.color,
     required this.url,
     required this.features,
@@ -103,7 +120,7 @@ class _AppCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -116,10 +133,20 @@ class _AppCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, size: 32, color: color),
+            child: iconAsset != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      iconAsset!,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Icon(Icons.apps, size: 32, color: color),
           ),
           const SizedBox(height: 24),
           Text(
@@ -167,15 +194,21 @@ class _AppCard extends StatelessWidget {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                backgroundColor: const Color(0xFF3ECF8E),
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 elevation: 0,
               ),
-              child: const Text('Conhecer Mais'),
+              child: const Text(
+                'Conhecer Mais',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
         ],

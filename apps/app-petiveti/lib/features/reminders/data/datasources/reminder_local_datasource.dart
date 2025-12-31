@@ -85,23 +85,52 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
         .map((reminders) => reminders.map(_toModel).toList());
   }
 
-  ReminderModel _toModel(db.Reminder reminder) {
+  ReminderModel _toModel(db.ReminderRecord reminder) {
+    // Parse type from string
+    ReminderType type = ReminderType.general;
+    try {
+      type = ReminderType.values.firstWhere(
+        (t) => t.name == reminder.type,
+        orElse: () => ReminderType.general,
+      );
+    } catch (_) {}
+
+    // Parse priority from string
+    ReminderPriority priority = ReminderPriority.medium;
+    try {
+      priority = ReminderPriority.values.firstWhere(
+        (p) => p.name == reminder.priority,
+        orElse: () => ReminderPriority.medium,
+      );
+    } catch (_) {}
+
+    // Parse status from string
+    ReminderStatus status = ReminderStatus.active;
+    try {
+      status = ReminderStatus.values.firstWhere(
+        (s) => s.name == reminder.status,
+        orElse: () => reminder.isCompleted
+            ? ReminderStatus.completed
+            : ReminderStatus.active,
+      );
+    } catch (_) {}
+
     return ReminderModel(
       id: reminder.id.toString(),
       animalId: reminder.animalId?.toString() ?? '',
       title: reminder.title,
       description: reminder.description ?? '',
       scheduledDate: reminder.reminderDateTime,
-      type: ReminderType.general,
-      priority: ReminderPriority.medium,
-      status: reminder.isCompleted
-          ? ReminderStatus.completed
-          : ReminderStatus.active,
-      isRecurring: reminder.frequency != null && reminder.frequency != 'once',
-      recurringDays: null,
+      type: type,
+      priority: priority,
+      status: status,
+      isRecurring: reminder.isRecurring,
+      recurringDays: reminder.recurringDays,
+      completedAt: reminder.completedAt,
+      snoozeUntil: reminder.snoozeUntil,
       userId: reminder.userId,
       createdAt: reminder.createdAt,
-      updatedAt: reminder.createdAt,
+      updatedAt: reminder.updatedAt ?? reminder.createdAt,
     );
   }
 
@@ -116,10 +145,18 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
         title: Value(model.title),
         description: Value.absentIfNull(model.description),
         reminderDateTime: Value(model.scheduledDate),
+        type: Value(model.type.name),
+        priority: Value(model.priority.name),
+        status: Value(model.status.name),
+        isRecurring: Value(model.isRecurring),
+        recurringDays: Value.absentIfNull(model.recurringDays),
+        completedAt: Value.absentIfNull(model.completedAt),
+        snoozeUntil: Value.absentIfNull(model.snoozeUntil),
         frequency: const Value('once'),
         isCompleted: Value(model.status == ReminderStatus.completed),
         notificationEnabled: const Value(true),
         userId: Value(model.userId),
+        updatedAt: Value(DateTime.now()),
       );
     }
 
@@ -128,6 +165,11 @@ class ReminderLocalDataSourceImpl implements ReminderLocalDataSource {
       title: model.title,
       description: Value.absentIfNull(model.description),
       reminderDateTime: model.scheduledDate,
+      type: Value(model.type.name),
+      priority: Value(model.priority.name),
+      status: Value(model.status.name),
+      isRecurring: Value(model.isRecurring),
+      recurringDays: Value.absentIfNull(model.recurringDays),
       frequency: const Value('once'),
       isCompleted: Value(model.status == ReminderStatus.completed),
       notificationEnabled: const Value(true),

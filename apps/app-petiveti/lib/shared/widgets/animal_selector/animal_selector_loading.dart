@@ -1,39 +1,79 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/constants/ui_constants.dart';
+
 class AnimalSelectorLoading extends StatelessWidget {
   const AnimalSelectorLoading({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+    return Semantics(
+      label: 'Carregando lista de pets',
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.large,
+          vertical: AppSpacing.xlarge,
         ),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Carregando pets...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
+          borderRadius: BorderRadius.circular(AppRadius.large),
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context)
+                  .colorScheme
+                  .primary
+                  .withValues(alpha: 0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: AppSizes.iconS,
+              height: AppSizes.iconS,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Theme.of(context).colorScheme.primary,
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.2),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.large),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Carregando pets...',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: AppFontWeights.medium,
+                      fontSize: AppFontSizes.medium,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Preparando sua lista de companheiros',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(
+                            alpha: AppOpacity.medium,
+                          ),
+                      fontSize: AppFontSizes.small,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -50,6 +50,24 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
     'Quíntupla Felina',
   ];
 
+  final List<String> _commonManufacturers = [
+    'Zoetis',
+    'MSD Saúde Animal',
+    'Boehringer Ingelheim',
+    'Virbac',
+    'Ceva Saúde Animal',
+    'Elanco',
+    'Merck Animal Health',
+    'Ourofino',
+    'Hertape Calier',
+    'Vencofarma',
+    'Biovet',
+    'Fort Dodge',
+    'Merial',
+    'Pfizer Animal Health',
+    'Bayer Animal Health',
+  ];
+
   bool get _isEditing => widget.vaccine != null;
 
   @override
@@ -189,6 +207,7 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
             labelText: 'Nome da Vacina *',
             hintText: 'Ex: V10 (Múltipla)',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
             suffixIcon: PopupMenuButton<String>(
               icon: const Icon(Icons.arrow_drop_down),
               onSelected: (value) => _nameController.text = value,
@@ -197,9 +216,14 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
                   .toList(),
             ),
           ),
+          maxLength: 100,
+          textCapitalization: TextCapitalization.words,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Nome da vacina é obrigatório';
+            }
+            if (value.trim().length < 2) {
+              return 'Nome deve ter pelo menos 2 caracteres';
             }
             return null;
           },
@@ -211,10 +235,16 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
             labelText: 'Veterinário *',
             hintText: 'Dr. João Silva',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 100,
+          textCapitalization: TextCapitalization.words,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
               return 'Nome do veterinário é obrigatório';
+            }
+            if (value.trim().length < 2) {
+              return 'Nome deve ter pelo menos 2 caracteres';
             }
             return null;
           },
@@ -308,18 +338,94 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
           controller: _batchController,
           decoration: InputDecoration(
             labelText: 'Lote',
-            hintText: 'Ex: 123456',
+            hintText: 'Ex: ABC123-456',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 30,
+          textCapitalization: TextCapitalization.characters,
+          validator: (value) {
+            if (value != null && value.trim().isNotEmpty) {
+              if (value.trim().length < 3) {
+                return 'Lote deve ter pelo menos 3 caracteres';
+              }
+              // Validate batch format (alphanumeric, hyphens, dots, slashes)
+              final validPattern = RegExp(r'^[a-zA-Z0-9\-\.\/]+$');
+              if (!validPattern.hasMatch(value.trim())) {
+                return 'Lote contém caracteres inválidos';
+              }
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          controller: _manufacturerController,
-          decoration: InputDecoration(
-            labelText: 'Fabricante',
-            hintText: 'Ex: Laboratório ABC',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return _commonManufacturers.take(5);
+            }
+            return _commonManufacturers.where((manufacturer) => manufacturer
+                .toLowerCase()
+                .contains(textEditingValue.text.toLowerCase()));
+          },
+          onSelected: (String selection) {
+            _manufacturerController.text = selection;
+          },
+          fieldViewBuilder: (
+            BuildContext context,
+            TextEditingController fieldController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted,
+          ) {
+            // Sync with our controller
+            if (fieldController.text.isEmpty &&
+                _manufacturerController.text.isNotEmpty) {
+              fieldController.text = _manufacturerController.text;
+            }
+            return TextFormField(
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: 'Fabricante',
+                hintText: 'Ex: Zoetis, MSD, Boehringer',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: '',
+              ),
+              maxLength: 100,
+              textCapitalization: TextCapitalization.words,
+              onChanged: (value) {
+                _manufacturerController.text = value;
+              },
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 200,
+                    maxWidth: 300,
+                  ),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: 16),
         TextFormField(
@@ -328,7 +434,9 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
             labelText: 'Dosagem',
             hintText: 'Ex: 1ml subcutâneo',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 100,
         ),
         const SizedBox(height: 16),
         PetiVetiFormComponents.notesGeneral(

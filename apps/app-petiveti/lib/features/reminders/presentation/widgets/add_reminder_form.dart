@@ -37,6 +37,30 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
   bool _isRecurring = false;
   bool _isSubmitting = false;
 
+  // Common reminder titles for autocomplete
+  final List<String> _commonTitles = [
+    'Vacina antirrábica',
+    'Vacina V10/V8',
+    'Vermífugo',
+    'Antipulgas/carrapatos',
+    'Consulta veterinária',
+    'Consulta de rotina',
+    'Banho e tosa',
+    'Comprar ração',
+    'Pesar o pet',
+    'Exame de sangue',
+    'Retorno veterinário',
+    'Medicação',
+    'Dar remédio',
+    'Trocar água',
+    'Limpar caixa de areia',
+    'Passear com o pet',
+    'Cortar unhas',
+    'Limpar ouvidos',
+    'Escovar pelos',
+    'Renovar plano de saúde',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -145,22 +169,81 @@ class _AddReminderFormState extends ConsumerState<AddReminderForm> {
   }
 
   Widget _buildTitleField() {
-    return TextFormField(
-      controller: _titleController,
-      decoration: const InputDecoration(
-        labelText: 'Título do Lembrete',
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(Icons.title),
-        hintText: 'Ex: Vacina da raiva, Consulta veterinária',
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Título é obrigatório';
+    return Autocomplete<String>(
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text.isEmpty) {
+          return _commonTitles.take(5);
         }
-        if (value.length < 3) {
-          return 'Título deve ter pelo menos 3 caracteres';
+        return _commonTitles.where((title) => title
+            .toLowerCase()
+            .contains(textEditingValue.text.toLowerCase()));
+      },
+      onSelected: (String selection) {
+        _titleController.text = selection;
+      },
+      fieldViewBuilder: (
+        BuildContext context,
+        TextEditingController fieldController,
+        FocusNode focusNode,
+        VoidCallback onFieldSubmitted,
+      ) {
+        if (fieldController.text.isEmpty &&
+            _titleController.text.isNotEmpty) {
+          fieldController.text = _titleController.text;
         }
-        return null;
+        return TextFormField(
+          controller: fieldController,
+          focusNode: focusNode,
+          decoration: const InputDecoration(
+            labelText: 'Título do Lembrete *',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.title),
+            hintText: 'Ex: Vacina da raiva, Consulta veterinária',
+            counterText: '',
+          ),
+          maxLength: 100,
+          textCapitalization: TextCapitalization.sentences,
+          onChanged: (value) {
+            _titleController.text = value;
+          },
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Título é obrigatório';
+            }
+            if (value.length < 3) {
+              return 'Título deve ter pelo menos 3 caracteres';
+            }
+            return null;
+          },
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(8),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 200,
+                maxWidth: 350,
+              ),
+              child: ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                itemBuilder: (context, index) {
+                  final option = options.elementAt(index);
+                  return ListTile(
+                    dense: true,
+                    title: Text(option),
+                    onTap: () => onSelected(option),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
       },
     );
   }

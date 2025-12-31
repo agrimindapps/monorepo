@@ -18,7 +18,8 @@ class Appointments extends Table {
   TextColumn get veterinarian => text().nullable()();
   TextColumn get location => text().nullable()();
   TextColumn get notes => text().nullable()();
-  TextColumn get status => text()(); // scheduled, completed, cancelled
+  TextColumn get status => text()(); // scheduled, completed, cancelled, inProgress
+  RealColumn get cost => real().nullable()();
 
   // Metadata
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

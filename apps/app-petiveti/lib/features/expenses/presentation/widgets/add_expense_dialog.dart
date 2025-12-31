@@ -43,6 +43,32 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
 
   bool get _isEditing => widget.expense != null;
 
+  // Common expense descriptions for autocomplete
+  final List<String> _commonDescriptions = [
+    'Consulta veterinária',
+    'Vacina antirrábica',
+    'Vacina V10/V8',
+    'Vermífugo',
+    'Antipulgas',
+    'Ração mensal',
+    'Petiscos',
+    'Banho',
+    'Tosa',
+    'Banho e tosa',
+    'Exame de sangue',
+    'Ultrassom',
+    'Raio-X',
+    'Cirurgia de castração',
+    'Limpeza dentária',
+    'Medicamento',
+    'Coleira',
+    'Caminha',
+    'Brinquedos',
+    'Caixa de transporte',
+    'Plano de saúde pet',
+    'Emergência veterinária',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -183,21 +209,80 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
       title: 'Informações Básicas',
       icon: Icons.info_outline,
       children: [
-        TextFormField(
-          controller: _descriptionController,
-          decoration: InputDecoration(
-            labelText: 'Descrição *',
-            hintText: 'Ex: Consulta veterinária, vacina antirrábica...',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Descrição é obrigatória';
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return _commonDescriptions.take(5);
             }
-            if (value.length < 3) {
-              return 'Descrição deve ter pelo menos 3 caracteres';
+            return _commonDescriptions.where((desc) => desc
+                .toLowerCase()
+                .contains(textEditingValue.text.toLowerCase()));
+          },
+          onSelected: (String selection) {
+            _descriptionController.text = selection;
+          },
+          fieldViewBuilder: (
+            BuildContext context,
+            TextEditingController fieldController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted,
+          ) {
+            if (fieldController.text.isEmpty &&
+                _descriptionController.text.isNotEmpty) {
+              fieldController.text = _descriptionController.text;
             }
-            return null;
+            return TextFormField(
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: 'Descrição *',
+                hintText: 'Ex: Consulta veterinária, vacina antirrábica...',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: '',
+              ),
+              maxLength: 150,
+              textCapitalization: TextCapitalization.sentences,
+              onChanged: (value) {
+                _descriptionController.text = value;
+              },
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Descrição é obrigatória';
+                }
+                if (value.length < 3) {
+                  return 'Descrição deve ter pelo menos 3 caracteres';
+                }
+                return null;
+              },
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 200,
+                    maxWidth: 350,
+                  ),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
           },
         ),
         const SizedBox(height: 16),
@@ -207,7 +292,16 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
             labelText: 'Veterinário/Local',
             hintText: 'Nome do veterinário ou clínica',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 100,
+          textCapitalization: TextCapitalization.words,
+          validator: (value) {
+            if (value != null && value.trim().isNotEmpty && value.trim().length < 2) {
+              return 'Nome deve ter pelo menos 2 caracteres';
+            }
+            return null;
+          },
         ),
       ],
     );
@@ -290,7 +384,16 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
+              counterText: '',
             ),
+            maxLength: 50,
+            textCapitalization: TextCapitalization.characters,
+            validator: (value) {
+              if (value != null && value.trim().isNotEmpty && value.trim().length < 3) {
+                return 'Número deve ter pelo menos 3 caracteres';
+              }
+              return null;
+            },
           ),
         ],
       ],

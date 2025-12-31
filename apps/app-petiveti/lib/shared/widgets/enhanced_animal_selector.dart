@@ -2,8 +2,8 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/constants/ui_constants.dart';
 import '../../features/animals/domain/entities/animal.dart';
-import '../../features/animals/domain/entities/animal_enums.dart';
 import '../../features/animals/presentation/providers/animals_providers.dart';
 import 'animal_selector/animal_selector_dropdown.dart';
 import 'animal_selector/animal_selector_empty.dart';
@@ -45,7 +45,7 @@ class _EnhancedAnimalSelectorState extends ConsumerState<EnhancedAnimalSelector>
     super.initState();
     _currentSelectedAnimalId = widget.selectedAnimalId;
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: AppDurations.normal,
       vsync: this,
     );
 
@@ -146,142 +146,9 @@ class _EnhancedAnimalSelectorState extends ConsumerState<EnhancedAnimalSelector>
   }
 
   void _onDropdownTap() {
-    if (!widget.enabled) return;
-
-    final animalsState = ref.read(animalsProvider);
-    final animals = animalsState.animals;
-
-    if (animals.length <= 1) return; // Não abre se só tem 1 animal
-
-    _showAnimalSelectionSheet(context, animals);
-  }
-
-  void _showAnimalSelectionSheet(BuildContext context, List<Animal> animals) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        maxChildSize: 0.9,
-        minChildSize: 0.3,
-        expand: false,
-        builder: (context, scrollController) => Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(vertical: 8),
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Text(
-                'Selecionar Pet',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView.builder(
-                controller: scrollController,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                itemCount: animals.length,
-                itemBuilder: (context, index) {
-                  final animal = animals[index];
-                  final isSelected = animal.id == _currentSelectedAnimalId;
-
-                  return ListTile(
-                    leading: _buildAnimalAvatar(animal),
-                    title: Text(
-                      animal.name,
-                      style: TextStyle(
-                        fontWeight: isSelected
-                            ? FontWeight.w600
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    subtitle: Text(
-                      (animal.breed != null && animal.breed!.isNotEmpty)
-                          ? animal.breed!
-                          : animal.species.displayName,
-                    ),
-                    trailing: isSelected
-                        ? Icon(
-                            Icons.check_circle,
-                            color: Theme.of(context).primaryColor,
-                          )
-                        : null,
-                    selected: isSelected,
-                    onTap: () {
-                      Navigator.pop(context);
-                      _onAnimalSelected(animal.id);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAnimalAvatar(Animal animal) {
-    final color = _getAnimalColor(animal.species);
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(_getAnimalIcon(animal.species), size: 20, color: color),
-    );
-  }
-
-  IconData _getAnimalIcon(AnimalSpecies species) {
-    switch (species) {
-      case AnimalSpecies.dog:
-        return Icons.pets;
-      case AnimalSpecies.cat:
-        return Icons.cruelty_free;
-      case AnimalSpecies.bird:
-        return Icons.flutter_dash;
-      case AnimalSpecies.rabbit:
-        return Icons.pets_outlined;
-      case AnimalSpecies.hamster:
-      case AnimalSpecies.guineaPig:
-        return Icons.pets_outlined;
-      case AnimalSpecies.fish:
-        return Icons.water;
-      default:
-        return Icons.pets;
-    }
-  }
-
-  Color _getAnimalColor(AnimalSpecies species) {
-    switch (species) {
-      case AnimalSpecies.dog:
-        return Colors.brown;
-      case AnimalSpecies.cat:
-        return Colors.orange;
-      case AnimalSpecies.bird:
-        return Colors.blue;
-      case AnimalSpecies.rabbit:
-        return Colors.pink;
-      case AnimalSpecies.hamster:
-      case AnimalSpecies.guineaPig:
-        return Colors.amber;
-      case AnimalSpecies.fish:
-        return Colors.cyan;
-      default:
-        return Colors.grey;
-    }
+    setState(() {
+      _isExpanded = !_isExpanded;
+    });
   }
 
   @override

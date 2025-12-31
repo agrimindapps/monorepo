@@ -16,9 +16,11 @@ class WeightRecords extends Table {
   TextColumn get unit => text().withDefault(const Constant('kg'))();
   DateTimeColumn get date => dateTime()();
   TextColumn get notes => text().nullable()();
+  IntColumn get bodyConditionScore => integer().nullable()();
 
   // Metadata
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().nullable()();
   BoolColumn get isDeleted => boolean().withDefault(const Constant(false))();
 
   // Sync fields

@@ -8,6 +8,7 @@ import '../../data/datasources/vaccine_remote_datasource.dart';
 import '../../data/repositories/vaccine_repository_impl.dart';
 import '../../domain/entities/vaccine.dart';
 import '../../domain/repositories/vaccine_repository.dart';
+import '../../domain/services/vaccine_validation_service.dart';
 import '../../domain/usecases/add_vaccine.dart';
 import '../../domain/usecases/delete_vaccine.dart';
 import '../../domain/usecases/get_overdue_vaccines.dart';
@@ -54,6 +55,15 @@ VaccineRepository vaccineRepository(Ref ref) {
 }
 
 // ============================================================================
+// SERVICES
+// ============================================================================
+
+@riverpod
+VaccineValidationService vaccineValidationService(Ref ref) {
+  return VaccineValidationService();
+}
+
+// ============================================================================
 // USE CASES
 // ============================================================================
 
@@ -89,12 +99,18 @@ SearchVaccines searchVaccines(Ref ref) {
 
 @riverpod
 AddVaccine addVaccine(Ref ref) {
-  return AddVaccine(ref.watch(vaccineRepositoryProvider));
+  return AddVaccine(
+    ref.watch(vaccineRepositoryProvider),
+    ref.watch(vaccineValidationServiceProvider),
+  );
 }
 
 @riverpod
 UpdateVaccine updateVaccine(Ref ref) {
-  return UpdateVaccine(ref.watch(vaccineRepositoryProvider));
+  return UpdateVaccine(
+    ref.watch(vaccineRepositoryProvider),
+    ref.watch(vaccineValidationServiceProvider),
+  );
 }
 
 @riverpod

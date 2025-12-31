@@ -6,7 +6,7 @@ import '../../petiveti_database.dart';
 import '../../tables/reminders_table.dart';
 
 /// Adapter de sincronização para Reminders
-class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<ReminderEntity, Reminder> {
+class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<ReminderEntity, ReminderRecord> {
   ReminderDriftSyncAdapter(
     PetivetiDatabase super.db,
     super.firestore,
@@ -19,7 +19,7 @@ class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<ReminderEntity, Remi
   String get collectionName => 'reminders';
 
   @override
-  TableInfo<Reminders, Reminder> get table => localDb.reminders;
+  TableInfo<Reminders, ReminderRecord> get table => localDb.reminders;
 
   @override
   Future<Either<Failure, List<ReminderEntity>>> getDirtyRecords(
@@ -65,7 +65,7 @@ class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<ReminderEntity, Remi
   }
 
   @override
-  ReminderEntity driftToEntity(Reminder row) {
+  ReminderEntity driftToEntity(ReminderRecord row) {
     return ReminderEntity(
       id: row.id.toString(),
       firebaseId: row.firebaseId,
@@ -86,7 +86,7 @@ class ReminderDriftSyncAdapter extends DriftSyncAdapterBase<ReminderEntity, Remi
   }
 
   @override
-  Insertable<Reminder> entityToCompanion(ReminderEntity entity) {
+  Insertable<ReminderRecord> entityToCompanion(ReminderEntity entity) {
     return RemindersCompanion(
       id: entity.id.isNotEmpty && int.tryParse(entity.id) != null
           ? Value(int.parse(entity.id))

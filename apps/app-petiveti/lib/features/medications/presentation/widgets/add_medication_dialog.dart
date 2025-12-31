@@ -159,24 +159,129 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
     );
   }
 
+  // Common medications for autocomplete
+  final List<String> _commonMedications = [
+    'Amoxicilina',
+    'Cefalexina',
+    'Enrofloxacina',
+    'Metronidazol',
+    'Doxiciclina',
+    'Meloxicam',
+    'Carprofeno',
+    'Prednisona',
+    'Prednisolona',
+    'Dipirona',
+    'Tramadol',
+    'Omeprazol',
+    'Ranitidina',
+    'Metoclopramida',
+    'Ondansetrona',
+    'Ivermectina',
+    'Milbemicina',
+    'Fembendazol',
+    'Praziquantel',
+    'Fipronil',
+    'Cetoconazol',
+    'Itraconazol',
+    'Vitamina B',
+    'Ômega 3',
+    'Probióticos',
+    'Condroitina',
+    'Glucosamina',
+  ];
+
+  // Common frequencies for autocomplete
+  final List<String> _commonFrequencies = [
+    '1x ao dia',
+    '2x ao dia',
+    '3x ao dia',
+    'A cada 6 horas',
+    'A cada 8 horas',
+    'A cada 12 horas',
+    'A cada 24 horas',
+    'Dose única',
+    'Semanal',
+    'Quinzenal',
+    'Mensal',
+  ];
+
   Widget _buildBasicInfoSection() {
     return FormSectionWidget(
       title: 'Informações Básicas',
       icon: Icons.info_outline,
       children: [
-        TextFormField(
-          controller: _nameController,
-          decoration: InputDecoration(
-            labelText: 'Nome do Medicamento *',
-            hintText: 'Ex: Amoxicilina',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) return 'Nome é obrigatório';
-            if (value.length < 2) {
-              return 'Nome deve ter pelo menos 2 caracteres';
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return _commonMedications.take(5);
             }
-            return null;
+            return _commonMedications.where((med) => med
+                .toLowerCase()
+                .contains(textEditingValue.text.toLowerCase()));
+          },
+          onSelected: (String selection) {
+            _nameController.text = selection;
+          },
+          fieldViewBuilder: (
+            BuildContext context,
+            TextEditingController fieldController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted,
+          ) {
+            if (fieldController.text.isEmpty &&
+                _nameController.text.isNotEmpty) {
+              fieldController.text = _nameController.text;
+            }
+            return TextFormField(
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: 'Nome do Medicamento *',
+                hintText: 'Ex: Amoxicilina',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: '',
+              ),
+              maxLength: 100,
+              textCapitalization: TextCapitalization.words,
+              onChanged: (value) {
+                _nameController.text = value;
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) return 'Nome é obrigatório';
+                if (value.length < 2) {
+                  return 'Nome deve ter pelo menos 2 caracteres';
+                }
+                return null;
+              },
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 200,
+                    maxWidth: 300,
+                  ),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
           },
         ),
         const SizedBox(height: 16),
@@ -207,25 +312,85 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Dosagem *',
             hintText: 'Ex: 250mg, 1 comprimido',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 100,
           validator: (value) {
             if (value == null || value.isEmpty) return 'Dosagem é obrigatória';
             return null;
           },
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          controller: _frequencyController,
-          decoration: InputDecoration(
-            labelText: 'Frequência *',
-            hintText: 'Ex: 2x ao dia, A cada 8 horas',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Frequência é obrigatória';
+        Autocomplete<String>(
+          optionsBuilder: (TextEditingValue textEditingValue) {
+            if (textEditingValue.text.isEmpty) {
+              return _commonFrequencies.take(5);
             }
-            return null;
+            return _commonFrequencies.where((freq) => freq
+                .toLowerCase()
+                .contains(textEditingValue.text.toLowerCase()));
+          },
+          onSelected: (String selection) {
+            _frequencyController.text = selection;
+          },
+          fieldViewBuilder: (
+            BuildContext context,
+            TextEditingController fieldController,
+            FocusNode focusNode,
+            VoidCallback onFieldSubmitted,
+          ) {
+            if (fieldController.text.isEmpty &&
+                _frequencyController.text.isNotEmpty) {
+              fieldController.text = _frequencyController.text;
+            }
+            return TextFormField(
+              controller: fieldController,
+              focusNode: focusNode,
+              decoration: InputDecoration(
+                labelText: 'Frequência *',
+                hintText: 'Ex: 2x ao dia, A cada 8 horas',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                counterText: '',
+              ),
+              maxLength: 100,
+              onChanged: (value) {
+                _frequencyController.text = value;
+              },
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Frequência é obrigatória';
+                }
+                return null;
+              },
+            );
+          },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 4,
+                borderRadius: BorderRadius.circular(8),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxHeight: 200,
+                    maxWidth: 300,
+                  ),
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return ListTile(
+                        dense: true,
+                        title: Text(option),
+                        onTap: () => onSelected(option),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
           },
         ),
         const SizedBox(height: 16),
@@ -235,7 +400,9 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Duração (opcional)',
             hintText: 'Ex: 7 dias, 2 semanas',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 50,
         ),
       ],
     );
@@ -295,7 +462,16 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
             labelText: 'Prescrito por (opcional)',
             hintText: 'Nome do veterinário',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            counterText: '',
           ),
+          maxLength: 100,
+          textCapitalization: TextCapitalization.words,
+          validator: (value) {
+            if (value != null && value.trim().isNotEmpty && value.trim().length < 2) {
+              return 'Nome deve ter pelo menos 2 caracteres';
+            }
+            return null;
+          },
         ),
         const SizedBox(height: 16),
         PetiVetiFormComponents.notesTreatment(

@@ -34,6 +34,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
 
   AnimalSpecies _selectedSpecies = AnimalSpecies.dog;
   AnimalGender _selectedGender = AnimalGender.male;
+  AnimalSize _selectedSize = AnimalSize.medium;
   DateTime _selectedBirthDate = DateTime.now().subtract(
     const Duration(days: 365),
   );
@@ -63,6 +64,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       _insuranceController.text = animal.insuranceInfo ?? '';
       _selectedSpecies = animal.species;
       _selectedGender = animal.gender;
+      _selectedSize = animal.size ?? AnimalSize.medium;
       _selectedBirthDate =
           animal.birthDate ??
           DateTime.now().subtract(const Duration(days: 365));
@@ -202,6 +204,16 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           value: _selectedBirthDate,
           onChanged: (date) {
             if (date != null) {
+              // Validar se a data não é no futuro
+              if (date.isAfter(DateTime.now())) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Data de nascimento não pode ser no futuro'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+                return;
+              }
               setState(() {
                 _selectedBirthDate = date;
               });
@@ -316,31 +328,66 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           ],
         ),
         const SizedBox(height: 16),
-        TextFormField(
-          controller: _weightController,
-          decoration: const InputDecoration(
-            labelText: 'Peso (kg) *',
-            hintText: 'Ex: 15.5',
-            border: OutlineInputBorder(),
-            suffixText: 'kg',
-          ),
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'^\d*[.,]?\d{0,2}$')),
+        Row(
+          children: [
+            Expanded(
+              child: TextFormField(
+                controller: _weightController,
+                decoration: const InputDecoration(
+                  labelText: 'Peso (kg) *',
+                  hintText: 'Ex: 15.5',
+                  border: OutlineInputBorder(),
+                  suffixText: 'kg',
+                ),
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*[.,]?\d{0,2}$')),
+                ],
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Peso é obrigatório';
+                  }
+                  final weight = double.tryParse(value.replaceAll(',', '.'));
+                  if (weight == null || weight <= 0) {
+                    return 'Peso deve ser um número maior que zero';
+                  }
+                  if (weight > 150) {
+                    return 'Peso deve ser menor que 150kg';
+                  }
+                  return null;
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: DropdownButtonFormField<AnimalSize>(
+                initialValue: _selectedSize,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: 'Porte',
+                  border: OutlineInputBorder(),
+                ),
+                items: AnimalSize.values
+                    .where((size) => size != AnimalSize.unknown)
+                    .map((size) {
+                  return DropdownMenuItem(
+                    value: size,
+                    child: Text(
+                      size.displayName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() {
+                      _selectedSize = value;
+                    });
+                  }
+                },
+              ),
+            ),
           ],
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Peso é obrigatório';
-            }
-            final weight = double.tryParse(value.replaceAll(',', '.'));
-            if (weight == null || weight <= 0) {
-              return 'Peso deve ser um número maior que zero';
-            }
-            if (weight > 150) {
-              return 'Peso deve ser menor que 150kg';
-            }
-            return null;
-          },
         ),
       ],
     );
@@ -628,6 +675,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             : _breedController.text.trim(),
         birthDate: _selectedBirthDate,
         gender: _selectedGender,
+        size: _selectedSize,
         color: _colorController.text.trim().isEmpty
             ? null
             : _colorController.text.trim(),
@@ -638,7 +686,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             : _notesController.text.trim(),
         createdAt: widget.animal?.createdAt ?? now,
         updatedAt: now,
-        // New health fields
+        // Health fields
         isCastrated: _isCastrated,
         microchipNumber: _microchipController.text.trim().isEmpty
             ? null

@@ -104,11 +104,12 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
       name: medication.name,
       dosage: medication.dosage,
       frequency: medication.frequency,
+      duration: medication.duration,
       startDate: medication.startDate,
       endDate: medication.endDate,
       notes: medication.notes,
       veterinarian: medication.veterinarian,
-      type: 'other', // Default type, can be enhanced later
+      type: medication.type,
       userId: medication.userId,
       createdAt: medication.createdAt,
       updatedAt: medication.updatedAt,
@@ -127,10 +128,12 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
         name: Value(model.name),
         dosage: Value(model.dosage),
         frequency: Value(model.frequency),
+        duration: Value.absentIfNull(model.duration),
         startDate: Value(model.startDate),
         endDate: Value.absentIfNull(model.endDate),
         notes: Value.absentIfNull(model.notes),
         veterinarian: Value.absentIfNull(model.veterinarian),
+        type: Value(model.type),
         userId: Value(model.userId),
         updatedAt: Value(DateTime.now()),
       );
@@ -141,10 +144,12 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
       name: model.name,
       dosage: model.dosage,
       frequency: model.frequency,
+      duration: Value.absentIfNull(model.duration),
       startDate: model.startDate,
       endDate: Value.absentIfNull(model.endDate),
       notes: Value.absentIfNull(model.notes),
       veterinarian: Value.absentIfNull(model.veterinarian),
+      type: Value(model.type),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );
@@ -198,7 +203,7 @@ class MedicationLocalDataSourceImpl implements MedicationLocalDataSource {
       medId,
       MedicationsCompanion(
         endDate: Value(DateTime.now()),
-        notes: Value('Discontinued: $reason'),
+        notes: Value('Descontinuado: $reason'),
         updatedAt: Value(DateTime.now()),
       ),
     );

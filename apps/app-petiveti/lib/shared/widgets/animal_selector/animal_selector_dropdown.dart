@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/constants/ui_constants.dart';
 import '../../../features/animals/domain/entities/animal.dart';
 import '../../../features/animals/domain/entities/animal_enums.dart';
+import 'animal_dropdown_item.dart';
+import 'animal_selected_item.dart';
 
 class AnimalSelectorDropdown extends StatelessWidget {
   const AnimalSelectorDropdown({
@@ -26,95 +30,141 @@ class AnimalSelectorDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectedAnimal = animals.firstWhere(
-      (a) => a.id == currentSelectedAnimalId,
-      orElse: () => animals.first,
-    );
+    final selectedAnimal = currentSelectedAnimalId != null
+        ? animals.firstWhere(
+            (a) => a.id == currentSelectedAnimalId,
+            orElse: () => animals.first,
+          )
+        : null;
 
-    return FadeTransition(
-      opacity: fadeAnimation,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final animalColor = selectedAnimal != null 
+        ? _getAnimalColor(selectedAnimal.species) 
+        : null;
+
+    return Semantics(
+      label: selectedAnimal != null
+          ? 'Pet selecionado: ${selectedAnimal.name}, ${selectedAnimal.species.displayName}'
+          : 'Selecionar pet',
+      button: true,
+      child: FadeTransition(
+        opacity: fadeAnimation,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selectedAnimal != null
+                  ? (animalColor ?? Theme.of(context).colorScheme.primary)
+                      .withValues(alpha: isDark ? 0.6 : 0.5)
+                  : Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withValues(alpha: isDark ? 0.4 : 0.3),
+              width: selectedAnimal != null ? 2.0 : 1.0,
+            ),
+            borderRadius: BorderRadius.circular(15),
+            color: isDark
+                ? Theme.of(context).colorScheme.surfaceContainerHigh
+                : Theme.of(context).colorScheme.surface,
           ),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: enabled ? onDropdownTap : null,
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  _buildAnimalIcon(context, selectedAnimal),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          selectedAnimal.name,
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        if (selectedAnimal.breed != null && selectedAnimal.breed!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            selectedAnimal.breed!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurface
-                                      .withValues(alpha: 0.6),
-                                ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ],
-                    ),
+          child: Material(
+            color: Colors.transparent,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 64),
+              child: DropdownButtonFormField<String>(
+                initialValue: currentSelectedAnimalId,
+                isDense: true,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.medium,
+                    vertical: AppSpacing.medium,
                   ),
-                  Icon(
-                    isExpanded ? Icons.expand_less : Icons.expand_more,
+                  border: InputBorder.none,
+                  hintText: hintText,
+                  hintStyle: TextStyle(
                     color: Theme.of(context)
                         .colorScheme
                         .onSurface
-                        .withValues(alpha: 0.6),
+                        .withValues(alpha: AppOpacity.medium),
+                    fontSize: AppFontSizes.medium,
+                    fontWeight: AppFontWeights.regular,
                   ),
-                ],
+                  prefixIcon: Container(
+                    margin: const EdgeInsets.only(left: AppSpacing.medium),
+                    child: Icon(
+                      selectedAnimal != null
+                          ? _getAnimalIcon(selectedAnimal.species)
+                          : Icons.pets,
+                      color: selectedAnimal != null
+                          ? animalColor
+                          : Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: AppOpacity.subtle),
+                      size: AppSizes.iconM,
+                    ),
+                  ),
+                ),
+                selectedItemBuilder: (BuildContext context) {
+                  return animals.map<Widget>((Animal animal) {
+                    final isSelected = animal.id == currentSelectedAnimalId;
+                    if (!isSelected) {
+                      return Container(
+                        alignment: Alignment.centerLeft,
+                        child: const SizedBox.shrink(),
+                      );
+                    }
+                    return AnimalSelectedItem(animal: animal);
+                  }).toList();
+                },
+                items: animals.map<DropdownMenuItem<String>>((Animal animal) {
+                  final isCurrentlySelected =
+                      animal.id == currentSelectedAnimalId;
+
+                  return DropdownMenuItem<String>(
+                    value: animal.id,
+                    child: AnimalDropdownItem(
+                      animal: animal,
+                      isSelected: isCurrentlySelected,
+                    ),
+                  );
+                }).toList(),
+                onChanged: enabled ? onAnimalSelected : null,
+                onTap: onDropdownTap,
+                isExpanded: true,
+                icon: AnimatedRotation(
+                  turns: isExpanded ? 0.5 : 0.0,
+                  duration: AppDurations.fast,
+                  child: Icon(
+                    Icons.expand_more,
+                    color: enabled
+                        ? (selectedAnimal != null
+                            ? animalColor
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: AppOpacity.prominent))
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: AppOpacity.disabled),
+                    size: AppSizes.iconM,
+                  ),
+                ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: AppFontSizes.medium,
+                ),
+                dropdownColor: isDark
+                    ? Theme.of(context).colorScheme.surfaceContainerHigh
+                    : Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(AppRadius.large),
+                elevation: isDark ? 4 : 8,
+                itemHeight: 80,
+                menuMaxHeight: 400,
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildAnimalIcon(BuildContext context, Animal animal) {
-    final color = _getAnimalColor(animal.species);
-
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(
-        _getAnimalIcon(animal.species),
-        size: 20,
-        color: color,
       ),
     );
   }

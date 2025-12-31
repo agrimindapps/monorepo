@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'features/settings/presentation/providers/petiveti_theme_notifier.dart';
 
 class PetiVetiApp extends ConsumerStatefulWidget {
   const PetiVetiApp({super.key});
@@ -96,11 +97,13 @@ class _PetiVetiAppState extends ConsumerState<PetiVetiApp>
   @override
   Widget build(BuildContext context) {
     final GoRouter router = ref.watch(appRouterProvider);
+    final ThemeMode currentThemeMode = ref.watch(petiVetiThemeProvider);
     
     return MaterialApp.router(
       title: 'PetiVeti',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
+      themeMode: currentThemeMode,
       routerConfig: router,
       debugShowCheckedModeBanner: false,
     );

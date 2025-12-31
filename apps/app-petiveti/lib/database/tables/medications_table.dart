@@ -15,10 +15,12 @@ class Medications extends Table {
   TextColumn get name => text()();
   TextColumn get dosage => text()();
   TextColumn get frequency => text()();
+  TextColumn get duration => text().nullable()();
   DateTimeColumn get startDate => dateTime()();
   DateTimeColumn get endDate => dateTime().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get veterinarian => text().nullable()();
+  TextColumn get type => text().withDefault(const Constant('other'))();
 
   // Metadata
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();

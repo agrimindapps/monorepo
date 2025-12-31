@@ -33,6 +33,29 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
 
   bool _isLoading = false;
 
+  // Common appointment reasons for autocomplete
+  final List<String> _commonReasons = [
+    'Consulta de rotina',
+    'Vacinação',
+    'Check-up anual',
+    'Exame de sangue',
+    'Vermifugação',
+    'Castração',
+    'Limpeza dentária',
+    'Problema de pele',
+    'Problema digestivo',
+    'Problema respiratório',
+    'Dor/Claudicação',
+    'Emergência',
+    'Cirurgia',
+    'Retorno',
+    'Ultrassom',
+    'Raio-X',
+    'Avaliação cardiológica',
+    'Avaliação oftalmológica',
+    'Avaliação ortopédica',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -200,30 +223,97 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                   TextFormField(
                     controller: _veterinarianController,
                     decoration: const InputDecoration(
-                      labelText: 'Veterinário',
+                      labelText: 'Veterinário *',
                       border: OutlineInputBorder(),
+                      counterText: '',
                     ),
+                    maxLength: 100,
+                    textCapitalization: TextCapitalization.words,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Nome do veterinário é obrigatório';
+                      }
+                      if (value.trim().length < 2) {
+                        return 'Nome deve ter pelo menos 2 caracteres';
                       }
                       return null;
                     },
                   ),
 
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _reasonController,
-                    decoration: const InputDecoration(
-                      labelText: 'Motivo da Consulta',
-                      border: OutlineInputBorder(),
-                    ),
-                    maxLines: 2,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'Motivo da consulta é obrigatório';
+                  Autocomplete<String>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return _commonReasons.take(5);
                       }
-                      return null;
+                      return _commonReasons.where((reason) => reason
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase()));
+                    },
+                    onSelected: (String selection) {
+                      _reasonController.text = selection;
+                    },
+                    fieldViewBuilder: (
+                      BuildContext context,
+                      TextEditingController fieldController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      if (fieldController.text.isEmpty &&
+                          _reasonController.text.isNotEmpty) {
+                        fieldController.text = _reasonController.text;
+                      }
+                      return TextFormField(
+                        controller: fieldController,
+                        focusNode: focusNode,
+                        decoration: const InputDecoration(
+                          labelText: 'Motivo da Consulta *',
+                          border: OutlineInputBorder(),
+                          counterText: '',
+                        ),
+                        maxLength: 200,
+                        maxLines: 2,
+                        onChanged: (value) {
+                          _reasonController.text = value;
+                        },
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Motivo da consulta é obrigatório';
+                          }
+                          if (value.trim().length < 3) {
+                            return 'Motivo deve ter pelo menos 3 caracteres';
+                          }
+                          return null;
+                        },
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(8),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxHeight: 200,
+                              maxWidth: 350,
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (context, index) {
+                                final option = options.elementAt(index);
+                                return ListTile(
+                                  dense: true,
+                                  title: Text(option),
+                                  onTap: () => onSelected(option),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
                     },
                   ),
 
@@ -256,7 +346,9 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     decoration: const InputDecoration(
                       labelText: 'Diagnóstico (opcional)',
                       border: OutlineInputBorder(),
+                      counterText: '',
                     ),
+                    maxLength: 500,
                     maxLines: 2,
                   ),
 
@@ -266,7 +358,9 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                     decoration: const InputDecoration(
                       labelText: 'Observações (opcional)',
                       border: OutlineInputBorder(),
+                      counterText: '',
                     ),
+                    maxLength: 500,
                     maxLines: 3,
                   ),
 
@@ -286,8 +380,14 @@ class _AddAppointmentFormState extends ConsumerState<AddAppointmentForm> {
                         final cost = double.tryParse(
                           value.replaceAll(',', '.'),
                         );
-                        if (cost == null || cost < 0) {
+                        if (cost == null) {
                           return 'Valor inválido';
+                        }
+                        if (cost < 0) {
+                          return 'Valor não pode ser negativo';
+                        }
+                        if (cost > 100000) {
+                          return 'Valor máximo é R\$ 100.000,00';
                         }
                       }
                       return null;

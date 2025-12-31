@@ -1,6 +1,7 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/header_theme_button.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../dialogs/feedback_dialog.dart';
 import '../widgets/sections/legal_section.dart';
@@ -32,6 +33,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                 subtitle: 'Gerencie suas preferências',
                 semanticLabel: 'Seção de configurações',
                 semanticHint: 'Página principal para gerenciar preferências',
+                actions: [
+                  HeaderThemeButton(),
+                ],
               ),
             ),
             Expanded(child: _buildContent(context)),

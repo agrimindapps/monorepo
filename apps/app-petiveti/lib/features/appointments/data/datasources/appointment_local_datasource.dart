@@ -94,18 +94,20 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
   }
 
   AppointmentModel _toModel(Appointment appointment) {
-    // Map Drift Appointment to AppointmentModel
-    // Drift: title -> Model: reason
-    // Drift: description -> Model: diagnosis
-    // Drift: appointmentDateTime -> Model: dateTimestamp
-    // Drift: veterinarian -> Model: veterinarianName
-    // Drift: status (text) -> Model: status (int)
-
+    // Map status text to int
     int statusInt = 0; // default to scheduled
-    if (appointment.status == 'completed') {
-      statusInt = 1;
-    } else if (appointment.status == 'cancelled') {
-      statusInt = 2;
+    switch (appointment.status) {
+      case 'completed':
+        statusInt = 1;
+        break;
+      case 'cancelled':
+        statusInt = 2;
+        break;
+      case 'inProgress':
+        statusInt = 3;
+        break;
+      default:
+        statusInt = 0; // scheduled
     }
 
     return AppointmentModel(
@@ -117,7 +119,7 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
       diagnosis: appointment.description,
       notes: appointment.notes,
       status: statusInt,
-      cost: null, // Not stored in Drift table yet
+      cost: appointment.cost,
       createdAtTimestamp: appointment.createdAt.millisecondsSinceEpoch,
       updatedAtTimestamp: appointment.updatedAt?.millisecondsSinceEpoch,
       isDeleted: appointment.isDeleted,
@@ -128,18 +130,20 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
     AppointmentModel model, {
     bool forUpdate = false,
   }) {
-    // Map AppointmentModel to Drift Companion
-    // Model: reason -> Drift: title
-    // Model: diagnosis -> Drift: description
-    // Model: dateTimestamp -> Drift: appointmentDateTime
-    // Model: veterinarianName -> Drift: veterinarian
-    // Model: status (int) -> Drift: status (text)
-
-    String statusText = 'scheduled';
-    if (model.status == 1) {
-      statusText = 'completed';
-    } else if (model.status == 2) {
-      statusText = 'cancelled';
+    // Map status int to text
+    String statusText;
+    switch (model.status) {
+      case 1:
+        statusText = 'completed';
+        break;
+      case 2:
+        statusText = 'cancelled';
+        break;
+      case 3:
+        statusText = 'inProgress';
+        break;
+      default:
+        statusText = 'scheduled';
     }
 
     final dateTime = DateTime.fromMillisecondsSinceEpoch(model.dateTimestamp);
@@ -154,10 +158,11 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
         veterinarian: Value.absentIfNull(
           model.veterinarianName.isEmpty ? null : model.veterinarianName,
         ),
-        location: const Value.absent(), // Not in new model
+        location: const Value.absent(),
         notes: Value.absentIfNull(model.notes),
         status: Value(statusText),
-        userId: const Value.absent(), // Will be set by repository/service
+        cost: Value.absentIfNull(model.cost),
+        userId: const Value.absent(),
         updatedAt: Value(DateTime.now()),
       );
     }
@@ -170,10 +175,11 @@ class AppointmentLocalDataSourceImpl implements AppointmentLocalDataSource {
       veterinarian: Value.absentIfNull(
         model.veterinarianName.isEmpty ? null : model.veterinarianName,
       ),
-      location: const Value.absent(), // Not in new model
+      location: const Value.absent(),
       notes: Value.absentIfNull(model.notes),
       status: statusText,
-      userId: '', // Will be set by repository/service
+      cost: Value.absentIfNull(model.cost),
+      userId: '',
       createdAt: Value(
         DateTime.fromMillisecondsSinceEpoch(model.createdAtTimestamp),
       ),

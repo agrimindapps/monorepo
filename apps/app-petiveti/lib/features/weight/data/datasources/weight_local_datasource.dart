@@ -190,7 +190,9 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
       userId: record.userId,
       date: record.date,
       notes: record.notes,
+      bodyConditionScore: record.bodyConditionScore,
       createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
       isDeleted: record.isDeleted,
     );
   }
@@ -207,7 +209,9 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
         unit: Value(model.unit),
         date: Value(model.date),
         notes: Value.absentIfNull(model.notes),
+        bodyConditionScore: Value.absentIfNull(model.bodyConditionScore),
         userId: Value(model.userId),
+        updatedAt: Value(DateTime.now()),
       );
     }
 
@@ -217,6 +221,7 @@ class WeightLocalDataSourceImpl implements WeightLocalDataSource {
       unit: Value(model.unit),
       date: model.date,
       notes: Value.absentIfNull(model.notes),
+      bodyConditionScore: Value.absentIfNull(model.bodyConditionScore),
       userId: model.userId,
       createdAt: Value(model.createdAt),
     );

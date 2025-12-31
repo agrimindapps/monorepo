@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/petiveti_theme_notifier.dart';
 import '../../providers/settings_providers.dart';
 import '../shared/new_settings_card.dart';
 import '../shared/new_settings_list_tile.dart';
@@ -21,6 +22,8 @@ class PreferencesSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settingsAsync = ref.watch(settingsProvider);
     final settings = settingsAsync.value;
+    final currentThemeMode = ref.watch(petiVetiThemeProvider);
+    final isDarkMode = currentThemeMode == ThemeMode.dark;
 
     return Column(
       children: [
@@ -35,11 +38,18 @@ class PreferencesSection extends ConsumerWidget {
                 subtitle: 'Usar tema escuro no aplicativo',
                 showDivider: true,
                 trailing: Switch.adaptive(
-                  value: settings?.darkMode ?? false,
+                  value: isDarkMode,
                   onChanged: settingsAsync.isLoading
                       ? null
                       : (value) {
-                          ref.read(settingsProvider.notifier).updateDarkMode(value);
+                          // Atualiza o provider de tema dedicado
+                          ref
+                              .read(petiVetiThemeProvider.notifier)
+                              .updateFromDarkMode(value);
+                          // Atualiza também no settings para persistência
+                          ref
+                              .read(settingsProvider.notifier)
+                              .updateDarkMode(value);
                           onThemeChanged?.call(value);
                         },
                 ),

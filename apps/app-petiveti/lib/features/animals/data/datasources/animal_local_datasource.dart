@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../../../database/petiveti_database.dart';
@@ -85,6 +87,20 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
     final species = AnimalSpeciesExtension.fromString(animal.species);
     final gender = AnimalGenderExtension.fromString(animal.gender);
 
+    // Parse allergies from JSON string
+    List<String>? allergies;
+    if (animal.allergies != null && animal.allergies!.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(animal.allergies!);
+        if (decoded is List) {
+          allergies = decoded.cast<String>();
+        }
+      } catch (_) {
+        // If not valid JSON, treat as single allergy
+        allergies = [animal.allergies!];
+      }
+    }
+
     return AnimalModel(
       id: animal.id,
       name: animal.name,
@@ -102,11 +118,23 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
       isDeleted: animal.isDeleted,
       createdAt: animal.createdAt,
       updatedAt: animal.updatedAt,
+      // Health fields
+      isCastrated: animal.isCastrated,
+      allergies: allergies,
+      bloodType: animal.bloodType,
+      preferredVeterinarian: animal.preferredVeterinarian,
+      insuranceInfo: animal.insuranceInfo,
     );
   }
 
   /// Convert domain AnimalModel to Drift AnimalsCompanion
   AnimalsCompanion _toCompanion(AnimalModel model, {bool forUpdate = false}) {
+    // Convert allergies list to JSON string
+    String? allergiesJson;
+    if (model.allergies != null && model.allergies!.isNotEmpty) {
+      allergiesJson = jsonEncode(model.allergies);
+    }
+
     if (forUpdate) {
       return AnimalsCompanion(
         id: model.id != null ? Value(model.id!) : const Value.absent(),
@@ -123,6 +151,12 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
         userId: Value(model.userId),
         isActive: Value(model.isActive),
         updatedAt: Value(DateTime.now()),
+        // Health fields
+        isCastrated: Value(model.isCastrated),
+        allergies: Value.absentIfNull(allergiesJson),
+        bloodType: Value.absentIfNull(model.bloodType),
+        preferredVeterinarian: Value.absentIfNull(model.preferredVeterinarian),
+        insuranceInfo: Value.absentIfNull(model.insuranceInfo),
       );
     }
 
@@ -140,6 +174,12 @@ class AnimalLocalDataSourceImpl implements AnimalLocalDataSource {
       userId: model.userId,
       isActive: Value(model.isActive),
       createdAt: Value(model.createdAt),
+      // Health fields
+      isCastrated: Value(model.isCastrated),
+      allergies: Value.absentIfNull(allergiesJson),
+      bloodType: Value.absentIfNull(model.bloodType),
+      preferredVeterinarian: Value.absentIfNull(model.preferredVeterinarian),
+      insuranceInfo: Value.absentIfNull(model.insuranceInfo),
     );
   }
 }

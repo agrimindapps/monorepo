@@ -16,9 +16,7 @@ part 'home_providers.g.dart';
 // ============================================================================
 
 @riverpod
-HomeAggregationRepository homeAggregationRepository(
-  Ref ref,
-) {
+HomeAggregationRepository homeAggregationRepository(Ref ref) {
   return HomeAggregationRepositoryImpl();
 }
 
@@ -120,8 +118,11 @@ class HomeStatsState {
   }
 
   bool get hasUrgentTasks => overdueItems > 0 || todayTasks > 0;
-  String get healthStatus =>
-      overdueItems > 5 ? 'Atenção' : overdueItems > 0 ? 'Cuidado' : 'Em dia';
+  String get healthStatus => overdueItems > 5
+      ? 'Atenção'
+      : overdueItems > 0
+      ? 'Cuidado'
+      : 'Em dia';
 }
 
 class HomeStatusState {
@@ -179,10 +180,7 @@ class HomeNotificationsNotifier extends _$HomeNotificationsNotifier {
   }
 
   void markAllAsRead() {
-    state = state.copyWith(
-      unreadCount: 0,
-      hasUrgentAlerts: false,
-    );
+    state = state.copyWith(unreadCount: 0, hasUrgentAlerts: false);
   }
 }
 
@@ -206,7 +204,8 @@ class HomeStatsNotifier extends _$HomeStatsNotifier {
 
       for (final animal in animals) {
         final speciesName = animal.species.displayName;
-        speciesBreakdown[speciesName] = (speciesBreakdown[speciesName] ?? 0) + 1;
+        speciesBreakdown[speciesName] =
+            (speciesBreakdown[speciesName] ?? 0) + 1;
 
         if (animal.birthDate != null) {
           totalAge += animal.ageInMonths;
@@ -226,8 +225,9 @@ class HomeStatsNotifier extends _$HomeStatsNotifier {
         totalReminders: animals.length * 2,
         overdueItems: overdueItems,
         todayTasks: todayTasks,
-        nextAppointment:
-            animals.isNotEmpty ? 'Consulta do ${animals.first.name}' : null,
+        nextAppointment: animals.isNotEmpty
+            ? 'Consulta do ${animals.first.name}'
+            : null,
         nextVaccination: animals.isNotEmpty
             ? 'Vacina antirrábica - ${animals.first.name}'
             : null,
@@ -284,10 +284,7 @@ class HomeStatusNotifier extends _$HomeStatusNotifier {
   }
 
   void setOfflineMode() {
-    state = state.copyWith(
-      isOnline: false,
-      lastUpdated: DateTime.now(),
-    );
+    state = state.copyWith(isOnline: false, lastUpdated: DateTime.now());
   }
 
   void clearError() {

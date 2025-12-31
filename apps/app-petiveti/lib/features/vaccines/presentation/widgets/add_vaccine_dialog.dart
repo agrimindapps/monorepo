@@ -36,6 +36,7 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
   bool _isRequired = true;
   VaccineStatus _status = VaccineStatus.scheduled;
   bool _isLoading = false;
+  String? _errorMessage;
 
   final List<String> _commonVaccines = [
     'V10 (Múltipla)',
@@ -130,6 +131,8 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
       headerIcon: Icons.vaccines,
       isLoading: _isLoading,
       confirmButtonText: _isEditing ? 'Salvar' : 'Cadastrar',
+      errorMessage: _errorMessage,
+      onClearError: () => setState(() => _errorMessage = null),
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: null,
       content: Form(
@@ -479,8 +482,17 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
   }
 
   Future<void> _saveVaccine() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedAnimal == null) return;
+    // Limpa erros anteriores
+    setState(() => _errorMessage = null);
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Preencha todos os campos obrigatórios');
+      return;
+    }
+    if (_selectedAnimal == null) {
+      setState(() => _errorMessage = 'Selecione um animal');
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -535,12 +547,7 @@ class _AddVaccineDialogState extends ConsumerState<AddVaccineDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar vacina: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() => _errorMessage = 'Erro ao salvar vacina: $e');
       }
     } finally {
       if (mounted) {

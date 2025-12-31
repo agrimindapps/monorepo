@@ -38,6 +38,7 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
   String? _selectedAnimalId;
   bool _isRecurring = false;
   bool _isSubmitting = false;
+  String? _errorMessage;
 
   bool get _isEditing => widget.reminder != null;
 
@@ -109,6 +110,8 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
       headerIcon: Icons.notifications,
       isLoading: _isSubmitting,
       confirmButtonText: _isEditing ? 'Salvar' : 'Cadastrar',
+      errorMessage: _errorMessage,
+      onClearError: () => setState(() => _errorMessage = null),
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: null,
       content: Form(
@@ -321,11 +324,15 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Limpa erros anteriores
+    setState(() => _errorMessage = null);
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Preencha todos os campos obrigatórios');
+      return;
+    }
     if (_selectedAnimalId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um animal')),
-      );
+      setState(() => _errorMessage = 'Selecione um animal');
       return;
     }
 
@@ -385,12 +392,7 @@ class _AddReminderDialogState extends ConsumerState<AddReminderDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar lembrete: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() => _errorMessage = 'Erro ao salvar lembrete: $e');
       }
     } finally {
       if (mounted) {

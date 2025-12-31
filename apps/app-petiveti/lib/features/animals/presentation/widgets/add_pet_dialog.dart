@@ -42,6 +42,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   bool _isCastrated = false;
   String? _selectedBloodType;
   List<String> _allergies = [];
+  String? _errorMessage;
 
   bool get _isEditing => widget.animal != null;
 
@@ -96,6 +97,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       headerIcon: Icons.pets,
       isLoading: _isLoading,
       confirmButtonText: _isEditing ? 'Salvar Alterações' : 'Cadastrar Pet',
+      errorMessage: _errorMessage,
+      onClearError: () => setState(() => _errorMessage = null),
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: _submitForm,
       content: Form(
@@ -648,7 +651,11 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   }
 
   Future<void> _submitForm() async {
+    // Limpa erros anteriores
+    setState(() => _errorMessage = null);
+
     if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Preencha todos os campos obrigatórios');
       return;
     }
 
@@ -727,13 +734,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       }
     } catch (error) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar pet: ${error.toString()}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        setState(() => _errorMessage = 'Erro ao salvar pet: ${error.toString()}');
       }
     } finally {
       if (mounted) {

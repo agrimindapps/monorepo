@@ -31,6 +31,7 @@ class _AddWeightDialogState extends ConsumerState<AddWeightDialog> {
   DateTime _selectedDate = DateTime.now();
   int? _bodyConditionScore;
   bool _isLoading = false;
+  String? _errorMessage;
 
   bool get _isEditing => widget.weight != null;
 
@@ -84,6 +85,8 @@ class _AddWeightDialogState extends ConsumerState<AddWeightDialog> {
       headerIcon: Icons.monitor_weight,
       isLoading: _isLoading,
       confirmButtonText: _isEditing ? 'Salvar' : 'Cadastrar',
+      errorMessage: _errorMessage,
+      onClearError: () => setState(() => _errorMessage = null),
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: null,
       content: Form(
@@ -360,8 +363,17 @@ class _AddWeightDialogState extends ConsumerState<AddWeightDialog> {
   }
 
   Future<void> _saveWeight() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedAnimal == null) return;
+    // Limpa erros anteriores
+    setState(() => _errorMessage = null);
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Preencha todos os campos obrigatórios');
+      return;
+    }
+    if (_selectedAnimal == null) {
+      setState(() => _errorMessage = 'Selecione um animal');
+      return;
+    }
 
     setState(() => _isLoading = true);
 
@@ -402,12 +414,7 @@ class _AddWeightDialogState extends ConsumerState<AddWeightDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar registro: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() => _errorMessage = 'Erro ao salvar registro: $e');
       }
     } finally {
       if (mounted) {

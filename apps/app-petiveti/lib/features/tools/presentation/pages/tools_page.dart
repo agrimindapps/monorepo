@@ -18,7 +18,7 @@ class ToolsPage extends StatelessWidget {
               child: PetivetiPageHeader(
                 icon: Icons.build_circle,
                 title: 'Ferramentas',
-                subtitle: 'Calculadoras e utilidades',
+                subtitle: 'Recursos úteis para cuidar do seu pet',
                 showBackButton: false,
               ),
             ),
@@ -35,96 +35,71 @@ class ToolsPage extends StatelessWidget {
                     color: Colors.orange,
                     route: '/reminders',
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   
-                  _buildSection(
+                  // Calculadoras como segundo item destacado
+                  _buildHighlightedTool(
                     context,
                     title: 'Calculadoras',
+                    subtitle: 'Calorias, peso ideal, hidratação, dosagem e muito mais',
                     icon: Icons.calculate,
                     color: Colors.blue,
-                    tools: [
-                      _ToolItem(
-                        title: 'Calculadora de Calorias',
-                        subtitle: 'Calcule as necessidades calóricas do seu pet',
-                        icon: Icons.restaurant,
-                        route: '/calculators/calorie',
-                      ),
-                      _ToolItem(
-                        title: 'Peso Ideal',
-                        subtitle: 'Descubra o peso ideal para seu pet',
-                        icon: Icons.monitor_weight,
-                        route: '/calculators/ideal-weight',
-                      ),
-                      _ToolItem(
-                        title: 'Exercícios',
-                        subtitle: 'Planeje exercícios adequados',
-                        icon: Icons.directions_run,
-                        route: '/calculators/exercise',
-                      ),
-                      _ToolItem(
-                        title: 'Idade do Pet',
-                        subtitle: 'Converta a idade do seu pet',
-                        icon: Icons.cake,
-                        route: '/calculators/animal-age',
-                      ),
-                      _ToolItem(
-                        title: 'Condição Corporal',
-                        subtitle: 'Avalie a condição física',
-                        icon: Icons.assignment,
-                        route: '/calculators/body-condition',
-                      ),
-                      _ToolItem(
-                        title: 'Hidratação',
-                        subtitle: 'Calcule necessidades de água',
-                        icon: Icons.water_drop,
-                        route: '/calculators/hydration',
-                      ),
-                      _ToolItem(
-                        title: 'Gestação',
-                        subtitle: 'Acompanhe a gestação',
-                        icon: Icons.pregnant_woman,
-                        route: '/calculators/pregnancy',
-                      ),
-                    ],
+                    route: '/calculators',
                   ),
                   const SizedBox(height: 24),
-                  _buildSection(
+                  
+                  // Outras ferramentas
+                  _buildSectionTitle(context, 'Outras Utilidades', Icons.apps, Colors.purple),
+                  const SizedBox(height: 12),
+                  
+                  _buildToolCard(
                     context,
-                    title: 'Calculadoras Veterinárias',
-                    icon: Icons.medical_services,
-                    color: Colors.red,
-                    tools: [
-                      _ToolItem(
-                        title: 'Dosagem de Medicamentos',
-                        subtitle: 'Calcule dosagens precisas',
-                        icon: Icons.medication,
-                        route: '/calculators/medication-dosage',
-                      ),
-                      _ToolItem(
-                        title: 'Fluidoterapia',
-                        subtitle: 'Calcule necessidades de fluidos',
-                        icon: Icons.water,
-                        route: '/calculators/fluid-therapy',
-                      ),
-                      _ToolItem(
-                        title: 'Anestesia',
-                        subtitle: 'Cálculos para procedimentos',
-                        icon: Icons.healing,
-                        route: '/calculators/anesthesia',
-                      ),
-                      _ToolItem(
-                        title: 'Insulina para Diabetes',
-                        subtitle: 'Calcule doses de insulina',
-                        icon: Icons.bloodtype,
-                        route: '/calculators/diabetes-insulin',
-                      ),
-                    ],
+                    title: 'Agenda de Vacinas',
+                    subtitle: 'Visualize o calendário de vacinação',
+                    icon: Icons.calendar_month,
+                    color: Colors.teal,
+                    route: '/vaccines',
+                  ),
+                  _buildToolCard(
+                    context,
+                    title: 'Controle de Peso',
+                    subtitle: 'Histórico e gráficos de peso',
+                    icon: Icons.show_chart,
+                    color: Colors.indigo,
+                    route: '/weight',
+                  ),
+                  _buildToolCard(
+                    context,
+                    title: 'Despesas',
+                    subtitle: 'Acompanhe os gastos com seu pet',
+                    icon: Icons.attach_money,
+                    color: Colors.green,
+                    route: '/expenses',
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(BuildContext context, String title, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 24),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -197,70 +172,32 @@ class ToolsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(
+  Widget _buildToolCard(
     BuildContext context, {
     required String title,
+    required String subtitle,
     required IconData icon,
     required Color color,
-    required List<_ToolItem> tools,
+    required String route,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 12),
-          child: Row(
-            children: [
-              Icon(icon, color: color, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: color,
-                    ),
-              ),
-            ],
-          ),
-        ),
-        ...tools.map((tool) => _buildToolCard(context, tool)),
-      ],
-    );
-  }
-
-  Widget _buildToolCard(BuildContext context, _ToolItem tool) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+          backgroundColor: color.withValues(alpha: 0.15),
           child: Icon(
-            tool.icon,
-            color: Theme.of(context).colorScheme.primary,
+            icon,
+            color: color,
           ),
         ),
         title: Text(
-          tool.title,
+          title,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        subtitle: Text(tool.subtitle),
+        subtitle: Text(subtitle),
         trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: () => context.push(tool.route),
+        onTap: () => context.push(route),
       ),
     );
   }
-}
-
-class _ToolItem {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final String route;
-
-  const _ToolItem({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.route,
-  });
 }

@@ -40,6 +40,7 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
   bool _hasReceipt = false;
   bool _isPaid = true;
   bool _isSubmitting = false;
+  String? _errorMessage;
 
   bool get _isEditing => widget.expense != null;
 
@@ -112,6 +113,8 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
       headerIcon: Icons.attach_money,
       isLoading: _isSubmitting,
       confirmButtonText: _isEditing ? 'Salvar' : 'Cadastrar',
+      errorMessage: _errorMessage,
+      onClearError: () => setState(() => _errorMessage = null),
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: null,
       content: Form(
@@ -467,15 +470,16 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Limpa erros anteriores
+    setState(() => _errorMessage = null);
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Preencha todos os campos obrigatórios');
+      return;
+    }
 
     if (_selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, selecione uma categoria'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      setState(() => _errorMessage = 'Por favor, selecione uma categoria');
       return;
     }
 
@@ -534,12 +538,7 @@ class _AddExpenseDialogState extends ConsumerState<AddExpenseDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar despesa: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() => _errorMessage = 'Erro ao salvar despesa: $e');
       }
     } finally {
       if (mounted) {

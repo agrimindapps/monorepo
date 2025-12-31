@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../core/providers/database_providers.dart';
 // import '../sync/adapters/calculation_history_drift_sync_adapter.dart';
 // import '../sync/adapters/promo_content_drift_sync_adapter.dart';
 import '../petiveti_database.dart';
@@ -117,20 +118,6 @@ PromoContentDriftSyncAdapter promoContentSyncAdapter(Ref ref) {
   );
 }
 */
-
-/// Provider do PetivetiDatabase
-@riverpod
-PetivetiDatabase petivetiDatabase(Ref ref) {
-  final db = PetivetiDatabase.production();
-
-  ref.onDispose(() {
-    db.close();
-  });
-
-  ref.keepAlive();
-
-  return db;
-}
 
 /// Provider do SubscriptionLocalRepository
 /// Cache local de assinaturas com Drift

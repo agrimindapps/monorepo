@@ -40,6 +40,7 @@ import '../../features/settings/presentation/pages/notifications_settings_page.d
 import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/subscription/presentation/pages/premium_subscription_page.dart';
 import '../../features/timeline/presentation/pages/timeline_page.dart';
+import '../../features/tools/presentation/pages/calculators_page.dart';
 import '../../features/tools/presentation/pages/tools_page.dart';
 import '../../features/vaccines/presentation/pages/vaccines_page.dart';
 import '../../features/weight/presentation/pages/weight_page.dart';
@@ -322,6 +323,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: '/tools',
                 name: 'tools',
                 builder: (context, state) => const ToolsPage(),
+              ),
+              // Página principal de calculadoras
+              GoRoute(
+                path: '/calculators',
+                name: 'calculators',
+                builder: (context, state) => const CalculatorsPage(),
               ),
               // Calculators como sub-rotas de tools
               GoRoute(

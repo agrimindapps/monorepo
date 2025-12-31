@@ -101,6 +101,11 @@ class _PromoAppBarState extends State<PromoAppBar> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      textStyle: const TextStyle(
+                        inherit: true,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     child: const Text('Já tenho conta'),
                   ),

@@ -13,6 +13,10 @@ class PetFormDialog extends StatelessWidget {
   final VoidCallback? onConfirm;
   final bool isLoading;
   final bool showCloseButton;
+  /// Mensagem de erro opcional - se fornecida, substitui o subtitle por erro
+  final String? errorMessage;
+  /// Callback para limpar o erro quando o usuário clica no botão de fechar
+  final VoidCallback? onClearError;
 
   const PetFormDialog({
     super.key,
@@ -26,6 +30,8 @@ class PetFormDialog extends StatelessWidget {
     this.onConfirm,
     this.isLoading = false,
     this.showCloseButton = true,
+    this.errorMessage,
+    this.onClearError,
   });
 
   @override
@@ -104,16 +110,81 @@ class PetFormDialog extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerLeft,
+          _buildSubtitleOrError(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubtitleOrError(BuildContext context) {
+    if (errorMessage != null && errorMessage!.isNotEmpty) {
+      return _buildErrorMessage(context);
+    }
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        subtitle,
+        style: const TextStyle(
+          color: AppColors.textOnPrimary,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Theme.of(context).colorScheme.error,
+            size: 18,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
             child: Text(
-              subtitle,
-              style: const TextStyle(
-                color: AppColors.textOnPrimary,
-                fontSize: 14,
+              errorMessage!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.2,
               ),
             ),
           ),
+          if (onClearError != null) ...[
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: onClearError,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .error
+                      .withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(
+                  Icons.close,
+                  color: Theme.of(context).colorScheme.error,
+                  size: 14,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -34,6 +34,7 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
   DateTime _endDate = DateTime.now().add(const Duration(days: 7));
   String? _selectedAnimalId;
   bool _isSubmitting = false;
+  String? _errorMessage;
 
   bool get _isEditing => widget.medication != null;
 
@@ -107,6 +108,8 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
       headerIcon: Icons.medication,
       isLoading: _isSubmitting,
       confirmButtonText: _isEditing ? 'Salvar' : 'Cadastrar',
+      errorMessage: _errorMessage,
+      onClearError: () => setState(() => _errorMessage = null),
       onCancel: () => Navigator.of(context).pop(),
       onConfirm: null,
       content: Form(
@@ -498,11 +501,15 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
   }
 
   Future<void> _submitForm() async {
-    if (!_formKey.currentState!.validate()) return;
+    // Limpa erros anteriores
+    setState(() => _errorMessage = null);
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Preencha todos os campos obrigatórios');
+      return;
+    }
     if (_selectedAnimalId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selecione um animal')),
-      );
+      setState(() => _errorMessage = 'Selecione um animal');
       return;
     }
 
@@ -556,12 +563,7 @@ class _AddMedicationDialogState extends ConsumerState<AddMedicationDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao salvar medicamento: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        setState(() => _errorMessage = 'Erro ao salvar medicamento: $e');
       }
     } finally {
       if (mounted) {

@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../database/providers/sync_providers.dart';
 import '../../../../shared/widgets/dialogs/pet_form_dialog.dart';
 import '../../../../shared/widgets/form_components/form_components.dart';
 import '../../../../shared/widgets/sections/form_section_widget.dart';
@@ -43,6 +46,10 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   String? _selectedBloodType;
   List<String> _allergies = [];
   String? _errorMessage;
+  
+  // Image state
+  Uint8List? _selectedImageBytes;
+  Uint8List? _existingImageBytes;
 
   bool get _isEditing => widget.animal != null;
 
@@ -50,6 +57,7 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
   void initState() {
     super.initState();
     _initializeForm();
+    _loadExistingImage();
   }
 
   void _initializeForm() {
@@ -72,6 +80,21 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
       _isCastrated = animal.isCastrated;
       _selectedBloodType = animal.bloodType;
       _allergies = animal.allergies?.toList() ?? [];
+    }
+  }
+  
+  Future<void> _loadExistingImage() async {
+    if (widget.animal != null) {
+      final animalId = int.tryParse(widget.animal!.id);
+      if (animalId != null) {
+        final repo = ref.read(animalImagesRepositoryProvider);
+        final primaryImage = await repo.getPrimaryImage(animalId);
+        if (primaryImage != null && mounted) {
+          setState(() {
+            _existingImageBytes = primaryImage.imageData;
+          });
+        }
+      }
     }
   }
 
@@ -106,6 +129,8 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildImageSection(),
+            const SizedBox(height: 20),
             _buildBasicInfoSection(),
             const SizedBox(height: 20),
             _buildPhysicalInfoSection(),
@@ -118,6 +143,108 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildImageSection() {
+    final hasImage = _selectedImageBytes != null || _existingImageBytes != null;
+    final imageBytes = _selectedImageBytes ?? _existingImageBytes;
+    
+    return Center(
+      child: GestureDetector(
+        onTap: _showImagePicker,
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  width: 120,
+                  height: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: ClipOval(
+                    child: hasImage && imageBytes != null
+                        ? Image.memory(
+                            imageBytes,
+                            fit: BoxFit.cover,
+                            width: 120,
+                            height: 120,
+                          )
+                        : Icon(
+                            _selectedSpecies.icon,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.surface,
+                        width: 2,
+                      ),
+                    ),
+                    child: Icon(
+                      hasImage ? Icons.edit : Icons.camera_alt,
+                      size: 16,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              hasImage ? 'Toque para alterar foto' : 'Adicionar foto do pet',
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.primary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  void _showImagePicker() {
+    final hasImage = _selectedImageBytes != null || _existingImageBytes != null;
+    
+    ProfileImagePickerWidget.show(
+      context: context,
+      hasCurrentImage: hasImage,
+      onImageSelected: (File file) async {
+        final bytes = await file.readAsBytes();
+        setState(() {
+          _selectedImageBytes = bytes;
+        });
+      },
+      onRemoveImage: hasImage ? () {
+        setState(() {
+          _selectedImageBytes = null;
+          _existingImageBytes = null;
+        });
+      } : null,
     );
   }
 
@@ -707,10 +834,26 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
             ? null
             : _insuranceController.text.trim(),
       );
+      
       if (_isEditing) {
         await ref.read(animalsProvider.notifier).updateAnimal(animal);
+        
+        // Save image for existing animal
+        await _saveAnimalImage(int.parse(widget.animal!.id), userId);
       } else {
         await ref.read(animalsProvider.notifier).addAnimal(animal);
+        
+        // For new animals, we need to find the created animal's ID
+        // Wait for state to update and get the newest animal with matching name
+        await Future<void>.delayed(const Duration(milliseconds: 300));
+        final animals = ref.read(animalsProvider).animals;
+        final createdAnimal = animals.where(
+          (a) => a.name == animal.name && a.userId == userId,
+        ).lastOrNull;
+        
+        if (createdAnimal != null) {
+          await _saveAnimalImage(int.parse(createdAnimal.id), userId);
+        }
       }
 
       if (mounted) {
@@ -742,6 +885,24 @@ class _AddPetDialogState extends ConsumerState<AddPetDialog> {
           _isLoading = false;
         });
       }
+    }
+  }
+  
+  Future<void> _saveAnimalImage(int animalId, String userId) async {
+    // Check if image was changed or removed
+    if (_selectedImageBytes != null) {
+      // New image selected - add it as primary
+      final repo = ref.read(animalImagesRepositoryProvider);
+      await repo.addImage(
+        animalId: animalId,
+        imageBytes: _selectedImageBytes!,
+        userId: userId,
+        isPrimary: true,
+      );
+    } else if (_existingImageBytes == null && _isEditing) {
+      // Image was removed in edit mode - delete all images
+      final repo = ref.read(animalImagesRepositoryProvider);
+      await repo.deleteAllImagesForAnimal(animalId);
     }
   }
 }

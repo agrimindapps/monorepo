@@ -19,7 +19,7 @@ class PromoCompactCountdown extends StatefulWidget {
 }
 
 class _PromoCompactCountdownState extends State<PromoCompactCountdown> {
-  late Timer _timer;
+  Timer? _timer;
   late String _displayText;
 
   @override
@@ -39,7 +39,7 @@ class _PromoCompactCountdownState extends State<PromoCompactCountdown> {
 
     if (remaining.isNegative) {
       _displayText = 'Lançado!';
-      _timer.cancel();
+      _timer?.cancel();
       return;
     }
 
@@ -59,7 +59,7 @@ class _PromoCompactCountdownState extends State<PromoCompactCountdown> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 

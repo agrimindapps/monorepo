@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 enum AnimalSpecies {
   dog,
   cat,
@@ -55,6 +57,31 @@ extension AnimalSpeciesExtension on AnimalSpecies {
         return 'Peixe';
       case AnimalSpecies.other:
         return 'Outro';
+    }
+  }
+  
+  IconData get icon {
+    switch (this) {
+      case AnimalSpecies.dog:
+        return Icons.pets;
+      case AnimalSpecies.cat:
+        return Icons.pets;
+      case AnimalSpecies.bird:
+        return Icons.flutter_dash;
+      case AnimalSpecies.rabbit:
+        return Icons.cruelty_free;
+      case AnimalSpecies.hamster:
+        return Icons.cruelty_free;
+      case AnimalSpecies.guineaPig:
+        return Icons.cruelty_free;
+      case AnimalSpecies.ferret:
+        return Icons.pets;
+      case AnimalSpecies.reptile:
+        return Icons.pest_control;
+      case AnimalSpecies.fish:
+        return Icons.water;
+      case AnimalSpecies.other:
+        return Icons.pets;
     }
   }
 

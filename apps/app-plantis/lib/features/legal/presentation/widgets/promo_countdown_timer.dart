@@ -22,7 +22,7 @@ class PromoCountdownTimer extends StatefulWidget {
 }
 
 class _PromoCountdownTimerState extends State<PromoCountdownTimer> {
-  late Timer _timer;
+  Timer? _timer;
   late Duration _remaining;
 
   @override
@@ -40,13 +40,13 @@ class _PromoCountdownTimerState extends State<PromoCountdownTimer> {
     _remaining = widget.launchDate.difference(DateTime.now());
     if (_remaining.isNegative) {
       _remaining = Duration.zero;
-      _timer.cancel();
+      _timer?.cancel();
     }
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 

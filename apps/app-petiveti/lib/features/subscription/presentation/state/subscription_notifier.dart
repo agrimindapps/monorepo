@@ -381,6 +381,92 @@ class Subscription extends _$Subscription {
   void clearError() {
     state = state.clearError();
   }
+  
+  // ============================================================================
+  // DEV/DEBUG LICENSE METHODS (somente para desenvolvimento)
+  // ============================================================================
+  
+  /// Gera uma licença local de desenvolvimento para testes
+  /// Só funciona em modo debug
+  Future<void> generateLocalLicense({int days = 30}) async {
+    if (!kDebugMode) {
+      developer.log(
+        '⚠️ generateLocalLicense: Only available in debug mode',
+        name: 'SubscriptionNotifier',
+      );
+      return;
+    }
+    
+    developer.log(
+      '🔧 DEV: Generating local license for $days days',
+      name: 'SubscriptionNotifier',
+    );
+    
+    final expirationDate = DateTime.now().add(Duration(days: days));
+    
+    // Cria uma assinatura mock local
+    final mockSubscription = PetivetiSubscriptionInfo(
+      productId: 'dev_license_${days}d',
+      isPremium: true,
+      isTrialPeriod: false,
+      hasUsedTrial: false,
+      purchaseDate: DateTime.now(),
+      expirationDate: expirationDate,
+      originalTransactionId: 'dev_local_${DateTime.now().millisecondsSinceEpoch}',
+    );
+    
+    state = state.copyWith(
+      currentSubscription: mockSubscription,
+    );
+    
+    developer.log(
+      '✅ DEV: Local license generated. Expires: $expirationDate',
+      name: 'SubscriptionNotifier',
+    );
+  }
+  
+  /// Revoga a licença local de desenvolvimento
+  /// Só funciona em modo debug
+  Future<void> revokeLocalLicense() async {
+    if (!kDebugMode) {
+      developer.log(
+        '⚠️ revokeLocalLicense: Only available in debug mode',
+        name: 'SubscriptionNotifier',
+      );
+      return;
+    }
+    
+    developer.log(
+      '🔧 DEV: Revoking local license',
+      name: 'SubscriptionNotifier',
+    );
+    
+    state = state.copyWith(
+      currentSubscription: null,
+    );
+    
+    developer.log(
+      '✅ DEV: Local license revoked',
+      name: 'SubscriptionNotifier',
+    );
+  }
+  
+  /// Verifica se a licença atual é uma licença de desenvolvimento
+  bool get isDevLicense {
+    final subscription = state.currentSubscription;
+    if (subscription == null) return false;
+    return subscription.productId.startsWith('dev_license_') ||
+           subscription.originalTransactionId?.startsWith('dev_local_') == true;
+  }
+  
+  /// Retorna a fonte da assinatura (para debug)
+  String get premiumSource {
+    final subscription = state.currentSubscription;
+    if (subscription == null) return 'Nenhuma';
+    if (isDevLicense) return 'Licença Local (Dev)';
+    if (subscription.isTrialPeriod) return 'Trial';
+    return 'RevenueCat';
+  }
 
   /// Mapeia falhas para mensagens amigáveis
   String _mapFailureToMessage(Failure failure) {

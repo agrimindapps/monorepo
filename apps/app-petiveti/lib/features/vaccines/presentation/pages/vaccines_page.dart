@@ -45,13 +45,21 @@ class _VaccinesPageState extends ConsumerState<VaccinesPage> {
           ],
         ),
       ),
-      floatingActionButton: _selectedAnimalId != null
-          ? FloatingActionButton(
-              onPressed: () => _navigateToAddVaccine(context),
-              tooltip: 'Adicionar Vacina',
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _selectedAnimalId != null
+            ? () => _navigateToAddVaccine(context)
+            : null,
+        tooltip: _selectedAnimalId != null
+            ? 'Adicionar Vacina'
+            : 'Selecione um pet primeiro',
+        backgroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        foregroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

@@ -196,7 +196,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -364,7 +366,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                 border: Border.all(
                   color: isSelected
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                      : Theme.of(
+                          context,
+                        ).colorScheme.outline.withValues(alpha: 0.3),
                 ),
               ),
               child: Center(
@@ -528,7 +532,14 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           const SizedBox(width: 8),
-                          Text('•', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          Text(
+                            '•',
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(width: 8),
                           Text(
                             'R\$ ${record.pricePerLiter.toStringAsFixed(3)}/L',
@@ -607,7 +618,9 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                                 '${record.consumption!.toStringAsFixed(1)} km/l',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: Theme.of(context).colorScheme.tertiary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.tertiary,
                                       fontWeight: FontWeight.w500,
                                     ),
                               ),

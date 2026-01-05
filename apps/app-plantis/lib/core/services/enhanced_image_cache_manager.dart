@@ -44,15 +44,22 @@ class EnhancedImageCacheManager {
 
   /// Optimized base64 decoding using compute for large images
   static Future<Uint8List> _decodeBase64Optimized(String base64String) async {
-    if (base64String.length > 1000000) {
-      return compute(_decodeBase64Worker, base64String);
+    // Remove o prefixo DataURI se presente (ex: 'data:image/jpeg;base64,')
+    String cleanBase64 = base64String;
+    if (base64String.contains(',')) {
+      cleanBase64 = base64String.split(',').last;
+    }
+
+    if (cleanBase64.length > 1000000) {
+      return compute(_decodeBase64Worker, cleanBase64);
     } else {
-      return base64Decode(base64String);
+      return base64Decode(cleanBase64);
     }
   }
 
   /// Worker function for compute isolation
   static Uint8List _decodeBase64Worker(String base64String) {
+    // Note: base64String já deve estar limpo quando chega aqui
     return base64Decode(base64String);
   }
 

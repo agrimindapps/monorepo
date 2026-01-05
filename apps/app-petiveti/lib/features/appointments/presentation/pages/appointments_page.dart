@@ -89,13 +89,21 @@ class _AppointmentsPageState extends ConsumerState<AppointmentsPage>
           ],
         ),
       ),
-      floatingActionButton: _selectedAnimalId != null
-          ? FloatingActionButton(
-              onPressed: () => context.push('/appointments/add'),
-              tooltip: 'Adicionar Consulta',
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _selectedAnimalId != null
+            ? () => context.push('/appointments/add')
+            : null,
+        tooltip: _selectedAnimalId != null
+            ? 'Adicionar Consulta'
+            : 'Selecione um pet primeiro',
+        backgroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        foregroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

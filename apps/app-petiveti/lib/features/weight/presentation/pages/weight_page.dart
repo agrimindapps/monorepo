@@ -58,13 +58,21 @@ class _WeightPageState extends ConsumerState<WeightPage> {
           ],
         ),
       ),
-      floatingActionButton: _selectedAnimalId != null
-          ? FloatingActionButton(
-              onPressed: () => _navigateToAddWeight(context),
-              tooltip: 'Adicionar Registro de Peso',
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: _selectedAnimalId != null
+            ? () => _navigateToAddWeight(context)
+            : null,
+        tooltip: _selectedAnimalId != null
+            ? 'Adicionar Registro de Peso'
+            : 'Selecione um pet primeiro',
+        backgroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        foregroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

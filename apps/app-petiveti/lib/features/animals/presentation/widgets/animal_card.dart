@@ -1,9 +1,14 @@
+import 'dart:typed_data';
+
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../database/petiveti_database.dart' show AnimalImage;
+import '../../../../database/providers/sync_providers.dart';
 import '../../domain/entities/animal.dart';
 import '../../domain/entities/animal_enums.dart';
 
-class AnimalCard extends StatelessWidget {
+class AnimalCard extends ConsumerWidget {
   final Animal animal;
   final VoidCallback onTap;
   final VoidCallback onEdit;
@@ -18,9 +23,15 @@ class AnimalCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final String animalAge = animal.displayAge;
     final String speciesName = animal.species.displayName;
+    final animalId = int.tryParse(animal.id);
+    
+    // Watch primary image stream
+    final imageAsync = animalId != null 
+        ? ref.watch(animalPrimaryImageStreamProvider(animalId))
+        : const AsyncValue<AnimalImage?>.data(null);
     
     return Semantics(
       label: '${animal.name}, $speciesName, $animalAge, peso ${animal.currentWeight.toStringAsFixed(1)} quilogramas',
@@ -37,32 +48,11 @@ class AnimalCard extends StatelessWidget {
             child: Row(
               children: [
                 Semantics(
-                  label: animal.photo != null 
-                      ? 'Foto de ${animal.name}'
-                      : 'Ícone de ${animal.name}',
-                  image: animal.photo != null,
-                  child: CircleAvatar(
-                    backgroundColor: Theme.of(context).colorScheme.primary,
-                    radius: 24,
-                    child: animal.photo != null
-                        ? ClipOval(
-                            child: Image.network(
-                              animal.photo!,
-                              width: 48,
-                              height: 48,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  animal.species == AnimalSpecies.dog ? Icons.pets : Icons.pets,
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                );
-                              },
-                            ),
-                          )
-                        : Icon(
-                            animal.species == AnimalSpecies.dog ? Icons.pets : Icons.pets,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
+                  label: 'Foto de ${animal.name}',
+                  image: true,
+                  child: _AnimalAvatar(
+                    animal: animal,
+                    imageBytes: imageAsync.value?.imageData,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -80,7 +70,7 @@ class AnimalCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${animal.species} • ${animal.displayAge}',
+                          '${animal.species.displayName} • ${animal.displayAge}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
@@ -150,6 +140,43 @@ class AnimalCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AnimalAvatar extends StatelessWidget {
+  final Animal animal;
+  final Uint8List? imageBytes;
+
+  const _AnimalAvatar({
+    required this.animal,
+    this.imageBytes,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      radius: 24,
+      child: imageBytes != null
+          ? ClipOval(
+              child: Image.memory(
+                imageBytes!,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    animal.species.icon,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  );
+                },
+              ),
+            )
+          : Icon(
+              animal.species.icon,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
     );
   }
 }

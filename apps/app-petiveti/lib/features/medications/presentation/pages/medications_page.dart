@@ -74,13 +74,21 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
           ],
         ),
       ),
-      floatingActionButton: (_selectedAnimalId != null || widget.animalId != null)
-          ? FloatingActionButton(
-              onPressed: () => _navigateToAddMedication(context),
-              tooltip: 'Adicionar medicamento',
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton(
+        onPressed: (_selectedAnimalId != null || widget.animalId != null)
+            ? () => _navigateToAddMedication(context)
+            : null,
+        tooltip: (_selectedAnimalId != null || widget.animalId != null)
+            ? 'Adicionar medicamento'
+            : 'Selecione um pet primeiro',
+        backgroundColor: (_selectedAnimalId != null || widget.animalId != null)
+            ? null
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        foregroundColor: (_selectedAnimalId != null || widget.animalId != null)
+            ? null
+            : Theme.of(context).colorScheme.onSurfaceVariant,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 

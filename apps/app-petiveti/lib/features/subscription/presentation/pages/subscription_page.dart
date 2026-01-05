@@ -1,9 +1,11 @@
 import 'package:core/core.dart' hide Column, SubscriptionState, SubscriptionInfo, subscriptionProvider;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/subscription_plan.dart';
 import '../state/subscription_notifier.dart';
 import '../state/subscription_state.dart';
+import '../widgets/premium_dev_controls.dart';
 import '../widgets/subscription_empty_state.dart';
 import '../widgets/subscription_feature_comparison.dart';
 import '../widgets/subscription_page_header.dart';
@@ -249,6 +251,11 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Dev controls (somente em modo debug)
+        if (kDebugMode) ...[
+          const PremiumDevControls(),
+          const SizedBox(height: 24),
+        ],
         ..._buildCurrentSubscriptionSection(state),
         const SubscriptionPageHeader(),
         const SizedBox(height: 24),

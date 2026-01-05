@@ -6,7 +6,7 @@ enum TimelineEventType {
   medication,
   appointment,
   weight,
-  reminder,
+  expense,
 }
 
 /// Item unificado para a timeline
@@ -15,23 +15,77 @@ class TimelineItem {
   final String id;
   final TimelineEventType type;
   final String title;
-  final String subtitle;
   final DateTime date;
   final String? animalId;
   final String? animalName;
   final IconData icon;
-  final Map<String, dynamic>? metadata;
+
+  // Campos específicos por tipo - Vacina
+  final String? veterinarian;
+  final DateTime? nextDueDate;
+  final String? batch;
+  final String? manufacturer;
+  final String? dosage;
+
+  // Campos específicos - Medicamento
+  final String? frequency;
+  final String? duration;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final String? medicationType;
+  final bool? isActive;
+
+  // Campos específicos - Consulta
+  final String? location;
+  final String? status;
+  final String? description;
+  final double? cost;
+
+  // Campos específicos - Peso
+  final double? weight;
+  final String? weightUnit;
+  final int? bodyConditionScore;
+
+  // Campos específicos - Despesa
+  final double? amount;
+  final String? category;
+  final String? paymentMethod;
+  final bool? isPaid;
+
+  // Campo genérico
+  final String? notes;
 
   const TimelineItem({
     required this.id,
     required this.type,
     required this.title,
-    required this.subtitle,
     required this.date,
     this.animalId,
     this.animalName,
     required this.icon,
-    this.metadata,
+    this.veterinarian,
+    this.nextDueDate,
+    this.batch,
+    this.manufacturer,
+    this.dosage,
+    this.frequency,
+    this.duration,
+    this.startDate,
+    this.endDate,
+    this.medicationType,
+    this.isActive,
+    this.location,
+    this.status,
+    this.description,
+    this.cost,
+    this.weight,
+    this.weightUnit,
+    this.bodyConditionScore,
+    this.amount,
+    this.category,
+    this.paymentMethod,
+    this.isPaid,
+    this.notes,
   });
 
   /// Retorna a cor associada ao tipo de evento
@@ -46,8 +100,8 @@ class TimelineItem {
         return Colors.blue;
       case TimelineEventType.weight:
         return Colors.green;
-      case TimelineEventType.reminder:
-        return Colors.purple;
+      case TimelineEventType.expense:
+        return Colors.red;
     }
   }
 
@@ -62,8 +116,8 @@ class TimelineItem {
         return 'Consulta';
       case TimelineEventType.weight:
         return 'Peso';
-      case TimelineEventType.reminder:
-        return 'Lembrete';
+      case TimelineEventType.expense:
+        return 'Despesa';
     }
   }
 }

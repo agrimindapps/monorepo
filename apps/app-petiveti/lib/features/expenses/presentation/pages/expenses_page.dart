@@ -58,8 +58,18 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddExpenseDialog(context),
-        tooltip: 'Adicionar Despesa',
+        onPressed: _selectedAnimalId != null
+            ? () => _showAddExpenseDialog(context)
+            : null,
+        tooltip: _selectedAnimalId != null
+            ? 'Adicionar Despesa'
+            : 'Selecione um pet primeiro',
+        backgroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
+        foregroundColor: _selectedAnimalId != null
+            ? null
+            : Theme.of(context).colorScheme.onSurfaceVariant,
         child: const Icon(Icons.add),
       ),
     );

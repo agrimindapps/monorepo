@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../animals/domain/entities/animal.dart';
 import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../../appointments/presentation/providers/appointments_providers.dart';
+import '../../../expenses/presentation/notifiers/expenses_notifier.dart';
 import '../../../medications/presentation/providers/medications_providers.dart';
 import '../../../vaccines/presentation/providers/vaccines_providers.dart';
 import '../../../weight/presentation/providers/weight_providers.dart';
@@ -76,15 +77,15 @@ class Timeline extends _$Timeline {
           id: 'vaccine_${vaccine.id}',
           type: TimelineEventType.vaccine,
           title: vaccine.name,
-          subtitle: vaccine.veterinarian,
           date: vaccine.date,
           animalId: vaccine.animalId,
           animalName: animal?.name,
           icon: Icons.vaccines,
-          metadata: {
-            'nextDose': vaccine.nextDueDate,
-            'batch': vaccine.batch,
-          },
+          veterinarian: vaccine.veterinarian,
+          nextDueDate: vaccine.nextDueDate,
+          batch: vaccine.batch,
+          dosage: vaccine.dosage,
+          notes: vaccine.notes,
         ));
       }
 
@@ -100,15 +101,19 @@ class Timeline extends _$Timeline {
           id: 'medication_${medication.id}',
           type: TimelineEventType.medication,
           title: medication.name,
-          subtitle: '${medication.dosage} - ${medication.frequency}',
           date: medication.startDate,
           animalId: medication.animalId,
           animalName: animal?.name,
           icon: Icons.medication,
-          metadata: {
-            'endDate': medication.endDate,
-            'isActive': medication.isActive,
-          },
+          dosage: medication.dosage,
+          frequency: medication.frequency,
+          duration: medication.duration,
+          startDate: medication.startDate,
+          endDate: medication.endDate,
+          medicationType: medication.type.displayName,
+          isActive: medication.isActive,
+          veterinarian: medication.prescribedBy,
+          notes: medication.notes,
         ));
       }
 
@@ -124,15 +129,15 @@ class Timeline extends _$Timeline {
           id: 'appointment_${appointment.id}',
           type: TimelineEventType.appointment,
           title: appointment.veterinarianName,
-          subtitle: appointment.reason,
           date: appointment.date,
           animalId: appointment.animalId,
           animalName: animal?.name,
           icon: Icons.calendar_today,
-          metadata: {
-            'reason': appointment.reason,
-            'diagnosis': appointment.diagnosis,
-          },
+          veterinarian: appointment.veterinarianName,
+          status: appointment.status.name,
+          description: appointment.reason,
+          cost: appointment.cost,
+          notes: appointment.diagnosis,
         ));
       }
 
@@ -142,20 +147,46 @@ class Timeline extends _$Timeline {
       if (animalId != null) {
         weights = weights.where((w) => w.animalId == animalId).toList();
       }
-      for (final weight in weights) {
-        final animal = animalsMap[weight.animalId];
+      for (final weightRecord in weights) {
+        final animal = animalsMap[weightRecord.animalId];
         items.add(TimelineItem(
-          id: 'weight_${weight.id}',
+          id: 'weight_${weightRecord.id}',
           type: TimelineEventType.weight,
-          title: '${weight.weight.toStringAsFixed(1)} kg',
-          subtitle: weight.notes ?? 'Registro de peso',
-          date: weight.date,
-          animalId: weight.animalId,
+          title: '${weightRecord.weight.toStringAsFixed(1)} kg',
+          date: weightRecord.date,
+          animalId: weightRecord.animalId,
           animalName: animal?.name,
           icon: Icons.monitor_weight,
-          metadata: {
-            'bodyCondition': weight.bodyCondition,
-          },
+          weight: weightRecord.weight,
+          weightUnit: 'kg',
+          bodyConditionScore: weightRecord.bodyConditionScore,
+          notes: weightRecord.notes,
+        ));
+      }
+
+      // Despesas
+      final expensesState = ref.read(expensesProvider);
+      var expenses = expensesState.expenses;
+      if (animalId != null) {
+        expenses = expenses.where((e) => e.animalId == animalId).toList();
+      }
+      for (final expense in expenses) {
+        final animal = animalsMap[expense.animalId];
+        items.add(TimelineItem(
+          id: 'expense_${expense.id}',
+          type: TimelineEventType.expense,
+          title: expense.title,
+          date: expense.expenseDate,
+          animalId: expense.animalId,
+          animalName: animal?.name,
+          icon: Icons.attach_money,
+          amount: expense.amount,
+          category: expense.category.name,
+          paymentMethod: expense.paymentMethod.name,
+          isPaid: expense.isPaid,
+          veterinarian: expense.veterinarianName,
+          description: expense.description,
+          notes: expense.notes,
         ));
       }
 
@@ -192,11 +223,6 @@ class Timeline extends _$Timeline {
       }
     }
     return grouped;
-  }
-
-  /// Filtra por tipo de evento
-  List<TimelineItem> filterByType(TimelineEventType type) {
-    return state.items.where((item) => item.type == type).toList();
   }
 }
 

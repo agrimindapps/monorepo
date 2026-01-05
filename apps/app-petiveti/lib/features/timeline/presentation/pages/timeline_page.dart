@@ -15,8 +15,8 @@ import '../widgets/timeline_date_group.dart';
 
 /// Timeline Page - Página principal mostrando timeline de atividades dos pets
 /// 
-/// Exibe todos os eventos (vacinas, medicamentos, consultas, peso) em ordem 
-/// cronológica, agrupados por data.
+/// Exibe todos os eventos (vacinas, medicamentos, consultas, peso, despesas) em ordem 
+/// cronológica, agrupados por data. Timeline unificada sem filtros por tipo.
 class TimelinePage extends ConsumerStatefulWidget {
   const TimelinePage({super.key});
 
@@ -27,7 +27,6 @@ class TimelinePage extends ConsumerStatefulWidget {
 class _TimelinePageState extends ConsumerState<TimelinePage> {
   String? _selectedAnimalId;
   bool _showAllAnimals = true;
-  TimelineEventType? _selectedFilter;
 
   @override
   void initState() {
@@ -81,12 +80,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     );
   }
 
-  void _onFilterChanged(TimelineEventType? filter) {
-    setState(() {
-      _selectedFilter = filter;
-    });
-  }
-
   void _onItemTap(TimelineItem item) {
     // Navega para a página correspondente
     switch (item.type) {
@@ -102,8 +95,8 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       case TimelineEventType.weight:
         context.go('/weight');
         break;
-      case TimelineEventType.reminder:
-        // TODO: Implementar página de lembretes
+      case TimelineEventType.expense:
+        context.go('/expenses');
         break;
     }
   }
@@ -123,9 +116,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
             // Animal Selector
             _buildAnimalSelector(context),
 
-            // Filter chips
-            _buildFilterChips(context),
-
             // Content
             Expanded(
               child: _buildContent(context, animalsState, timelineState),
@@ -142,7 +132,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       child: PetivetiPageHeader(
         icon: Icons.timeline,
         title: 'Timeline',
-        subtitle: 'Histórico de atividades dos seus pets',
+        subtitle: 'Histórico completo dos seus pets',
         actions: [
           // Toggle all animals
           IconButton(
@@ -220,51 +210,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
     );
   }
 
-  Widget _buildFilterChips(BuildContext context) {
-    final filters = [
-      (null, 'Todos', Icons.list),
-      (TimelineEventType.vaccine, 'Vacinas', Icons.vaccines),
-      (TimelineEventType.medication, 'Medicamentos', Icons.medication),
-      (TimelineEventType.appointment, 'Consultas', Icons.calendar_today),
-      (TimelineEventType.weight, 'Peso', Icons.monitor_weight),
-    ];
-
-    return SizedBox(
-      height: 48,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        itemCount: filters.length,
-        itemBuilder: (context, index) {
-          final (filter, label, icon) = filters[index];
-          final isSelected = _selectedFilter == filter;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: FilterChip(
-              selected: isSelected,
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    size: 14,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimaryContainer
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(label),
-                ],
-              ),
-              onSelected: (_) => _onFilterChanged(filter),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildContent(
     BuildContext context,
     AnimalsState animalsState,
@@ -285,19 +230,13 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
       return _buildEmptyAnimalsState(context);
     }
 
-    // Filter items if needed
-    var items = timelineState.items;
-    if (_selectedFilter != null) {
-      items = items.where((item) => item.type == _selectedFilter).toList();
-    }
-
     // Empty state
-    if (items.isEmpty) {
+    if (timelineState.items.isEmpty) {
       return _buildEmptyState(context);
     }
 
     // Group items by date
-    final groupedItems = _groupItemsByDate(items);
+    final groupedItems = _groupItemsByDate(timelineState.items);
     final sortedDates = groupedItems.keys.toList()
       ..sort((a, b) => b.compareTo(a));
 
@@ -372,8 +311,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    final filterLabel = _selectedFilter?.name ?? 'atividades';
-    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -392,21 +329,12 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
             ),
             const SizedBox(height: 8),
             Text(
-              _selectedFilter != null
-                  ? 'Não há $filterLabel registradas para este filtro'
-                  : 'Comece a registrar vacinas, consultas e outras atividades',
+              'Comece a registrar vacinas, consultas, medicamentos e outras atividades',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
-            if (_selectedFilter != null) ...[
-              const SizedBox(height: 24),
-              OutlinedButton(
-                onPressed: () => _onFilterChanged(null),
-                child: const Text('Limpar filtros'),
-              ),
-            ],
           ],
         ),
       ),

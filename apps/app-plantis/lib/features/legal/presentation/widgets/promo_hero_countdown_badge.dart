@@ -16,7 +16,7 @@ class PromoHeroCountdownBadge extends StatefulWidget {
 }
 
 class _PromoHeroCountdownBadgeState extends State<PromoHeroCountdownBadge> {
-  late Timer _timer;
+  Timer? _timer;
   late int _days;
   late int _hours;
   late int _minutes;
@@ -42,7 +42,7 @@ class _PromoHeroCountdownBadgeState extends State<PromoHeroCountdownBadge> {
       _hours = 0;
       _minutes = 0;
       _seconds = 0;
-      _timer.cancel();
+      _timer?.cancel();
       return;
     }
 
@@ -54,7 +54,7 @@ class _PromoHeroCountdownBadgeState extends State<PromoHeroCountdownBadge> {
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 

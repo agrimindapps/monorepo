@@ -176,20 +176,34 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   int _getBranchIndex(int navigationIndex) {
     if (ResponsiveLayout.isMobile(context)) {
       // Mobile: 5 itens mapeados para branches específicos
-      // Nav: Timeline(0), Animals(1), Activities(2), Tools(3), Settings(4)
+      // Nav: Timeline(0), Animals(1), Lembretes(2), Tools(3), Settings(4)
       // Branches: Timeline(0), Animals(1), Appointments(2), Vaccines(3), Medications(4),
-      //           Weight(5), Activities(6), Tools(7), Expenses(8), Settings(9)
+      //           Weight(5), Reminders(6), Tools(7), Expenses(8), Settings(9)
       const mobileMapping = {
-        0: 0, // Timeline (novo)
+        0: 0, // Timeline
         1: 1, // Animals
-        2: 6, // Activities (era Home/Reminders branch 6)
-        3: 7, // Tools (inclui Reminders)
+        2: 6, // Lembretes (substituiu Activities)
+        3: 7, // Tools
         4: 9, // Settings
       };
       return mobileMapping[navigationIndex] ?? 0;
     } else {
-      // Tablet/Desktop: mapeamento direto (10 itens = 10 branches)
-      return navigationIndex;
+      // Tablet/Desktop: 9 itens (removido Activities)
+      // Nav: Timeline(0), Animals(1), Appointments(2), Vaccines(3), Medications(4),
+      //      Weight(5), Tools(6), Expenses(7), Settings(8)
+      // Branch mapping:
+      const desktopMapping = {
+        0: 0, // Timeline
+        1: 1, // Animals
+        2: 2, // Appointments
+        3: 3, // Vaccines
+        4: 4, // Medications
+        5: 5, // Weight
+        6: 7, // Tools (pula branch 6)
+        7: 8, // Expenses
+        8: 9, // Settings
+      };
+      return desktopMapping[navigationIndex] ?? 0;
     }
   }
 
@@ -198,9 +212,9 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
     if (ResponsiveLayout.isMobile(context)) {
       // Branches → Mobile Navigation (reverse mapping)
       const branchToMobile = {
-        0: 0, // Timeline (novo)
+        0: 0, // Timeline
         1: 1, // Animals
-        6: 2, // Activities (era Reminders)
+        6: 2, // Lembretes
         7: 3, // Tools
         9: 4, // Settings
         // Branches não em mobile → fallback para Timeline
@@ -212,69 +226,75 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
       };
       return branchToMobile[branchIndex] ?? 0;
     } else {
-      // Tablet/Desktop: mapeamento direto
-      return branchIndex;
+      // Tablet/Desktop: reverse mapping (9 itens)
+      const branchToDesktop = {
+        0: 0, // Timeline
+        1: 1, // Animals
+        2: 2, // Appointments
+        3: 3, // Vaccines
+        4: 4, // Medications
+        5: 5, // Weight
+        6: 0, // Activities → Timeline (removido)
+        7: 6, // Tools
+        8: 7, // Expenses
+        9: 8, // Settings
+      };
+      return branchToDesktop[branchIndex] ?? 0;
     }
   }
 
-  /// Get navigation destinations for rail layout (tablet/desktop)
+  /// Get navigation destinations for rail layout (tablet/desktop - 9 itens)
   List<NavigationRailDestination> _getNavigationRailDestinations() {
     return const [
-      // Branch 0: Timeline
+      // Index 0 → Branch 0: Timeline
       NavigationRailDestination(
         icon: Icon(Icons.timeline_outlined),
         selectedIcon: Icon(Icons.timeline),
         label: Text('Timeline'),
       ),
-      // Branch 1: Animals
+      // Index 1 → Branch 1: Animals
       NavigationRailDestination(
         icon: Icon(Icons.pets_outlined),
         selectedIcon: Icon(Icons.pets),
         label: Text('Pets'),
       ),
-      // Branch 2: Appointments
+      // Index 2 → Branch 2: Appointments
       NavigationRailDestination(
         icon: Icon(Icons.event_outlined),
         selectedIcon: Icon(Icons.event),
         label: Text('Consultas'),
       ),
-      // Branch 3: Vaccines
+      // Index 3 → Branch 3: Vaccines
       NavigationRailDestination(
         icon: Icon(Icons.medical_services_outlined),
         selectedIcon: Icon(Icons.medical_services),
         label: Text('Vacinas'),
       ),
-      // Branch 4: Medications
+      // Index 4 → Branch 4: Medications
       NavigationRailDestination(
         icon: Icon(Icons.medication_outlined),
         selectedIcon: Icon(Icons.medication),
         label: Text('Medicamentos'),
       ),
-      // Branch 5: Weight
+      // Index 5 → Branch 5: Weight
       NavigationRailDestination(
         icon: Icon(Icons.monitor_weight_outlined),
         selectedIcon: Icon(Icons.monitor_weight),
         label: Text('Peso'),
       ),
-      // Branch 6: Activities (era Reminders)
-      NavigationRailDestination(
-        icon: Icon(Icons.dashboard_outlined),
-        selectedIcon: Icon(Icons.dashboard),
-        label: Text('Atividades'),
-      ),
-      // Branch 7: Tools
+      // Index 6 → Branch 7: Tools
       NavigationRailDestination(
         icon: Icon(Icons.handyman_outlined),
         selectedIcon: Icon(Icons.handyman),
         label: Text('Ferramentas'),
       ),
-      // Branch 8: Expenses
+      // Index 7 → Branch 8: Expenses
       NavigationRailDestination(
         icon: Icon(Icons.attach_money_outlined),
         selectedIcon: Icon(Icons.attach_money),
         label: Text('Despesas'),
       ),
-      // Branch 9: Settings
+      // Index 8 → Branch 9: Settings
       NavigationRailDestination(
         icon: Icon(Icons.settings_outlined),
         selectedIcon: Icon(Icons.settings),
@@ -298,11 +318,11 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         selectedIcon: Icon(Icons.pets),
         label: 'Pets',
       ),
-      // Mobile 2 → Branch 6: Activities
+      // Mobile 2 → Branch 6: Lembretes
       NavigationDestination(
-        icon: Icon(Icons.dashboard_outlined),
-        selectedIcon: Icon(Icons.dashboard),
-        label: 'Atividades',
+        icon: Icon(Icons.notifications_outlined),
+        selectedIcon: Icon(Icons.notifications),
+        label: 'Lembretes',
       ),
       // Mobile 3 → Branch 7: Tools
       NavigationDestination(

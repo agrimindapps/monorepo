@@ -22,7 +22,7 @@ class LandingCountdownTimer extends StatefulWidget {
 }
 
 class _LandingCountdownTimerState extends State<LandingCountdownTimer> {
-  late Timer _timer;
+  Timer? _timer;
   late Duration _remaining;
 
   @override
@@ -40,13 +40,13 @@ class _LandingCountdownTimerState extends State<LandingCountdownTimer> {
     _remaining = widget.launchDate.difference(DateTime.now());
     if (_remaining.isNegative) {
       _remaining = Duration.zero;
-      _timer.cancel();
+      _timer?.cancel();
     }
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 

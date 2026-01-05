@@ -1,23 +1,19 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../../../../core/constants/responsive_constants.dart';
 import '../../../../core/utils/date_utils.dart' as local_date_utils;
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
+import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_notifier.dart';
 import '../providers/odometer_state.dart';
 import 'odometer_form_page.dart';
-import 'package:core/core.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 
 
@@ -37,40 +33,71 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
     final vehiclesAsync = ref.watch(vehiclesProvider);
     final odometerState = ref.watch(odometerProvider);
 
-    return SafeArea(
-      child: Column(
-        children: [
-          _buildHeader(context),
-          _buildVehicleSelector(context),
-          if (_selectedVehicleId != null &&
-              (vehiclesAsync.value?.isNotEmpty ?? false))
-            _buildMonthSelector(odometerState),
-          Expanded(
-            child: vehiclesAsync.when(
-              data: (vehicles) {
-                if (_selectedVehicleId == null) {
-                  return _buildSelectVehicleState();
-                }
-                return _buildContent(context, odometerState);
-              },
-              loading: () => const StandardLoadingView(
-                message: 'Carregando veículos...',
-                showProgress: true,
-              ),
-              error: (error, _) => EnhancedEmptyState(
-                title: 'Erro ao carregar veículos',
-                description: error.toString(),
-                icon: Icons.error_outline,
-                actionLabel: 'Tentar novamente',
-                onAction: () {
-                  ref.read(vehiclesProvider.notifier).refresh();
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            _buildVehicleSelector(context),
+            if (_selectedVehicleId != null &&
+                (vehiclesAsync.value?.isNotEmpty ?? false))
+              _buildMonthSelector(odometerState),
+            Expanded(
+              child: vehiclesAsync.when(
+                data: (vehicles) {
+                  if (_selectedVehicleId == null) {
+                    return _buildSelectVehicleState();
+                  }
+                  return _buildContent(context, odometerState);
                 },
+                loading: () => const StandardLoadingView(
+                  message: 'Carregando veículos...',
+                  showProgress: true,
+                ),
+                error: (error, _) => EnhancedEmptyState(
+                  title: 'Erro ao carregar veículos',
+                  description: error.toString(),
+                  icon: Icons.error_outline,
+                  actionLabel: 'Tentar novamente',
+                  onAction: () {
+                    ref.read(vehiclesProvider.notifier).refresh();
+                  },
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      floatingActionButton: AdaptiveFloatingActionButton(
+        onPressed: _addOdometerReading,
+        tooltip: 'Adicionar leitura',
+        child: const Icon(Icons.add),
       ),
     );
+  }
+
+  /// Adicionar nova leitura de odômetro
+  void _addOdometerReading() {
+    if (_selectedVehicleId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selecione um veículo primeiro'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    showDialog<bool>(
+      context: context,
+      builder: (context) => OdometerFormPage(
+        vehicleId: _selectedVehicleId,
+        initialMode: CrudDialogMode.create,
+      ),
+    ).then((result) {
+      if (result == true && _selectedVehicleId != null) {
+        ref.read(odometerProvider.notifier).loadByVehicle(_selectedVehicleId!);
+      }
+    });
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -476,43 +503,6 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
         ref.read(odometerProvider.notifier).loadByVehicle(_selectedVehicleId!);
       }
     });
-  }
-
-  Widget _buildFloatingActionButton(BuildContext context) {
-    final vehiclesAsync = ref.watch(vehiclesProvider);
-    final hasVehicles = vehiclesAsync.value?.isNotEmpty ?? false;
-    final isEnabled = hasVehicles && _selectedVehicleId != null;
-
-    return FloatingActionButton(
-      onPressed: () {
-        if (_selectedVehicleId == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Selecione um veículo primeiro'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-          return;
-        }
-        showDialog<bool>(
-          context: context,
-          builder: (context) => OdometerFormPage(
-            vehicleId: _selectedVehicleId,
-            initialMode: CrudDialogMode.create,
-          ),
-        ).then((result) {
-          if (result == true && _selectedVehicleId != null) {
-            // Reload odometer list after adding
-            ref
-                .read(odometerProvider.notifier)
-                .loadByVehicle(_selectedVehicleId!);
-          }
-        });
-      },
-      backgroundColor: isEnabled ? null : Colors.grey,
-      tooltip: 'Adicionar leitura',
-      child: const Icon(Icons.add),
-    );
   }
 
   Widget _buildSelectVehicleState() {

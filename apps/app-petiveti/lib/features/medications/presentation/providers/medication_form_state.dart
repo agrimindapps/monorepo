@@ -1,26 +1,6 @@
 import '../../domain/entities/medication.dart';
 
 class MedicationFormState {
-  const MedicationFormState({
-    this.medication,
-    this.animalId,
-    this.name = '',
-    this.dosage = '',
-    this.frequency = '',
-    this.duration = '',
-    this.notes = '',
-    this.prescribedBy = '',
-    this.type = MedicationType.other,
-    DateTime? startDate,
-    DateTime? endDate,
-    this.isLoading = false,
-    this.errorMessage,
-  })  : startDate = startDate ?? _fallbackStartDate,
-        endDate = endDate ?? _fallbackEndDate;
-
-  static final DateTime _fallbackStartDate = DateTime.now();
-  static final DateTime _fallbackEndDate = DateTime.now().add(const Duration(days: 7));
-
   final Medication? medication;
   final String? animalId;
   final String name;
@@ -34,6 +14,23 @@ class MedicationFormState {
   final DateTime endDate;
   final bool isLoading;
   final String? errorMessage;
+
+  MedicationFormState({
+    this.medication,
+    this.animalId,
+    this.name = '',
+    this.dosage = '',
+    this.frequency = '',
+    this.duration = '',
+    this.notes = '',
+    this.prescribedBy = '',
+    this.type = MedicationType.other,
+    DateTime? startDate,
+    DateTime? endDate,
+    this.isLoading = false,
+    this.errorMessage,
+  })  : startDate = startDate ?? DateTime.now(),
+        endDate = endDate ?? DateTime.now().add(const Duration(days: 7));
 
   bool get isEditing => medication != null;
 

@@ -58,7 +58,7 @@ class MedicationFormView extends ConsumerWidget {
 
   Widget _buildAnimalSelector(BuildContext context, WidgetRef ref, MedicationFormState state) {
     return PetiVetiFormComponents.animalRequired(
-      initialValue: state.animalId,
+      value: state.animalId,
       onChanged: isReadOnly ? null : (value) {},
     );
   }
@@ -290,6 +290,10 @@ class MedicationFormView extends ConsumerWidget {
         return 'Vitamina';
       case MedicationType.supplement:
         return 'Suplemento';
+      case MedicationType.antifungal:
+        return 'Antifúngico';
+      case MedicationType.vaccine:
+        return 'Vacina';
       case MedicationType.other:
         return 'Outro';
     }

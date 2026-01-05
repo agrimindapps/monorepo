@@ -254,8 +254,8 @@ class _WeightPageState extends ConsumerState<WeightPage> {
     final statistics = state.statistics!;
 
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(12),
@@ -487,7 +487,7 @@ class _WeightPageState extends ConsumerState<WeightPage> {
               Expanded(
                 child: ListView(
                   controller: scrollController,
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   children: [
                     WeightCard(
                       weight: weight,

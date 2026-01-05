@@ -124,7 +124,7 @@ class SyncStatusPage extends ConsumerWidget {
     );
 
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       children: [
         // Global status indicator
         SyncStatusIndicator(

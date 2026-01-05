@@ -119,16 +119,17 @@ class CompactFormSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FormSectionHeader(
       title: title,
       icon: icon,
       iconColor: iconColor,
       iconSize: GasometerDesignTokens.iconSizeXs,
       applyVerticalPadding: false,
-      titleStyle: const TextStyle(
+      titleStyle: TextStyle(
         fontSize: GasometerDesignTokens.fontSizeBody,
         fontWeight: GasometerDesignTokens.fontWeightMedium,
-        color: GasometerDesignTokens.colorTextSecondary,
+        color: theme.colorScheme.onSurfaceVariant,
       ),
       child: child,
     );

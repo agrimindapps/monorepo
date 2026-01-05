@@ -34,6 +34,8 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     // Group by severity
     final critical = _filteredIndicators
         .where((i) => i.severity == IndicatorSeverity.critical)
@@ -92,12 +94,16 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
                     Center(
                       child: Column(
                         children: [
-                          Icon(Icons.search_off, size: 64, color: Colors.grey.shade400),
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             'Nenhum indicador encontrado',
                             style: TextStyle(
-                              color: Colors.grey.shade600,
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 16,
                             ),
                           ),
@@ -185,6 +191,9 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
   }
 
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
@@ -202,7 +211,9 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
                 )
               : null,
           filled: true,
-          fillColor: Colors.grey.shade100,
+          fillColor: isDark 
+              ? theme.colorScheme.surfaceContainerHighest 
+              : Colors.grey.shade100,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -215,6 +226,8 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
   }
 
   Widget _buildSectionHeader(String title, String subtitle, Color color, IconData icon) {
+    final theme = Theme.of(context);
+    
     return Row(
       children: [
         Container(
@@ -242,7 +255,7 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
                 subtitle,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -253,6 +266,8 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
   }
 
   Widget _buildIndicatorCard(DashboardIndicator indicator) {
+    final theme = Theme.of(context);
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
@@ -290,9 +305,10 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
                   children: [
                     Text(
                       indicator.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -300,7 +316,7 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
                       indicator.description,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -343,7 +359,7 @@ class _DashboardIndicatorsPageState extends State<DashboardIndicatorsPage> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+              Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
             ],
           ),
         ),

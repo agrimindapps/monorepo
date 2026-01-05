@@ -241,7 +241,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage> {
     return RefreshIndicator(
       onRefresh: () async => _loadReminders(),
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         itemCount: reminders.length,
         itemBuilder: (context, index) {
           final reminder = reminders[index];
@@ -287,7 +287,7 @@ class _RemindersPageState extends ConsumerState<RemindersPage> {
         onTap: () => _showReminderOptions(reminder),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

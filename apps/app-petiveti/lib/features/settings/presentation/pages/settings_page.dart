@@ -50,7 +50,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     final isMobile = screenWidth < 768;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: Column(
         children: [
           // Profile Section - Only on mobile

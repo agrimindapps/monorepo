@@ -53,7 +53,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -90,7 +90,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
@@ -134,7 +134,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
   Widget _buildAnimalInfoSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -200,7 +200,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
   Widget _buildProcedureSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -253,7 +253,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
   Widget _buildPatientAssessmentSection() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -338,7 +338,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
     return Card(
       elevation: 3,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -522,7 +522,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
             Icon(
@@ -546,7 +546,7 @@ class _AnesthesiaPageState extends ConsumerState<AnesthesiaPage> {
 
   Widget _buildCalculateButton(bool isLoading) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: SizedBox(
         width: double.infinity,
         height: 48,

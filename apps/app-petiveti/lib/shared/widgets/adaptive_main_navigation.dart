@@ -176,13 +176,13 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
   int _getBranchIndex(int navigationIndex) {
     if (ResponsiveLayout.isMobile(context)) {
       // Mobile: 5 itens mapeados para branches específicos
-      // Nav: Timeline(0), Animals(1), Lembretes(2), Tools(3), Settings(4)
+      // Nav: Timeline(0), Animals(1), Activities(2), Tools(3), Settings(4)
       // Branches: Timeline(0), Animals(1), Appointments(2), Vaccines(3), Medications(4),
-      //           Weight(5), Reminders(6), Tools(7), Expenses(8), Settings(9)
+      //           Weight(5), Activities(6), Tools(7), Expenses(8), Settings(9)
       const mobileMapping = {
         0: 0, // Timeline
         1: 1, // Animals
-        2: 6, // Lembretes (substituiu Activities)
+        2: 6, // Activities (Home/Dashboard)
         3: 7, // Tools
         4: 9, // Settings
       };
@@ -318,11 +318,11 @@ class _AdaptiveMainNavigationState extends State<AdaptiveMainNavigation> {
         selectedIcon: Icon(Icons.pets),
         label: 'Pets',
       ),
-      // Mobile 2 → Branch 6: Lembretes
+      // Mobile 2 → Branch 6: Activities (Home)
       NavigationDestination(
-        icon: Icon(Icons.notifications_outlined),
-        selectedIcon: Icon(Icons.notifications),
-        label: 'Lembretes',
+        icon: Icon(Icons.dashboard_outlined),
+        selectedIcon: Icon(Icons.dashboard),
+        label: 'Atividades',
       ),
       // Mobile 3 → Branch 7: Tools
       NavigationDestination(

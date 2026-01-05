@@ -37,7 +37,7 @@ class SyncHistoryPage extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             itemCount: history.length,
             itemBuilder: (context, index) {
               final operation = history[index];

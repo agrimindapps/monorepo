@@ -1,14 +1,17 @@
 import 'package:core/core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/utils/month_extractor.dart';
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
-import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../../shared/widgets/month_selector.dart';
+import '../../../../shared/widgets/record_page_header.dart';
+import '../../../../shared/widgets/stat_card.dart';
+import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/fuel_record_entity.dart';
 import '../providers/fuel_riverpod_notifier.dart';
@@ -37,12 +40,50 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
+            RecordPageHeader(
+              title: 'Abastecimentos',
+              subtitle: 'Gerencie os abastecimentos do seu veículo',
+              icon: Icons.local_gas_station,
+              semanticLabel: 'Seção de abastecimentos',
+              semanticHint: 'Página principal para gerenciar abastecimentos',
+              actionButton: IconButton(
+                icon: Icon(
+                  _showMonthlyStats
+                      ? Icons.analytics
+                      : Icons.analytics_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                tooltip: _showMonthlyStats
+                    ? 'Ocultar estatísticas'
+                    : 'Mostrar estatísticas',
+                onPressed: () {
+                  setState(() {
+                    _showMonthlyStats = !_showMonthlyStats;
+                  });
+                },
+              ),
+            ),
 
             if (!isOnline || pendingCount > 0)
               _buildOfflineIndicator(isOnline, pendingCount, isSyncing),
 
-            _buildVehicleSelector(context),
+            VehicleSelectorSection(
+              selectedVehicleId: _selectedVehicleId,
+              onVehicleChanged: (vehicleId) {
+                setState(() {
+                  _selectedVehicleId = vehicleId;
+                });
+                // Filtrar abastecimentos por veículo
+                if (vehicleId != null) {
+                  ref
+                      .read(fuelRiverpodProvider.notifier)
+                      .filterByVehicle(vehicleId);
+                } else {
+                  ref.read(fuelRiverpodProvider.notifier).clearVehicleFilter();
+                }
+              },
+            ),
 
             if (_selectedVehicleId != null &&
                 (vehiclesAsync.value?.isNotEmpty ?? false))
@@ -185,129 +226,16 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(
-                context,
-              ).colorScheme.primary.withValues(alpha: 0.3),
-              blurRadius: 9,
-              offset: const Offset(0, 3),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Botão de voltar
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.pop(),
-              tooltip: 'Voltar',
-            ),
-            const SizedBox(width: 4),
-            Semantics(
-              label: 'Seção de abastecimentos',
-              hint: 'Página principal para gerenciar abastecimentos',
-              child: Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(
-                  Icons.local_gas_station,
-                  color: Colors.white,
-                  size: 19,
-                ),
-              ),
-            ),
-            const SizedBox(width: 13),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SemanticText.heading(
-                    'Abastecimentos',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  SemanticText.subtitle(
-                    'Histórico de abastecimentos dos seus veículos',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      height: 1.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Botão de toggle para estatísticas mensais
-            IconButton(
-              icon: Icon(
-                _showMonthlyStats ? Icons.analytics : Icons.analytics_outlined,
-                color: Colors.white,
-                size: 24,
-              ),
-              tooltip: _showMonthlyStats
-                  ? 'Ocultar estatísticas'
-                  : 'Mostrar estatísticas',
-              onPressed: () {
-                setState(() {
-                  _showMonthlyStats = !_showMonthlyStats;
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVehicleSelector(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      child: EnhancedVehicleSelector(
-        selectedVehicleId: _selectedVehicleId,
-        onVehicleChanged: (vehicleId) {
-          setState(() {
-            _selectedVehicleId = vehicleId;
-          });
-          // Filtrar abastecimentos por veículo
-          if (vehicleId != null) {
-            ref.read(fuelRiverpodProvider.notifier).filterByVehicle(vehicleId);
-          } else {
-            ref.read(fuelRiverpodProvider.notifier).clearVehicleFilter();
-          }
-        },
-        hintText: 'Selecione um veículo',
-      ),
-    );
-  }
-
   Widget _buildMonthSelector(FuelState fuelState) {
     final vehicleRecords = fuelState.fuelRecords
         .where((r) => r.vehicleId == _selectedVehicleId)
         .toList();
 
-    final months = _getMonths(vehicleRecords);
+    final months = MonthExtractor.extractMonths(
+      vehicleRecords,
+      (record) => record.date,
+    );
+
     final selectedMonth = fuelState.selectedMonth;
 
     // Se não há mês selecionado e há meses disponíveis, seleciona o mês atual (ou o mais recente)
@@ -330,64 +258,12 @@ class _FuelPageState extends ConsumerState<FuelPage> {
       });
     }
 
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: months.length,
-        itemBuilder: (context, index) {
-          final month = months[index];
-          final isSelected =
-              selectedMonth != null &&
-              month.year == selectedMonth.year &&
-              month.month == selectedMonth.month;
-
-          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
-          final formattedMonth =
-              monthName[0].toUpperCase() + monthName.substring(1);
-
-          return GestureDetector(
-            onTap: () {
-              // Sempre permite selecionar, nunca desmarca
-              if (!isSelected) {
-                ref.read(fuelRiverpodProvider.notifier).selectMonth(month);
-              }
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(
-                          context,
-                        ).colorScheme.outline.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  formattedMonth,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+    return MonthSelector(
+      months: months,
+      selectedMonth: selectedMonth,
+      onMonthSelected: (month) {
+        ref.read(fuelRiverpodProvider.notifier).selectMonth(month);
+      },
     );
   }
 
@@ -412,6 +288,18 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     }
 
     final records = fuelState.filteredRecords;
+
+    // DEBUG: Verificar registros
+    if (kDebugMode) {
+      debugPrint(
+        '🔍 Fuel Page - Total records: ${fuelState.fuelRecords.length}',
+      );
+      debugPrint('🔍 Fuel Page - Filtered records: ${records.length}');
+      debugPrint(
+        '🔍 Fuel Page - Selected vehicle: ${fuelState.selectedVehicleId}',
+      );
+      debugPrint('🔍 Fuel Page - Selected month: ${fuelState.selectedMonth}');
+    }
 
     if (records.isEmpty) {
       return EnhancedEmptyState(
@@ -679,12 +567,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
     );
   }
 
-  List<DateTime> _getMonths(List<FuelRecordEntity> records) {
-    final dates = records.map((e) => e.date).toList();
-    final dateUtils = local_date_utils.DateUtils();
-    return dateUtils.generateMonthRange(dates);
-  }
-
   /// Painel de estatísticas mensais fixo
   Widget _buildMonthlyStatsPanel(List<FuelRecordEntity> records) {
     if (records.isEmpty) return const SizedBox.shrink();
@@ -759,7 +641,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.attach_money,
                   label: 'Total Gasto',
                   value: currencyFormat.format(totalSpent),
@@ -768,7 +650,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.local_gas_station,
                   label: 'Total Litros',
                   value: '${totalLiters.toStringAsFixed(1)} L',
@@ -781,7 +663,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.trending_up,
                   label: 'Média/Litro',
                   value: currencyFormat.format(avgPricePerLiter),
@@ -790,7 +672,7 @@ class _FuelPageState extends ConsumerState<FuelPage> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.route,
                   label: 'Km Rodados',
                   value: '${kmDriven.toStringAsFixed(0)} km',
@@ -798,63 +680,6 @@ class _FuelPageState extends ConsumerState<FuelPage> {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Card individual de estatística
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

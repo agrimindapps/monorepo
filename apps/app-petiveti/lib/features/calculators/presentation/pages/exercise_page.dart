@@ -473,7 +473,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
             if (result.summary != null) ...[
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primaryContainer.withValues(
                     alpha: 0.3,
@@ -574,7 +574,7 @@ class _ExercisePageState extends ConsumerState<ExercisePage> {
         const SizedBox(height: 8),
         if (safetyAlerts.isNotEmpty) ...[
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(8),
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               color: Colors.orange.withValues(alpha: 0.1),

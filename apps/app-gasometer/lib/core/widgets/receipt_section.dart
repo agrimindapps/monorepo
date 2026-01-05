@@ -87,6 +87,7 @@ class ReceiptSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return FormSectionHeader(
       title: required ? '$title *' : title,
       icon: icon,
@@ -96,9 +97,9 @@ class ReceiptSection extends StatelessWidget {
           if (description != null) ...[
             Text(
               description!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeCaption,
-                color: GasometerDesignTokens.colorTextSecondary,
+                color: theme.colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -111,8 +112,8 @@ class ReceiptSection extends StatelessWidget {
             onImageRemoved: onImageRemoved ?? () {},
           ),
           if (showStatusIndicators) ...[
-            if (isUploading) _buildUploadingIndicator(),
-            if (uploadError != null) _buildErrorIndicator(uploadError!),
+            if (isUploading) _buildUploadingIndicator(context),
+            if (uploadError != null) _buildErrorIndicator(uploadError!, context),
           ],
         ],
       ),
@@ -133,7 +134,8 @@ class ReceiptSection extends StatelessWidget {
   }
 
   /// Indicador de upload em progresso
-  Widget _buildUploadingIndicator() {
+  Widget _buildUploadingIndicator(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
       child: Row(
@@ -144,16 +146,16 @@ class ReceiptSection extends StatelessWidget {
             child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(
-                Colors.grey.shade600,
+                theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ),
           const SizedBox(width: GasometerDesignTokens.spacingSm),
-          const Text(
+          Text(
             'Processando imagem...',
             style: TextStyle(
               fontSize: GasometerDesignTokens.fontSizeSm,
-              color: GasometerDesignTokens.colorTextSecondary,
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -162,23 +164,24 @@ class ReceiptSection extends StatelessWidget {
   }
 
   /// Indicador de erro no upload
-  Widget _buildErrorIndicator(String error) {
+  Widget _buildErrorIndicator(String error, BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(top: GasometerDesignTokens.spacingSm),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline,
             size: 16,
-            color: GasometerDesignTokens.colorError,
+            color: theme.colorScheme.error,
           ),
           const SizedBox(width: GasometerDesignTokens.spacingSm),
           Expanded(
             child: Text(
               error,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: GasometerDesignTokens.fontSizeSm,
-                color: GasometerDesignTokens.colorError,
+                color: theme.colorScheme.error,
               ),
             ),
           ),

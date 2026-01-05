@@ -301,7 +301,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -450,7 +450,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
         await ref.read(expensesProvider.notifier).loadExpenses(widget.userId);
       },
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         itemCount: expenses.length,
         itemBuilder: (context, index) {
           final expense = expenses[index];

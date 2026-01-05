@@ -1,10 +1,8 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../expenses/presentation/providers/expenses_providers.dart';
-import '../../../maintenance/presentation/notifiers/unified_maintenance_notifier.dart';
-import '../../../odometer/presentation/providers/odometer_providers.dart';
-import '../../../../core/providers/dependency_providers.dart' as deps;
+import '../../../activities/domain/usecases/get_recent_params.dart';
+import '../../../activities/presentation/providers/activities_providers.dart';
 import '../../domain/models/timeline_entry.dart';
 
 part 'timeline_providers.g.dart';
@@ -13,15 +11,22 @@ part 'timeline_providers.g.dart';
 const int _timelineLimit = 50;
 
 /// Timeline provider - combines all records from fuel, maintenance, expenses, and odometer
+/// Uses the same use cases as activities page for consistency
 @riverpod
 Future<List<TimelineEntry>> timeline(Ref ref) async {
   try {
     final entries = <TimelineEntry>[];
 
+    // Use a higher limit for timeline (50 instead of 3)
+    const params = GetRecentParams(vehicleId: '', limit: _timelineLimit);
+
     // Fetch fuel records
-    final fuelResult = await ref.watch(deps.getAllFuelRecordsProvider).call();
+    final fuelUseCase = ref.watch(getRecentFuelRecordsProvider);
+    final fuelResult = await fuelUseCase(params);
     fuelResult.fold(
-      (failure) => null,
+      (failure) => SecureLogger.warning(
+        'Failed to load fuel records: ${failure.message}',
+      ),
       (fuelRecords) {
         for (final record in fuelRecords) {
           entries.add(TimelineEntry.fuel(record));
@@ -30,10 +35,12 @@ Future<List<TimelineEntry>> timeline(Ref ref) async {
     );
 
     // Fetch maintenance records
-    final maintenanceUseCase = ref.watch(getAllMaintenanceRecordsProvider);
-    final maintenanceResult = await maintenanceUseCase.call(const NoParams());
+    final maintenanceUseCase = ref.watch(getRecentMaintenanceRecordsProvider);
+    final maintenanceResult = await maintenanceUseCase(params);
     maintenanceResult.fold(
-      (failure) => null,
+      (failure) => SecureLogger.warning(
+        'Failed to load maintenance records: ${failure.message}',
+      ),
       (maintenanceRecords) {
         for (final record in maintenanceRecords) {
           entries.add(TimelineEntry.maintenance(record));
@@ -42,10 +49,11 @@ Future<List<TimelineEntry>> timeline(Ref ref) async {
     );
 
     // Fetch expense records
-    final expensesUseCase = ref.watch(getAllExpensesProvider);
-    final expensesResult = await expensesUseCase.call(const NoParams());
+    final expensesUseCase = ref.watch(getRecentExpensesProvider);
+    final expensesResult = await expensesUseCase(params);
     expensesResult.fold(
-      (failure) => null,
+      (failure) =>
+          SecureLogger.warning('Failed to load expenses: ${failure.message}'),
       (expenseRecords) {
         for (final record in expenseRecords) {
           entries.add(TimelineEntry.expense(record));
@@ -54,10 +62,12 @@ Future<List<TimelineEntry>> timeline(Ref ref) async {
     );
 
     // Fetch odometer records
-    final odometerUseCase = ref.watch(getAllOdometerReadingsProvider);
-    final odometerResult = await odometerUseCase.call(const NoParams());
+    final odometerUseCase = ref.watch(getRecentOdometerRecordsProvider);
+    final odometerResult = await odometerUseCase(params);
     odometerResult.fold(
-      (failure) => null,
+      (failure) => SecureLogger.warning(
+        'Failed to load odometer records: ${failure.message}',
+      ),
       (odometerRecords) {
         for (final record in odometerRecords) {
           entries.add(TimelineEntry.odometer(record));
@@ -68,13 +78,10 @@ Future<List<TimelineEntry>> timeline(Ref ref) async {
     // Sort by date (newest first)
     entries.sort((a, b) => b.date.compareTo(a.date));
 
-    // Apply limit
-    if (entries.length > _timelineLimit) {
-      return entries.take(_timelineLimit).toList();
-    }
-
+    SecureLogger.info('Timeline loaded ${entries.length} total entries');
     return entries;
   } catch (e) {
+    SecureLogger.error('Error loading timeline: $e');
     // Return empty list on error
     return [];
   }
@@ -88,30 +95,75 @@ Future<List<TimelineEntry>> filteredTimeline(
   DateTime? startDate,
   DateTime? endDate,
 }) async {
-  final allEntries = await ref.watch(timelineProvider.future);
-
-  final filtered = allEntries.where((entry) {
-    // Filter by vehicle
-    if (vehicleId != null && entry.vehicleId != vehicleId) {
-      return false;
-    }
-
-    // Filter by date range
-    if (startDate != null && entry.date.isBefore(startDate)) {
-      return false;
-    }
-
-    if (endDate != null && entry.date.isAfter(endDate)) {
-      return false;
-    }
-
-    return true;
-  }).toList();
-
-  // Apply limit after filtering
-  if (filtered.length > _timelineLimit) {
-    return filtered.take(_timelineLimit).toList();
+  if (vehicleId == null || vehicleId.isEmpty) {
+    return ref.watch(timelineProvider.future);
   }
 
-  return filtered;
+  try {
+    final entries = <TimelineEntry>[];
+
+    // Use vehicle-specific params
+    final params = GetRecentParams(vehicleId: vehicleId, limit: _timelineLimit);
+
+    // Fetch fuel records for vehicle
+    final fuelUseCase = ref.watch(getRecentFuelRecordsProvider);
+    final fuelResult = await fuelUseCase(params);
+    fuelResult.fold((failure) => null, (fuelRecords) {
+      for (final record in fuelRecords) {
+        entries.add(TimelineEntry.fuel(record));
+      }
+    });
+
+    // Fetch maintenance records for vehicle
+    final maintenanceUseCase = ref.watch(getRecentMaintenanceRecordsProvider);
+    final maintenanceResult = await maintenanceUseCase(params);
+    maintenanceResult.fold((failure) => null, (maintenanceRecords) {
+      for (final record in maintenanceRecords) {
+        entries.add(TimelineEntry.maintenance(record));
+      }
+    });
+
+    // Fetch expense records for vehicle
+    final expensesUseCase = ref.watch(getRecentExpensesProvider);
+    final expensesResult = await expensesUseCase(params);
+    expensesResult.fold((failure) => null, (expenseRecords) {
+      for (final record in expenseRecords) {
+        entries.add(TimelineEntry.expense(record));
+      }
+    });
+
+    // Fetch odometer records for vehicle
+    final odometerUseCase = ref.watch(getRecentOdometerRecordsProvider);
+    final odometerResult = await odometerUseCase(params);
+    odometerResult.fold((failure) => null, (odometerRecords) {
+      for (final record in odometerRecords) {
+        entries.add(TimelineEntry.odometer(record));
+      }
+    });
+
+    // Apply date filters if provided
+    var filtered = entries;
+    if (startDate != null || endDate != null) {
+      filtered = entries.where((entry) {
+        if (startDate != null && entry.date.isBefore(startDate)) {
+          return false;
+        }
+        if (endDate != null && entry.date.isAfter(endDate)) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
+
+    // Sort by date (newest first)
+    filtered.sort((a, b) => b.date.compareTo(a.date));
+
+    SecureLogger.info(
+      'Filtered timeline for vehicle $vehicleId: ${filtered.length} entries',
+    );
+    return filtered;
+  } catch (e) {
+    SecureLogger.error('Error loading filtered timeline: $e');
+    return [];
+  }
 }

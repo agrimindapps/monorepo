@@ -57,7 +57,7 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
         title: const Text('Configurações de Sincronização'),
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         children: [
           Card(
             child: Column(
@@ -96,7 +96,7 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -134,7 +134,7 @@ class _SyncSettingsPageState extends State<SyncSettingsPage> {
           Card(
             color: Colors.orange.shade50,
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

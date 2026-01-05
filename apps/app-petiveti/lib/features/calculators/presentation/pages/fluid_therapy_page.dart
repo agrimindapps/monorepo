@@ -47,7 +47,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1120),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -75,7 +75,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -133,7 +133,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
   Widget _buildCalculationForm() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Form(
           key: _formKey,
           child: Column(
@@ -427,7 +427,7 @@ class _FluidTherapyPageState extends ConsumerState<FluidTherapyPage> {
     return Card(
       color: theme.colorScheme.errorContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Row(
           children: [
             Icon(Icons.error_outline, color: theme.colorScheme.error),

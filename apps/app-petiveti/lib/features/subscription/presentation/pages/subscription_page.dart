@@ -203,7 +203,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
         content: Text(error),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.all(8),
       ),
     );
   }
@@ -247,7 +247,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   );
 
   Widget _buildBody(SubscriptionState state) => SingleChildScrollView(
-    padding: const EdgeInsets.all(16),
+    padding: const EdgeInsets.all(8),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -296,7 +296,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
       return [
         Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

@@ -1,11 +1,13 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/crud_form_dialog.dart';
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../../appointments/presentation/providers/appointments_providers.dart';
 import '../../../medications/presentation/providers/medications_providers.dart';
+import '../../../vaccines/presentation/pages/vaccine_form_page.dart';
 import '../../../vaccines/presentation/providers/vaccines_providers.dart';
 import '../../../weight/presentation/providers/weight_providers.dart';
 import '../providers/activities_providers.dart';
@@ -123,9 +125,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     HomeNotificationsState notificationsState,
     bool hasUnreadNotifications,
   ) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: PetivetiPageHeader(
+    return PetivetiPageHeader(
       icon: Icons.history,
       title: 'Atividades',
       subtitle: 'Últimas atividades dos seus pets',
@@ -175,13 +175,12 @@ class _HomePageState extends ConsumerState<HomePage> {
           onPressed: () => _actionsService.showStatusInfo(context, statusState),
         ),
       ],
-      ),
     );
   }
 
   Widget _buildAnimalSelector(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+      padding: const EdgeInsets.fromLTRB(8.0, 12.0, 8.0, 0.0),
       child: EnhancedAnimalSelector(
         selectedAnimalId: _selectedAnimalId,
         onAnimalChanged: (animalId) {
@@ -210,6 +209,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.vaccines,
               recordItems: const [],
               onViewAll: () => context.go('/vaccines'),
+              onAdd: null, // Desabilitado sem animais
               isEmpty: true,
               emptyMessage: 'Nenhum pet cadastrado',
             ),
@@ -218,6 +218,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.calendar_today,
               recordItems: const [],
               onViewAll: () => context.go('/appointments'),
+              onAdd: null, // Desabilitado sem animais
               isEmpty: true,
               emptyMessage: 'Nenhum pet cadastrado',
             ),
@@ -226,6 +227,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.medication,
               recordItems: const [],
               onViewAll: () => context.go('/medications'),
+              onAdd: null, // Desabilitado sem animais
               isEmpty: true,
               emptyMessage: 'Nenhum pet cadastrado',
             ),
@@ -234,6 +236,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.monitor_weight,
               recordItems: const [],
               onViewAll: () => context.go('/weight'),
+              onAdd: null, // Desabilitado sem animais
               isEmpty: true,
               emptyMessage: 'Nenhum pet cadastrado',
             ),
@@ -253,6 +256,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.vaccines,
               recordItems: const [],
               onViewAll: () => context.go('/vaccines'),
+              onAdd: null, // Desabilitado sem seleção
               isEmpty: true,
               emptyMessage: 'Selecione um pet acima',
             ),
@@ -261,6 +265,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.calendar_today,
               recordItems: const [],
               onViewAll: () => context.go('/appointments'),
+              onAdd: null, // Desabilitado sem seleção
               isEmpty: true,
               emptyMessage: 'Selecione um pet acima',
             ),
@@ -269,6 +274,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.medication,
               recordItems: const [],
               onViewAll: () => context.go('/medications'),
+              onAdd: null, // Desabilitado sem seleção
               isEmpty: true,
               emptyMessage: 'Selecione um pet acima',
             ),
@@ -277,6 +283,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               icon: Icons.monitor_weight,
               recordItems: const [],
               onViewAll: () => context.go('/weight'),
+              onAdd: null, // Desabilitado sem seleção
               isEmpty: true,
               emptyMessage: 'Selecione um pet acima',
             ),
@@ -405,10 +412,18 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _openAddDialog(String type) async {
     if (_selectedAnimalId == null) return;
 
+    bool? result;
+
     // Navega para a página correspondente para adicionar
     switch (type) {
       case 'vaccines':
-        context.go('/vaccines');
+        result = await showDialog<bool>(
+          context: context,
+          builder: (context) => VaccineFormPage(
+            animalId: _selectedAnimalId,
+            initialMode: CrudDialogMode.create,
+          ),
+        );
         break;
       case 'appointments':
         context.go('/appointments');
@@ -419,6 +434,11 @@ class _HomePageState extends ConsumerState<HomePage> {
       case 'weight':
         context.go('/weight');
         break;
+    }
+
+    if (result == true && mounted) {
+      // Recarrega dados após salvar
+      ref.invalidate(vaccinesProvider);
     }
   }
 

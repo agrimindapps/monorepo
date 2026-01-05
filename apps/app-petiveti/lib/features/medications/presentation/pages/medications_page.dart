@@ -2,13 +2,14 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../shared/widgets/crud_form_dialog.dart';
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
 import '../../domain/entities/medication.dart';
 import '../providers/medications_provider.dart';
-import '../widgets/add_medication_dialog.dart';
 import '../widgets/empty_medications_state.dart';
 import '../widgets/medication_card.dart';
+import 'medication_form_page.dart';
 
 /// Página de medicamentos simplificada seguindo padrão Odometer
 class MedicationsPage extends ConsumerStatefulWidget {
@@ -319,7 +320,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
 
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -411,7 +412,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
@@ -462,7 +463,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
     return RefreshIndicator(
       onRefresh: _refreshMedications,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         itemCount: medications.length,
         itemBuilder: (context, index) {
           final medication = medications[index];
@@ -547,23 +548,32 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
   void _navigateToAddMedication(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => AddMedicationDialog(
-        initialAnimalId: widget.animalId ?? _selectedAnimalId,
+      builder: (context) => MedicationFormPage(
+        animalId: widget.animalId ?? _selectedAnimalId,
+        initialMode: CrudDialogMode.create,
       ),
     );
   }
 
   void _navigateToMedicationDetails(BuildContext context, Medication medication) {
-    Navigator.of(context).pushNamed(
-      '/medications/details',
-      arguments: {'medicationId': medication.id},
+    showDialog<void>(
+      context: context,
+      builder: (context) => MedicationFormPage(
+        medicationId: medication.id,
+        animalId: medication.animalId,
+        initialMode: CrudDialogMode.view,
+      ),
     );
   }
 
   void _navigateToEditMedication(BuildContext context, Medication medication) {
     showDialog<void>(
       context: context,
-      builder: (context) => AddMedicationDialog(medication: medication),
+      builder: (context) => MedicationFormPage(
+        medicationId: medication.id,
+        animalId: medication.animalId,
+        initialMode: CrudDialogMode.edit,
+      ),
     );
   }
 

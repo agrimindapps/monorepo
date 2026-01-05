@@ -43,7 +43,7 @@ class SyncConflictsPage extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             itemCount: conflicts.length,
             itemBuilder: (context, index) {
               final conflict = conflicts[index];

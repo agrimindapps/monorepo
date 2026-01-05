@@ -1,21 +1,21 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/utils/month_extractor.dart';
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
-import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../../shared/widgets/month_selector.dart';
+import '../../../../shared/widgets/record_page_header.dart';
+import '../../../../shared/widgets/stat_card.dart';
+import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/expense_entity.dart';
 import '../notifiers/expenses_notifier.dart';
 import '../state/expenses_state.dart';
 import 'expense_form_page.dart';
-
-
 
 class ExpensesPage extends ConsumerStatefulWidget {
   const ExpensesPage({super.key});
@@ -37,8 +37,44 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(context),
-            _buildVehicleSelector(context),
+            RecordPageHeader(
+              title: 'Despesas',
+              subtitle: 'Gerencie as despesas do seu veículo',
+              icon: Icons.attach_money,
+              semanticLabel: 'Seção de despesas',
+              semanticHint:
+                  'Página principal para gerenciar despesas do veículo',
+              actionButton: IconButton(
+                icon: Icon(
+                  _showMonthlyStats
+                      ? Icons.analytics
+                      : Icons.analytics_outlined,
+                  color: Colors.white,
+                  size: 24,
+                ),
+                tooltip: _showMonthlyStats
+                    ? 'Ocultar estatísticas'
+                    : 'Mostrar estatísticas',
+                onPressed: () {
+                  setState(() {
+                    _showMonthlyStats = !_showMonthlyStats;
+                  });
+                },
+              ),
+            ),
+            VehicleSelectorSection(
+              selectedVehicleId: _selectedVehicleId,
+              onVehicleChanged: (vehicleId) {
+                setState(() {
+                  _selectedVehicleId = vehicleId;
+                });
+                if (vehicleId != null) {
+                  ref
+                      .read(expensesProvider.notifier)
+                      .filterByVehicle(vehicleId);
+                }
+              },
+            ),
             if (_selectedVehicleId != null &&
                 (vehiclesAsync.value?.isNotEmpty ?? false))
               _buildMonthSelector(expensesState),
@@ -95,130 +131,23 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       ),
     ).then((result) {
       if (result == true && _selectedVehicleId != null) {
-        ref.read(expensesProvider.notifier).loadExpensesByVehicle(_selectedVehicleId!);
+        ref
+            .read(expensesProvider.notifier)
+            .loadExpensesByVehicle(_selectedVehicleId!);
       }
     });
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-              blurRadius: 9,
-              offset: const Offset(0, 3),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Botão de voltar
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.pop(),
-              tooltip: 'Voltar',
-            ),
-            const SizedBox(width: 4),
-            Semantics(
-              label: 'Seção de despesas',
-              hint: 'Página principal para gerenciar despesas do veículo',
-              child: Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(
-                  Icons.attach_money,
-                  color: Colors.white,
-                  size: 19,
-                ),
-              ),
-            ),
-            const SizedBox(width: 13),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SemanticText.heading(
-                    'Despesas',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  SemanticText.subtitle(
-                    'Histórico de despesas dos seus veículos',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      height: 1.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Botão de toggle para estatísticas mensais
-            IconButton(
-              icon: Icon(
-                _showMonthlyStats ? Icons.analytics : Icons.analytics_outlined,
-                color: Colors.white,
-                size: 24,
-              ),
-              tooltip: _showMonthlyStats 
-                ? 'Ocultar estatísticas' 
-                : 'Mostrar estatísticas',
-              onPressed: () {
-                setState(() {
-                  _showMonthlyStats = !_showMonthlyStats;
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVehicleSelector(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      child: EnhancedVehicleSelector(
-        selectedVehicleId: _selectedVehicleId,
-        onVehicleChanged: (vehicleId) {
-          setState(() {
-            _selectedVehicleId = vehicleId;
-          });
-          if (vehicleId != null) {
-            ref
-                .read(expensesProvider.notifier)
-                .loadExpensesByVehicle(vehicleId);
-          }
-        },
-        hintText: 'Selecione um veículo',
-      ),
-    );
-  }
-
   Widget _buildMonthSelector(ExpensesState state) {
-    final vehicleRecords =
-        state.expenses.where((r) => r.vehicleId == _selectedVehicleId).toList();
+    final vehicleRecords = state.expenses
+        .where((r) => r.vehicleId == _selectedVehicleId)
+        .toList();
 
-    final months = _getMonths(vehicleRecords);
+    final months = MonthExtractor.extractMonths(
+      vehicleRecords,
+      (record) => record.date,
+    );
+
     final selectedMonth = state.filtersConfig.selectedMonth;
 
     // Se não há mês selecionado e há meses disponíveis, seleciona o mês atual (ou o mais recente)
@@ -226,11 +155,12 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final now = DateTime.now();
         final currentMonth = DateTime(now.year, now.month);
-        
+
         // Verifica se o mês atual existe nos dados
-        final hasCurrentMonth = months.any((m) => 
-          m.year == currentMonth.year && m.month == currentMonth.month);
-        
+        final hasCurrentMonth = months.any(
+          (m) => m.year == currentMonth.year && m.month == currentMonth.month,
+        );
+
         if (hasCurrentMonth) {
           ref.read(expensesProvider.notifier).selectMonth(currentMonth);
         } else {
@@ -240,60 +170,12 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
       });
     }
 
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: months.length,
-        itemBuilder: (context, index) {
-          final month = months[index];
-          final isSelected = selectedMonth != null &&
-              month.year == selectedMonth.year &&
-              month.month == selectedMonth.month;
-
-          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
-          final formattedMonth =
-              monthName[0].toUpperCase() + monthName.substring(1);
-
-          return GestureDetector(
-            onTap: () {
-              // Sempre permite selecionar, nunca desmarca
-              if (!isSelected) {
-                ref.read(expensesProvider.notifier).selectMonth(month);
-              }
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  formattedMonth,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+    return MonthSelector(
+      months: months,
+      selectedMonth: selectedMonth,
+      onMonthSelected: (month) {
+        ref.read(expensesProvider.notifier).selectMonth(month);
+      },
     );
   }
 
@@ -340,11 +222,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     // Layout com estatísticas fixas + lista scrollable
     return Column(
       children: [
-        if (_showMonthlyStats)
-          _buildMonthlyStatsPanel(records),
-        Expanded(
-          child: _buildExpenseList(records),
-        ),
+        if (_showMonthlyStats) _buildMonthlyStatsPanel(records),
+        Expanded(child: _buildExpenseList(records)),
       ],
     );
   }
@@ -406,7 +285,8 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                     children: [
                       Text(
                         day,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.primary,
                               height: 1.0,
@@ -415,14 +295,14 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                       Text(
                         weekday,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Vertical Divider
                 VerticalDivider(
                   color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
@@ -438,21 +318,25 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                     children: [
                       // Row 1: Title/Description
                       Text(
-                        record.description.isNotEmpty ? record.description : record.type.displayName,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        record.description.isNotEmpty
+                            ? record.description
+                            : record.type.displayName,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       // Row 2: Type Badge
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: record.type.color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
@@ -485,15 +369,17 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                       ),
 
                       const SizedBox(height: 4),
-                      
+
                       // Row 3: Odometer
                       if (record.odometer > 0)
                         Row(
                           children: [
                             Icon(
-                              Icons.speed, 
-                              size: 14, 
-                              color: Theme.of(context).colorScheme.onSurfaceVariant
+                              Icons.speed,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -514,9 +400,9 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
                     Text(
                       'R\$ ${record.amount.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -554,22 +440,16 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     );
   }
 
-  List<DateTime> _getMonths(List<ExpenseEntity> records) {
-    final dates = records.map((e) => e.date).toList();
-    final dateUtils = local_date_utils.DateUtils();
-    return dateUtils.generateMonthRange(dates);
-  }
-
   /// Painel de estatísticas mensais fixo - Despesas
   Widget _buildMonthlyStatsPanel(List<ExpenseEntity> records) {
     if (records.isEmpty) return const SizedBox.shrink();
 
     // Cálculos
     final totalSpent = records.fold<double>(0.0, (sum, r) => sum + r.amount);
-    
+
     final amounts = records.map((r) => r.amount).toList();
     amounts.sort();
-    
+
     final avgExpense = totalSpent / records.length;
     final maxExpense = amounts.isNotEmpty ? amounts.last : 0.0;
     final minExpense = amounts.isNotEmpty ? amounts.first : 0.0;
@@ -624,7 +504,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.attach_money,
                   label: 'Total Gasto',
                   value: currencyFormat.format(totalSpent),
@@ -633,7 +513,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.show_chart,
                   label: 'Média por Despesa',
                   value: currencyFormat.format(avgExpense),
@@ -646,7 +526,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.arrow_upward,
                   label: 'Maior Despesa',
                   value: currencyFormat.format(maxExpense),
@@ -655,7 +535,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
+                child: StatCard(
                   icon: Icons.arrow_downward,
                   label: 'Menor Despesa',
                   value: currencyFormat.format(minExpense),
@@ -670,59 +550,4 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   }
 
   /// Card individual de estatística
-  Widget _buildStatCard({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
 }

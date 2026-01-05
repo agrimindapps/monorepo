@@ -375,7 +375,9 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
     final size = renderBox.size;
 
     return OverlayEntry(
-      builder: (context) => Positioned(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        return Positioned(
         width: size.width,
         child: CompositedTransformFollower(
           link: _layerLink,
@@ -389,10 +391,14 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                 maxHeight: widget.maxHeight!,
               ),
               decoration: BoxDecoration(
-                color: GasometerDesignTokens.colorSurface,
+                color: isDark 
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest 
+                    : GasometerDesignTokens.colorSurface,
                 borderRadius: GasometerDesignTokens.borderRadius(GasometerDesignTokens.radiusLg),
                 border: Border.all(
-                  color: GasometerDesignTokens.colorNeutral200,
+                  color: isDark 
+                      ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3) 
+                      : GasometerDesignTokens.colorNeutral200,
                 ),
               ),
               child: Column(
@@ -407,7 +413,8 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
             ),
           ),
         ),
-      ),
+      );
+      },
     );
   }
 
@@ -442,19 +449,19 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
     if (_filteredItems.isEmpty) {
       return Container(
         padding: GasometerDesignTokens.paddingAll(GasometerDesignTokens.spacingXxl),
-        child: const Column(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.search_off,
               size: GasometerDesignTokens.iconSizeXl,
-              color: GasometerDesignTokens.colorNeutral400,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
-            SizedBox(height: GasometerDesignTokens.spacingSm),
+            const SizedBox(height: GasometerDesignTokens.spacingSm),
             Text(
               'Nenhum item encontrado',
               style: TextStyle(
-                color: GasometerDesignTokens.colorTextSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontSize: GasometerDesignTokens.fontSizeBody,
               ),
             ),
@@ -481,7 +488,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                 .add(GasometerDesignTokens.paddingVertical(GasometerDesignTokens.spacingMd)),
             decoration: BoxDecoration(
               color: isSelected
-                  ? GasometerDesignTokens.colorPrimary.withValues(alpha: 0.1)
+                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
                   : null,
             ),
             child: Row(
@@ -490,10 +497,10 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                   child: DefaultTextStyle(
                     style: TextStyle(
                       color: !item.enabled
-                          ? GasometerDesignTokens.colorTextSecondary
+                          ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5)
                           : isSelected
-                              ? GasometerDesignTokens.colorPrimary
-                              : GasometerDesignTokens.colorTextPrimary,
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurface,
                       fontWeight: isSelected 
                           ? GasometerDesignTokens.fontWeightMedium 
                           : GasometerDesignTokens.fontWeightRegular,
@@ -503,10 +510,10 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
                   ),
                 ),
                 if (isSelected)
-                  const Icon(
+                  Icon(
                     Icons.check,
                     size: GasometerDesignTokens.iconSizeSm,
-                    color: GasometerDesignTokens.colorPrimary,
+                    color: Theme.of(context).colorScheme.primary,
                   ),
               ],
             ),
@@ -541,6 +548,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final borderColor = _getBorderColor();
     final selectedItem = widget.value != null 
         ? widget.items.where((item) => item.value == widget.value).firstOrNull
@@ -555,17 +563,17 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
             child: RichText(
               text: TextSpan(
                 text: widget.label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: GasometerDesignTokens.fontWeightMedium,
-                  color: GasometerDesignTokens.colorTextPrimary,
+                  color: theme.colorScheme.onSurface,
                   fontSize: GasometerDesignTokens.fontSizeBody,
                 ),
                 children: [
                   if (widget.required)
-                    const TextSpan(
+                    TextSpan(
                       text: ' *',
                       style: TextStyle(
-                        color: GasometerDesignTokens.colorError,
+                        color: theme.colorScheme.error,
                         fontWeight: GasometerDesignTokens.fontWeightMedium,
                       ),
                     ),
@@ -661,7 +669,7 @@ class _ValidatedDropdownFieldState<T> extends State<ValidatedDropdownField<T>>
             child: Text(
               _displayHelperText!,
               style: TextStyle(
-                color: _helperTextColor ?? GasometerDesignTokens.colorTextSecondary,
+                color: _helperTextColor ?? theme.colorScheme.onSurfaceVariant,
                 fontSize: GasometerDesignTokens.fontSizeCaption,
               ),
             ),

@@ -40,7 +40,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1120),
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Form(
               key: _formKey,
               child: Column(
@@ -74,7 +74,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             Icon(
@@ -105,7 +105,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
   Widget _buildSpeciesSelector() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -142,7 +142,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
   Widget _buildConversionTypeSelector() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -191,7 +191,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -258,7 +258,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
     return Card(
       color: Theme.of(context).colorScheme.primaryContainer,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           children: [
             Row(
@@ -321,7 +321,7 @@ class _AnimalAgePageState extends State<AnimalAgePage> {
   Widget _buildInfoTable() {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

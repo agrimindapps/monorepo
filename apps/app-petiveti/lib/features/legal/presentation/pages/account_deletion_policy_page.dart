@@ -16,7 +16,7 @@ class AccountDeletionPolicyPage extends StatelessWidget {
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -135,7 +135,7 @@ class AccountDeletionPolicyPage extends StatelessWidget {
 
   Widget _buildWarningBox(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
         border: Border.all(color: Colors.red.shade700, width: 2),

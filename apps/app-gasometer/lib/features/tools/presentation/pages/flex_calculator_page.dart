@@ -1,3 +1,4 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -68,7 +69,7 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -108,7 +109,9 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
           borderRadius: BorderRadius.circular(15),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.3),
               blurRadius: 9,
               offset: const Offset(0, 3),
               spreadRadius: 0,
@@ -128,11 +131,7 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(9),
               ),
-              child: const Icon(
-                Icons.calculate,
-                color: Colors.white,
-                size: 19,
-              ),
+              child: const Icon(Icons.calculate, color: Colors.white, size: 19),
             ),
             const SizedBox(width: 13),
             const Expanded(
@@ -168,6 +167,8 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
   }
 
   Widget _buildInputCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -178,20 +179,30 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
             // Álcool field
             TextField(
               controller: _alcoholController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-              ],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 labelText: 'Preço do Álcool',
                 prefixText: 'R\$ ',
                 hintText: '0,00',
-                prefixIcon: Icon(Icons.local_gas_station, color: Colors.green.shade700),
+                prefixIcon: Icon(
+                  Icons.local_gas_station,
+                  color: isDark ? Colors.green.shade400 : Colors.green.shade700,
+                ),
                 border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: isDark
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : theme.colorScheme.surface,
               ),
               onChanged: (value) {
                 setState(() {
-                  _alcoholPrice = double.tryParse(value.replaceAll(',', '.'));
+                  final cleanValue = value
+                      .replaceAll('.', '')
+                      .replaceAll(',', '.');
+                  _alcoholPrice = double.tryParse(cleanValue);
                 });
               },
             ),
@@ -199,20 +210,32 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
             // Gasolina field
             TextField(
               controller: _gasolineController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
-              ],
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 labelText: 'Preço da Gasolina',
                 prefixText: 'R\$ ',
                 hintText: '0,00',
-                prefixIcon: Icon(Icons.local_gas_station, color: Colors.orange.shade700),
+                prefixIcon: Icon(
+                  Icons.local_gas_station,
+                  color: isDark
+                      ? Colors.orange.shade400
+                      : Colors.orange.shade700,
+                ),
                 border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: isDark
+                    ? theme.colorScheme.surfaceContainerHighest
+                    : theme.colorScheme.surface,
               ),
               onChanged: (value) {
                 setState(() {
-                  _gasolinePrice = double.tryParse(value.replaceAll(',', '.'));
+                  final cleanValue = value
+                      .replaceAll('.', '')
+                      .replaceAll(',', '.');
+                  _gasolinePrice = double.tryParse(cleanValue);
                 });
               },
             ),
@@ -251,27 +274,46 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
   }
 
   Widget _buildResultCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final useAlcohol = _useAlcohol!;
-    final color = useAlcohol ? Colors.green : Colors.orange;
     final icon = useAlcohol ? Icons.check_circle : Icons.info;
-    
+
     final ratio = (_alcoholPrice! / _gasolinePrice!) * 100;
 
     return Card(
       elevation: 4,
-      color: color.shade50,
+      color: isDark
+          ? (useAlcohol ? Colors.green.shade900 : Colors.orange.shade900)
+                .withValues(alpha: 0.3)
+          : (useAlcohol ? Colors.green.shade50 : Colors.orange.shade50),
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Icon(icon, color: color.shade700, size: 56),
+            Icon(
+              icon,
+              color: isDark
+                  ? (useAlcohol
+                        ? Colors.green.shade400
+                        : Colors.orange.shade400)
+                  : (useAlcohol
+                        ? Colors.green.shade700
+                        : Colors.orange.shade700),
+              size: 56,
+            ),
             const SizedBox(height: 16),
             Text(
               _result!,
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: color.shade900,
+                color: isDark
+                    ? (useAlcohol
+                          ? Colors.green.shade300
+                          : Colors.orange.shade300)
+                    : (useAlcohol
+                          ? Colors.green.shade900
+                          : Colors.orange.shade900),
               ),
               textAlign: TextAlign.center,
             ),
@@ -279,7 +321,9 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark
+                    ? theme.colorScheme.surfaceContainerHigh
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(
@@ -287,15 +331,19 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Relação:',
-                        style: TextStyle(fontSize: 15),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                       Text(
                         '${ratio.toStringAsFixed(1)}%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -304,16 +352,25 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Limite:',
-                        style: TextStyle(fontSize: 15),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: theme.colorScheme.onSurface,
+                        ),
                       ),
                       Text(
                         '70%',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: color.shade700,
+                          color: isDark
+                              ? (useAlcohol
+                                    ? Colors.green.shade400
+                                    : Colors.orange.shade400)
+                              : (useAlcohol
+                                    ? Colors.green.shade700
+                                    : Colors.orange.shade700),
                         ),
                       ),
                     ],
@@ -348,6 +405,7 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
                   'Como funciona?',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ],
@@ -358,6 +416,7 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
               'Por isso, só compensa abastecer com álcool quando o preço for no máximo 70% do preço da gasolina.',
               style: theme.textTheme.bodySmall?.copyWith(
                 height: 1.5,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
           ],

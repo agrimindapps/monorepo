@@ -24,7 +24,7 @@ class CalculatorsPage extends StatelessWidget {
             ),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(8),
                 children: [
                   _buildSection(
                     context,

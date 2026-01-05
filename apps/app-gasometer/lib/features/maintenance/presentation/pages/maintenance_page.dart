@@ -2,15 +2,16 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/utils/date_utils.dart' as local_date_utils;
+import '../../../../core/utils/month_extractor.dart';
+import '../../../../shared/widgets/record_page_header.dart';
+import '../../../../shared/widgets/stat_card.dart';
+import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
-import '../../../../core/widgets/responsive_content_area.dart';
-import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
-import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
+import '../../../../shared/widgets/month_selector.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../notifiers/maintenances_notifier.dart';
@@ -38,43 +39,59 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         child: Column(
           children: [
             // Header (sempre visível - mobile e desktop)
-            _buildHeader(context),
+            RecordPageHeader(
+              title: 'Manutenções',
+              subtitle: 'Gerencie as manutenções do seu veículo',
+              icon: Icons.build,
+              semanticLabel: 'Seção de manutenções',
+              semanticHint:
+                  'Página principal para gerenciar manutenções do veículo',
+            ),
 
             Expanded(
-              child: ResponsiveContentArea(
-                child: Column(
-                  children: [
-                    _buildVehicleSelector(context),
+              child: Column(
+                children: [
+                  VehicleSelectorSection(
+                    selectedVehicleId: _selectedVehicleId,
+                    onVehicleChanged: (vehicleId) {
+                      setState(() {
+                        _selectedVehicleId = vehicleId;
+                      });
+                      // filterByVehicle aceita null
+                      ref
+                          .read(maintenancesProvider.notifier)
+                          .filterByVehicle(vehicleId);
+                    },
+                  ),
 
-                    if (_selectedVehicleId != null &&
-                        (vehiclesAsync.value?.isNotEmpty ?? false))
-                      _buildMonthSelector(maintenanceState),
+                  if (_selectedVehicleId != null &&
+                      (vehiclesAsync.value?.isNotEmpty ?? false))
+                    _buildMonthSelector(maintenanceState),
 
-                    Expanded(
-                      child: vehiclesAsync.when(
-                        data: (vehicles) {
-                          if (_selectedVehicleId == null) {
-                            return _buildSelectVehicleState();
-                          }
-                          return _buildContent(context, maintenanceState);
+                  Expanded(
+                    child: vehiclesAsync.when(
+                      data: (vehicles) {
+                        if (_selectedVehicleId == null) {
+                          return _buildSelectVehicleState();
+                        }
+                        return _buildContent(context, maintenanceState);
+                      },
+                      loading: () => const StandardLoadingView(
+                        message: 'Carregando veículos...',
+                        showProgress: true,
+                      ),
+                      error: (error, _) => EnhancedEmptyState(
+                        title: 'Erro ao carregar veículos',
+                        description: error.toString(),
+                        icon: Icons.error_outline,
+                        actionLabel: 'Tentar novamente',
+                        onAction: () {
+                          ref.read(vehiclesProvider.notifier).refresh();
                         },
-                        loading: () => const StandardLoadingView(
-                          message: 'Carregando veículos...',
-                          showProgress: true,
-                        ),
-                        error: (error, _) => EnhancedEmptyState(
-                          title: 'Erro ao carregar veículos',
-                          description: error.toString(),
-                          icon: Icons.error_outline,
-                          actionLabel: 'Tentar novamente',
-                          onAction: () {
-                            ref.read(vehiclesProvider.notifier).refresh();
-                          },
-                        ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -109,122 +126,17 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     });
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: Container(
-        margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primary,
-          borderRadius: BorderRadius.circular(15),
-          boxShadow: [
-            BoxShadow(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-              blurRadius: 9,
-              offset: const Offset(0, 3),
-              spreadRadius: 0,
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Botão de voltar
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => context.pop(),
-              tooltip: 'Voltar',
-            ),
-            const SizedBox(width: 4),
-            Semantics(
-              label: 'Seção de manutenções',
-              hint: 'Página principal para gerenciar manutenções',
-              child: Container(
-                padding: const EdgeInsets.all(9),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(9),
-                ),
-                child: const Icon(Icons.build, color: Colors.white, size: 19),
-              ),
-            ),
-            const SizedBox(width: 13),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SemanticText.heading(
-                    'Manutenções',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  SemanticText.subtitle(
-                    'Histórico de manutenções dos seus veículos',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                      height: 1.3,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Botão de toggle para estatísticas mensais
-            IconButton(
-              icon: Icon(
-                _showMonthlyStats ? Icons.analytics : Icons.analytics_outlined,
-                color: Colors.white,
-                size: 24,
-              ),
-              tooltip: _showMonthlyStats 
-                ? 'Ocultar estatísticas' 
-                : 'Mostrar estatísticas',
-              onPressed: () {
-                setState(() {
-                  _showMonthlyStats = !_showMonthlyStats;
-                });
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVehicleSelector(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-      child: EnhancedVehicleSelector(
-        selectedVehicleId: _selectedVehicleId,
-        onVehicleChanged: (vehicleId) {
-          setState(() {
-            _selectedVehicleId = vehicleId;
-          });
-          if (vehicleId != null) {
-            ref
-                .read(maintenancesProvider.notifier)
-                .loadMaintenancesByVehicle(vehicleId);
-          }
-        },
-        hintText: 'Selecione um veículo',
-      ),
-    );
-  }
 
   Widget _buildMonthSelector(MaintenancesState state) {
     final vehicleRecords = state.maintenances
         .where((r) => r.vehicleId == _selectedVehicleId)
         .toList();
 
-    final months = _getMonths(vehicleRecords);
+    final months = MonthExtractor.extractMonths(
+      vehicleRecords,
+      (record) => record.serviceDate,
+    );
+
     final selectedMonth = state.selectedMonth;
 
     // Se não há mês selecionado e há meses disponíveis, seleciona o mês atual (ou o mais recente)
@@ -232,11 +144,12 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final now = DateTime.now();
         final currentMonth = DateTime(now.year, now.month);
-        
+
         // Verifica se o mês atual existe nos dados
-        final hasCurrentMonth = months.any((m) => 
-          m.year == currentMonth.year && m.month == currentMonth.month);
-        
+        final hasCurrentMonth = months.any(
+          (m) => m.year == currentMonth.year && m.month == currentMonth.month,
+        );
+
         if (hasCurrentMonth) {
           ref.read(maintenancesProvider.notifier).selectMonth(currentMonth);
         } else {
@@ -246,62 +159,12 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
       });
     }
 
-    return Container(
-      height: 50,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: months.length,
-        itemBuilder: (context, index) {
-          final month = months[index];
-          final isSelected = selectedMonth != null &&
-              month.year == selectedMonth.year &&
-              month.month == selectedMonth.month;
-
-          final monthName = DateFormat('MMM yy', 'pt_BR').format(month);
-          final formattedMonth =
-              monthName[0].toUpperCase() + monthName.substring(1);
-
-          return GestureDetector(
-            onTap: () {
-              // Sempre permite selecionar, nunca desmarca
-              if (!isSelected) {
-                ref
-                    .read(maintenancesProvider.notifier)
-                    .selectMonth(month);
-              }
-            },
-            child: Container(
-              margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  formattedMonth,
-                  style: TextStyle(
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
+    return MonthSelector(
+      months: months,
+      selectedMonth: selectedMonth,
+      onMonthSelected: (month) {
+        ref.read(maintenancesProvider.notifier).selectMonth(month);
+      },
     );
   }
 
@@ -344,11 +207,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     // Layout com estatísticas fixas + lista scrollable
     return Column(
       children: [
-        if (_showMonthlyStats)
-          _buildMonthlyStatsPanel(records),
-        Expanded(
-          child: _buildMaintenanceList(records),
-        ),
+        if (_showMonthlyStats) _buildMonthlyStatsPanel(records),
+        Expanded(child: _buildMaintenanceList(records)),
       ],
     );
   }
@@ -410,7 +270,8 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                     children: [
                       Text(
                         day,
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        style: Theme.of(context).textTheme.headlineMedium
+                            ?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.primary,
                               height: 1.0,
@@ -419,14 +280,14 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                       Text(
                         weekday,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Vertical Divider
                 VerticalDivider(
                   color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
@@ -443,27 +304,33 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                       // Row 1: Title
                       Text(
                         record.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      
+
                       const SizedBox(height: 4),
-                      
+
                       // Row 2: Badges (Type & Status)
                       Wrap(
                         spacing: 8,
                         runSpacing: 4,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: Color(record.type.colorValue).withValues(alpha: 0.1),
+                              color: Color(
+                                record.type.colorValue,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: Color(record.type.colorValue).withValues(alpha: 0.3),
+                                color: Color(
+                                  record.type.colorValue,
+                                ).withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -477,12 +344,19 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
-                              color: Color(record.status.colorValue).withValues(alpha: 0.1),
+                              color: Color(
+                                record.status.colorValue,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
                               border: Border.all(
-                                color: Color(record.status.colorValue).withValues(alpha: 0.3),
+                                color: Color(
+                                  record.status.colorValue,
+                                ).withValues(alpha: 0.3),
                                 width: 1,
                               ),
                             ),
@@ -499,15 +373,17 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                       ),
 
                       const SizedBox(height: 4),
-                      
+
                       // Row 3: Odometer
                       if (record.odometer > 0)
                         Row(
                           children: [
                             Icon(
-                              Icons.speed, 
-                              size: 14, 
-                              color: Theme.of(context).colorScheme.onSurfaceVariant
+                              Icons.speed,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -528,9 +404,9 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                     Text(
                       'R\$ ${record.cost.toStringAsFixed(2)}',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                     ),
                   ],
                 ),
@@ -568,22 +444,16 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     );
   }
 
-  List<DateTime> _getMonths(List<MaintenanceEntity> records) {
-    final dates = records.map((e) => e.serviceDate).toList();
-    final dateUtils = local_date_utils.DateUtils();
-    return dateUtils.generateMonthRange(dates);
-  }
-
   /// Painel de estatísticas mensais fixo - Manutenções
   Widget _buildMonthlyStatsPanel(List<MaintenanceEntity> records) {
     if (records.isEmpty) return const SizedBox.shrink();
 
     // Cálculos
     final totalSpent = records.fold<double>(0.0, (sum, r) => sum + r.cost);
-    
+
     final costs = records.map((r) => r.cost).toList();
     costs.sort();
-    
+
     final avgCost = totalSpent / records.length;
     final maxCost = costs.isNotEmpty ? costs.last : 0.0;
     final totalServices = records.length;
@@ -638,8 +508,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
-                  context: context,
+                child: StatCard(
                   icon: Icons.attach_money,
                   label: 'Total Gasto',
                   value: currencyFormat.format(totalSpent),
@@ -648,8 +517,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  context: context,
+                child: StatCard(
                   icon: Icons.show_chart,
                   label: 'Média/Manutenção',
                   value: currencyFormat.format(avgCost),
@@ -662,8 +530,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatCard(
-                  context: context,
+                child: StatCard(
                   icon: Icons.arrow_upward,
                   label: 'Maior Custo',
                   value: currencyFormat.format(maxCost),
@@ -672,8 +539,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildStatCard(
-                  context: context,
+                child: StatCard(
                   icon: Icons.build_circle,
                   label: 'Total Serviços',
                   value: totalServices.toString(),
@@ -681,64 +547,6 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
                 ),
               ),
             ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Card individual de estatística
-  Widget _buildStatCard({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

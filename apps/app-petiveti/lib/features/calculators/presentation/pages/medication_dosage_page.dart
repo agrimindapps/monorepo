@@ -133,7 +133,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
 
   Widget _buildInputTab() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -160,7 +160,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: Column(
         children: [
           MedicationDosageResultCard(output: provider.output!),
@@ -201,14 +201,14 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       child: SafetyAlertsWidget(alerts: provider.output!.alerts),
     );
   }
 
   Widget _buildSafetyHeader() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.orange.shade50,
         border: Border.all(color: Colors.orange.shade200),
@@ -318,7 +318,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -376,7 +376,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
     return Card(
       elevation: 2,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -532,7 +532,7 @@ class _MedicationDosagePageState extends ConsumerState<MedicationDosagePage>
         builder: (context, scrollController) {
           final provider = ref.watch(medicationDosageProviderProvider);
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

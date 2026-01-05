@@ -76,7 +76,9 @@ class CustomDropdown<T> extends StatelessWidget {
             : Theme.of(context).colorScheme.surface,
         filled: filled,
       ),
-      dropdownColor: Theme.of(context).colorScheme.surface,
+      dropdownColor: Theme.of(context).brightness == Brightness.dark
+          ? Theme.of(context).colorScheme.surfaceContainerHighest
+          : Theme.of(context).colorScheme.surface,
       menuMaxHeight: dropdownMaxHeight ?? 300,
       icon: const Icon(Icons.keyboard_arrow_down),
       iconSize: 24,

@@ -35,13 +35,13 @@ class CalculatorState<T> {
   );
   
   /// Create success state with calculation
-  CalculatorState<T> toSuccess(T calc) => CalculatorState(
+  CalculatorState<T> toSuccess(T calc) => CalculatorState<T>(
     calculation: calc,
     isLoading: false,
   );
   
   /// Create error state
-  CalculatorState<T> toError(String msg) => CalculatorState(
+  CalculatorState<T> toError(String msg) => CalculatorState<T>(
     errorMessage: msg,
     isLoading: false,
   );

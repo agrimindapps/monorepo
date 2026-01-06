@@ -5,6 +5,8 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Configurações'),
@@ -13,10 +15,10 @@ class SettingsPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.settings_outlined,
               size: 64,
-              color: Colors.grey,
+              color: isDark ? Colors.grey[600] : Colors.grey,
             ),
             const SizedBox(height: 16),
             Text(

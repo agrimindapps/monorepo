@@ -19,7 +19,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    final percentFormatter = NumberFormat.percentPattern('pt_BR');
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Card(
       elevation: 4,
@@ -55,13 +56,13 @@ class CashVsInstallmentResultCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: calculation.bestOption == 'À Vista'
-                    ? Colors.green[50]
-                    : Colors.grey[100],
+                    ? (isDark ? Colors.green[900]!.withOpacity(0.3) : Colors.green[50])
+                    : (isDark ? Colors.grey[800] : Colors.grey[100]),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: calculation.bestOption == 'À Vista'
-                      ? Colors.green
-                      : Colors.grey,
+                      ? (isDark ? Colors.green[400]! : Colors.green)
+                      : (isDark ? Colors.grey[600]! : Colors.grey),
                   width: 2,
                 ),
               ),
@@ -76,8 +77,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                           Icon(
                             Icons.money_off,
                             color: calculation.bestOption == 'À Vista'
-                                ? Colors.green[700]
-                                : Colors.grey[600],
+                                ? (isDark ? Colors.green[400] : Colors.green[700])
+                                : (isDark ? Colors.grey[400] : Colors.grey[600]),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -87,8 +88,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               color: calculation.bestOption == 'À Vista'
-                                  ? Colors.green[900]
-                                  : Colors.grey[700],
+                                  ? (isDark ? Colors.green[300] : Colors.green[900])
+                                  : (isDark ? Colors.grey[300] : Colors.grey[700]),
                             ),
                           ),
                         ],
@@ -121,8 +122,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: calculation.bestOption == 'À Vista'
-                          ? Colors.green[900]
-                          : Colors.grey[700],
+                          ? (isDark ? Colors.green[300] : Colors.green[900])
+                          : (isDark ? Colors.grey[300] : Colors.grey[700]),
                     ),
                   ),
                 ],
@@ -136,13 +137,13 @@ class CashVsInstallmentResultCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: calculation.bestOption == 'Parcelado'
-                    ? Colors.green[50]
-                    : Colors.grey[100],
+                    ? (isDark ? Colors.green[900]!.withOpacity(0.3) : Colors.green[50])
+                    : (isDark ? Colors.grey[800] : Colors.grey[100]),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: calculation.bestOption == 'Parcelado'
-                      ? Colors.green
-                      : Colors.grey,
+                      ? (isDark ? Colors.green[400]! : Colors.green)
+                      : (isDark ? Colors.grey[600]! : Colors.grey),
                   width: 2,
                 ),
               ),
@@ -157,8 +158,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                           Icon(
                             Icons.credit_card,
                             color: calculation.bestOption == 'Parcelado'
-                                ? Colors.green[700]
-                                : Colors.grey[600],
+                                ? (isDark ? Colors.green[400] : Colors.green[700])
+                                : (isDark ? Colors.grey[400] : Colors.grey[600]),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -168,8 +169,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               color: calculation.bestOption == 'Parcelado'
-                                  ? Colors.green[900]
-                                  : Colors.grey[700],
+                                  ? (isDark ? Colors.green[300] : Colors.green[900])
+                                  : (isDark ? Colors.grey[300] : Colors.grey[700]),
                             ),
                           ),
                         ],
@@ -202,8 +203,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: calculation.bestOption == 'Parcelado'
-                          ? Colors.green[900]
-                          : Colors.grey[700],
+                          ? (isDark ? Colors.green[300] : Colors.green[900])
+                          : (isDark ? Colors.grey[300] : Colors.grey[700]),
                     ),
                   ),
                   Text(
@@ -211,8 +212,8 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: calculation.bestOption == 'Parcelado'
-                          ? Colors.green[700]
-                          : Colors.grey[600],
+                          ? (isDark ? Colors.green[400] : Colors.green[700])
+                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
                     ),
                   ),
                 ],

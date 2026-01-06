@@ -158,6 +158,8 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   Widget _buildEmptyState(String message, IconData icon) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(48),
@@ -166,13 +168,13 @@ class _HomePageState extends ConsumerState<HomePage> {
             Icon(
               icon,
               size: 64,
-              color: Colors.grey.shade300,
+              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
             ),
             const SizedBox(height: 16),
             Text(
               message,
               style: TextStyle(
-                color: Colors.grey.shade400,
+                color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
                 fontSize: 16,
               ),
               textAlign: TextAlign.center,
@@ -524,14 +526,14 @@ class _CategoryChip extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isSelected ? chipColor : Colors.grey,
+              color: isSelected ? chipColor : (isDark ? Colors.grey[400] : Colors.grey),
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? chipColor : Colors.grey,
+                color: isSelected ? chipColor : (isDark ? Colors.grey[400] : Colors.grey),
               ),
             ),
           ],
@@ -704,7 +706,7 @@ class _CalculatorListTile extends ConsumerWidget {
                   Text(
                     item.description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey,
+                          color: isDark ? Colors.grey[400] : Colors.grey,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -750,7 +752,7 @@ class _CalculatorListTile extends ConsumerWidget {
               },
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : Colors.grey,
+                color: isFavorite ? Colors.red : (isDark ? Colors.grey[400] : Colors.grey),
               ),
             ),
           ],
@@ -874,7 +876,7 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                                   ? Icons.favorite
                                   : Icons.favorite_border,
                               size: 20,
-                              color: isFavorite ? Colors.red : Colors.grey,
+                              color: isFavorite ? Colors.red : (isDark ? Colors.grey[400] : Colors.grey),
                             ),
                           ),
                         ),
@@ -899,7 +901,7 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                 Text(
                   widget.item.description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey,
+                        color: isDark ? Colors.grey[400] : Colors.grey,
                       ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

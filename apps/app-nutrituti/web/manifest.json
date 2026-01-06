@@ -1,23 +1,67 @@
 {
-    "name": "app_nutrituti",
-    "short_name": "app_nutrituti",
-    "start_url": ".",
+    "name": "NutriTuti - Nutrição e Saúde Inteligente",
+    "short_name": "NutriTuti",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#1A1A1A",
+    "theme_color": "#F59E0B",
+    "description": "Seu companheiro completo de nutrição e saúde. Calculadoras de IMC, TMB, calorias, rastreamento de água, dicas nutricionais e planos alimentares personalizados.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
+    "lang": "pt-BR",
+    "dir": "ltr",
+    "categories": ["health", "lifestyle", "utilities"],
+    "shortcuts": [
+        {
+            "name": "Calculadoras",
+            "short_name": "Calcular",
+            "description": "Calculadoras nutricionais",
+            "url": "/calculators",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Rastreamento de Água",
+            "short_name": "Água",
+            "description": "Controle de hidratação",
+            "url": "/water",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Dicas Diárias",
+            "short_name": "Dicas",
+            "description": "Dicas nutricionais",
+            "url": "/tips",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
@@ -30,6 +74,19 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "48x48",
+            "type": "image/png",
+            "purpose": "any"
         }
-    ]
+    ],
+    "iarc_rating_id": "",
+    "edge_side_panel": {
+        "preferred_width": 480
+    },
+    "launch_handler": {
+        "client_mode": "focus-existing"
+    }
 }

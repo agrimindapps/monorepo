@@ -57,9 +57,57 @@ class _HomePageState extends ConsumerState<HomePage> {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // Hero Section
-          SliverToBoxAdapter(
-            child: _HeroSection(isDark: isDark),
+          // New Modern AppBar - Fixed logo and app name
+          SliverAppBar(
+            floating: true,
+            snap: true,
+            pinned: true,
+            elevation: 0,
+            scrolledUnderElevation: 1,
+            backgroundColor: isDark ? const Color(0xFF1a1a1a) : Colors.white,
+            surfaceTintColor: Colors.transparent,
+            title: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.calculate_rounded,
+                    size: 22,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Calculei',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              // Theme toggle
+              IconButton(
+                icon: Icon(
+                  isDark ? Icons.light_mode : Icons.dark_mode,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+                onPressed: () {
+                  ref.read(themeModeProvider.notifier).toggleTheme();
+                },
+                tooltip: isDark ? 'Modo Claro' : 'Modo Escuro',
+              ),
+              // Calculators Dropdown - using the new component
+              _HomeCalculatorsDropdown(isDark: isDark),
+              const SizedBox(width: 8),
+            ],
           ),
 
           // Category Filter Bar
@@ -393,51 +441,6 @@ class _CalculatorItem {
     this.tags = const [],
     this.isPopular = false,
   });
-}
-
-class _HeroSection extends StatelessWidget {
-  final bool isDark;
-
-  const _HeroSection({required this.isDark});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(24, 56, 24, 24),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: isDark
-              ? [Colors.indigo.shade900, Colors.blue.shade900]
-              : [Colors.blue.shade600, Colors.indigo.shade600],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Bem-vindo ao Calculei',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '8+ calculadoras disponíveis',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withOpacity(0.85),
-                ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _CategoryFilterBar extends StatelessWidget {
@@ -936,6 +939,143 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                   ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Calculators dropdown for home page
+class _HomeCalculatorsDropdown extends StatefulWidget {
+  final bool isDark;
+
+  const _HomeCalculatorsDropdown({required this.isDark});
+
+  @override
+  State<_HomeCalculatorsDropdown> createState() => _HomeCalculatorsDropdownState();
+}
+
+class _HomeCalculatorsDropdownState extends State<_HomeCalculatorsDropdown> {
+  final _menuController = MenuController();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDesktop = MediaQuery.of(context).size.width >= 800;
+    
+    return MenuAnchor(
+      controller: _menuController,
+      menuChildren: [
+        // Trabalhista Category
+        _buildCategoryHeader('Trabalhista', Icons.work_outline, Colors.blue),
+        _buildMenuItem('Salário Líquido', '/calculators/financial/net-salary', Icons.monetization_on, Colors.orange),
+        _buildMenuItem('13º Salário', '/calculators/financial/thirteenth-salary', Icons.card_giftcard, Colors.green),
+        _buildMenuItem('Férias', '/calculators/financial/vacation', Icons.beach_access, Colors.blue),
+        _buildMenuItem('Horas Extras', '/calculators/financial/overtime', Icons.access_time, Colors.purple),
+        _buildMenuItem('Seguro Desemprego', '/calculators/financial/unemployment-insurance', Icons.work_off, Colors.red),
+        const Divider(height: 8),
+        // Financeiro Category
+        _buildCategoryHeader('Financeiro', Icons.account_balance_wallet, Colors.green),
+        _buildMenuItem('Reserva de Emergência', '/calculators/financial/emergency-reserve', Icons.savings, Colors.teal),
+        _buildMenuItem('À Vista vs Parcelado', '/calculators/financial/cash-vs-installment', Icons.payment, Colors.indigo),
+      ],
+      style: MenuStyle(
+        elevation: WidgetStateProperty.all(8),
+        shape: WidgetStateProperty.all(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        padding: WidgetStateProperty.all(
+          const EdgeInsets.symmetric(vertical: 8),
+        ),
+      ),
+      child: isDesktop
+          ? _buildDesktopButton(theme)
+          : IconButton(
+              icon: Icon(
+                Icons.calculate,
+                color: widget.isDark ? Colors.white70 : Colors.black54,
+              ),
+              onPressed: () {
+                if (_menuController.isOpen) {
+                  _menuController.close();
+                } else {
+                  _menuController.open();
+                }
+              },
+              tooltip: 'Calculadoras',
+            ),
+    );
+  }
+
+  Widget _buildCategoryHeader(String name, IconData icon, Color color) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 16, color: color),
+          const SizedBox(width: 8),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: color,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(String title, String route, IconData icon, Color color) {
+    return MenuItemButton(
+      onPressed: () {
+        _menuController.close();
+        context.go(route);
+      },
+      leadingIcon: Icon(icon, size: 20, color: color),
+      child: Text(title),
+    );
+  }
+
+  Widget _buildDesktopButton(ThemeData theme) {
+    return MouseRegion(
+      child: GestureDetector(
+        onTap: () {
+          if (_menuController.isOpen) {
+            _menuController.close();
+          } else {
+            _menuController.open();
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Calculadoras',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onPrimary,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.keyboard_arrow_down,
+                size: 20,
+                color: theme.colorScheme.onPrimary,
+              ),
+            ],
           ),
         ),
       ),

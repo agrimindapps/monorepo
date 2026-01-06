@@ -153,7 +153,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        indicatorColor: AppColors.primary.withOpacity(0.12),
+        indicatorColor: AppColors.primary.withValues(alpha: 0.12),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
@@ -235,7 +235,8 @@ class AppTheme {
 
   /// Dark theme with PetiVeti branding
   static ThemeData get dark {
-    const darkSurface = Color(0xFF1E1E1E);
+    const darkBackground = Color(0xFF1C1C1E);
+    const darkSurface = Color(0xFF2D2D2D);
     const darkOnSurface = Color(0xFFE0E0E0);
     
     return ThemeData(
@@ -252,10 +253,11 @@ class AppTheme {
         error: AppColors.errorLight,
         onError: Colors.black,
       ),
+      scaffoldBackgroundColor: darkBackground,
       appBarTheme: const AppBarTheme(
         centerTitle: true,
         elevation: 0,
-        backgroundColor: darkSurface,
+        backgroundColor: darkBackground,
         foregroundColor: darkOnSurface,
         surfaceTintColor: Colors.transparent,
         systemOverlayStyle: SystemUiOverlayStyle.light,
@@ -273,25 +275,25 @@ class AppTheme {
         shadowColor: Colors.black45,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
         color: darkSurface,
       ),
       inputDecorationTheme: InputDecorationTheme(
         border: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           borderSide: BorderSide(color: Colors.grey[600]!),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
           borderSide: BorderSide(color: Colors.grey[600]!),
         ),
         focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
           borderSide: BorderSide(color: AppColors.primaryLight, width: 2),
         ),
         errorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
           borderSide: BorderSide(color: AppColors.errorLight),
         ),
         contentPadding: const EdgeInsets.symmetric(
@@ -306,7 +308,7 @@ class AppTheme {
         suffixIconColor: Colors.grey[400],
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: darkSurface,
+        backgroundColor: const Color(0xFF1E1E1E),
         indicatorColor: AppColors.primaryLight.withValues(alpha: 0.15),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -335,7 +337,7 @@ class AppTheme {
         }),
       ),
       navigationRailTheme: NavigationRailThemeData(
-        backgroundColor: darkSurface,
+        backgroundColor: darkBackground,
         indicatorColor: AppColors.primaryLight.withValues(alpha: 0.15),
         selectedIconTheme: const IconThemeData(
           color: AppColors.primaryLight,

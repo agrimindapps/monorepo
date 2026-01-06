@@ -1,6 +1,7 @@
 import 'package:core/core.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../constants/calculation_constants.dart';
 import '../entities/vacation_calculation.dart';
 
 /// Parameters for vacation calculation
@@ -83,12 +84,15 @@ class CalculateVacationUseCase {
     // Constitutional 1/3 bonus
     final constitutionalBonus = baseValue / 3;
 
-    // Sold vacation days value (if applicable - max 10 days)
-    double soldDaysValue = 0;
+    // Sold vacation days value (if applicable - max 1/3 of vacation days, up to 10)
+    var soldDaysValue = 0.0;
+    var soldDays = 0;
     if (params.sellVacationDays) {
-      final soldDays = (params.vacationDays / 3).floor().clamp(0, 10);
-      soldDaysValue = (params.grossSalary / 30) * soldDays;
-      soldDaysValue += soldDaysValue / 3; // +1/3 on sold days too
+      // Can sell up to 1/3 of vacation days, maximum 10 days
+      soldDays = (params.vacationDays / 3).floor().clamp(1, 10);
+      final dailyRate = params.grossSalary / 30;
+      final soldDaysBase = dailyRate * soldDays;
+      soldDaysValue = soldDaysBase + (soldDaysBase / 3); // Base + 1/3 constitutional bonus
     }
 
     // Gross total
@@ -119,38 +123,45 @@ class CalculateVacationUseCase {
     );
   }
 
-  /// Calculate INSS discount (2024 progressive table)
+  /// Calculate INSS discount using shared constants (2024 progressive table)
   double _calculateInss(double value) {
-    // INSS 2024 brackets
-    const brackets = [
-      (limit: 1412.00, rate: 0.075),
-      (limit: 2666.68, rate: 0.09),
-      (limit: 4000.03, rate: 0.12),
-      (limit: 7786.02, rate: 0.14),
-    ];
-
     var discount = 0.0;
-    var previousLimit = 0.0;
 
-    for (final bracket in brackets) {
-      if (value <= previousLimit) break;
+    for (final bracket in CalculationConstants.faixasInss) {
+      final min = bracket['min']!;
+      final max = bracket['max']!;
+      final rate = bracket['aliquota']!;
 
-      final taxableAmount =
-          (value > bracket.limit ? bracket.limit : value) - previousLimit;
-      discount += taxableAmount * bracket.rate;
-      previousLimit = bracket.limit;
+      if (value > min) {
+        final calculationBase = value > max ? max : value;
+        final bracketValue = calculationBase - min;
+        discount += bracketValue * rate;
+      }
+    }
+
+    // Apply INSS ceiling
+    const maxInssDiscount = CalculationConstants.tetoInss * 0.14;
+    if (discount > maxInssDiscount) {
+      discount = maxInssDiscount;
     }
 
     return discount;
   }
 
-  /// Calculate IR discount (2024 progressive table)
+  /// Calculate IR discount using shared constants (2024 progressive table)
   double _calculateIR(double value) {
-    // IR 2024 brackets (after INSS)
-    if (value <= 2259.20) return 0.0;
-    if (value <= 2826.65) return value * 0.075 - 169.44;
-    if (value <= 3751.05) return value * 0.15 - 381.44;
-    if (value <= 4664.68) return value * 0.225 - 662.77;
-    return value * 0.275 - 896.00;
+    for (final bracket in CalculationConstants.faixasIrrf) {
+      final min = bracket['min']!;
+      final max = bracket['max']!;
+      final rate = bracket['aliquota']!;
+      final deduction = bracket['deducao']!;
+
+      if (value >= min && value <= max) {
+        final discount = (value * rate) - deduction;
+        return discount > 0 ? discount : 0.0;
+      }
+    }
+
+    return 0.0;
   }
 }

@@ -172,6 +172,53 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
           ),
           const SizedBox(height: 16),
 
+          // Night Additional Percentage
+          TextFormField(
+            controller: _nightPercentageController,
+            decoration: const InputDecoration(
+              labelText: 'Adicional Noturno (%)',
+              border: OutlineInputBorder(),
+              helperText: 'Mínimo legal: 20%',
+              suffixText: '%',
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            validator: (value) {
+              if (value != null && value.isNotEmpty) {
+                final percentage = double.tryParse(value) ?? 0;
+                if (percentage < 0 || percentage > 100) {
+                  return 'Percentual deve estar entre 0 e 100';
+                }
+              }
+              return null;
+            },
+            onSaved: (_) => _submitForm(),
+          ),
+          const SizedBox(height: 16),
+
+          // Sunday/Holiday Hours
+          TextFormField(
+            controller: _sundayHolidayHoursController,
+            decoration: const InputDecoration(
+              labelText: 'Horas Domingo/Feriado (opcional)',
+              border: OutlineInputBorder(),
+              helperText: 'Horas trabalhadas em domingos ou feriados',
+            ),
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            validator: (value) {
+              if (value != null && value.isNotEmpty) {
+                final hours = double.tryParse(value) ?? 0;
+                if (hours < 0) {
+                  return 'Valor não pode ser negativo';
+                }
+              }
+              return null;
+            },
+            onSaved: (_) => _submitForm(),
+          ),
+          const SizedBox(height: 16),
+
           // Work Days per Month
           TextFormField(
             controller: _workDaysController,

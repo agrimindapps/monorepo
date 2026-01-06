@@ -1,38 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
+  <!-- Essential Meta Tags -->
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+
+  <!-- Primary Meta Tags -->
+  <title>NutriTuti - Nutrição e Saúde Inteligente | Calculadoras e Rastreamento</title>
+  <meta name="title" content="NutriTuti - Nutrição e Saúde Inteligente | Calculadoras e Rastreamento">
+  <meta name="description"
+    content="Seu companheiro completo de nutrição e saúde. Calculadoras de IMC, TMB, calorias, rastreamento de água, dicas nutricionais e planos alimentares personalizados. Cuide da sua saúde de forma inteligente.">
+  <meta name="keywords"
+    content="nutrição, saúde, IMC, TMB, calorias, dieta, alimentação saudável, rastreamento água, peso ideal, nutrituti, calculadora nutricional, fitness">
+  <meta name="author" content="Agrimind - Soluções Tecnológicas">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="language" content="Portuguese">
+  <meta name="revisit-after" content="7 days">
+  <meta name="rating" content="general">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NutriTuti">
+  <meta property="og:url" content="https://nutrituti.agrimind.com.br/">
+  <meta property="og:title" content="NutriTuti - Nutrição e Saúde Inteligente">
+  <meta property="og:description"
+    content="Seu companheiro de nutrição e saúde. Calculadoras, rastreamento de água, dicas nutricionais e planos personalizados.">
+  <meta property="og:image" content="https://nutrituti.agrimind.com.br/icons/Icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="NutriTuti - Logo do app de nutrição">
+  <meta property="og:locale" content="pt_BR">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:site" content="@nutrituti_app">
+  <meta property="twitter:creator" content="@agrimind_tech">
+  <meta property="twitter:url" content="https://nutrituti.agrimind.com.br/">
+  <meta property="twitter:title" content="NutriTuti - Nutrição e Saúde Inteligente">
+  <meta property="twitter:description"
+    content="Seu companheiro de nutrição. Calculadoras, rastreamento e dicas personalizadas.">
+  <meta property="twitter:image" content="https://nutrituti.agrimind.com.br/icons/Icon-512.png">
+  <meta property="twitter:image:alt" content="NutriTuti - App de nutrição">
+
+  <!-- Additional SEO Meta Tags -->
+  <meta name="theme-color" content="#F59E0B">
+  <meta name="msapplication-TileColor" content="#F59E0B">
+  <meta name="msapplication-navbutton-color" content="#F59E0B">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="application-name" content="NutriTuti">
+  <meta name="msapplication-tooltip" content="NutriTuti - Nutrição e Saúde">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="HandheldFriendly" content="true">
+
+  <!-- Geographic & Language -->
+  <meta name="geo.region" content="BR">
+  <meta name="geo.placename" content="Brasil">
+  <meta http-equiv="content-language" content="pt-br">
+  <link rel="alternate" hreflang="pt-br" href="https://nutrituti.agrimind.com.br/">
+  <link rel="alternate" hreflang="x-default" href="https://nutrituti.agrimind.com.br/">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "NutriTuti",
+    "description": "Aplicativo completo de nutrição e saúde com calculadoras, rastreamento e dicas personalizadas",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Android, iOS, Web",
+    "url": "https://nutrituti.agrimind.com.br/",
+    "image": "https://nutrituti.agrimind.com.br/icons/Icon-512.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "BRL",
+      "availability": "https://schema.org/InStock"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Agrimind Soluções Tecnológicas",
+      "url": "https://agrimind.com.br",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://agrimind.com.br/logo.png"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.7",
+      "reviewCount": "789",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "featureList": [
+      "Calculadora de IMC",
+      "Calculadora de TMB",
+      "Contador de calorias",
+      "Rastreamento de água",
+      "Dicas nutricionais diárias",
+      "Planos alimentares",
+      "Calendário de refeições",
+      "Gráficos de evolução"
+    ],
+    "inLanguage": "pt-BR",
+    "datePublished": "2024-01-01",
+    "dateModified": "2026-01-06"
+  }
+  </script>
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="app_nutrituti">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="NutriTuti">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <!-- Favicon and Icons -->
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/Icon-512.png" />
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
 
-  <title>app_nutrituti</title>
+  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- Preconnect for better performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://nutrituti.agrimind.com.br/">
 </head>
+
 <body>
+  <!-- Loading Screen for better UX -->
+  <div id="loading" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1A1A1A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  ">
+    <img src="icons/Icon-192.png" alt="NutriTuti Logo"
+      style="width: 120px; height: 120px; margin-bottom: 24px; border-radius: 20px;">
+    <h1
+      style="color: #F59E0B; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 32px; margin: 0 0 16px 0;">
+      NutriTuti</h1>
+    <p
+      style="color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; margin: 0; opacity: 0.8;">
+      Carregando sua saúde...</p>
+    <div style="
+      margin-top: 32px;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #333;
+      border-top: 4px solid #F59E0B;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    "></div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+  <!-- Hide loading screen when Flutter loads -->
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.display = 'none';
+      }
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

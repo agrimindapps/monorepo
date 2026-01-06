@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'calculator_app_bar.dart';
+
 /// A reusable layout for calculator pages.
 ///
 /// Adapts to screen size:
@@ -8,14 +10,14 @@ import 'package:flutter/material.dart';
 class CalculatorLayout extends StatelessWidget {
   const CalculatorLayout({
     super.key,
-    required this.title,
+    required this.pageTitle,
     required this.inputForm,
     required this.resultCard,
     this.actions,
     this.padding = const EdgeInsets.all(16),
   });
 
-  final String title;
+  final String pageTitle;
   final Widget inputForm;
   final Widget resultCard;
   final List<Widget>? actions;
@@ -24,8 +26,7 @@ class CalculatorLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
+      appBar: CalculatorAppBar(
         actions: actions,
       ),
       body: LayoutBuilder(
@@ -34,22 +35,40 @@ class CalculatorLayout extends StatelessWidget {
             // Desktop Layout: Split View
             return Padding(
               padding: padding,
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Input Form (Left)
-                  Expanded(
-                    flex: 3,
-                    child: SingleChildScrollView(
-                      child: inputForm,
+                  // Page Title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      pageTitle,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
-                  const SizedBox(width: 24),
-                  // Result Card (Right)
+                  // Content Row
                   Expanded(
-                    flex: 2,
-                    child: SingleChildScrollView(
-                      child: resultCard,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Input Form (Left)
+                        Expanded(
+                          flex: 3,
+                          child: SingleChildScrollView(
+                            child: inputForm,
+                          ),
+                        ),
+                        const SizedBox(width: 24),
+                        // Result Card (Right)
+                        Expanded(
+                          flex: 2,
+                          child: SingleChildScrollView(
+                            child: resultCard,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -62,6 +81,16 @@ class CalculatorLayout extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Page Title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      pageTitle,
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
                   inputForm,
                   const SizedBox(height: 24),
                   resultCard,

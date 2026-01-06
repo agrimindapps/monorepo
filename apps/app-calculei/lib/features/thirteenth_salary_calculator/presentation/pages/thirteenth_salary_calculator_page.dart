@@ -1,10 +1,14 @@
 // Flutter imports:
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 
+import '../../../../core/data/calculator_content_repository.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
+import '../../../../shared/widgets/educational_tabs.dart';
 import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
 import '../providers/thirteenth_salary_calculator_provider.dart';
 import '../widgets/thirteenth_salary_input_form.dart';
@@ -33,21 +37,9 @@ class _ThirteenthSalaryCalculatorPageState
     final state = ref.watch(thirteenthSalaryCalculatorProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.card_giftcard, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Cálculo de 13º Salário'),
-          ],
-        ),
+      appBar: CalculatorAppBar(
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
+          InfoAppBarAction(
             onPressed: () => _showInfo(context),
           ),
         ],
@@ -60,7 +52,18 @@ class _ThirteenthSalaryCalculatorPageState
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Page Title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      'Calculadora de 13º Salário',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
                   // Input Form Card
                   Card(
                     elevation: 2,
@@ -189,9 +192,78 @@ class _ThirteenthSalaryCalculatorPageState
   }
 
   void _showInfo(BuildContext context) {
+    // Check if educational content exists
+    if (CalculatorContentRepository.hasContent(
+        '/calculators/financial/thirteenth-salary')) {
+      _showEducationalDialog(context);
+    } else {
+      _showSimpleInfoDialog(context);
+    }
+  }
+
+  void _showEducationalDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          child: Column(
+            children: [
+              // Dialog Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.school_outlined,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Saiba Mais',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Educational Content
+              Expanded(
+                child: EducationalTabs(
+                  content: CalculatorContentRepository.getContent(
+                      '/calculators/financial/thirteenth-salary')!,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSimpleInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sobre o 13º Salário'),
         content: const SingleChildScrollView(
           child: Text(
@@ -212,7 +284,7 @@ class _ThirteenthSalaryCalculatorPageState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Fechar'),
           ),
         ],

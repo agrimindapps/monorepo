@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/data/calculator_content_repository.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import '../../../../shared/widgets/educational_tabs.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../providers/vacation_calculator_provider.dart';
@@ -9,17 +11,28 @@ import '../widgets/calculation_result_card.dart';
 import '../widgets/vacation_input_form.dart';
 
 /// Vacation calculator page
-class VacationCalculatorPage extends ConsumerWidget {
+class VacationCalculatorPage extends ConsumerStatefulWidget {
   const VacationCalculatorPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<VacationCalculatorPage> createState() =>
+      _VacationCalculatorPageState();
+}
+
+class _VacationCalculatorPageState
+    extends ConsumerState<VacationCalculatorPage> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
     final calculation = ref.watch(vacationCalculatorProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadora de Férias'),
+      appBar: CalculatorAppBar(
         actions: [
+          InfoAppBarAction(
+            onPressed: () => _showEducationalDialog(context),
+          ),
           if (calculation.id.isNotEmpty)
             ShareButton(
               text: ShareFormatter.formatVacationCalculation(
@@ -38,7 +51,17 @@ class VacationCalculatorPage extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Info Card
+              // Page Title
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  'Calculadora de Férias',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              // Info Card (Quick Reference)
               Card(
                 color: Theme.of(context).colorScheme.primaryContainer,
                 child: Padding(
@@ -77,7 +100,7 @@ class VacationCalculatorPage extends ConsumerWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .onPrimaryContainer
-                              .withOpacity(0.9),
+                              .withValues(alpha: 0.9),
                         ),
                       ),
                     ],
@@ -88,16 +111,26 @@ class VacationCalculatorPage extends ConsumerWidget {
               const SizedBox(height: 24),
 
               // Input Form
-              VacationInputForm(
-                onCalculate: (grossSalary, vacationDays, sellVacationDays) {
-                  _performCalculation(
-                    ref,
-                    context,
-                    grossSalary: grossSalary,
-                    vacationDays: vacationDays,
-                    sellVacationDays: sellVacationDays,
-                  );
-                },
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      VacationInputForm(
+                        onCalculate: (grossSalary, vacationDays, sellVacationDays) {
+                          _performCalculation(
+                            ref,
+                            context,
+                            grossSalary: grossSalary,
+                            vacationDays: vacationDays,
+                            sellVacationDays: sellVacationDays,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
               const SizedBox(height: 24),
@@ -105,24 +138,70 @@ class VacationCalculatorPage extends ConsumerWidget {
               // Result Card
               if (calculation.id.isNotEmpty)
                 CalculationResultCard(calculation: calculation),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-              const SizedBox(height: 32),
+  void _showEducationalDialog(BuildContext context) {
+    if (!CalculatorContentRepository.hasContent(
+        '/calculators/financial/vacation')) {
+      return;
+    }
 
-              // Educational Tabs
-              if (CalculatorContentRepository.hasContent(
-                  '/calculators/financial/vacation')) ...[
-                Text(
-                  'Saiba Mais',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    showDialog(
+      context: context,
+      builder: (dialogContext) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          child: Column(
+            children: [
+              // Dialog Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
                 ),
-                const SizedBox(height: 16),
-                EducationalTabs(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.school_outlined,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Saiba Mais',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Educational Content
+              Expanded(
+                child: EducationalTabs(
                   content: CalculatorContentRepository.getContent(
                       '/calculators/financial/vacation')!,
                 ),
-              ],
+              ),
             ],
           ),
         ),

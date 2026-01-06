@@ -1,10 +1,12 @@
 // Flutter imports:
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import '../../domain/usecases/calculate_unemployment_insurance_usecase.dart';
 import '../providers/unemployment_insurance_calculator_provider.dart';
 import '../widgets/unemployment_insurance_input_form.dart';
@@ -33,21 +35,9 @@ class _UnemploymentInsuranceCalculatorPageState
     final state = ref.watch(unemploymentInsuranceCalculatorProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.work_off, color: Colors.red),
-            SizedBox(width: 8),
-            Text('Cálculo de Seguro Desemprego'),
-          ],
-        ),
+      appBar: CalculatorAppBar(
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
+          InfoAppBarAction(
             onPressed: () => _showInfo(context),
           ),
         ],
@@ -60,7 +50,18 @@ class _UnemploymentInsuranceCalculatorPageState
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Page Title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      'Calculadora de Seguro Desemprego',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
                   // Input Form Card
                   Card(
                     elevation: 2,
@@ -191,7 +192,7 @@ class _UnemploymentInsuranceCalculatorPageState
   void _showInfo(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sobre o Seguro Desemprego'),
         content: const SingleChildScrollView(
           child: Text(
@@ -220,7 +221,7 @@ class _UnemploymentInsuranceCalculatorPageState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Fechar'),
           ),
         ],

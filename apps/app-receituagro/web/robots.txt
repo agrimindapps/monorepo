@@ -1,0 +1,44 @@
+# robots.txt for ReceituAgro Mobile
+# https://app.receituagro.com.br
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://app.receituagro.com.br/sitemap.xml
+
+# Crawl delay (optional - helps reduce server load)
+Crawl-delay: 1
+
+# Allow access to important assets
+Allow: /icons/
+Allow: /assets/
+Allow: /favicon.png
+Allow: /manifest.json
+
+# Block access to development and testing paths
+Disallow: /test/
+Disallow: /dev/
+Disallow: /.git/
+Disallow: /drift_worker.dart.js
+Disallow: /sqlite3.wasm
+
+# Specific rules for common search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# AI Crawlers Control (2026)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# Host directive
+Host: https://app.receituagro.com.br

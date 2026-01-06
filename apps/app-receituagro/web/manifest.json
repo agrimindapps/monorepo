@@ -1,23 +1,74 @@
 {
-    "name": "app_receituagro",
-    "short_name": "app_receituagro",
-    "start_url": ".",
+    "name": "ReceituAgro - Defensivos Agrícolas Mobile",
+    "short_name": "ReceituAgro",
+    "start_url": "/",
+    "scope": "/",
     "display": "standalone",
-    "background_color": "#0175C2",
+    "background_color": "#1A1A1A",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Aplicativo mobile para consulta offline de defensivos agrícolas. Base completa com registro MAPA, toxicidade e modo de ação.",
     "orientation": "portrait-primary",
-    "prefer_related_applications": false,
+    "prefer_related_applications": true,
+    "related_applications": [
+        {
+            "platform": "play",
+            "url": "https://play.google.com/store/apps/details?id=com.agrimind.receituagro",
+            "id": "com.agrimind.receituagro"
+        }
+    ],
+    "lang": "pt-BR",
+    "dir": "ltr",
+    "categories": ["agriculture", "business", "productivity"],
+    "shortcuts": [
+        {
+            "name": "Buscar Defensivo",
+            "short_name": "Buscar",
+            "description": "Buscar produto",
+            "url": "/search",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Favoritos",
+            "short_name": "Favoritos",
+            "description": "Defensivos favoritos",
+            "url": "/favorites",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Ingredientes Ativos",
+            "short_name": "Ativos",
+            "description": "Lista de ingredientes",
+            "url": "/active-ingredients",
+            "icons": [
+                {
+                    "src": "icons/Icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ],
     "icons": [
         {
             "src": "icons/Icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
             "src": "icons/Icon-maskable-192.png",
@@ -30,6 +81,19 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
+        },
+        {
+            "src": "favicon.png",
+            "sizes": "48x48",
+            "type": "image/png",
+            "purpose": "any"
         }
-    ]
+    ],
+    "iarc_rating_id": "",
+    "edge_side_panel": {
+        "preferred_width": 480
+    },
+    "launch_handler": {
+        "client_mode": "focus-existing"
+    }
 }

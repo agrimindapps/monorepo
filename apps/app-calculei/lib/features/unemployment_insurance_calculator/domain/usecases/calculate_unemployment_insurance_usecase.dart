@@ -211,51 +211,38 @@ class CalculateUnemploymentInsuranceUseCase {
   }
 
   int _calculateNumberOfInstallments(int workMonths, int timesReceived) {
-    // First time receiving
+    // First time receiving (needs 12+ months)
     if (timesReceived == 0) {
-      const firstTimeTable = [
-        {'minMonths': 12, 'maxMonths': 23, 'installments': 4},
-        {'minMonths': 24, 'maxMonths': 35, 'installments': 5},
-        {'minMonths': 36, 'maxMonths': 999, 'installments': 5},
-      ];
-
-      for (final bracket in firstTimeTable) {
-        final min = bracket['minMonths']!;
-        final max = bracket['maxMonths']!;
-        final installments = bracket['installments']!;
-
-        if (workMonths >= min && workMonths <= max) {
-          return installments;
-        }
+      if (workMonths >= 12 && workMonths <= 23) {
+        return 4;
+      } else if (workMonths >= 24) {
+        return 5;
       }
-    } else {
-      // Already received before
-      const repeatedTable = [
-        {'times': 1, 'minMonths': 9, 'maxMonths': 23, 'installments': 3},
-        {'times': 1, 'minMonths': 24, 'maxMonths': 999, 'installments': 4},
-        {'times': 2, 'minMonths': 6, 'maxMonths': 23, 'installments': 2},
-        {'times': 2, 'minMonths': 24, 'maxMonths': 999, 'installments': 3},
-      ];
-
-      for (final bracket in repeatedTable) {
-        final times = bracket['times'] as int;
-        final min = bracket['minMonths'] as int;
-        final max = bracket['maxMonths'] as int;
-        final installments = bracket['installments'] as int;
-
-        if (timesReceived == times && workMonths >= min && workMonths <= max) {
-          return installments;
-        }
+      return 0; // Not eligible
+    }
+    
+    // Second time receiving (needs 9+ months)
+    if (timesReceived == 1) {
+      if (workMonths >= 9 && workMonths <= 11) {
+        return 3;
+      } else if (workMonths >= 12 && workMonths <= 23) {
+        return 4;
+      } else if (workMonths >= 24) {
+        return 5;
       }
-
-      // For 3+ times, use similar logic as 2 times
-      if (timesReceived >= 3) {
-        if (workMonths >= 6 && workMonths <= 23) {
-          return 2;
-        } else if (workMonths >= 24) {
-          return 3;
-        }
+      return 0; // Not eligible
+    }
+    
+    // Third time or more (needs 6+ months)
+    if (timesReceived >= 2) {
+      if (workMonths >= 6 && workMonths <= 11) {
+        return 3;
+      } else if (workMonths >= 12 && workMonths <= 23) {
+        return 4;
+      } else if (workMonths >= 24) {
+        return 5;
       }
+      return 0; // Not eligible
     }
 
     return 0; // Not eligible

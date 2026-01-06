@@ -1,11 +1,15 @@
 // Flutter imports:
-import 'package:app_calculei/core/presentation/widgets/calculator_layout.dart';
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+// Project imports:
+import 'package:app_calculei/core/presentation/widgets/calculator_layout.dart';
+import 'package:app_calculei/core/style/shadcn_style.dart';
 
+import '../../../../core/data/calculator_content_repository.dart';
+import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../shared/widgets/educational_tabs.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
 import '../providers/net_salary_calculator_provider.dart';
 import '../widgets/net_salary_input_form.dart';
@@ -29,7 +33,7 @@ class _NetSalaryCalculatorPageState
     final state = ref.watch(netSalaryCalculatorProvider);
 
     return CalculatorLayout(
-      title: 'Cálculo de Salário Líquido',
+      pageTitle: 'Calculadora de Salário Líquido',
       actions: [
         IconButton(
           icon: const Icon(Icons.info_outline),
@@ -39,22 +43,20 @@ class _NetSalaryCalculatorPageState
       inputForm: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Dados do Cálculo',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: ShadcnStyle.textColor,
-                ),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Input Form
               NetSalaryInputForm(
@@ -64,35 +66,12 @@ class _NetSalaryCalculatorPageState
 
               const SizedBox(height: 24),
 
-              // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton.icon(
-                    onPressed: _handleClear,
-                    icon: const Icon(Icons.clear),
-                    label: const Text('Limpar'),
-                    style: ShadcnStyle.textButtonStyle,
-                  ),
-                  const SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    onPressed: state.isLoading ? null : _handleSubmit,
-                    icon: state.isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.calculate),
-                    label: Text(
-                      state.isLoading ? 'Calculando...' : 'Calcular',
-                    ),
-                    style: ShadcnStyle.primaryButtonStyle,
-                  ),
-                ],
+              // Calculator Button
+              CalculatorButton(
+                label: 'Calcular salário líquido',
+                icon: Icons.calculate,
+                onPressed: _handleSubmit,
+                isLoading: state.isLoading,
               ),
 
               // Error Message
@@ -185,15 +164,79 @@ class _NetSalaryCalculatorPageState
     ref.read(netSalaryCalculatorProvider.notifier).calculate(params);
   }
 
-  void _handleClear() {
-    _formKey.currentState?.reset();
-    ref.read(netSalaryCalculatorProvider.notifier).clearCalculation();
+  void _showInfo(BuildContext context) {
+    // Check if educational content exists
+    if (CalculatorContentRepository.hasContent(
+        '/calculators/financial/net-salary')) {
+      _showEducationalDialog(context);
+    } else {
+      _showSimpleInfoDialog(context);
+    }
   }
 
-  void _showInfo(BuildContext context) {
+  void _showEducationalDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => Dialog(
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
+          child: Column(
+            children: [
+              // Dialog Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(28),
+                    topRight: Radius.circular(28),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.school_outlined,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Saiba Mais',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onPrimaryContainer,
+                            ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Educational Content
+              Expanded(
+                child: EducationalTabs(
+                  content: CalculatorContentRepository.getContent(
+                      '/calculators/financial/net-salary')!,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showSimpleInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sobre o Salário Líquido'),
         content: const SingleChildScrollView(
           child: Text(
@@ -211,7 +254,7 @@ class _NetSalaryCalculatorPageState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Fechar'),
           ),
         ],

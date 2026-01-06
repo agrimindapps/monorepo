@@ -1,10 +1,12 @@
 // Flutter imports:
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../providers/overtime_calculator_provider.dart';
 import '../widgets/overtime_input_form.dart';
@@ -33,21 +35,9 @@ class _OvertimeCalculatorPageState
     final state = ref.watch(overtimeCalculatorProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Row(
-          children: [
-            Icon(Icons.access_time, color: Colors.purple),
-            SizedBox(width: 8),
-            Text('Cálculo de Horas Extras'),
-          ],
-        ),
+      appBar: CalculatorAppBar(
         actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
+          InfoAppBarAction(
             onPressed: () => _showInfo(context),
           ),
         ],
@@ -60,7 +50,18 @@ class _OvertimeCalculatorPageState
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Page Title
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16.0),
+                    child: Text(
+                      'Calculadora de Horas Extras',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
                   // Input Form Card
                   Card(
                     elevation: 2,
@@ -191,15 +192,15 @@ class _OvertimeCalculatorPageState
   void _showInfo(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Sobre Horas Extras'),
         content: const SingleChildScrollView(
           child: Text(
             'Horas extras são as horas trabalhadas além da jornada normal de trabalho.\n\n'
             'Tipos de horas extras:\n'
             '• 50%: Dias normais (segunda a sábado até 22h)\n'
-            '• 100%: Domingos, feriados e noturnas\n'
-            '• Adicional noturno: Geralmente 20% (22h às 5h)\n\n'
+            '• 100%: Domingos, feriados e noturnas\n\n'
+            'Adicional noturno: Geralmente 20% (22h às 5h)\n\n'
             'Reflexos das horas extras:\n'
             '• DSR: Descanso Semanal Remunerado\n'
             '• Férias: 1/3 do valor das horas extras\n'
@@ -210,7 +211,7 @@ class _OvertimeCalculatorPageState
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Fechar'),
           ),
         ],

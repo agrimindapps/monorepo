@@ -264,9 +264,32 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   }
 
   int _calculateMonthsWorked(DateTime admission, DateTime calculation) {
-    final diff = calculation.difference(admission);
-    final months = (diff.inDays / 30).floor();
-    return months > 12 ? 12 : months;
+    // For 13th salary, we count full months worked in the current year
+    // If admission is before current year, start from January 1st
+    final yearStart = DateTime(calculation.year, 1, 1);
+    final effectiveStart = admission.isAfter(yearStart) ? admission : yearStart;
+    
+    // Calculate months difference properly
+    var months = (calculation.year - effectiveStart.year) * 12 +
+        calculation.month - effectiveStart.month;
+    
+    // If day of calculation is >= day of admission, count current month
+    // Brazilian rule: work 15+ days in a month = count as full month
+    if (calculation.day >= 15 && effectiveStart.day <= 15) {
+      months += 1;
+    } else if (calculation.day >= effectiveStart.day) {
+      months += 1;
+    }
+    
+    // Ensure months is between 1 and 12
+    if (months < 1) {
+      months = 1;
+    }
+    if (months > 12) {
+      months = 12;
+    }
+    
+    return months;
   }
 
   double _parseNumericValue(String value) {

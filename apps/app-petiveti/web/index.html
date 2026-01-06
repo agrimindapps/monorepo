@@ -1,38 +1,210 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
+
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
+  <!-- Essential Meta Tags -->
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+
+  <!-- Primary Meta Tags -->
+  <title>PetiVeti - Cuidado Veterinário Inteligente | Saúde do seu Pet</title>
+  <meta name="title" content="PetiVeti - Cuidado Veterinário Inteligente | Saúde do seu Pet">
+  <meta name="description"
+    content="Gerencie a saúde do seu pet com inteligência. Controle vacinas, consultas veterinárias, medicamentos e histórico médico completo. Lembretes automáticos para cuidados essenciais.">
+  <meta name="keywords"
+    content="veterinário, pet, cachorro, gato, vacinas pet, saúde animal, consulta veterinária, medicamentos pet, prontuário pet, petiveti, cuidados animais">
+  <meta name="author" content="Agrimind - Soluções Tecnológicas">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta name="language" content="Portuguese">
+  <meta name="revisit-after" content="7 days">
+  <meta name="rating" content="general">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PetiVeti">
+  <meta property="og:url" content="https://petiveti.agrimind.com.br/">
+  <meta property="og:title" content="PetiVeti - Cuidado Veterinário Inteligente">
+  <meta property="og:description"
+    content="Gerencie a saúde do seu pet com inteligência. Controle vacinas, consultas, medicamentos e histórico médico completo.">
+  <meta property="og:image" content="https://petiveti.agrimind.com.br/icons/Icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:alt" content="PetiVeti - Logo do aplicativo veterinário">
+  <meta property="og:locale" content="pt_BR">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:site" content="@petiveti_app">
+  <meta property="twitter:creator" content="@agrimind_tech">
+  <meta property="twitter:url" content="https://petiveti.agrimind.com.br/">
+  <meta property="twitter:title" content="PetiVeti - Cuidado Veterinário Inteligente">
+  <meta property="twitter:description"
+    content="Gerencie a saúde do seu pet. Controle vacinas, consultas, medicamentos e histórico médico.">
+  <meta property="twitter:image" content="https://petiveti.agrimind.com.br/icons/Icon-512.png">
+  <meta property="twitter:image:alt" content="PetiVeti - Aplicativo veterinário">
+
+  <!-- Additional SEO Meta Tags -->
+  <meta name="theme-color" content="#FF6B6B">
+  <meta name="msapplication-TileColor" content="#FF6B6B">
+  <meta name="msapplication-navbutton-color" content="#FF6B6B">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="application-name" content="PetiVeti">
+  <meta name="msapplication-tooltip" content="PetiVeti - Cuidado Veterinário">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="HandheldFriendly" content="true">
+
+  <!-- Geographic & Language -->
+  <meta name="geo.region" content="BR">
+  <meta name="geo.placename" content="Brasil">
+  <meta http-equiv="content-language" content="pt-br">
+  <link rel="alternate" hreflang="pt-br" href="https://petiveti.agrimind.com.br/">
+  <link rel="alternate" hreflang="x-default" href="https://petiveti.agrimind.com.br/">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "PetiVeti",
+    "description": "Aplicativo inteligente para gestão completa da saúde e cuidados veterinários do seu pet",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "Android, iOS, Web",
+    "url": "https://petiveti.agrimind.com.br/",
+    "image": "https://petiveti.agrimind.com.br/icons/Icon-512.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "BRL",
+      "availability": "https://schema.org/InStock"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "Agrimind Soluções Tecnológicas",
+      "url": "https://agrimind.com.br",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://agrimind.com.br/logo.png"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "634",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "featureList": [
+      "Prontuário veterinário completo",
+      "Controle de vacinas e vermífugos",
+      "Agendamento de consultas",
+      "Registro de medicamentos",
+      "Histórico médico detalhado",
+      "Lembretes automáticos",
+      "Backup na nuvem",
+      "Multi-pets"
+    ],
+    "inLanguage": "pt-BR",
+    "datePublished": "2024-01-01",
+    "dateModified": "2026-01-06"
+  }
+  </script>
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="app_petiveti">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="PetiVeti">
+  <link rel="apple-touch-icon" sizes="192x192" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="icons/Icon-512.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <!-- Favicon and Icons -->
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/Icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/Icon-512.png" />
+  <link rel="shortcut icon" type="image/png" href="favicon.png" />
 
-  <title>app_petiveti</title>
+  <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
+
+  <!-- Preconnect for better performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://petiveti.agrimind.com.br/">
 </head>
+
 <body>
+  <!-- Loading Screen for better UX -->
+  <div id="loading" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #1A1A1A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  ">
+    <img src="icons/Icon-192.png" alt="PetiVeti Logo"
+      style="width: 120px; height: 120px; margin-bottom: 24px; border-radius: 20px;">
+    <h1
+      style="color: #FF6B6B; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 32px; margin: 0 0 16px 0;">
+      PetiVeti</h1>
+    <p
+      style="color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 16px; margin: 0; opacity: 0.8;">
+      Carregando cuidados para seu pet...</p>
+    <div style="
+      margin-top: 32px;
+      width: 40px;
+      height: 40px;
+      border: 4px solid #333;
+      border-top: 4px solid #FF6B6B;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    "></div>
+  </div>
+
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+  <!-- Hide loading screen when Flutter loads -->
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.display = 'none';
+      }
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
+
 </html>

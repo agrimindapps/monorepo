@@ -347,13 +347,13 @@ class ReceitaAgroSyncService implements ISyncService {
         return const Right(0);
       }
 
-      final user = await _authRepository!.currentUser.first;
+      final user = await _authRepository.currentUser.first;
       if (user == null) return const Right(0);
 
       int totalSynced = 0;
 
       // 1. Push local changes
-      final pushResult = await _subscriptionSyncAdapter!.pushDirtyRecords(user.id);
+      final pushResult = await _subscriptionSyncAdapter.pushDirtyRecords(user.id);
       
       if (pushResult.isLeft()) {
         return Left((pushResult as Left<Failure, SyncPushResult>).value);
@@ -362,7 +362,7 @@ class ReceitaAgroSyncService implements ISyncService {
       totalSynced += (pushResult as Right<Failure, SyncPushResult>).value.recordsPushed;
 
       // 2. Pull remote changes
-      final pullResult = await _subscriptionSyncAdapter!.pullRemoteChanges(user.id);
+      final pullResult = await _subscriptionSyncAdapter.pullRemoteChanges(user.id);
       
       if (pullResult.isLeft()) {
         return Left((pullResult as Left<Failure, SyncPullResult>).value);
@@ -422,10 +422,11 @@ class ReceitaAgroSyncService implements ISyncService {
     try {
       try {
         if (_favoritosRepository == null) {
-          if (kDebugMode)
+          if (kDebugMode) {
             print(
               '⚠️ FavoritosRepository not injected in ReceitaAgroSyncService',
             );
+          }
           return const Right(0);
         }
 

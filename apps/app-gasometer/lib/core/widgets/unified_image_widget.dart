@@ -34,48 +34,6 @@ class UnifiedImageWidget extends StatefulWidget {
     this.placeholderIcon = Icons.image,
   });
 
-  /// Imagem em Base64 (com ou sem prefixo DataURI)
-  final String? imageBase64;
-
-  /// Caminho do arquivo local
-  final String? imagePath;
-
-  /// URL da imagem na rede
-  final String? imageUrl;
-
-  /// Largura do widget
-  final double width;
-
-  /// Altura do widget
-  final double height;
-
-  /// Como a imagem deve preencher o espaço
-  final BoxFit fit;
-
-  /// Borda arredondada
-  final BorderRadius? borderRadius;
-
-  /// Widget placeholder customizado
-  final Widget? placeholder;
-
-  /// Widget de erro customizado
-  final Widget? errorWidget;
-
-  /// Cor do placeholder padrão
-  final Color? placeholderColor;
-
-  /// Cor da borda
-  final Color? borderColor;
-
-  /// Largura da borda
-  final double? borderWidth;
-
-  /// Se deve usar cache em memória
-  final bool enableMemoryCache;
-
-  /// Ícone do placeholder
-  final IconData placeholderIcon;
-
   /// Factory para imagens de veículos
   factory UnifiedImageWidget.vehicle({
     Key? key,
@@ -117,6 +75,48 @@ class UnifiedImageWidget extends StatefulWidget {
       placeholderIcon: Icons.receipt,
     );
   }
+
+  /// Imagem em Base64 (com ou sem prefixo DataURI)
+  final String? imageBase64;
+
+  /// Caminho do arquivo local
+  final String? imagePath;
+
+  /// URL da imagem na rede
+  final String? imageUrl;
+
+  /// Largura do widget
+  final double width;
+
+  /// Altura do widget
+  final double height;
+
+  /// Como a imagem deve preencher o espaço
+  final BoxFit fit;
+
+  /// Borda arredondada
+  final BorderRadius? borderRadius;
+
+  /// Widget placeholder customizado
+  final Widget? placeholder;
+
+  /// Widget de erro customizado
+  final Widget? errorWidget;
+
+  /// Cor do placeholder padrão
+  final Color? placeholderColor;
+
+  /// Cor da borda
+  final Color? borderColor;
+
+  /// Largura da borda
+  final double? borderWidth;
+
+  /// Se deve usar cache em memória
+  final bool enableMemoryCache;
+
+  /// Ícone do placeholder
+  final IconData placeholderIcon;
 
   @override
   State<UnifiedImageWidget> createState() => _UnifiedImageWidgetState();
@@ -384,12 +384,12 @@ class _UnifiedImageWidgetState extends State<UnifiedImageWidget>
 
 /// Cache LRU para imagens decodificadas
 class _LRUImageCache {
+
+  _LRUImageCache({required this.maxSize});
   final int maxSize;
   final Map<String, _CacheNode> _cache = {};
   _CacheNode? _head;
   _CacheNode? _tail;
-
-  _LRUImageCache({required this.maxSize});
 
   Uint8List? get(String key) {
     final node = _cache[key];
@@ -466,10 +466,10 @@ class _LRUImageCache {
 }
 
 class _CacheNode {
+
+  _CacheNode(this.key, this.value);
   final String key;
   Uint8List value;
   _CacheNode? prev;
   _CacheNode? next;
-
-  _CacheNode(this.key, this.value);
 }

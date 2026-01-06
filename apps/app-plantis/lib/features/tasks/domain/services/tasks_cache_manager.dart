@@ -40,7 +40,7 @@ class TasksCacheManager {
     try {
       debugPrint('🔄 TasksCacheManager: Loading tasks (local-first)...');
 
-      final result = await _getTasksUseCase(NoParams());
+      final result = await _getTasksUseCase(const NoParams());
 
       return await result.fold(
         (failure) async {
@@ -75,7 +75,7 @@ class TasksCacheManager {
       _isSyncing = true;
       debugPrint('🔄 TasksCacheManager: Background sync started...');
 
-      final result = await _getTasksUseCase(NoParams());
+      final result = await _getTasksUseCase(const NoParams());
 
       return result.fold(
         (failure) {
@@ -107,7 +107,7 @@ class TasksCacheManager {
     try {
       debugPrint('🔄 TasksCacheManager: Force refresh...');
 
-      final result = await _getTasksUseCase(NoParams());
+      final result = await _getTasksUseCase(const NoParams());
 
       return result.fold(
         (failure) {

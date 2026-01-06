@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../loading/contextual_loading_manager.dart';
 import '../core/feedback_orchestrator.dart';
 import '../core/operation_config.dart';
-import '../../loading/contextual_loading_manager.dart';
 
 /// Extension helpers para operações de sync e backup
 extension SyncFeedbackHelpers on FeedbackOrchestrator {

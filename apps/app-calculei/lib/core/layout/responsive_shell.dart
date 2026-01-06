@@ -200,27 +200,27 @@ class _DesktopNavigationRail extends StatelessWidget {
             ),
 
             // Category Items
-            _CategoryItem(
+            const _CategoryItem(
               icon: Icons.apps,
               label: 'Todos',
               color: Colors.grey,
             ),
-            _CategoryItem(
+            const _CategoryItem(
               icon: Icons.favorite,
               label: 'Favoritos',
               color: Colors.red,
             ),
-            _CategoryItem(
+            const _CategoryItem(
               icon: Icons.history,
               label: 'Recentes',
               color: Colors.purple,
             ),
-            _CategoryItem(
+            const _CategoryItem(
               icon: Icons.account_balance_wallet,
               label: 'Financeiro',
               color: Colors.blue,
             ),
-            _CategoryItem(
+            const _CategoryItem(
               icon: Icons.construction,
               label: 'Construção',
               color: Colors.deepOrange,

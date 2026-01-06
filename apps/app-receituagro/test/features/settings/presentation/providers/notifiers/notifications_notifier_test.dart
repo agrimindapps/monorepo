@@ -32,7 +32,7 @@ void main() {
     mockPromotionalManager = MockPromotionalNotificationManager();
 
     registerFallbackValue(UserSettingsEntity.createDefault('user-123'));
-    registerFallbackValue(NotificationPreferences(promotionalEnabled: true, seasonalAlertsEnabled: true, premiumOffersEnabled: true, newFeaturesEnabled: true, interestedCategories: []));
+    registerFallbackValue(const NotificationPreferences(promotionalEnabled: true, seasonalAlertsEnabled: true, premiumOffersEnabled: true, newFeaturesEnabled: true, interestedCategories: []));
     
     // Mock cleanup
     when(() => mockNotificationService.cancelAllNotifications())
@@ -93,7 +93,7 @@ void main() {
       when(() => mockUpdateUserSettingsUseCase(any()))
           .thenAnswer((_) async => expectedSettings);
       when(() => mockPromotionalManager.getUserNotificationPreferences())
-          .thenAnswer((_) async => NotificationPreferences(promotionalEnabled: true, seasonalAlertsEnabled: true, premiumOffersEnabled: true, newFeaturesEnabled: true, interestedCategories: []));
+          .thenAnswer((_) async => const NotificationPreferences(promotionalEnabled: true, seasonalAlertsEnabled: true, premiumOffersEnabled: true, newFeaturesEnabled: true, interestedCategories: []));
       when(() => mockPromotionalManager.saveUserNotificationPreferences(any()))
           .thenAnswer((_) async => true);
 

@@ -2,17 +2,16 @@ import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
 import '../gasometer_database.dart';
-import '../tables/gasometer_tables.dart';
 
 /// Repositório local para cache de assinaturas
 class SubscriptionLocalRepository {
-  final GasometerDatabase _db;
-  final StorageEncryptionService _encryptionService;
 
   SubscriptionLocalRepository(
     this._db, {
     StorageEncryptionService? encryptionService,
   }) : _encryptionService = encryptionService ?? StorageEncryptionService();
+  final GasometerDatabase _db;
+  final StorageEncryptionService _encryptionService;
 
   /// Salva ou atualiza uma assinatura no cache local
   Future<void> saveSubscription(SubscriptionEntity subscription) async {

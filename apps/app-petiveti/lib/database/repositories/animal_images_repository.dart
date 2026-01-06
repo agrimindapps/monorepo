@@ -4,7 +4,6 @@ import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
 import '../petiveti_database.dart';
-import '../tables/animal_images_table.dart';
 
 /// ============================================================================
 /// ANIMAL IMAGES REPOSITORY - Repositório de imagens de animais
@@ -130,7 +129,7 @@ class AnimalImagesRepository {
       sizeBytes: Value(processed.sizeBytes),
       isPrimary: Value(isPrimary),
       caption: Value(caption),
-      isDirty: Value(true),
+      isDirty: const Value(true),
       createdAt: Value(DateTime.now()),
     );
     
@@ -175,7 +174,7 @@ class AnimalImagesRepository {
       sizeBytes: Value(sizeBytes),
       isPrimary: Value(isPrimary),
       caption: Value(caption),
-      isDirty: Value(false),
+      isDirty: const Value(false),
       lastSyncAt: Value(lastSyncAt),
       version: Value(version),
       createdAt: Value(DateTime.now()),

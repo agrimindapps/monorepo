@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/providers/dependency_providers.dart' as deps;
 import '../../../../core/widgets/semantic_widgets.dart';
@@ -221,7 +220,7 @@ class _CostPerKmCalculatorPageState extends ConsumerState<CostPerKmCalculatorPag
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<String>(
-            value: _selectedVehicleId,
+            initialValue: _selectedVehicleId,
             decoration: InputDecoration(
               filled: true,
               fillColor: Colors.white,

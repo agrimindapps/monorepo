@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/providers/auth_providers.dart';
-import '../../tasks/presentation/pages/home_page.dart';
 import '../../premium/presentation/promotional_page.dart';
+import '../../tasks/presentation/pages/home_page.dart';
 import 'login_page.dart';
 
 class AuthGate extends ConsumerWidget {

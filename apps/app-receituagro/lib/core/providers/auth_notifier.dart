@@ -157,7 +157,7 @@ class AuthNotifier extends _$AuthNotifier {
   Future<void> _clearUserSession() async {
     await _analytics.clearUser();
 
-    state = AsyncValue.data(const AuthState.initial());
+    state = const AsyncValue.data(AuthState.initial());
 
     if (kDebugMode) print('✅ Auth Notifier: Session cleared');
   }
@@ -419,8 +419,9 @@ class AuthNotifier extends _$AuthNotifier {
     required String password,
   }) async {
     final currentState = state.value;
-    if (currentState == null)
+    if (currentState == null) {
       return AuthResult.failure('Estado não inicializado');
+    }
 
     try {
       state = AsyncValue.data(
@@ -478,8 +479,9 @@ class AuthNotifier extends _$AuthNotifier {
     required String displayName,
   }) async {
     final currentState = state.value;
-    if (currentState == null)
+    if (currentState == null) {
       return AuthResult.failure('Estado não inicializado');
+    }
 
     try {
       state = AsyncValue.data(
@@ -535,8 +537,9 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<AuthResult> signInAnonymously() async {
     final currentState = state.value;
-    if (currentState == null)
+    if (currentState == null) {
       return AuthResult.failure('Estado não inicializado');
+    }
 
     try {
       state = AsyncValue.data(
@@ -587,8 +590,9 @@ class AuthNotifier extends _$AuthNotifier {
     required String displayName,
   }) async {
     final currentState = state.value;
-    if (currentState == null)
+    if (currentState == null) {
       return AuthResult.failure('Estado não inicializado');
+    }
 
     try {
       state = AsyncValue.data(
@@ -693,8 +697,9 @@ class AuthNotifier extends _$AuthNotifier {
 
   Future<AuthResult> deleteAccount({String? password}) async {
     final currentState = state.value;
-    if (currentState == null)
+    if (currentState == null) {
       return AuthResult.failure('Estado não inicializado');
+    }
 
     try {
       if (currentState.currentUser == null) {
@@ -819,7 +824,7 @@ class AuthNotifier extends _$AuthNotifier {
   }
 
   void _performPostDeletionCleanup() {
-    state = AsyncValue.data(const AuthState.initial());
+    state = const AsyncValue.data(AuthState.initial());
   }
 
   Future<Map<String, dynamic>?> getAccountDeletionPreview() async {

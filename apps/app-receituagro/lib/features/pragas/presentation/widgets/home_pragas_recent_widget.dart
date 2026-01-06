@@ -75,7 +75,7 @@ class HomePragasRecentWidget extends ConsumerWidget {
       BuildContext context, String nomeCientifico, String type, String emoji) {
     final categoryColor = _getColorForType(type, context);
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(

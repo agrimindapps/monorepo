@@ -5,11 +5,6 @@ import '../../../constants/settings_design_tokens.dart';
 /// Standardized section header for settings pages
 /// Provides consistent title styling and spacing
 class SectionHeader extends StatelessWidget {
-  final String title;
-  final IconData? icon;
-  final Widget? action;
-  final EdgeInsets? padding;
-  final bool showIcon;
 
   const SectionHeader({
     super.key,
@@ -19,6 +14,11 @@ class SectionHeader extends StatelessWidget {
     this.padding,
     this.showIcon = false,
   });
+  final String title;
+  final IconData? icon;
+  final Widget? action;
+  final EdgeInsets? padding;
+  final bool showIcon;
 
   @override
   Widget build(BuildContext context) {

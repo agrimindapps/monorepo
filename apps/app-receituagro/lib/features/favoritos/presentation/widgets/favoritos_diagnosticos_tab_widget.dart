@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/premium_notifier.dart';
 import '../../../../core/widgets/premium_feature_card.dart';

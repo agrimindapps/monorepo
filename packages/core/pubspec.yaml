@@ -134,6 +134,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.5.24
   sqlite3_web: ^0.4.1  # Web support with WASM
   
+  web: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

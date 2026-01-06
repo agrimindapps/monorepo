@@ -1,8 +1,6 @@
 import 'package:core/core.dart' hide SubscriptionPage, analyticsServiceProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../features/comentarios/comentarios_page.dart';
 import '../../features/culturas/lista_culturas_page.dart';

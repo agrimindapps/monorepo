@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 class SendPasswordResetEmailUseCase {
   final IAuthRepository _repository;

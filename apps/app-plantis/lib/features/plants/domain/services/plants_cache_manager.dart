@@ -39,7 +39,7 @@ class PlantsCacheManager {
     try {
       debugPrint('🔄 PlantsCacheManager: Loading plants (local-first)...');
 
-      final result = await _getPlantsUseCase.call(NoParams());
+      final result = await _getPlantsUseCase.call(const NoParams());
 
       return await result.fold(
         (failure) async {
@@ -74,7 +74,7 @@ class PlantsCacheManager {
       _isSyncing = true;
       debugPrint('🔄 PlantsCacheManager: Background sync started...');
 
-      final result = await _getPlantsUseCase.call(NoParams());
+      final result = await _getPlantsUseCase.call(const NoParams());
 
       return result.fold(
         (failure) {

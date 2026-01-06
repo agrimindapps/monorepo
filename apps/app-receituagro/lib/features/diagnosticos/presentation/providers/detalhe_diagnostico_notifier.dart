@@ -181,18 +181,14 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                 );
 
                 // Se não achou, tenta buscar pelo ID da tabela (caso onde ID == DefensivoID)
-                if (defensivoInfo == null) {
-                  defensivoInfo = await fitossanitariosInfoRepo.findById(
+                defensivoInfo ??= await fitossanitariosInfoRepo.findById(
                     defensivo.id,
                   );
-                }
 
                 // Se ainda não achou, tenta pelo idDefensivo (String)
-                if (defensivoInfo == null) {
-                  defensivoInfo = await fitossanitariosInfoRepo.findByIdReg(
+                defensivoInfo ??= await fitossanitariosInfoRepo.findByIdReg(
                     defensivo.idDefensivo,
                   );
-                }
 
                 debugPrint(
                   '   defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}',

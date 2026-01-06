@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/constants/task_list_colors.dart';
-import '../../tasks/presentation/providers/task_notifier.dart';
 import '../../../shared/widgets/empty_state_widget.dart';
 import '../../../shared/widgets/loading_widget.dart';
 import '../../tasks/domain/task_list_entity.dart';
+import '../../tasks/presentation/providers/task_notifier.dart';
 import '../providers/task_list_providers.dart';
 import 'create_edit_task_list_page.dart';
 import 'task_list_detail_page.dart';

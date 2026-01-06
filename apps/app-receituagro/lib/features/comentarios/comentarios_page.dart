@@ -270,15 +270,15 @@ class _ComentariosPageContentState
                   : const Icon(Icons.add),
             );
           },
-          loading: () => FloatingActionButton(
+          loading: () => const FloatingActionButton(
             onPressed: null,
             backgroundColor: Colors.grey,
-            child: const Icon(Icons.lock),
+            child: Icon(Icons.lock),
           ),
-          error: (_, __) => FloatingActionButton(
+          error: (_, __) => const FloatingActionButton(
             onPressed: null,
             backgroundColor: Colors.grey,
-            child: const Icon(Icons.lock),
+            child: Icon(Icons.lock),
           ),
         );
       },

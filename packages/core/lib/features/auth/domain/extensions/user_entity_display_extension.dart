@@ -9,12 +9,12 @@ extension UserEntityDisplayExtension on UserEntity {
   /// 2. Parte local do email (antes do @)
   /// 3. "Usuário"
   String get safeDisplayName {
-    if (displayName != null && displayName!.trim().isNotEmpty) {
-      return displayName!.trim();
+    if (displayName.trim().isNotEmpty) {
+      return displayName.trim();
     }
     
-    if (email != null && email!.isNotEmpty) {
-      final emailParts = email!.split('@');
+    if (email.isNotEmpty) {
+      final emailParts = email.split('@');
       if (emailParts.isNotEmpty && emailParts.first.isNotEmpty) {
         return emailParts.first;
       }
@@ -25,8 +25,8 @@ extension UserEntityDisplayExtension on UserEntity {
   
   /// Retorna email seguro
   String get safeEmail {
-    if (email != null && email!.trim().isNotEmpty) {
-      return email!.trim();
+    if (email.trim().isNotEmpty) {
+      return email.trim();
     }
     return 'Sem email';
   }

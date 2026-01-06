@@ -298,7 +298,7 @@ class VaccineFormView extends ConsumerWidget {
           )
         else
           DropdownButtonFormField<VaccineStatus>(
-            value: value,
+            initialValue: value,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
             ),

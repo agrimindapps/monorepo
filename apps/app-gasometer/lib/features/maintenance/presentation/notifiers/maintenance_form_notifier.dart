@@ -1,8 +1,8 @@
 import 'package:core/core.dart' as core;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:core/core.dart' hide connectivityServiceProvider;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/services/analytics/gasometer_analytics_service.dart';
@@ -21,9 +21,9 @@ import '../providers/maintenance_providers.dart';
 import 'maintenance_form_state.dart';
 
 part 'maintenance_form_notifier.g.dart';
-part 'maintenance_form_notifier_validation.dart';
 part 'maintenance_form_notifier_image.dart';
 part 'maintenance_form_notifier_persistence.dart';
+part 'maintenance_form_notifier_validation.dart';
 
 /// Notifier Riverpod para gerenciar o estado do formulário de manutenção
 ///

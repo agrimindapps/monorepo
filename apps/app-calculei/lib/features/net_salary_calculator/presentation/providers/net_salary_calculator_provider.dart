@@ -15,7 +15,7 @@ CalculateNetSalaryUseCase calculateNetSalaryUseCase(Ref ref) {
 class NetSalaryCalculatorNotifier extends _$NetSalaryCalculatorNotifier {
   @override
   CalculatorState<NetSalaryCalculation> build() {
-    return CalculatorState.empty();
+    return CalculatorState.empty<NetSalaryCalculation>();
   }
 
   Future<void> calculate(CalculateNetSalaryParams params) async {
@@ -31,6 +31,6 @@ class NetSalaryCalculatorNotifier extends _$NetSalaryCalculatorNotifier {
   }
 
   void clearCalculation() {
-    state = CalculatorState.empty();
+    state = CalculatorState.empty<NetSalaryCalculation>();
   }
 }

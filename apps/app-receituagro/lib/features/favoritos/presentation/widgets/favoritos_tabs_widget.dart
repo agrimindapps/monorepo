@@ -20,17 +20,17 @@ class FavoritosTabsWidget extends StatelessWidget {
 
   /// Tabs para Favoritos
   static List<StandardTabData> get favoritosTabs => [
-    StandardTabData(
+    const StandardTabData(
       icon: FontAwesomeIcons.shield,
       text: 'Defensivos',
       semanticLabel: 'Defensivos favoritos',
     ),
-    StandardTabData(
+    const StandardTabData(
       icon: FontAwesomeIcons.bug,
       text: 'Pragas',
       semanticLabel: 'Pragas favoritas',
     ),
-    StandardTabData(
+    const StandardTabData(
       icon: FontAwesomeIcons.magnifyingGlass,
       text: 'Diagnósticos',
       semanticLabel: 'Diagnósticos favoritos',

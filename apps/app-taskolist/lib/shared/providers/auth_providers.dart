@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:core/core.dart' as core;
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/providers/core_providers.dart';
 import '../../core/providers/realtime_sync_notifier.dart';
 import '../../infrastructure/services/auth_service.dart';
 import '../../infrastructure/services/sync_service.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'auth_providers.g.dart';
 

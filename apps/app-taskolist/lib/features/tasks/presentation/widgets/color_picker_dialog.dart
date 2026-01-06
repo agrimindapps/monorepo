@@ -35,7 +35,7 @@ class ColorPickerDialog extends StatelessWidget {
                 Navigator.pop(context);
               },
               borderRadius: BorderRadius.circular(24),
-              child: Container(
+              child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: colorEntry.value,
                   shape: BoxShape.circle,

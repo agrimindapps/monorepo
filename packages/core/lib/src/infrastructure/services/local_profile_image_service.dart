@@ -23,16 +23,16 @@ class LocalProfileImageService {
         );
       }
       if (!await imageFile.exists()) {
-        return Left(
-          const ValidationFailure('Arquivo de imagem não encontrado'),
+        return const Left(
+          ValidationFailure('Arquivo de imagem não encontrado'),
         );
       }
       final fileSizeInBytes = await imageFile.length();
       const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
       if (fileSizeInBytes > maxSizeInBytes) {
-        return Left(
-          const ValidationFailure(
+        return const Left(
+          ValidationFailure(
             'Imagem muito grande. Máximo permitido: 5MB',
           ),
         );
@@ -40,8 +40,8 @@ class LocalProfileImageService {
       final imageBytes = await imageFile.readAsBytes();
       final image = img.decodeImage(imageBytes);
       if (image == null) {
-        return Left(
-          const ValidationFailure('Formato de imagem não suportado'),
+        return const Left(
+          ValidationFailure('Formato de imagem não suportado'),
         );
       }
       img.Image resizedImage = image;
@@ -106,8 +106,8 @@ class LocalProfileImageService {
       // Em web, dart:io não é suportado, então apenas validamos a extensão
       if (!kIsWeb) {
         if (!imageFile.existsSync()) {
-          return Left(
-            const ValidationFailure('Arquivo não encontrado'),
+          return const Left(
+            ValidationFailure('Arquivo não encontrado'),
           );
         }
       }
@@ -117,8 +117,8 @@ class LocalProfileImageService {
 
       final bool hasValidExtension = validExtensions.any(extension.endsWith);
       if (!hasValidExtension) {
-        return Left(
-          const ValidationFailure(
+        return const Left(
+          ValidationFailure(
             'Formato não suportado. Use JPG, PNG ou WebP',
           ),
         );
@@ -131,15 +131,15 @@ class LocalProfileImageService {
           const maxSizeInBytes = 5 * 1024 * 1024; // 5MB
 
           if (fileSizeInBytes > maxSizeInBytes) {
-            return Left(
-              const ValidationFailure(
+            return const Left(
+              ValidationFailure(
                 'Arquivo muito grande. Máximo: 5MB',
               ),
             );
           }
 
           if (fileSizeInBytes == 0) {
-            return Left(const ValidationFailure('Arquivo está vazio'));
+            return const Left(ValidationFailure('Arquivo está vazio'));
           }
         } catch (e) {
           return Left(
@@ -204,8 +204,8 @@ class LocalProfileImageService {
       final image = img.decodeImage(bytes);
 
       if (image == null) {
-        return Left(
-          const ValidationFailure(
+        return const Left(
+          ValidationFailure(
             'Não foi possível decodificar a imagem',
           ),
         );

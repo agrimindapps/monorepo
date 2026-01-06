@@ -17,13 +17,13 @@ class CreateNextRecurrenceUseCase {
   Future<Either<Failure, TaskEntity>> call(TaskEntity completedTask) async {
     // Validate task is recurring
     if (!completedTask.isRecurring) {
-      return Left(ValidationFailure('Task is not recurring'));
+      return const Left(ValidationFailure('Task is not recurring'));
     }
 
     // Get next occurrence date
     final nextDate = completedTask.nextOccurrence;
     if (nextDate == null) {
-      return Left(ValidationFailure('No more occurrences for this task'));
+      return const Left(ValidationFailure('No more occurrences for this task'));
     }
 
     // Create new task with same properties but new dates
@@ -48,7 +48,7 @@ class CreateNextRecurrenceUseCase {
       (failure) => Left(failure),
       (taskId) async {
         // TODO: Implementar getTaskById no repository
-        return Left(DatabaseFailure('getTaskById not implemented yet'));
+        return const Left(DatabaseFailure('getTaskById not implemented yet'));
       },
     );
   }

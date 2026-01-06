@@ -381,7 +381,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
       if (!formState.hasReceiptImage) {
         return const SizedBox.shrink();
       }
-      return FormSectionHeader(
+      return const FormSectionHeader(
         title: 'Comprovante',
         icon: Icons.receipt_long,
         child: ReadOnlyField(

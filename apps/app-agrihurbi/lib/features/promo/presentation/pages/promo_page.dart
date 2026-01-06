@@ -151,7 +151,7 @@ class PromoPage extends StatelessWidget {
           const SizedBox(height: 24),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: Text(
+            child: const Text(
               'Controle completo da sua propriedade rural com tecnologia de ponta. Aumente sua produtividade e reduza custos com o AgriHurbi.',
               style: TextStyle(
                 fontSize: 20,
@@ -323,7 +323,7 @@ class PromoPage extends StatelessWidget {
                     const SizedBox(height: 12),
                     Text(
                       feature['description'] as String,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: DesignTokens.textSecondaryColor,
                         height: 1.5,
@@ -416,7 +416,7 @@ class PromoPage extends StatelessWidget {
           const SizedBox(height: 16),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
-            child: Text(
+            child: const Text(
               'Junte-se a milhares de produtores que já estão transformando seus resultados com o AgriHurbi.',
               style: TextStyle(
                 fontSize: 18,
@@ -454,11 +454,11 @@ class PromoPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
-        border: Border(
+        border: const Border(
           top: BorderSide(color: DesignTokens.borderColor),
         ),
       ),
-      child: Column(
+      child: const Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -468,8 +468,8 @@ class PromoPage extends StatelessWidget {
                 color: DesignTokens.primaryColor,
                 size: 24,
               ),
-              const SizedBox(width: 8),
-              const Text(
+              SizedBox(width: 8),
+              Text(
                 'AgriHurbi',
                 style: TextStyle(
                   fontSize: 20,
@@ -479,7 +479,7 @@ class PromoPage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           Text(
             '© 2025 AgriHurbi. Todos os direitos reservados.',
             style: TextStyle(

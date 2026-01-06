@@ -107,9 +107,7 @@ class _SubscriptionSyncCoordinatorSimple {
         subscription = result.fold((f) => null, (s) => s);
       }
 
-      if (subscription == null) {
-        subscription = await _fetchFromFirebase();
-      }
+      subscription ??= await _fetchFromFirebase();
 
       if (!_subscriptionController.isClosed) {
         _subscriptionController.add(subscription);

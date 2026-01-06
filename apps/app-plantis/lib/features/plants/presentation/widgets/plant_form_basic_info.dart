@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:core/core.dart' hide Column;
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/providers/spaces_providers.dart';

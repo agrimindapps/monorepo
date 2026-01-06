@@ -30,7 +30,7 @@ void main() {
     color: 'Prata',
     licensePlate: 'ABC-1234',
     type: VehicleType.car,
-    supportedFuels: [FuelType.gasoline],
+    supportedFuels: const [FuelType.gasoline],
     currentOdometer: 15000.0,
     createdAt: DateTime(2024, 1, 1),
     updatedAt: DateTime(2024, 1, 1),
@@ -76,7 +76,7 @@ void main() {
       // Arrange
       final params = AddVehicleParams(vehicle: testVehicle);
       when(() => mockRepository.addVehicle(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Database error')));
+          .thenAnswer((_) async => const Left(ServerFailure('Database error')));
 
       // Act
       final result = await useCase(params);
@@ -138,7 +138,7 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       when(() => mockRepository.getAllVehicles())
-          .thenAnswer((_) async => Left(CacheFailure('No data')));
+          .thenAnswer((_) async => const Left(CacheFailure('No data')));
 
       // Act
       final result = await useCase();
@@ -157,7 +157,7 @@ void main() {
 
     test('should get vehicle by id successfully', () async {
       // Arrange
-      final params = GetVehicleByIdParams(vehicleId: 'test-id');
+      const params = GetVehicleByIdParams(vehicleId: 'test-id');
       when(() => mockRepository.getVehicleById(any()))
           .thenAnswer((_) async => Right(testVehicle));
 
@@ -176,9 +176,9 @@ void main() {
 
     test('should return failure when vehicle not found', () async {
       // Arrange
-      final params = GetVehicleByIdParams(vehicleId: 'invalid-id');
+      const params = GetVehicleByIdParams(vehicleId: 'invalid-id');
       when(() => mockRepository.getVehicleById(any()))
-          .thenAnswer((_) async => Left(CacheFailure('Vehicle not found')));
+          .thenAnswer((_) async => const Left(CacheFailure('Vehicle not found')));
 
       // Act
       final result = await useCase(params);
@@ -219,7 +219,7 @@ void main() {
       // Arrange
       final params = UpdateVehicleParams(vehicle: testVehicle);
       when(() => mockRepository.updateVehicle(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Update failed')));
+          .thenAnswer((_) async => const Left(ServerFailure('Update failed')));
 
       // Act
       final result = await useCase(params);
@@ -238,7 +238,7 @@ void main() {
 
     test('should delete vehicle successfully', () async {
       // Arrange
-      final params = DeleteVehicleParams(vehicleId: 'test-id');
+      const params = DeleteVehicleParams(vehicleId: 'test-id');
       when(() => mockRepository.deleteVehicle(any()))
           .thenAnswer((_) async => const Right(unit));
 
@@ -252,9 +252,9 @@ void main() {
 
     test('should return failure when delete fails', () async {
       // Arrange
-      final params = DeleteVehicleParams(vehicleId: 'test-id');
+      const params = DeleteVehicleParams(vehicleId: 'test-id');
       when(() => mockRepository.deleteVehicle(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Delete failed')));
+          .thenAnswer((_) async => const Left(ServerFailure('Delete failed')));
 
       // Act
       final result = await useCase(params);
@@ -273,7 +273,7 @@ void main() {
 
     test('should search vehicles successfully', () async {
       // Arrange
-      final params = SearchVehiclesParams(query: 'Toyota');
+      const params = SearchVehiclesParams(query: 'Toyota');
       final vehicles = [testVehicle];
       when(() => mockRepository.searchVehicles(any()))
           .thenAnswer((_) async => Right(vehicles));
@@ -296,7 +296,7 @@ void main() {
 
     test('should return empty list when no matches', () async {
       // Arrange
-      final params = SearchVehiclesParams(query: 'NonExistent');
+      const params = SearchVehiclesParams(query: 'NonExistent');
       when(() => mockRepository.searchVehicles(any()))
           .thenAnswer((_) async => const Right([]));
 
@@ -313,9 +313,9 @@ void main() {
 
     test('should return failure when search fails', () async {
       // Arrange
-      final params = SearchVehiclesParams(query: 'Test');
+      const params = SearchVehiclesParams(query: 'Test');
       when(() => mockRepository.searchVehicles(any()))
-          .thenAnswer((_) async => Left(CacheFailure('Search error')));
+          .thenAnswer((_) async => const Left(CacheFailure('Search error')));
 
       // Act
       final result = await useCase(params);

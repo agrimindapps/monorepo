@@ -209,7 +209,7 @@ class AdSenseWebService implements IWebAdsRepository {
   void _pushAdSense() {
     // Executa JavaScript para fazer push do AdSense
     // Nota: Em package:web, usamos js_interop para chamar JS
-    final script = '(adsbygoogle = window.adsbygoogle || []).push({});';
+    const script = '(adsbygoogle = window.adsbygoogle || []).push({});';
     final scriptElement =
         web.document.createElement('script') as web.HTMLScriptElement;
     scriptElement.textContent = script;

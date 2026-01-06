@@ -10,13 +10,14 @@ part 'vacation_calculator_provider.g.dart';
 CalculateVacationUseCase calculateVacationUseCase(
   Ref ref,
 ) {
-  return CalculateVacationUseCase();
+  return const CalculateVacationUseCase();
 }
 
 /// State notifier for vacation calculator
 @riverpod
 class VacationCalculator extends _$VacationCalculator {
   
+  @override
   VacationCalculation build() {
     return VacationCalculation.empty();
   }

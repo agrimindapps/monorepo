@@ -295,7 +295,7 @@ class _RangeCalculatorPageState extends ConsumerState<RangeCalculatorPage> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.orange.shade200),
             ),
-            child: Text('Erro ao carregar dados'),
+            child: const Text('Erro ao carregar dados'),
           ),
           (allRecords) {
             // Filter by vehicle

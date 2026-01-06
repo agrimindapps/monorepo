@@ -86,13 +86,13 @@ class _WebLegalPageLayoutState extends State<WebLegalPageLayout> {
         children: [
           // Background gradient
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  const Color(0xFF0F2F21),
-                  const Color(0xFF0A1F14),
+                  Color(0xFF0F2F21),
+                  Color(0xFF0A1F14),
                 ],
               ),
             ),

@@ -321,16 +321,16 @@ class _ClearTypeSelector extends StatelessWidget {
         RadioGroup<String>(
           groupValue: selectedType,
           onChanged: (value) => onChanged(value!),
-          child: Column(
+          child: const Column(
             children: [
               RadioListTile<String>(
-                title: const Text('Limpeza completa'),
-                subtitle: const Text('Remove todos os dados locais'),
+                title: Text('Limpeza completa'),
+                subtitle: Text('Remove todos os dados locais'),
                 value: 'all',
               ),
               RadioListTile<String>(
-                title: const Text('Limpeza seletiva'),
-                subtitle: const Text('Escolha módulos específicos'),
+                title: Text('Limpeza seletiva'),
+                subtitle: Text('Escolha módulos específicos'),
                 value: 'selective',
               ),
             ],

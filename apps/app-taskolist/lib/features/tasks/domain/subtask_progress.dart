@@ -42,5 +42,5 @@ class SubtaskProgress extends Equatable {
   List<Object?> get props => [total, completed];
 
   @override
-  String toString() => 'SubtaskProgress($formattedCount, ${progressPercent}%)';
+  String toString() => 'SubtaskProgress($formattedCount, $progressPercent%)';
 }

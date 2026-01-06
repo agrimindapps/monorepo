@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'package:flutter/material.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../domain/entities/user_settings_entity.dart';
 import '../../../domain/usecases/get_user_settings_usecase.dart';

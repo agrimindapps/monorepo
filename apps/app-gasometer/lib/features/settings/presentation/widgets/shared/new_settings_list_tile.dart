@@ -5,15 +5,6 @@ import '../../../constants/settings_design_tokens.dart';
 /// Standardized list tile for settings options
 /// Provides consistent layout and interaction patterns
 class NewSettingsListTile extends StatelessWidget {
-  final IconData leadingIcon;
-  final String title;
-  final String? subtitle;
-  final Widget? trailing;
-  final VoidCallback? onTap;
-  final Color? iconColor;
-  final Color? backgroundColor;
-  final bool enabled;
-  final bool showDivider;
 
   const NewSettingsListTile({
     super.key,
@@ -27,6 +18,15 @@ class NewSettingsListTile extends StatelessWidget {
     this.enabled = true,
     this.showDivider = false,
   });
+  final IconData leadingIcon;
+  final String title;
+  final String? subtitle;
+  final Widget? trailing;
+  final VoidCallback? onTap;
+  final Color? iconColor;
+  final Color? backgroundColor;
+  final bool enabled;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {

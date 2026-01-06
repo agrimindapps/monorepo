@@ -25,6 +25,22 @@ dependencies:
   hive_flutter: any
 
   # Auth & Preferences
+  drift: any
+  cloud_firestore: any
+  dartz: any
+  firebase_auth: any
+  google_sign_in: any
+  connectivity_plus: any
+  flutter_local_notifications: any
+  timezone: any
+  go_router: any
+  permission_handler: any
+  intl: any
+  shared_preferences: any
+  freezed_annotation: any
+  url_launcher: any
+  firebase_core: any
+  package_info_plus: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

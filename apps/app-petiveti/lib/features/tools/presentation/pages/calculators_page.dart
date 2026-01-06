@@ -32,25 +32,25 @@ class CalculatorsPage extends StatelessWidget {
                     icon: Icons.favorite,
                     color: Colors.green,
                     tools: [
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Calculadora de Calorias',
                         subtitle: 'Calcule as necessidades calóricas do seu pet',
                         icon: Icons.restaurant,
                         route: '/calculators/calorie',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Peso Ideal',
                         subtitle: 'Descubra o peso ideal para seu pet',
                         icon: Icons.monitor_weight,
                         route: '/calculators/ideal-weight',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Condição Corporal',
                         subtitle: 'Avalie a condição física',
                         icon: Icons.assignment,
                         route: '/calculators/body-condition',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Hidratação',
                         subtitle: 'Calcule necessidades de água',
                         icon: Icons.water_drop,
@@ -65,19 +65,19 @@ class CalculatorsPage extends StatelessWidget {
                     icon: Icons.pets,
                     color: Colors.blue,
                     tools: [
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Exercícios',
                         subtitle: 'Planeje exercícios adequados',
                         icon: Icons.directions_run,
                         route: '/calculators/exercise',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Idade do Pet',
                         subtitle: 'Converta a idade do seu pet para anos humanos',
                         icon: Icons.cake,
                         route: '/calculators/animal-age',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Gestação',
                         subtitle: 'Acompanhe a gestação do seu pet',
                         icon: Icons.pregnant_woman,
@@ -92,25 +92,25 @@ class CalculatorsPage extends StatelessWidget {
                     icon: Icons.medical_services,
                     color: Colors.red,
                     tools: [
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Dosagem de Medicamentos',
                         subtitle: 'Calcule dosagens precisas para medicamentos',
                         icon: Icons.medication,
                         route: '/calculators/medication-dosage',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Fluidoterapia',
                         subtitle: 'Calcule necessidades de fluidos IV',
                         icon: Icons.water,
                         route: '/calculators/fluid-therapy',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Anestesia',
                         subtitle: 'Cálculos para procedimentos anestésicos',
                         icon: Icons.healing,
                         route: '/calculators/anesthesia',
                       ),
-                      _ToolItem(
+                      const _ToolItem(
                         title: 'Insulina para Diabetes',
                         subtitle: 'Calcule doses de insulina para pets diabéticos',
                         icon: Icons.bloodtype,

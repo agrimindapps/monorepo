@@ -206,11 +206,11 @@ class _TaskDetailDrawerState extends ConsumerState<TaskDetailDrawer> {
       height: double.infinity,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: AppColors.shadow,
             blurRadius: 10,
-            offset: const Offset(-5, 0),
+            offset: Offset(-5, 0),
           ),
         ],
       ),

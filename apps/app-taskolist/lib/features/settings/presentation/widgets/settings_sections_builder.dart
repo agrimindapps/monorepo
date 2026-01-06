@@ -253,7 +253,7 @@ class SettingsSectionsBuilder {
       padding: const EdgeInsets.fromLTRB(24, 16, 16, 8),
       child: Text(
         title,
-        style: TextStyle(
+        style: const TextStyle(
           fontWeight: FontWeight.bold,
           color: AppColors.primaryColor,
           fontSize: 14,

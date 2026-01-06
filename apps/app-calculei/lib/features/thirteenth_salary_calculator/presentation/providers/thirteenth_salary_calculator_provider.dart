@@ -15,7 +15,7 @@ CalculateThirteenthSalaryUseCase calculateThirteenthSalaryUseCase(Ref ref) {
 class ThirteenthSalaryCalculatorNotifier extends _$ThirteenthSalaryCalculatorNotifier {
   @override
   CalculatorState<ThirteenthSalaryCalculation> build() {
-    return CalculatorState.empty();
+    return CalculatorState.empty<ThirteenthSalaryCalculation>();
   }
 
   Future<void> calculate(CalculateThirteenthSalaryParams params) async {
@@ -31,6 +31,6 @@ class ThirteenthSalaryCalculatorNotifier extends _$ThirteenthSalaryCalculatorNot
   }
 
   void clearCalculation() {
-    state = CalculatorState.empty();
+    state = CalculatorState.empty<ThirteenthSalaryCalculation>();
   }
 }

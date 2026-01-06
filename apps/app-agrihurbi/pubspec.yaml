@@ -21,6 +21,17 @@ dependencies:
   # Specific dependencies not in core
   xml: any
 
+  drift: any
+  riverpod_annotation: any
+  flutter_riverpod: any
+  dio: any
+  connectivity_plus: any
+  dartz: any
+  go_router: any
+  flutter_secure_storage: any
+  freezed_annotation: any
+  intl: any
+  path_provider: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -39,12 +39,13 @@ import 'package:flutter/material.dart';
 import '../loading/contextual_loading_manager.dart';
 import 'feedback_system.dart';
 import 'unified_feedback_system.dart';
+
 export '../loading/contextual_loading_manager.dart';
-export 'services/animation_service.dart';
 export 'confirmation_system.dart';
 export 'feedback_system.dart';
 export 'haptic_service.dart';
 export 'progress_tracker.dart';
+export 'services/animation_service.dart';
 export 'toast_service.dart';
 export 'unified_feedback_system.dart';
 

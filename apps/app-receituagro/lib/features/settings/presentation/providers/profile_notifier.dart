@@ -1,6 +1,6 @@
 import 'package:core/core.dart' hide Column;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/repositories/profile_repository.dart';
 import '../../providers/profile_providers.dart';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../core/data/calculator_content_repository.dart';
 import '../../../../core/presentation/widgets/calculator_app_bar.dart';
@@ -21,8 +20,6 @@ class VacationCalculatorPage extends ConsumerStatefulWidget {
 
 class _VacationCalculatorPageState
     extends ConsumerState<VacationCalculatorPage> {
-  final _formKey = GlobalKey<FormState>();
-
   @override
   Widget build(BuildContext context) {
     final calculation = ref.watch(vacationCalculatorProvider);

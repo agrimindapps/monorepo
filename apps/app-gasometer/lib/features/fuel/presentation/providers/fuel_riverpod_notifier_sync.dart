@@ -7,7 +7,7 @@ extension FuelRiverpodSync on FuelRiverpod {
   Future<void> _setupConnectivityListener() async {
     final isOnline = await _connectivityService.initialize();
 
-    this.state = AsyncValue.data(
+    state = AsyncValue.data(
       const FuelState().copyWith(isOnline: isOnline),
     );
 
@@ -22,9 +22,9 @@ extension FuelRiverpodSync on FuelRiverpod {
   }
 
   void _onConnectivityChanged(bool isOnline) {
-    this.state.whenData((FuelState currentState) {
+    state.whenData((FuelState currentState) {
       final wasOnline = currentState.isOnline;
-      this.state = AsyncValue.data(currentState.copyWith(isOnline: isOnline));
+      state = AsyncValue.data(currentState.copyWith(isOnline: isOnline));
 
       if (_connectivityService.hasGoneOnline(wasOnline) &&
           currentState.hasPendingRecords) {
@@ -46,14 +46,14 @@ extension FuelRiverpodSync on FuelRiverpod {
   }
 
   Future<void> syncPendingRecords() async {
-    final currentState = this.state.value;
+    final currentState = state.value;
     if (currentState == null ||
         !currentState.isOnline ||
         !currentState.hasPendingRecords) {
       return;
     }
 
-    this.state = AsyncValue.data(currentState.copyWith(isSyncing: true));
+    state = AsyncValue.data(currentState.copyWith(isSyncing: true));
 
     if (kDebugMode) {
       debugPrint(
@@ -104,7 +104,7 @@ extension FuelRiverpodSync on FuelRiverpod {
     // Reload pending records
     final updatedPending = await _loadPendingRecords();
 
-    this.state = AsyncValue.data(
+    state = AsyncValue.data(
       currentState.copyWith(pendingRecords: updatedPending, isSyncing: false),
     );
 

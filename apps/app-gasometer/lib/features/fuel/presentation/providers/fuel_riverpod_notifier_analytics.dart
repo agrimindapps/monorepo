@@ -7,7 +7,7 @@ extension FuelRiverpodAnalytics on FuelRiverpod {
   Future<void> loadAnalytics(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
-    final currentState = this.state.value;
+    final currentState = state.value;
     if (currentState == null) return;
 
     try {
@@ -56,7 +56,7 @@ extension FuelRiverpodAnalytics on FuelRiverpod {
       );
       updatedAnalyticsCache[vehicleId] = analytics;
 
-      this.state = AsyncValue.data(
+      state = AsyncValue.data(
         currentState.copyWith(analytics: updatedAnalyticsCache),
       );
 
@@ -71,7 +71,7 @@ extension FuelRiverpodAnalytics on FuelRiverpod {
   }
 
   double getTotalSpentInDateRange(DateTime startDate, DateTime endDate) {
-    return this.state.whenData((FuelState currentState) {
+    return state.whenData((FuelState currentState) {
           return _calculationService.calculateTotalSpentInRange(
             currentState.fuelRecords,
             startDate,
@@ -82,7 +82,7 @@ extension FuelRiverpodAnalytics on FuelRiverpod {
   }
 
   double getTotalLitersInDateRange(DateTime startDate, DateTime endDate) {
-    return this.state.whenData((FuelState currentState) {
+    return state.whenData((FuelState currentState) {
           return _calculationService.calculateTotalLitersInRange(
             currentState.fuelRecords,
             startDate,

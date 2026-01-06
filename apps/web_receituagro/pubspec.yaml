@@ -43,6 +43,24 @@ dependencies:
   get: ^4.7.2
   flutter_web_plugins:
     sdk: flutter
+  supabase_flutter: any
+  shared_preferences: any
+  firebase_core: any
+  url_launcher: any
+  flutter_staggered_grid_view: any
+  skeletonizer: any
+  flutter_riverpod: any
+  dartz: any
+  equatable: any
+  riverpod_annotation: any
+  uuid: any
+  go_router: any
+  icons_plus: any
+  cloud_firestore: any
+  firebase_analytics: any
+  device_info_plus: any
+  package_info_plus: any
+  intl: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,6 +1,4 @@
-import 'dart:developer' as developer;
 
-import 'package:cloud_firestore/cloud_firestore.dart' as fs;
 import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
@@ -10,7 +8,6 @@ import '../../tables/gasometer_tables.dart';
 /// Adapter de sincronização para Assinaturas
 class SubscriptionDriftSyncAdapter
     extends DriftSyncAdapterBase<SubscriptionEntity, UserSubscription> {
-  final StorageEncryptionService _encryptionService;
 
   SubscriptionDriftSyncAdapter(
     GasometerDatabase super.db,
@@ -18,6 +15,7 @@ class SubscriptionDriftSyncAdapter
     super.connectivityService, {
     StorageEncryptionService? encryptionService,
   }) : _encryptionService = encryptionService ?? StorageEncryptionService();
+  final StorageEncryptionService _encryptionService;
 
   GasometerDatabase get localDb => db as GasometerDatabase;
 
@@ -127,7 +125,7 @@ class SubscriptionDriftSyncAdapter
       isDirty: Value(entity.isDirty),
       isDeleted: Value(entity.isDeleted),
       version: Value(entity.version),
-      firebaseId: entity.id != null ? Value(entity.id) : const Value.absent(),
+      firebaseId: Value(entity.id),
     );
   }
 

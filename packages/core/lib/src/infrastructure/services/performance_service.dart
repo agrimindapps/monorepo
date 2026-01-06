@@ -586,7 +586,7 @@ class PerformanceService implements IPerformanceRepository, IDisposableService {
     try {
       _activeTraces[traceName] = DateTime.now();
       if (_config.enableFirebaseIntegration && _firebasePerformance != null) {
-        final trace = _firebasePerformance!.newTrace(traceName);
+        final trace = _firebasePerformance.newTrace(traceName);
 
         if (attributes != null) {
           for (final entry in attributes.entries) {

@@ -55,7 +55,7 @@ final navigationAnalyticsServiceProvider = Provider<NavigationAnalyticsService>(
 final analyticsRouteObserverProvider = Provider<AnalyticsRouteObserver>((ref) {
   final analyticsService = ref.watch(analyticsServiceProvider);
   final navigationAnalytics = ref.watch(navigationAnalyticsServiceProvider);
-  final isDebugMode = kDebugMode;
+  const isDebugMode = kDebugMode;
   
   return AnalyticsRouteObserver(
     analyticsRepository: analyticsService,
@@ -73,7 +73,7 @@ final analyticsRouteObserverProvider = Provider<AnalyticsRouteObserver>((ref) {
 final analyticsRouteObserverFamilyProvider = Provider.family<AnalyticsRouteObserver, String?>((ref, appPrefix) {
   final analyticsService = ref.watch(analyticsServiceProvider);
   final navigationAnalytics = ref.watch(navigationAnalyticsServiceProvider);
-  final isDebugMode = kDebugMode;
+  const isDebugMode = kDebugMode;
   
   return AnalyticsRouteObserver(
     analyticsRepository: analyticsService,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:core/core.dart' hide FormState, Column;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
@@ -221,7 +220,7 @@ class _AddOdometerPageState extends ConsumerState<AddOdometerPage>
   }
 
   Widget _buildAdditionalInfoSection() {
-    return FormSectionHeader(
+    return const FormSectionHeader(
       title: 'Adicionais',
       icon: Icons.more_horiz,
       child: Column(children: [

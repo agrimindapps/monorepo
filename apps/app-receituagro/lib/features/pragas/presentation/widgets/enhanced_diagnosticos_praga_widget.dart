@@ -212,7 +212,7 @@ class _EnhancedDiagnosticosPragaWidgetState
           Row(
             children: [
               Expanded(
-                child: Container(
+                child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
@@ -228,7 +228,7 @@ class _EnhancedDiagnosticosPragaWidgetState
                     controller: _searchController,
                     decoration: InputDecoration(
                       hintText: 'Buscar por defensivo...',
-                      hintStyle: TextStyle(fontSize: 14),
+                      hintStyle: const TextStyle(fontSize: 14),
                       prefixIcon: const Icon(Icons.search, size: 20),
                       suffixIcon: _searchController.text.isNotEmpty
                           ? IconButton(
@@ -261,7 +261,7 @@ class _EnhancedDiagnosticosPragaWidgetState
               ),
               if (state.hasFilters) ...[
                 const SizedBox(width: SpacingTokens.sm),
-                Container(
+                DecoratedBox(
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
@@ -294,7 +294,7 @@ class _EnhancedDiagnosticosPragaWidgetState
           ),
           if (state.availableCulturas.length > 2) ...[
             const SizedBox(height: SpacingTokens.sm),
-            Container(
+            DecoratedBox(
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),

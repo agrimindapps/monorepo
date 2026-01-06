@@ -121,15 +121,17 @@ class DeviceManagementState {
 
   Color get statusColor {
     if (!hasDevices) return Colors.grey;
-    if (activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices)
+    if (activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices) {
       return Colors.green;
+    }
     return Colors.orange;
   }
 
   IconData get statusIcon {
     if (!hasDevices) return Icons.devices_other;
-    if (activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices)
+    if (activeMobileDeviceCount < plantisDeviceLimitConfig.maxMobileDevices) {
       return Icons.verified;
+    }
     return Icons.warning;
   }
 

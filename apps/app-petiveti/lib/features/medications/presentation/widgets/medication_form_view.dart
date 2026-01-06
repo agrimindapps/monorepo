@@ -85,7 +85,7 @@ class MedicationFormView extends ConsumerWidget {
 
   Widget _buildTypeSelector(BuildContext context, WidgetRef ref, MedicationFormState state) {
     return DropdownButtonFormField<MedicationType>(
-      value: state.type,
+      initialValue: state.type,
       decoration: const InputDecoration(
         labelText: 'Tipo',
         border: OutlineInputBorder(),

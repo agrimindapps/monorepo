@@ -409,7 +409,7 @@ class AuthNotifier extends _$AuthNotifier {
       // Verifica status premium atualizado para garantir limite correto
       bool isPremium = state.value?.isPremium ?? false;
       if (!isPremium && _subscriptionRepository != null && state.value?.currentUser != null) {
-         final subResult = await _subscriptionRepository!.hasPlantisSubscription();
+         final subResult = await _subscriptionRepository.hasPlantisSubscription();
          isPremium = subResult.getOrElse(() => false);
          
          if (isPremium) {

@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/design_tokens.dart';
 
 class SubscriptionPlansWidget extends StatefulWidget {
-  final List<ProductInfo> availableProducts;
-  final String? selectedPlanId;
-  final void Function(String) onPlanSelected;
 
   const SubscriptionPlansWidget({
     super.key,
@@ -14,6 +11,9 @@ class SubscriptionPlansWidget extends StatefulWidget {
     this.selectedPlanId,
     required this.onPlanSelected,
   });
+  final List<ProductInfo> availableProducts;
+  final String? selectedPlanId;
+  final void Function(String) onPlanSelected;
 
   @override
   State<SubscriptionPlansWidget> createState() =>

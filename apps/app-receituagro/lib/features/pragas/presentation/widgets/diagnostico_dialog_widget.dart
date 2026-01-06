@@ -72,9 +72,7 @@ class _DiagnosticoDialogWidgetState
         }
         
         // Se não encontrou, tenta como string (idDefensivo original)
-        if (defensivo == null) {
-          defensivo = await defensivoRepository.findByIdDefensivo(widget.diagnostico.defensivoId);
-        }
+        defensivo ??= await defensivoRepository.findByIdDefensivo(widget.diagnostico.defensivoId);
         
         if (mounted) {
           setState(() {

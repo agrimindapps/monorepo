@@ -14,6 +14,7 @@ abstract class LocalSettingsDataSource {
 class SettingsLocalDataSource implements LocalSettingsDataSource {
   static const String _settingsKey = 'app_settings';
 
+  @override
   Future<SettingsModel> getSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -30,6 +31,7 @@ class SettingsLocalDataSource implements LocalSettingsDataSource {
     }
   }
 
+  @override
   Future<void> saveSettings(SettingsModel settings) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -40,6 +42,7 @@ class SettingsLocalDataSource implements LocalSettingsDataSource {
     }
   }
 
+  @override
   Future<void> clearSettings() async {
     try {
       final prefs = await SharedPreferences.getInstance();

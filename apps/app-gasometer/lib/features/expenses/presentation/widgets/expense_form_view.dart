@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/design_tokens.dart';
 import '../../../../core/widgets/datetime_field.dart';
 import '../../../../core/widgets/form_section_header.dart';
-import '../../../../core/widgets/form_section_widget.dart';
 import '../../../../core/widgets/money_form_field.dart';
 import '../../../../core/widgets/notes_form_field.dart';
 import '../../../../core/widgets/odometer_field.dart';
@@ -164,7 +163,7 @@ class ExpenseFormView extends ConsumerWidget {
           if (isReadOnly)
             // Em modo de visualização, mostrar apenas se tiver imagem
             state.hasReceiptImage
-                ? FormSectionHeader(
+                ? const FormSectionHeader(
                     title: 'Comprovante da Despesa',
                     icon: Icons.receipt_long,
                     child: ReadOnlyField(

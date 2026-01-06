@@ -14,7 +14,7 @@ void main() {
       receiptImagePath: '/path/to/receipt.jpg',
       location: 'Auto Center XYZ',
       notes: 'Óleo sintético 5W30',
-      metadata: {'mechanic': 'João Silva'},
+      metadata: const {'mechanic': 'João Silva'},
       createdAt: DateTime(2024, 1, 15),
       updatedAt: DateTime(2024, 1, 15),
       userId: 'user-001',

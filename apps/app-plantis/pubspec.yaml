@@ -24,6 +24,19 @@ dependencies:
   google_fonts: ^6.1.0
   riverpod_annotation: ^3.0.3
   image_picker: ^1.2.1
+  drift: any
+  flutter_riverpod: any
+  freezed_annotation: any
+  cloud_firestore: any
+  dartz: any
+  shared_preferences: any
+  path_provider: any
+  url_launcher: any
+  intl: any
+  go_router: any
+  equatable: any
+  flutter_staggered_grid_view: any
+  firebase_auth: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -32,6 +45,7 @@ dev_dependencies:
   drift_dev: ^2.20.0
   riverpod_generator: ^3.0.3
 
+  flutter_riverpod: any
 flutter:
   uses-material-design: true
 

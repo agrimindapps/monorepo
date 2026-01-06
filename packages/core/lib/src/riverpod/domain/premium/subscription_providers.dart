@@ -437,7 +437,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
         state = const SubscriptionInactive();
       }
     } catch (e) {
-      state = SubscriptionError('Erro ao verificar assinatura: \$e');
+      state = const SubscriptionError('Erro ao verificar assinatura: \$e');
     }
   }
 
@@ -458,7 +458,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
       state = SubscriptionActive(info);
       return true;
     } catch (e) {
-      state = SubscriptionError('Erro na compra: \$e');
+      state = const SubscriptionError('Erro na compra: \$e');
       return false;
     }
   }
@@ -480,7 +480,7 @@ class SubscriptionNotifier extends Notifier<SubscriptionState> {
 
       return state is SubscriptionActive;
     } catch (e) {
-      state = SubscriptionError('Erro ao restaurar compras: \$e');
+      state = const SubscriptionError('Erro ao restaurar compras: \$e');
       return false;
     }
   }

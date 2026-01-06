@@ -90,7 +90,7 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
       _resolvedVehicleId = widget.vehicleId;
       final notifier = ref.read(fuelFormProvider(widget.vehicleId!).notifier);
       notifier.clearForm();
-      await notifier.initialize(vehicleId: widget.vehicleId!, userId: userId);
+      await notifier.initialize(vehicleId: widget.vehicleId, userId: userId);
     }
 
     if (mounted) setState(() {});

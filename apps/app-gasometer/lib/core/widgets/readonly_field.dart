@@ -357,7 +357,7 @@ class ReadOnlyFieldSection extends StatelessWidget {
         const SizedBox(height: 12),
         ...children.expand(
           (child) => [child, SizedBox(height: spacing)],
-        ).take(children.length * 2 - 1).toList(),
+        ).take(children.length * 2 - 1),
       ],
     );
   }

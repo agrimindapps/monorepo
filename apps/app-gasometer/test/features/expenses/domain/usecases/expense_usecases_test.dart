@@ -271,7 +271,7 @@ void main() {
     test('should return failure when repository throws', () async {
       // Arrange
       when(() => mockRepository.getAllExpenses())
-          .thenThrow(CacheFailure('Database error'));
+          .thenThrow(const CacheFailure('Database error'));
 
       // Act
       final result = await useCase(const NoParams());
@@ -436,7 +436,7 @@ void main() {
       when(() => mockRepository.getExpenseById(any()))
           .thenAnswer((_) async => testExpense);
       when(() => mockRepository.deleteExpense(any()))
-          .thenThrow(CacheFailure('Delete failed'));
+          .thenThrow(const CacheFailure('Delete failed'));
 
       // Act
       final result = await useCase('test-id');

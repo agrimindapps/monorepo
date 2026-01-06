@@ -69,7 +69,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
         return Scaffold(
           extendBodyBehindAppBar: true,
           backgroundColor: Colors.transparent,
-          body: Container(
+          body: DecoratedBox(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
@@ -89,7 +89,7 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
                 ),
                 child: Column(
                   children: [
-                    ModernHeaderWidget(
+                    const ModernHeaderWidget(
                       title: 'Planos',
                       subtitle: 'Gerencie sua assinatura premium',
                       leftIcon: Icons.workspace_premium,

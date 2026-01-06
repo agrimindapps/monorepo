@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
 import '../../features/sync/domain/services/gasometer_sync_service.dart';

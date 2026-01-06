@@ -15,7 +15,7 @@ CalculateOvertimeUseCase calculateOvertimeUseCase(Ref ref) {
 class OvertimeCalculatorNotifier extends _$OvertimeCalculatorNotifier {
   @override
   CalculatorState<OvertimeCalculation> build() {
-    return CalculatorState.empty();
+    return CalculatorState.empty<OvertimeCalculation>();
   }
 
   Future<void> calculate(CalculateOvertimeParams params) async {
@@ -31,6 +31,6 @@ class OvertimeCalculatorNotifier extends _$OvertimeCalculatorNotifier {
   }
 
   void clearCalculation() {
-    state = CalculatorState.empty();
+    state = CalculatorState.empty<OvertimeCalculation>();
   }
 }

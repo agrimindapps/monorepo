@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../../core/widgets/enhanced_image_picker.dart';
 import '../../../../../core/widgets/form_section_header.dart';

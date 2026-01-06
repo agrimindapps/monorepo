@@ -262,7 +262,7 @@ class DeviceIdentityService {
   String _generateFallbackUuid() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final random = (timestamp % 10000).toString().padLeft(4, '0');
-    final platform = kIsWeb ? 'web' : 'unk';
+    const platform = kIsWeb ? 'web' : 'unk';
 
     return 'fallback-$platform-$timestamp-$random';
   }

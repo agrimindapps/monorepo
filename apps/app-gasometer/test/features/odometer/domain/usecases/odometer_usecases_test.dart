@@ -26,7 +26,7 @@ void main() {
     registrationDate: DateTime(2024, 1, 15),
     description: 'Registro de viagem',
     type: OdometerType.trip,
-    metadata: {},
+    metadata: const {},
     createdAt: DateTime(2024, 1, 15),
     updatedAt: DateTime(2024, 1, 15),
     userId: 'user-001',
@@ -162,7 +162,7 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       when(() => mockRepository.addOdometerReading(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Database error')));
+          .thenAnswer((_) async => const Left(ServerFailure('Database error')));
 
       // Act
       final result = await useCase(testOdometer);
@@ -235,7 +235,7 @@ void main() {
     test('should return empty list when no readings', () async {
       // Arrange
       when(() => mockRepository.getAllOdometerReadings())
-          .thenAnswer((_) async => Right([]));
+          .thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await useCase(const NoParams());
@@ -251,7 +251,7 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       when(() => mockRepository.getAllOdometerReadings())
-          .thenAnswer((_) async => Left(CacheFailure('No data')));
+          .thenAnswer((_) async => const Left(CacheFailure('No data')));
 
       // Act
       final result = await useCase(const NoParams());

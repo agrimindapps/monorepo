@@ -1,9 +1,9 @@
 import 'dart:async';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'dart:developer' as developer;
 
 import 'package:core/core.dart' hide PremiumFeature, Column;
 import 'package:flutter/foundation.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/analytics/analytics_service.dart';
 import '../providers/core_providers.dart' as local_providers;

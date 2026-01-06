@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../loading/contextual_loading_manager.dart';
 import '../core/feedback_orchestrator.dart';
 import '../core/operation_config.dart';
 import '../feedback_system.dart';
-import '../../loading/contextual_loading_manager.dart';
 
 /// Extension helpers para operações de autenticação e premium
 extension AuthFeedbackHelpers on FeedbackOrchestrator {

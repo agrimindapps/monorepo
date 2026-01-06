@@ -7,11 +7,11 @@ import 'package:flutter/services.dart';
 import 'core/init/app_initialization.dart';
 import 'core/navigation/app_router.dart' as app_router;
 import 'core/providers/dependency_providers.dart';
-import 'features/settings/presentation/providers/theme_notifier.dart';
 import 'core/theme/receituagro_theme.dart';
 import 'core/utils/diagnostico_logger.dart';
 import 'core/utils/theme_preference_migration.dart';
 import 'features/analytics/analytics_providers.dart';
+import 'features/settings/presentation/providers/theme_notifier.dart';
 import 'firebase_options.dart';
 
 late ProviderContainer _container;

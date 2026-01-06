@@ -15,7 +15,7 @@ CalculateUnemploymentInsuranceUseCase calculateUnemploymentInsuranceUseCase(Ref 
 class UnemploymentInsuranceCalculatorNotifier extends _$UnemploymentInsuranceCalculatorNotifier {
   @override
   CalculatorState<UnemploymentInsuranceCalculation> build() {
-    return CalculatorState.empty();
+    return CalculatorState.empty<UnemploymentInsuranceCalculation>();
   }
 
   Future<void> calculate(CalculateUnemploymentInsuranceParams params) async {
@@ -31,6 +31,6 @@ class UnemploymentInsuranceCalculatorNotifier extends _$UnemploymentInsuranceCal
   }
 
   void clearCalculation() {
-    state = CalculatorState.empty();
+    state = CalculatorState.empty<UnemploymentInsuranceCalculation>();
   }
 }

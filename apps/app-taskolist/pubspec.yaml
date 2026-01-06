@@ -21,6 +21,18 @@ dependencies:
   
   # Date formatting
   
+  drift: any
+  cloud_firestore: any
+  riverpod_annotation: any
+  dartz: any
+  shared_preferences: any
+  equatable: any
+  uuid: any
+  flutter_riverpod: any
+  intl: any
+  json_annotation: any
+  purchases_flutter: any
+  path_provider: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

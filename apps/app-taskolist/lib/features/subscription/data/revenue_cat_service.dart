@@ -2,8 +2,6 @@ import 'dart:io' show Platform;
 
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
 final revenueCatServiceProvider = Provider<RevenueCatService>((ref) {
   return RevenueCatService();

@@ -15,7 +15,7 @@ CalculateCashVsInstallmentUseCase calculateCashVsInstallmentUseCase(Ref ref) {
 class CashVsInstallmentCalculatorNotifier extends _$CashVsInstallmentCalculatorNotifier {
   @override
   CalculatorState<CashVsInstallmentCalculation> build() {
-    return CalculatorState.empty();
+    return CalculatorState.empty<CashVsInstallmentCalculation>();
   }
 
   Future<void> calculate(CalculateCashVsInstallmentParams params) async {
@@ -31,6 +31,6 @@ class CashVsInstallmentCalculatorNotifier extends _$CashVsInstallmentCalculatorN
   }
 
   void clearCalculation() {
-    state = CalculatorState.empty();
+    state = CalculatorState.empty<CashVsInstallmentCalculation>();
   }
 }

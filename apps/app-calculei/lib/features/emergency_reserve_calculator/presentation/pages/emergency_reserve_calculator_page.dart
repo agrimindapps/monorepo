@@ -1,10 +1,9 @@
 // Flutter imports:
+// Project imports:
+import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 
 import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';

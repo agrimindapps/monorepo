@@ -180,6 +180,7 @@ class FuelRiverpod extends _$FuelRiverpod {
   /// Cache para itens deletados (para suportar undo)
   final Map<String, FuelRecordEntity> _deletedCache = {};
 
+  @override
   FutureOr<FuelState> build() async {
     // Initialize specialized services via Bridge Providers
     _crudService = ref.watch(fuelCrudServiceProvider);

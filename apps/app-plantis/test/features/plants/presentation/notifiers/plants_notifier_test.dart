@@ -1,11 +1,10 @@
 import 'package:app_plantis/core/auth/auth_state_notifier.dart';
+import 'package:app_plantis/core/providers/repository_providers.dart';
 import 'package:app_plantis/features/plants/domain/usecases/add_plant_usecase.dart';
 import 'package:app_plantis/features/plants/domain/usecases/update_plant_usecase.dart';
 import 'package:app_plantis/features/plants/presentation/providers/plants_notifier.dart';
 import 'package:app_plantis/features/plants/presentation/providers/plants_providers.dart';
-import 'package:app_plantis/core/providers/repository_providers.dart';
 import 'package:core/core.dart' hide Column;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -111,7 +110,7 @@ void main() {
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
-          .addPlant(AddPlantParams(name: 'Rosa', species: 'Rosa gallica'));
+          .addPlant(const AddPlantParams(name: 'Rosa', species: 'Rosa gallica'));
 
       // Assert
       expect(result, true);
@@ -123,7 +122,7 @@ void main() {
       // Act
       final result = await container
           .read(plantsNotifierProvider.notifier)
-          .addPlant(AddPlantParams(name: ''));
+          .addPlant(const AddPlantParams(name: ''));
 
       // Assert
       expect(result, false);
@@ -153,7 +152,7 @@ void main() {
       final result = await container
           .read(plantsNotifierProvider.notifier)
           .addPlant(
-            AddPlantParams(
+            const AddPlantParams(
               name: 'Orquídea',
               species: 'Phalaenopsis',
               notes: 'Luz indireta',

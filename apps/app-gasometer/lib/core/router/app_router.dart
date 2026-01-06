@@ -2,8 +2,8 @@ import 'package:core/core.dart' ;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../features/auth/presentation/notifiers/auth_notifier.dart';
 import '../../features/activities/presentation/pages/activities_page.dart';
+import '../../features/auth/presentation/notifiers/auth_notifier.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
 import '../../features/auth/presentation/pages/web_login_page.dart';
 import '../../features/expenses/presentation/pages/add_expense_page.dart';

@@ -50,7 +50,7 @@ class PetivetiSyncStatus extends Equatable {
         isEmergencyMode = false;
 
   /// Creates a syncing status
-  PetivetiSyncStatus.syncing({
+  const PetivetiSyncStatus.syncing({
     required this.entityStatus,
     this.progress,
   })  : state = SyncStatus.syncing,

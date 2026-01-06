@@ -348,7 +348,7 @@ class FuelFormView extends ConsumerWidget {
       if (!state.hasReceiptImage) {
         return const SizedBox.shrink();
       }
-      return FormSectionHeader(
+      return const FormSectionHeader(
         title: 'Comprovante',
         icon: Icons.receipt_long,
         child: ReadOnlyField(

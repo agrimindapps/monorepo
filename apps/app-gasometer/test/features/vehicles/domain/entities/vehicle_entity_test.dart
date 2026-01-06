@@ -13,7 +13,7 @@ void main() {
       color: 'Prata',
       licensePlate: 'ABC-1234',
       type: VehicleType.car,
-      supportedFuels: [FuelType.gasoline, FuelType.ethanol],
+      supportedFuels: const [FuelType.gasoline, FuelType.ethanol],
       tankCapacity: 50.0,
       engineSize: 2.0,
       currentOdometer: 15000.0,

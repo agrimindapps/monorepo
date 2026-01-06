@@ -1,5 +1,4 @@
 import 'package:core/core.dart' hide AuthState, Column;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/domain/usecases/send_password_reset_email_usecase.dart';
 import '../../features/auth/domain/usecases/update_profile_usecase.dart';

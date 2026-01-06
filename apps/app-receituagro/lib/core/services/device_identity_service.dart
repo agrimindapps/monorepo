@@ -4,11 +4,11 @@
 /// DeviceInfo é mantido como alias para DeviceEntity para compatibilidade.
 library;
 
-// Re-export from core
-export 'package:core/core.dart' show DeviceIdentityService, DeviceEntity;
-
 import 'package:core/core.dart' show DeviceEntity;
 import 'package:flutter/foundation.dart' show kIsWeb, defaultTargetPlatform;
+
+// Re-export from core
+export 'package:core/core.dart' show DeviceIdentityService, DeviceEntity;
 
 /// Tipo alias para compatibilidade com código existente
 /// DeviceInfo agora é um alias para DeviceEntity do core

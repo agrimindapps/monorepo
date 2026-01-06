@@ -74,7 +74,7 @@ void main() {
       // Arrange
       final params = AddMaintenanceRecordParams(maintenance: testMaintenance);
       when(() => mockRepository.addMaintenanceRecord(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Database error')));
+          .thenAnswer((_) async => const Left(ServerFailure('Database error')));
 
       // Act
       final result = await useCase(params);
@@ -136,7 +136,7 @@ void main() {
     test('should return failure when repository fails', () async {
       // Arrange
       when(() => mockRepository.getAllMaintenanceRecords())
-          .thenAnswer((_) async => Left(CacheFailure('No data')));
+          .thenAnswer((_) async => const Left(CacheFailure('No data')));
 
       // Act
       final result = await useCase(const NoParams());
@@ -177,7 +177,7 @@ void main() {
       // Arrange
       final params = UpdateMaintenanceRecordParams(maintenance: testMaintenance);
       when(() => mockRepository.updateMaintenanceRecord(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Update failed')));
+          .thenAnswer((_) async => const Left(ServerFailure('Update failed')));
 
       // Act
       final result = await useCase(params);
@@ -213,7 +213,7 @@ void main() {
 
     test('should delete maintenance record successfully', () async {
       // Arrange
-      final params = DeleteMaintenanceRecordParams(id: 'test-id');
+      const params = DeleteMaintenanceRecordParams(id: 'test-id');
       when(() => mockRepository.deleteMaintenanceRecord(any()))
           .thenAnswer((_) async => const Right(unit));
 
@@ -227,9 +227,9 @@ void main() {
 
     test('should return failure when delete fails', () async {
       // Arrange
-      final params = DeleteMaintenanceRecordParams(id: 'test-id');
+      const params = DeleteMaintenanceRecordParams(id: 'test-id');
       when(() => mockRepository.deleteMaintenanceRecord(any()))
-          .thenAnswer((_) async => Left(ServerFailure('Delete failed')));
+          .thenAnswer((_) async => const Left(ServerFailure('Delete failed')));
 
       // Act
       final result = await useCase(params);
@@ -240,9 +240,9 @@ void main() {
 
     test('should handle non-existent record', () async {
       // Arrange
-      final params = DeleteMaintenanceRecordParams(id: 'invalid-id');
+      const params = DeleteMaintenanceRecordParams(id: 'invalid-id');
       when(() => mockRepository.deleteMaintenanceRecord(any()))
-          .thenAnswer((_) async => Left(CacheFailure('Record not found')));
+          .thenAnswer((_) async => const Left(CacheFailure('Record not found')));
 
       // Act
       final result = await useCase(params);

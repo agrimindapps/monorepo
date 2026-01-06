@@ -3,7 +3,6 @@
 /// Export all fuel-related providers for easy importing
 library;
 
-import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../core/providers/dependency_providers.dart' as deps;

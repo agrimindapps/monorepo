@@ -1,7 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/task_entity.dart';
-import 'task_notifier.dart';
 
 part 'recurrence_processor_provider.g.dart';
 

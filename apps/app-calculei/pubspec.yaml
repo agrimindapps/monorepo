@@ -37,6 +37,17 @@ dependencies:
   # Dependencies from core (use core's versions)
   google_fonts: ^6.3.2
 
+  firebase_core: any
+  flutter_riverpod: any
+  go_router: any
+  logger: any
+  riverpod_annotation: any
+  shared_preferences: any
+  icons_plus: any
+  uuid: any
+  equatable: any
+  intl: any
+  share_plus: any
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -50,6 +61,7 @@ dev_dependencies:
   # Testing
   mocktail: ^1.0.0
 
+  drift: any
 flutter:
   uses-material-design: true
 

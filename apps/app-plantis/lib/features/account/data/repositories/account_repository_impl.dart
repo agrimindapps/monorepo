@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:core/core.dart' hide Column;
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 
+import '../../../premium/domain/repositories/premium_repository.dart';
 import '../../domain/entities/account_info.dart';
 import '../../domain/repositories/account_repository.dart';
-import '../../../premium/domain/repositories/premium_repository.dart';
 import '../datasources/account_local_datasource.dart';
 import '../datasources/account_remote_datasource.dart';
 

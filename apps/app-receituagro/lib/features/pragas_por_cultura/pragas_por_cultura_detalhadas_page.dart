@@ -286,7 +286,7 @@ class _PragasPorCulturaDetalhadasPageState
   ) {
     return Padding(
       padding: const EdgeInsets.all(8),
-      child: Container(
+      child: DecoratedBox(
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF1E1E22) : Colors.white,
           borderRadius: BorderRadius.circular(16),

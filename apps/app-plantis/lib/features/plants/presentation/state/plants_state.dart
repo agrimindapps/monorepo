@@ -74,8 +74,9 @@ extension PlantsStateX on PlantsState {
         break;
       case PlantsViewFilter.needsWater:
         filtered = filtered.where((p) {
-          if (p.lastWatered == null || p.wateringFrequency == null)
+          if (p.lastWatered == null || p.wateringFrequency == null) {
             return false;
+          }
           final daysSinceWatered = DateTime.now()
               .difference(p.lastWatered!)
               .inDays;

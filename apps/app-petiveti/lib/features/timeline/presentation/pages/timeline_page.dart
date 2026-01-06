@@ -1,6 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';

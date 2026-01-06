@@ -3,7 +3,6 @@ import 'dart:developer' as developer;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../features/sync/domain/services/gasometer_sync_service.dart';
 import '../services/gasometer_realtime_service.dart';
 import 'dependency_providers.dart';
 

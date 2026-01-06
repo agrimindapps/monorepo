@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../feedback_system.dart';
 import '../../loading/contextual_loading_manager.dart';
+import '../feedback_system.dart';
 
 part 'operation_config.freezed.dart';
 

@@ -26,7 +26,7 @@ part 'weight_providers.g.dart';
 WeightValidationService weightValidationService(
   Ref ref,
 ) {
-  return WeightValidationService();
+  return const WeightValidationService();
 }
 
 @riverpod

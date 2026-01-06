@@ -42,7 +42,7 @@ class PremiumDevControls extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.developer_mode,
                   color: AppColors.warning,
                   size: 20,
@@ -123,17 +123,17 @@ class PremiumDevControls extends ConsumerWidget {
                     onPressed: subscriptionState.isLoading
                       ? null
                       : () => _revokeLicense(context, ref),
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.block,
                       size: 18,
                       color: AppColors.error,
                     ),
-                    label: Text(
+                    label: const Text(
                       'Revogar Licença',
                       style: TextStyle(color: AppColors.error),
                     ),
                     style: OutlinedButton.styleFrom(
-                      side: BorderSide(color: AppColors.error),
+                      side: const BorderSide(color: AppColors.error),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                   ),
@@ -233,7 +233,7 @@ class PremiumDevControls extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.science,
                                 size: 14,
                                 color: AppColors.warning,
@@ -325,8 +325,8 @@ class PremiumDevControls extends ConsumerWidget {
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Licença local revogada'),
+        const SnackBar(
+          content: Text('Licença local revogada'),
           backgroundColor: AppColors.info,
           behavior: SnackBarBehavior.floating,
         ),
@@ -353,8 +353,8 @@ class PremiumDevControls extends ConsumerWidget {
       if (!context.mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Status atualizado'),
+        const SnackBar(
+          content: Text('Status atualizado'),
           backgroundColor: AppColors.info,
           behavior: SnackBarBehavior.floating,
         ),

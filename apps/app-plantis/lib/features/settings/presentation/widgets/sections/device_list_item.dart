@@ -258,8 +258,9 @@ class DeviceListItem extends StatelessWidget {
     if (difference.inHours < 1) return '${difference.inMinutes}m atrás';
     if (difference.inDays < 1) return '${difference.inHours}h atrás';
     if (difference.inDays < 7) return '${difference.inDays}d atrás';
-    if (difference.inDays < 30)
+    if (difference.inDays < 30) {
       return '${(difference.inDays / 7).floor()} sem atrás';
+    }
 
     return DateFormat('dd/MM/yyyy').format(lastActive);
   }

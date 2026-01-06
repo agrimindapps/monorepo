@@ -3,11 +3,6 @@ import 'package:flutter/material.dart';
 /// Standardized card widget for settings sections
 /// Provides consistent styling across all settings components
 class NewSettingsCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsets? padding;
-  final Color? color;
-  final bool showBorder;
-  final Color? borderColor;
 
   const NewSettingsCard({
     super.key,
@@ -17,6 +12,11 @@ class NewSettingsCard extends StatelessWidget {
     this.showBorder = false,
     this.borderColor,
   });
+  final Widget child;
+  final EdgeInsets? padding;
+  final Color? color;
+  final bool showBorder;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {

@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import 'services/animation_service.dart';
 import 'haptic_service.dart';
+import 'services/animation_service.dart';
 
 /// Serviço de confirmação com feedback visual e háptico
 /// Para ações críticas que precisam de confirmação do usuário

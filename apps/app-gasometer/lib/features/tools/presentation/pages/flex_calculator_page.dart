@@ -1,4 +1,3 @@
-import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -42,7 +41,7 @@ class _FlexCalculatorPageState extends State<FlexCalculatorPage> {
 
     // Rule: if alcohol <= 70% of gasoline price, use alcohol
     final ratio = alcohol / gasoline;
-    final threshold = 0.70;
+    const threshold = 0.70;
 
     setState(() {
       if (ratio <= threshold) {

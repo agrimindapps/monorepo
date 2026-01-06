@@ -153,7 +153,7 @@ class CounterInputField extends StatelessWidget {
             // Decrement Button
             _CounterButton(
               icon: Icons.remove,
-              onPressed: () => _decrement(),
+              onPressed: _decrement,
               enabled: _getCurrentValue() > minValue,
             ),
 
@@ -182,7 +182,7 @@ class CounterInputField extends StatelessWidget {
             // Increment Button
             _CounterButton(
               icon: Icons.add,
-              onPressed: () => _increment(),
+              onPressed: _increment,
               enabled: _getCurrentValue() < maxValue,
             ),
           ],

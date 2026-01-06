@@ -185,7 +185,7 @@ class SubtaskListWidget extends ConsumerWidget {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                 // Quick Add Field
                 QuickAddSubtaskField(parentTaskId: parentTaskId),
               ],

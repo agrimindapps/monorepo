@@ -10,7 +10,7 @@ void main() {
       registrationDate: DateTime(2024, 1, 15),
       description: 'Registro inicial',
       type: OdometerType.trip,
-      metadata: {'source': 'manual'},
+      metadata: const {'source': 'manual'},
       createdAt: DateTime(2024, 1, 15),
       updatedAt: DateTime(2024, 1, 15),
       userId: 'user-001',

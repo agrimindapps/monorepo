@@ -129,7 +129,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute<dynamic>(
-                builder: (context) => AuthGuard(child: HomePage()),
+                builder: (context) => const AuthGuard(child: HomePage()),
               ),
             );
           },
@@ -250,7 +250,7 @@ class _PremiumPageState extends ConsumerState<PremiumPage> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute<dynamic>(
-                          builder: (context) => AuthGuard(child: HomePage()),
+                          builder: (context) => const AuthGuard(child: HomePage()),
                         ),
                       );
                     },

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 
 /// Entidade que representa uma imagem armazenada no sistema
 ///

@@ -1,17 +1,16 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/utils/month_extractor.dart';
-import '../../../../shared/widgets/record_page_header.dart';
-import '../../../../shared/widgets/stat_card.dart';
-import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../../../shared/widgets/month_selector.dart';
+import '../../../../shared/widgets/record_page_header.dart';
+import '../../../../shared/widgets/stat_card.dart';
+import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/maintenance_entity.dart';
 import '../notifiers/maintenances_notifier.dart';
@@ -27,7 +26,7 @@ class MaintenancePage extends ConsumerStatefulWidget {
 
 class _MaintenancePageState extends ConsumerState<MaintenancePage> {
   String? _selectedVehicleId;
-  bool _showMonthlyStats = false; // Toggle para mostrar/ocultar estatísticas
+  final bool _showMonthlyStats = false; // Toggle para mostrar/ocultar estatísticas
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +38,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
         child: Column(
           children: [
             // Header (sempre visível - mobile e desktop)
-            RecordPageHeader(
+            const RecordPageHeader(
               title: 'Manutenções',
               subtitle: 'Gerencie as manutenções do seu veículo',
               icon: Icons.build,
@@ -118,7 +117,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     }
     showDialog<bool>(
       context: context,
-      builder: (context) => AddMaintenancePage(vehicleId: _selectedVehicleId!),
+      builder: (context) => AddMaintenancePage(vehicleId: _selectedVehicleId),
     ).then((result) {
       if (result == true) {
         ref.read(maintenancesProvider.notifier).loadMaintenances();

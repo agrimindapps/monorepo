@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gasometer_drift/features/fuel/domain/services/fuel_query_service.dart';
 import 'package:mocktail/mocktail.dart';
 
+import '../../../test_utils/test_helpers.dart';
 import '../../helpers/fake_data.dart';
 import '../../helpers/mock_factories.dart';
-import '../../../test_utils/test_helpers.dart';
 
 void main() {
   late FuelQueryService service;

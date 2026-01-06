@@ -200,7 +200,7 @@ class PlantCommentsRepositoryImpl implements PlantCommentsRepository {
       );
 
       if (!localUpdateSuccess) {
-        return Left(CacheFailure('Failed to update comment in local database'));
+        return const Left(CacheFailure('Failed to update comment in local database'));
       }
 
       // Sync update to Firebase

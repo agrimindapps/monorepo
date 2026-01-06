@@ -9,7 +9,6 @@ import '../../../infrastructure/repositories/device_repository_impl.dart';
 import '../../../infrastructure/services/connectivity_service.dart';
 import '../../../infrastructure/services/device_identity_service.dart';
 import '../../../infrastructure/services/firebase_device_service.dart';
-import '../../../shared/utils/failure.dart';
 import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
 import '../premium/subscription_providers.dart' show currentAppIdProvider, featureLimitsProvider, FeatureLimits;
 
@@ -502,7 +501,7 @@ class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao registrar dispositivo: \$e');
+      state = const DeviceManagementError('Erro ao registrar dispositivo: \$e');
       return false;
     }
   }
@@ -515,7 +514,7 @@ class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
       state = const DeviceManagementSuccess('Dispositivo revogado com sucesso');
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao revogar dispositivo: \$e');
+      state = const DeviceManagementError('Erro ao revogar dispositivo: \$e');
       return false;
     }
   }
@@ -530,7 +529,7 @@ class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao revogar outros dispositivos: \$e');
+      state = const DeviceManagementError('Erro ao revogar outros dispositivos: \$e');
       return false;
     }
   }
@@ -545,7 +544,7 @@ class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = DeviceManagementError('Erro ao atualizar informações: \$e');
+      state = const DeviceManagementError('Erro ao atualizar informações: \$e');
       return false;
     }
   }
@@ -555,7 +554,7 @@ class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
       state = const DeviceManagementLoading();
       state = const DeviceManagementIdle();
     } catch (e) {
-      state = DeviceManagementError('Erro ao atualizar lista: \$e');
+      state = const DeviceManagementError('Erro ao atualizar lista: \$e');
     }
   }
 

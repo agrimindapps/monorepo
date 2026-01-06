@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';

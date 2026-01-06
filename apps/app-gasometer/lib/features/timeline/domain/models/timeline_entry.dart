@@ -9,6 +9,14 @@ import '../../../odometer/domain/entities/odometer_entity.dart';
 sealed class TimelineEntry {
   const TimelineEntry();
 
+  /// Factory constructors for each type
+  factory TimelineEntry.fuel(FuelRecordEntity fuel) = FuelTimelineEntry;
+  factory TimelineEntry.maintenance(MaintenanceEntity maintenance) =
+      MaintenanceTimelineEntry;
+  factory TimelineEntry.expense(ExpenseEntity expense) = ExpenseTimelineEntry;
+  factory TimelineEntry.odometer(OdometerEntity odometer) =
+      OdometerTimelineEntry;
+
   /// Get the date of this entry
   DateTime get date;
 
@@ -38,14 +46,6 @@ sealed class TimelineEntry {
 
   /// Get the amount/cost if applicable
   double? get amount;
-
-  /// Factory constructors for each type
-  factory TimelineEntry.fuel(FuelRecordEntity fuel) = FuelTimelineEntry;
-  factory TimelineEntry.maintenance(MaintenanceEntity maintenance) =
-      MaintenanceTimelineEntry;
-  factory TimelineEntry.expense(ExpenseEntity expense) = ExpenseTimelineEntry;
-  factory TimelineEntry.odometer(OdometerEntity odometer) =
-      OdometerTimelineEntry;
 
   /// Pattern matching helper
   T when<T>({

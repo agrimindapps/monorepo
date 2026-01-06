@@ -88,7 +88,7 @@ class PremiumSyncService {
     );
 
     if (subscription != null && _localRepository != null) {
-      _localRepository!.saveSubscription(subscription).catchError((e) {
+      _localRepository.saveSubscription(subscription).catchError((e) {
         debugPrint('[PremiumSyncService] Erro ao salvar localmente: $e');
       });
     }
@@ -237,7 +237,7 @@ class PremiumSyncService {
           
           // Se tivermos uma assinatura válida, salvar localmente e propagar
           if (subscription != null && _localRepository != null) {
-            await _localRepository!.saveSubscription(subscription);
+            await _localRepository.saveSubscription(subscription);
             
             // Propagar para Firebase explicitamente se necessário
             // A propagação já acontece em _updateMasterStatus -> _propagateStatusChange
@@ -260,7 +260,7 @@ class PremiumSyncService {
       // 1. Try local repository first
       if (_localRepository != null) {
         try {
-          final localSub = await _localRepository!.getActiveSubscription(userId);
+          final localSub = await _localRepository.getActiveSubscription(userId);
           if (localSub != null) {
              final status = await _buildPremiumStatusFromSubscription(localSub);
              _masterStatusController.add(status);

@@ -1,6 +1,5 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../shared/widgets/crud_form_dialog.dart';
 import '../../../../shared/widgets/enhanced_animal_selector.dart';
@@ -312,8 +311,7 @@ class _MedicationsPageState extends ConsumerState<MedicationsPage> {
     final total = medications.length;
     final active = medications.where((m) => m.isActive).length;
     final expiring = medications.where((m) {
-      if (m.endDate == null) return false;
-      final daysUntilEnd = m.endDate!.difference(DateTime.now()).inDays;
+      final daysUntilEnd = m.endDate.difference(DateTime.now()).inDays;
       return daysUntilEnd <= 7 && daysUntilEnd >= 0;
     }).length;
     final completed = medications.where((m) => !m.isActive).length;

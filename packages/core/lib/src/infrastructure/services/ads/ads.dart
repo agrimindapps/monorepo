@@ -34,27 +34,9 @@ export '../../../domain/entities/ads/ad_event_entity.dart';
 export '../../../domain/entities/ads/ad_frequency_config.dart';
 export '../../../domain/entities/ads/ad_sense_config_entity.dart';
 export '../../../domain/entities/ads/ad_unit_entity.dart';
-
 // Domain - Interfaces
 export '../../../domain/repositories/i_ads_repository.dart';
 export '../../../domain/repositories/i_web_ads_repository.dart';
-
-// Infrastructure - Services Mobile (AdMob)
-export 'google_mobile_ads_service.dart';
-export 'specialized_services/ad_lifecycle_manager.dart';
-export 'specialized_services/banner_ad_service.dart';
-export 'specialized_services/interstitial_ad_service.dart';
-export 'specialized_services/rewarded_ad_service.dart';
-export 'specialized_services/rewarded_interstitial_ad_service.dart';
-export 'specialized_services/app_open_ad_service.dart';
-
-// Infrastructure - Services Web (AdSense)
-// Usa importação condicional para selecionar implementação correta
-export 'web/adsense_service.dart';
-
-// Infrastructure - Configuração Unificada
-export 'unified_ads_config.dart';
-
 // Presentation - Widgets
 export '../../../presentation/widgets/ads/ad_banner_widget.dart';
 export '../../../presentation/widgets/ads/unified_ad_banner_widget.dart';
@@ -64,3 +46,16 @@ export '../../../presentation/widgets/ads/unified_ad_banner_widget.dart';
 // Riverpod - Providers
 export '../../../riverpod/domain/ads/ads_providers.dart';
 export '../../../riverpod/domain/ads/web_ads_providers.dart';
+// Infrastructure - Services Mobile (AdMob)
+export 'google_mobile_ads_service.dart';
+export 'specialized_services/ad_lifecycle_manager.dart';
+export 'specialized_services/app_open_ad_service.dart';
+export 'specialized_services/banner_ad_service.dart';
+export 'specialized_services/interstitial_ad_service.dart';
+export 'specialized_services/rewarded_ad_service.dart';
+export 'specialized_services/rewarded_interstitial_ad_service.dart';
+// Infrastructure - Configuração Unificada
+export 'unified_ads_config.dart';
+// Infrastructure - Services Web (AdSense)
+// Usa importação condicional para selecionar implementação correta
+export 'web/adsense_service.dart';

@@ -1,9 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/settings_entity.dart';
 import '../../domain/entities/user_profile_entity.dart';
-import '../../data/repositories/settings_repository_impl.dart';
 import '../../data/repositories/sync_repository_impl.dart';
-import '../../data/repositories/user_profile_repository_impl.dart';
 import 'settings_providers.dart';
 import 'profile_providers.dart';
 

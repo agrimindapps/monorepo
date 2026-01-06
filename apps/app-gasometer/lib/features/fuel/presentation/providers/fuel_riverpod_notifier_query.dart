@@ -5,9 +5,9 @@ part of 'fuel_riverpod_notifier.dart';
 
 extension FuelRiverpodQuery on FuelRiverpod {
   Future<void> loadFuelRecords() async {
-    this.state = AsyncValue<FuelState>.loading();
+    state = const AsyncValue<FuelState>.loading();
 
-    this.state = await AsyncValue.guard(() async {
+    state = await AsyncValue.guard(() async {
       final result = await _queryService.loadAllRecords(forceRefresh: true);
 
       return result.fold(
@@ -35,8 +35,8 @@ extension FuelRiverpodQuery on FuelRiverpod {
   Future<void> loadFuelRecordsByVehicle(String vehicleId) async {
     if (vehicleId.isEmpty) return;
 
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(
           isLoading: true,
           selectedVehicleId: vehicleId,
@@ -47,10 +47,10 @@ extension FuelRiverpodQuery on FuelRiverpod {
 
     final result = await _queryService.loadRecordsByVehicle(vehicleId);
 
-    this.state.whenData((FuelState currentState) {
+    state.whenData((FuelState currentState) {
       result.fold(
         (failure) {
-          this.state = AsyncValue.data(
+          state = AsyncValue.data(
             currentState.copyWith(
               isLoading: false,
               errorMessage: _mapFailureToMessage(failure),
@@ -64,7 +64,7 @@ extension FuelRiverpodQuery on FuelRiverpod {
             );
           }
 
-          this.state = AsyncValue.data(
+          state = AsyncValue.data(
             currentState.copyWith(
               fuelRecords: records,
               isLoading: false,
@@ -77,8 +77,8 @@ extension FuelRiverpodQuery on FuelRiverpod {
   }
 
   void searchFuelRecords(String query) {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(searchQuery: query.trim()),
       );
 
@@ -91,38 +91,38 @@ extension FuelRiverpodQuery on FuelRiverpod {
   }
 
   void clearSearch() {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(searchQuery: '', clearSearchQuery: true),
       );
     });
   }
 
   void filterByVehicle(String vehicleId) {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(selectedVehicleId: vehicleId),
       );
     });
   }
 
   void selectMonth(DateTime month) {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(currentState.copyWith(selectedMonth: month));
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(currentState.copyWith(selectedMonth: month));
     });
   }
 
   void clearMonthFilter() {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(clearMonthFilter: true),
       );
     });
   }
 
   void clearVehicleFilter() {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(
           selectedVehicleId: null,
           clearVehicleFilter: true,
@@ -132,8 +132,8 @@ extension FuelRiverpodQuery on FuelRiverpod {
   }
 
   void clearAllFilters() {
-    this.state.whenData((FuelState currentState) {
-      this.state = AsyncValue.data(
+    state.whenData((FuelState currentState) {
+      state = AsyncValue.data(
         currentState.copyWith(
           selectedVehicleId: null,
           searchQuery: '',
@@ -147,7 +147,7 @@ extension FuelRiverpodQuery on FuelRiverpod {
   }
 
   FuelRecordEntity? getFuelRecordById(String id) {
-    return this.state.whenData((FuelState currentState) {
+    return state.whenData((FuelState currentState) {
       try {
         return currentState.fuelRecords.firstWhere(
           (FuelRecordEntity record) => record.id == id,

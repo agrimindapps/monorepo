@@ -2,15 +2,15 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/month_extractor.dart';
-import '../../../../shared/widgets/record_page_header.dart';
-import '../../../../shared/widgets/stat_card.dart';
-import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../../core/widgets/enhanced_empty_state.dart';
 import '../../../../core/widgets/standard_loading_view.dart';
 import '../../../../core/widgets/swipe_to_delete_wrapper.dart';
 import '../../../../shared/widgets/adaptive_main_navigation.dart';
 import '../../../../shared/widgets/month_selector.dart';
+import '../../../../shared/widgets/record_page_header.dart';
+import '../../../../shared/widgets/stat_card.dart';
+import '../../../../shared/widgets/vehicle_selector_section.dart';
 import '../../../vehicles/presentation/providers/vehicles_notifier.dart';
 import '../../domain/entities/odometer_entity.dart';
 import '../providers/odometer_notifier.dart';
@@ -26,7 +26,7 @@ class OdometerPage extends ConsumerStatefulWidget {
 
 class _OdometerPageState extends ConsumerState<OdometerPage> {
   String? _selectedVehicleId;
-  bool _showMonthlyStats = false; // Toggle para mostrar/ocultar estatísticas
+  final bool _showMonthlyStats = false; // Toggle para mostrar/ocultar estatísticas
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class _OdometerPageState extends ConsumerState<OdometerPage> {
       body: SafeArea(
         child: Column(
           children: [
-            RecordPageHeader(
+            const RecordPageHeader(
               title: 'Odômetro',
               subtitle: 'Registre as leituras do odômetro',
               icon: Icons.speed,

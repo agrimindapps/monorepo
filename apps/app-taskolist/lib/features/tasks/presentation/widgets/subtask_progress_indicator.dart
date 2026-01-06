@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../tasks/domain/subtask_progress.dart';
 import '../../../tasks/presentation/providers/task_notifier.dart';
 
 /// Widget compacto para exibir progresso de subtarefas em TaskCard

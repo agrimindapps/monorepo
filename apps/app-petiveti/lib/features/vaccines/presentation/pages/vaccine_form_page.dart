@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/crud_form_dialog.dart';
-import '../../domain/entities/vaccine.dart';
 import '../providers/vaccine_form_notifier.dart';
 import '../providers/vaccines_provider.dart';
 import '../widgets/vaccine_form_view.dart';

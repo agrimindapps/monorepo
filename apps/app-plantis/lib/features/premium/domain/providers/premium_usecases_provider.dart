@@ -1,5 +1,4 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart' hide subscriptionRepositoryProvider;
 
 import '../../../../core/providers/repository_providers.dart';
 import '../../../../database/providers/database_providers.dart';

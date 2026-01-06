@@ -1,5 +1,4 @@
 import 'package:core/core.dart';
-import 'package:dartz/dartz.dart';
 
 /// Interface para abstração de Sync - permite inversão de dependência
 /// Repository não precisa conhecer UnifiedSyncManager diretamente

@@ -1,7 +1,5 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/widgets/semantic_widgets.dart';
 import '../../../../shared/widgets/enhanced_vehicle_selector.dart';
@@ -613,10 +611,10 @@ class _TimelinePageState extends ConsumerState<TimelinePage>
 
 /// Date group model
 class _DateGroup {
-  final DateTime date;
-  final List<TimelineEntry> entries;
 
   _DateGroup({required this.date, required this.entries});
+  final DateTime date;
+  final List<TimelineEntry> entries;
 }
 
 /// Timeline day group widget with vertical line

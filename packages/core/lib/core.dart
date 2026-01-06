@@ -30,13 +30,15 @@ export 'package:riverpod/riverpod.dart' hide StreamProvider;
 export 'package:share_plus/share_plus.dart';
 export 'package:shared_preferences/shared_preferences.dart';
 export 'package:shimmer/shimmer.dart';
-export 'package:skeletonizer/skeletonizer.dart';
 export 'package:sign_in_with_apple/sign_in_with_apple.dart';
+export 'package:skeletonizer/skeletonizer.dart';
 export 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthException, AuthState, OAuthProvider, User;
 export 'package:timezone/timezone.dart';
 export 'package:url_launcher/url_launcher.dart';
 
+// Auth Extensions
+export 'features/auth/domain/extensions/user_entity_display_extension.dart';
 export 'models/license_info.dart';
 export 'repositories/license_repository.dart';
 // ============================================================================
@@ -46,15 +48,20 @@ export 'repositories/license_repository.dart';
 export 'services/drift/base_drift_database.dart';
 export 'services/drift/base_drift_repository.dart';
 export 'services/drift/drift_database_config.dart';
-
-// Camada 2: Infraestrutura Avançada (infrastructure/storage/drift/)
-export 'src/infrastructure/storage/drift/drift_storage.dart';
-export 'src/infrastructure/storage/drift/interfaces/i_drift_manager.dart';
 export 'services/image_compression_service.dart';
 export 'services/license_service.dart';
 export 'services/shimmer_service.dart';
 export 'src/data/repositories/base_supabase_repository.dart';
 export 'src/domain/contracts/i_app_data_cleaner.dart';
+// ============================================================================
+// ADS - Sistema de Anúncios Multiplataforma (AdMob + AdSense)
+// ============================================================================
+// Domain Entities
+export 'src/domain/entities/ads/ad_config_entity.dart';
+export 'src/domain/entities/ads/ad_event_entity.dart';
+export 'src/domain/entities/ads/ad_frequency_config.dart';
+export 'src/domain/entities/ads/ad_sense_config_entity.dart';
+export 'src/domain/entities/ads/ad_unit_entity.dart';
 export 'src/domain/entities/auth_result.dart';
 export 'src/domain/entities/base_entity.dart';
 export 'src/domain/entities/base_sync_entity.dart';
@@ -77,8 +84,8 @@ export 'src/domain/entities/security_entity.dart';
 export 'src/domain/entities/shared_preferences_record.dart';
 export 'src/domain/entities/subscription_entity.dart';
 export 'src/domain/entities/user_entity.dart';
-// Auth Extensions
-export 'features/auth/domain/extensions/user_entity_display_extension.dart';
+// Domain Repositories
+export 'src/domain/repositories/i_ads_repository.dart';
 export 'src/domain/repositories/i_analytics_repository.dart';
 export 'src/domain/repositories/i_app_rating_repository.dart';
 export 'src/domain/repositories/i_auth_repository.dart';
@@ -94,6 +101,7 @@ export 'src/domain/repositories/i_security_repository.dart';
 export 'src/domain/repositories/i_storage_repository.dart';
 export 'src/domain/repositories/i_subscription_repository.dart';
 export 'src/domain/repositories/i_sync_repository.dart';
+export 'src/domain/repositories/i_web_ads_repository.dart';
 export 'src/domain/services/i_subscription_sync_service.dart';
 export 'src/domain/usecases/auth/delete_account_usecase.dart';
 export 'src/domain/usecases/auth/login_usecase.dart';
@@ -107,8 +115,16 @@ export 'src/infrastructure/helpers/notification_analytics_helper.dart';
 export 'src/infrastructure/helpers/notification_helper.dart';
 export 'src/infrastructure/helpers/notification_migration_helper.dart';
 export 'src/infrastructure/helpers/notification_template_engine.dart';
+// Image Processing & Storage
+export 'src/infrastructure/images/images.dart';
+// Device Management - Unified Implementation
+export 'src/infrastructure/repositories/datasources/device_local_datasource.dart';
+export 'src/infrastructure/repositories/device_repository_impl.dart';
 export 'src/infrastructure/services/account_deletion_rate_limiter.dart';
 export 'src/infrastructure/services/account_deletion_service.dart';
+// Infrastructure Services
+export 'src/infrastructure/services/ads/google_mobile_ads_service.dart';
+export 'src/infrastructure/services/ads/unified_ads_config.dart';
 export 'src/infrastructure/services/anonymous_data_cleaner.dart';
 export 'src/infrastructure/services/app_rating_service.dart';
 export 'src/infrastructure/services/auth/auth_account_service.dart';
@@ -117,11 +133,9 @@ export 'src/infrastructure/services/auth/auth_provider_linking_service.dart';
 export 'src/infrastructure/services/auth/auth_sign_in_service.dart';
 export 'src/infrastructure/services/connectivity_service.dart';
 export 'src/infrastructure/services/data_migration_service.dart';
+// Device Identity Service - Unified device identification
+export 'src/infrastructure/services/device_identity_service.dart';
 export 'src/infrastructure/services/device_management_service.dart';
-export 'src/services/optimized_analytics_wrapper.dart';
-// Device Management - Unified Implementation
-export 'src/infrastructure/repositories/datasources/device_local_datasource.dart';
-export 'src/infrastructure/repositories/device_repository_impl.dart';
 export 'src/infrastructure/services/enhanced_account_deletion_service.dart';
 export 'src/infrastructure/services/enhanced_analytics_service.dart';
 export 'src/infrastructure/services/enhanced_connectivity_service.dart';
@@ -159,8 +173,9 @@ export 'src/infrastructure/services/storage/storage_encryption_service.dart';
 export 'src/infrastructure/services/sync_firebase_service.dart';
 export 'src/infrastructure/services/validation_service.dart';
 export 'src/infrastructure/services/web_notification_service.dart';
-// Device Identity Service - Unified device identification
-export 'src/infrastructure/services/device_identity_service.dart';
+// Camada 2: Infraestrutura Avançada (infrastructure/storage/drift/)
+export 'src/infrastructure/storage/drift/drift_storage.dart';
+export 'src/infrastructure/storage/drift/interfaces/i_drift_manager.dart';
 // Drift Storage Service e Sync Infrastructure
 export 'src/infrastructure/storage/drift/services/drift_storage_service.dart';
 export 'src/infrastructure/storage/drift/sync/adapters/drift_sync_adapter_base.dart';
@@ -171,6 +186,11 @@ export 'src/presentation/theme/base/base_theme.dart';
 export 'src/presentation/theme/base/base_typography.dart';
 export 'src/presentation/widgets/account_deletion/account_deletion_confirmation_dialog.dart';
 export 'src/presentation/widgets/account_deletion/account_deletion_progress_dialog.dart';
+// Presentation Widgets
+export 'src/presentation/widgets/ads/ad_banner_widget.dart';
+export 'src/presentation/widgets/ads/unified_ad_banner_widget.dart';
+export 'src/presentation/widgets/image/core_image_widget.dart';
+export 'src/presentation/widgets/profile/profile_image_picker_widget.dart';
 export 'src/riverpod/common_notifiers.dart';
 export 'src/riverpod/common_providers.dart'
     hide
@@ -181,6 +201,9 @@ export 'src/riverpod/common_providers.dart'
         SyncState,
         ThemeNotifier,
         AuthStateNotifier;
+// Riverpod Providers
+export 'src/riverpod/domain/ads/ads_providers.dart';
+export 'src/riverpod/domain/ads/web_ads_providers.dart';
 export 'src/riverpod/domain/analytics/analytics_providers.dart';
 export 'src/riverpod/domain/auth/auth_domain_providers.dart';
 export 'src/riverpod/domain/device/device_management_providers.dart';
@@ -190,6 +213,7 @@ export 'src/riverpod/domain/profile/profile_providers.dart';
 export 'src/riverpod/domain/sync/sync_providers.dart' hide OfflineData;
 export 'src/riverpod/riverpod_utils.dart';
 export 'src/services/cache/cache_service.dart';
+export 'src/services/optimized_analytics_wrapper.dart';
 export 'src/services/simple_subscription_sync_service.dart';
 export 'src/services/subscription/advanced_subscription_services.dart'
     hide CacheStatistics, ConflictResolutionStrategy;
@@ -202,12 +226,12 @@ export 'src/shared/extensions/log_level_extensions.dart';
 export 'src/shared/extensions/supabase_query_extensions.dart';
 export 'src/shared/interfaces/i_navigation_extension.dart';
 export 'src/shared/models/navigation_state.dart';
+export 'src/shared/services/analytics_route_observer.dart';
 export 'src/shared/services/asset_loader_service.dart';
 export 'src/shared/services/cache_management_service.dart' hide CacheConfig;
 export 'src/shared/services/dio_service.dart';
 export 'src/shared/services/enhanced_navigation_service.dart';
 export 'src/shared/services/firebase_id_service.dart';
-export 'src/shared/services/analytics_route_observer.dart';
 export 'src/shared/services/navigation_analytics_service.dart';
 export 'src/shared/services/navigation_configuration_service.dart';
 export 'src/shared/services/navigation_service.dart';
@@ -239,30 +263,3 @@ export 'src/sync/unified_sync_manager.dart';
 export 'utils/core_icons.dart';
 export 'utils/random_selection_service.dart';
 export 'widgets/core_carousel_widget.dart';
-export 'src/presentation/widgets/profile/profile_image_picker_widget.dart';
-export 'src/presentation/widgets/image/core_image_widget.dart';
-
-// Image Processing & Storage
-export 'src/infrastructure/images/images.dart';
-
-// ============================================================================
-// ADS - Sistema de Anúncios Multiplataforma (AdMob + AdSense)
-// ============================================================================
-// Domain Entities
-export 'src/domain/entities/ads/ad_config_entity.dart';
-export 'src/domain/entities/ads/ad_event_entity.dart';
-export 'src/domain/entities/ads/ad_frequency_config.dart';
-export 'src/domain/entities/ads/ad_sense_config_entity.dart';
-export 'src/domain/entities/ads/ad_unit_entity.dart';
-// Domain Repositories
-export 'src/domain/repositories/i_ads_repository.dart';
-export 'src/domain/repositories/i_web_ads_repository.dart';
-// Infrastructure Services
-export 'src/infrastructure/services/ads/google_mobile_ads_service.dart';
-export 'src/infrastructure/services/ads/unified_ads_config.dart';
-// Presentation Widgets
-export 'src/presentation/widgets/ads/ad_banner_widget.dart';
-export 'src/presentation/widgets/ads/unified_ad_banner_widget.dart';
-// Riverpod Providers
-export 'src/riverpod/domain/ads/ads_providers.dart';
-export 'src/riverpod/domain/ads/web_ads_providers.dart';

@@ -1,6 +1,5 @@
 import 'package:app_agrihurbi/core/constants/app_constants.dart';
 import 'package:app_agrihurbi/core/error/failures.dart';
-import 'package:app_agrihurbi/core/theme/app_theme.dart';
 import 'package:app_agrihurbi/core/theme/design_tokens.dart';
 import 'package:app_agrihurbi/core/utils/error_handler.dart';
 import 'package:app_agrihurbi/core/validators/input_validators.dart';
@@ -143,13 +142,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 prefixIcon: const Icon(Icons.email_outlined),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: DesignTokens.borderColor,
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: DesignTokens.borderColor,
                                   ),
                                 ),
@@ -187,13 +186,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: DesignTokens.borderColor,
                                   ),
                                 ),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
+                                  borderSide: const BorderSide(
                                     color: DesignTokens.borderColor,
                                   ),
                                 ),
@@ -277,13 +276,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     const SizedBox(height: 32),
 
                     // Social Login (Visual Only)
-                    Row(
+                    const Row(
                       children: [
                         Expanded(
                           child: Divider(color: DesignTokens.borderColor),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          padding: EdgeInsets.symmetric(horizontal: 16),
                           child: Text(
                             'Ou continue com',
                             style: TextStyle(

@@ -1,6 +1,5 @@
-import 'package:dartz/dartz.dart';
-
 import 'package:core/core.dart' hide SyncEvent;
+
 import '../../domain/repositories/isync_manager.dart';
 
 /// No-op implementation of ISyncManager for compilation

@@ -337,7 +337,7 @@ class _CreateCulturaPlaceholder extends StatelessWidget {
 class _EditCulturaPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _EditCulturaPlaceholder({this.id});
+  const _EditCulturaPlaceholder();
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +364,7 @@ class _EditCulturaPlaceholder extends StatelessWidget {
 class _PragaDetailsPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _PragaDetailsPlaceholder({this.id});
+  const _PragaDetailsPlaceholder();
 
   @override
   Widget build(BuildContext context) {
@@ -412,7 +412,7 @@ class _CreatePragaPlaceholder extends StatelessWidget {
 class _EditPragaPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _EditPragaPlaceholder({this.id});
+  const _EditPragaPlaceholder();
 
   @override
   Widget build(BuildContext context) {

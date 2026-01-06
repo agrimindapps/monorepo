@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/create_task.dart';
 import '../../domain/delete_task.dart';
@@ -10,7 +11,6 @@ import '../../domain/task_entity.dart';
 import '../../domain/update_task.dart';
 import '../../domain/watch_tasks.dart';
 import '../../providers/task_providers.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'task_notifier.g.dart';
 

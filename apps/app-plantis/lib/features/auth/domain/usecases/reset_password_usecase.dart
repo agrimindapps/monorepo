@@ -1,7 +1,7 @@
 import 'package:core/core.dart' hide Column;
 
-import '../repositories/auth_repository.dart';
 import '../../utils/auth_validators.dart';
+import '../repositories/auth_repository.dart';
 
 /// Use case para solicitar reset de senha via email
 ///

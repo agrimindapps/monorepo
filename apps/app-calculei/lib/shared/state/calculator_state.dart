@@ -21,16 +21,17 @@ class CalculatorState<T> {
     return CalculatorState<T>(
       calculation: calculation ?? this.calculation,
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   /// Create empty state
-  static CalculatorState<T> empty<T>() => const CalculatorState();
+  static CalculatorState<T> empty<T>() => CalculatorState<T>();
   
   /// Create loading state
-  CalculatorState<T> toLoading() => copyWith(
-    isLoading: true, 
+  CalculatorState<T> toLoading() => CalculatorState<T>(
+    calculation: calculation,
+    isLoading: true,
     errorMessage: null,
   );
   

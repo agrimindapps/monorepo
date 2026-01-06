@@ -15,7 +15,7 @@ CalculateEmergencyReserveUseCase calculateEmergencyReserveUseCase(Ref ref) {
 class EmergencyReserveCalculatorNotifier extends _$EmergencyReserveCalculatorNotifier {
   @override
   CalculatorState<EmergencyReserveCalculation> build() {
-    return CalculatorState.empty();
+    return CalculatorState.empty<EmergencyReserveCalculation>();
   }
 
   Future<void> calculate(CalculateEmergencyReserveParams params) async {
@@ -31,6 +31,6 @@ class EmergencyReserveCalculatorNotifier extends _$EmergencyReserveCalculatorNot
   }
 
   void clearCalculation() {
-    state = CalculatorState.empty();
+    state = CalculatorState.empty<EmergencyReserveCalculation>();
   }
 }

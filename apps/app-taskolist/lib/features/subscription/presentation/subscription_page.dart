@@ -1,7 +1,5 @@
 import 'package:core/core.dart' hide SubscriptionPage;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../data/revenue_cat_service.dart';
 import '../presentation/subscription_providers.dart' as local_providers;
@@ -69,18 +67,18 @@ class _SubscriptionPageState extends ConsumerState<SubscriptionPage> {
   }
 
   Widget _buildPremiumContent() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.workspace_premium, size: 100, color: Colors.amber),
-          const SizedBox(height: 24),
-          const Text(
+          Icon(Icons.workspace_premium, size: 100, color: Colors.amber),
+          SizedBox(height: 24),
+          Text(
             'Você já é Premium! 🎉',
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 16),
-          const Padding(
+          SizedBox(height: 16),
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 32),
             child: Text(
               'Aproveite todos os recursos ilimitados do Taskolist!',

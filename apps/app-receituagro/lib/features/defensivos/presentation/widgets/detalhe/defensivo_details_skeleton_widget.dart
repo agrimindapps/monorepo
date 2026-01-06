@@ -41,7 +41,7 @@ class DefensivoInfoCardsSkeleton extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final skeletonColor = isDark ? Colors.grey.shade700 : Colors.grey.shade300;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),

@@ -44,7 +44,7 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
   // ==================== QUERIES POR LISTA ====================
 
   /// Busca tasks de uma lista específica
-  Future<Result<List<TaskData>>> getTasksByList(
+  Future<Either<Failure, List<TaskData>>> getTasksByList(
     String listId,
     String userId,
   ) async {
@@ -72,7 +72,7 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
   // ==================== QUERIES POR STATUS ====================
 
   /// Busca tasks pendentes
-  Future<Result<List<TaskData>>> getPendingTasks(String userId) async {
+  Future<Either<Failure, List<TaskData>>> getPendingTasks(String userId) async {
     return findWhere(
       (t) =>
           t.status.equals(TaskStatus.pending.index) &
@@ -82,7 +82,7 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
   }
 
   /// Busca tasks em progresso
-  Future<Result<List<TaskData>>> getInProgressTasks(String userId) async {
+  Future<Either<Failure, List<TaskData>>> getInProgressTasks(String userId) async {
     return findWhere(
       (t) =>
           t.status.equals(TaskStatus.inProgress.index) &
@@ -92,7 +92,7 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
   }
 
   /// Busca tasks completadas
-  Future<Result<List<TaskData>>> getCompletedTasks(String userId) async {
+  Future<Either<Failure, List<TaskData>>> getCompletedTasks(String userId) async {
     return findWhere(
       (t) =>
           t.status.equals(TaskStatus.completed.index) &
@@ -102,7 +102,7 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
   }
 
   /// Busca tasks com estrela
-  Future<Result<List<TaskData>>> getStarredTasks(String userId) async {
+  Future<Either<Failure, List<TaskData>>> getStarredTasks(String userId) async {
     return findWhere(
       (t) =>
           t.isStarred.equals(true) &
@@ -114,7 +114,7 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
   // ==================== QUERIES ESPECIAIS ====================
 
   /// Busca tasks vencidas
-  Future<Result<List<TaskData>>> getOverdueTasks(String userId) async {
+  Future<Either<Failure, List<TaskData>>> getOverdueTasks(String userId) async {
     try {
       final now = DateTime.now();
       final results = await (_db.select(_db.tasks)
@@ -128,34 +128,34 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
             ))
           .get();
 
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca task pelo firebaseId
-  Future<Result<TaskData?>> getByFirebaseId(String firebaseId) async {
+  Future<Either<Failure, TaskData?>> getByFirebaseId(String firebaseId) async {
     try {
       final result = await (_db.select(_db.tasks)
             ..where((t) => t.firebaseId.equals(firebaseId)))
           .getSingleOrNull();
 
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== SYNC HELPERS ====================
 
   /// Busca tasks dirty (pendentes de sync)
-  Future<Result<List<TaskData>>> getDirtyTasks() async {
+  Future<Either<Failure, List<TaskData>>> getDirtyTasks() async {
     return findWhere((t) => t.isDirty.equals(true));
   }
 
   /// Marca task como sincronizada
-  Future<Result<int>> markAsSynced(String firebaseId) async {
+  Future<Either<Failure, int>> markAsSynced(String firebaseId) async {
     try {
       final updated = await (_db.update(_db.tasks)
             ..where((t) => t.firebaseId.equals(firebaseId)))
@@ -166,53 +166,65 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
         ),
       );
 
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Marca múltiplas tasks como sincronizadas
-  Future<Result<int>> markAllAsSynced(List<String> firebaseIds) async {
+  Future<Either<Failure, int>> markAllAsSynced(List<String> firebaseIds) async {
     try {
       int total = 0;
       for (final id in firebaseIds) {
         final result = await markAsSynced(id);
-        if (result.isSuccess) total += result.data!;
+        result.fold(
+          (l) => null,
+          (count) => total += count,
+        );
       }
-      return Result.success(total);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(total);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== UPSERT ====================
 
   /// Upsert por firebaseId
-  Future<Result<int>> upsertByFirebaseId(TasksCompanion task) async {
+  Future<Either<Failure, int>> upsertByFirebaseId(TasksCompanion task) async {
     try {
       final existing = await getByFirebaseId(task.firebaseId.value);
 
-      if (existing.isSuccess && existing.data != null) {
-        // Update
-        final updated = await (_db.update(_db.tasks)
-              ..where((t) => t.firebaseId.equals(task.firebaseId.value)))
-            .write(task);
-        return Result.success(updated);
-      } else {
-        // Insert
-        final id = await _db.into(_db.tasks).insert(task);
-        return Result.success(id);
-      }
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return existing.fold(
+        (failure) async {
+          // Insert (não encontrou)
+          final id = await _db.into(_db.tasks).insert(task);
+          return Right(id);
+        },
+        (taskData) async {
+          if (taskData != null) {
+            // Update
+            final updated = await (_db.update(_db.tasks)
+                  ..where((t) => t.firebaseId.equals(task.firebaseId.value)))
+                .write(task);
+            return Right(updated);
+          } else {
+            // Insert
+            final id = await _db.into(_db.tasks).insert(task);
+            return Right(id);
+          }
+        },
+      );
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== SOFT DELETE ====================
 
   /// Soft delete de task
-  Future<Result<int>> softDelete(String firebaseId) async {
+  Future<Either<Failure, int>> softDelete(String firebaseId) async {
     try {
       final updated = await (_db.update(_db.tasks)
             ..where((t) => t.firebaseId.equals(firebaseId)))
@@ -224,16 +236,16 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
         ),
       );
 
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== UPDATE HELPERS ====================
 
   /// Atualiza status da task
-  Future<Result<int>> updateStatus(String firebaseId, TaskStatus status) async {
+  Future<Either<Failure, int>> updateStatus(String firebaseId, TaskStatus status) async {
     try {
       final updated = await (_db.update(_db.tasks)
             ..where((t) => t.firebaseId.equals(firebaseId)))
@@ -245,14 +257,14 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
         ),
       );
 
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Toggle estrela
-  Future<Result<int>> toggleStar(String firebaseId, bool isStarred) async {
+  Future<Either<Failure, int>> toggleStar(String firebaseId, bool isStarred) async {
     try {
       final updated = await (_db.update(_db.tasks)
             ..where((t) => t.firebaseId.equals(firebaseId)))
@@ -264,14 +276,14 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
         ),
       );
 
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Atualiza prioridade
-  Future<Result<int>> updatePriority(
+  Future<Either<Failure, int>> updatePriority(
     String firebaseId,
     TaskPriority priority,
   ) async {
@@ -286,16 +298,16 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
         ),
       );
 
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== CONTADORES ====================
 
   /// Conta tasks por status
-  Future<Result<Map<TaskStatus, int>>> getTaskCountsByStatus(
+  Future<Either<Failure, Map<TaskStatus, int>>> getTaskCountsByStatus(
     String userId,
   ) async {
     try {
@@ -316,9 +328,9 @@ class TaskRepository extends DriftRepositoryBase<TaskData, Tasks> {
         counts[status] = result.read(count) ?? 0;
       }
 
-      return Result.success(counts);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(counts);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 }

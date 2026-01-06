@@ -57,7 +57,7 @@ class RevenueCatService {
   Future<CustomerInfo?> purchasePackage(Package package) async {
     try {
       debugPrint('💰 [RevenueCat] Iniciando compra: ${package.identifier}');
-      final result = await Purchases.purchasePackage(package);
+      final result = await Purchases.purchase(package: package);
       debugPrint('✅ [RevenueCat] Compra concluída com sucesso');
       return result.customerInfo;
     } catch (e, stack) {

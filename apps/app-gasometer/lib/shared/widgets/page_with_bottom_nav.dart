@@ -83,7 +83,7 @@ class PageWithBottomNav extends StatelessWidget {
   }
 
   void _showAddOptionsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,

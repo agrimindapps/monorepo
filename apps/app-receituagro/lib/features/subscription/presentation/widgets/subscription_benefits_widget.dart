@@ -18,8 +18,6 @@ class SubscriptionBenefitsWidget extends ConsumerStatefulWidget {
 
 class _SubscriptionBenefitsWidgetState
     extends ConsumerState<SubscriptionBenefitsWidget> {
-  final bool _isExpanded = true;
-
   final List<Map<String, dynamic>> _features = [
     {
       'icon': Icons.description,

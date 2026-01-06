@@ -85,7 +85,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
   Color _getIconColor(ThemeData theme) {
     if (!widget.enabled) {
-      return theme.colorScheme.onSurface.withOpacity(0.38);
+      return theme.colorScheme.onSurface.withValues(alpha: 0.38);
     }
 
     if (widget.iconColor != null) {
@@ -108,21 +108,21 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
 
   Color _getBackgroundColor(ThemeData theme) {
     if (!widget.enabled) {
-      return Colors.grey.withOpacity(0.1);
+      return Colors.grey.withValues(alpha: 0.1);
     }
 
     if (_isHovered) {
       switch (widget.type) {
         case SettingsItemType.normal:
-          return AppColors.primaryColor.withOpacity(0.08);
+          return AppColors.primaryColor.withValues(alpha: 0.08);
         case SettingsItemType.premium:
-          return AppColors.premium.withOpacity(0.08);
+          return AppColors.premium.withValues(alpha: 0.08);
         case SettingsItemType.danger:
-          return AppColors.error.withOpacity(0.08);
+          return AppColors.error.withValues(alpha: 0.08);
         case SettingsItemType.info:
-          return AppColors.info.withOpacity(0.08);
+          return AppColors.info.withValues(alpha: 0.08);
         case SettingsItemType.success:
-          return AppColors.success.withOpacity(0.08);
+          return AppColors.success.withValues(alpha: 0.08);
       }
     }
 
@@ -136,7 +136,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
         height: 36,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: _getIconColor(theme).withOpacity(0.1),
+            color: _getIconColor(theme).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Center(
@@ -162,7 +162,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
         boxShadow: widget.enabled
             ? [
                 BoxShadow(
-                  color: _getIconColor(theme).withOpacity(0.3),
+                  color: _getIconColor(theme).withValues(alpha: 0.3),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
@@ -186,7 +186,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.premium, AppColors.premium.withOpacity(0.8)],
+                colors: [AppColors.premium, AppColors.premium.withValues(alpha: 0.8)],
               ),
               borderRadius: BorderRadius.circular(12),
             ),
@@ -213,7 +213,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
       Icons.chevron_right,
       color: widget.enabled
           ? theme.colorScheme.onSurfaceVariant
-          : theme.colorScheme.onSurface.withOpacity(0.38),
+          : theme.colorScheme.onSurface.withValues(alpha: 0.38),
       size: 20,
     );
   }
@@ -251,7 +251,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                     border: !widget.isLast
                         ? Border(
                             bottom: BorderSide(
-                              color: Colors.grey.withOpacity(0.2),
+                              color: Colors.grey.withValues(alpha: 0.2),
                               width: 0.5,
                             ),
                           )
@@ -282,7 +282,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                       color: widget.enabled
                                           ? theme.colorScheme.onSurface
                                           : theme.colorScheme.onSurface
-                                              .withOpacity(0.38),
+                                              .withValues(alpha: 0.38),
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -299,7 +299,7 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                       gradient: LinearGradient(
                                         colors: [
                                           AppColors.premium,
-                                          AppColors.premium.withOpacity(0.8),
+                                          AppColors.premium.withValues(alpha: 0.8),
                                         ],
                                       ),
                                       borderRadius: BorderRadius.circular(8),

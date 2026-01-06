@@ -57,7 +57,7 @@ class InternalPageAppBar extends ConsumerWidget implements PreferredSizeWidget {
       final navigationService = ref.read(navigationServiceProvider);
       // Se não consegue voltar, vai para a home
       if (!navigationService.canGoBack()) {
-        navigationService.navigateTo('/');
+        navigationService.navigateTo<void>('/');
       } else {
         navigationService.goBack<void>();
       }

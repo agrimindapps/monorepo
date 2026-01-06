@@ -193,7 +193,7 @@ class _CostPerKmCalculatorPageState extends ConsumerState<CostPerKmCalculatorPag
     );
   }
 
-  Widget _buildVehicleSelector(List vehicles) {
+  Widget _buildVehicleSelector(List<dynamic> vehicles) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(

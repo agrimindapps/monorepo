@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../widgets/app_colors.dart';
 import '../providers/settings_providers.dart';
-import '../providers/settings_providers.dart';
 import '../widgets/settings_card.dart';
 import '../widgets/settings_switch_item.dart';
 

@@ -36,7 +36,6 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   final HomeActionsService _actionsService = HomeActionsService();
   String? _selectedAnimalId;
-  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -51,20 +50,13 @@ class _HomePageState extends ConsumerState<HomePage> {
       if (mounted && savedAnimalId != null) {
         setState(() {
           _selectedAnimalId = savedAnimalId;
-          _isInitialized = true;
         });
         _loadAllData();
       } else if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
         _loadAllData();
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _isInitialized = true;
-        });
         _loadAllData();
       }
     }

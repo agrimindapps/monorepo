@@ -180,7 +180,7 @@ class ModernHeaderWidget extends ConsumerWidget {
       final navigationService = ref.read(receitaAgroNavigationServiceProvider);
       // Se não consegue voltar, vai para a home
       if (!navigationService.canGoBack()) {
-        navigationService.navigateTo('/');
+        navigationService.navigateTo<void>('/');
       } else {
         navigationService.goBack<void>();
       }

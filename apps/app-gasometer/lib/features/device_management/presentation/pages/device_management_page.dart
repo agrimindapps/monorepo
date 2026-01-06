@@ -1,4 +1,4 @@
-import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState, WidgetRef;
+import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/gasometer_colors.dart';

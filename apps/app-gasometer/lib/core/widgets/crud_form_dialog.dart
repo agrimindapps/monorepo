@@ -251,46 +251,6 @@ class CrudFormDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildModeBadge(BuildContext context) {
-    final theme = Theme.of(context);
-    final (color, icon, label) = switch (mode) {
-      CrudDialogMode.create => (
-          Colors.green,
-          Icons.add_circle_outline,
-          'Novo'
-        ),
-      CrudDialogMode.view => (
-          Colors.blue,
-          Icons.visibility_outlined,
-          'Visualizando'
-        ),
-      CrudDialogMode.edit => (Colors.orange, Icons.edit_outlined, 'Editando'),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildBottomButtons(BuildContext context) {
     final theme = Theme.of(context);
 

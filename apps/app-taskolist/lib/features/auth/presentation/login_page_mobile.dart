@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 
 import '../../../core/errors/failures.dart' as local;
 import '../../../shared/providers/auth_providers.dart';
-import '../../../shared/widgets/sync/task_sync_loading.dart';
 import '../../tasks/presentation/pages/home_page.dart';
 import 'register_page.dart';
 
@@ -516,39 +515,6 @@ class _LoginPageMobileState extends ConsumerState<LoginPageMobile>
   }
 
   /// Mostra loading simples de sincronização que navega automaticamente
-  void _showSimpleSyncLoading() {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Colors.black54,
-      builder:
-          (context) => SimpleTaskSyncLoading(
-            message: 'Sincronizando suas tarefas...',
-            primaryColor: Theme.of(context).primaryColor,
-          ),
-    );
-    _navigateAfterSync();
-  }
-
-  /// Navega para HomePage quando sync terminar ou imediatamente
-  void _navigateAfterSync() {
-    late StreamSubscription<dynamic> subscription;
-
-    subscription = Stream<dynamic>.periodic(
-      const Duration(milliseconds: 500),
-    ).listen((_) {
-      subscription.cancel();
-      Future<void>.delayed(const Duration(milliseconds: 100), () {
-        if (mounted) {
-          if (Navigator.canPop(context)) {
-            Navigator.of(context).pop();
-          }
-          _navigateToHomePage();
-        }
-      });
-    });
-  }
-
   /// Navega para a HomePage principal
   void _navigateToHomePage() {
     debugPrint('🚀 Navegando para HomePage...');

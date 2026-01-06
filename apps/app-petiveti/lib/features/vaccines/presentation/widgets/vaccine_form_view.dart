@@ -151,7 +151,7 @@ class VaccineFormView extends ConsumerWidget {
     String? errorText,
     List<String>? suggestions,
     int maxLines = 1,
-    required Function(String) onChanged,
+    required void Function(String) onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,7 +215,7 @@ class VaccineFormView extends ConsumerWidget {
     required DateTime? value,
     required bool readOnly,
     String? errorText,
-    required Function(DateTime) onChanged,
+    required void Function(DateTime) onChanged,
     bool allowClear = false,
   }) {
     final dateFormat = DateFormat('dd/MM/yyyy');
@@ -275,7 +275,7 @@ class VaccineFormView extends ConsumerWidget {
     required BuildContext context,
     required VaccineStatus value,
     required bool readOnly,
-    required Function(VaccineStatus) onChanged,
+    required void Function(VaccineStatus) onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

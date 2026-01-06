@@ -88,7 +88,7 @@ class PremiumSyncService {
     );
 
     if (subscription != null && _localRepository != null) {
-      _localRepository.saveSubscription(subscription).catchError((e) {
+      _localRepository.saveSubscription(subscription).catchError((Object e) {
         debugPrint('[PremiumSyncService] Erro ao salvar localmente: $e');
       });
     }

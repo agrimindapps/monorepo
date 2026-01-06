@@ -65,7 +65,7 @@ class DeviceManagementSection extends ConsumerWidget {
           leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: _getStatusColor(activeDeviceCount).withOpacity(0.1),
+              color: _getStatusColor(activeDeviceCount).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -278,8 +278,8 @@ class DeviceManagementSection extends ConsumerWidget {
                             contentPadding: const EdgeInsets.all(12),
                             leading: CircleAvatar(
                               backgroundColor: device.isActive
-                                  ? AppColors.success.withOpacity(0.1)
-                                  : Colors.grey.withOpacity(0.1),
+                                  ? AppColors.success.withValues(alpha: 0.1)
+                                  : Colors.grey.withValues(alpha: 0.1),
                               child: Icon(
                                 _getDeviceIcon(device.platform),
                                 color: device.isActive ? AppColors.success : Colors.grey,

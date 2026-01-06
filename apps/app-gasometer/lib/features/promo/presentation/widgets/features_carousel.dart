@@ -243,7 +243,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      transform: Matrix4.identity()..translate(0.0, isHovered ? -10.0 : 0.0),
+      transform: Matrix4.identity()..translateByDouble(0.0, isHovered ? -10.0 : 0.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(

@@ -27,57 +27,57 @@ class RainfallMeasurementRepository {
   // ==================== CREATE ====================
 
   /// Insere uma nova medição
-  Future<Result<int>> insert(RainfallMeasurementsCompanion measurement) async {
+  Future<Either<Failure, int>> insert(RainfallMeasurementsCompanion measurement) async {
     try {
       final rowsAffected =
           await _db.into(_db.rainfallMeasurements).insert(measurement);
-      return Result.success(rowsAffected);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(rowsAffected);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Upsert (insert or update)
-  Future<Result<int>> upsert(RainfallMeasurementsCompanion measurement) async {
+  Future<Either<Failure, int>> upsert(RainfallMeasurementsCompanion measurement) async {
     try {
       final rowsAffected = await _db
           .into(_db.rainfallMeasurements)
           .insertOnConflictUpdate(measurement);
-      return Result.success(rowsAffected);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(rowsAffected);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== READ ====================
 
   /// Busca medição por ID
-  Future<Result<RainfallMeasurement?>> getById(String id) async {
+  Future<Either<Failure, RainfallMeasurement?>> getById(String id) async {
     try {
       final result = await (_db.select(_db.rainfallMeasurements)
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca todas as medições ativas
-  Future<Result<List<RainfallMeasurement>>> getAll() async {
+  Future<Either<Failure, List<RainfallMeasurement>>> getAll() async {
     try {
       final results = await (_db.select(_db.rainfallMeasurements)
             ..where((t) => t.isActive.equals(true))
             ..orderBy([(t) => OrderingTerm.desc(t.measurementDate)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca medições por pluviômetro
-  Future<Result<List<RainfallMeasurement>>> getByRainGauge(
+  Future<Either<Failure, List<RainfallMeasurement>>> getByRainGauge(
     String rainGaugeId,
   ) async {
     try {
@@ -88,14 +88,14 @@ class RainfallMeasurementRepository {
             )
             ..orderBy([(t) => OrderingTerm.desc(t.measurementDate)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca medições por período
-  Future<Result<List<RainfallMeasurement>>> getByPeriod(
+  Future<Either<Failure, List<RainfallMeasurement>>> getByPeriod(
     DateTime start,
     DateTime end,
   ) async {
@@ -109,14 +109,14 @@ class RainfallMeasurementRepository {
             )
             ..orderBy([(t) => OrderingTerm.desc(t.measurementDate)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca medições por pluviômetro e período
-  Future<Result<List<RainfallMeasurement>>> getByRainGaugeAndPeriod(
+  Future<Either<Failure, List<RainfallMeasurement>>> getByRainGaugeAndPeriod(
     String rainGaugeId,
     DateTime start,
     DateTime end,
@@ -132,14 +132,14 @@ class RainfallMeasurementRepository {
             )
             ..orderBy([(t) => OrderingTerm.desc(t.measurementDate)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca medições do mês atual
-  Future<Result<List<RainfallMeasurement>>> getCurrentMonthMeasurements() async {
+  Future<Either<Failure, List<RainfallMeasurement>>> getCurrentMonthMeasurements() async {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, 1);
     final end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
@@ -147,7 +147,7 @@ class RainfallMeasurementRepository {
   }
 
   /// Busca medições do ano atual
-  Future<Result<List<RainfallMeasurement>>> getCurrentYearMeasurements() async {
+  Future<Either<Failure, List<RainfallMeasurement>>> getCurrentYearMeasurements() async {
     final now = DateTime.now();
     final start = DateTime(now.year, 1, 1);
     final end = DateTime(now.year, 12, 31, 23, 59, 59);
@@ -183,7 +183,7 @@ class RainfallMeasurementRepository {
   // ==================== UPDATE ====================
 
   /// Atualiza medição
-  Future<Result<int>> update(
+  Future<Either<Failure, int>> update(
     String id,
     RainfallMeasurementsCompanion measurement,
   ) async {
@@ -191,16 +191,16 @@ class RainfallMeasurementRepository {
       final updated = await (_db.update(_db.rainfallMeasurements)
             ..where((t) => t.id.equals(id)))
           .write(measurement);
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== DELETE ====================
 
   /// Soft delete (marca como inativo)
-  Future<Result<int>> softDelete(String id) async {
+  Future<Either<Failure, int>> softDelete(String id) async {
     try {
       final updated = await (_db.update(_db.rainfallMeasurements)
             ..where((t) => t.id.equals(id)))
@@ -210,36 +210,36 @@ class RainfallMeasurementRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Hard delete
-  Future<Result<int>> delete(String id) async {
+  Future<Either<Failure, int>> delete(String id) async {
     try {
       final deleted = await (_db.delete(_db.rainfallMeasurements)
             ..where((t) => t.id.equals(id)))
           .go();
-      return Result.success(deleted);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(deleted);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Limpa todas as medições
-  Future<Result<int>> clear() async {
+  Future<Either<Failure, int>> clear() async {
     try {
       final deleted = await _db.delete(_db.rainfallMeasurements).go();
-      return Result.success(deleted);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(deleted);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Remove medições de um pluviômetro (soft delete em cascade)
-  Future<Result<int>> softDeleteByRainGauge(String rainGaugeId) async {
+  Future<Either<Failure, int>> softDeleteByRainGauge(String rainGaugeId) async {
     try {
       final updated = await (_db.update(_db.rainfallMeasurements)
             ..where((t) => t.rainGaugeId.equals(rainGaugeId)))
@@ -249,16 +249,16 @@ class RainfallMeasurementRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== ESTATÍSTICAS ====================
 
   /// Total acumulado de chuva em um período
-  Future<Result<double>> getTotalByPeriod(DateTime start, DateTime end) async {
+  Future<Either<Failure, double>> getTotalByPeriod(DateTime start, DateTime end) async {
     try {
       final sum = _db.rainfallMeasurements.amount.sum();
       final query = _db.selectOnly(_db.rainfallMeasurements)
@@ -272,14 +272,14 @@ class RainfallMeasurementRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(sum) ?? 0.0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(sum) ?? 0.0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Total acumulado por pluviômetro em um período
-  Future<Result<double>> getTotalByRainGaugeAndPeriod(
+  Future<Either<Failure, double>> getTotalByRainGaugeAndPeriod(
     String rainGaugeId,
     DateTime start,
     DateTime end,
@@ -298,14 +298,14 @@ class RainfallMeasurementRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(sum) ?? 0.0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(sum) ?? 0.0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Média de chuva em um período
-  Future<Result<double>> getAverageByPeriod(DateTime start, DateTime end) async {
+  Future<Either<Failure, double>> getAverageByPeriod(DateTime start, DateTime end) async {
     try {
       final avg = _db.rainfallMeasurements.amount.avg();
       final query = _db.selectOnly(_db.rainfallMeasurements)
@@ -319,14 +319,14 @@ class RainfallMeasurementRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(avg) ?? 0.0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(avg) ?? 0.0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Máximo de chuva em um período
-  Future<Result<double>> getMaxByPeriod(DateTime start, DateTime end) async {
+  Future<Either<Failure, double>> getMaxByPeriod(DateTime start, DateTime end) async {
     try {
       final max = _db.rainfallMeasurements.amount.max();
       final query = _db.selectOnly(_db.rainfallMeasurements)
@@ -340,14 +340,14 @@ class RainfallMeasurementRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(max) ?? 0.0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(max) ?? 0.0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Mínimo de chuva em um período (excluindo zeros)
-  Future<Result<double>> getMinByPeriod(DateTime start, DateTime end) async {
+  Future<Either<Failure, double>> getMinByPeriod(DateTime start, DateTime end) async {
     try {
       final min = _db.rainfallMeasurements.amount.min();
       final query = _db.selectOnly(_db.rainfallMeasurements)
@@ -362,14 +362,14 @@ class RainfallMeasurementRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(min) ?? 0.0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(min) ?? 0.0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Conta medições ativas
-  Future<Result<int>> countActive() async {
+  Future<Either<Failure, int>> countActive() async {
     try {
       final count = _db.rainfallMeasurements.id.count();
       final query = _db.selectOnly(_db.rainfallMeasurements)
@@ -377,14 +377,14 @@ class RainfallMeasurementRepository {
         ..where(_db.rainfallMeasurements.isActive.equals(true));
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(count) ?? 0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Conta medições por pluviômetro
-  Future<Result<int>> countByRainGauge(String rainGaugeId) async {
+  Future<Either<Failure, int>> countByRainGauge(String rainGaugeId) async {
     try {
       final count = _db.rainfallMeasurements.id.count();
       final query = _db.selectOnly(_db.rainfallMeasurements)
@@ -395,14 +395,14 @@ class RainfallMeasurementRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(count) ?? 0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Totais mensais de um ano específico
-  Future<Result<Map<int, double>>> getMonthlyTotals(int year) async {
+  Future<Either<Failure, Map<int, double>>> getMonthlyTotals(int year) async {
     try {
       final monthlyTotals = <int, double>{};
       
@@ -417,14 +417,14 @@ class RainfallMeasurementRepository {
         }
       }
 
-      return Result.success(monthlyTotals);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(monthlyTotals);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Total anual por ano
-  Future<Result<Map<int, double>>> getYearlyTotals({
+  Future<Either<Failure, Map<int, double>>> getYearlyTotals({
     int startYear = 2020,
     int? endYear,
   }) async {
@@ -443,9 +443,9 @@ class RainfallMeasurementRepository {
         }
       }
 
-      return Result.success(yearlyTotals);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(yearlyTotals);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 }

@@ -3,7 +3,7 @@ import '../../../../core/theme/list_colors.dart';
 
 class ColorPickerDialog extends StatelessWidget {
   final String selectedColorKey;
-  final Function(String) onColorSelected;
+  final void Function(String) onColorSelected;
 
   const ColorPickerDialog({
     super.key,
@@ -45,7 +45,7 @@ class ColorPickerDialog extends StatelessWidget {
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: colorEntry.value.withOpacity(0.5),
+                            color: colorEntry.value.withValues(alpha: 0.5),
                             blurRadius: 8,
                             spreadRadius: 2,
                           )

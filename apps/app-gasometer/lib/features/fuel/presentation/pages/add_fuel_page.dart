@@ -244,7 +244,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
 
       if (mounted) {
         result.fold(
-          (failure) {
+          (Failure failure) {
             debugPrint('[FUEL DEBUG] FAILURE - ${failure.message}');
             setFormError(failure.message);
           },

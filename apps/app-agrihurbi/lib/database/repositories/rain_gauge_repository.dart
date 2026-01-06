@@ -26,55 +26,55 @@ class RainGaugeRepository {
   // ==================== CREATE ====================
 
   /// Insere um novo pluviômetro
-  Future<Result<int>> insert(RainGaugesCompanion rainGauge) async {
+  Future<Either<Failure, int>> insert(RainGaugesCompanion rainGauge) async {
     try {
       final rowsAffected = await _db.into(_db.rainGauges).insert(rainGauge);
-      return Result.success(rowsAffected);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(rowsAffected);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Upsert (insert or update)
-  Future<Result<int>> upsert(RainGaugesCompanion rainGauge) async {
+  Future<Either<Failure, int>> upsert(RainGaugesCompanion rainGauge) async {
     try {
       final rowsAffected =
           await _db.into(_db.rainGauges).insertOnConflictUpdate(rainGauge);
-      return Result.success(rowsAffected);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(rowsAffected);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== READ ====================
 
   /// Busca pluviômetro por ID
-  Future<Result<RainGauge?>> getById(String id) async {
+  Future<Either<Failure, RainGauge?>> getById(String id) async {
     try {
       final result = await (_db.select(_db.rainGauges)
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca todos os pluviômetros ativos
-  Future<Result<List<RainGauge>>> getAll() async {
+  Future<Either<Failure, List<RainGauge>>> getAll() async {
     try {
       final results = await (_db.select(_db.rainGauges)
             ..where((t) => t.isActive.equals(true))
             ..orderBy([(t) => OrderingTerm.asc(t.description)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca pluviômetros por grupo
-  Future<Result<List<RainGauge>>> getByGroup(String groupId) async {
+  Future<Either<Failure, List<RainGauge>>> getByGroup(String groupId) async {
     try {
       final results = await (_db.select(_db.rainGauges)
             ..where(
@@ -82,14 +82,14 @@ class RainGaugeRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.description)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca pluviômetros com localização GPS
-  Future<Result<List<RainGauge>>> getWithLocation() async {
+  Future<Either<Failure, List<RainGauge>>> getWithLocation() async {
     try {
       final results = await (_db.select(_db.rainGauges)
             ..where(
@@ -100,14 +100,14 @@ class RainGaugeRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.description)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca por descrição (like)
-  Future<Result<List<RainGauge>>> searchByDescription(String query) async {
+  Future<Either<Failure, List<RainGauge>>> searchByDescription(String query) async {
     try {
       final results = await (_db.select(_db.rainGauges)
             ..where(
@@ -115,9 +115,9 @@ class RainGaugeRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.description)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
@@ -150,21 +150,21 @@ class RainGaugeRepository {
   // ==================== UPDATE ====================
 
   /// Atualiza pluviômetro
-  Future<Result<int>> update(String id, RainGaugesCompanion rainGauge) async {
+  Future<Either<Failure, int>> update(String id, RainGaugesCompanion rainGauge) async {
     try {
       final updated = await (_db.update(_db.rainGauges)
             ..where((t) => t.id.equals(id)))
           .write(rainGauge);
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== DELETE ====================
 
   /// Soft delete (marca como inativo)
-  Future<Result<int>> softDelete(String id) async {
+  Future<Either<Failure, int>> softDelete(String id) async {
     try {
       final updated = await (_db.update(_db.rainGauges)
             ..where((t) => t.id.equals(id)))
@@ -174,38 +174,38 @@ class RainGaugeRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Hard delete
-  Future<Result<int>> delete(String id) async {
+  Future<Either<Failure, int>> delete(String id) async {
     try {
       final deleted = await (_db.delete(_db.rainGauges)
             ..where((t) => t.id.equals(id)))
           .go();
-      return Result.success(deleted);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(deleted);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Limpa todos os pluviômetros
-  Future<Result<int>> clear() async {
+  Future<Either<Failure, int>> clear() async {
     try {
       final deleted = await _db.delete(_db.rainGauges).go();
-      return Result.success(deleted);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(deleted);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== CONTADORES ====================
 
   /// Conta pluviômetros ativos
-  Future<Result<int>> countActive() async {
+  Future<Either<Failure, int>> countActive() async {
     try {
       final count = _db.rainGauges.id.count();
       final query = _db.selectOnly(_db.rainGauges)
@@ -213,14 +213,14 @@ class RainGaugeRepository {
         ..where(_db.rainGauges.isActive.equals(true));
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(count) ?? 0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Conta pluviômetros por grupo
-  Future<Result<Map<String, int>>> countByGroup() async {
+  Future<Either<Failure, Map<String, int>>> countByGroup() async {
     try {
       final counts = <String, int>{};
 
@@ -233,9 +233,9 @@ class RainGaugeRepository {
         counts[group] = (counts[group] ?? 0) + 1;
       }
 
-      return Result.success(counts);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(counts);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 }

@@ -3,7 +3,7 @@ import '../../../../core/theme/list_colors.dart';
 
 class ColorSelector extends StatelessWidget {
   final String selectedColorKey;
-  final Function(String) onColorSelected;
+  final void Function(String) onColorSelected;
   final bool showLabel;
   final String label;
 
@@ -51,20 +51,20 @@ class ColorSelector extends StatelessWidget {
                       border: isSelected
                           ? Border.all(color: Colors.white, width: 3)
                           : Border.all(
-                              color: Colors.grey.withOpacity(0.3),
+                              color: Colors.grey.withValues(alpha: 0.3),
                               width: 1,
                             ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: colorEntry.value.withOpacity(0.4),
+                                color: colorEntry.value.withValues(alpha: 0.4),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               )
                             ]
                           : [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
                               )

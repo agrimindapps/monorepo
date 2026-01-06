@@ -204,7 +204,7 @@ class _CreateEditTaskListPageState
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: TaskListColors.fromHex(_selectedColor).withOpacity(0.1),
+                color: TaskListColors.fromHex(_selectedColor).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: TaskListColors.fromHex(_selectedColor),

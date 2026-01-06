@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 /// Widget para seleção de recorrência de tarefa
 class RecurrenceSelector extends StatelessWidget {
   final String? currentRule;
-  final Function(String?) onChanged;
+  final void Function(String?) onChanged;
 
   const RecurrenceSelector({
     super.key,
@@ -28,7 +28,7 @@ class RecurrenceSelector extends StatelessWidget {
   }
 
   void _showRecurrenceDialog(BuildContext context) {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => _RecurrenceDialog(
         currentRule: currentRule,
@@ -63,7 +63,7 @@ class RecurrenceSelector extends StatelessWidget {
 
 class _RecurrenceDialog extends StatefulWidget {
   final String? currentRule;
-  final Function(String?) onSelected;
+  final void Function(String?) onSelected;
 
   const _RecurrenceDialog({
     this.currentRule,

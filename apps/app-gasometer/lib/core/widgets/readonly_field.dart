@@ -276,7 +276,6 @@ class ReadOnlyBoolField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     return ReadOnlyField(
       label: label,

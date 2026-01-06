@@ -5,7 +5,6 @@ import '../../../../core/constants/product_ids.dart';
 import '../../../../core/constants/subscription_features.dart';
 import '../../../../database/repositories/subscription_local_repository.dart';
 import '../../domain/repositories/i_app_subscription_repository.dart';
-import '../services/subscription_error_handling_service.dart';
 
 /// Implementação do repositório de subscription específico do Petiveti
 /// Utiliza o core ISubscriptionRepository (RevenueCat) e adiciona funcionalidades específicas do app
@@ -13,15 +12,12 @@ class SubscriptionRepositoryImpl implements IAppSubscriptionRepository {
   SubscriptionRepositoryImpl(
     this._coreRepository,
     this._localStorageRepository,
-    // ignore: unused_element
-    this._errorService,
     this._subscriptionLocalRepository,
     this._authService,
   );
 
   final ISubscriptionRepository _coreRepository;
   final ILocalStorageRepository _localStorageRepository;
-  final SubscriptionErrorHandlingService _errorService;
   final SubscriptionLocalRepository? _subscriptionLocalRepository;
   final AuthService? _authService;
 

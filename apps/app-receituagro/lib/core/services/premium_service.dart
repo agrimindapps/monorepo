@@ -476,7 +476,7 @@ class ReceitaAgroPremiumService {
       
       // Save to local cache for offline access
       if (_localRepository != null) {
-        _localRepository.saveSubscription(subscription).catchError((e) {
+        _localRepository.saveSubscription(subscription).catchError((Object e) {
           developer.log('⚠️ Failed to save local subscription: $e', name: 'PremiumService');
         });
       }

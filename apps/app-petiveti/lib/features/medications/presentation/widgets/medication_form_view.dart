@@ -212,7 +212,7 @@ class MedicationFormView extends ConsumerWidget {
     MedicationFormState state,
     String label,
     DateTime date,
-    Function(DateTime) onDateSelected,
+    void Function(DateTime) onDateSelected,
   ) {
     return InkWell(
       onTap: isReadOnly

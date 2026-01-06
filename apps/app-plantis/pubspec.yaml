@@ -45,7 +45,6 @@ dev_dependencies:
   drift_dev: ^2.20.0
   riverpod_generator: ^3.0.3
 
-  flutter_riverpod: any
 flutter:
   uses-material-design: true
 

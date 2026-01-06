@@ -48,8 +48,6 @@ dev_dependencies:
   mocktail: ^1.0.0
   riverpod_generator: ^3.0.3
 
-  shared_preferences: any
-  flutter_riverpod: any
 flutter:
   uses-material-design: true
 

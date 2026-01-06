@@ -39,7 +39,7 @@ class ColorPicker extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: colorOption.color.withOpacity(0.4),
+                        color: colorOption.color.withValues(alpha: 0.4),
                         blurRadius: 8,
                         spreadRadius: 2,
                       ),

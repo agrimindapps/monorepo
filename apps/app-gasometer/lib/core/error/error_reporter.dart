@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:core/core.dart' hide AppError, NetworkError, ServerError, TimeoutError, ValidationError, UnexpectedError;
+import 'package:core/core.dart' hide AppError, NetworkError, ValidationError;
 import 'package:flutter/foundation.dart';
 import '../services/analytics/gasometer_analytics_service.dart';
 

@@ -111,15 +111,15 @@ class _SettingsCardState extends State<SettingsCard>
 
     switch (widget.category) {
       case SettingsCardCategory.general:
-        return Colors.grey.withOpacity(0.05);
+        return Colors.grey.withValues(alpha: 0.05);
       case SettingsCardCategory.account:
-        return AppColors.info.withOpacity(0.05);
+        return AppColors.info.withValues(alpha: 0.05);
       case SettingsCardCategory.premium:
-        return AppColors.premium.withOpacity(0.05);
+        return AppColors.premium.withValues(alpha: 0.05);
       case SettingsCardCategory.privacy:
-        return AppColors.info.withOpacity(0.05);
+        return AppColors.info.withValues(alpha: 0.05);
       case SettingsCardCategory.data:
-        return AppColors.success.withOpacity(0.05);
+        return AppColors.success.withValues(alpha: 0.05);
     }
   }
 
@@ -145,8 +145,8 @@ class _SettingsCardState extends State<SettingsCard>
   Color _getBorderColor() {
     final color = _getHeaderColor();
     return _isHovered
-        ? color.withOpacity(0.3)
-        : color.withOpacity(0.1);
+        ? color.withValues(alpha: 0.3)
+        : color.withValues(alpha: 0.1);
   }
 
   Widget _buildLeading() {
@@ -163,7 +163,7 @@ class _SettingsCardState extends State<SettingsCard>
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: _getHeaderColor().withOpacity(0.3),
+              color: _getHeaderColor().withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -204,9 +204,9 @@ class _SettingsCardState extends State<SettingsCard>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.1),
+        color: badgeColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: badgeColor.withOpacity(0.3), width: 1),
+        border: Border.all(color: badgeColor.withValues(alpha: 0.3), width: 1),
       ),
       child: Text(
         badgeText,
@@ -247,14 +247,14 @@ class _SettingsCardState extends State<SettingsCard>
                 boxShadow: _isHovered
                     ? [
                         BoxShadow(
-                          color: _getHeaderColor().withOpacity(0.15),
+                          color: _getHeaderColor().withValues(alpha: 0.15),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -277,8 +277,8 @@ class _SettingsCardState extends State<SettingsCard>
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            _getHeaderColor().withOpacity(0.05),
-                            _getHeaderColor().withOpacity(0.02),
+                            _getHeaderColor().withValues(alpha: 0.05),
+                            _getHeaderColor().withValues(alpha: 0.02),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,

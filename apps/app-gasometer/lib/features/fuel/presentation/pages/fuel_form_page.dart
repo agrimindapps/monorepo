@@ -234,7 +234,7 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
 
       if (mounted) {
         result.fold(
-          (failure) => _setFormError(failure.message),
+          (Failure failure) => _setFormError(failure.message),
           (success) {
             formNotifier.clearForm();
             WidgetsBinding.instance.addPostFrameCallback((_) {

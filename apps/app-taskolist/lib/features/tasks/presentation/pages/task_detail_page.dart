@@ -24,7 +24,6 @@ class _TaskDetailPageState extends ConsumerState<TaskDetailPage> {
   late TaskStatus _selectedStatus;
   late TaskPriority _selectedPriority;
   late bool _isStarred;
-  String? _recurrenceRule;
   bool _isEditing = false;
   bool _isLoading = false;
 

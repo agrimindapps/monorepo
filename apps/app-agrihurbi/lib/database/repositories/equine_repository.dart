@@ -26,55 +26,55 @@ class EquineRepository {
   // ==================== CREATE ====================
 
   /// Insere um novo equino
-  Future<Result<int>> insert(EquinesCompanion equine) async {
+  Future<Either<Failure, int>> insert(EquinesCompanion equine) async {
     try {
       final rowsAffected = await _db.into(_db.equines).insert(equine);
-      return Result.success(rowsAffected);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(rowsAffected);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Upsert (insert or update)
-  Future<Result<int>> upsert(EquinesCompanion equine) async {
+  Future<Either<Failure, int>> upsert(EquinesCompanion equine) async {
     try {
       final rowsAffected =
           await _db.into(_db.equines).insertOnConflictUpdate(equine);
-      return Result.success(rowsAffected);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(rowsAffected);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== READ ====================
 
   /// Busca equino por ID
-  Future<Result<Equine?>> getById(String id) async {
+  Future<Either<Failure, Equine?>> getById(String id) async {
     try {
       final result = await (_db.select(_db.equines)
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
-      return Result.success(result);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca todos os equinos ativos
-  Future<Result<List<Equine>>> getAll() async {
+  Future<Either<Failure, List<Equine>>> getAll() async {
     try {
       final results = await (_db.select(_db.equines)
             ..where((t) => t.isActive.equals(true))
             ..orderBy([(t) => OrderingTerm.asc(t.commonName)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca equinos por temperamento
-  Future<Result<List<Equine>>> getByTemperament(int temperament) async {
+  Future<Either<Failure, List<Equine>>> getByTemperament(int temperament) async {
     try {
       final results = await (_db.select(_db.equines)
             ..where(
@@ -83,14 +83,14 @@ class EquineRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.commonName)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca equinos por pelagem
-  Future<Result<List<Equine>>> getByCoat(int coat) async {
+  Future<Either<Failure, List<Equine>>> getByCoat(int coat) async {
     try {
       final results = await (_db.select(_db.equines)
             ..where(
@@ -98,14 +98,14 @@ class EquineRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.commonName)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca equinos por uso primário
-  Future<Result<List<Equine>>> getByPrimaryUse(int primaryUse) async {
+  Future<Either<Failure, List<Equine>>> getByPrimaryUse(int primaryUse) async {
     try {
       final results = await (_db.select(_db.equines)
             ..where(
@@ -113,14 +113,14 @@ class EquineRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.commonName)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Busca por nome (like)
-  Future<Result<List<Equine>>> searchByName(String query) async {
+  Future<Either<Failure, List<Equine>>> searchByName(String query) async {
     try {
       final results = await (_db.select(_db.equines)
             ..where(
@@ -128,9 +128,9 @@ class EquineRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.commonName)]))
           .get();
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(results);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
@@ -163,21 +163,21 @@ class EquineRepository {
   // ==================== UPDATE ====================
 
   /// Atualiza equino
-  Future<Result<int>> update(String id, EquinesCompanion equine) async {
+  Future<Either<Failure, int>> update(String id, EquinesCompanion equine) async {
     try {
       final updated = await (_db.update(_db.equines)
             ..where((t) => t.id.equals(id)))
           .write(equine);
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== DELETE ====================
 
   /// Soft delete (marca como inativo)
-  Future<Result<int>> softDelete(String id) async {
+  Future<Either<Failure, int>> softDelete(String id) async {
     try {
       final updated = await (_db.update(_db.equines)
             ..where((t) => t.id.equals(id)))
@@ -187,37 +187,37 @@ class EquineRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(updated);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Hard delete
-  Future<Result<int>> delete(String id) async {
+  Future<Either<Failure, int>> delete(String id) async {
     try {
       final deleted =
           await (_db.delete(_db.equines)..where((t) => t.id.equals(id))).go();
-      return Result.success(deleted);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(deleted);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Limpa todos os equinos
-  Future<Result<int>> clear() async {
+  Future<Either<Failure, int>> clear() async {
     try {
       final deleted = await _db.delete(_db.equines).go();
-      return Result.success(deleted);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(deleted);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   // ==================== CONTADORES ====================
 
   /// Conta equinos ativos
-  Future<Result<int>> countActive() async {
+  Future<Either<Failure, int>> countActive() async {
     try {
       final count = _db.equines.id.count();
       final query = _db.selectOnly(_db.equines)
@@ -225,14 +225,14 @@ class EquineRepository {
         ..where(_db.equines.isActive.equals(true));
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(result.read(count) ?? 0);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 
   /// Conta equinos por uso primário
-  Future<Result<Map<int, int>>> countByPrimaryUse() async {
+  Future<Either<Failure, Map<int, int>>> countByPrimaryUse() async {
     try {
       final counts = <int, int>{};
 
@@ -249,9 +249,9 @@ class EquineRepository {
         counts[use] = result.read(count) ?? 0;
       }
 
-      return Result.success(counts);
-    } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Right(counts);
+    } catch (e) {
+      return Left(ServerFailure('Operation failed: $e'));
     }
   }
 }

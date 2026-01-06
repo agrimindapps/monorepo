@@ -192,7 +192,7 @@ class _RecurrencePickerState extends ConsumerState<RecurrencePicker> {
   }
 
   void _showRecurrenceTypeDialog() {
-    showDialog(
+    showDialog<void>(
       context: context,
       builder: (context) => SimpleDialog(
         title: const Text('Tipo de repetição'),

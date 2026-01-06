@@ -61,7 +61,6 @@ class MyDayNotifier extends _$MyDayNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final userId = state.value?.firstOrNull?.userId ?? '';
       final removeTaskFromMyDay = ref.read(removeTaskFromMyDayProvider);
       final result = await removeTaskFromMyDay(
         RemoveTaskFromMyDayParams(taskId: taskId),

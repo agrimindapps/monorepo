@@ -9,7 +9,6 @@ import '../../domain/repositories/i_favoritos_repository.dart';
 import '../factories/favorito_entity_factory_registry.dart';
 import 'favoritos_cache_service_inline.dart';
 import 'favoritos_data_resolver_service.dart';
-import 'favoritos_sync_service.dart';
 import 'favoritos_validator_service.dart';
 
 /// Service consolidado para Favoritos com Specialized Services
@@ -26,20 +25,17 @@ class FavoritosService {
   // Specialized Services (injetadas via construtor - DIP)
   final FavoritosDataResolverService _dataResolver;
   final FavoritosValidatorService _validator;
-  final FavoritosSyncService _syncService;
   final FavoritosCacheServiceInline _cache;
   final IFavoritoEntityFactoryRegistry _factoryRegistry;
 
   FavoritosService({
     required FavoritosDataResolverService dataResolver,
     required FavoritosValidatorService validator,
-    required FavoritosSyncService syncService,
     required FavoritosCacheServiceInline cache,
     required IFavoritoEntityFactoryRegistry factoryRegistry,
     required FavoritoRepository repository,
   }) : _dataResolver = dataResolver,
        _validator = validator,
-       _syncService = syncService,
        _cache = cache,
        _factoryRegistry = factoryRegistry,
        _repository = repository;
@@ -85,11 +81,6 @@ class FavoritosService {
         return false;
       }
 
-      final itemData = {
-        'id': id,
-        'tipo': tipo,
-        'adicionadoEm': DateTime.now().toIso8601String(),
-      };
       final itemDataString =
           '{"id":"$id","tipo":"$tipo","adicionadoEm":"${DateTime.now().toIso8601String()}"}';
 

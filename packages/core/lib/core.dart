@@ -244,3 +244,25 @@ export 'src/presentation/widgets/image/core_image_widget.dart';
 
 // Image Processing & Storage
 export 'src/infrastructure/images/images.dart';
+
+// ============================================================================
+// ADS - Sistema de Anúncios Multiplataforma (AdMob + AdSense)
+// ============================================================================
+// Domain Entities
+export 'src/domain/entities/ads/ad_config_entity.dart';
+export 'src/domain/entities/ads/ad_event_entity.dart';
+export 'src/domain/entities/ads/ad_frequency_config.dart';
+export 'src/domain/entities/ads/ad_sense_config_entity.dart';
+export 'src/domain/entities/ads/ad_unit_entity.dart';
+// Domain Repositories
+export 'src/domain/repositories/i_ads_repository.dart';
+export 'src/domain/repositories/i_web_ads_repository.dart';
+// Infrastructure Services
+export 'src/infrastructure/services/ads/google_mobile_ads_service.dart';
+export 'src/infrastructure/services/ads/unified_ads_config.dart';
+// Presentation Widgets
+export 'src/presentation/widgets/ads/ad_banner_widget.dart';
+export 'src/presentation/widgets/ads/unified_ad_banner_widget.dart';
+// Riverpod Providers
+export 'src/riverpod/domain/ads/ads_providers.dart';
+export 'src/riverpod/domain/ads/web_ads_providers.dart';

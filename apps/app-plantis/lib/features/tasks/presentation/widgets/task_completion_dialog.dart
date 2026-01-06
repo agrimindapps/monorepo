@@ -78,7 +78,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
     final theme = Theme.of(context);
 
     return AlertDialog(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       contentPadding: const EdgeInsets.all(24),
       content: SingleChildScrollView(
@@ -252,6 +252,9 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
   }
 
   Widget _buildCompletionSection(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final greenColor = isDark ? Colors.green.shade300 : Colors.green.shade700;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -305,14 +308,14 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
                   Text(
                     _formatDate(_completionDate),
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.green.shade700,
+                      color: greenColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const Spacer(),
                   Icon(
                     Icons.calendar_month,
-                    color: Colors.green.shade700,
+                    color: greenColor,
                     size: 20,
                   ),
                 ],
@@ -326,6 +329,10 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
 
   /// Card editável para a data do próximo vencimento
   Widget _buildNextDueDateCard(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final orangeColor = isDark ? Colors.orange.shade300 : Colors.orange.shade700;
+    final greyColor = isDark ? Colors.grey.shade400 : Colors.grey.shade600;
+    
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
@@ -378,7 +385,7 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
                   child: Text(
                     'Resetar',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.grey.shade600,
+                      color: greyColor,
                     ),
                   ),
                 ),
@@ -401,14 +408,14 @@ class _TaskCompletionDialogState extends State<TaskCompletionDialog> {
                   Text(
                     _formatDateDescription(_nextDueDate),
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.orange.shade700,
+                      color: orangeColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const Spacer(),
                   Icon(
                     Icons.edit_calendar,
-                    color: Colors.orange.shade700,
+                    color: orangeColor,
                     size: 20,
                   ),
                 ],

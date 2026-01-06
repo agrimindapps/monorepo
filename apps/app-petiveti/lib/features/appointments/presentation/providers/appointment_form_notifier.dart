@@ -4,7 +4,6 @@ import '../../../animals/presentation/providers/animals_providers.dart';
 import '../../domain/entities/appointment.dart';
 import '../../domain/usecases/add_appointment.dart';
 import '../../domain/usecases/delete_appointment.dart';
-import '../../domain/usecases/get_appointment_by_id.dart';
 import '../../domain/usecases/update_appointment.dart';
 import 'appointment_form_state.dart';
 import 'appointments_providers.dart';
@@ -40,11 +39,16 @@ class AppointmentFormNotifier extends _$AppointmentFormNotifier {
       // Se tem appointmentId, carregar dados
       Appointment? loadedAppointment = appointment;
       if (appointmentId != null && appointment == null) {
-        final appointments = await ref.read(appointmentsProvider(animalId).future);
-        loadedAppointment = appointments.firstWhere(
-          (a) => a.id == appointmentId,
-          orElse: () => throw Exception('Consulta não encontrada'),
-        );
+        final appointmentsState = ref.read(appointmentsProvider);
+        final allAppointments = appointmentsState.appointments;
+        
+        try {
+          loadedAppointment = allAppointments.firstWhere(
+            (a) => a.id == appointmentId,
+          );
+        } catch (e) {
+          throw Exception('Consulta não encontrada');
+        }
       }
 
       // Preencher estado com dados carregados
@@ -168,10 +172,10 @@ class AppointmentFormNotifier extends _$AppointmentFormNotifier {
 
       if (state.appointment == null) {
         final addUseCase = ref.read(addAppointmentProvider);
-        await addUseCase(AddAppointmentParams(appointment));
+        await addUseCase(AddAppointmentParams(appointment: appointment));
       } else {
         final updateUseCase = ref.read(updateAppointmentProvider);
-        await updateUseCase(UpdateAppointmentParams(appointment));
+        await updateUseCase(UpdateAppointmentParams(appointment: appointment));
       }
 
       state = state.copyWith(isSaving: false);
@@ -193,7 +197,7 @@ class AppointmentFormNotifier extends _$AppointmentFormNotifier {
 
     try {
       final deleteUseCase = ref.read(deleteAppointmentProvider);
-      await deleteUseCase(DeleteAppointmentParams(state.appointment!.id));
+      await deleteUseCase(DeleteAppointmentParams(id: state.appointment!.id));
       state = state.copyWith(isSaving: false);
       return true;
     } catch (e) {

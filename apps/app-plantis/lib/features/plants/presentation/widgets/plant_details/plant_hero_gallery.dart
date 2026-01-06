@@ -131,7 +131,12 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
   Widget _buildHeroCarousel(BuildContext context) {
     final theme = Theme.of(context);
     final imageUrls = widget.plant.imageUrls;
-    final hasMultipleImages = imageUrls.length > 1;
+    final imageBase64 = widget.plant.imageBase64;
+    final hasBase64Image = imageBase64 != null && imageBase64.isNotEmpty;
+    
+    // Calculate total images: base64 image + URL images
+    final totalImages = (hasBase64Image ? 1 : 0) + imageUrls.length;
+    final hasMultipleImages = totalImages > 1;
 
     return Column(
       children: [
@@ -157,14 +162,24 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
                 onPageChanged: (index) {
                   setState(() => _currentPage = index);
                 },
-                itemCount: imageUrls.length,
+                itemCount: totalImages,
                 itemBuilder: (context, index) {
+                  // First image is base64 if available, rest are URLs
+                  final isBase64Index = hasBase64Image && index == 0;
+                  final urlIndex = hasBase64Image ? index - 1 : index;
+                  
                   return GestureDetector(
-                    onTap: () => _showFullscreenImage(context, imageUrls, index),
+                    onTap: () => _showFullscreenImage(
+                      context, 
+                      imageUrls, 
+                      hasBase64Image ? (index == 0 ? -1 : urlIndex) : index,
+                      imageBase64,
+                    ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: OptimizedImageWidget(
-                        imageUrl: imageUrls[index],
+                        base64Image: isBase64Index ? imageBase64 : null,
+                        imageUrl: isBase64Index ? null : (urlIndex < imageUrls.length ? imageUrls[urlIndex] : null),
                         width: double.infinity,
                         height: 320,
                         fit: BoxFit.cover,
@@ -301,7 +316,7 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ...List.generate(
-                imageUrls.length,
+                totalImages,
                 (index) => Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: AnimatedContainer(
@@ -319,7 +334,7 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
               ),
               const SizedBox(width: 12),
               Text(
-                '${_currentPage + 1}/${imageUrls.length}',
+                '${_currentPage + 1}/$totalImages',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontWeight: FontWeight.w500,
@@ -330,17 +345,21 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
         ],
 
         // Thumbnail strip (for multiple images)
-        if (hasMultipleImages && imageUrls.length > 1) ...[
+        if (hasMultipleImages && totalImages > 1) ...[
           const SizedBox(height: 12),
           SizedBox(
             height: 80,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: imageUrls.length,
+              itemCount: totalImages,
               itemBuilder: (context, index) {
+                // First thumbnail is base64 if available
+                final isBase64Index = hasBase64Image && index == 0;
+                final urlIndex = hasBase64Image ? index - 1 : index;
+                
                 return Padding(
                   padding: EdgeInsets.only(
-                    right: index < imageUrls.length - 1 ? 8 : 0,
+                    right: index < totalImages - 1 ? 8 : 0,
                   ),
                   child: GestureDetector(
                     onTap: () {
@@ -373,7 +392,8 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(12),
                         child: OptimizedImageWidget(
-                          imageUrl: imageUrls[index],
+                          base64Image: isBase64Index ? imageBase64 : null,
+                          imageUrl: isBase64Index ? null : (urlIndex < imageUrls.length ? imageUrls[urlIndex] : null),
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
@@ -397,7 +417,13 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
     BuildContext context,
     List<String> imageUrls,
     int initialIndex,
+    String? imageBase64,
   ) {
+    final hasBase64Image = imageBase64 != null && imageBase64.isNotEmpty;
+    final totalImages = (hasBase64Image ? 1 : 0) + imageUrls.length;
+    // Convert initialIndex: -1 means base64 image, otherwise URL index
+    final adjustedInitialIndex = initialIndex == -1 ? 0 : (hasBase64Image ? initialIndex + 1 : initialIndex);
+    
     showDialog<void>(
       context: context,
       barrierColor: Colors.black87,
@@ -406,15 +432,19 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
         child: Stack(
           children: [
             PageView.builder(
-              controller: PageController(initialPage: initialIndex),
-              itemCount: imageUrls.length,
+              controller: PageController(initialPage: adjustedInitialIndex),
+              itemCount: totalImages,
               itemBuilder: (context, index) {
+                final isBase64Index = hasBase64Image && index == 0;
+                final urlIndex = hasBase64Image ? index - 1 : index;
+                
                 return Center(
                   child: InteractiveViewer(
                     minScale: 0.5,
                     maxScale: 3.0,
                     child: OptimizedImageWidget(
-                      imageUrl: imageUrls[index],
+                      base64Image: isBase64Index ? imageBase64 : null,
+                      imageUrl: isBase64Index ? null : (urlIndex < imageUrls.length ? imageUrls[urlIndex] : null),
                       fit: BoxFit.contain,
                       cacheKey: index,
                       enablePreloading: false,
@@ -457,7 +487,7 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
                   ),
                 ),
               ),
-            if (imageUrls.length > 1)
+            if (totalImages > 1)
               Positioned(
                 bottom: 32,
                 left: 0,
@@ -473,7 +503,7 @@ class _PlantHeroGalleryState extends State<PlantHeroGallery> {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      '${initialIndex + 1}/${imageUrls.length}',
+                      '${adjustedInitialIndex + 1}/$totalImages',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,

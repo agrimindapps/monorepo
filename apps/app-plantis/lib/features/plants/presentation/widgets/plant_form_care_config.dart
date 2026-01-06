@@ -194,6 +194,7 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
     String? errorText, // Add error text parameter
   }) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -213,7 +214,7 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
                     ? iconColor.withValues(
                         alpha: 0.5,
                       ) // Stronger border when enabled
-                    : Colors.grey[300]!),
+                    : (isDark ? Colors.grey[700]! : Colors.grey[300]!)),
           width: isEnabled ? 2.0 : 1.5, // Thicker border when enabled
         ),
         boxShadow: [
@@ -253,8 +254,8 @@ class _PlantFormCareConfigState extends ConsumerState<PlantFormCareConfig> {
                 onChanged: onToggle,
                 activeThumbColor: Colors.white,
                 activeTrackColor: iconColor,
-                inactiveThumbColor: Colors.grey[400],
-                inactiveTrackColor: Colors.grey[300],
+                inactiveThumbColor: isDark ? Colors.grey[600] : Colors.grey[400],
+                inactiveTrackColor: isDark ? Colors.grey[800] : Colors.grey[300],
               ),
             ],
           ),

@@ -30,7 +30,7 @@ class PlantTaskModel extends PlantTask {
   factory PlantTaskModel.fromJson(Map<String, dynamic> json) {
     return PlantTaskModel(
       id: json['id'] as String,
-      plantId: json['plantId'] as String,
+      plantId: (json['plantId'] as String?) ?? '', // Null-safe: use empty string if plantId is null
       type: TaskType.values.firstWhere(
         (e) => e.name == json['type'],
         orElse: () => TaskType.watering,

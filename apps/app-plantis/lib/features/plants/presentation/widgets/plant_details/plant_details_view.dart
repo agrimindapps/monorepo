@@ -483,7 +483,7 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       onBackPressed: () => _controller?.goBack(),
       actions: [
         PopupMenuButton<String>(
-          color: _PlantDetailsConstants.lightBackgroundColor,
+          color: Theme.of(context).colorScheme.surface,
           icon: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -493,27 +493,43 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
             child: const Icon(Icons.more_vert, color: Colors.white, size: 20),
           ),
           onSelected: (action) => _handleMenuAction(action, plant),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'edit',
-              child: ListTile(
-                leading: Icon(Icons.edit_outlined),
-                title: Text('Editar'),
-                contentPadding: EdgeInsets.zero,
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: ListTile(
-                leading: Icon(Icons.delete_outline, color: PlantisColors.error),
-                title: Text(
-                  'Excluir',
-                  style: TextStyle(color: PlantisColors.error),
+          itemBuilder: (context) {
+            final theme = Theme.of(context);
+            final isDark = theme.brightness == Brightness.dark;
+            
+            return [
+              PopupMenuItem(
+                value: 'edit',
+                child: ListTile(
+                  leading: Icon(
+                    Icons.edit_outlined,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                  title: Text(
+                    'Editar',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                  contentPadding: EdgeInsets.zero,
                 ),
-                contentPadding: EdgeInsets.zero,
               ),
-            ),
-          ],
+              PopupMenuItem(
+                value: 'delete',
+                child: ListTile(
+                  leading: Icon(
+                    Icons.delete_outline,
+                    color: isDark ? Colors.red.shade300 : PlantisColors.error,
+                  ),
+                  title: Text(
+                    'Excluir',
+                    style: TextStyle(
+                      color: isDark ? Colors.red.shade300 : PlantisColors.error,
+                    ),
+                  ),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ];
+          },
         ),
       ],
     );

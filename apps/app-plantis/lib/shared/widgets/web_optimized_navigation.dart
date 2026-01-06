@@ -38,14 +38,16 @@ class _DesktopLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final backgroundColor = PlantisColors.getPageBackgroundColor(context);
+    
     return Scaffold(
-      backgroundColor: PlantisColors.getPageBackgroundColor(context),
+      backgroundColor: backgroundColor,
       body: Row(
         children: [
           const ModernSidebar(),
           Expanded(
             child: DecoratedBox(
-              decoration: const BoxDecoration(color: Color(0xFFE8ECEF)),
+              decoration: BoxDecoration(color: backgroundColor),
               child: ClipRRect(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0),

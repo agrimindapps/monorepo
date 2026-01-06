@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../domain/entities/appointment.dart';
 import '../providers/appointment_form_notifier.dart';
+import '../providers/appointment_form_state.dart';
 
 class AppointmentFormView extends ConsumerWidget {
   const AppointmentFormView({
@@ -59,7 +60,7 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildVeterinarianField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return Autocomplete<String>(
@@ -92,7 +93,7 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildReasonField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return Autocomplete<String>(
@@ -125,7 +126,7 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildDateField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return InkWell(
@@ -174,11 +175,11 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildStatusField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return DropdownButtonFormField<AppointmentStatus>(
-      value: state.status,
+      initialValue: state.status,
       decoration: const InputDecoration(
         labelText: 'Status',
         prefixIcon: Icon(Icons.info_outline),
@@ -197,7 +198,7 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildDiagnosisField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return TextFormField(
@@ -215,7 +216,7 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildCostField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return TextFormField(
@@ -243,7 +244,7 @@ class AppointmentFormView extends ConsumerWidget {
 
   Widget _buildNotesField(
     BuildContext context,
-    state,
+    AppointmentFormState state,
     AppointmentFormNotifier notifier,
   ) {
     return TextFormField(

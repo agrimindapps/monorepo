@@ -162,6 +162,9 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
   }
 
   Widget _buildFiltersContent(TasksState tasksState, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(8),
       child: SingleChildScrollView(
@@ -212,7 +215,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
                 labelStyle: TextStyle(
                   color: tasksState.currentFilter == TasksFilterType.overdue
                       ? Colors.red[700]
-                      : Colors.grey[700],
+                      : (isDark ? theme.colorScheme.onSurface : Colors.grey[700]),
                   fontSize: 16,
                   fontWeight:
                       tasksState.currentFilter == TasksFilterType.overdue
@@ -264,7 +267,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               labelStyle: TextStyle(
                 color: tasksState.currentFilter == TasksFilterType.today
                     ? PlantisColors.primary
-                    : Colors.grey[700],
+                    : (isDark ? theme.colorScheme.onSurface : Colors.grey[700]),
                 fontSize: 16,
                 fontWeight: tasksState.currentFilter == TasksFilterType.today
                     ? FontWeight.w600
@@ -314,7 +317,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               labelStyle: TextStyle(
                 color: tasksState.currentFilter == TasksFilterType.upcoming
                     ? PlantisColors.primary
-                    : Colors.grey[700],
+                    : (isDark ? theme.colorScheme.onSurface : Colors.grey[700]),
                 fontSize: 16,
                 fontWeight: tasksState.currentFilter == TasksFilterType.upcoming
                     ? FontWeight.w600
@@ -364,7 +367,7 @@ class _TasksListPageState extends ConsumerState<TasksListPage> {
               labelStyle: TextStyle(
                 color: tasksState.currentFilter == TasksFilterType.allFuture
                     ? PlantisColors.primary
-                    : Colors.grey[700],
+                    : (isDark ? theme.colorScheme.onSurface : Colors.grey[700]),
                 fontSize: 16,
                 fontWeight:
                     tasksState.currentFilter == TasksFilterType.allFuture

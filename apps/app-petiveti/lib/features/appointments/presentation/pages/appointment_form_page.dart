@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../shared/widgets/crud_form_dialog.dart';
 import '../providers/appointment_form_notifier.dart';
-import '../providers/appointments_providers.dart';
 import '../widgets/appointment_form_view.dart';
 
 class AppointmentFormPage extends ConsumerStatefulWidget {
@@ -90,9 +89,11 @@ class _AppointmentFormPageState extends ConsumerState<AppointmentFormPage> {
     return CrudFormDialog(
       mode: _mode,
       title: _getTitle(),
+      subtitle: 'Gerenciar informações da consulta',
+      headerIcon: Icons.calendar_today,
       canSave: state.canSave,
       isSaving: state.isSaving,
-      onModeChanged: (newMode) {
+      onModeChange: (newMode) {
         setState(() {
           _mode = newMode;
         });
@@ -117,7 +118,7 @@ class _AppointmentFormPageState extends ConsumerState<AppointmentFormPage> {
       onCancel: () {
         Navigator.of(context).pop(false);
       },
-      child: AppointmentFormView(
+      content: AppointmentFormView(
         animalId: widget.animalId,
         readOnly: _mode == CrudDialogMode.view,
       ),

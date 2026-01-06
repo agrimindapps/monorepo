@@ -8,6 +8,7 @@ Complete implementation of Google Mobile Ads for the monorepo following Clean Ar
 - [Architecture](#architecture)
 - [Setup](#setup)
 - [Usage](#usage)
+- [Web - AdSense](#web---adsense)
 - [Ad Types](#ad-types)
 - [Frequency Capping](#frequency-capping)
 - [Premium Integration](#premium-integration)
@@ -310,6 +311,148 @@ class _MyAppState extends ConsumerState<MyApp> with WidgetsBindingObserver {
   }
 }
 ```
+
+---
+
+## Web - AdSense
+
+Para Flutter Web, use Google AdSense em vez de AdMob. O AdSense é implementado via `HtmlElementView` para injetar elementos HTML nativos.
+
+### Setup Web
+
+#### 1. Adicione o script ao index.html
+
+```html
+<!-- web/index.html -->
+<head>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-SEU_ID"
+     crossorigin="anonymous"></script>
+</head>
+```
+
+#### 2. Configure o Provider
+
+```dart
+import 'package:core/core.dart';
+
+void main() {
+  runApp(
+    ProviderScope(
+      overrides: [
+        adSenseConfigProvider.overrideWithValue(
+          AdSenseConfigEntity.production(
+            clientId: 'ca-pub-XXXXXXX',
+            adSlots: {
+              'banner_top': '1234567890',
+              'banner_bottom': '0987654321',
+            },
+          ),
+        ),
+      ],
+      child: MyApp(),
+    ),
+  );
+}
+```
+
+### Widgets AdSense
+
+```dart
+// Importe diretamente (só funciona em builds web)
+import 'package:core/src/presentation/widgets/ads/web/adsense_banner_widget.dart';
+
+// Banner básico
+AdSenseBannerWidget(
+  slotName: 'banner_top',
+  adSlot: '1234567890',
+  height: 100,
+  onAdLoaded: () => print('Ad loaded'),
+  onAdFailed: (error) => print('Error: $error'),
+)
+
+// Banner responsivo
+ResponsiveAdSenseBannerWidget(
+  slotName: 'banner_top',
+  adSlot: '1234567890',
+)
+
+// In-article (entre parágrafos)
+InArticleAdSenseWidget(
+  slotName: 'in_article',
+  adSlot: '1234567890',
+)
+
+// In-feed (em listagens)
+InFeedAdSenseWidget(
+  slotName: 'in_feed',
+  adSlot: '1234567890',
+)
+```
+
+### Formatos AdSense
+
+| Formato | Uso | Código |
+|---------|-----|--------|
+| `auto` | Detecta automaticamente | `AdSenseFormat.auto` |
+| `horizontal` | Banners horizontais | `AdSenseFormat.horizontal` |
+| `vertical` | Banners verticais | `AdSenseFormat.vertical` |
+| `rectangle` | Retângulos | `AdSenseFormat.rectangle` |
+| `inArticle` | Entre parágrafos | `AdSenseFormat.inArticle` |
+| `inFeed` | Em listagens | `AdSenseFormat.inFeed` |
+
+### Tamanhos AdSense
+
+| Tamanho | Dimensões | Código |
+|---------|-----------|--------|
+| Banner | 320x50 | `AdSenseSize.banner` |
+| Large Banner | 320x100 | `AdSenseSize.largeBanner` |
+| Medium Rectangle | 300x250 | `AdSenseSize.mediumRectangle` |
+| Full Banner | 468x60 | `AdSenseSize.fullBanner` |
+| Leaderboard | 728x90 | `AdSenseSize.leaderboard` |
+| Wide Skyscraper | 160x600 | `AdSenseSize.wideSkyscraper` |
+| Responsivo | Adaptável | `AdSenseSize.responsive` |
+
+### Providers Web
+
+```dart
+// Repositório web
+final webAdsRepo = ref.read(webAdsRepositoryProvider);
+
+// Verificar se deve mostrar ads
+final shouldShow = await ref.read(shouldShowWebAdsProvider('banner').future);
+
+// Definir status premium (não mostra ads)
+ref.read(webAdsPremiumStatusProvider.notifier).state = true;
+```
+
+### App Multiplataforma
+
+```dart
+import 'package:flutter/foundation.dart';
+import 'package:core/core.dart';
+
+Widget buildAdBanner() {
+  if (kIsWeb) {
+    // Para web - importe separadamente
+    return _buildWebAd();
+  } else {
+    // Para mobile
+    return UnifiedAdBannerWidget(
+      mobileConfig: MobileAdConfig.banner(
+        adUnitId: 'ca-app-pub-xxx/yyy',
+      ),
+    );
+  }
+}
+```
+
+### Considerações Web
+
+1. **AdBlockers**: Usuários com AdBlock não verão anúncios
+2. **Container**: Garanta que tenha altura definida
+3. **Renderer**: Funciona melhor com `--web-renderer html`
+4. **SPA**: Anúncios podem não recarregar em navegações
 
 ---
 

@@ -143,7 +143,9 @@ class CalculatorAppBar extends StatelessWidget implements PreferredSizeWidget {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                          color: isDark
+                              ? Colors.white
+                              : theme.colorScheme.onSurface,
                         ),
                         onPressed: onBack ?? () => context.go('/home'),
                         tooltip: 'Voltar',
@@ -169,7 +171,9 @@ class CalculatorAppBar extends StatelessWidget implements PreferredSizeWidget {
                       style: TextStyle(
                         fontSize: isDesktop ? 20 : 18,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                        color: isDark
+                            ? Colors.white
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                   ],

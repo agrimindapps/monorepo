@@ -36,11 +36,7 @@ class _OvertimeCalculatorPageState
 
     return Scaffold(
       appBar: CalculatorAppBar(
-        actions: [
-          InfoAppBarAction(
-            onPressed: () => _showInfo(context),
-          ),
-        ],
+        actions: [InfoAppBarAction(onPressed: () => _showInfo(context))],
       ),
       body: SafeArea(
         child: Align(
@@ -57,9 +53,8 @@ class _OvertimeCalculatorPageState
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
                       'Calculadora de Horas Extras',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   // Input Form Card
@@ -104,8 +99,9 @@ class _OvertimeCalculatorPageState
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _handleSubmit,
                                 icon: state.isLoading
                                     ? const SizedBox(
                                         width: 16,
@@ -117,7 +113,9 @@ class _OvertimeCalculatorPageState
                                       )
                                     : const Icon(Icons.calculate),
                                 label: Text(
-                                  state.isLoading ? 'Calculando...' : 'Calcular',
+                                  state.isLoading
+                                      ? 'Calculando...'
+                                      : 'Calcular',
                                 ),
                                 style: ShadcnStyle.primaryButtonStyle,
                               ),
@@ -178,18 +176,14 @@ class _OvertimeCalculatorPageState
   }
 
   void _handleCalculate(CalculateOvertimeParams params) {
-    ref
-        .read(overtimeCalculatorProvider.notifier)
-        .calculate(params);
+    ref.read(overtimeCalculatorProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
     setState(() {
       _formKeyId = UniqueKey();
     });
-    ref
-        .read(overtimeCalculatorProvider.notifier)
-        .clearCalculation();
+    ref.read(overtimeCalculatorProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {

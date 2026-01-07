@@ -36,11 +36,7 @@ class _UnemploymentInsuranceCalculatorPageState
 
     return Scaffold(
       appBar: CalculatorAppBar(
-        actions: [
-          InfoAppBarAction(
-            onPressed: () => _showInfo(context),
-          ),
-        ],
+        actions: [InfoAppBarAction(onPressed: () => _showInfo(context))],
       ),
       body: SafeArea(
         child: Align(
@@ -57,9 +53,8 @@ class _UnemploymentInsuranceCalculatorPageState
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
                       'Calculadora de Seguro Desemprego',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   // Input Form Card
@@ -104,8 +99,9 @@ class _UnemploymentInsuranceCalculatorPageState
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _handleSubmit,
                                 icon: state.isLoading
                                     ? const SizedBox(
                                         width: 16,
@@ -117,7 +113,9 @@ class _UnemploymentInsuranceCalculatorPageState
                                       )
                                     : const Icon(Icons.calculate),
                                 label: Text(
-                                  state.isLoading ? 'Calculando...' : 'Calcular',
+                                  state.isLoading
+                                      ? 'Calculando...'
+                                      : 'Calcular',
                                 ),
                                 style: ShadcnStyle.primaryButtonStyle,
                               ),

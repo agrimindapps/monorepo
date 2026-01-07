@@ -38,11 +38,7 @@ class _ThirteenthSalaryCalculatorPageState
 
     return Scaffold(
       appBar: CalculatorAppBar(
-        actions: [
-          InfoAppBarAction(
-            onPressed: () => _showInfo(context),
-          ),
-        ],
+        actions: [InfoAppBarAction(onPressed: () => _showInfo(context))],
       ),
       body: SafeArea(
         child: Align(
@@ -59,9 +55,8 @@ class _ThirteenthSalaryCalculatorPageState
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
                       'Calculadora de 13º Salário',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   // Input Form Card
@@ -106,8 +101,9 @@ class _ThirteenthSalaryCalculatorPageState
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _handleSubmit,
                                 icon: state.isLoading
                                     ? const SizedBox(
                                         width: 16,
@@ -119,7 +115,9 @@ class _ThirteenthSalaryCalculatorPageState
                                       )
                                     : const Icon(Icons.calculate),
                                 label: Text(
-                                  state.isLoading ? 'Calculando...' : 'Calcular',
+                                  state.isLoading
+                                      ? 'Calculando...'
+                                      : 'Calcular',
                                 ),
                                 style: ShadcnStyle.primaryButtonStyle,
                               ),
@@ -180,24 +178,21 @@ class _ThirteenthSalaryCalculatorPageState
   }
 
   void _handleCalculate(CalculateThirteenthSalaryParams params) {
-    ref
-        .read(thirteenthSalaryCalculatorProvider.notifier)
-        .calculate(params);
+    ref.read(thirteenthSalaryCalculatorProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
     setState(() {
       _formKeyId = UniqueKey();
     });
-    ref
-        .read(thirteenthSalaryCalculatorProvider.notifier)
-        .clearCalculation();
+    ref.read(thirteenthSalaryCalculatorProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {
     // Check if educational content exists
     if (CalculatorContentRepository.hasContent(
-        '/calculators/financial/thirteenth-salary')) {
+      '/calculators/financial/thirteenth-salary',
+    )) {
       _showEducationalDialog(context);
     } else {
       _showSimpleInfoDialog(context);
@@ -233,11 +228,11 @@ class _ThirteenthSalaryCalculatorPageState
                       child: Text(
                         'Saiba Mais',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                            ),
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
+                        ),
                       ),
                     ),
                     IconButton(
@@ -253,7 +248,8 @@ class _ThirteenthSalaryCalculatorPageState
               Expanded(
                 child: EducationalTabs(
                   content: CalculatorContentRepository.getContent(
-                      '/calculators/financial/thirteenth-salary')!,
+                    '/calculators/financial/thirteenth-salary',
+                  )!,
                 ),
               ),
             ],

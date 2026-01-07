@@ -49,10 +49,10 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       colorScheme: colorScheme,
+
       // Removing static scaffoldBackgroundColor to allow M3 dynamic surface tones
-      
       textTheme: _buildTextTheme(colorScheme.onSurface),
-      
+
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface, // Matches background
         foregroundColor: colorScheme.onSurface,
@@ -61,7 +61,7 @@ class AppTheme {
         scrolledUnderElevation: 3,
         surfaceTintColor: colorScheme.primary, // Subtle tint on scroll
       ),
-      
+
       cardTheme: CardThemeData(
         // Use a slightly different surface for cards to separate from background
         color: Color.alphaBlend(
@@ -76,7 +76,7 @@ class AppTheme {
         ),
         margin: EdgeInsets.zero,
       ),
-      
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryLight,
@@ -90,17 +90,20 @@ class AppTheme {
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
-      
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Colors.white.withValues(alpha: 0.7), // Semi-transparent white
+        fillColor: Colors.white.withValues(
+          alpha: 0.7,
+        ), // Semi-transparent white
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 18,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none, // Filled style often has no border until focus
+          borderSide:
+              BorderSide.none, // Filled style often has no border until focus
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -157,7 +160,10 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.05), width: 1),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.05),
+            width: 1,
+          ),
         ),
         margin: EdgeInsets.zero,
       ),

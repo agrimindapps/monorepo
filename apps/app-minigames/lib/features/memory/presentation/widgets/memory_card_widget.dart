@@ -33,13 +33,17 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
     );
     _animation = TweenSequence([
       TweenSequenceItem(
-        tween: Tween(begin: 0.0, end: -0.5)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween(
+          begin: 0.0,
+          end: -0.5,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 50,
       ),
       TweenSequenceItem(
-        tween: Tween(begin: -0.5, end: 0.0)
-            .chain(CurveTween(curve: Curves.easeIn)),
+        tween: Tween(
+          begin: -0.5,
+          end: 0.0,
+        ).chain(CurveTween(curve: Curves.easeIn)),
         weight: 50,
       ),
     ]).animate(_controller);
@@ -68,7 +72,9 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
         animation: _animation,
         builder: (context, child) {
           final value = _animation.value;
-          final isFlipped = value < -0.25;
+          final isRevealed = widget.card.state != CardState.hidden;
+          final showFront = isRevealed ? (value > -0.25) : (value < -0.25);
+          
           final transform = Matrix4.identity()
             ..setEntry(3, 2, 0.001)
             ..rotateY(value * 3.14);
@@ -81,7 +87,7 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
               width: widget.size,
               height: widget.size,
               decoration: BoxDecoration(
-                color: isFlipped ? _getCardColor() : Colors.blue,
+                color: showFront ? _getCardColor() : Colors.blue,
                 borderRadius: BorderRadius.circular(8),
                 boxShadow: [
                   BoxShadow(
@@ -91,8 +97,8 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
                   ),
                 ],
               ),
-              child: isFlipped
-                  ? (widget.card.isHidden ? null : _buildCardContent())
+              child: showFront
+                  ? _buildCardContent()
                   : const Center(
                       child: Icon(
                         Icons.question_mark,
@@ -120,6 +126,19 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
     }
   }
 
+  Widget _buildCardContent() {
+    if (widget.card.isSprite) {
+      return _buildSpriteContent();
+    }
+    return Center(
+      child: Icon(
+        widget.card.icon ?? Icons.help_outline,
+        color: Colors.white,
+        size: widget.size * 0.5,
+      ),
+    );
+  }
+
   Widget _buildSpriteContent() {
     return Padding(
       padding: const EdgeInsets.all(4.0), // Padding inside the card
@@ -130,5 +149,4 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
       ),
     );
   }
-}
 }

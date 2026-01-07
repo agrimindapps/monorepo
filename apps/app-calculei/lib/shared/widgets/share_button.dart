@@ -863,4 +863,181 @@ $_footer''';
 💡 Monitore a umidade do solo e condições climáticas para ajustes.
 $_footer''';
   }
+
+  /// Format fertilizer dosing calculation for sharing
+  static String formatFertilizerDosingCalculation({
+    required String fertilizerType,
+    required double areaHa,
+    required double productKg,
+    required double cost,
+  }) {
+    return '''
+📋 Dosagem de Fertilizante - Calculei App
+
+🌱 Fertilizante: $fertilizerType
+📏 Área: ${areaHa.toStringAsFixed(1)} ha
+
+📊 Resultado:
+• Quantidade: ${productKg.toStringAsFixed(0)} kg
+• Custo estimado: R\$ ${cost.toStringAsFixed(2)}
+
+💡 Aplique de forma uniforme na área.
+$_footer''';
+  }
+
+  /// Format soil pH calculation for sharing
+  static String formatSoilPhCalculation({
+    required double currentPh,
+    required double targetPh,
+    required double areaHa,
+    required double limeKg,
+  }) {
+    return '''
+📋 Correção de pH do Solo - Calculei App
+
+🧪 pH atual: ${currentPh.toStringAsFixed(1)}
+🎯 pH alvo: ${targetPh.toStringAsFixed(1)}
+📏 Área: ${areaHa.toStringAsFixed(1)} ha
+
+📊 Resultado:
+• Calcário necessário: ${limeKg.toStringAsFixed(0)} kg
+
+💡 Aplique 2-3 meses antes do plantio para melhor incorporação.
+$_footer''';
+  }
+
+  /// Format planting density calculation for sharing
+  static String formatPlantingDensityCalculation({
+    required double rowSpacing,
+    required double plantSpacing,
+    required double areaHa,
+    required int plantsPerHa,
+    required int totalPlants,
+  }) {
+    return '''
+📋 Densidade de Plantio - Calculei App
+
+📏 Espaçamento: ${rowSpacing.toStringAsFixed(2)}m × ${plantSpacing.toStringAsFixed(2)}m
+🌾 Área: ${areaHa.toStringAsFixed(1)} ha
+
+📊 Resultado:
+• Plantas/ha: $plantsPerHa
+• Total de plantas: $totalPlants
+
+💡 Ajuste conforme recomendação para sua cultivar.
+$_footer''';
+  }
+
+  /// Format yield prediction calculation for sharing
+  static String formatYieldPredictionCalculation({
+    required String cropType,
+    required double areaHa,
+    required double grossYield,
+    required double netYield,
+    required double marketValue,
+  }) {
+    return '''
+📋 Previsão de Produtividade - Calculei App
+
+🌾 Cultura: $cropType
+📏 Área: ${areaHa.toStringAsFixed(1)} ha
+
+📊 Resultado:
+• Produção bruta: ${grossYield.toStringAsFixed(0)} kg
+• Produção líquida: ${netYield.toStringAsFixed(0)} kg
+• Valor de mercado: R\$ ${marketValue.toStringAsFixed(2)}
+
+💡 Valores estimados - considere fatores climáticos e de manejo.
+$_footer''';
+  }
+
+  /// Format feed calculator for sharing
+  static String formatFeedCalculation({
+    required String animalType,
+    required int numAnimals,
+    required double dailyFeed,
+    required double totalFeed,
+    required double cost,
+  }) {
+    return '''
+📋 Cálculo de Ração - Calculei App
+
+🐄 Animal: $animalType
+📊 Quantidade: $numAnimals animais
+
+📊 Resultado:
+• Consumo diário: ${dailyFeed.toStringAsFixed(1)} kg/dia
+• Total necessário: ${totalFeed.toStringAsFixed(0)} kg
+• Custo estimado: R\$ ${cost.toStringAsFixed(2)}
+
+💡 Ajuste conforme fase de produção e qualidade do alimento.
+$_footer''';
+  }
+
+  /// Format weight gain calculation for sharing
+  static String formatWeightGainCalculation({
+    required String animalType,
+    required double initialWeight,
+    required double targetWeight,
+    required int daysNeeded,
+    required double totalFeed,
+  }) {
+    return '''
+📋 Ganho de Peso - Calculei App
+
+🐄 Animal: $animalType
+⚖️ Peso inicial: ${initialWeight.toStringAsFixed(1)} kg
+🎯 Peso meta: ${targetWeight.toStringAsFixed(1)} kg
+
+📊 Resultado:
+• Dias até a meta: $daysNeeded dias
+• Ração estimada: ${totalFeed.toStringAsFixed(0)} kg
+
+💡 Monitore peso semanalmente para ajustar manejo.
+$_footer''';
+  }
+
+  /// Format breeding cycle calculation for sharing
+  static String formatBreedingCycleCalculation({
+    required String species,
+    required String breedingDate,
+    required String expectedBirth,
+    required int gestationDays,
+    required int daysRemaining,
+  }) {
+    return '''
+📋 Ciclo Reprodutivo - Calculei App
+
+🐄 Espécie: $species
+📅 Cobertura: $breedingDate
+📅 Parto previsto: $expectedBirth
+
+📊 Gestação:
+• Duração média: $gestationDays dias
+• Dias restantes: $daysRemaining
+
+💡 Prepare instalações e monitore sinais de parto.
+$_footer''';
+  }
+
+  /// Format evapotranspiration calculation for sharing
+  static String formatEvapotranspirationCalculation({
+    required double temperature,
+    required double humidity,
+    required double etoMmDay,
+    required double weeklyWater,
+  }) {
+    return '''
+📋 Evapotranspiração - Calculei App
+
+🌡️ Temperatura: ${temperature.toStringAsFixed(1)}°C
+💧 Umidade: ${humidity.toStringAsFixed(0)}%
+
+📊 Resultado:
+• ETo diário: ${etoMmDay.toStringAsFixed(2)} mm/dia
+• Necessidade semanal: ${weeklyWater.toStringAsFixed(1)} mm
+
+💡 Use para planejamento de irrigação.
+$_footer''';
+  }
 }

@@ -39,9 +39,17 @@ import '../../features/pet_calculator/presentation/pages/pregnancy_calculator_pa
 import '../../features/pet_calculator/presentation/pages/unit_conversion_calculator_page.dart';
 // Agriculture Calculators
 import '../../features/agriculture_calculator/presentation/pages/agriculture_selection_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/breeding_cycle_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/evapotranspiration_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/feed_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/fertilizer_dosing_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/irrigation_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/npk_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/planting_density_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/seed_rate_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/soil_ph_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/weight_gain_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/yield_prediction_calculator_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 // Financial Calculators
 import '../../features/thirteenth_salary_calculator/presentation/pages/thirteenth_salary_calculator_page.dart';
@@ -251,6 +259,43 @@ final appRouter = GoRouter(
             GoRoute(
               path: '/calculators/agriculture/irrigation',
               builder: (context, state) => const IrrigationCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/fertilizer-dosing',
+              builder: (context, state) =>
+                  const FertilizerDosingCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/soil-ph',
+              builder: (context, state) => const SoilPhCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/planting-density',
+              builder: (context, state) =>
+                  const PlantingDensityCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/yield-prediction',
+              builder: (context, state) =>
+                  const YieldPredictionCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/feed',
+              builder: (context, state) => const FeedCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/weight-gain',
+              builder: (context, state) => const WeightGainCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/breeding-cycle',
+              builder: (context, state) =>
+                  const BreedingCycleCalculatorPage(),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/evapotranspiration',
+              builder: (context, state) =>
+                  const EvapotranspirationCalculatorPage(),
             ),
           ],
         ),

@@ -17,7 +17,10 @@ class CardGeneratorService {
   // ============================================================================
 
   /// Generates a complete set of cards for given difficulty and optional deck config
-  List<CardEntity> generateCards(GameDifficulty difficulty, {DeckConfiguration? deckConfig}) {
+  List<CardEntity> generateCards(
+    GameDifficulty difficulty, {
+    DeckConfiguration? deckConfig,
+  }) {
     final totalPairs = difficulty.totalPairs;
     final List<CardEntity> cards = [];
 
@@ -49,10 +52,10 @@ class CardGeneratorService {
     // Calculate sprite position in grid
     // If we need more pairs than available sprites, wrap around
     final spriteIndex = pairId % config.totalSprites;
-    
+
     final col = spriteIndex % config.columns;
     final row = spriteIndex ~/ config.columns;
-    
+
     final sourceRect = Rect.fromLTWH(
       col * config.spriteWidth.toDouble(),
       row * config.spriteHeight.toDouble(),
@@ -230,14 +233,18 @@ class CardGeneratorService {
 
     for (final card in cards) {
       colorUsage[card.color] = (colorUsage[card.color] ?? 0) + 1;
-      iconUsage[card.icon] = (iconUsage[card.icon] ?? 0) + 1;
+      if (card.icon != null) {
+        iconUsage[card.icon!] = (iconUsage[card.icon!] ?? 0) + 1;
+      }
     }
 
     return ThemeUsageStats(
       colorUsage: colorUsage,
       iconUsage: iconUsage,
-      mostUsedColor: _findMostUsed(colorUsage),
-      mostUsedIcon: _findMostUsed(iconUsage),
+      mostUsedColor: colorUsage.isEmpty
+          ? Colors.transparent
+          : _findMostUsed(colorUsage),
+      mostUsedIcon: iconUsage.isEmpty ? Icons.help : _findMostUsed(iconUsage),
     );
   }
 
@@ -288,14 +295,10 @@ class CardGeneratorService {
     for (int i = 0; i < config.pairCount; i++) {
       final theme =
           config.forcedThemes != null && i < config.forcedThemes!.length
-              ? config.forcedThemes![i]
-              : selectTheme(i);
+          ? config.forcedThemes![i]
+          : selectTheme(i);
 
-      cards.addAll(createPair(
-        pairId: i,
-        color: theme.color,
-        icon: theme.icon,
-      ));
+      cards.addAll(createPair(pairId: i, color: theme.color, icon: theme.icon));
     }
 
     if (!config.skipShuffle) {
@@ -315,10 +318,7 @@ class CardTheme {
   final Color color;
   final IconData icon;
 
-  const CardTheme({
-    required this.color,
-    required this.icon,
-  });
+  const CardTheme({required this.color, required this.icon});
 }
 
 /// Validation result for card generation

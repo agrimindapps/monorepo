@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/datasources/memory_local_datasource.dart';
 import '../../data/repositories/memory_repository_impl.dart';
 import '../../domain/repositories/memory_repository.dart';
+import '../../domain/services/card_generator_service.dart';
 import '../../domain/usecases/check_match_usecase.dart';
 import '../../domain/usecases/flip_card_usecase.dart';
 import '../../domain/usecases/generate_cards_usecase.dart';
@@ -21,6 +22,15 @@ part 'memory_providers.g.dart';
 MemoryLocalDataSource memoryLocalDataSource(Ref ref) {
   final sharedPrefs = ref.watch(sharedPreferencesProvider);
   return MemoryLocalDataSourceImpl(sharedPrefs);
+}
+
+// =========================================================================
+// SERVICES
+// =========================================================================
+
+@riverpod
+CardGeneratorService cardGeneratorService(Ref ref) {
+  return CardGeneratorService();
 }
 
 // =========================================================================
@@ -54,8 +64,8 @@ CheckMatchUseCase checkMatchUseCase(Ref ref) {
 
 @riverpod
 RestartGameUseCase restartGameUseCase(Ref ref) {
-  final generateCards = ref.watch(generateCardsUseCaseProvider);
-  return RestartGameUseCase(generateCards);
+  final cardGenerator = ref.watch(cardGeneratorServiceProvider);
+  return RestartGameUseCase(cardGenerator);
 }
 
 @riverpod

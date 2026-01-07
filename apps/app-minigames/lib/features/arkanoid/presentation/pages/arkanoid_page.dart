@@ -1,7 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../game/arkanoid_game.dart';
 
 class ArkanoidPage extends StatelessWidget {
@@ -9,42 +9,45 @@ class ArkanoidPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Arkanoid'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
+    return GamePageLayout(
+      title: 'Arkanoid',
+      accentColor: const Color(0xFF00BCD4),
+      instructions: 'Arraste para mover a raquete.\n\n'
+          '🟦 Destrua todos os blocos\n'
+          '⚪ Não deixe a bola cair\n'
+          '🏆 Marque o máximo de pontos!',
+      maxGameWidth: 500,
+      child: AspectRatio(
+        aspectRatio: 0.7,
+        child: GameWidget<ArkanoidGame>(
+          game: ArkanoidGame(),
+          overlayBuilderMap: {
+            'GameOver': (context, game) => _buildOverlay(
+              'Game Over',
+              'Score: ${game.score}',
+              'Jogar novamente',
+              game.reset,
+              Colors.red,
+            ),
+            'GameWon': (context, game) => _buildOverlay(
+              'Você Venceu!',
+              'Score: ${game.score}',
+              'Jogar novamente',
+              game.reset,
+              Colors.green,
+            ),
+          },
         ),
-      ),
-      body: GameWidget<ArkanoidGame>(
-        game: ArkanoidGame(),
-        overlayBuilderMap: {
-          'GameOver': (context, game) => _buildOverlay(
-            context,
-            'Game Over',
-            'Score: ${game.score}',
-            'Try Again',
-            game.reset,
-          ),
-          'GameWon': (context, game) => _buildOverlay(
-            context,
-            'You Win!',
-            'Score: ${game.score}',
-            'Play Again',
-            game.reset,
-          ),
-        },
       ),
     );
   }
 
   Widget _buildOverlay(
-    BuildContext context,
     String title,
     String subtitle,
     String buttonText,
     VoidCallback onAction,
+    Color color,
   ) {
     return Center(
       child: Container(
@@ -52,39 +55,36 @@ class ArkanoidPage extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.8),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.cyan, width: 2),
+          border: Border.all(color: color, width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 32,
+              style: TextStyle(
+                color: color,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               subtitle,
               style: const TextStyle(
                 color: Colors.white70,
-                fontSize: 20,
+                fontSize: 18,
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: onAction,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.cyan,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                backgroundColor: color,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: Text(
-                buttonText,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
+              child: Text(buttonText, style: const TextStyle(fontSize: 16)),
             ),
           ],
         ),

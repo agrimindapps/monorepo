@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/game_page_layout.dart';
 import '../providers/simon_says_controller.dart';
 import '../widgets/simon_button.dart';
 
@@ -13,51 +13,49 @@ class SimonSaysPage extends ConsumerWidget {
     final state = ref.watch(simonSaysControllerProvider);
     final notifier = ref.read(simonSaysControllerProvider.notifier);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A2E),
-      appBar: AppBar(
-        title: const Text('Simon Says'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/'),
-        ),
-      ),
-      body: Center(
+    return GamePageLayout(
+      title: 'Genius',
+      accentColor: const Color(0xFFE91E63),
+      instructions: 'Memorize e repita a sequência de cores!\n\n'
+          '👀 Observe as cores acenderem\n'
+          '🎯 Repita a sequência\n'
+          '📈 Cada rodada adiciona uma cor',
+      maxGameWidth: 400,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Score Display
             Text(
               'Score: ${state.score}',
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 32,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             
             // Status Message
             Text(
               _getStatusMessage(state.gameState),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.7),
-                fontSize: 18,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
 
             // Game Board
             SizedBox(
-              width: 320,
-              height: 320,
+              width: 280,
+              height: 280,
               child: GridView.count(
                 crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                padding: const EdgeInsets.all(16),
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                padding: const EdgeInsets.all(8),
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
                   SimonButton(
@@ -92,7 +90,7 @@ class SimonSaysPage extends ConsumerWidget {
               ),
             ),
             
-            const SizedBox(height: 40),
+            const SizedBox(height: 24),
 
             // Controls
             if (state.gameState == SimonGameState.idle || 
@@ -100,13 +98,13 @@ class SimonSaysPage extends ConsumerWidget {
               ElevatedButton(
                 onPressed: () => notifier.startGame(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 16),
+                  backgroundColor: const Color(0xFFE91E63),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                 ),
                 child: Text(
-                  state.gameState == SimonGameState.idle ? 'START' : 'TRY AGAIN',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  state.gameState == SimonGameState.idle ? 'INICIAR' : 'TENTAR NOVAMENTE',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ),
           ],
@@ -118,11 +116,11 @@ class SimonSaysPage extends ConsumerWidget {
   String _getStatusMessage(SimonGameState state) {
     switch (state) {
       case SimonGameState.idle:
-        return 'Tap Start to play';
+        return 'Toque em Iniciar para jogar';
       case SimonGameState.showingSequence:
-        return 'Watch carefully...';
+        return 'Observe com atenção...';
       case SimonGameState.waitingForInput:
-        return 'Your turn!';
+        return 'Sua vez!';
       case SimonGameState.gameOver:
         return 'Game Over!';
     }

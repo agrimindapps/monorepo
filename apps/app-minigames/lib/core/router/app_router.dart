@@ -24,6 +24,9 @@ import 'package:app_minigames/features/asteroids/presentation/pages/asteroids_pa
 import 'package:app_minigames/features/damas/presentation/pages/damas_page.dart';
 import 'package:app_minigames/features/reversi/presentation/pages/reversi_page.dart';
 import 'package:app_minigames/features/batalha_naval/presentation/pages/batalha_naval_page.dart';
+import 'package:app_minigames/features/frogger/presentation/pages/frogger_page.dart';
+import 'package:app_minigames/features/tetris/presentation/pages/tetris_page.dart';
+import 'package:app_minigames/features/galaga/presentation/pages/galaga_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -125,6 +128,18 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/batalha-naval',
       builder: (context, state) => const BatalhaNavalPage(),
+    ),
+    GoRoute(
+      path: '/frogger',
+      builder: (context, state) => const FroggerPage(),
+    ),
+    GoRoute(
+      path: '/tetris',
+      builder: (context, state) => const TetrisPage(),
+    ),
+    GoRoute(
+      path: '/galaga',
+      builder: (context, state) => const GalagaPage(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

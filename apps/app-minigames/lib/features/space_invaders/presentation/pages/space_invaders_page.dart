@@ -1,7 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../game/space_invaders_game.dart';
 
 class SpaceInvadersPage extends StatelessWidget {
@@ -9,41 +9,38 @@ class SpaceInvadersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF000020),
-      appBar: AppBar(
-        title: const Text('Space Invaders'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/'),
+    return GamePageLayout(
+      title: 'Space Invaders',
+      accentColor: const Color(0xFF4CAF50),
+      instructions: 'Arraste para mover, toque para atirar.\n\n'
+          '👾 Destrua os invasores\n'
+          '🛡️ Defenda a Terra\n'
+          '❤️ Você tem 3 vidas',
+      maxGameWidth: 500,
+      child: AspectRatio(
+        aspectRatio: 0.7,
+        child: GameWidget<SpaceInvadersGame>(
+          game: SpaceInvadersGame(),
+          overlayBuilderMap: {
+            'GameOver': (context, game) => _buildOverlay(
+              'Game Over',
+              'Score: ${game.score}',
+              Colors.red,
+              game.reset,
+            ),
+            'GameWon': (context, game) => _buildOverlay(
+              'Vitória!',
+              'Score: ${game.score}',
+              Colors.green,
+              game.reset,
+            ),
+          },
         ),
-      ),
-      body: GameWidget<SpaceInvadersGame>(
-        game: SpaceInvadersGame(),
-        overlayBuilderMap: {
-          'GameOver': (context, game) => _buildOverlay(
-            context,
-            'Game Over',
-            'Score: ${game.score}',
-            Colors.red,
-            game.reset,
-          ),
-          'GameWon': (context, game) => _buildOverlay(
-            context,
-            'Victory!',
-            'Score: ${game.score}',
-            Colors.green,
-            game.reset,
-          ),
-        },
       ),
     );
   }
 
   Widget _buildOverlay(
-    BuildContext context,
     String title,
     String subtitle,
     Color color,
@@ -51,11 +48,11 @@ class SpaceInvadersPage extends StatelessWidget {
   ) {
     return Center(
       child: Container(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
           color: Colors.black.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color, width: 3),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color, width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -64,25 +61,25 @@ class SpaceInvadersPage extends StatelessWidget {
               title,
               style: TextStyle(
                 color: color,
-                fontSize: 36,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               subtitle,
-              style: const TextStyle(color: Colors.white, fontSize: 24),
+              style: const TextStyle(color: Colors.white, fontSize: 20),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: onRestart,
               style: ElevatedButton.styleFrom(
                 backgroundColor: color,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: const Text(
-                'Play Again',
-                style: TextStyle(fontSize: 20, color: Colors.white),
+                'Jogar novamente',
+                style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
           ],

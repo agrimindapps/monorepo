@@ -283,7 +283,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
   }
 
   Widget _buildStatsPanel(List<Expense> expenses) {
-    final total = expenses.fold<double>(0, (sum, e) => sum + e.amount);
+    final total = expenses.fold<double>(0, (acc, e) => acc + e.amount);
     final count = expenses.length;
     final average = count > 0 ? total / count : 0.0;
     

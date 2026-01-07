@@ -107,8 +107,6 @@ class QuizPage extends ConsumerWidget {
                     } else if (state.currentAnswerState.isIncorrect) {
                       if (option == question.correctAnswer) {
                         buttonColor = Colors.green;
-                      } else if (state.selectedAnswer == option) {
-                        buttonColor = Colors.red;
                       }
                     }
 

@@ -195,7 +195,9 @@ class SpacesRepositoryImpl implements SpacesRepository {
       if (await networkInfo.isConnected) {
         try {
           await remoteDatasource.deleteSpace(id, userId);
-        } catch (e) {}
+        } catch (e) {
+          // Ignore remote deletion errors (offline-first)
+        }
       }
 
       return const Right(null);

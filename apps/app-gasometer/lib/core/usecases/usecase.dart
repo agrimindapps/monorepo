@@ -5,15 +5,15 @@ import '../constants/ui_constants.dart';
 
 /// Base class for all use cases
 ///
-/// [Type] is the return type
+/// [T] is the return type
 /// [Params] is the input parameters type
-abstract class UseCase<Type, Params> {
-  Future<core.Either<core.Failure, Type>> call(Params params);
+abstract class UseCase<T, Params> {
+  Future<core.Either<core.Failure, T>> call(Params params);
 }
 
 /// Use case for operations that don't require parameters
-abstract class NoParamsUseCase<Type> {
-  Future<core.Either<core.Failure, Type>> call();
+abstract class NoParamsUseCase<T> {
+  Future<core.Either<core.Failure, T>> call();
 }
 
 /// Base class for use case parameters

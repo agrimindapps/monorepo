@@ -313,7 +313,7 @@ void main() {
         expect(result.isRight(), true);
         result.fold(
           (_) => fail('Should return success'),
-          (count) => expect(count, 0),
+          (recordCount) => expect(recordCount, 0),
         );
       });
     });

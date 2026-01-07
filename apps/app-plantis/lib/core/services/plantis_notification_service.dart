@@ -335,7 +335,9 @@ class PlantisNotificationService {
               );
               if (!cancelled) allCancelled = false;
             }
-          } catch (e) {}
+          } catch (e) {
+            // Ignore notification cancellation errors
+          }
         }
       }
 

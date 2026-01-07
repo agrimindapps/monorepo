@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:go_router/go_router.dart';
 
 /// Página de seleção de calculadoras de pets
@@ -8,9 +9,7 @@ class PetSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadoras Pet'),
-      ),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -84,16 +83,58 @@ class PetSelectionPage extends StatelessWidget {
                           _CalculatorCard(
                             title: 'Idade',
                             subtitle: 'Idade em anos humanos',
-                            emoji: '🐾',
+                            icon: Icons.pets,
                             color: Colors.blue,
                             route: '/calculators/pet/age',
                           ),
                           _CalculatorCard(
                             title: 'Gestação',
                             subtitle: 'Acompanhe a gravidez',
-                            emoji: '🐣',
+                            icon: Icons.child_friendly,
                             color: Colors.pink,
                             route: '/calculators/pet/pregnancy',
+                          ),
+                          _CalculatorCard(
+                            title: 'Condição Corporal',
+                            subtitle: 'BCS - Escore 1-9',
+                            icon: Icons.fitness_center,
+                            color: Colors.orange,
+                            route: '/calculators/pet/body-condition',
+                          ),
+                          _CalculatorCard(
+                            title: 'Calorias',
+                            subtitle: 'Necessidade Diária',
+                            icon: Icons.restaurant,
+                            color: Colors.green,
+                            route: '/calculators/pet/caloric-needs',
+                          ),
+                          _CalculatorCard(
+                            title: 'Medicamento',
+                            subtitle: 'Dosagem por Peso',
+                            icon: Icons.medication,
+                            color: Colors.red,
+                            route: '/calculators/pet/medication',
+                          ),
+                          _CalculatorCard(
+                            title: 'Fluidoterapia',
+                            subtitle: 'Volume de Fluidos',
+                            icon: Icons.water_drop,
+                            color: Colors.cyan,
+                            route: '/calculators/pet/fluid-therapy',
+                          ),
+                          _CalculatorCard(
+                            title: 'Peso Ideal',
+                            subtitle: 'Meta de Peso',
+                            icon: Icons.monitor_weight,
+                            color: Colors.purple,
+                            route: '/calculators/pet/ideal-weight',
+                          ),
+                          _CalculatorCard(
+                            title: 'Conversão',
+                            subtitle: 'Unidades de Medida',
+                            icon: Icons.swap_horiz,
+                            color: Colors.grey,
+                            route: '/calculators/pet/unit-conversion',
                           ),
                         ],
                       );
@@ -112,14 +153,14 @@ class PetSelectionPage extends StatelessWidget {
 class _CalculatorCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final String emoji;
+  final IconData icon;
   final Color color;
   final String route;
 
   const _CalculatorCard({
     required this.title,
     required this.subtitle,
-    required this.emoji,
+    required this.icon,
     required this.color,
     required this.route,
   });
@@ -141,9 +182,10 @@ class _CalculatorCard extends StatelessWidget {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  emoji,
-                  style: const TextStyle(fontSize: 32),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: color,
                 ),
               ),
               const SizedBox(height: 8),

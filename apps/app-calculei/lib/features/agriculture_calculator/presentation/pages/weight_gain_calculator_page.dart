@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
@@ -34,7 +35,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Calculadora de Ganho de Peso')),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

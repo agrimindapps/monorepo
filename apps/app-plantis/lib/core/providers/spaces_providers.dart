@@ -247,20 +247,20 @@ class SpacesNotifier extends _$SpacesNotifier {
   /// Convert Failure to user-friendly error message
   String _getErrorMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ValidationFailure:
+      case ValidationFailure _:
         return failure.message;
-      case CacheFailure:
+      case CacheFailure _:
         return failure.message;
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Sem conexão com a internet';
-      case ServerFailure:
+      case ServerFailure _:
         if (failure.message.contains('não autenticado') ||
             failure.message.contains('unauthorized') ||
             failure.message.contains('Usuário não autenticado')) {
           return 'Erro de autenticação. Tente fazer login novamente.';
         }
         return failure.message;
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return failure.message;
       default:
         return 'Erro inesperado';

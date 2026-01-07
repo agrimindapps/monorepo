@@ -445,7 +445,7 @@ class _ExpensesPageState extends ConsumerState<ExpensesPage> {
     if (records.isEmpty) return const SizedBox.shrink();
 
     // Cálculos
-    final totalSpent = records.fold<double>(0.0, (sum, r) => sum + r.amount);
+    final totalSpent = records.fold<double>(0.0, (acc, r) => acc + r.amount);
 
     final amounts = records.map((r) => r.amount).toList();
     amounts.sort();

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/presentation/widgets/calculator_input_field.dart';
@@ -36,8 +37,7 @@ class _DeficitSuperavitCalculatorPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Déficit/Superávit Calórico'),
+      appBar: const CalculatorAppBar(
       ),
       body: SafeArea(
         child: Align(

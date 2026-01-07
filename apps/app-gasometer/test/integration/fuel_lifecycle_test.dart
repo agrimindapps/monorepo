@@ -285,8 +285,8 @@ void main() {
       vehicle1Result.fold(
         (_) {},
         (records) {
-          final totalLiters = records.fold(0.0, (sum, r) => sum + r.liters);
-          final totalCost = records.fold(0.0, (sum, r) => sum + r.totalPrice);
+          final totalLiters = records.fold(0.0, (acc, r) => acc + r.liters);
+          final totalCost = records.fold(0.0, (acc, r) => acc + r.totalPrice);
           final avgPricePerLiter = totalCost / totalLiters;
 
           expect(totalLiters, 78.0);

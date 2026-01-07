@@ -657,12 +657,12 @@ class WeatherRepositoryImpl implements WeatherRepository {
       final pendingResult = await uploadPendingMeasurements();
       pendingResult.fold(
         (failure) => null, // Log but continue
-        (count) => syncedCount += count,
+        (syncCount) => syncedCount += syncCount,
       );
       final updatesResult = await downloadWeatherUpdates();
       updatesResult.fold(
         (failure) => null, // Log but continue
-        (count) => syncedCount += count,
+        (updateCount) => syncedCount += updateCount,
       );
       await _localDataSource.setLastSyncTime(DateTime.now());
 

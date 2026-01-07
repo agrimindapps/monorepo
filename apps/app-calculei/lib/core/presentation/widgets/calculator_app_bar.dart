@@ -6,27 +6,13 @@ class CalculatorCategory {
   final String name;
   final IconData icon;
   final Color color;
-  final List<CalculatorMenuItem> calculators;
+  final String route;
 
   const CalculatorCategory({
     required this.name,
     required this.icon,
     required this.color,
-    required this.calculators,
-  });
-}
-
-class CalculatorMenuItem {
-  final String title;
-  final String route;
-  final IconData icon;
-  final Color? iconColor;
-
-  const CalculatorMenuItem({
-    required this.title,
     required this.route,
-    required this.icon,
-    this.iconColor,
   });
 }
 
@@ -59,60 +45,34 @@ class CalculatorAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   static const List<CalculatorCategory> _categories = [
     CalculatorCategory(
-      name: 'Trabalhista',
-      icon: Icons.work_outline,
-      color: Colors.blue,
-      calculators: [
-        CalculatorMenuItem(
-          title: 'Salário Líquido',
-          route: '/calculators/financial/net-salary',
-          icon: Icons.monetization_on,
-          iconColor: Colors.orange,
-        ),
-        CalculatorMenuItem(
-          title: '13º Salário',
-          route: '/calculators/financial/thirteenth-salary',
-          icon: Icons.card_giftcard,
-          iconColor: Colors.green,
-        ),
-        CalculatorMenuItem(
-          title: 'Férias',
-          route: '/calculators/financial/vacation',
-          icon: Icons.beach_access,
-          iconColor: Colors.blue,
-        ),
-        CalculatorMenuItem(
-          title: 'Horas Extras',
-          route: '/calculators/financial/overtime',
-          icon: Icons.access_time,
-          iconColor: Colors.purple,
-        ),
-        CalculatorMenuItem(
-          title: 'Seguro Desemprego',
-          route: '/calculators/financial/unemployment-insurance',
-          icon: Icons.work_off,
-          iconColor: Colors.red,
-        ),
-      ],
-    ),
-    CalculatorCategory(
       name: 'Financeiro',
       icon: Icons.account_balance_wallet,
+      color: Colors.blue,
+      route: '/calculators/financial/selection',
+    ),
+    CalculatorCategory(
+      name: 'Construção',
+      icon: Icons.construction,
+      color: Colors.deepOrange,
+      route: '/calculators/construction/selection',
+    ),
+    CalculatorCategory(
+      name: 'Saúde',
+      icon: Icons.favorite,
       color: Colors.green,
-      calculators: [
-        CalculatorMenuItem(
-          title: 'Reserva de Emergência',
-          route: '/calculators/financial/emergency-reserve',
-          icon: Icons.savings,
-          iconColor: Colors.teal,
-        ),
-        CalculatorMenuItem(
-          title: 'À Vista vs Parcelado',
-          route: '/calculators/financial/cash-vs-installment',
-          icon: Icons.payment,
-          iconColor: Colors.indigo,
-        ),
-      ],
+      route: '/calculators/health/selection',
+    ),
+    CalculatorCategory(
+      name: 'Pet',
+      icon: Icons.pets,
+      color: Colors.brown,
+      route: '/calculators/pet/selection',
+    ),
+    CalculatorCategory(
+      name: 'Agricultura',
+      icon: Icons.agriculture,
+      color: Colors.teal,
+      route: '/calculators/agriculture/selection',
     ),
   ];
 
@@ -277,50 +237,29 @@ class _CalculatorsDropdownState extends State<_CalculatorsDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return MenuAnchor(
       controller: _menuController,
       menuChildren: [
-        // Categories with calculators
-        for (final category in CalculatorAppBar._categories) ...[
-          // Category Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: Row(
-              children: [
-                Icon(category.icon, size: 16, color: category.color),
-                const SizedBox(width: 8),
-                Text(
-                  category.name,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: category.color,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
+        // Categories only - navigate to selection pages
+        for (final category in CalculatorAppBar._categories)
+          MenuItemButton(
+            onPressed: () {
+              _menuController.close();
+              context.go(category.route);
+            },
+            leadingIcon: Icon(
+              category.icon,
+              size: 20,
+              color: category.color,
+            ),
+            child: Text(
+              category.name,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: category.color,
+              ),
             ),
           ),
-          // Calculator Items
-          for (final calc in category.calculators)
-            MenuItemButton(
-              onPressed: () {
-                _menuController.close();
-                context.go(calc.route);
-              },
-              leadingIcon: Icon(
-                calc.icon,
-                size: 20,
-                color: calc.iconColor ?? theme.colorScheme.primary,
-              ),
-              child: Text(calc.title),
-            ),
-          // Divider between categories (except last)
-          if (category != CalculatorAppBar._categories.last)
-            const Divider(height: 8),
-        ],
       ],
       style: MenuStyle(
         elevation: WidgetStateProperty.all(8),

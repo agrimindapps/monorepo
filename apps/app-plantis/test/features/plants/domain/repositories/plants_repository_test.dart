@@ -264,8 +264,8 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      result.fold((_) => fail('Should return count'), (count) {
-        expect(count, equals(5));
+      result.fold((_) => fail('Should return count'), (plantCount) {
+        expect(plantCount, equals(5));
       });
     });
 

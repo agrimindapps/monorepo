@@ -15,6 +15,15 @@ import 'package:app_minigames/features/quiz/presentation/pages/quiz_page.dart';
 import 'package:app_minigames/features/quiz_image/presentation/pages/quiz_image_page.dart';
 import 'package:app_minigames/features/caca_palavra/presentation/pages/caca_palavra_page.dart';
 import 'package:app_minigames/features/soletrando/presentation/pages/soletrando_page.dart';
+import 'package:app_minigames/features/dino_run/presentation/dino_run_page.dart';
+import 'package:app_minigames/features/arkanoid/presentation/pages/arkanoid_page.dart';
+import 'package:app_minigames/features/simon_says/presentation/pages/simon_says_page.dart';
+import 'package:app_minigames/features/connect_four/presentation/pages/connect_four_page.dart';
+import 'package:app_minigames/features/space_invaders/presentation/pages/space_invaders_page.dart';
+import 'package:app_minigames/features/asteroids/presentation/pages/asteroids_page.dart';
+import 'package:app_minigames/features/damas/presentation/pages/damas_page.dart';
+import 'package:app_minigames/features/reversi/presentation/pages/reversi_page.dart';
+import 'package:app_minigames/features/batalha_naval/presentation/pages/batalha_naval_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -80,6 +89,42 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/soletrando',
       builder: (context, state) => const SoletrandoPage(),
+    ),
+    GoRoute(
+      path: '/dino-run',
+      builder: (context, state) => const DinoRunPage(),
+    ),
+    GoRoute(
+      path: '/arkanoid',
+      builder: (context, state) => const ArkanoidPage(),
+    ),
+    GoRoute(
+      path: '/simon-says',
+      builder: (context, state) => const SimonSaysPage(),
+    ),
+    GoRoute(
+      path: '/connect-four',
+      builder: (context, state) => const ConnectFourPage(),
+    ),
+    GoRoute(
+      path: '/space-invaders',
+      builder: (context, state) => const SpaceInvadersPage(),
+    ),
+    GoRoute(
+      path: '/asteroids',
+      builder: (context, state) => const AsteroidsPage(),
+    ),
+    GoRoute(
+      path: '/damas',
+      builder: (context, state) => const DamasPage(),
+    ),
+    GoRoute(
+      path: '/reversi',
+      builder: (context, state) => const ReversiPage(),
+    ),
+    GoRoute(
+      path: '/batalha-naval',
+      builder: (context, state) => const BatalhaNavalPage(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

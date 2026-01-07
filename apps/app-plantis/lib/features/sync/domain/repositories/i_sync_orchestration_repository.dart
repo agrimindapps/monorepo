@@ -16,7 +16,7 @@ import '../entities/sync_status.dart' as plantis;
 /// - Failed operation retry logic
 /// - Sync status monitoring
 ///
-/// All methods return Either<Failure, T> for consistent error handling.
+/// All methods return Either with Failure and T for consistent error handling.
 abstract class ISyncOrchestrationRepository {
   /// Performs a complete bidirectional sync operation.
   ///

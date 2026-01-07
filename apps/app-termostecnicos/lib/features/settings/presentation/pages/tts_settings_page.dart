@@ -12,9 +12,6 @@ class TTSSettingsPage extends ConsumerStatefulWidget {
 }
 
 class _TTSSettingsPageState extends ConsumerState<TTSSettingsPage> {
-  final String _testPhrase =
-      'O que é Geografia? A Geografia é uma ciência que estuda o espaço geográfico, ou seja, a relação entre o homem e o meio ambiente.';
-
   @override
   Widget build(BuildContext context) {
     final settingsAsync = ref.watch(settingsProvider);

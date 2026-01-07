@@ -111,7 +111,7 @@ class PlantisSyncService implements ISyncService {
       final subscriptionsResult = await _syncSubscriptions();
       subscriptionsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync plants
@@ -128,7 +128,7 @@ class PlantisSyncService implements ISyncService {
       final plantsResult = await _syncPlants();
       plantsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync spaces
@@ -145,7 +145,7 @@ class PlantisSyncService implements ISyncService {
       final spacesResult = await _syncSpaces();
       spacesResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync tasks
@@ -162,7 +162,7 @@ class PlantisSyncService implements ISyncService {
       final tasksResult = await _syncTasks();
       tasksResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync comments
@@ -179,7 +179,7 @@ class PlantisSyncService implements ISyncService {
       final commentsResult = await _syncComments();
       commentsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       _progressController.add(

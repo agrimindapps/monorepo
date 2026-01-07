@@ -253,7 +253,7 @@ class AdiposidadeSecurityService {
   static String _sanitizeInput(String input) {
     return input
         .replaceAll(
-            RegExp(r'[<>"\' ']'), '') // Remove caracteres HTML perigosos
+            RegExp(r'''[<>"' ]'''), '') // Remove caracteres HTML perigosos
         .replaceAll(RegExp(r'[;&|`${}()\\]'), '') // Remove caracteres de shell
         .trim(); // Remove espaços extras
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/presentation/widgets/calculator_input_field.dart';
@@ -24,8 +25,7 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gestação Pet'),
+      appBar: const CalculatorAppBar(
       ),
       body: SafeArea(
         child: Align(

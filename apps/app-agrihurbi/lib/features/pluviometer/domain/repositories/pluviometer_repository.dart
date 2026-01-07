@@ -47,7 +47,7 @@ class RainfallStatistics {
 /// Interface do repositório de pluviometria seguindo Clean Architecture
 ///
 /// Define os contratos para operações com pluviômetros e medições
-/// Usa Either<Failure, Success> para error handling funcional
+/// Usa Either com Failure e Success para error handling funcional
 abstract class PluviometerRepository {
   // ==================== RAIN GAUGES ====================
 

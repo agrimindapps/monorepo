@@ -193,7 +193,7 @@ class AnimalImagesRepository {
     return (_db.update(_db.animalImages)
       ..where((t) => t.id.equals(id)))
         .write(updated)
-        .then((count) => count > 0);
+        .then((rowCount) => rowCount > 0);
   }
   
   /// Define uma imagem como primária
@@ -222,7 +222,7 @@ class AnimalImagesRepository {
           updatedAt: Value(DateTime.now()),
           isDirty: const Value(true),
         ))
-        .then((count) => count > 0);
+        .then((rowCount) => rowCount > 0);
   }
   
   /// Hard delete (remove definitivamente)
@@ -230,7 +230,7 @@ class AnimalImagesRepository {
     return (_db.delete(_db.animalImages)
       ..where((t) => t.id.equals(id)))
         .go()
-        .then((count) => count > 0);
+        .then((rowCount) => rowCount > 0);
   }
   
   /// Remove todas as imagens de um animal

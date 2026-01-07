@@ -24,7 +24,7 @@ abstract class IRecommendationService {
   ///   - idPraga: ID of the praga
   ///   - limit: Maximum number of recommendations (default 10)
   /// 
-  /// Returns Either<Failure, List<DiagnosticoEntity>> with ranked recommendations
+  /// Returns Either with Failure and List of DiagnosticoEntity with ranked recommendations
   Future<Either<Failure, List<DiagnosticoEntity>>> getRecommendations({
     required String idCultura,
     required String idPraga,
@@ -33,7 +33,7 @@ abstract class IRecommendationService {
 
   /// Validates compatibility between defensivo-cultura-praga
   /// 
-  /// Returns Either<Failure, bool> - true if compatible
+  /// Returns Either with Failure and bool - true if compatible
   Future<Either<Failure, bool>> validateCompatibility({
     required String idDefensivo,
     required String idCultura,

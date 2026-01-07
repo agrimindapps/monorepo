@@ -55,6 +55,7 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/thirteenth_salary_calculator/presentation/pages/thirteenth_salary_calculator_page.dart';
 import '../../features/unemployment_insurance_calculator/presentation/pages/unemployment_insurance_calculator_page.dart';
 import '../../features/vacation_calculator/presentation/pages/vacation_calculator_page.dart';
+import '../../features/financial_calculator/presentation/pages/financial_selection_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -87,6 +88,10 @@ final appRouter = GoRouter(
               builder: (context, state) => const HomePage(),
             ),
             // Financial
+            GoRoute(
+              path: '/calculators/financial/selection',
+              builder: (context, state) => const FinancialSelectionPage(),
+            ),
             GoRoute(
               path: '/calculators/financial/thirteenth-salary',
               builder: (context, state) =>

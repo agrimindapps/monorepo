@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 
 import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
@@ -26,8 +27,7 @@ class _BodyConditionCalculatorPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Escore de Condição Corporal'),
+      appBar: const CalculatorAppBar(
       ),
       body: SafeArea(
         child: Align(

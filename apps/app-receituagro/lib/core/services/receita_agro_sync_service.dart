@@ -108,7 +108,7 @@ class ReceitaAgroSyncService implements ISyncService {
       final subscriptionsResult = await _syncSubscriptions();
       subscriptionsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync diagnostics
@@ -125,7 +125,7 @@ class ReceitaAgroSyncService implements ISyncService {
       final diagnosticsResult = await _syncDiagnostics();
       diagnosticsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync crops
@@ -142,7 +142,7 @@ class ReceitaAgroSyncService implements ISyncService {
       final cropsResult = await _syncCrops();
       cropsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync pests
@@ -159,7 +159,7 @@ class ReceitaAgroSyncService implements ISyncService {
       final pestsResult = await _syncPests();
       pestsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // Sync phytosanitary products
@@ -176,7 +176,7 @@ class ReceitaAgroSyncService implements ISyncService {
       final phytosanitaryResult = await _syncPhytosanitary();
       phytosanitaryResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       _progressController.add(
@@ -305,9 +305,9 @@ class ReceitaAgroSyncService implements ISyncService {
             debugPrint('⚠️ Falha ao sincronizar favoritos: ${failure.message}');
           }
         },
-        (count) {
-          totalSynced += count;
-          if (kDebugMode) debugPrint('✅ Favoritos sincronizados: $count');
+        (syncCount) {
+          totalSynced += syncCount;
+          if (kDebugMode) debugPrint('✅ Favoritos sincronizados: $syncCount');
         },
       );
 

@@ -115,22 +115,18 @@ class ExportAvailabilityResult extends Equatable {
 
   /// Creates an available result
   const ExportAvailabilityResult.available({
-    required Map<DataType, bool> availableDataTypes,
-    int? estimatedSizeInBytes,
+    required this.availableDataTypes,
+    this.estimatedSizeInBytes,
   }) : isAvailable = true,
        reason = null,
-       availableDataTypes = availableDataTypes,
-       earliestAvailableDate = null,
-       estimatedSizeInBytes = estimatedSizeInBytes;
+       earliestAvailableDate = null;
 
   /// Creates an unavailable result
   const ExportAvailabilityResult.unavailable({
-    required String reason,
-    DateTime? earliestAvailableDate,
+    required this.reason,
+    this.earliestAvailableDate,
   }) : isAvailable = false,
-       reason = reason,
        availableDataTypes = const {},
-       earliestAvailableDate = earliestAvailableDate,
        estimatedSizeInBytes = null;
 
   @override

@@ -153,6 +153,6 @@ class SoletrandoWordsDataSource {
   /// Get total word count
   Future<int> get totalWordCount async {
     await _loadWords();
-    return _wordsByCategory.values.fold(0, (sum, words) => sum + words.length);
+    return _wordsByCategory.values.fold<int>(0, (sum, words) => sum + words.length);
   }
 }

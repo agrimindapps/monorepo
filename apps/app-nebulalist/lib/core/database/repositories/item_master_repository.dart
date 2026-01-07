@@ -270,7 +270,7 @@ class ItemMasterDriftRepository {
 
 /// Extension para converter ItemMasterRecord para/de models
 extension ItemMasterRecordExtension on ItemMasterRecord {
-  /// Converte tags JSON string para List<String>
+  /// Converte tags JSON string para list of strings
   List<String> get tagsList {
     try {
       final decoded = jsonDecode(tags);

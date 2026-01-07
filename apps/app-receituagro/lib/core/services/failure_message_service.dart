@@ -14,20 +14,20 @@ class FailureMessageService {
   /// Maps a Failure to a user-friendly error message
   String mapFailureToMessage(Failure failure) {
     switch (failure.runtimeType) {
-      case ServerFailure:
+      case ServerFailure _:
         return 'Erro do servidor. Tente novamente.';
 
-      case CacheFailure:
+      case CacheFailure _:
         return 'Erro ao acessar dados locais.';
 
-      case NetworkFailure:
+      case NetworkFailure _:
         return 'Erro de conexão. Verifique sua internet.';
 
-      case ValidationFailure:
+      case ValidationFailure _:
         final validationFailure = failure as ValidationFailure;
         return validationFailure.message;
 
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return 'Dados não encontrados.';
 
       default:
@@ -43,13 +43,13 @@ class FailureMessageService {
   /// Checks if the failure is retryable
   bool canRetry(Failure failure) {
     switch (failure.runtimeType) {
-      case ServerFailure:
-      case NetworkFailure:
-      case CacheFailure:
+      case ServerFailure _:
+      case NetworkFailure _:
+      case CacheFailure _:
         return true;
 
-      case ValidationFailure:
-      case NotFoundFailure:
+      case ValidationFailure _:
+      case NotFoundFailure _:
         return false;
 
       default:
@@ -60,26 +60,26 @@ class FailureMessageService {
   /// Gets suggestions based on failure type
   List<String> getSuggestions(Failure failure) {
     switch (failure.runtimeType) {
-      case ServerFailure:
+      case ServerFailure _:
         return [
           'Tente novamente em alguns instantes',
           'Verifique se o serviço está disponível',
         ];
 
-      case NetworkFailure:
+      case NetworkFailure _:
         return [
           'Verifique sua conexão com a internet',
           'Tente mudar de rede Wi-Fi',
           'Ative os dados móveis',
         ];
 
-      case CacheFailure:
+      case CacheFailure _:
         return ['Limpe o cache do aplicativo', 'Reinstale o aplicativo'];
 
-      case ValidationFailure:
+      case ValidationFailure _:
         return ['Verifique os dados inseridos', 'Corrija os campos destacados'];
 
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return ['Recarregue os dados', 'Verifique se o item ainda existe'];
 
       default:

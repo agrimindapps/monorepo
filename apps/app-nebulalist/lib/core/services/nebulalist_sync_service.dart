@@ -154,7 +154,7 @@ class NebulalistSyncService implements ISyncService {
       final listsResult = await _syncLists();
       listsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // 2. Sync ItemMasters
@@ -171,7 +171,7 @@ class NebulalistSyncService implements ISyncService {
       final itemMastersResult = await _syncItemMasters();
       itemMastersResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       // 3. Sync ListItems
@@ -188,7 +188,7 @@ class NebulalistSyncService implements ISyncService {
       final listItemsResult = await _syncListItems();
       listItemsResult.fold(
         (failure) => totalFailed++,
-        (count) => totalSynced += count,
+        (syncCount) => totalSynced += syncCount,
       );
 
       _progressController.add(

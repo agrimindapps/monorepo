@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:go_router/go_router.dart';
 
 /// Página de seleção de calculadoras agrícolas
@@ -8,9 +9,7 @@ class AgricultureSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadoras Agrícolas'),
-      ),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -55,7 +54,7 @@ class AgricultureSelectionPage extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text(
                             'Calculadoras para auxiliar no planejamento da safra, '
-                            'adubação e irrigação.',
+                            'adubação, irrigação e manejo de animais.',
                             style: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme
@@ -84,23 +83,79 @@ class AgricultureSelectionPage extends StatelessWidget {
                           _CalculatorCard(
                             title: 'NPK',
                             subtitle: 'Adubação de culturas',
-                            emoji: '🧪',
+                            icon: Icons.grass,
                             color: Colors.green,
                             route: '/calculators/agriculture/npk',
                           ),
                           _CalculatorCard(
                             title: 'Semeadura',
                             subtitle: 'Taxa de sementes',
-                            emoji: '🌱',
-                            color: Colors.orange,
+                            icon: Icons.agriculture,
+                            color: Colors.amber,
                             route: '/calculators/agriculture/seed-rate',
                           ),
                           _CalculatorCard(
                             title: 'Irrigação',
                             subtitle: 'Necessidade hídrica',
-                            emoji: '💧',
+                            icon: Icons.water,
                             color: Colors.blue,
                             route: '/calculators/agriculture/irrigation',
+                          ),
+                          _CalculatorCard(
+                            title: 'Fertilizante',
+                            subtitle: 'Dosagem por área',
+                            icon: Icons.science,
+                            color: Colors.purple,
+                            route: '/calculators/agriculture/fertilizer-dosing',
+                          ),
+                          _CalculatorCard(
+                            title: 'Correção pH',
+                            subtitle: 'Calcário necessário',
+                            icon: Icons.landscape,
+                            color: Colors.brown,
+                            route: '/calculators/agriculture/soil-ph',
+                          ),
+                          _CalculatorCard(
+                            title: 'Densidade',
+                            subtitle: 'Plantas por hectare',
+                            icon: Icons.grid_on,
+                            color: Colors.lightGreen,
+                            route: '/calculators/agriculture/planting-density',
+                          ),
+                          _CalculatorCard(
+                            title: 'Produtividade',
+                            subtitle: 'Previsão de colheita',
+                            icon: Icons.trending_up,
+                            color: Colors.orange,
+                            route: '/calculators/agriculture/yield-prediction',
+                          ),
+                          _CalculatorCard(
+                            title: 'Ração',
+                            subtitle: 'Consumo de animais',
+                            icon: Icons.pets,
+                            color: Colors.red,
+                            route: '/calculators/agriculture/feed',
+                          ),
+                          _CalculatorCard(
+                            title: 'Ganho Peso',
+                            subtitle: 'Tempo para meta',
+                            icon: Icons.monitor_weight,
+                            color: Colors.teal,
+                            route: '/calculators/agriculture/weight-gain',
+                          ),
+                          _CalculatorCard(
+                            title: 'Reprodução',
+                            subtitle: 'Ciclo e gestação',
+                            icon: Icons.child_friendly,
+                            color: Colors.pink,
+                            route: '/calculators/agriculture/breeding-cycle',
+                          ),
+                          _CalculatorCard(
+                            title: 'Evapotranspiração',
+                            subtitle: 'ETo e clima',
+                            icon: Icons.wb_sunny,
+                            color: Colors.cyan,
+                            route: '/calculators/agriculture/evapotranspiration',
                           ),
                         ],
                       );
@@ -119,14 +174,14 @@ class AgricultureSelectionPage extends StatelessWidget {
 class _CalculatorCard extends StatelessWidget {
   final String title;
   final String subtitle;
-  final String emoji;
+  final IconData icon;
   final Color color;
   final String route;
 
   const _CalculatorCard({
     required this.title,
     required this.subtitle,
-    required this.emoji,
+    required this.icon,
     required this.color,
     required this.route,
   });
@@ -148,9 +203,10 @@ class _CalculatorCard extends StatelessWidget {
                   color: color.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  emoji,
-                  style: const TextStyle(fontSize: 32),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: color,
                 ),
               ),
               const SizedBox(height: 8),

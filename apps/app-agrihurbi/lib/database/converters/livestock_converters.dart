@@ -82,8 +82,8 @@ class EquinePrimaryUseConverter extends TypeConverter<EquinePrimaryUse, int> {
   }
 }
 
-/// Conversor para List<String> (array/tags/imageUrls)
-/// Mapeia entre String JSON (banco de dados) e List<String> (domínio)
+/// Conversor para list of strings (array/tags/imageUrls)
+/// Mapeia entre String JSON (banco de dados) e list of strings (domínio)
 class StringListConverter extends TypeConverter<List<String>, String> {
   const StringListConverter();
 

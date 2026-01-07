@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:go_router/go_router.dart';
 
 /// Página de seleção de calculadoras de saúde
@@ -8,9 +9,7 @@ class HealthSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadoras de Saúde'),
-      ),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -122,6 +121,48 @@ class HealthSelectionPage extends StatelessWidget {
                             icon: Icons.pie_chart_outline,
                             color: Colors.amber,
                             route: '/calculators/health/macros',
+                          ),
+                          _CalculatorCard(
+                            title: 'Proteínas',
+                            subtitle: 'Necessidade Diária',
+                            icon: Icons.restaurant,
+                            color: Colors.red,
+                            route: '/calculators/health/protein',
+                          ),
+                          _CalculatorCard(
+                            title: 'Exercício',
+                            subtitle: 'Calorias Queimadas',
+                            icon: Icons.directions_run,
+                            color: Colors.deepOrange,
+                            route: '/calculators/health/exercise-calories',
+                          ),
+                          _CalculatorCard(
+                            title: 'Cintura-Quadril',
+                            subtitle: 'Risco Cardiovascular',
+                            icon: Icons.straighten,
+                            color: Colors.pink,
+                            route: '/calculators/health/waist-hip',
+                          ),
+                          _CalculatorCard(
+                            title: 'Álcool',
+                            subtitle: 'Nível no Sangue (BAC)',
+                            icon: Icons.local_bar,
+                            color: Colors.brown,
+                            route: '/calculators/health/blood-alcohol',
+                          ),
+                          _CalculatorCard(
+                            title: 'Volume Sanguíneo',
+                            subtitle: 'Estimativa Corporal',
+                            icon: Icons.bloodtype,
+                            color: Colors.red,
+                            route: '/calculators/health/blood-volume',
+                          ),
+                          _CalculatorCard(
+                            title: 'Déficit Calórico',
+                            subtitle: 'Meta de Peso',
+                            icon: Icons.trending_down,
+                            color: Colors.indigo,
+                            route: '/calculators/health/caloric-deficit',
                           ),
                         ],
                       );

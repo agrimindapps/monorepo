@@ -565,7 +565,7 @@ class MaintenanceRepositoryDriftImpl implements MaintenanceRepository {
       final vehicleIdInt = int.parse(vehicleId);
       final allData = await _dataSource.findByVehicleId(vehicleIdInt);
       if (allData.isEmpty) return const Right(0.0);
-      final total = allData.fold<double>(0.0, (sum, data) => sum + data.valor);
+      final total = allData.fold<double>(0.0, (acc, data) => acc + data.valor);
       return Right(total / allData.length);
     } catch (e) {
       return Left(CacheFailure(e.toString()));

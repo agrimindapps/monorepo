@@ -7,7 +7,7 @@
 /// 
 /// ✅ REUSABILITY & COMPOSITION:
 /// - Static methods allow for functional composition
-/// - Generic <T> enables use across any model type
+/// - Generic T enables use across any model type
 /// - Higher-order functions (callbacks) provide flexibility:
 ///   - String Function(T): extract display text/value
 ///   - bool Function(T): define predicates

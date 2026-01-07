@@ -68,7 +68,9 @@ class MemoryMonitoringService {
       try {
         usedMemoryMB = 50; // Placeholder estimate
         heapMemoryMB = 100; // Placeholder estimate
-      } catch (e) {}
+      } catch (e) {
+        // Ignore memory estimation errors in debug mode
+      }
     }
     final imageCacheStats =
         <String, dynamic>{}; // OptimizedPlantImageWidget.getCacheStats();

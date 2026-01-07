@@ -2,19 +2,19 @@ import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 /// Adaptador para sistema de erros do app-plantis
-/// App-plantis usa exclusivamente Either<Failure, T>
+/// App-plantis usa exclusivamente Either com Failure e T
 class ErrorAdapter {
   /// Converte Failure para AppError
   static AppError failureToAppError(Failure failure) {
     switch (failure.runtimeType) {
-      case NetworkFailure:
+      case NetworkFailure _:
         return NetworkError(
           message: failure.message,
           code: 'NETWORK_ERROR',
           details: failure.toString(),
         );
 
-      case ServerFailure:
+      case ServerFailure _:
         return ExternalServiceError(
           message: failure.message,
           code: 'SERVER_ERROR',
@@ -22,14 +22,14 @@ class ErrorAdapter {
           serviceName: 'API',
         );
 
-      case CacheFailure:
+      case CacheFailure _:
         return StorageError(
           message: failure.message,
           code: 'CACHE_ERROR',
           details: failure.toString(),
         );
 
-      case NotFoundFailure:
+      case NotFoundFailure _:
         return BusinessError(
           message: failure.message,
           code: 'NOT_FOUND',
@@ -37,21 +37,21 @@ class ErrorAdapter {
           businessRule: 'RESOURCE_NOT_FOUND',
         );
 
-      case AuthFailure:
+      case AuthFailure _:
         return AuthenticationError(
           message: failure.message,
           code: 'UNAUTHORIZED',
           details: failure.toString(),
         );
 
-      case ValidationFailure:
+      case ValidationFailure _:
         return ValidationError(
           message: failure.message,
           code: 'VALIDATION_ERROR',
           details: failure.toString(),
         );
 
-      case UnknownFailure:
+      case UnknownFailure _:
       default:
         return UnknownError(
           message: failure.message,

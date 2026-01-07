@@ -62,7 +62,9 @@ class ImageOptimizer {
           try {
             await loadImage(source, quality: ImageQuality.low);
             _preloadedImages.add(source);
-          } catch (e) {}
+          } catch (e) {
+            // Ignore preload errors
+          }
         })
         .toList();
 

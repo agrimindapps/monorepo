@@ -67,13 +67,11 @@ class PlantisSyncStatus extends Equatable {
       progress = null;
 
   /// Creates a syncing status with optional progress
-  const PlantisSyncStatus.syncing({required int pendingCount, double? progress})
+  const PlantisSyncStatus.syncing({required this.pendingCount, this.progress})
     : state = PlantisSyncState.syncing,
-      pendingCount = pendingCount,
       failedCount = 0,
       lastSyncAt = null,
-      errorMessage = null,
-      progress = progress;
+      errorMessage = null;
 
   /// Creates a success status after sync completion
   PlantisSyncStatus.success({DateTime? syncTime})
@@ -86,14 +84,11 @@ class PlantisSyncStatus extends Equatable {
 
   /// Creates an error status with failure details
   const PlantisSyncStatus.error({
-    required String message,
-    int pendingCount = 0,
-    int failedCount = 0,
+    required this.errorMessage,
+    this.pendingCount = 0,
+    this.failedCount = 0,
   }) : state = PlantisSyncState.error,
-       pendingCount = pendingCount,
-       failedCount = failedCount,
        lastSyncAt = null,
-       errorMessage = message,
        progress = null;
 
   /// Computed properties for UI

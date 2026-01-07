@@ -448,7 +448,7 @@ class _MaintenancePageState extends ConsumerState<MaintenancePage> {
     if (records.isEmpty) return const SizedBox.shrink();
 
     // Cálculos
-    final totalSpent = records.fold<double>(0.0, (sum, r) => sum + r.cost);
+    final totalSpent = records.fold<double>(0.0, (acc, r) => acc + r.cost);
 
     final costs = records.map((r) => r.cost).toList();
     costs.sort();

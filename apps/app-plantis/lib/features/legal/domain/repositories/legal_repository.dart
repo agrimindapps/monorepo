@@ -4,7 +4,7 @@ import '../entities/document_type.dart';
 import '../entities/legal_document.dart';
 
 /// Repository interface for legal documents
-/// Follows the Repository pattern and returns Either<Failure, T>
+/// Follows the Repository pattern and returns Either with Failure and T
 abstract class LegalRepository {
   /// Get a legal document by its type
   ///

@@ -371,7 +371,7 @@ class _CostPerKmCalculatorPageState extends ConsumerState<CostPerKmCalculatorPag
           final initialKm = sortedRecords.first.odometer;
           final finalKm = sortedRecords.last.odometer;
           totalKm = finalKm - initialKm;
-          totalCost = records.fold(0.0, (sum, record) => sum + record.totalPrice);
+          totalCost = records.fold(0.0, (acc, record) => acc + record.totalPrice);
           recordCount = records.length;
         }
       },

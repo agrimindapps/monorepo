@@ -438,6 +438,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'lastLoginAt': DateTime.now().millisecondsSinceEpoch,
       });
     } catch (e) {
+      // Ignore lastLogin update errors
     }
   }
 

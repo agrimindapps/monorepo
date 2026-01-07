@@ -27,7 +27,7 @@ class FitossanitariosDataLoader {
         '🛡️ [FITOSSANITARIOS] Iniciando carregamento de fitossanitários...',
         name: 'FitossanitariosDataLoader',
       );
-      print(
+      debugPrint(
         '🛡️ [FITOSSANITARIOS] Iniciando carregamento de fitossanitários...',
       );
 
@@ -72,7 +72,7 @@ class FitossanitariosDataLoader {
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
         name: 'FitossanitariosDataLoader',
       );
-      print(
+      debugPrint(
         '🛡️ [FITOSSANITARIOS] JSON carregado: ${allFitossanitarios.length} registros totais, ${fitossanitarios.length} fitossanitários válidos',
       );
       final repository = ref.read(fitossanitariosRepositoryProvider);
@@ -102,10 +102,10 @@ class FitossanitariosDataLoader {
         '❌ [FITOSSANITARIOS] Erro durante carregamento de fitossanitários: $e',
         name: 'FitossanitariosDataLoader',
       );
-      print(
+      debugPrint(
         '❌ [FITOSSANITARIOS] Erro durante carregamento de fitossanitários: $e',
       );
-      print('❌ [FITOSSANITARIOS] Stack trace: ${StackTrace.current}');
+      debugPrint('❌ [FITOSSANITARIOS] Stack trace: ${StackTrace.current}');
     }
   }
 

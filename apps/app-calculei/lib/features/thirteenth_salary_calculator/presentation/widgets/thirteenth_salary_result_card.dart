@@ -5,16 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/thirteenth_salary_calculation.dart';
 
 /// Card displaying 13th salary calculation results
 class ThirteenthSalaryResultCard extends StatelessWidget {
   final ThirteenthSalaryCalculation calculation;
 
-  const ThirteenthSalaryResultCard({
-    super.key,
-    required this.calculation,
-  });
+  const ThirteenthSalaryResultCard({super.key, required this.calculation});
 
   @override
   Widget build(BuildContext context) {
@@ -31,18 +29,14 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green[700],
-                  size: 28,
-                ),
+                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ],
             ),
@@ -170,11 +164,11 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                ),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,12 +202,23 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
                   if (calculation.monthsWorked != calculation.consideredMonths)
                     Text(
                       '• Desconto por faltas: ${calculation.monthsWorked - calculation.consideredMonths} ${calculation.monthsWorked - calculation.consideredMonths == 1 ? "mês" : "meses"}',
-                      style: _detailTextStyle(context).copyWith(
-                        color: Colors.red[700],
-                      ),
+                      style: _detailTextStyle(
+                        context,
+                      ).copyWith(color: Colors.red[700]),
                     ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+            ShareButton(
+              text: ShareFormatter.formatThirteenthSalary(
+                grossSalary: calculation.grossSalary,
+                monthsWorked: calculation.monthsWorked,
+                totalGross: calculation.grossThirteenthSalary,
+                totalNet: calculation.netThirteenthSalary,
+                isAdvance: calculation.isAdvancePayment,
+              ),
+              subject: 'Cálculo de 13º Salário',
             ),
           ],
         ),
@@ -250,12 +255,14 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: isBold ? 18 : 15,
-              fontWeight: isBold || isHighlight ? FontWeight.bold : FontWeight.w500,
+              fontWeight: isBold || isHighlight
+                  ? FontWeight.bold
+                  : FontWeight.w500,
               color: isDeduction
                   ? Colors.red[700]
                   : isHighlight
-                      ? Colors.green[700]
-                      : Theme.of(context).colorScheme.onSecondaryContainer,
+                  ? Colors.green[700]
+                  : Theme.of(context).colorScheme.onSecondaryContainer,
             ),
           ),
         ],
@@ -287,10 +294,7 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 deadline,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: Colors.blue[700],
-                ),
+                style: TextStyle(fontSize: 11, color: Colors.blue[700]),
               ),
             ],
           ),
@@ -310,7 +314,7 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
   TextStyle _detailTextStyle(BuildContext context) {
     return TextStyle(
       fontSize: 12,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
     );
   }
 }

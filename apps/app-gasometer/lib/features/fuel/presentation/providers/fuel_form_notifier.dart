@@ -93,6 +93,7 @@ class FuelFormNotifier extends _$FuelFormNotifier {
       receiptImageService: receiptImageService,
     );
     _calculator = const FuelFormCalculator();
+  }
 
   // ==================== INITIALIZATION METHODS ====================
 
@@ -536,8 +537,6 @@ class FuelFormNotifier extends _$FuelFormNotifier {
       ),
     );
   }
-}
-
 }
 
 /// Derived providers for form state

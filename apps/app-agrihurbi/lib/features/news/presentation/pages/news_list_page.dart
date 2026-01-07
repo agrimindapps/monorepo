@@ -121,27 +121,15 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).dividerColor,
-            width: 1,
-          ),
+          bottom: BorderSide(color: Theme.of(context).dividerColor, width: 1),
         ),
       ),
       child: TabBar(
         controller: _tabController,
         tabs: const [
-          Tab(
-            icon: Icon(Icons.article),
-            text: 'Notícias',
-          ),
-          Tab(
-            icon: Icon(Icons.star),
-            text: 'Premium',
-          ),
-          Tab(
-            icon: Icon(Icons.trending_up),
-            text: 'Commodities',
-          ),
+          Tab(icon: Icon(Icons.article), text: 'Notícias'),
+          Tab(icon: Icon(Icons.star), text: 'Premium'),
+          Tab(icon: Icon(Icons.trending_up), text: 'Commodities'),
         ],
       ),
     );
@@ -292,9 +280,14 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
                 Text('Índice: ${summary.marketIndex.toStringAsFixed(2)}'),
                 const SizedBox(width: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: summary.marketIndexChange >= 0 ? Colors.green : Colors.red,
+                    color: summary.marketIndexChange >= 0
+                        ? Colors.green
+                        : Colors.red,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
@@ -323,11 +316,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.error_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
+          const Icon(Icons.error_outline, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
             'Erro ao carregar notícias',
@@ -356,11 +345,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.article_outlined,
-            size: 64,
-            color: Colors.grey,
-          ),
+          const Icon(Icons.article_outlined, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
             'Nenhuma notícia encontrada',
@@ -388,11 +373,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.star_outline,
-            size: 64,
-            color: Colors.grey,
-          ),
+          const Icon(Icons.star_outline, size: 64, color: Colors.grey),
           const SizedBox(height: 16),
           Text(
             'Conteúdo Premium',
@@ -420,9 +401,11 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
     final notifier = ref.read(newsProvider.notifier);
 
     return FloatingActionButton(
-      onPressed: state.isRefreshing ? null : () {
-        notifier.refreshRSSFeeds();
-      },
+      onPressed: state.isRefreshing
+          ? null
+          : () {
+              notifier.refreshRSSFeeds();
+            },
       child: state.isRefreshing
           ? const SizedBox(
               width: 20,
@@ -517,11 +500,7 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   void _navigateToArticle(NewsArticleEntity article) {
-    Navigator.pushNamed(
-      context,
-      '/news/article',
-      arguments: article,
-    );
+    Navigator.pushNamed(context, '/news/article', arguments: article);
   }
 
   Future<void> _toggleFavorite(String articleId) async {
@@ -531,9 +510,9 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
     if (isFavorite) {
       await notifier.removeFromFavorites(articleId);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Removido dos favoritos')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Removido dos favoritos')));
       }
     } else {
       await notifier.addToFavorites(articleId);
@@ -546,11 +525,11 @@ class _NewsListPageState extends ConsumerState<NewsListPage>
   }
 
   void _shareArticle(NewsArticleEntity article) {
-    print('Sharing article: ${article.title}');
+    debugPrint('Sharing article: ${article.title}');
   }
 
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day.toString().padLeft(2, '0')}/${dateTime.month.toString().padLeft(2, '0')}/${dateTime.year} '
-           '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+        '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
   }
 }

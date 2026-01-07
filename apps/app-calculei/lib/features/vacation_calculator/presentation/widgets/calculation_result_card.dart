@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// Project imports:
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/vacation_calculation.dart';
 
 /// Card displaying vacation calculation results
 class CalculationResultCard extends StatelessWidget {
   final VacationCalculation calculation;
 
-  const CalculationResultCard({
-    super.key,
-    required this.calculation,
-  });
+  const CalculationResultCard({super.key, required this.calculation});
 
   @override
   Widget build(BuildContext context) {
@@ -27,18 +26,14 @@ class CalculationResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green[700],
-                  size: 28,
-                ),
+                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ],
             ),
@@ -130,11 +125,11 @@ class CalculationResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                ),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,20 +146,18 @@ class CalculationResultCard extends StatelessWidget {
                     '• ${calculation.vacationDays} dias de férias',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   Text(
                     '• Salário base: ${formatter.format(calculation.grossSalary)}',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.7),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
                   ),
                   if (calculation.sellVacationDays)
@@ -172,14 +165,24 @@ class CalculationResultCard extends StatelessWidget {
                       '• Com venda de 1/3 das férias (abono)',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.7),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
                       ),
                     ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+            ShareButton(
+              text: ShareFormatter.formatVacationCalculation(
+                grossSalary: calculation.grossSalary,
+                vacationDays: calculation.vacationDays,
+                totalGross: calculation.grossTotal,
+                totalNet: calculation.netTotal,
+                sellVacationDays: calculation.sellVacationDays,
+              ),
+              subject: 'Cálculo de Férias',
             ),
           ],
         ),
@@ -216,12 +219,14 @@ class CalculationResultCard extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: isBold ? 18 : 15,
-              fontWeight: isBold || isHighlight ? FontWeight.bold : FontWeight.w500,
+              fontWeight: isBold || isHighlight
+                  ? FontWeight.bold
+                  : FontWeight.w500,
               color: isDeduction
                   ? Colors.red[700]
                   : isHighlight
-                      ? Colors.green[700]
-                      : Theme.of(context).colorScheme.onSecondaryContainer,
+                  ? Colors.green[700]
+                  : Theme.of(context).colorScheme.onSecondaryContainer,
             ),
           ),
         ],

@@ -108,7 +108,7 @@ class FavoritosValidatorService {
     try {
       if (!isValidTipo(tipo)) {
         if (kDebugMode) {
-          print('Tipo inválido: $tipo');
+          debugPrint('Tipo inválido: $tipo');
         }
         return false;
       }
@@ -125,13 +125,13 @@ class FavoritosValidatorService {
       final isFallback = _fallbackValidators.isFallback(tipo, data, id);
 
       if (kDebugMode && !isFallback) {
-        print('Item existe: tipo=$tipo, id=$id');
+        debugPrint('Item existe: tipo=$tipo, id=$id');
       }
 
       return !isFallback;
     } catch (e) {
       if (kDebugMode) {
-        print('Erro ao verificar existência: $e');
+        debugPrint('Erro ao verificar existência: $e');
       }
       return false;
     }

@@ -7,13 +7,13 @@ import '../../features/tasks/data/task_local_datasource.dart';
 import '../../features/tasks/data/task_model.dart';
 
 /// Serviço responsável por sincronizar tasks dirty (local → Firebase)
-/// 
+///
 /// **Fluxo:**
 /// 1. Query tasks WHERE isDirty = true
 /// 2. Batch upload para Firebase
 /// 3. Update isDirty = false + lastSyncAt
 /// 4. Retry com exponential backoff em caso de erro
-/// 
+///
 /// **Uso:**
 /// ```dart
 /// final service = ref.read(taskUploadSyncServiceProvider);
@@ -23,13 +23,10 @@ class TaskUploadSyncService {
   final TaskLocalDataSource _localDataSource;
   final TaskFirebaseDataSource _firebaseDataSource;
 
-  TaskUploadSyncService(
-    this._localDataSource,
-    this._firebaseDataSource,
-  );
+  TaskUploadSyncService(this._localDataSource, this._firebaseDataSource);
 
   /// Sincroniza todas as tasks dirty do usuário
-  /// 
+  ///
   /// **Retorna:** Número de tasks sincronizadas
   Future<int> syncDirtyTasks(String userId) async {
     try {
@@ -45,7 +42,9 @@ class TaskUploadSyncService {
       }
 
       if (kDebugMode) {
-        debugPrint('[UploadSync] Found ${dirtyTasks.length} dirty tasks to sync');
+        debugPrint(
+          '[UploadSync] Found ${dirtyTasks.length} dirty tasks to sync',
+        );
       }
 
       // 2. Batch upload para Firebase
@@ -54,15 +53,14 @@ class TaskUploadSyncService {
       // 3. Marcar como sincronizado (isDirty = false, lastSyncAt = now)
       final now = DateTime.now();
       for (final task in dirtyTasks) {
-        final syncedTask = task.copyWith(
-          isDirty: false,
-          lastSyncAt: now,
-        );
+        final syncedTask = task.copyWith(isDirty: false, lastSyncAt: now);
         await _localDataSource.updateTask(TaskModel.fromEntity(syncedTask));
       }
 
       if (kDebugMode) {
-        debugPrint('[UploadSync] Successfully synced ${dirtyTasks.length} tasks');
+        debugPrint(
+          '[UploadSync] Successfully synced ${dirtyTasks.length} tasks',
+        );
       }
 
       return dirtyTasks.length;
@@ -120,7 +118,7 @@ class TaskUploadSyncService {
   }
 
   /// Força sincronização imediata de todas as tasks dirty
-  /// 
+  ///
   /// **Com retry logic:**
   /// - Tenta até 3x com exponential backoff
   /// - Backoff: 2s, 4s, 8s
@@ -133,9 +131,11 @@ class TaskUploadSyncService {
     while (attempt < maxRetries) {
       try {
         syncedCount = await syncDirtyTasks(userId);
-        
+
         if (kDebugMode) {
-          debugPrint('[UploadSync] Force sync succeeded on attempt ${attempt + 1}');
+          debugPrint(
+            '[UploadSync] Force sync succeeded on attempt ${attempt + 1}',
+          );
         }
 
         return SyncResult.success(syncedCount);
@@ -146,7 +146,9 @@ class TaskUploadSyncService {
         if (attempt < maxRetries) {
           final delaySeconds = (2 << (attempt - 1)); // 2, 4, 8 seconds
           if (kDebugMode) {
-            debugPrint('[UploadSync] Attempt $attempt failed, retrying in ${delaySeconds}s...');
+            debugPrint(
+              '[UploadSync] Attempt $attempt failed, retrying in ${delaySeconds}s...',
+            );
           }
           await Future<void>.delayed(Duration(seconds: delaySeconds));
         }
@@ -188,16 +190,11 @@ class SyncResult {
     this.error,
   });
 
-  factory SyncResult.success(int count) => SyncResult._(
-        success: true,
-        syncedCount: count,
-      );
+  factory SyncResult.success(int count) =>
+      SyncResult._(success: true, syncedCount: count);
 
-  factory SyncResult.failure(Exception error) => SyncResult._(
-        success: false,
-        syncedCount: 0,
-        error: error,
-      );
+  factory SyncResult.failure(Exception error) =>
+      SyncResult._(success: false, syncedCount: 0, error: error);
 }
 
 /// Estatísticas de sincronização

@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/crud_form_dialog.dart';
 import '../../../auth/presentation/notifiers/auth_notifier.dart';
@@ -167,9 +167,9 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
 
   String _formatOdometer(num odometer) {
     return odometer.toInt().toString().replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        );
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
   }
 
   void _submitFormWithRateLimit() {
@@ -195,7 +195,9 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
       if (firstErrorField != null) {
         final formState = ref.read(fuelFormProvider(vehicleId));
         final errorMessage = formState.formModel.errors[firstErrorField];
-        _setFormError(errorMessage ?? 'Por favor, corrija os campos destacados');
+        _setFormError(
+          errorMessage ?? 'Por favor, corrija os campos destacados',
+        );
 
         final focusNode = formNotifier.fieldFocusNodes[firstErrorField];
         if (focusNode != null) {
@@ -233,17 +235,16 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
       final result = await formNotifier.saveFuelRecord();
 
       if (mounted) {
-        result.fold(
-          (Failure failure) => _setFormError(failure.message),
-          (success) {
-            formNotifier.clearForm();
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && context.mounted) {
-                Navigator.of(context).pop(true);
-              }
-            });
-          },
-        );
+        result.fold((Failure failure) => _setFormError(failure.message), (
+          success,
+        ) {
+          formNotifier.clearForm();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && context.mounted) {
+              Navigator.of(context).pop(true);
+            }
+          });
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -265,6 +266,8 @@ class _FuelFormPageState extends ConsumerState<FuelFormPage> {
     Navigator.of(context).pop();
 
     // Executa o delete via notifier da lista (com undo)
-    await ref.read(fuelRiverpodProvider.notifier).deleteOptimistic(fuelRecordId);
+    await ref
+        .read(fuelRiverpodProvider.notifier)
+        .deleteOptimistic(fuelRecordId);
   }
 }

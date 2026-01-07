@@ -279,7 +279,7 @@ class PlantsRepositoryImpl implements PlantsRepository {
               if (kDebugMode) {
                 debugPrint('❌ Falha ao inserir versão remota: $updateError');
               }
-              throw CacheFailure(
+              throw Exception(
                 'Falha ao atualizar planta localmente: ${updateError.toString()}',
               );
             }

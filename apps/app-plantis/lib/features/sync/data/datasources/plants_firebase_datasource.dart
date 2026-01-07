@@ -46,7 +46,7 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
     try {
       // Validate user authentication
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw Exception('User ID cannot be empty');
       }
 
       // Convert PlantModel to Firestore JSON
@@ -58,17 +58,17 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       return docRef.id;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw Exception('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure(
+        throw Exception(
           'Firebase network error - service unavailable',
         );
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw Exception('Firebase error: ${e.message}');
       }
     } catch (e) {
       if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error creating plant: $e');
+      throw Exception('Unexpected error creating plant: $e');
     }
   }
 
@@ -83,10 +83,10 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw Exception('User ID cannot be empty');
       }
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Plant Firebase ID cannot be empty');
+        throw Exception('Plant Firebase ID cannot be empty');
       }
 
       // Fetch document from Firestore
@@ -94,7 +94,7 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
 
       // Check if document exists
       if (!doc.exists || doc.data() == null) {
-        throw NotFoundFailure('Plant not found with ID: $firebaseId');
+        throw Exception('Plant not found with ID: $firebaseId');
       }
 
       // Convert Firestore JSON to PlantModel
@@ -103,23 +103,23 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
 
       // Check if plant is soft-deleted
       if (plant.isDeleted) {
-        throw NotFoundFailure('Plant was deleted: $firebaseId');
+        throw Exception('Plant was deleted: $firebaseId');
       }
 
       return plant;
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw Exception('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure(
+        throw Exception(
           'Firebase network error - service unavailable',
         );
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw Exception('Firebase error: ${e.message}');
       }
     } catch (e) {
       if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching plant: $e');
+      throw Exception('Unexpected error fetching plant: $e');
     }
   }
 
@@ -134,10 +134,10 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw Exception('User ID cannot be empty');
       }
       if (plant.id.isEmpty) {
-        throw const ValidationFailure('Plant ID cannot be empty');
+        throw Exception('Plant ID cannot be empty');
       }
 
       // Convert PlantModel to Firestore JSON
@@ -149,19 +149,19 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       ).doc(plant.id).set(plantData, SetOptions(merge: true));
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw Exception('User not authenticated or permission denied');
       } else if (e.code == 'not-found') {
-        throw NotFoundFailure('Plant not found with ID: ${plant.id}');
+        throw Exception('Plant not found with ID: ${plant.id}');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure(
+        throw Exception(
           'Firebase network error - service unavailable',
         );
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw Exception('Firebase error: ${e.message}');
       }
     } catch (e) {
       if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error updating plant: $e');
+      throw Exception('Unexpected error updating plant: $e');
     }
   }
 
@@ -180,10 +180,10 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
     try {
       // Validate inputs
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw Exception('User ID cannot be empty');
       }
       if (firebaseId.isEmpty) {
-        throw const ValidationFailure('Plant Firebase ID cannot be empty');
+        throw Exception('Plant Firebase ID cannot be empty');
       }
 
       final docRef = _getPlantsCollection(userId).doc(firebaseId);
@@ -200,17 +200,17 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       }
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw Exception('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure(
+        throw Exception(
           'Firebase network error - service unavailable',
         );
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw Exception('Firebase error: ${e.message}');
       }
     } catch (e) {
       if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error deleting plant: $e');
+      throw Exception('Unexpected error deleting plant: $e');
     }
   }
 
@@ -228,7 +228,7 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
     try {
       // Validate user
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw Exception('User ID cannot be empty');
       }
 
       Query query = _getPlantsCollection(
@@ -250,17 +250,17 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       return PlantFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw Exception('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure(
+        throw Exception(
           'Firebase network error - service unavailable',
         );
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw Exception('Firebase error: ${e.message}');
       }
     } catch (e) {
       if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching plants: $e');
+      throw Exception('Unexpected error fetching plants: $e');
     }
   }
 
@@ -275,7 +275,7 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
     try {
       // Validate user
       if (userId.isEmpty) {
-        throw const AuthFailure('User ID cannot be empty');
+        throw Exception('User ID cannot be empty');
       }
 
       // Fetch all non-deleted plants
@@ -288,17 +288,17 @@ class PlantsFirebaseDataSourceImpl implements PlantsFirebaseDataSource {
       return PlantFirebaseMapper.fromQuerySnapshot(snapshot);
     } on FirebaseException catch (e) {
       if (e.code == 'permission-denied') {
-        throw const AuthFailure('User not authenticated or permission denied');
+        throw Exception('User not authenticated or permission denied');
       } else if (e.code == 'unavailable') {
-        throw const NetworkFailure(
+        throw Exception(
           'Firebase network error - service unavailable',
         );
       } else {
-        throw ServerFailure('Firebase error: ${e.message}');
+        throw Exception('Firebase error: ${e.message}');
       }
     } catch (e) {
       if (e is Failure) rethrow;
-      throw ServerFailure('Unexpected error fetching all plants: $e');
+      throw Exception('Unexpected error fetching all plants: $e');
     }
   }
 }

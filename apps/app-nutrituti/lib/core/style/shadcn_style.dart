@@ -110,7 +110,7 @@ class ShadcnStyle {
   // Shadows
   static List<BoxShadow> shadowSmall = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.1),
+      color: Colors.black.withValues(alpha: 0.1),
       blurRadius: 4,
       offset: const Offset(0, 2),
     ),
@@ -118,7 +118,7 @@ class ShadcnStyle {
 
   static List<BoxShadow> shadowMedium = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.15),
+      color: Colors.black.withValues(alpha: 0.15),
       blurRadius: 8,
       offset: const Offset(0, 4),
     ),
@@ -126,7 +126,7 @@ class ShadcnStyle {
 
   static List<BoxShadow> shadowLarge = [
     BoxShadow(
-      color: Colors.black.withOpacity(0.2),
+      color: Colors.black.withValues(alpha: 0.2),
       blurRadius: 16,
       offset: const Offset(0, 8),
     ),

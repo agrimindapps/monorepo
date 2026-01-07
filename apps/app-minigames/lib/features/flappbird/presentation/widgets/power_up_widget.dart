@@ -35,7 +35,7 @@ class PowerUpWidget extends StatelessWidget {
           width: powerUp.size,
           height: powerUp.size,
           decoration: BoxDecoration(
-            color: _getPowerUpColor(powerUp.type).withOpacity(0.3),
+            color: _getPowerUpColor(powerUp.type).withValues(alpha: 0.3),
             shape: BoxShape.circle,
             border: Border.all(
               color: _getPowerUpColor(powerUp.type),
@@ -43,7 +43,7 @@ class PowerUpWidget extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: _getPowerUpColor(powerUp.type).withOpacity(0.5),
+                color: _getPowerUpColor(powerUp.type).withValues(alpha: 0.5),
                 blurRadius: 10,
                 spreadRadius: 2,
               ),

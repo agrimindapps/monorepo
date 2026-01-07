@@ -34,25 +34,28 @@ class ValidationResult {
   }
 }
 
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+ValidationResult ValidationRight() => ValidationResult.success();
+// ignore: non_constant_identifier_names
+ValidationResult ValidationLeft(String message) =>
+    ValidationResult.error(message);
+
 /// Severidade da validação
-enum ValidationSeverity {
-  error,
-  warning,
-  info,
-}
+enum ValidationSeverity { error, warning, info }
 
 /// Service responsável por toda a lógica de validação dos campos
 class AdiposidadeValidationService {
   /// Valida o campo de circunferência do quadril
   static ValidationResult validateQuadril(String value) {
     if (value.isEmpty) {
-      return ValidationResult.error(
-          'Necessário informar a circunferência do quadril');
+      return ValidationLeft('Necessário informar a circunferência do quadril');
     }
 
     // Validação de segurança primeiro
-    final securityResult =
-        AdiposidadeSecurityService.validateQuadrilSecurity(value);
+    final securityResult = AdiposidadeSecurityService.validateQuadrilSecurity(
+      value,
+    );
     if (!securityResult.isSecure) {
       // Log da violação de segurança
       AdiposidadeSecurityService.logSecurityViolation(
@@ -62,8 +65,10 @@ class AdiposidadeValidationService {
         fieldName: 'quadril',
       );
 
-      return ValidationResult.error(securityResult.vulnerabilityReason ??
-          'Entrada inválida por motivos de segurança');
+      return ValidationLeft(
+        securityResult.vulnerabilityReason ??
+            'Entrada inválida por motivos de segurança',
+      );
     }
 
     // Usar valor sanitizado se disponível
@@ -73,15 +78,15 @@ class AdiposidadeValidationService {
       final quadril = _parseDecimal(processedValue);
 
       if (quadril <= 0) {
-        return ValidationResult.error('Circunferência deve ser maior que zero');
+        return ValidationLeft('Circunferência deve ser maior que zero');
       }
 
       if (quadril < 30) {
-        return ValidationResult.error('Valor muito baixo (mínimo 30cm)');
+        return ValidationLeft('Valor muito baixo (mínimo 30cm)');
       }
 
       if (quadril > 200) {
-        return ValidationResult.error('Valor muito alto (máximo 200cm)');
+        return ValidationLeft('Valor muito alto (máximo 200cm)');
       }
 
       // Validação de warning para valores extremos mas válidos
@@ -93,21 +98,22 @@ class AdiposidadeValidationService {
         return ValidationResult.warning('Valor alto - verifique a medição');
       }
 
-      return ValidationResult.success();
+      return ValidationRight();
     } catch (e) {
-      return ValidationResult.error('Formato inválido - use apenas números');
+      return ValidationLeft('Formato inválido - use apenas números');
     }
   }
 
   /// Valida o campo de altura
   static ValidationResult validateAltura(String value) {
     if (value.isEmpty) {
-      return ValidationResult.error('Necessário informar a altura');
+      return ValidationLeft('Necessário informar a altura');
     }
 
     // Validação de segurança primeiro
-    final securityResult =
-        AdiposidadeSecurityService.validateAlturaSecurity(value);
+    final securityResult = AdiposidadeSecurityService.validateAlturaSecurity(
+      value,
+    );
     if (!securityResult.isSecure) {
       // Log da violação de segurança
       AdiposidadeSecurityService.logSecurityViolation(
@@ -117,8 +123,10 @@ class AdiposidadeValidationService {
         fieldName: 'altura',
       );
 
-      return ValidationResult.error(securityResult.vulnerabilityReason ??
-          'Entrada inválida por motivos de segurança');
+      return ValidationLeft(
+        securityResult.vulnerabilityReason ??
+            'Entrada inválida por motivos de segurança',
+      );
     }
 
     // Usar valor sanitizado se disponível
@@ -128,15 +136,15 @@ class AdiposidadeValidationService {
       final altura = _parseDecimal(processedValue);
 
       if (altura <= 0) {
-        return ValidationResult.error('Altura deve ser maior que zero');
+        return ValidationLeft('Altura deve ser maior que zero');
       }
 
       if (altura < 50) {
-        return ValidationResult.error('Altura muito baixa (mínimo 50cm)');
+        return ValidationLeft('Altura muito baixa (mínimo 50cm)');
       }
 
       if (altura > 300) {
-        return ValidationResult.error('Altura muito alta (máximo 300cm)');
+        return ValidationLeft('Altura muito alta (máximo 300cm)');
       }
 
       // Validação de warning para valores extremos mas válidos
@@ -148,21 +156,22 @@ class AdiposidadeValidationService {
         return ValidationResult.warning('Altura alta - verifique a medição');
       }
 
-      return ValidationResult.success();
+      return ValidationRight();
     } catch (e) {
-      return ValidationResult.error('Formato inválido - use apenas números');
+      return ValidationLeft('Formato inválido - use apenas números');
     }
   }
 
   /// Valida o campo de idade
   static ValidationResult validateIdade(String value) {
     if (value.isEmpty) {
-      return ValidationResult.error('Necessário informar a idade');
+      return ValidationLeft('Necessário informar a idade');
     }
 
     // Validação de segurança primeiro
-    final securityResult =
-        AdiposidadeSecurityService.validateIdadeSecurity(value);
+    final securityResult = AdiposidadeSecurityService.validateIdadeSecurity(
+      value,
+    );
     if (!securityResult.isSecure) {
       // Log da violação de segurança
       AdiposidadeSecurityService.logSecurityViolation(
@@ -172,8 +181,10 @@ class AdiposidadeValidationService {
         fieldName: 'idade',
       );
 
-      return ValidationResult.error(securityResult.vulnerabilityReason ??
-          'Entrada inválida por motivos de segurança');
+      return ValidationLeft(
+        securityResult.vulnerabilityReason ??
+            'Entrada inválida por motivos de segurança',
+      );
     }
 
     // Usar valor sanitizado se disponível
@@ -183,100 +194,101 @@ class AdiposidadeValidationService {
       final idade = int.parse(processedValue);
 
       if (idade < 5) {
-        return ValidationResult.error('Idade deve ser maior que 5 anos');
+        return ValidationLeft('Idade deve ser maior que 5 anos');
       }
 
       if (idade > 120) {
-        return ValidationResult.error('Idade deve ser menor que 120 anos');
+        return ValidationLeft('Idade deve ser menor que 120 anos');
       }
 
       // Validação de warning para idades extremas mas válidas
       if (idade < 18) {
         return ValidationResult.warning(
-            'Atenção: Menor de idade - consulte um profissional');
+          'Atenção: Menor de idade - consulte um profissional',
+        );
       }
 
       if (idade > 80) {
         return ValidationResult.warning(
-            'Atenção: Para idosos, consulte orientação médica específica');
+          'Atenção: Para idosos, consulte orientação médica específica',
+        );
       }
 
-      return ValidationResult.success();
+      return ValidationRight();
     } catch (e) {
-      return ValidationResult.error(
-          'Formato inválido - use apenas números inteiros');
+      return ValidationLeft('Formato inválido - use apenas números inteiros');
     }
   }
 
   /// Valida o campo de circunferência de forma individual (para validação em tempo real)
   static ValidationResult validateQuadrilRealTime(String value) {
     if (value.isEmpty) {
-      return ValidationResult.success(); // Não mostra erro se está vazio
+      return ValidationRight(); // Não mostra erro se está vazio
     }
 
     try {
       final quadril = _parseDecimal(value);
 
       if (quadril <= 0) {
-        return ValidationResult.error('Circunferência deve ser maior que zero');
+        return ValidationLeft('Circunferência deve ser maior que zero');
       }
 
       if (quadril < 30) {
-        return ValidationResult.error('Valor muito baixo (mínimo 30cm)');
+        return ValidationLeft('Valor muito baixo (mínimo 30cm)');
       }
 
       if (quadril > 200) {
-        return ValidationResult.error('Valor muito alto (máximo 200cm)');
+        return ValidationLeft('Valor muito alto (máximo 200cm)');
       }
 
-      return ValidationResult.success();
+      return ValidationRight();
     } catch (e) {
-      return ValidationResult.error('Formato inválido');
+      return ValidationLeft('Formato inválido');
     }
   }
 
   /// Valida o campo de altura de forma individual (para validação em tempo real)
   static ValidationResult validateAlturaRealTime(String value) {
     if (value.isEmpty) {
-      return ValidationResult.success(); // Não mostra erro se está vazio
+      return ValidationRight(); // Não mostra erro se está vazio
     }
 
     try {
       final altura = _parseDecimal(value);
 
       if (altura <= 0) {
-        return ValidationResult.error('Altura deve ser maior que zero');
+        return ValidationLeft('Altura deve ser maior que zero');
       }
 
       if (altura < 50) {
-        return ValidationResult.error('Altura muito baixa (mínimo 50cm)');
+        return ValidationLeft('Altura muito baixa (mínimo 50cm)');
       }
 
       if (altura > 300) {
-        return ValidationResult.error('Altura muito alta (máximo 300cm)');
+        return ValidationLeft('Altura muito alta (máximo 300cm)');
       }
 
-      return ValidationResult.success();
+      return ValidationRight();
     } catch (e) {
-      return ValidationResult.error('Formato inválido');
+      return ValidationLeft('Formato inválido');
     }
   }
 
   /// Valida o campo de idade de forma individual (para validação em tempo real)
   static ValidationResult validateIdadeRealTime(String value) {
     if (value.isEmpty) {
-      return ValidationResult.success(); // Não mostra erro se está vazio
+      return ValidationRight(); // Não mostra erro se está vazio
     }
 
     try {
       final idade = int.parse(value);
 
       if (idade < 5) {
-        return ValidationResult.error('Idade deve ser maior que 5 anos');
+        return ValidationLeft('Idade deve ser maior que 5 anos');
       }
 
       if (idade > 120) {
-        return ValidationResult.error('Idade deve ser menor que 120 anos');
+        return ValidationLeft('Idade deve ser menor que 120 anos');
       }
 
       if (idade < 18) {
@@ -287,9 +299,9 @@ class AdiposidadeValidationService {
         return ValidationResult.warning('Atenção: Consulte orientação médica');
       }
 
-      return ValidationResult.success();
+      return ValidationRight();
     } catch (e) {
-      return ValidationResult.error('Formato inválido');
+      return ValidationLeft('Formato inválido');
     }
   }
 
@@ -323,7 +335,8 @@ class AdiposidadeValidationService {
 
   /// Obtém todas as mensagens de warning
   static List<String> getWarningMessages(
-      Map<String, ValidationResult> results) {
+    Map<String, ValidationResult> results,
+  ) {
     final warnings = <String>[];
     for (final result in results.values) {
       if (result.isValid &&

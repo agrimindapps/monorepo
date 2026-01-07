@@ -24,7 +24,7 @@ abstract class ResultUseCase<Type, Params> {
   ///
   /// [params] The parameters for the use case.
   /// Returns a [Future] with a [Result] containing the [Type].
-  Future<Result<Type>> call(Params params);
+  Future<Either<Failure, Type>> call(Params params);
 }
 
 /// A use case that takes no parameters.
@@ -44,7 +44,7 @@ abstract class NoParamsResultUseCase<Type> {
   /// Executes the use case.
   ///
   /// Returns a [Future] with a [Result] containing the [Type].
-  Future<Result<Type>> call();
+  Future<Either<Failure, Type>> call();
 }
 
 /// A class to represent the absence of parameters for a use case.

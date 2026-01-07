@@ -27,92 +27,100 @@ class ItemRepository {
   // ==================== CREATE ====================
 
   /// Insere um novo item
-  Future<Result<int>> insert(ItemsCompanion item) async {
+  Future<Either<Failure, int>> insert(ItemsCompanion item) async {
     try {
       final rowsAffected = await _db.into(_db.items).insert(item);
-      return Result.success(rowsAffected);
+      return Right(rowsAffected);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Upsert (insert or update)
-  Future<Result<int>> upsert(ItemsCompanion item) async {
+  Future<Either<Failure, int>> upsert(ItemsCompanion item) async {
     try {
-      final rowsAffected =
-          await _db.into(_db.items).insertOnConflictUpdate(item);
-      return Result.success(rowsAffected);
+      final rowsAffected = await _db
+          .into(_db.items)
+          .insertOnConflictUpdate(item);
+      return Right(rowsAffected);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Insere múltiplos itens
-  Future<Result<void>> insertAll(List<ItemsCompanion> items) async {
+  Future<Either<Failure, void>> insertAll(List<ItemsCompanion> items) async {
     try {
       await _db.batch((batch) {
         batch.insertAll(_db.items, items);
       });
-      return Result.success(null);
+      return Right(null);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== READ ====================
 
   /// Busca item por ID
-  Future<Result<ItemRecord?>> getById(String id) async {
+  Future<Either<Failure, ItemRecord?>> getById(String id) async {
     try {
-      final result = await (_db.select(_db.items)
-            ..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
-      return Result.success(result);
+      final result = await (_db.select(
+        _db.items,
+      )..where((t) => t.id.equals(id))).getSingleOrNull();
+      return Right(result);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca todos os itens de uma lista
-  Future<Result<List<ItemRecord>>> getByListId(String listId) async {
+  Future<Either<Failure, List<ItemRecord>>> getByListId(String listId) async {
     try {
-      final results = await (_db.select(_db.items)
-            ..where((t) => t.listId.equals(listId))
-            ..orderBy([(t) => OrderingTerm.asc(t.position)]))
-          .get();
-      return Result.success(results);
+      final results =
+          await (_db.select(_db.items)
+                ..where((t) => t.listId.equals(listId))
+                ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+              .get();
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca itens não completados de uma lista
-  Future<Result<List<ItemRecord>>> getPendingItems(String listId) async {
+  Future<Either<Failure, List<ItemRecord>>> getPendingItems(
+    String listId,
+  ) async {
     try {
-      final results = await (_db.select(_db.items)
-            ..where(
-              (t) => t.listId.equals(listId) & t.isCompleted.equals(false),
-            )
-            ..orderBy([(t) => OrderingTerm.asc(t.position)]))
-          .get();
-      return Result.success(results);
+      final results =
+          await (_db.select(_db.items)
+                ..where(
+                  (t) => t.listId.equals(listId) & t.isCompleted.equals(false),
+                )
+                ..orderBy([(t) => OrderingTerm.asc(t.position)]))
+              .get();
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca itens completados de uma lista
-  Future<Result<List<ItemRecord>>> getCompletedItems(String listId) async {
+  Future<Either<Failure, List<ItemRecord>>> getCompletedItems(
+    String listId,
+  ) async {
     try {
-      final results = await (_db.select(_db.items)
-            ..where(
-              (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
-            )
-            ..orderBy([(t) => OrderingTerm.desc(t.completedAt)]))
-          .get();
-      return Result.success(results);
+      final results =
+          await (_db.select(_db.items)
+                ..where(
+                  (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
+                )
+                ..orderBy([(t) => OrderingTerm.desc(t.completedAt)]))
+              .get();
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
@@ -129,9 +137,7 @@ class ItemRepository {
   /// Stream de itens pendentes
   Stream<List<ItemRecord>> watchPendingItems(String listId) {
     return (_db.select(_db.items)
-          ..where(
-            (t) => t.listId.equals(listId) & t.isCompleted.equals(false),
-          )
+          ..where((t) => t.listId.equals(listId) & t.isCompleted.equals(false))
           ..orderBy([(t) => OrderingTerm.asc(t.position)]))
         .watch();
   }
@@ -139,178 +145,180 @@ class ItemRepository {
   /// Stream de itens completados
   Stream<List<ItemRecord>> watchCompletedItems(String listId) {
     return (_db.select(_db.items)
-          ..where(
-            (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
-          )
+          ..where((t) => t.listId.equals(listId) & t.isCompleted.equals(true))
           ..orderBy([(t) => OrderingTerm.desc(t.completedAt)]))
         .watch();
   }
 
   /// Stream de um item específico
   Stream<ItemRecord?> watchById(String id) {
-    return (_db.select(_db.items)..where((t) => t.id.equals(id)))
-        .watchSingleOrNull();
+    return (_db.select(
+      _db.items,
+    )..where((t) => t.id.equals(id))).watchSingleOrNull();
   }
 
   // ==================== UPDATE ====================
 
   /// Atualiza item
-  Future<Result<int>> update(String id, ItemsCompanion item) async {
+  Future<Either<Failure, int>> update(String id, ItemsCompanion item) async {
     try {
-      final updated = await (_db.update(_db.items)
-            ..where((t) => t.id.equals(id)))
-          .write(item);
-      return Result.success(updated);
+      final updated = await (_db.update(
+        _db.items,
+      )..where((t) => t.id.equals(id))).write(item);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Toggle completado
-  Future<Result<int>> toggleCompleted(String id, bool isCompleted) async {
+  Future<Either<Failure, int>> toggleCompleted(
+    String id,
+    bool isCompleted,
+  ) async {
     try {
-      final updated = await (_db.update(_db.items)
-            ..where((t) => t.id.equals(id)))
-          .write(
-        ItemsCompanion(
-          isCompleted: Value(isCompleted),
-          completedAt: isCompleted ? Value(DateTime.now()) : const Value(null),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-      return Result.success(updated);
+      final updated =
+          await (_db.update(_db.items)..where((t) => t.id.equals(id))).write(
+            ItemsCompanion(
+              isCompleted: Value(isCompleted),
+              completedAt: isCompleted
+                  ? Value(DateTime.now())
+                  : const Value(null),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Atualiza posição do item
-  Future<Result<int>> updatePosition(String id, int position) async {
+  Future<Either<Failure, int>> updatePosition(String id, int position) async {
     try {
-      final updated = await (_db.update(_db.items)
-            ..where((t) => t.id.equals(id)))
-          .write(
-        ItemsCompanion(
-          position: Value(position),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-      return Result.success(updated);
+      final updated =
+          await (_db.update(_db.items)..where((t) => t.id.equals(id))).write(
+            ItemsCompanion(
+              position: Value(position),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Atualiza quantidade
-  Future<Result<int>> updateQuantity(String id, int quantity) async {
+  Future<Either<Failure, int>> updateQuantity(String id, int quantity) async {
     try {
-      final updated = await (_db.update(_db.items)
-            ..where((t) => t.id.equals(id)))
-          .write(
-        ItemsCompanion(
-          quantity: Value(quantity),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-      return Result.success(updated);
+      final updated =
+          await (_db.update(_db.items)..where((t) => t.id.equals(id))).write(
+            ItemsCompanion(
+              quantity: Value(quantity),
+              updatedAt: Value(DateTime.now()),
+            ),
+          );
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Marca todos os itens de uma lista como completados
-  Future<Result<int>> completeAllInList(String listId) async {
+  Future<Either<Failure, int>> completeAllInList(String listId) async {
     try {
-      final updated = await (_db.update(_db.items)
-            ..where(
-              (t) => t.listId.equals(listId) & t.isCompleted.equals(false),
-            ))
-          .write(
-        ItemsCompanion(
-          isCompleted: const Value(true),
-          completedAt: Value(DateTime.now()),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-      return Result.success(updated);
+      final updated =
+          await (_db.update(_db.items)..where(
+                (t) => t.listId.equals(listId) & t.isCompleted.equals(false),
+              ))
+              .write(
+                ItemsCompanion(
+                  isCompleted: const Value(true),
+                  completedAt: Value(DateTime.now()),
+                  updatedAt: Value(DateTime.now()),
+                ),
+              );
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Desmarca todos os itens de uma lista
-  Future<Result<int>> uncompleteAllInList(String listId) async {
+  Future<Either<Failure, int>> uncompleteAllInList(String listId) async {
     try {
-      final updated = await (_db.update(_db.items)
-            ..where(
-              (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
-            ))
-          .write(
-        ItemsCompanion(
-          isCompleted: const Value(false),
-          completedAt: const Value(null),
-          updatedAt: Value(DateTime.now()),
-        ),
-      );
-      return Result.success(updated);
+      final updated =
+          await (_db.update(_db.items)..where(
+                (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
+              ))
+              .write(
+                ItemsCompanion(
+                  isCompleted: const Value(false),
+                  completedAt: const Value(null),
+                  updatedAt: Value(DateTime.now()),
+                ),
+              );
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== DELETE ====================
 
   /// Deleta item
-  Future<Result<int>> delete(String id) async {
+  Future<Either<Failure, int>> delete(String id) async {
     try {
-      final deleted =
-          await (_db.delete(_db.items)..where((t) => t.id.equals(id))).go();
-      return Result.success(deleted);
+      final deleted = await (_db.delete(
+        _db.items,
+      )..where((t) => t.id.equals(id))).go();
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Deleta todos os itens de uma lista
-  Future<Result<int>> deleteByListId(String listId) async {
+  Future<Either<Failure, int>> deleteByListId(String listId) async {
     try {
-      final deleted = await (_db.delete(_db.items)
-            ..where((t) => t.listId.equals(listId)))
-          .go();
-      return Result.success(deleted);
+      final deleted = await (_db.delete(
+        _db.items,
+      )..where((t) => t.listId.equals(listId))).go();
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Deleta itens completados de uma lista
-  Future<Result<int>> deleteCompletedInList(String listId) async {
+  Future<Either<Failure, int>> deleteCompletedInList(String listId) async {
     try {
-      final deleted = await (_db.delete(_db.items)
-            ..where(
-              (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
-            ))
-          .go();
-      return Result.success(deleted);
+      final deleted =
+          await (_db.delete(_db.items)..where(
+                (t) => t.listId.equals(listId) & t.isCompleted.equals(true),
+              ))
+              .go();
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Limpa todos os itens
-  Future<Result<int>> clear() async {
+  Future<Either<Failure, int>> clear() async {
     try {
       final deleted = await _db.delete(_db.items).go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== CONTADORES ====================
 
   /// Conta itens de uma lista
-  Future<Result<int>> countByListId(String listId) async {
+  Future<Either<Failure, int>> countByListId(String listId) async {
     try {
       final count = _db.items.id.count();
       final query = _db.selectOnly(_db.items)
@@ -318,14 +326,14 @@ class ItemRepository {
         ..where(_db.items.listId.equals(listId));
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
+      return Right(result.read(count) ?? 0);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Conta itens completados de uma lista
-  Future<Result<int>> countCompletedByListId(String listId) async {
+  Future<Either<Failure, int>> countCompletedByListId(String listId) async {
     try {
       final count = _db.items.id.count();
       final query = _db.selectOnly(_db.items)
@@ -335,29 +343,29 @@ class ItemRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
+      return Right(result.read(count) ?? 0);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Retorna contagens para uma lista (total e completados)
-  Future<Result<({int total, int completed})>> getCountsForList(
+  Future<Either<Failure, ({int total, int completed})>> getCountsForList(
     String listId,
   ) async {
     try {
       final totalResult = await countByListId(listId);
-      if (totalResult.isError) return Result.error(totalResult.error!);
-
       final completedResult = await countCompletedByListId(listId);
-      if (completedResult.isError) return Result.error(completedResult.error!);
 
-      return Result.success((
-        total: totalResult.data!,
-        completed: completedResult.data!,
-      ));
+      return totalResult.fold(
+        (failure) => Left(failure),
+        (total) => completedResult.fold(
+          (failure) => Left(failure),
+          (completed) => Right((total: total, completed: completed)),
+        ),
+      );
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 }

@@ -25,7 +25,7 @@ class CulturasDataLoader {
         '🌱 [CULTURAS] Iniciando carregamento de culturas...',
         name: 'CulturasDataLoader',
       );
-      print('🌱 [CULTURAS] Iniciando carregamento de culturas...');
+      debugPrint('🌱 [CULTURAS] Iniciando carregamento de culturas...');
       const String assetPath = kIsWeb
           ? 'database/json/tbculturas/TBCULTURAS0.json'
           : 'assets/database/json/tbculturas/TBCULTURAS0.json';
@@ -50,7 +50,7 @@ class CulturasDataLoader {
         '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
         name: 'CulturasDataLoader',
       );
-      print(
+      debugPrint(
         '🌱 [CULTURAS] JSON carregado: ${allCulturas.length} registros totais, ${culturas.length} culturas válidas',
       );
 
@@ -91,8 +91,8 @@ class CulturasDataLoader {
         '❌ [CULTURAS] Erro durante carregamento de culturas: $e',
         name: 'CulturasDataLoader',
       );
-      print('❌ [CULTURAS] Erro durante carregamento de culturas: $e');
-      print('❌ [CULTURAS] Stack trace: ${StackTrace.current}');
+      debugPrint('❌ [CULTURAS] Erro durante carregamento de culturas: $e');
+      debugPrint('❌ [CULTURAS] Stack trace: ${StackTrace.current}');
     }
   }
 

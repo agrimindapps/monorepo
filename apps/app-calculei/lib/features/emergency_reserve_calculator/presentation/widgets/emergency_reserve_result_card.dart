@@ -5,16 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/emergency_reserve_calculation.dart';
 
 /// Card displaying emergency reserve calculation results
 class EmergencyReserveResultCard extends StatelessWidget {
   final EmergencyReserveCalculation calculation;
 
-  const EmergencyReserveResultCard({
-    super.key,
-    required this.calculation,
-  });
+  const EmergencyReserveResultCard({super.key, required this.calculation});
 
   @override
   Widget build(BuildContext context) {
@@ -31,18 +29,14 @@ class EmergencyReserveResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green[700],
-                  size: 28,
-                ),
+                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ],
             ),
@@ -134,10 +128,7 @@ class EmergencyReserveResultCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     calculation.categoryDescription,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
                   ),
                 ],
               ),
@@ -194,11 +185,11 @@ class EmergencyReserveResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                ),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,6 +220,16 @@ class EmergencyReserveResultCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+            ShareButton(
+              text: ShareFormatter.formatEmergencyReserve(
+                monthlyExpenses: calculation.totalMonthlyExpenses,
+                monthsToCover: calculation.desiredMonths,
+                totalReserve: calculation.totalReserveAmount,
+                monthlySavings: calculation.monthlySavings,
+              ),
+              subject: 'Reserva de Emergência',
             ),
           ],
         ),
@@ -288,7 +289,7 @@ class EmergencyReserveResultCard extends StatelessWidget {
   TextStyle _detailTextStyle(BuildContext context) {
     return TextStyle(
       fontSize: 12,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
     );
   }
 }

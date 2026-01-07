@@ -91,17 +91,17 @@ class FormValidator {
 
   /// Valida todos os campos e retorna o primeiro erro encontrado
   ///
-  /// Retorna [ValidationResult.success()] se todos os campos forem válidos,
-  /// ou [ValidationResult.error(message)] com a mensagem do primeiro erro.
+  /// Retorna [ValidationRight()] se todos os campos forem válidos,
+  /// ou [ValidationLeft(message)] com a mensagem do primeiro erro.
   Future<ValidationResult> validateAll() async {
     for (final field in _fields) {
       final result = await _validateField(field);
       if (!result.isValid) {
-        return ValidationResult.error(result.message);
+        return ValidationLeft(result.message);
       }
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida um campo específico
@@ -181,8 +181,8 @@ class FormValidator {
     if (field.customValidator != null) {
       final error = field.customValidator!(text);
       return error != null
-          ? ValidationResult.error(error)
-          : ValidationResult.success();
+          ? ValidationLeft(error)
+          : ValidationRight();
     }
     final validationService = _ValidationServiceAdapter();
 
@@ -282,7 +282,7 @@ class _ValidationServiceAdapter {
 
     switch (type) {
       case ValidationType.none:
-        return ValidationResult.success();
+        return ValidationRight();
 
       case ValidationType.required:
         return _validateRequired(text, label);
@@ -340,35 +340,35 @@ class _ValidationServiceAdapter {
           maxLength: maxLength ?? 255);
 
       case ValidationType.custom:
-        return ValidationResult.success(); // Handled by customValidator
+        return ValidationRight(); // Handled by customValidator
     }
   }
 
   ValidationResult _validateRequired(String text, String label) {
     if (text.trim().isEmpty) {
-      return ValidationResult.error('$label é obrigatório');
+      return ValidationLeft('$label é obrigatório');
     }
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateEmail(String text) {
-    if (text.isEmpty) return ValidationResult.success();
+    if (text.isEmpty) return ValidationRight();
 
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
     if (!emailRegex.hasMatch(text)) {
-      return ValidationResult.error('Email inválido');
+      return ValidationLeft('Email inválido');
     }
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validatePhone(String text) {
-    if (text.isEmpty) return ValidationResult.success();
+    if (text.isEmpty) return ValidationRight();
 
     final phoneRegex = RegExp(r'^\(\d{2}\)\s\d{4,5}-\d{4}$');
     if (!phoneRegex.hasMatch(text)) {
-      return ValidationResult.error('Telefone inválido');
+      return ValidationLeft('Telefone inválido');
     }
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateMoney(String text, String label, {
@@ -378,8 +378,8 @@ class _ValidationServiceAdapter {
   }) {
     if (text.isEmpty) {
       return required
-          ? ValidationResult.error('$label é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$label é obrigatório')
+          : ValidationRight();
     }
 
     final cleanText = text.replaceAll(RegExp(r'[^\d,.]'), '');
@@ -387,18 +387,18 @@ class _ValidationServiceAdapter {
     final value = double.tryParse(normalizedText);
 
     if (value == null) {
-      return ValidationResult.error('$label deve ser um valor válido');
+      return ValidationLeft('$label deve ser um valor válido');
     }
 
     if (value < min) {
-      return ValidationResult.error('$label deve ser maior que R\$ ${min.toStringAsFixed(2)}');
+      return ValidationLeft('$label deve ser maior que R\$ ${min.toStringAsFixed(2)}');
     }
 
     if (value > max) {
-      return ValidationResult.error('$label deve ser menor que R\$ ${max.toStringAsFixed(2)}');
+      return ValidationLeft('$label deve ser menor que R\$ ${max.toStringAsFixed(2)}');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateDecimal(String text, String label, {
@@ -408,26 +408,26 @@ class _ValidationServiceAdapter {
   }) {
     if (text.isEmpty) {
       return required
-          ? ValidationResult.error('$label é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$label é obrigatório')
+          : ValidationRight();
     }
 
     final cleanText = text.replaceAll(',', '.');
     final value = double.tryParse(cleanText);
 
     if (value == null) {
-      return ValidationResult.error('$label deve ser um número válido');
+      return ValidationLeft('$label deve ser um número válido');
     }
 
     if (min != null && value < min) {
-      return ValidationResult.error('$label deve ser maior que $min');
+      return ValidationLeft('$label deve ser maior que $min');
     }
 
     if (max != null && value > max) {
-      return ValidationResult.error('$label deve ser menor que $max');
+      return ValidationLeft('$label deve ser menor que $max');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateInteger(String text, String label, {
@@ -437,58 +437,58 @@ class _ValidationServiceAdapter {
   }) {
     if (text.isEmpty) {
       return required
-          ? ValidationResult.error('$label é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$label é obrigatório')
+          : ValidationRight();
     }
 
     final value = int.tryParse(text);
 
     if (value == null) {
-      return ValidationResult.error('$label deve ser um número inteiro válido');
+      return ValidationLeft('$label deve ser um número inteiro válido');
     }
 
     if (min != null && value < min) {
-      return ValidationResult.error('$label deve ser maior que $min');
+      return ValidationLeft('$label deve ser maior que $min');
     }
 
     if (max != null && value > max) {
-      return ValidationResult.error('$label deve ser menor que $max');
+      return ValidationLeft('$label deve ser menor que $max');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateLicensePlate(String text) {
-    if (text.isEmpty) return ValidationResult.success();
+    if (text.isEmpty) return ValidationRight();
     final oldFormatRegex = RegExp(r'^[A-Z]{3}\d{4}$');
     final mercosulFormatRegex = RegExp(r'^[A-Z]{3}\d[A-Z]\d{2}$');
 
     if (!oldFormatRegex.hasMatch(text) && !mercosulFormatRegex.hasMatch(text)) {
-      return ValidationResult.error('Placa inválida (use ABC1234 ou ABC1D23)');
+      return ValidationLeft('Placa inválida (use ABC1234 ou ABC1D23)');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateChassis(String text) {
-    if (text.isEmpty) return ValidationResult.success();
+    if (text.isEmpty) return ValidationRight();
 
     if (text.length != 17) {
-      return ValidationResult.error('Chassi deve ter 17 caracteres');
+      return ValidationLeft('Chassi deve ter 17 caracteres');
     }
     final invalidChars = RegExp(r'[IOQ]');
     if (invalidChars.hasMatch(text)) {
-      return ValidationResult.error('Chassi não pode conter as letras I, O ou Q');
+      return ValidationLeft('Chassi não pode conter as letras I, O ou Q');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateRenavam(String text) {
-    if (text.isEmpty) return ValidationResult.success();
+    if (text.isEmpty) return ValidationRight();
 
     if (text.length != 11) {
-      return ValidationResult.error('Renavam deve ter 11 dígitos');
+      return ValidationLeft('Renavam deve ter 11 dígitos');
     }
     final digits = text.split('').map(int.parse).toList();
     final sequence = [3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -502,10 +502,10 @@ class _ValidationServiceAdapter {
     final expectedDigit = mod < 2 ? 0 : 11 - mod;
 
     if (digits[10] != expectedDigit) {
-      return ValidationResult.error('Renavam inválido');
+      return ValidationLeft('Renavam inválido');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateOdometer(String text, {
@@ -515,26 +515,26 @@ class _ValidationServiceAdapter {
   }) {
     if (text.isEmpty) {
       return required
-          ? ValidationResult.error('Odômetro é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('Odômetro é obrigatório')
+          : ValidationRight();
     }
 
     final cleanText = text.replaceAll(',', '.');
     final value = double.tryParse(cleanText);
 
     if (value == null) {
-      return ValidationResult.error('Odômetro deve ser um número válido');
+      return ValidationLeft('Odômetro deve ser um número válido');
     }
 
     if (value < 0) {
-      return ValidationResult.error('Odômetro não pode ser negativo');
+      return ValidationLeft('Odômetro não pode ser negativo');
     }
 
     if (currentOdometer != null && value < currentOdometer) {
-      return ValidationResult.error('Odômetro não pode ser menor que o atual (${currentOdometer.toStringAsFixed(0)} km)');
+      return ValidationLeft('Odômetro não pode ser menor que o atual (${currentOdometer.toStringAsFixed(0)} km)');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateFuelLiters(String text, {
@@ -543,33 +543,33 @@ class _ValidationServiceAdapter {
   }) {
     if (text.isEmpty) {
       return required
-          ? ValidationResult.error('Litros é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('Litros é obrigatório')
+          : ValidationRight();
     }
 
     final cleanText = text.replaceAll(',', '.');
     final value = double.tryParse(cleanText);
 
     if (value == null) {
-      return ValidationResult.error('Litros deve ser um número válido');
+      return ValidationLeft('Litros deve ser um número válido');
     }
 
     if (value <= 0) {
-      return ValidationResult.error('Litros deve ser maior que zero');
+      return ValidationLeft('Litros deve ser maior que zero');
     }
 
     if (tankCapacity != null && value > tankCapacity) {
-      return ValidationResult.error('Litros não pode exceder a capacidade do tanque (${tankCapacity.toStringAsFixed(0)}L)');
+      return ValidationLeft('Litros não pode exceder a capacidade do tanque (${tankCapacity.toStringAsFixed(0)}L)');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateFuelPrice(String text, {required bool required}) {
     if (text.isEmpty) {
       return required
-          ? ValidationResult.error('Preço é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('Preço é obrigatório')
+          : ValidationRight();
     }
 
     final cleanText = text.replaceAll(RegExp(r'[^\d,.]'), '');
@@ -577,18 +577,18 @@ class _ValidationServiceAdapter {
     final value = double.tryParse(normalizedText);
 
     if (value == null) {
-      return ValidationResult.error('Preço deve ser um valor válido');
+      return ValidationLeft('Preço deve ser um valor válido');
     }
 
     if (value <= 0) {
-      return ValidationResult.error('Preço deve ser maior que zero');
+      return ValidationLeft('Preço deve ser maior que zero');
     }
 
     if (value > 50.0) {
-      return ValidationResult.error('Preço muito alto (máximo R\$ 50,00)');
+      return ValidationLeft('Preço muito alto (máximo R\$ 50,00)');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   ValidationResult _validateLength(String text, String label, {
@@ -598,14 +598,14 @@ class _ValidationServiceAdapter {
     final length = text.trim().length;
 
     if (length < minLength) {
-      return ValidationResult.error('$label deve ter pelo menos $minLength caracteres');
+      return ValidationLeft('$label deve ter pelo menos $minLength caracteres');
     }
 
     if (length > maxLength) {
-      return ValidationResult.error('$label deve ter no máximo $maxLength caracteres');
+      return ValidationLeft('$label deve ter no máximo $maxLength caracteres');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 }
 
@@ -641,12 +641,12 @@ extension FormValidatorExtensions on FormValidator {
       if (field.required) {
         final result = await _validateField(field);
         if (!result.isValid) {
-          return ValidationResult.error(result.message);
+          return ValidationLeft(result.message);
         }
       }
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 }
 

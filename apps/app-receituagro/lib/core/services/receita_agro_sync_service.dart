@@ -67,7 +67,7 @@ class ReceitaAgroSyncService implements ISyncService {
       _isInitialized = true;
 
       if (kDebugMode) {
-        print('✅ ReceitaAgroSyncService initialized');
+        debugPrint('✅ ReceitaAgroSyncService initialized');
       }
 
       return const Right(null);
@@ -272,7 +272,7 @@ class ReceitaAgroSyncService implements ISyncService {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId == null || userId.isEmpty) {
         if (kDebugMode) {
-          print('⚠️ User not authenticated for sync');
+          debugPrint('⚠️ User not authenticated for sync');
         }
         final duration = DateTime.now().difference(startTime);
         _updateStatus(SyncServiceStatus.completed);
@@ -302,12 +302,12 @@ class ReceitaAgroSyncService implements ISyncService {
         (failure) {
           totalFailed++;
           if (kDebugMode) {
-            print('⚠️ Falha ao sincronizar favoritos: ${failure.message}');
+            debugPrint('⚠️ Falha ao sincronizar favoritos: ${failure.message}');
           }
         },
         (count) {
           totalSynced += count;
-          if (kDebugMode) print('✅ Favoritos sincronizados: $count');
+          if (kDebugMode) debugPrint('✅ Favoritos sincronizados: $count');
         },
       );
 
@@ -334,7 +334,7 @@ class ReceitaAgroSyncService implements ISyncService {
       );
     } catch (e) {
       _updateStatus(SyncServiceStatus.failed);
-      if (kDebugMode) print('❌ Erro ao sincronizar dados do usuário: $e');
+      if (kDebugMode) debugPrint('❌ Erro ao sincronizar dados do usuário: $e');
 
       return Left(ServerFailure('User data sync failed: $e'));
     }
@@ -423,7 +423,7 @@ class ReceitaAgroSyncService implements ISyncService {
       try {
         if (_favoritosRepository == null) {
           if (kDebugMode) {
-            print(
+            debugPrint(
               '⚠️ FavoritosRepository not injected in ReceitaAgroSyncService',
             );
           }
@@ -449,17 +449,17 @@ class ReceitaAgroSyncService implements ISyncService {
         );
 
         if (kDebugMode) {
-          print('✅ Favoritos sincronizados - Total: $totalFavoritos');
+          debugPrint('✅ Favoritos sincronizados - Total: $totalFavoritos');
         }
 
         return Right(totalFavoritos);
       } catch (e) {
         // Se não conseguir, tenta sem erro crítico
-        if (kDebugMode) print('⚠️ Aviso ao sincronizar favoritos: $e');
+        if (kDebugMode) debugPrint('⚠️ Aviso ao sincronizar favoritos: $e');
         return const Right(0);
       }
     } catch (e) {
-      if (kDebugMode) print('❌ Erro ao sincronizar favoritos: $e');
+      if (kDebugMode) debugPrint('❌ Erro ao sincronizar favoritos: $e');
       return Left(ServerFailure('Erro ao sincronizar favoritos: $e'));
     }
   }

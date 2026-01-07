@@ -34,7 +34,7 @@ class CalculatorEngineV2 {
     try {
       final strategy = _strategyRegistry.getStrategy(strategyId);
       if (strategy == null) {
-        return CompleteCalculationResult.error(
+        return CompleteCalculationLeft(
           EngineError(
             type: EngineErrorType.strategyNotFound,
             message: 'Estratégia não encontrada: $strategyId',
@@ -50,7 +50,7 @@ class CalculatorEngineV2 {
           inputs,
         );
         if (!validationResult.isValid && !opts.allowInvalidInputs) {
-          return CompleteCalculationResult.error(
+          return CompleteCalculationLeft(
             EngineError(
               type: EngineErrorType.validationFailed,
               message:
@@ -69,7 +69,7 @@ class CalculatorEngineV2 {
       );
 
       if (!executionResult.isSuccess) {
-        return CompleteCalculationResult.error(
+        return CompleteCalculationLeft(
           EngineError(
             type: EngineErrorType.executionFailed,
             message:
@@ -92,7 +92,7 @@ class CalculatorEngineV2 {
       final endTime = DateTime.now();
       final duration = endTime.difference(startTime);
 
-      return CompleteCalculationResult.success(
+      return CompleteCalculationRight(
         CompleteCalculationSuccess(
           strategyId: strategyId,
           strategy: strategy,
@@ -109,7 +109,7 @@ class CalculatorEngineV2 {
         ),
       );
     } catch (e) {
-      return CompleteCalculationResult.error(
+      return CompleteCalculationLeft(
         EngineError(
           type: EngineErrorType.unexpectedError,
           message: 'Erro inesperado: ${e.toString()}',
@@ -130,7 +130,7 @@ class CalculatorEngineV2 {
     final compatibleStrategy = _findBestStrategy(inputs, preferredStrategyType);
 
     if (compatibleStrategy == null) {
-      return CompleteCalculationResult.error(
+      return CompleteCalculationLeft(
         const EngineError(
           type: EngineErrorType.noCompatibleStrategy,
           message:
@@ -168,7 +168,7 @@ class CalculatorEngineV2 {
           break;
         }
       } catch (e) {
-        results[request.id] = CompleteCalculationResult.error(
+        results[request.id] = CompleteCalculationLeft(
           EngineError(
             type: EngineErrorType.batchItemFailed,
             message: 'Erro no item ${request.id}: ${e.toString()}',
@@ -300,8 +300,8 @@ class CalculatorEngineV2 {
       final preferredStrategies = allStrategies
           .where(
             (s) => s.runtimeType.toString().toLowerCase().contains(
-                  preferredType.toLowerCase(),
-                ),
+              preferredType.toLowerCase(),
+            ),
           )
           .toList();
 
@@ -368,6 +368,16 @@ class CompleteCalculationResult {
     return CompleteCalculationResult._(isSuccess: false, error: error);
   }
 }
+
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+CompleteCalculationResult CompleteCalculationRight(
+  CompleteCalculationSuccess success,
+) => CompleteCalculationResult.success(success);
+
+// ignore: non_constant_identifier_names
+CompleteCalculationResult CompleteCalculationLeft(EngineError error) =>
+    CompleteCalculationResult.error(error);
 
 class CompleteCalculationSuccess {
   final String strategyId;

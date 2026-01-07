@@ -19,7 +19,8 @@ class RevenueCatService {
       if (!kIsWeb && Platform.isIOS) {
         configuration = PurchasesConfiguration(apiKeyIos)..appUserID = userId;
       } else if (!kIsWeb && Platform.isAndroid) {
-        configuration = PurchasesConfiguration(apiKeyAndroid)..appUserID = userId;
+        configuration = PurchasesConfiguration(apiKeyAndroid)
+          ..appUserID = userId;
       } else {
         debugPrint('🛒 [RevenueCat] Plataforma não suportada');
         return;
@@ -57,7 +58,7 @@ class RevenueCatService {
   Future<CustomerInfo?> purchasePackage(Package package) async {
     try {
       debugPrint('💰 [RevenueCat] Iniciando compra: ${package.identifier}');
-      final result = await Purchases.purchase(package: package);
+      final result = await Purchases.purchasePackage(package);
       debugPrint('✅ [RevenueCat] Compra concluída com sucesso');
       return result.customerInfo;
     } catch (e, stack) {
@@ -80,13 +81,16 @@ class RevenueCatService {
 
   bool isPremium(CustomerInfo? customerInfo) {
     if (customerInfo == null) return false;
-    
+
     final entitlements = customerInfo.entitlements.active;
-    final hasPremium = entitlements.containsKey('premium') || 
-                       entitlements.containsKey('Premium') ||
-                       entitlements.containsKey('pro');
-    
-    debugPrint('👑 [RevenueCat] isPremium: $hasPremium (entitlements: ${entitlements.keys.join(', ')})');
+    final hasPremium =
+        entitlements.containsKey('premium') ||
+        entitlements.containsKey('Premium') ||
+        entitlements.containsKey('pro');
+
+    debugPrint(
+      '👑 [RevenueCat] isPremium: $hasPremium (entitlements: ${entitlements.keys.join(', ')})',
+    );
     return hasPremium;
   }
 

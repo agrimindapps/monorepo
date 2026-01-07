@@ -7,6 +7,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
 import '../../domain/usecases/calculate_unemployment_insurance_usecase.dart';
+import '../../../../shared/widgets/responsive_input_row.dart';
 
 /// Input form for unemployment insurance calculation
 class UnemploymentInsuranceInputForm extends StatefulWidget {
@@ -71,114 +72,110 @@ class _UnemploymentInsuranceInputFormState
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Average Salary (last 3 months)
-          TextFormField(
-            controller: _averageSalaryController,
-            decoration: const InputDecoration(
-              labelText: 'Salário Médio (últimos 3 meses)',
-              prefixText: 'R\$ ',
-              border: OutlineInputBorder(),
-              helperText: 'Média dos últimos 3 salários',
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _averageSalaryController,
+              decoration: const InputDecoration(
+                labelText: 'Salário Médio (últimos 3 meses)',
+                prefixText: 'R\$ ',
+                border: OutlineInputBorder(),
+                helperText: 'Média dos últimos 3 salários',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [_currencyFormatter],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe o salário médio';
+                }
+                final numericValue = _parseNumericValue(value);
+                if (numericValue <= 0) {
+                  return 'Salário deve ser maior que zero';
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
             ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [_currencyFormatter],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe o salário médio';
-              }
-              final numericValue = _parseNumericValue(value);
-              if (numericValue <= 0) {
-                return 'Salário deve ser maior que zero';
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 16),
-
-          // Work Months
-          TextFormField(
-            controller: _workMonthsController,
-            decoration: const InputDecoration(
-              labelText: 'Meses Trabalhados',
-              border: OutlineInputBorder(),
-              helperText: 'Tempo no último emprego',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe os meses trabalhados';
-              }
-              final months = int.tryParse(value) ?? 0;
-              if (months < 0) {
-                return 'Valor não pode ser negativo';
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 16),
-
-          // Times Received
-          TextFormField(
-            controller: _timesReceivedController,
-            decoration: const InputDecoration(
-              labelText: 'Vezes que já recebeu',
-              border: OutlineInputBorder(),
-              helperText: '0 = primeira vez, 1 = segunda vez, etc.',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final times = int.tryParse(value) ?? 0;
-                if (times < 0) {
+            right: TextFormField(
+              controller: _workMonthsController,
+              decoration: const InputDecoration(
+                labelText: 'Meses Trabalhados',
+                border: OutlineInputBorder(),
+                helperText: 'Tempo no último emprego',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe os meses trabalhados';
+                }
+                final months = int.tryParse(value) ?? 0;
+                if (months < 0) {
                   return 'Valor não pode ser negativo';
                 }
-                if (times > 10) {
-                  return 'Valor muito alto';
-                }
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
           ),
           const SizedBox(height: 16),
 
-          // Dismissal Date
-          TextFormField(
-            controller: _dismissalDateController,
-            decoration: const InputDecoration(
-              labelText: 'Data de Demissão',
-              border: OutlineInputBorder(),
-              helperText: 'DD/MM/AAAA',
-              suffixIcon: Icon(Icons.calendar_today),
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _timesReceivedController,
+              decoration: const InputDecoration(
+                labelText: 'Vezes que já recebeu',
+                border: OutlineInputBorder(),
+                helperText: '0 = primeira vez, 1 = segunda vez, etc.',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final times = int.tryParse(value) ?? 0;
+                  if (times < 0) {
+                    return 'Valor não pode ser negativo';
+                  }
+                  if (times > 10) {
+                    return 'Valor muito alto';
+                  }
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
             ),
-            keyboardType: TextInputType.datetime,
-            inputFormatters: [_dateFormatter],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe a data de demissão';
-              }
-              final date = _parseDate(value);
-              if (date == null) {
-                return 'Data inválida';
-              }
-              if (date.isAfter(DateTime.now())) {
-                return 'Data não pode ser futura';
-              }
-              return null;
-            },
-            onChanged: (value) {
-              final date = _parseDate(value);
-              if (date != null) {
-                setState(() {
-                  _dismissalDate = date;
-                });
-              }
-            },
-            onTap: () => _selectDate(context),
+            right: TextFormField(
+              controller: _dismissalDateController,
+              decoration: const InputDecoration(
+                labelText: 'Data de Demissão',
+                border: OutlineInputBorder(),
+                helperText: 'DD/MM/AAAA',
+                suffixIcon: Icon(Icons.calendar_today),
+              ),
+              keyboardType: TextInputType.datetime,
+              inputFormatters: [_dateFormatter],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe a data de demissão';
+                }
+                final date = _parseDate(value);
+                if (date == null) {
+                  return 'Data inválida';
+                }
+                if (date.isAfter(DateTime.now())) {
+                  return 'Data não pode ser futura';
+                }
+                return null;
+              },
+              onChanged: (value) {
+                final date = _parseDate(value);
+                if (date != null) {
+                  setState(() {
+                    _dismissalDate = date;
+                  });
+                }
+              },
+              onTap: () => _selectDate(context),
+            ),
           ),
         ],
       ),
@@ -235,7 +232,15 @@ class _UnemploymentInsuranceInputFormState
   }
 
   void _submitForm() {
-    if (!widget.formKey.currentState!.validate()) return;
+    if (!widget.formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha os campos obrigatórios'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final params = CalculateUnemploymentInsuranceParams(
       averageSalary: _parseNumericValue(_averageSalaryController.text),

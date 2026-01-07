@@ -365,7 +365,7 @@ class _AddMaintenancePageState extends ConsumerState<AddMaintenancePage> {
               hint: '0,0',
               currentOdometer: formState.vehicle?.currentOdometer,
               onChanged: (value) =>
-                  _validationResults['odometer'] = ValidationResult.success(),
+                  _validationResults['odometer'] = ValidationRight(),
             ),
         ],
       ),

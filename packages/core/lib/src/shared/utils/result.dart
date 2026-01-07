@@ -153,10 +153,7 @@ sealed class Result<T> {
 
   /// Converte Result<T> para Either<Failure, T> (compatibilidade)
   Either<Failure, T> toEither() {
-    return fold(
-      (error) => Left(error.toFailure()),
-      (data) => Right(data),
-    );
+    return fold((error) => Left(error.toFailure()), (data) => Right(data));
   }
 }
 
@@ -270,9 +267,7 @@ class ResultUtils {
       if (error is AppError) {
         return Result.error(error);
       }
-      return Result.error(
-        AppErrorFactory.fromException(error, stackTrace),
-      );
+      return Result.error(AppErrorFactory.fromException(error, stackTrace));
     }
   }
 
@@ -287,9 +282,7 @@ class ResultUtils {
       if (error is AppError) {
         return Result.error(error);
       }
-      return Result.error(
-        AppErrorFactory.fromException(error, stackTrace),
-      );
+      return Result.error(AppErrorFactory.fromException(error, stackTrace));
     }
   }
 
@@ -323,10 +316,7 @@ class ResultUtils {
   }
 
   /// Cria Result a partir de valor nullable
-  static Result<T> fromNullable<T>(
-    T? value,
-    AppError Function() onNull,
-  ) {
+  static Result<T> fromNullable<T>(T? value, AppError Function() onNull) {
     if (value != null) {
       return Result.success(value);
     } else {
@@ -344,5 +334,58 @@ class ResultUtils {
     Future<Either<Failure, T>> futureEither,
   ) {
     return futureEither.toResult();
+  }
+}
+
+/// Utility class for working with Either<Failure, T>
+/// Modern replacement for ResultUtils that works with dartz Either
+class EitherUtils {
+  /// Executes a synchronous operation that may throw exceptions
+  /// Returns Either<Failure, T> instead of Result<T>
+  static Either<Failure, T> tryExecute<T>(T Function() operation) {
+    try {
+      return Right(operation());
+    } catch (error) {
+      if (error is Failure) {
+        return Left(error);
+      }
+      return Left(UnexpectedFailure('Erro inesperado: ${error.toString()}'));
+    }
+  }
+
+  /// Executes an async operation that may throw exceptions
+  /// Returns Future<Either<Failure, T>> instead of Future<Result<T>>
+  static Future<Either<Failure, T>> tryExecuteAsync<T>(
+    Future<T> Function() operation,
+  ) async {
+    try {
+      final result = await operation();
+      return Right(result);
+    } catch (error) {
+      if (error is Failure) {
+        return Left(error);
+      }
+      return Left(UnexpectedFailure('Erro inesperado: ${error.toString()}'));
+    }
+  }
+
+  /// Combines multiple Either results into one
+  static Either<Failure, List<T>> combine<T>(List<Either<Failure, T>> results) {
+    final List<T> data = [];
+
+    for (final result in results) {
+      final value = result.fold((failure) => null, (success) => success);
+
+      if (value == null) {
+        return result.fold(
+          (failure) => Left(failure),
+          (_) => const Left(UnexpectedFailure('Unexpected null value')),
+        );
+      }
+
+      data.add(value);
+    }
+
+    return Right(data);
   }
 }

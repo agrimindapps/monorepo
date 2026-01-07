@@ -2,65 +2,50 @@ import 'failure.dart';
 
 /// Classe base para falhas relacionadas ao Supabase
 abstract class SupabaseFailure extends Failure {
-  const SupabaseFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const SupabaseFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de conexão com o Supabase
 class SupabaseConnectionFailure extends SupabaseFailure {
   const SupabaseConnectionFailure([String? message])
-      : super(
-          message ?? 'Falha ao conectar com o Supabase',
-        );
+    : super(message ?? 'Falha ao conectar com o Supabase');
 }
 
 /// Falha quando recurso não é encontrado no Supabase
 class SupabaseNotFoundFailure extends SupabaseFailure {
   const SupabaseNotFoundFailure(String resource)
-      : super('$resource não encontrado');
+    : super('$resource não encontrado');
 }
 
 /// Falha de servidor do Supabase
 class SupabaseServerFailure extends SupabaseFailure {
   const SupabaseServerFailure([String? message])
-      : super(
-          message ?? 'Erro no servidor Supabase',
-        );
+    : super(message ?? 'Erro no servidor Supabase');
 }
 
 /// Falha de autenticação no Supabase
 class SupabaseAuthFailure extends SupabaseFailure {
   const SupabaseAuthFailure([String? message])
-      : super(
-          message ?? 'Erro de autenticação no Supabase',
-        );
+    : super(message ?? 'Erro de autenticação no Supabase');
 }
 
 /// Falha de parsing de dados do Supabase
 class SupabaseParseFailure extends SupabaseFailure {
   const SupabaseParseFailure([String? message])
-      : super(
-          message ?? 'Erro ao processar dados do Supabase',
-        );
+    : super(message ?? 'Erro ao processar dados do Supabase');
 }
 
 /// Falha de timeout do Supabase
 class SupabaseTimeoutFailure extends SupabaseFailure {
   const SupabaseTimeoutFailure([String? message])
-      : super(
-          message ?? 'Tempo de resposta excedido',
-        );
+    : super(message ?? 'Tempo de resposta excedido');
 }
 
 /// Falha de query inválida do Supabase
 class SupabaseQueryFailure extends SupabaseFailure {
   const SupabaseQueryFailure([String? message])
-      : super(
-          message ?? 'Erro na consulta ao Supabase',
-        );
+    : super(message ?? 'Erro na consulta ao Supabase');
 }
 
 /// Extension para converter exceções do Supabase em Failures

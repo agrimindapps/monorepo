@@ -6,7 +6,7 @@ import '../entities/calculator_parameter.dart';
 /// com precisão e validação adequadas para uso agrícola
 class UnitConversionService {
   UnitConversionService._();
-  
+
   /// Conversões de área (base: metros quadrados)
   static const Map<ParameterUnit, double> _areaConversions = {
     ParameterUnit.metro2: 1.0,
@@ -52,28 +52,33 @@ class UnitConversionService {
   }) {
     try {
       if (fromUnit == toUnit) {
-        return ConversionResult.success(value, fromUnit, toUnit);
+        return ConversionRight(value, fromUnit, toUnit);
       }
       final category = _getUnitCategory(fromUnit);
-      
+
       if (category != _getUnitCategory(toUnit)) {
-        return ConversionResult.error(
+        return ConversionLeft(
           'Não é possível converter entre categorias diferentes: '
           '${fromUnit.name} para ${toUnit.name}',
         );
       }
 
-      final convertedValue = _performConversion(value, fromUnit, toUnit, category);
-      
+      final convertedValue = _performConversion(
+        value,
+        fromUnit,
+        toUnit,
+        category,
+      );
+
       if (convertedValue == null) {
-        return ConversionResult.error(
+        return ConversionLeft(
           'Conversão não suportada: ${fromUnit.name} para ${toUnit.name}',
         );
       }
 
-      return ConversionResult.success(convertedValue, fromUnit, toUnit);
+      return ConversionRight(convertedValue, fromUnit, toUnit);
     } catch (e) {
-      return ConversionResult.error('Erro na conversão: $e');
+      return ConversionLeft('Erro na conversão: $e');
     }
   }
 
@@ -105,7 +110,7 @@ class UnitConversionService {
   /// Normaliza valor para unidade base da categoria
   static double normalizeToBase(double value, ParameterUnit unit) {
     final category = _getUnitCategory(unit);
-    
+
     switch (category) {
       case UnitCategory.area:
         return value * (_areaConversions[unit] ?? 1.0);
@@ -132,7 +137,7 @@ class UnitConversionService {
   /// Converte valor da unidade base para unidade específica
   static double denormalizeFromBase(double baseValue, ParameterUnit unit) {
     final category = _getUnitCategory(unit);
-    
+
     switch (category) {
       case UnitCategory.area:
         return baseValue / (_areaConversions[unit] ?? 1.0);
@@ -159,10 +164,14 @@ class UnitConversionService {
   /// Obtém unidades compatíveis para conversão
   static List<ParameterUnit> getCompatibleUnits(ParameterUnit unit) {
     final category = _getUnitCategory(unit);
-    
+
     switch (category) {
       case UnitCategory.area:
-        return [ParameterUnit.metro2, ParameterUnit.hectare, ParameterUnit.acre];
+        return [
+          ParameterUnit.metro2,
+          ParameterUnit.hectare,
+          ParameterUnit.acre,
+        ];
       case UnitCategory.volume:
         return [ParameterUnit.litro, ParameterUnit.metro3];
       case UnitCategory.weight:
@@ -200,7 +209,7 @@ class UnitConversionService {
     if (_weightConversions.containsKey(unit)) return UnitCategory.weight;
     if (_distanceConversions.containsKey(unit)) return UnitCategory.distance;
     if (_timeConversions.containsKey(unit)) return UnitCategory.time;
-    
+
     switch (unit) {
       case ParameterUnit.celsius:
         return UnitCategory.temperature;
@@ -230,11 +239,26 @@ class UnitConversionService {
       case UnitCategory.area:
         return _convertBetweenUnits(value, fromUnit, toUnit, _areaConversions);
       case UnitCategory.volume:
-        return _convertBetweenUnits(value, fromUnit, toUnit, _volumeConversions);
+        return _convertBetweenUnits(
+          value,
+          fromUnit,
+          toUnit,
+          _volumeConversions,
+        );
       case UnitCategory.weight:
-        return _convertBetweenUnits(value, fromUnit, toUnit, _weightConversions);
+        return _convertBetweenUnits(
+          value,
+          fromUnit,
+          toUnit,
+          _weightConversions,
+        );
       case UnitCategory.distance:
-        return _convertBetweenUnits(value, fromUnit, toUnit, _distanceConversions);
+        return _convertBetweenUnits(
+          value,
+          fromUnit,
+          toUnit,
+          _distanceConversions,
+        );
       case UnitCategory.time:
         return _convertBetweenUnits(value, fromUnit, toUnit, _timeConversions);
       case UnitCategory.temperature:
@@ -278,7 +302,10 @@ class UnitConversionService {
     throw UnsupportedError('Unidade de temperatura não suportada: $unit');
   }
 
-  static double _convertTemperatureFromBase(double baseValue, ParameterUnit unit) {
+  static double _convertTemperatureFromBase(
+    double baseValue,
+    ParameterUnit unit,
+  ) {
     if (unit == ParameterUnit.celsius) return baseValue;
     throw UnsupportedError('Unidade de temperatura não suportada: $unit');
   }
@@ -290,7 +317,7 @@ class UnitConversionService {
     ParameterUnit toUnit,
   ) {
     const barToAtm = 0.986923; // 1 bar = 0.986923 atm
-    
+
     if (fromUnit == ParameterUnit.bar && toUnit == ParameterUnit.atm) {
       return value * barToAtm;
     } else if (fromUnit == ParameterUnit.atm && toUnit == ParameterUnit.bar) {
@@ -298,8 +325,10 @@ class UnitConversionService {
     } else if (fromUnit == toUnit) {
       return value;
     }
-    
-    throw UnsupportedError('Conversão de pressão não suportada: $fromUnit para $toUnit');
+
+    throw UnsupportedError(
+      'Conversão de pressão não suportada: $fromUnit para $toUnit',
+    );
   }
 
   static double _convertPressureToBase(double value, ParameterUnit unit) {
@@ -320,7 +349,6 @@ class UnitConversionService {
     ParameterUnit fromUnit,
     ParameterUnit toUnit,
   ) {
-    
     if (fromUnit == toUnit) return value;
     if (fromUnit == ParameterUnit.ppm && toUnit == ParameterUnit.mgL) {
       return value;
@@ -331,8 +359,10 @@ class UnitConversionService {
         (fromUnit == ParameterUnit.mgdm3 && toUnit == ParameterUnit.mgL)) {
       return value;
     }
-    
-    throw UnsupportedError('Conversão de concentração não suportada: $fromUnit para $toUnit');
+
+    throw UnsupportedError(
+      'Conversão de concentração não suportada: $fromUnit para $toUnit',
+    );
   }
 
   /// Formata valor com unidade apropriada
@@ -343,13 +373,13 @@ class UnitConversionService {
   }) {
     final unitSymbol = _getUnitSymbol(unit);
     final places = decimalPlaces ?? _getDefaultDecimalPlaces(unit);
-    
+
     final formattedValue = value.toStringAsFixed(places);
-    
+
     if (unitSymbol.isEmpty) {
       return formattedValue;
     }
-    
+
     return '$formattedValue $unitSymbol';
   }
 
@@ -494,9 +524,18 @@ class ConversionResult {
   }
 
   factory ConversionResult.error(String message) {
-    return ConversionResult._(
-      isSuccess: false,
-      errorMessage: message,
-    );
+    return ConversionResult._(isSuccess: false, errorMessage: message);
   }
 }
+
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+ConversionResult ConversionRight(
+  double value,
+  ParameterUnit fromUnit,
+  ParameterUnit toUnit,
+) => ConversionResult.success(value, fromUnit, toUnit);
+
+// ignore: non_constant_identifier_names
+ConversionResult ConversionLeft(String message) =>
+    ConversionResult.error(message);

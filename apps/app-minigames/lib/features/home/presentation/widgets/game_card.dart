@@ -40,7 +40,7 @@ class _GameCardState extends State<GameCard> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: game.primaryColor.withOpacity(_isHovered ? 0.5 : 0.3),
+                  color: game.primaryColor.withValues(alpha: _isHovered ? 0.5 : 0.3),
                   blurRadius: _isHovered ? 20 : 10,
                   offset: const Offset(0, 4),
                 ),
@@ -68,7 +68,7 @@ class _GameCardState extends State<GameCard> {
                   Positioned.fill(
                     child: CustomPaint(
                       painter: _PatternPainter(
-                        color: Colors.white.withOpacity(0.05),
+                        color: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
                   ),
@@ -126,10 +126,10 @@ class _GameCardState extends State<GameCard> {
                                 child: Container(
                                   padding: EdgeInsets.all(widget.isCompact ? 16 : 24),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
+                                    color: Colors.white.withValues(alpha: 0.2),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: Colors.white.withOpacity(0.2),
+                                      color: Colors.white.withValues(alpha: 0.2),
                                       width: 1.5,
                                     ),
                                   ),
@@ -163,7 +163,7 @@ class _GameCardState extends State<GameCard> {
                             game.description,
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.white.withOpacity(0.8),
+                              color: Colors.white.withValues(alpha: 0.8),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -180,7 +180,7 @@ class _GameCardState extends State<GameCard> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.3),
+                            color: Colors.white.withValues(alpha: 0.3),
                             width: 2,
                           ),
                         ),
@@ -216,10 +216,10 @@ class _Badge extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.85),
+            color: color.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 0.5,
             ),
           ),

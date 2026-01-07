@@ -1,10 +1,9 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/contracts/i_app_data_cleaner.dart';
 import '../../domain/repositories/i_auth_repository.dart';
-import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
-import '../../shared/utils/result.dart';
 import 'account_deletion_rate_limiter.dart';
 import 'firestore_deletion_service.dart';
 import 'revenuecat_cancellation_service.dart';
@@ -41,7 +40,7 @@ class EnhancedAccountDeletionService {
   /// [password] Senha para re-autenticação (obrigatória para contas email/senha)
   /// [userId] ID do usuário (obtido automaticamente se não fornecido)
   /// [isAnonymous] Se é usuário anônimo (obtido automaticamente se não fornecido)
-  Future<Result<EnhancedDeletionResult>> deleteAccount({
+  Future<Either<Failure, EnhancedDeletionResult>> deleteAccount({
     String? password,
     String? userId,
     bool? isAnonymous,
@@ -56,10 +55,8 @@ class EnhancedAccountDeletionService {
       result.steps.add('Verificando autenticação...');
       final isLoggedIn = await _authRepository.isLoggedIn;
       if (!isLoggedIn) {
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            const AuthenticationFailure('Usuário não está autenticado'),
-          ),
+        return const Left(
+          AuthenticationFailure('Usuário não está autenticado'),
         );
       }
       String? currentUserId = userId;
@@ -74,10 +71,8 @@ class EnhancedAccountDeletionService {
       }
 
       if (currentUserId == null) {
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            const AuthenticationFailure('Não foi possível obter ID do usuário'),
-          ),
+        return const Left(
+          AuthenticationFailure('Não foi possível obter ID do usuário'),
         );
       }
 
@@ -86,12 +81,10 @@ class EnhancedAccountDeletionService {
         if (kDebugMode) {
           debugPrint('❌ Anonymous users cannot delete account');
         }
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            const ValidationFailure(
-              'Usuários anônimos não podem excluir conta. '
-              'Crie uma conta permanente primeiro.',
-            ),
+        return const Left(
+          ValidationFailure(
+            'Usuários anônimos não podem excluir conta. '
+            'Crie uma conta permanente primeiro.',
           ),
         );
       }
@@ -104,12 +97,10 @@ class EnhancedAccountDeletionService {
           debugPrint('🔒 Rate limit exceeded for user $currentUserId');
         }
 
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            ValidationFailure(
-              'Muitas tentativas de exclusão. '
-              'Aguarde $minutes minutos antes de tentar novamente.',
-            ),
+        return Left(
+          ValidationFailure(
+            'Muitas tentativas de exclusão. '
+            'Aguarde $minutes minutos antes de tentar novamente.',
           ),
         );
       }
@@ -136,10 +127,8 @@ class EnhancedAccountDeletionService {
             debugPrint('❌ Re-authentication failed');
           }
 
-          return Result.error(
-            AppErrorFactory.fromFailure(
-              const AuthenticationFailure('Senha incorreta. Tente novamente.'),
-            ),
+          return const Left(
+            AuthenticationFailure('Senha incorreta. Tente novamente.'),
           );
         }
 
@@ -147,12 +136,8 @@ class EnhancedAccountDeletionService {
           debugPrint('✅ Re-authentication successful');
         }
       } else {
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            const ValidationFailure(
-              'Senha obrigatória para exclusão de conta.',
-            ),
-          ),
+        return const Left(
+          ValidationFailure('Senha obrigatória para exclusão de conta.'),
         );
       }
       result.steps.add('Verificando assinaturas...');
@@ -161,8 +146,8 @@ class EnhancedAccountDeletionService {
           debugPrint('💳 Checking RevenueCat subscriptions');
         }
 
-        final cancellationResult =
-            await _revenueCatCancellation.handleSubscriptionCancellation();
+        final cancellationResult = await _revenueCatCancellation
+            .handleSubscriptionCancellation();
 
         cancellationResult.fold(
           (error) {
@@ -225,8 +210,8 @@ class EnhancedAccountDeletionService {
             debugPrint('🧹 Cleaning local app data');
           }
 
-          final statsBeforeCleaning =
-              await _appDataCleaner.getDataStatsBeforeCleaning();
+          final statsBeforeCleaning = await _appDataCleaner
+              .getDataStatsBeforeCleaning();
           result.dataStatsBeforeCleaning = statsBeforeCleaning;
 
           final cleanupResult = await _appDataCleaner.clearAllAppData();
@@ -271,19 +256,18 @@ class EnhancedAccountDeletionService {
           );
         }
 
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            AuthenticationFailure(
-              result.firebaseDeleteError ?? 'Erro ao deletar conta',
-            ),
+        return Left(
+          AuthenticationFailure(
+            result.firebaseDeleteError ?? 'Erro ao deletar conta',
           ),
         );
       }
       _rateLimiter.clearAttempts(currentUserId);
 
       result.completedAt = DateTime.now();
-      result.totalDurationSeconds =
-          result.completedAt!.difference(startTime).inSeconds;
+      result.totalDurationSeconds = result.completedAt!
+          .difference(startTime)
+          .inSeconds;
 
       if (kDebugMode) {
         debugPrint('✅ Account deletion completed successfully');
@@ -300,23 +284,19 @@ class EnhancedAccountDeletionService {
         );
       }
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ Unexpected error during account deletion: $e');
       }
 
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro inesperado durante exclusão: $e'),
-        ),
-      );
+      return Left(UnexpectedFailure('Erro inesperado durante exclusão: $e'));
     }
   }
 
   /// Obtém preview detalhado do que será excluído
   /// Útil para exibir confirmação ao usuário
-  Future<Result<Map<String, dynamic>>> getAccountDeletionPreview(
+  Future<Either<Failure, Map<String, dynamic>>> getAccountDeletionPreview(
     String userId,
   ) async {
     try {
@@ -347,8 +327,8 @@ class EnhancedAccountDeletionService {
         preview['cloudDataError'] = e.toString();
       }
       try {
-        final subscriptionDetails =
-            await _revenueCatCancellation.getSubscriptionDetails();
+        final subscriptionDetails = await _revenueCatCancellation
+            .getSubscriptionDetails();
         subscriptionDetails.fold(
           (error) => preview['subscriptionError'] = error.message,
           (details) => preview['subscription'] = details,
@@ -358,13 +338,9 @@ class EnhancedAccountDeletionService {
       }
       preview['rateLimitStatus'] = _rateLimiter.getStats(userId);
 
-      return Result.success(preview);
+      return Right(preview);
     } catch (e) {
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro ao obter preview: $e'),
-        ),
-      );
+      return Left(UnexpectedFailure('Erro ao obter preview: $e'));
     }
   }
 

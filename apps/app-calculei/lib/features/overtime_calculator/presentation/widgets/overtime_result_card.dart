@@ -5,16 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/overtime_calculation.dart';
 
 /// Card displaying overtime calculation results
 class OvertimeResultCard extends StatelessWidget {
   final OvertimeCalculation calculation;
 
-  const OvertimeResultCard({
-    super.key,
-    required this.calculation,
-  });
+  const OvertimeResultCard({super.key, required this.calculation});
 
   @override
   Widget build(BuildContext context) {
@@ -31,18 +29,14 @@ class OvertimeResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green[700],
-                  size: 28,
-                ),
+                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ],
             ),
@@ -200,11 +194,11 @@ class OvertimeResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                ),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,6 +225,15 @@ class OvertimeResultCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 16),
+            ShareButton(
+              text: ShareFormatter.formatOvertime(
+                grossSalary: calculation.grossSalary,
+                weeklyHours: calculation.weeklyHours,
+                totalOvertimeValue: calculation.totalOvertime,
+              ),
+              subject: 'Cálculo de Horas Extras',
             ),
           ],
         ),
@@ -267,12 +270,14 @@ class OvertimeResultCard extends StatelessWidget {
             value,
             style: TextStyle(
               fontSize: isBold ? 18 : 15,
-              fontWeight: isBold || isHighlight ? FontWeight.bold : FontWeight.w500,
+              fontWeight: isBold || isHighlight
+                  ? FontWeight.bold
+                  : FontWeight.w500,
               color: isDeduction
                   ? Colors.red[700]
                   : isHighlight
-                      ? Colors.green[700]
-                      : Theme.of(context).colorScheme.onSecondaryContainer,
+                  ? Colors.green[700]
+                  : Theme.of(context).colorScheme.onSecondaryContainer,
             ),
           ),
         ],
@@ -283,7 +288,7 @@ class OvertimeResultCard extends StatelessWidget {
   TextStyle _detailTextStyle(BuildContext context) {
     return TextStyle(
       fontSize: 12,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
     );
   }
 }

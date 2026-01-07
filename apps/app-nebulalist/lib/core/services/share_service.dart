@@ -1,3 +1,4 @@
+import 'package:share_plus/share_plus.dart';
 import 'package:core/core.dart';
 
 /// Service for sharing lists and items
@@ -25,7 +26,7 @@ class ShareService {
       itemNames: itemNames,
     );
 
-    await Share.share(text);
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   /// Share a single item details
@@ -50,7 +51,7 @@ class ShareService {
       preferredBrand: preferredBrand,
     );
 
-    await Share.share(text);
+    await SharePlus.instance.share(ShareParams(text: text));
   }
 
   /// Share multiple lists summary
@@ -68,7 +69,7 @@ class ShareService {
     buffer.writeln('---');
     buffer.writeln('Compartilhado via NebulaList');
 
-    await Share.share(buffer.toString());
+    await SharePlus.instance.share(ShareParams(text: buffer.toString()));
   }
 
   /// Build formatted text for list sharing
@@ -142,7 +143,9 @@ class ShareService {
 
     // Price
     if (estimatedPrice != null && estimatedPrice > 0) {
-      buffer.writeln('💰 Preço estimado: R\$ ${estimatedPrice.toStringAsFixed(2)}');
+      buffer.writeln(
+        '💰 Preço estimado: R\$ ${estimatedPrice.toStringAsFixed(2)}',
+      );
     }
 
     // Brand

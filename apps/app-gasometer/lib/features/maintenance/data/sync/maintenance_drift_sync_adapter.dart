@@ -276,13 +276,13 @@ class MaintenanceDriftSyncAdapter
 
       // Validar campos obrigatórios
       if (entity.id.isEmpty) {
-        throw const ValidationFailure(
+        throw Exception(
           'Maintenance ID missing from Firestore document',
         );
       }
 
       if (entity.vehicleId.isEmpty) {
-        throw const ValidationFailure(
+        throw Exception(
           'Vehicle ID missing from Firestore document',
         );
       }
@@ -296,7 +296,7 @@ class MaintenanceDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      throw ParseFailure('Failed to parse maintenance from Firestore: $e');
+      throw Exception('Failed to parse maintenance from Firestore: $e');
     }
   }
 

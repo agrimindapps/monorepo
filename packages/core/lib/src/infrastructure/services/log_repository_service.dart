@@ -97,7 +97,7 @@ class LogRepositoryService implements IDisposableService {
       23,
     ); // HH:mm:ss.SSS
 
-    print('$levelStr [$timeStr] $contextStr${entry.descricao}');
+    debugPrint('$levelStr [$timeStr] $contextStr${entry.descricao}');
   }
 
   /// Remove logs antigos quando limite é excedido
@@ -224,7 +224,7 @@ class LogRepositoryService implements IDisposableService {
             _logs.add(entry);
           } catch (e) {
             if (kDebugMode) {
-              print('Failed to parse persisted log: $e');
+              debugPrint('Failed to parse persisted log: $e');
             }
           }
         }
@@ -234,7 +234,7 @@ class LogRepositoryService implements IDisposableService {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Failed to load persisted logs: $e');
+        debugPrint('Failed to load persisted logs: $e');
       }
     }
   }
@@ -252,7 +252,7 @@ class LogRepositoryService implements IDisposableService {
       await prefs.setStringList(_prefsKey, logsJson);
     } catch (e) {
       if (kDebugMode) {
-        print('Failed to persist logs: $e');
+        debugPrint('Failed to persist logs: $e');
       }
     }
   }
@@ -264,7 +264,7 @@ class LogRepositoryService implements IDisposableService {
       await prefs.remove(_prefsKey);
     } catch (e) {
       if (kDebugMode) {
-        print('Failed to clear persisted logs: $e');
+        debugPrint('Failed to clear persisted logs: $e');
       }
     }
   }
@@ -306,13 +306,13 @@ class LogRepositoryService implements IDisposableService {
       await _logStreamController.close();
     } catch (e) {
       if (kDebugMode) {
-        print('Error closing log stream controller: $e');
+        debugPrint('Error closing log stream controller: $e');
       }
     }
 
     _logs.clear();
     if (kDebugMode) {
-      print('LogRepositoryService disposed');
+      debugPrint('LogRepositoryService disposed');
     }
   }
 

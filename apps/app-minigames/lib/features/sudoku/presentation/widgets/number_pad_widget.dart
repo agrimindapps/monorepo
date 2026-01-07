@@ -53,7 +53,7 @@ class NumberPadWidget extends StatelessWidget {
         onPressed: () => onNumberTap(number),
         style: ElevatedButton.styleFrom(
           backgroundColor: notesMode
-              ? theme.primaryColor.withOpacity(0.2)
+              ? theme.primaryColor.withValues(alpha: 0.2)
               : theme.primaryColor,
           foregroundColor: notesMode ? theme.primaryColor : Colors.white,
           padding: EdgeInsets.zero,

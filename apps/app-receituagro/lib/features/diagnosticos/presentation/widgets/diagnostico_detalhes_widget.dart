@@ -3,15 +3,12 @@ import 'package:flutter/material.dart';
 class DiagnosticoDetalhesWidget extends StatelessWidget {
   final Map<String, String> diagnosticoData;
 
-  const DiagnosticoDetalhesWidget({
-    super.key,
-    required this.diagnosticoData,
-  });
+  const DiagnosticoDetalhesWidget({super.key, required this.diagnosticoData});
 
   @override
   Widget build(BuildContext context) {
-    print('🎨 [DEBUG] DiagnosticoDetalhesWidget.build');
-    print('📊 [DEBUG] diagnosticoData: $diagnosticoData');
+    debugPrint('🎨 [DEBUG] DiagnosticoDetalhesWidget.build');
+    debugPrint('📊 [DEBUG] diagnosticoData: $diagnosticoData');
     final theme = Theme.of(context);
 
     return Column(
@@ -33,26 +30,47 @@ class DiagnosticoDetalhesWidget extends StatelessWidget {
 
   Widget _buildDiagnosticoCards(BuildContext context) {
     final diagnosticoItems = [
-      {'label': 'Formulação', 'value': diagnosticoData['formulacao'] ?? 'N/A', 'icon': Icons.science_outlined},
-      {'label': 'Modo de Ação', 'value': diagnosticoData['modoAcao'] ?? 'N/A', 'icon': Icons.bolt},
-      {'label': 'Registro MAPA', 'value': diagnosticoData['mapa'] ?? 'N/A', 'icon': Icons.verified},
+      {
+        'label': 'Formulação',
+        'value': diagnosticoData['formulacao'] ?? 'N/A',
+        'icon': Icons.science_outlined,
+      },
+      {
+        'label': 'Modo de Ação',
+        'value': diagnosticoData['modoAcao'] ?? 'N/A',
+        'icon': Icons.bolt,
+      },
+      {
+        'label': 'Registro MAPA',
+        'value': diagnosticoData['mapa'] ?? 'N/A',
+        'icon': Icons.verified,
+      },
     ];
 
-    print('🎨 [DEBUG] diagnosticoItems: $diagnosticoItems');
+    debugPrint('🎨 [DEBUG] diagnosticoItems: $diagnosticoItems');
 
     return Column(
-      children: diagnosticoItems.map((item) => _buildInfoCard(
-        context,
-        item['label'] as String,
-        item['value'] as String,
-        item['icon'] as IconData,
-      )).toList(),
+      children: diagnosticoItems
+          .map(
+            (item) => _buildInfoCard(
+              context,
+              item['label'] as String,
+              item['value'] as String,
+              item['icon'] as IconData,
+            ),
+          )
+          .toList(),
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, String label, String value, IconData icon) {
+  Widget _buildInfoCard(
+    BuildContext context,
+    String label,
+    String value,
+    IconData icon,
+  ) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(8.0),
@@ -76,11 +94,7 @@ class DiagnosticoDetalhesWidget extends StatelessWidget {
               color: theme.colorScheme.primaryContainer,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: theme.colorScheme.primary,
-              size: 20,
-            ),
+            child: Icon(icon, color: theme.colorScheme.primary, size: 20),
           ),
           const SizedBox(width: 16),
           Expanded(

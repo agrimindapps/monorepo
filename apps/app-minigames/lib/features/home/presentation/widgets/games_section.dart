@@ -38,7 +38,7 @@ class GamesSection extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFD700).withOpacity(0.2),
+                    color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -68,7 +68,7 @@ class GamesSection extends StatelessWidget {
                       Text(
                         'VER MAIS',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
+                          color: Colors.white.withValues(alpha: 0.7),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
@@ -76,7 +76,7 @@ class GamesSection extends StatelessWidget {
                       const SizedBox(width: 4),
                       Icon(
                         Icons.arrow_forward,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         size: 16,
                       ),
                     ],

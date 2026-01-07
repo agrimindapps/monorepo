@@ -11,7 +11,7 @@ class AvatarService {
   static const int _maxSizeBytes = 50 * 1024; // 50KB max
   static const int _targetDimension = 200; // 200x200px target
   static const int _maxFileSizeBytes = 5 * 1024 * 1024; // 5MB max input
-  
+
   final ImagePicker _imagePicker = ImagePicker();
 
   /// Select image from camera with proper permissions and validation
@@ -19,7 +19,7 @@ class AvatarService {
     try {
       final cameraStatus = await Permission.camera.request();
       if (!cameraStatus.isGranted) {
-        return AvatarResult.error('Permissão de câmera necessária');
+        return AvatarLeft('Permissão de câmera necessária');
       }
 
       final XFile? pickedFile = await _imagePicker.pickImage(
@@ -35,7 +35,7 @@ class AvatarService {
 
       return await _processImage(pickedFile);
     } catch (e) {
-      return AvatarResult.error('Erro ao acessar câmera: ${e.toString()}');
+      return AvatarLeft('Erro ao acessar câmera: ${e.toString()}');
     }
   }
 
@@ -57,7 +57,7 @@ class AvatarService {
       }
 
       if (!status.isGranted) {
-        return AvatarResult.error('Permissão de galeria necessária');
+        return AvatarLeft('Permissão de galeria necessária');
       }
 
       final XFile? pickedFile = await _imagePicker.pickImage(
@@ -73,7 +73,7 @@ class AvatarService {
 
       return await _processImage(pickedFile);
     } catch (e) {
-      return AvatarResult.error('Erro ao acessar galeria: ${e.toString()}');
+      return AvatarLeft('Erro ao acessar galeria: ${e.toString()}');
     }
   }
 
@@ -83,19 +83,19 @@ class AvatarService {
       final File file = File(imageFile.path);
       final fileSize = await file.length();
       if (fileSize > _maxFileSizeBytes) {
-        return AvatarResult.error('Arquivo muito grande (max 5MB)');
+        return AvatarLeft('Arquivo muito grande (max 5MB)');
       }
       final extension = imageFile.path.toLowerCase();
-      if (!extension.endsWith('.jpg') && 
-          !extension.endsWith('.jpeg') && 
+      if (!extension.endsWith('.jpg') &&
+          !extension.endsWith('.jpeg') &&
           !extension.endsWith('.png')) {
-        return AvatarResult.error('Tipo de arquivo não suportado (apenas JPG/PNG)');
+        return AvatarLeft('Tipo de arquivo não suportado (apenas JPG/PNG)');
       }
       final Uint8List originalBytes = await file.readAsBytes();
       final img.Image? originalImage = img.decodeImage(originalBytes);
-      
+
       if (originalImage == null) {
-        return AvatarResult.error('Imagem corrompida ou formato inválido');
+        return AvatarLeft('Imagem corrompida ou formato inválido');
       }
       final img.Image processedImage = _resizeAndCropToSquare(originalImage);
       final String base64String = await _compressToBase64(processedImage);
@@ -105,19 +105,17 @@ class AvatarService {
         print('Warning: Could not delete temporary file: $e');
       }
 
-      return AvatarResult.success(
-        base64String,
-        _calculateSizeKB(base64String),
-      );
-      
+      return AvatarRight(base64String, _calculateSizeKB(base64String));
     } catch (e) {
-      return AvatarResult.error('Erro ao processar imagem: ${e.toString()}');
+      return AvatarLeft('Erro ao processar imagem: ${e.toString()}');
     }
   }
 
   /// Resize image to square format with smart cropping
   img.Image _resizeAndCropToSquare(img.Image image) {
-    final int smallerSide = image.width < image.height ? image.width : image.height;
+    final int smallerSide = image.width < image.height
+        ? image.width
+        : image.height;
     final int cropX = (image.width - smallerSide) ~/ 2;
     final int cropY = (image.height - smallerSide) ~/ 2;
     final img.Image croppedImage = img.copyCrop(
@@ -139,7 +137,7 @@ class AvatarService {
   Future<String> _compressToBase64(img.Image image) async {
     int quality = 95;
     String base64String = '';
-    
+
     do {
       final List<int> jpegBytes = img.encodeJpg(image, quality: quality);
       base64String = base64Encode(jpegBytes);
@@ -148,7 +146,7 @@ class AvatarService {
       }
       quality -= 10;
     } while (quality > 0);
-    
+
     return base64String;
   }
 
@@ -170,7 +168,8 @@ class AvatarService {
 
     try {
       final bytes = base64Decode(base64String);
-      return bytes.isNotEmpty && _calculateSizeBytes(base64String) <= _maxSizeBytes;
+      return bytes.isNotEmpty &&
+          _calculateSizeBytes(base64String) <= _maxSizeBytes;
     } catch (e) {
       return false;
     }
@@ -202,6 +201,13 @@ class AvatarService {
 
 /// Result wrapper for avatar operations
 class AvatarResult {
+  factory AvatarResult.success(String base64Data, double sizeKB) {
+    return AvatarResult._(
+      success: true,
+      base64Data: base64Data,
+      sizeKB: sizeKB,
+    );
+  }
 
   const AvatarResult._({
     required this.success,
@@ -211,26 +217,12 @@ class AvatarResult {
     this.cancelled = false,
   });
 
-  factory AvatarResult.success(String base64Data, double sizeKB) {
-    return AvatarResult._(
-      success: true,
-      base64Data: base64Data,
-      sizeKB: sizeKB,
-    );
-  }
-
   factory AvatarResult.error(String message) {
-    return AvatarResult._(
-      success: false,
-      errorMessage: message,
-    );
+    return AvatarResult._(success: false, errorMessage: message);
   }
 
   factory AvatarResult.cancelled() {
-    return const AvatarResult._(
-      success: false,
-      cancelled: true,
-    );
+    return const AvatarResult._(success: false, cancelled: true);
   }
   final bool success;
   final String? base64Data;
@@ -238,3 +230,8 @@ class AvatarResult {
   final String? errorMessage;
   final bool cancelled;
 }
+
+// Helper functions for legacy compatibility
+AvatarResult AvatarRight(String base64Data, double sizeKB) =>
+    AvatarResult.success(base64Data, sizeKB);
+AvatarResult AvatarLeft(String message) => AvatarResult.error(message);

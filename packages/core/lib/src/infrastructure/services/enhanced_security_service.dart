@@ -3,12 +3,13 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:dartz/dartz.dart';
 import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
 import '../../shared/utils/app_error.dart';
-import '../../shared/utils/result.dart';
+import '../../shared/utils/failure.dart';
 
 /// Enhanced Security Service - Sistema completo de segurança
 ///
@@ -48,12 +49,12 @@ class EnhancedSecurityService {
   bool _initialized = false;
 
   /// Inicializa o security service
-  Future<Result<void>> initialize({
+  Future<Either<Failure, void>> initialize({
     bool enableBiometrics = true,
     int maxFailedAttempts = 5,
     Duration lockoutDuration = const Duration(minutes: 15),
   }) async {
-    if (_initialized) return Result.success(null);
+    if (_initialized) return const Right(null);
 
     try {
       _maxFailedAttempts = maxFailedAttempts;
@@ -65,24 +66,28 @@ class EnhancedSecurityService {
       await _ensureMasterSalt();
 
       _initialized = true;
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao inicializar security service: ${e.toString()}',
           code: 'SECURITY_INIT_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Criptografa dados usando AES-256-GCM
-  Future<Result<String>> encrypt(String data, {String? customKey}) async {
+  Future<Either<Failure, String>> encrypt(
+    String data, {
+    String? customKey,
+  }) async {
     if (!_initialized) {
       final initResult = await initialize();
-      if (initResult.isError) return Result.error(initResult.error!);
+      final left = initResult.fold((l) => l, (_) => null);
+      if (left != null) return Left(left);
     }
 
     try {
@@ -94,27 +99,28 @@ class EnhancedSecurityService {
       final encrypted = encrypter.encrypt(data, iv: iv);
       final result = '$_encryptionVersion:${iv.base64}:${encrypted.base64}';
 
-      return Result.success(result);
+      return Right(result);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao criptografar dados: ${e.toString()}',
           code: 'ENCRYPT_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Descriptografa dados (suporta tanto AES quanto legacy Base64)
-  Future<Result<String>> decrypt(
+  Future<Either<Failure, String>> decrypt(
     String encryptedData, {
     String? customKey,
   }) async {
     if (!_initialized) {
       final initResult = await initialize();
-      if (initResult.isError) return Result.error(initResult.error!);
+      final left = initResult.fold((l) => l, (_) => null);
+      if (left != null) return Left(left);
     }
 
     try {
@@ -125,11 +131,11 @@ class EnhancedSecurityService {
 
       final parts = encryptedData.split(':');
       if (parts.length < 3) {
-        return Result.error(
+        return Left(
           SecurityError(
             message: 'Formato de dados criptografados inválido',
             code: 'INVALID_ENCRYPTED_FORMAT',
-          ),
+          ).toFailure(),
         );
       }
 
@@ -140,19 +146,19 @@ class EnhancedSecurityService {
         return _decryptLegacyData(encryptedData, customKey);
       }
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao descriptografar dados: ${e.toString()}',
           code: 'DECRYPT_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Gera hash seguro de senha usando PBKDF2
-  Future<Result<String>> hashPassword(
+  Future<Either<Failure, String>> hashPassword(
     String password, {
     String? customSalt,
   }) async {
@@ -165,32 +171,32 @@ class EnhancedSecurityService {
       }
 
       final hashedPassword = base64Encode(hash);
-      return Result.success('$salt:$hashedPassword');
+      return Right('$salt:$hashedPassword');
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao fazer hash da senha: ${e.toString()}',
           code: 'HASH_PASSWORD_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Verifica senha contra hash
-  Future<Result<bool>> verifyPassword(
+  Future<Either<Failure, bool>> verifyPassword(
     String password,
     String hashedPassword,
   ) async {
     try {
       final parts = hashedPassword.split(':');
       if (parts.length != 2) {
-        return Result.error(
+        return Left(
           SecurityError(
             message: 'Formato de hash inválido',
             code: 'INVALID_HASH_FORMAT',
-          ),
+          ).toFailure(),
         );
       }
 
@@ -198,53 +204,57 @@ class EnhancedSecurityService {
       final expectedHash = parts[1];
 
       final newHashResult = await hashPassword(password, customSalt: salt);
-      if (newHashResult.isError) return Result.error(newHashResult.error!);
+      final leftError = newHashResult.fold((l) => l, (_) => null);
+      if (leftError != null) return Left(leftError);
 
-      final newHashParts = newHashResult.data!.split(':');
+      final newHashData = newHashResult.fold(
+        (l) => throw Exception(),
+        (r) => r,
+      );
+      final newHashParts = newHashData.split(':');
       final newHash = newHashParts[1];
 
       final isValid = _constantTimeCompare(expectedHash, newHash);
-      return Result.success(isValid);
+      return Right(isValid);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao verificar senha: ${e.toString()}',
           code: 'VERIFY_PASSWORD_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Gera token seguro
-  Future<Result<String>> generateSecureToken({int length = 32}) async {
+  Future<Either<Failure, String>> generateSecureToken({int length = 32}) async {
     try {
       final random = Random.secure();
       const chars =
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 
-      final token =
-          List.generate(
-            length,
-            (_) => chars[random.nextInt(chars.length)],
-          ).join();
+      final token = List.generate(
+        length,
+        (_) => chars[random.nextInt(chars.length)],
+      ).join();
 
-      return Result.success(token);
+      return Right(token);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao gerar token: ${e.toString()}',
           code: 'TOKEN_GENERATION_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Gera chave criptográfica segura
-  Future<Result<String>> generateCryptoKey({
+  Future<Either<Failure, String>> generateCryptoKey({
     int length = _defaultKeyLength,
   }) async {
     try {
@@ -252,21 +262,21 @@ class EnhancedSecurityService {
       final bytes = List.generate(length, (_) => random.nextInt(256));
       final key = base64Encode(bytes);
 
-      return Result.success(key);
+      return Right(key);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao gerar chave criptográfica: ${e.toString()}',
           code: 'CRYPTO_KEY_GENERATION_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Gera UUID seguro
-  Future<Result<String>> generateSecureUUID() async {
+  Future<Either<Failure, String>> generateSecureUUID() async {
     try {
       final random = Random.secure();
       final bytes = List.generate(16, (_) => random.nextInt(256));
@@ -277,21 +287,21 @@ class EnhancedSecurityService {
       final uuid =
           '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}';
 
-      return Result.success(uuid);
+      return Right(uuid);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao gerar UUID: ${e.toString()}',
           code: 'UUID_GENERATION_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Verifica se biometria está disponível
-  Future<Result<BiometricInfo>> getBiometricInfo() async {
+  Future<Either<Failure, BiometricInfo>> getBiometricInfo() async {
     try {
       final isAvailable = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
@@ -304,29 +314,29 @@ class EnhancedSecurityService {
         isEnabled: _biometricsEnabled,
       );
 
-      return Result.success(info);
+      return Right(info);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao verificar biometria: ${e.toString()}',
           code: 'BIOMETRIC_CHECK_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Autentica usando biometria
-  Future<Result<bool>> authenticateWithBiometrics({
+  Future<Either<Failure, bool>> authenticateWithBiometrics({
     String reason = 'Autenticação necessária',
   }) async {
     if (!_biometricsEnabled) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Biometria não está habilitada',
           code: 'BIOMETRIC_NOT_ENABLED',
-        ),
+        ).toFailure(),
       );
     }
 
@@ -339,21 +349,21 @@ class EnhancedSecurityService {
         ),
       );
 
-      return Result.success(isAuthenticated);
+      return Right(isAuthenticated);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro na autenticação biométrica: ${e.toString()}',
           code: 'BIOMETRIC_AUTH_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Armazena dados com criptografia adicional
-  Future<Result<void>> secureStore(
+  Future<Either<Failure, void>> secureStore(
     String key,
     String value, {
     bool requireBiometrics = false,
@@ -363,34 +373,39 @@ class EnhancedSecurityService {
         final authResult = await authenticateWithBiometrics(
           reason: 'Autenticação necessária para armazenar dados',
         );
-        if (authResult.isError || !authResult.data!) {
-          return Result.error(
-            SecurityError(
-              message: 'Autenticação biométrica necessária',
-              code: 'BIOMETRIC_AUTH_REQUIRED',
-            ),
-          );
+
+        final authError = authResult.fold(
+          (failure) => failure,
+          (isAuthenticated) => isAuthenticated
+              ? null
+              : const ServerFailure('Autenticação falhou'),
+        );
+        if (authError != null) {
+          return Left(authError);
         }
       }
       final encryptResult = await encrypt(value);
-      if (encryptResult.isError) return Result.error(encryptResult.error!);
 
-      await _secureStorage.write(key: key, value: encryptResult.data);
-      return Result.success(null);
+      final encryptError = encryptResult.fold((l) => l, (_) => null);
+      if (encryptError != null) return Left(encryptError);
+
+      final encryptedData = encryptResult.fold((_) => '', (r) => r);
+      await _secureStorage.write(key: key, value: encryptedData);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao armazenar dados seguros: ${e.toString()}',
           code: 'SECURE_STORE_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Recupera dados com descriptografia
-  Future<Result<String?>> secureRetrieve(
+  Future<Either<Failure, String?>> secureRetrieve(
     String key, {
     bool requireBiometrics = false,
   }) async {
@@ -399,55 +414,56 @@ class EnhancedSecurityService {
         final authResult = await authenticateWithBiometrics(
           reason: 'Autenticação necessária para acessar dados',
         );
-        if (authResult.isError || !authResult.data!) {
-          return Result.error(
-            SecurityError(
-              message: 'Autenticação biométrica necessária',
-              code: 'BIOMETRIC_AUTH_REQUIRED',
-            ),
-          );
+
+        final authError = authResult.fold(
+          (failure) => failure,
+          (isAuthenticated) => isAuthenticated
+              ? null
+              : const ServerFailure('Autenticação falhou'),
+        );
+        if (authError != null) {
+          return Left(authError);
         }
       }
 
       final encryptedValue = await _secureStorage.read(key: key);
       if (encryptedValue == null) {
-        return Result.success(null);
+        return const Right(null);
       }
       final decryptResult = await decrypt(encryptedValue);
-      if (decryptResult.isError) return Result.error(decryptResult.error!);
 
-      return Result.success(decryptResult.data);
+      return decryptResult.fold((l) => Left(l), (r) => Right(r));
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao recuperar dados seguros: ${e.toString()}',
           code: 'SECURE_RETRIEVE_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Remove dados seguros
-  Future<Result<void>> secureDelete(String key) async {
+  Future<Either<Failure, void>> secureDelete(String key) async {
     try {
       await _secureStorage.delete(key: key);
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao deletar dados seguros: ${e.toString()}',
           code: 'SECURE_DELETE_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Verifica se operação está sendo feita com muita frequência
-  Future<Result<bool>> checkRateLimit(
+  Future<Either<Failure, bool>> checkRateLimit(
     String operation, {
     int maxAttempts = 10,
     Duration timeWindow = const Duration(minutes: 1),
@@ -458,47 +474,47 @@ class EnhancedSecurityService {
       attempts.removeWhere((attempt) => now.difference(attempt) > timeWindow);
 
       if (attempts.length >= maxAttempts) {
-        return Result.success(false); // Rate limit exceeded
+        return const Right(false); // Rate limit exceeded
       }
 
       attempts.add(now);
       _rateLimitMap[operation] = attempts;
 
-      return Result.success(true); // Within rate limit
+      return const Right(true); // Within rate limit
     } catch (e) {
-      return Result.success(true); // Em caso de erro, permite a operação
+      return const Right(true); // Em caso de erro, permite a operação
     }
   }
 
   /// Registra tentativa falhada
-  Future<Result<void>> recordFailedAttempt(String identifier) async {
+  Future<Either<Failure, void>> recordFailedAttempt(String identifier) async {
     try {
       final currentAttempts = _failedAttempts[identifier] ?? 0;
       _failedAttempts[identifier] = currentAttempts + 1;
 
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
-      return Result.success(null); // Falha não crítica
+      return const Right(null); // Falha não crítica
     }
   }
 
   /// Verifica se identificador está bloqueado
-  Future<Result<bool>> isBlocked(String identifier) async {
+  Future<Either<Failure, bool>> isBlocked(String identifier) async {
     try {
       final attempts = _failedAttempts[identifier] ?? 0;
-      return Result.success(attempts >= _maxFailedAttempts);
+      return Right(attempts >= _maxFailedAttempts);
     } catch (e) {
-      return Result.success(false); // Em caso de erro, não bloqueia
+      return const Right(false); // Em caso de erro, não bloqueia
     }
   }
 
   /// Limpa tentativas falhadas
-  Future<Result<void>> clearFailedAttempts(String identifier) async {
+  Future<Either<Failure, void>> clearFailedAttempts(String identifier) async {
     try {
       _failedAttempts.remove(identifier);
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
-      return Result.success(null); // Falha não crítica
+      return const Right(null); // Falha não crítica
     }
   }
 
@@ -534,39 +550,44 @@ class EnhancedSecurityService {
   }
 
   /// Gera hash para validação de integridade
-  Future<Result<String>> generateIntegrityHash(String data) async {
+  Future<Either<Failure, String>> generateIntegrityHash(String data) async {
     try {
       final bytes = utf8.encode(data);
       final digest = sha256.convert(bytes);
-      return Result.success(digest.toString());
+      return Right(digest.toString());
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao gerar hash de integridade: ${e.toString()}',
           code: 'INTEGRITY_HASH_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Verifica integridade dos dados
-  Future<Result<bool>> verifyIntegrity(String data, String expectedHash) async {
+  Future<Either<Failure, bool>> verifyIntegrity(
+    String data,
+    String expectedHash,
+  ) async {
     try {
       final hashResult = await generateIntegrityHash(data);
-      if (hashResult.isError) return Result.error(hashResult.error!);
+      final hashError = hashResult.fold((l) => l, (_) => null);
+      if (hashError != null) return Left(hashError);
 
-      final isValid = _constantTimeCompare(hashResult.data!, expectedHash);
-      return Result.success(isValid);
+      final hashData = hashResult.fold((_) => '', (r) => r);
+      final isValid = _constantTimeCompare(hashData, expectedHash);
+      return Right(isValid);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao verificar integridade: ${e.toString()}',
           code: 'INTEGRITY_VERIFY_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -583,42 +604,41 @@ class EnhancedSecurityService {
   }
 
   /// Descriptografa dados legacy usando Base64
-  Future<Result<String>> _decryptLegacyData(
+  Future<Either<Failure, String>> _decryptLegacyData(
     String encryptedData,
     String? customKey,
   ) async {
     try {
-      final data =
-          encryptedData.startsWith(_legacyPrefix)
-              ? encryptedData.substring(_legacyPrefix.length)
-              : encryptedData;
+      final data = encryptedData.startsWith(_legacyPrefix)
+          ? encryptedData.substring(_legacyPrefix.length)
+          : encryptedData;
       final decoded = utf8.decode(base64Decode(data));
 
-      return Result.success(decoded);
+      return Right(decoded);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao descriptografar dados legacy: ${e.toString()}',
           code: 'DECRYPT_LEGACY_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Descriptografa dados AES
-  Future<Result<String>> _decryptAESData(
+  Future<Either<Failure, String>> _decryptAESData(
     List<String> parts,
     String? customKey,
   ) async {
     try {
       if (parts.length < 3) {
-        return Result.error(
+        return Left(
           SecurityError(
             message: 'Formato AES inválido - partes insuficientes',
             code: 'INVALID_AES_FORMAT',
-          ),
+          ).toFailure(),
         );
       }
 
@@ -635,15 +655,15 @@ class EnhancedSecurityService {
       final encrypter = Encrypter(AES(key, mode: AESMode.gcm));
       final decrypted = encrypter.decrypt(encrypted, iv: iv);
 
-      return Result.success(decrypted);
+      return Right(decrypted);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         SecurityError(
           message: 'Erro ao descriptografar dados AES: ${e.toString()}',
           code: 'DECRYPT_AES_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -654,12 +674,13 @@ class EnhancedSecurityService {
 
     if (key == null) {
       final keyResult = await generateCryptoKey();
-      if (keyResult.isSuccess && keyResult.data != null) {
-        key = keyResult.data;
-        await _secureStorage.write(key: keyKey, value: key);
-      } else {
-        throw Exception('Failed to generate crypto key');
-      }
+
+      key = keyResult.fold(
+        (l) => throw Exception('Failed to generate crypto key: ${l.message}'),
+        (r) => r,
+      );
+
+      await _secureStorage.write(key: keyKey, value: key);
     }
 
     return key!;

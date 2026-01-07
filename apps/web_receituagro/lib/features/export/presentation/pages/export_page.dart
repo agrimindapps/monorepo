@@ -67,7 +67,7 @@ class _ExportPageState extends ConsumerState<ExportPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.3),
+            color: Colors.green.withValues(alpha: 0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -98,7 +98,7 @@ class _ExportPageState extends ConsumerState<ExportPage> {
                   'Exporte os dados do sistema para backup ou análise',
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
               ],

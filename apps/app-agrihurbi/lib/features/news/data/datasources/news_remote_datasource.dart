@@ -1,8 +1,8 @@
 import 'package:app_agrihurbi/core/error/exceptions.dart';
-
 import 'package:app_agrihurbi/features/news/data/models/commodity_price_model.dart';
 import 'package:app_agrihurbi/features/news/data/models/news_article_model.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:xml/xml.dart';
 
 /// News Remote Data Source
@@ -37,7 +37,7 @@ class NewsRemoteDataSource {
           final articles = await _parseRSSFeed(feedUrl);
           allArticles.addAll(articles);
         } catch (e) {
-          print('Failed to fetch from feed $feedUrl: $e');
+          debugPrint('Failed to fetch from feed $feedUrl: $e');
         }
       }
       allArticles.sort((a, b) => b.publishedAt.compareTo(a.publishedAt));
@@ -274,7 +274,7 @@ class NewsRemoteDataSource {
         readTimeMinutes: _calculateReadTime(description),
       );
     } catch (e) {
-      print('Error parsing RSS item: $e');
+      debugPrint('Error parsing RSS item: $e');
       return null;
     }
   }

@@ -26,79 +26,76 @@ class CalculatorLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CalculatorAppBar(
-        actions: actions,
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          if (constraints.maxWidth >= 900) {
-            // Desktop Layout: Split View
-            return Padding(
-              padding: padding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Page Title
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      pageTitle,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ),
-                  // Content Row
-                  Expanded(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Input Form (Left)
-                        Expanded(
-                          flex: 3,
-                          child: SingleChildScrollView(
-                            child: inputForm,
-                          ),
+      appBar: CalculatorAppBar(actions: actions),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 900) {
+                // Desktop Layout: Split View
+                return Padding(
+                  padding: padding,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Page Title
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Text(
+                          pageTitle,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(width: 24),
-                        // Result Card (Right)
-                        Expanded(
-                          flex: 2,
-                          child: SingleChildScrollView(
-                            child: resultCard,
-                          ),
+                      ),
+                      // Content Row
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Input Form (Left)
+                            Expanded(
+                              flex: 3,
+                              child: SingleChildScrollView(child: inputForm),
+                            ),
+                            const SizedBox(width: 24),
+                            // Result Card (Right)
+                            Expanded(
+                              flex: 2,
+                              child: SingleChildScrollView(child: resultCard),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          } else {
-            // Mobile/Tablet Layout: Vertical Scroll
-            return SingleChildScrollView(
-              padding: padding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Page Title
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      pageTitle,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
+                );
+              } else {
+                // Mobile/Tablet Layout: Vertical Scroll
+                return SingleChildScrollView(
+                  padding: padding,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Page Title
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Text(
+                          pageTitle,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      inputForm,
+                      const SizedBox(height: 24),
+                      resultCard,
+                    ],
                   ),
-                  inputForm,
-                  const SizedBox(height: 24),
-                  resultCard,
-                ],
-              ),
-            );
-          }
-        },
+                );
+              }
+            },
+          ),
+        ),
       ),
     );
   }

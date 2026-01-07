@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:core/core.dart' hide Column;
 
 import '../../../../core/theme/theme_providers.dart';
@@ -147,11 +146,7 @@ class SettingsPage extends ConsumerWidget {
                   color: AppColors.contentColorCyan,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 30,
-                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 30),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -167,8 +162,9 @@ class SettingsPage extends ConsumerWidget {
                     Text(
                       'Faça login para sincronizar seus dados',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -234,8 +230,9 @@ class SettingsPage extends ConsumerWidget {
                     Text(
                       '• Planos alimentares personalizados\n• Análises nutricionais detalhadas\n• Receitas exclusivas\n• Sincronização ilimitada\n• Sem anúncios',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.textTheme.bodyMedium?.color
-                            ?.withValues(alpha: 0.7),
+                        color: theme.textTheme.bodyMedium?.color?.withValues(
+                          alpha: 0.7,
+                        ),
                       ),
                     ),
                   ],
@@ -577,9 +574,7 @@ class SettingsPage extends ConsumerWidget {
                 await ref.read(settingsProvider.notifier).resetSettings();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Dados limpos com sucesso'),
-                    ),
+                    const SnackBar(content: Text('Dados limpos com sucesso')),
                   );
                 }
               },

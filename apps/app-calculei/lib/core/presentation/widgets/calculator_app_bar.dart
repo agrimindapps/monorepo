@@ -31,7 +31,7 @@ class CalculatorMenuItem {
 }
 
 /// Standardized AppBar for all calculator pages
-/// 
+///
 /// Inspired by modern web design with:
 /// - Logo on the left (always "Calculei")
 /// - Navigation links in the center/right
@@ -123,71 +123,89 @@ class CalculatorAppBar extends StatelessWidget implements PreferredSizeWidget {
     final isDesktop = MediaQuery.of(context).size.width >= 800;
 
     return AppBar(
-      centerTitle: false,
-      elevation: 0,
-      scrolledUnderElevation: 1,
-      backgroundColor: isDark ? const Color(0xFF1a1a1a) : Colors.white,
-      surfaceTintColor: Colors.transparent,
-      leading: showBackButton
-          ? IconButton(
-              icon: Icon(
-                Icons.arrow_back,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-              onPressed: onBack ?? () => context.go('/home'),
-              tooltip: 'Voltar',
-            )
-          : null,
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Logo - Always fixed
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.calculate_rounded,
-              size: 22,
-              color: theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // App Name - Always "Calculei"
-          Text(
-            'Calculei',
-            style: TextStyle(
-              fontSize: isDesktop ? 20 : 18,
-              fontWeight: FontWeight.bold,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        // Desktop: Show navigation links
-        if (isDesktop) ...[
-          _NavLink(
-            label: 'Início',
-            onTap: () => context.go('/home'),
-            isDark: isDark,
-          ),
-        ],
-        
-        // Calculators Dropdown
-        if (showCalculatorsDropdown)
-          _CalculatorsDropdown(
-            isDark: isDark,
-            isCompact: !isDesktop,
-          ),
-        
-        // Custom actions
-        if (actions != null) ...actions!,
+      centerTitle: true,
+      // No explicit styling here, relying on Theme.of(context).appBarTheme
+      automaticallyImplyLeading: false,
+      titleSpacing: 0,
+      title: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Left side: Back Button + Logo + Title
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showBackButton)
+                      IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                        ),
+                        onPressed: onBack ?? () => context.go('/home'),
+                        tooltip: 'Voltar',
+                      ),
+                    if (showBackButton) const SizedBox(width: 4),
+                    // Logo - Always fixed
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(
+                        Icons.calculate_rounded,
+                        size: 22,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    // App Name - Always "Calculei"
+                    Text(
+                      'Calculei',
+                      style: TextStyle(
+                        fontSize: isDesktop ? 20 : 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : theme.colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
 
-        const SizedBox(width: 8),
-      ],
+                // Right side: Actions
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Desktop: Show navigation links
+                    if (isDesktop) ...[
+                      _NavLink(
+                        label: 'Início',
+                        onTap: () => context.go('/home'),
+                        isDark: isDark,
+                      ),
+                    ],
+
+                    // Calculators Dropdown
+                    if (showCalculatorsDropdown)
+                      _CalculatorsDropdown(
+                        isDark: isDark,
+                        isCompact: !isDesktop,
+                      ),
+
+                    // Custom actions
+                    if (actions != null) ...actions!,
+
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -244,10 +262,7 @@ class _CalculatorsDropdown extends StatefulWidget {
   final bool isDark;
   final bool isCompact;
 
-  const _CalculatorsDropdown({
-    required this.isDark,
-    required this.isCompact,
-  });
+  const _CalculatorsDropdown({required this.isDark, required this.isCompact});
 
   @override
   State<_CalculatorsDropdown> createState() => _CalculatorsDropdownState();
@@ -259,7 +274,7 @@ class _CalculatorsDropdownState extends State<_CalculatorsDropdown> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return MenuAnchor(
       controller: _menuController,
       menuChildren: [
@@ -270,11 +285,7 @@ class _CalculatorsDropdownState extends State<_CalculatorsDropdown> {
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
             child: Row(
               children: [
-                Icon(
-                  category.icon,
-                  size: 16,
-                  color: category.color,
-                ),
+                Icon(category.icon, size: 16, color: category.color),
                 const SizedBox(width: 8),
                 Text(
                   category.name,
@@ -310,9 +321,7 @@ class _CalculatorsDropdownState extends State<_CalculatorsDropdown> {
       style: MenuStyle(
         elevation: WidgetStateProperty.all(8),
         shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 8),
@@ -352,10 +361,7 @@ class _DropdownButton extends StatefulWidget {
   final bool isDark;
   final VoidCallback onTap;
 
-  const _DropdownButton({
-    required this.isDark,
-    required this.onTap,
-  });
+  const _DropdownButton({required this.isDark, required this.onTap});
 
   @override
   State<_DropdownButton> createState() => _DropdownButtonState();
@@ -367,7 +373,7 @@ class _DropdownButtonState extends State<_DropdownButton> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -412,16 +418,12 @@ class InfoAppBarAction extends StatelessWidget {
   final VoidCallback onPressed;
   final String? tooltip;
 
-  const InfoAppBarAction({
-    super.key,
-    required this.onPressed,
-    this.tooltip,
-  });
+  const InfoAppBarAction({super.key, required this.onPressed, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return IconButton(
       icon: Icon(
         Icons.info_outline,
@@ -438,16 +440,12 @@ class ShareAppBarAction extends StatelessWidget {
   final VoidCallback onPressed;
   final String? tooltip;
 
-  const ShareAppBarAction({
-    super.key,
-    required this.onPressed,
-    this.tooltip,
-  });
+  const ShareAppBarAction({super.key, required this.onPressed, this.tooltip});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return IconButton(
       icon: Icon(
         Icons.share_outlined,

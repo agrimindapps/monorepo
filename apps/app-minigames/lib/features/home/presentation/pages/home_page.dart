@@ -110,10 +110,10 @@ class _HomePageState extends ConsumerState<HomePage> {
           data: Theme.of(context).copyWith(
             scrollbarTheme: ScrollbarThemeData(
               thumbColor: WidgetStateProperty.all(
-                const Color(0xFFFFD700).withOpacity(0.3),
+                const Color(0xFFFFD700).withValues(alpha: 0.3),
               ),
               trackColor: WidgetStateProperty.all(
-                Colors.white.withOpacity(0.05),
+                Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -185,7 +185,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFFD700).withOpacity(0.2),
+                  color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Icon(
@@ -254,7 +254,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFD700).withOpacity(0.2),
+                color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(
@@ -291,13 +291,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                 Icon(
                   Icons.search_off,
                   size: 64,
-                  color: Colors.white.withOpacity(0.3),
+                  color: Colors.white.withValues(alpha: 0.3),
                 ),
                 const SizedBox(height: 16),
                 Text(
                   'Nenhum jogo encontrado',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.5),
+                    color: Colors.white.withValues(alpha: 0.5),
                     fontSize: 18,
                   ),
                 ),
@@ -329,7 +329,7 @@ class _BackgroundPatternPainter extends CustomPainter {
           text: TextSpan(
             text: icons[iconIndex % icons.length],
             style: TextStyle(
-              color: Colors.white.withOpacity(0.03),
+              color: Colors.white.withValues(alpha: 0.03),
               fontSize: 20,
             ),
           ),

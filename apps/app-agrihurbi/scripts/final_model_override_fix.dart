@@ -1,18 +1,35 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 void main() {
   final fixes = {
     'lib/features/news/data/models/commodity_price_model.dart': [
-      (String line) => line.replaceAll('final List<HistoricalPriceModel> history;', '// Removed duplicated field'),
-      (String line) => line.replaceAll('final List<CommodityPriceModel> topGainers;', '// Removed duplicated field'),
-      (String line) => line.replaceAll('final List<CommodityPriceModel> topLosers;', '// Removed duplicated field')
+      (String line) => line.replaceAll(
+        'final List<HistoricalPriceModel> history;',
+        '// Removed duplicated field',
+      ),
+      (String line) => line.replaceAll(
+        'final List<CommodityPriceModel> topGainers;',
+        '// Removed duplicated field',
+      ),
+      (String line) => line.replaceAll(
+        'final List<CommodityPriceModel> topLosers;',
+        '// Removed duplicated field',
+      ),
     ],
     'lib/features/news/data/models/news_article_model.dart': [
-      (String line) => line.replaceAll('final List<String> tags;', '// Removed duplicated field')
+      (String line) => line.replaceAll(
+        'final List<String> tags;',
+        '// Removed duplicated field',
+      ),
     ],
     'lib/features/settings/data/models/settings_model.dart': [
-      (String line) => line.replaceAll('final String? lastBackupDate;', '// Removed duplicated field')
-    ]
+      (String line) => line.replaceAll(
+        'final String? lastBackupDate;',
+        '// Removed duplicated field',
+      ),
+    ],
   };
 
   for (var entry in fixes.entries) {
@@ -29,6 +46,6 @@ void main() {
     }
 
     file.writeAsStringSync(lines.join('\n'));
-    print('Processed: $filePath');
+    debugPrint('Processed: $filePath');
   }
 }

@@ -103,7 +103,7 @@ class LoginNotifier extends _$LoginNotifier {
   /// Login with email and password
   Future<void> signInWithEmailAndSync() async {
     if (kDebugMode) {
-      print('🎯 LoginNotifier: Iniciando login - ReceitaAgro');
+      debugPrint('🎯 LoginNotifier: Iniciando login - ReceitaAgro');
     }
 
     final email = _emailController.text.trim();
@@ -117,7 +117,7 @@ class LoginNotifier extends _$LoginNotifier {
     if (validation.isLeft()) {
       final errorMessage = validation.fold((error) => error, (_) => '');
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro de validação - $errorMessage');
+        debugPrint('❌ LoginNotifier: Erro de validação - $errorMessage');
       }
       state = state.copyWith(errorMessage: errorMessage);
       return;
@@ -133,7 +133,7 @@ class LoginNotifier extends _$LoginNotifier {
       );
 
       if (kDebugMode) {
-        print('✅ LoginNotifier: Login resultado - ${result.isSuccess}');
+        debugPrint('✅ LoginNotifier: Login resultado - ${result.isSuccess}');
       }
 
       // Atualiza state baseado no resultado
@@ -152,7 +152,7 @@ class LoginNotifier extends _$LoginNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro no login - $e');
+        debugPrint('❌ LoginNotifier: Erro no login - $e');
       }
       state = state.copyWith(
         isLoading: false,
@@ -165,7 +165,7 @@ class LoginNotifier extends _$LoginNotifier {
   /// Signup with email, password and name
   Future<void> signUpWithEmailAndSync() async {
     if (kDebugMode) {
-      print('🎯 LoginNotifier: Iniciando cadastro - ReceitaAgro');
+      debugPrint('🎯 LoginNotifier: Iniciando cadastro - ReceitaAgro');
     }
 
     final email = _emailController.text.trim();
@@ -183,7 +183,7 @@ class LoginNotifier extends _$LoginNotifier {
     if (validation.isLeft()) {
       final errorMessage = validation.fold((error) => error, (_) => '');
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro de validação no cadastro - $errorMessage');
+        debugPrint('❌ LoginNotifier: Erro de validação no cadastro - $errorMessage');
       }
       state = state.copyWith(errorMessage: errorMessage);
       return;
@@ -200,7 +200,7 @@ class LoginNotifier extends _$LoginNotifier {
       );
 
       if (kDebugMode) {
-        print('✅ LoginNotifier: Cadastro resultado - ${result.isSuccess}');
+        debugPrint('✅ LoginNotifier: Cadastro resultado - ${result.isSuccess}');
       }
 
       // Atualiza state baseado no resultado
@@ -219,7 +219,7 @@ class LoginNotifier extends _$LoginNotifier {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro no cadastro - $e');
+        debugPrint('❌ LoginNotifier: Erro no cadastro - $e');
       }
       state = state.copyWith(
         isLoading: false,
@@ -232,7 +232,7 @@ class LoginNotifier extends _$LoginNotifier {
   /// Send password reset email
   Future<void> sendPasswordReset() async {
     if (kDebugMode) {
-      print('🎯 LoginNotifier: Enviando email de recuperação');
+      debugPrint('🎯 LoginNotifier: Enviando email de recuperação');
     }
 
     final email = _emailController.text.trim();
@@ -241,7 +241,7 @@ class LoginNotifier extends _$LoginNotifier {
     if (validation.isLeft()) {
       final errorMessage = validation.fold((error) => error, (_) => '');
       if (kDebugMode) {
-        print(
+        debugPrint(
           '❌ LoginNotifier: Erro de validação no email de recuperação - $errorMessage',
         );
       }
@@ -255,12 +255,12 @@ class LoginNotifier extends _$LoginNotifier {
     try {
       await _authNotifier.sendPasswordResetEmail(email);
       if (kDebugMode) {
-        print('✅ LoginNotifier: Email de recuperação enviado');
+        debugPrint('✅ LoginNotifier: Email de recuperação enviado');
       }
       state = state.copyWith(isLoading: false, clearError: true);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ LoginNotifier: Erro ao enviar email de recuperação - $e');
+        debugPrint('❌ LoginNotifier: Erro ao enviar email de recuperação - $e');
       }
       state = state.copyWith(
         isLoading: false,

@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../../../database/repositories/plants_drift_repository.dart';
@@ -64,9 +63,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
 
       return plants;
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao buscar plantas do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar plantas do cache local: ${e.toString()}');
     }
   }
 
@@ -76,9 +73,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       // Buscar COM config carregado
       return await _driftRepo.getPlantByIdWithConfig(id);
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao buscar planta do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar planta do cache local: ${e.toString()}');
     }
   }
 
@@ -109,9 +104,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       if (kDebugMode) {
         debugPrint('❌ PlantsLocalDatasourceImpl.addPlant() - Erro: $e');
       }
-      throw CacheFailure(
-        'Erro ao salvar planta no cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao salvar planta no cache local: ${e.toString()}');
     }
   }
 
@@ -122,7 +115,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       await _driftRepo.updatePlant(plantModel);
       _invalidateCache();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao atualizar planta no cache local: ${e.toString()}',
       );
     }
@@ -134,9 +127,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       await _driftRepo.deletePlant(id);
       _invalidateCache();
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao deletar planta do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao deletar planta do cache local: ${e.toString()}');
     }
   }
 
@@ -163,7 +154,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       if (kDebugMode) {
         debugPrint('❌ PlantsLocalDatasourceImpl.hardDeletePlant() - Erro: $e');
       }
-      throw CacheFailure(
+      throw Exception(
         'Erro ao remover fisicamente planta do cache local: ${e.toString()}',
       );
     }
@@ -183,7 +174,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       try {
         return await _driftRepo.searchPlants(query);
       } catch (fallbackError) {
-        throw CacheFailure(
+        throw Exception(
           'Erro ao buscar plantas no cache local: ${fallbackError.toString()}',
         );
       }
@@ -195,7 +186,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
     try {
       return await _driftRepo.getPlantsBySpace(spaceId);
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar plantas por espaço no cache local: ${e.toString()}',
       );
     }
@@ -208,7 +199,7 @@ class PlantsLocalDatasourceImpl implements PlantsLocalDatasource {
       _invalidateCache();
       _searchService.clearCache();
     } catch (e) {
-      throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
+      throw Exception('Erro ao limpar cache local: ${e.toString()}');
     }
   }
 

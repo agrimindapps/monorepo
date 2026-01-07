@@ -46,9 +46,9 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
           )
           .toList();
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao buscar espaços: ${e.message}');
+      throw Exception('Erro ao buscar espaços: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao buscar espaços: ${e.toString()}');
+      throw Exception('Erro inesperado ao buscar espaços: ${e.toString()}');
     }
   }
 
@@ -60,22 +60,22 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
       final doc = await _getSpacesCollection(userId).doc(id).get();
 
       if (!doc.exists) {
-        throw const ServerFailure('Espaço não encontrado');
+        throw Exception('Espaço não encontrado');
       }
 
       final data = doc.data() as Map<String, dynamic>;
       final space = SpaceModel.fromJson({...data, 'id': doc.id});
 
       if (space.isDeleted) {
-        throw const ServerFailure('Espaço não encontrado');
+        throw Exception('Espaço não encontrado');
       }
 
       return space;
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao buscar espaço: ${e.message}');
+      throw Exception('Erro ao buscar espaço: ${e.message}');
     } catch (e) {
       if (e is ServerFailure) rethrow;
-      throw ServerFailure('Erro inesperado ao buscar espaço: ${e.toString()}');
+      throw Exception('Erro inesperado ao buscar espaço: ${e.toString()}');
     }
   }
 
@@ -90,9 +90,9 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
       final docRef = await _getSpacesCollection(userId).add(spaceData);
       return space.copyWith(id: docRef.id, isDirty: false);
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao adicionar espaço: ${e.message}');
+      throw Exception('Erro ao adicionar espaço: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao adicionar espaço: ${e.toString()}',
       );
     }
@@ -110,9 +110,9 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
 
       return space.copyWith(isDirty: false);
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao atualizar espaço: ${e.message}');
+      throw Exception('Erro ao atualizar espaço: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao atualizar espaço: ${e.toString()}',
       );
     }
@@ -129,9 +129,9 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
         'needsSync': false,
       });
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao deletar espaço: ${e.message}');
+      throw Exception('Erro ao deletar espaço: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao deletar espaço: ${e.toString()}');
+      throw Exception('Erro inesperado ao deletar espaço: ${e.toString()}');
     }
   }
 
@@ -156,9 +156,9 @@ class SpacesRemoteDatasourceImpl implements SpacesRemoteDatasource {
 
       await batch.commit();
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao sincronizar espaços: ${e.message}');
+      throw Exception('Erro ao sincronizar espaços: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao sincronizar espaços: ${e.toString()}',
       );
     }

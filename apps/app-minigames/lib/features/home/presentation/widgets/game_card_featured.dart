@@ -39,7 +39,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: game.primaryColor.withOpacity(_isHovered ? 0.6 : 0.4),
+                  color: game.primaryColor.withValues(alpha: _isHovered ? 0.6 : 0.4),
                   blurRadius: _isHovered ? 30 : 15,
                   offset: const Offset(0, 8),
                 ),
@@ -57,9 +57,9 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          game.primaryColor.withOpacity(0.9),
+                          game.primaryColor.withValues(alpha: 0.9),
                           game.secondaryColor,
-                          game.secondaryColor.withOpacity(0.8),
+                          game.secondaryColor.withValues(alpha: 0.8),
                         ],
                       ),
                     ),
@@ -74,7 +74,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                       height: 150,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                       ),
                     ),
                   ),
@@ -86,7 +86,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                       height: 100,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.08),
+                        color: Colors.white.withValues(alpha: 0.08),
                       ),
                     ),
                   ),
@@ -150,7 +150,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                   game.description,
                                   style: TextStyle(
                                     fontSize: 13,
-                                    color: Colors.white.withOpacity(0.9),
+                                    color: Colors.white.withValues(alpha: 0.9),
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -170,7 +170,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                   borderRadius: BorderRadius.circular(25),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
+                                      color: Colors.black.withValues(alpha: 0.2),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -213,10 +213,10 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                   child: Container(
                                     padding: const EdgeInsets.all(30),
                                     decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.15),
+                                      color: Colors.white.withValues(alpha: 0.15),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white.withOpacity(0.3),
+                                        color: Colors.white.withValues(alpha: 0.3),
                                         width: 2,
                                       ),
                                     ),
@@ -242,7 +242,7 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.4),
+                            color: Colors.white.withValues(alpha: 0.4),
                             width: 2,
                           ),
                         ),
@@ -278,17 +278,17 @@ class _FeaturedBadge extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.85),
+            color: color.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.4),
+                color: color.withValues(alpha: 0.4),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
             ],
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               width: 0.5,
             ),
           ),

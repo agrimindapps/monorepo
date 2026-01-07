@@ -36,25 +36,25 @@ class ValidationService {
   /// Valida email
   ValidationResult validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return ValidationResult.success();
+      return ValidationRight();
     }
 
     final sanitized = sanitizeInput(value);
     final emailRegex = RegExp(r'^[\w\.-]+@[\w\.-]+\.\w+$');
 
     if (!emailRegex.hasMatch(sanitized)) {
-      return ValidationResult.error('Email inválido');
+      return ValidationLeft('Email inválido');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida campos obrigatórios
   ValidationResult validateRequired(String? value, String fieldName) {
     if (value == null || value.trim().isEmpty) {
-      return ValidationResult.error('$fieldName é obrigatório');
+      return ValidationLeft('$fieldName é obrigatório');
     }
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida comprimento de texto
@@ -64,23 +64,23 @@ class ValidationService {
     int minLength = 0,
     int maxLength = 255,
   }) {
-    if (value == null) return ValidationResult.success();
+    if (value == null) return ValidationRight();
 
     final sanitized = sanitizeInput(value);
 
     if (sanitized.length < minLength) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName deve ter pelo menos $minLength caracteres',
       );
     }
 
     if (sanitized.length > maxLength) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName deve ter no máximo $maxLength caracteres',
       );
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida números decimais
@@ -93,8 +93,8 @@ class ValidationService {
   }) {
     if (value == null || value.trim().isEmpty) {
       return required
-          ? ValidationResult.error('$fieldName é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$fieldName é obrigatório')
+          : ValidationRight();
     }
 
     final cleanValue = value
@@ -103,18 +103,18 @@ class ValidationService {
     final number = double.tryParse(cleanValue);
 
     if (number == null) {
-      return ValidationResult.error('$fieldName deve ser um número válido');
+      return ValidationLeft('$fieldName deve ser um número válido');
     }
 
     if (min != null && number < min) {
-      return ValidationResult.error('$fieldName deve ser pelo menos $min');
+      return ValidationLeft('$fieldName deve ser pelo menos $min');
     }
 
     if (max != null && number > max) {
-      return ValidationResult.error('$fieldName deve ser no máximo $max');
+      return ValidationLeft('$fieldName deve ser no máximo $max');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida números inteiros
@@ -127,28 +127,28 @@ class ValidationService {
   }) {
     if (value == null || value.trim().isEmpty) {
       return required
-          ? ValidationResult.error('$fieldName é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$fieldName é obrigatório')
+          : ValidationRight();
     }
 
     final cleanValue = value.replaceAll(RegExp(r'[^\d]'), '');
     final number = int.tryParse(cleanValue);
 
     if (number == null) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName deve ser um número inteiro válido',
       );
     }
 
     if (min != null && number < min) {
-      return ValidationResult.error('$fieldName deve ser pelo menos $min');
+      return ValidationLeft('$fieldName deve ser pelo menos $min');
     }
 
     if (max != null && number > max) {
-      return ValidationResult.error('$fieldName deve ser no máximo $max');
+      return ValidationLeft('$fieldName deve ser no máximo $max');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida datas
@@ -162,8 +162,8 @@ class ValidationService {
   }) {
     if (date == null) {
       return required
-          ? ValidationResult.error('$fieldName é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$fieldName é obrigatório')
+          : ValidationRight();
     }
 
     final now = DateTime.now();
@@ -171,22 +171,22 @@ class ValidationService {
     final selectedDate = DateTime(date.year, date.month, date.day);
 
     if (!allowFuture && selectedDate.isAfter(today)) {
-      return ValidationResult.error('$fieldName não pode ser futura');
+      return ValidationLeft('$fieldName não pode ser futura');
     }
 
     if (minDate != null && selectedDate.isBefore(minDate)) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName não pode ser anterior a ${_formatDate(minDate)}',
       );
     }
 
     if (maxDate != null && selectedDate.isAfter(maxDate)) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName não pode ser posterior a ${_formatDate(maxDate)}',
       );
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida valores monetários
@@ -199,8 +199,8 @@ class ValidationService {
   }) {
     if (value == null || value.trim().isEmpty) {
       return required
-          ? ValidationResult.error('$fieldName é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('$fieldName é obrigatório')
+          : ValidationRight();
     }
     final cleanValue = value
         .replaceAll('R\$', '')
@@ -211,45 +211,45 @@ class ValidationService {
     final amount = double.tryParse(cleanValue);
 
     if (amount == null) {
-      return ValidationResult.error('$fieldName deve ser um valor válido');
+      return ValidationLeft('$fieldName deve ser um valor válido');
     }
 
     if (amount < min) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName deve ser pelo menos R\$ ${min.toStringAsFixed(2)}',
       );
     }
 
     if (amount > max) {
-      return ValidationResult.error(
+      return ValidationLeft(
         '$fieldName deve ser no máximo R\$ ${max.toStringAsFixed(2)}',
       );
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida telefone brasileiro
   ValidationResult validatePhone(String? value) {
     if (value == null || value.trim().isEmpty) {
-      return ValidationResult.success(); // Opcional por padrão
+      return ValidationRight(); // Opcional por padrão
     }
 
     final cleaned = value.replaceAll(RegExp(r'[^\d]'), '');
 
     if (cleaned.length < 10 || cleaned.length > 11) {
-      return ValidationResult.error('Telefone deve ter 10 ou 11 dígitos');
+      return ValidationLeft('Telefone deve ter 10 ou 11 dígitos');
     }
 
     if (cleaned.length == 11 && !cleaned.startsWith(RegExp(r'[1-9][1-9]9'))) {
-      return ValidationResult.error('Formato de celular inválido');
+      return ValidationLeft('Formato de celular inválido');
     }
 
     if (cleaned.length == 10 && !cleaned.startsWith(RegExp(r'[1-9][1-9]'))) {
-      return ValidationResult.error('Formato de telefone inválido');
+      return ValidationLeft('Formato de telefone inválido');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Validação com debounce para performance
@@ -269,7 +269,7 @@ class ValidationService {
         _validationCache[key] = result;
         completer.complete(result);
       } catch (e) {
-        completer.complete(ValidationResult.error('Erro na validação: $e'));
+        completer.complete(ValidationLeft('Erro na validação: $e'));
       }
     });
 
@@ -283,7 +283,7 @@ class ValidationService {
         return result;
       }
     }
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Formatar data para exibição
@@ -298,7 +298,7 @@ class ValidationService {
   /// Valida placa de veículo (Brasil)
   ValidationResult validateLicensePlate(String? value) {
     if (value == null || value.isEmpty) {
-      return ValidationResult.error('Placa é obrigatória');
+      return ValidationLeft('Placa é obrigatória');
     }
 
     final cleanValue = sanitizeInput(
@@ -309,18 +309,18 @@ class ValidationService {
 
     if (!mercosulRegex.hasMatch(cleanValue) &&
         !antigaRegex.hasMatch(cleanValue)) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'Formato de placa inválido. Use ABC1234 ou ABC1D23',
       );
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida chassi de veículo
   ValidationResult validateChassis(String? value) {
     if (value == null || value.isEmpty) {
-      return ValidationResult.success(); // Opcional
+      return ValidationRight(); // Opcional
     }
 
     final cleanValue = sanitizeInput(
@@ -328,34 +328,34 @@ class ValidationService {
     );
 
     if (cleanValue.length != 17) {
-      return ValidationResult.error('Chassi deve ter 17 caracteres');
+      return ValidationLeft('Chassi deve ter 17 caracteres');
     }
     if (RegExp(r'[IOQ]').hasMatch(cleanValue)) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'Chassi não pode conter as letras I, O ou Q',
       );
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida RENAVAM
   ValidationResult validateRenavam(String? value) {
     if (value == null || value.isEmpty) {
-      return ValidationResult.success(); // Opcional
+      return ValidationRight(); // Opcional
     }
 
     final cleanValue = sanitizeInput(value.trim());
 
     if (cleanValue.length != 11) {
-      return ValidationResult.error('RENAVAM deve ter 11 dígitos');
+      return ValidationLeft('RENAVAM deve ter 11 dígitos');
     }
 
     if (!RegExp(r'^\d+$').hasMatch(cleanValue)) {
-      return ValidationResult.error('RENAVAM deve conter apenas números');
+      return ValidationLeft('RENAVAM deve conter apenas números');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida odômetro com contexto
@@ -368,30 +368,30 @@ class ValidationService {
   }) {
     if (value == null || value.isEmpty) {
       return required
-          ? ValidationResult.error('Odômetro é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('Odômetro é obrigatório')
+          : ValidationRight();
     }
 
     final cleanValue = value.replaceAll(',', '.');
     final odometer = double.tryParse(cleanValue);
 
     if (odometer == null || odometer < 0) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'Odômetro deve ser um número válido não negativo',
       );
     }
 
     if (odometer > 9999999) {
-      return ValidationResult.error('Valor do odômetro muito alto');
+      return ValidationLeft('Valor do odômetro muito alto');
     }
     if (initialOdometer != null && odometer < initialOdometer) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'Odômetro não pode ser menor que o inicial (${initialOdometer.toStringAsFixed(0)} km)',
       );
     }
     if (currentOdometer != null) {
       if (odometer < currentOdometer - 1000) {
-        return ValidationResult.error('Odômetro muito abaixo do atual');
+        return ValidationLeft('Odômetro muito abaixo do atual');
       }
 
       if (maxAllowedDifference != null &&
@@ -402,7 +402,7 @@ class ValidationService {
       }
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida quantidade de litros de combustível
@@ -413,19 +413,19 @@ class ValidationService {
   }) {
     if (value == null || value.isEmpty) {
       return required
-          ? ValidationResult.error('Quantidade de litros é obrigatória')
-          : ValidationResult.success();
+          ? ValidationLeft('Quantidade de litros é obrigatória')
+          : ValidationRight();
     }
 
     final cleanValue = value.replaceAll(',', '.');
     final liters = double.tryParse(cleanValue);
 
     if (liters == null || liters <= 0) {
-      return ValidationResult.error('Quantidade deve ser maior que zero');
+      return ValidationLeft('Quantidade deve ser maior que zero');
     }
 
     if (liters > 999.999) {
-      return ValidationResult.error('Quantidade muito alta');
+      return ValidationLeft('Quantidade muito alta');
     }
     if (tankCapacity != null && liters > tankCapacity * 1.1) {
       return ValidationResult.warning(
@@ -433,33 +433,33 @@ class ValidationService {
       );
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Valida preço por litro de combustível
   ValidationResult validateFuelPrice(String? value, {bool required = true}) {
     if (value == null || value.isEmpty) {
       return required
-          ? ValidationResult.error('Preço por litro é obrigatório')
-          : ValidationResult.success();
+          ? ValidationLeft('Preço por litro é obrigatório')
+          : ValidationRight();
     }
 
     final cleanValue = value.replaceAll(',', '.');
     final price = double.tryParse(cleanValue);
 
     if (price == null || price <= 0) {
-      return ValidationResult.error('Preço deve ser maior que zero');
+      return ValidationLeft('Preço deve ser maior que zero');
     }
 
     if (price < 0.1) {
-      return ValidationResult.error('Preço muito baixo (mínimo R\$ 0,10)');
+      return ValidationLeft('Preço muito baixo (mínimo R\$ 0,10)');
     }
 
     if (price > 9.999) {
-      return ValidationResult.error('Preço muito alto');
+      return ValidationLeft('Preço muito alto');
     }
 
-    return ValidationResult.success();
+    return ValidationRight();
   }
 
   /// Validação de formulário completo
@@ -545,7 +545,7 @@ extension ValidationServiceExtension on ValidationService {
       validations.add(validateRequired(value, fieldName));
     }
     if ((value == null || value.isEmpty) && !required) {
-      return ValidationResult.success();
+      return ValidationRight();
     }
     if (minLength != null || maxLength != null) {
       validations.add(
@@ -582,7 +582,7 @@ extension ValidationServiceExtension on ValidationService {
       final regex = RegExp(pattern);
       if (!regex.hasMatch(value)) {
         validations.add(
-          ValidationResult.error('$fieldName tem formato inválido'),
+          ValidationLeft('$fieldName tem formato inválido'),
         );
       }
     }

@@ -56,7 +56,7 @@ class ActivePowerUpIndicator extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: _getPowerUpColor(powerUp.type).withOpacity(0.3),
+            color: _getPowerUpColor(powerUp.type).withValues(alpha: 0.3),
             blurRadius: 8,
           ),
         ],
@@ -145,7 +145,7 @@ class PowerUpStatusCompact extends StatelessWidget {
             color: Colors.black54,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: _getPowerUpColor(powerUp.type).withOpacity(0.5),
+              color: _getPowerUpColor(powerUp.type).withValues(alpha: 0.5),
             ),
           ),
           child: Row(

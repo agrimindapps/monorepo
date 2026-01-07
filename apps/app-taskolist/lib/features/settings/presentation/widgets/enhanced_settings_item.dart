@@ -333,8 +333,8 @@ class _EnhancedSettingsItemState extends State<EnhancedSettingsItem>
                                 style: TextStyle(
                                   color: widget.enabled
                                       ? theme.colorScheme.onSurfaceVariant
-                                      : theme.colorScheme.onSurface.withOpacity(
-                                          0.38,
+                                      : theme.colorScheme.onSurface.withValues(
+                                          alpha: 0.38,
                                         ),
                                   fontSize: 13,
                                 ),

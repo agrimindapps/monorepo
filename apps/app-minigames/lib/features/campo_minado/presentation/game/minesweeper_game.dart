@@ -143,7 +143,7 @@ class MinesweeperGame extends FlameGame with PanDetector, ScrollDetector {
               speed: speed,
               child: CircleParticle(
                 radius: 2,
-                paint: Paint()..color = Colors.grey.withOpacity(0.6),
+                paint: Paint()..color = Colors.grey.withValues(alpha: 0.6),
               ),
             );
           },

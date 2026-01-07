@@ -138,7 +138,7 @@ class RecoveryFormWidget extends ConsumerWidget {
 
   void _handlePasswordReset(BuildContext context, WidgetRef ref) async {
     if (kDebugMode) {
-      print('🎯 RecoveryFormWidget: Enviando email de recuperação');
+      debugPrint('🎯 RecoveryFormWidget: Enviando email de recuperação');
     }
 
     final loginNotifier = ref.read(loginProvider.notifier);

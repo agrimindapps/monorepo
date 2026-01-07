@@ -11,9 +11,11 @@ class FeaturesCarousel extends StatefulWidget {
 
 class _FeaturesCarouselState extends State<FeaturesCarousel> {
   int _currentPage = 0;
-  final PageController _pageController =
-      PageController(initialPage: 0, viewportFraction: 0.85);
-  
+  final PageController _pageController = PageController(
+    initialPage: 0,
+    viewportFraction: 0.85,
+  );
+
   // Hover state for desktop
   int? _hoveredIndex;
 
@@ -168,7 +170,11 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
         return MouseRegion(
           onEnter: (_) => setState(() => _hoveredIndex = index),
           onExit: (_) => setState(() => _hoveredIndex = null),
-          child: _buildFeatureCard(widget.features[index], index, isHovered: _hoveredIndex == index),
+          child: _buildFeatureCard(
+            widget.features[index],
+            index,
+            isHovered: _hoveredIndex == index,
+          ),
         );
       },
     );
@@ -194,7 +200,11 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
                   horizontal: 10,
                   vertical: _currentPage == index ? 0 : 20,
                 ),
-                child: _buildFeatureCard(widget.features[index], index, isHovered: _currentPage == index),
+                child: _buildFeatureCard(
+                  widget.features[index],
+                  index,
+                  isHovered: _currentPage == index,
+                ),
               );
             },
           ),
@@ -231,7 +241,11 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
     );
   }
 
-  Widget _buildFeatureCard(Map<String, dynamic> feature, int index, {bool isHovered = false}) {
+  Widget _buildFeatureCard(
+    Map<String, dynamic> feature,
+    int index, {
+    bool isHovered = false,
+  }) {
     // Different accent colors for cards
     final List<Color> accentColors = [
       Colors.blue,
@@ -243,7 +257,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      transform: Matrix4.identity()..translateByDouble(0.0, isHovered ? -10.0 : 0.0),
+      transform: Matrix4.translationValues(0.0, isHovered ? -10.0 : 0.0, 0.0),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(
@@ -253,7 +267,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
               color: Colors.white.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(24),
               border: Border.all(
-                color: isHovered 
+                color: isHovered
                     ? accentColor.withValues(alpha: 0.5)
                     : Colors.white.withValues(alpha: 0.1),
                 width: isHovered ? 2 : 1,
@@ -317,11 +331,7 @@ class _FeaturesCarouselState extends State<FeaturesCarousel> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Icon(
-                        Icons.arrow_forward,
-                        size: 16,
-                        color: accentColor,
-                      ),
+                      Icon(Icons.arrow_forward, size: 16, color: accentColor),
                     ],
                   ),
                 ),

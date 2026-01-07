@@ -29,65 +29,65 @@ class ItemMasterDriftRepository {
   // ==================== CREATE ====================
 
   /// Insere um novo item master
-  Future<Result<int>> insert(ItemMastersCompanion itemMaster) async {
+  Future<Either<Failure, int>> insert(ItemMastersCompanion itemMaster) async {
     try {
       final rowsAffected = await _db.into(_db.itemMasters).insert(itemMaster);
-      return Result.success(rowsAffected);
+      return Right(rowsAffected);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Upsert (insert or update)
-  Future<Result<int>> upsert(ItemMastersCompanion itemMaster) async {
+  Future<Either<Failure, int>> upsert(ItemMastersCompanion itemMaster) async {
     try {
       final rowsAffected =
           await _db.into(_db.itemMasters).insertOnConflictUpdate(itemMaster);
-      return Result.success(rowsAffected);
+      return Right(rowsAffected);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== READ ====================
 
   /// Busca item master por ID
-  Future<Result<ItemMasterRecord?>> getById(String id) async {
+  Future<Either<Failure, ItemMasterRecord?>> getById(String id) async {
     try {
       final result = await (_db.select(_db.itemMasters)
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
-      return Result.success(result);
+      return Right(result);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca todos os item masters
-  Future<Result<List<ItemMasterRecord>>> getAll() async {
+  Future<Either<Failure, List<ItemMasterRecord>>> getAll() async {
     try {
       final results = await _db.select(_db.itemMasters).get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca item masters do usuário
-  Future<Result<List<ItemMasterRecord>>> getByOwner(String ownerId) async {
+  Future<Either<Failure, List<ItemMasterRecord>>> getByOwner(String ownerId) async {
     try {
       final results = await (_db.select(_db.itemMasters)
             ..where((t) => t.ownerId.equals(ownerId))
             ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca item masters por categoria
-  Future<Result<List<ItemMasterRecord>>> getByCategory(
+  Future<Either<Failure, List<ItemMasterRecord>>> getByCategory(
     String ownerId,
     String category,
   ) async {
@@ -98,19 +98,19 @@ class ItemMasterDriftRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.name)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Pesquisa item masters por nome
-  Future<Result<List<ItemMasterRecord>>> search(
+  Future<Either<Failure, List<ItemMasterRecord>>> search(
     String ownerId,
     String query,
   ) async {
     if (query.trim().isEmpty) {
-      return Result.success([]);
+      return Right([]);
     }
 
     try {
@@ -122,9 +122,9 @@ class ItemMasterDriftRepository {
             )
             ..orderBy([(t) => OrderingTerm.asc(t.name)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
@@ -160,26 +160,26 @@ class ItemMasterDriftRepository {
   // ==================== UPDATE ====================
 
   /// Atualiza item master
-  Future<Result<int>> update(String id, ItemMastersCompanion itemMaster) async {
+  Future<Either<Failure, int>> update(String id, ItemMastersCompanion itemMaster) async {
     try {
       final updated = await (_db.update(_db.itemMasters)
             ..where((t) => t.id.equals(id)))
           .write(itemMaster);
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Incrementa contador de uso
-  Future<Result<int>> incrementUsageCount(String id) async {
+  Future<Either<Failure, int>> incrementUsageCount(String id) async {
     try {
       final item = await (_db.select(_db.itemMasters)
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
 
       if (item == null) {
-        return Result.success(0);
+        return Right(0);
       }
 
       final updated = await (_db.update(_db.itemMasters)
@@ -190,52 +190,52 @@ class ItemMasterDriftRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== DELETE ====================
 
   /// Deleta item master
-  Future<Result<int>> delete(String id) async {
+  Future<Either<Failure, int>> delete(String id) async {
     try {
       final deleted = await (_db.delete(_db.itemMasters)
             ..where((t) => t.id.equals(id)))
           .go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Deleta todos os item masters do usuário
-  Future<Result<int>> deleteAllByOwner(String ownerId) async {
+  Future<Either<Failure, int>> deleteAllByOwner(String ownerId) async {
     try {
       final deleted = await (_db.delete(_db.itemMasters)
             ..where((t) => t.ownerId.equals(ownerId)))
           .go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Limpa todos os item masters
-  Future<Result<int>> clear() async {
+  Future<Either<Failure, int>> clear() async {
     try {
       final deleted = await _db.delete(_db.itemMasters).go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== CONTADORES ====================
 
   /// Conta item masters do usuário
-  Future<Result<int>> countByOwner(String ownerId) async {
+  Future<Either<Failure, int>> countByOwner(String ownerId) async {
     try {
       final count = _db.itemMasters.id.count();
       final query = _db.selectOnly(_db.itemMasters)
@@ -243,14 +243,14 @@ class ItemMasterDriftRepository {
         ..where(_db.itemMasters.ownerId.equals(ownerId));
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
+      return Right(result.read(count) ?? 0);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Conta item masters por categoria
-  Future<Result<int>> countByCategory(String ownerId, String category) async {
+  Future<Either<Failure, int>> countByCategory(String ownerId, String category) async {
     try {
       final count = _db.itemMasters.id.count();
       final query = _db.selectOnly(_db.itemMasters)
@@ -261,9 +261,9 @@ class ItemMasterDriftRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
+      return Right(result.read(count) ?? 0);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 }

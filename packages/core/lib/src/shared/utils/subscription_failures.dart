@@ -6,97 +6,113 @@ import 'failure.dart';
 /// Erro de rede durante operação de subscription
 class SubscriptionNetworkFailure extends Failure {
   const SubscriptionNetworkFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro de conexão. Verifique sua internet.');
+    : super(
+        message: customMessage ?? 'Erro de conexão. Verifique sua internet.',
+      );
 }
 
 /// Erro de autenticação/autorização
 class SubscriptionAuthFailure extends Failure {
   const SubscriptionAuthFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro de autenticação. Faça login novamente.');
+    : super(
+        message: customMessage ?? 'Erro de autenticação. Faça login novamente.',
+      );
 }
 
 /// Erro de pagamento/transação
 class SubscriptionPaymentFailure extends Failure {
   const SubscriptionPaymentFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro no pagamento. Verifique seus dados de pagamento.');
+    : super(
+        message:
+            customMessage ??
+            'Erro no pagamento. Verifique seus dados de pagamento.',
+      );
 
   const SubscriptionPaymentFailure.userCancelled()
-      : super(message: 'Compra cancelada pelo usuário.');
+    : super(message: 'Compra cancelada pelo usuário.');
 
   const SubscriptionPaymentFailure.productUnavailable()
-      : super(message: 'Produto não disponível no momento.');
+    : super(message: 'Produto não disponível no momento.');
 
   const SubscriptionPaymentFailure.alreadyPurchased()
-      : super(message: 'Você já possui este produto.');
+    : super(message: 'Você já possui este produto.');
 
   const SubscriptionPaymentFailure.notAllowed()
-      : super(message: 'Compras não permitidas neste dispositivo.');
+    : super(message: 'Compras não permitidas neste dispositivo.');
 }
 
 /// Erro de validação/regras de negócio
 class SubscriptionValidationFailure extends Failure {
   const SubscriptionValidationFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro de validação.');
+    : super(message: customMessage ?? 'Erro de validação.');
 
   const SubscriptionValidationFailure.invalidReceipt()
-      : super(message: 'Recibo de compra inválido.');
+    : super(message: 'Recibo de compra inválido.');
 
   const SubscriptionValidationFailure.receiptInUse()
-      : super(message: 'Este recibo já está em uso em outra conta.');
+    : super(message: 'Este recibo já está em uso em outra conta.');
 
   const SubscriptionValidationFailure.notEligibleForTrial()
-      : super(message: 'Você não é elegível para o período de teste.');
+    : super(message: 'Você não é elegível para o período de teste.');
 }
 
 /// Erro de configuração do RevenueCat
 class SubscriptionConfigFailure extends Failure {
   const SubscriptionConfigFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro de configuração do sistema de assinaturas.');
+    : super(
+        message:
+            customMessage ?? 'Erro de configuração do sistema de assinaturas.',
+      );
 
   const SubscriptionConfigFailure.missingApiKey()
-      : super(message: 'API key do RevenueCat não configurada.');
+    : super(message: 'API key do RevenueCat não configurada.');
 
   const SubscriptionConfigFailure.invalidCredentials()
-      : super(message: 'Credenciais do RevenueCat inválidas.');
+    : super(message: 'Credenciais do RevenueCat inválidas.');
 
   const SubscriptionConfigFailure.notAvailable()
-      : super(message: 'Sistema de assinaturas não disponível nesta plataforma.');
+    : super(message: 'Sistema de assinaturas não disponível nesta plataforma.');
 }
 
 /// Erro de sincronização
 class SubscriptionSyncFailure extends Failure {
   const SubscriptionSyncFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro ao sincronizar assinatura.');
+    : super(message: customMessage ?? 'Erro ao sincronizar assinatura.');
 
   const SubscriptionSyncFailure.conflictDetected()
-      : super(message: 'Conflito detectado entre dispositivos. Tentando resolver...');
+    : super(
+        message: 'Conflito detectado entre dispositivos. Tentando resolver...',
+      );
 
   const SubscriptionSyncFailure.maxRetriesReached()
-      : super(message: 'Não foi possível sincronizar após várias tentativas.');
+    : super(message: 'Não foi possível sincronizar após várias tentativas.');
 }
 
 /// Erro de servidor/backend
 class SubscriptionServerFailure extends Failure {
   const SubscriptionServerFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro no servidor. Tente novamente mais tarde.');
+    : super(
+        message:
+            customMessage ?? 'Erro no servidor. Tente novamente mais tarde.',
+      );
 
   const SubscriptionServerFailure.unexpectedResponse()
-      : super(message: 'Resposta inesperada do servidor.');
+    : super(message: 'Resposta inesperada do servidor.');
 
   const SubscriptionServerFailure.backendError()
-      : super(message: 'Erro no servidor RevenueCat.');
+    : super(message: 'Erro no servidor RevenueCat.');
 }
 
 /// Erro de operação já em andamento
 class SubscriptionOperationInProgressFailure extends Failure {
   const SubscriptionOperationInProgressFailure()
-      : super(message: 'Operação já em andamento. Aguarde a conclusão.');
+    : super(message: 'Operação já em andamento. Aguarde a conclusão.');
 }
 
 /// Erro desconhecido
 class SubscriptionUnknownFailure extends Failure {
   const SubscriptionUnknownFailure([String? customMessage])
-      : super(message: customMessage ?? 'Erro desconhecido na assinatura.');
+    : super(message: customMessage ?? 'Erro desconhecido na assinatura.');
 }
 
 /// Extension para converter PlatformException codes em Failures específicos

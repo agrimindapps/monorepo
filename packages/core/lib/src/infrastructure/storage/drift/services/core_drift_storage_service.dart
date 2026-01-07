@@ -1,23 +1,24 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../shared/utils/app_error.dart';
-import '../../../../shared/utils/result.dart';
+import '../../../../shared/utils/failure.dart';
 import '../../common/interfaces/i_storage_service.dart';
-import '../exceptions/drift_exceptions.dart';
 import '../interfaces/i_drift_manager.dart';
 import '../interfaces/i_drift_storage_service.dart';
 import 'drift_manager.dart';
 
 /// Implementação concreta do serviço de storage usando Drift
 /// Orquestra o DriftManager e fornece funcionalidades de alto nível
-/// 
+///
 /// Equivalente Drift do CoreHiveStorageService
 /// Implementa IBoxStorageService (interface agnóstica) e IDatabaseStorageService (específica Drift)
 class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageService {
+  /// Gerenciador de banco de dados Drift
   final IDriftManager _driftManager;
   bool _isInitialized = false;
   String? _appName;
 
+  /// Cria uma instância de CoreDriftStorageService
   CoreDriftStorageService({IDriftManager? driftManager})
     : _driftManager = driftManager ?? DriftManager.instance;
 
@@ -28,54 +29,47 @@ class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageSer
   bool get isInitialized => _isInitialized;
 
   @override
-  Future<Result<void>> initialize(Map<String, dynamic>? config) async {
+  Future<Either<Failure, void>> initialize(Map<String, dynamic>? config) async {
     if (_isInitialized) {
       debugPrint('$serviceName: Already initialized');
-      return Result.success(null);
+      return const Right(null);
     }
 
     try {
       _appName = config?['appName'] as String?;
       if (_appName == null || _appName!.isEmpty) {
-        return Result.error(
-          AppErrorFactory.fromException(
-            const DriftInitializationException(
-              'App name is required in config',
-            ),
-            null,
-          ),
+        return const Left(
+          UnexpectedFailure('App name is required in config'),
         );
       }
 
       final initResult = await _driftManager.initialize(_appName!);
-      if (initResult.isError) {
-        return initResult;
-      }
-
-      _isInitialized = true;
-      debugPrint('$serviceName: Successfully initialized for app: $_appName');
-      return Result.success(null);
-    } catch (e, stackTrace) {
+      return initResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          _isInitialized = true;
+          debugPrint('$serviceName: Successfully initialized for app: $_appName');
+          return const Right(null);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Initialization failed - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to initialize storage service',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to initialize storage service'),
       );
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> healthCheck() async {
+  Future<Either<Failure, Map<String, dynamic>>> healthCheck() async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final isDriftInitialized = _driftManager.isInitialized;
@@ -95,7 +89,7 @@ class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageSer
       };
 
       debugPrint('$serviceName: Health check completed successfully');
-      return Result.success(healthData);
+      return Right(healthData);
     } catch (e) {
       debugPrint('$serviceName: Health check failed - $e');
       final errorData = {
@@ -104,16 +98,20 @@ class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageSer
         'error': e.toString(),
         'timestamp': DateTime.now().toIso8601String(),
       };
-      return Result.success(errorData);
+      return Right(errorData);
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getStatistics() async {
+  Future<Either<Failure, Map<String, dynamic>>> getStatistics() async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final databaseStats = _driftManager.getDatabaseStatistics();
@@ -130,416 +128,337 @@ class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageSer
         'lastUpdated': DateTime.now().toIso8601String(),
       };
 
-      return Result.success(statistics);
-    } catch (e, stackTrace) {
+      return Right(statistics);
+    } catch (e) {
       debugPrint('$serviceName: Failed to get statistics - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to get storage statistics',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to get storage statistics'),
       );
     }
   }
 
   @override
-  Future<Result<List<String>>> listBoxes() async {
+  Future<Either<Failure, List<String>>> listBoxes() async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final openDatabases = _driftManager.openDatabaseNames;
-      return Result.success(openDatabases);
-    } catch (e, stackTrace) {
+      return Right(openDatabases);
+    } catch (e) {
       debugPrint('$serviceName: Failed to list databases - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to list databases',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to list databases'),
       );
     }
   }
 
   @override
-  Future<Result<bool>> boxExists(String boxName) async {
+  Future<Either<Failure, bool>> boxExists(String boxName) async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final exists = _driftManager.isDatabaseOpen(boxName);
-      return Result.success(exists);
-    } catch (e, stackTrace) {
+      return Right(exists);
+    } catch (e) {
       debugPrint('$serviceName: Failed to check if database exists - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to check if database exists: $boxName',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to check if database exists'),
       );
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getBoxStatistics(String boxName) async {
+  Future<Either<Failure, Map<String, dynamic>>> getBoxStatistics(String boxName) async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final infoResult = await _driftManager.getDatabaseInfo(boxName);
       return infoResult;
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('$serviceName: Failed to get database statistics - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to get statistics for database: $boxName',
-            boxName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to get statistics for database'),
       );
     }
   }
 
   @override
-  Future<Result<void>> compactBox(String boxName) async {
+  Future<Either<Failure, void>> compactBox(String boxName) async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
+      if (validationResult.isLeft()) {
         return validationResult;
       }
 
       final vacuumResult = await _driftManager.vacuumDatabase(boxName);
-      if (vacuumResult.isError) {
-        return vacuumResult;
-      }
-
-      debugPrint('$serviceName: Compacted (vacuumed) database: $boxName');
-      return Result.success(null);
-    } catch (e, stackTrace) {
+      return vacuumResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          debugPrint('$serviceName: Compacted (vacuumed) database: $boxName');
+          return const Right(null);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Failed to compact database - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to compact database: $boxName',
-            boxName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to compact database'),
       );
     }
   }
 
   @override
-  Future<Result<void>> deleteBox(String boxName) async {
+  Future<Either<Failure, void>> deleteBox(String boxName) async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
+      if (validationResult.isLeft()) {
         return validationResult;
       }
 
       final closeResult = await _driftManager.closeDatabase(boxName);
-      if (closeResult.isError) {
-        return closeResult;
-      }
-
-      debugPrint(
-        '$serviceName: Database closed: $boxName (Physical deletion requires app-level implementation)',
+      return closeResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          debugPrint(
+            '$serviceName: Database closed: $boxName (Physical deletion requires app-level implementation)',
+          );
+          return const Right(null);
+        },
       );
-      return Result.success(null);
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('$serviceName: Failed to delete database - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to delete database: $boxName',
-            boxName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to delete database'),
       );
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> backup() async {
+  Future<Either<Failure, Map<String, dynamic>>> backup() async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final statisticsResult = await getStatistics();
-      if (statisticsResult.isError) {
-        return statisticsResult;
-      }
+      return statisticsResult.fold(
+        (failure) => Left(failure),
+        (stats) {
+          final backupData = {
+            'serviceName': serviceName,
+            'appName': _appName,
+            'backupTimestamp': DateTime.now().toIso8601String(),
+            'statistics': stats,
+            'note':
+                'Full backup functionality requires database-level implementation',
+          };
 
-      final backupData = {
-        'serviceName': serviceName,
-        'appName': _appName,
-        'backupTimestamp': DateTime.now().toIso8601String(),
-        'statistics': statisticsResult.data,
-        'note':
-            'Full backup functionality requires database-level implementation',
-      };
-
-      debugPrint('$serviceName: Backup metadata created');
-      return Result.success(backupData);
-    } catch (e, stackTrace) {
+          debugPrint('$serviceName: Backup metadata created');
+          return Right(backupData);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Failed to create backup - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to create backup',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to create backup'),
       );
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> backupBox(String boxName) async {
+  Future<Either<Failure, Map<String, dynamic>>> backupBox(String boxName) async {
     try {
       final statisticsResult = await getBoxStatistics(boxName);
-      if (statisticsResult.isError) {
-        return statisticsResult;
-      }
+      return statisticsResult.fold(
+        (failure) => Left(failure),
+        (stats) {
+          final backupData = {
+            'databaseName': boxName,
+            'backupTimestamp': DateTime.now().toIso8601String(),
+            'statistics': stats,
+            'note':
+                'Database data backup requires app-specific implementation per data type',
+          };
 
-      final backupData = {
-        'databaseName': boxName,
-        'backupTimestamp': DateTime.now().toIso8601String(),
-        'statistics': statisticsResult.data!,
-        'note':
-            'Database data backup requires app-specific implementation per data type',
-      };
-
-      return Result.success(backupData);
-    } catch (e, stackTrace) {
+          return Right(backupData);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Failed to backup database - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to backup database: $boxName',
-            boxName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to backup database'),
       );
     }
   }
 
   @override
-  Future<Result<void>> restore(Map<String, dynamic> backupData) async {
+  Future<Either<Failure, void>> restore(Map<String, dynamic> backupData) async {
     debugPrint(
       '$serviceName: Restore functionality requires app-specific implementation',
     );
-    return Result.error(
-      AppErrorFactory.fromException(
-        const DriftInitializationException(
-          'Restore functionality not implemented yet',
-        ),
-        null,
-      ),
+    return const Left(
+      UnexpectedFailure('Restore functionality not implemented yet'),
     );
   }
 
   @override
-  Future<Result<void>> restoreBox(
+  Future<Either<Failure, void>> restoreBox(
     String boxName,
     Map<String, dynamic> boxData,
   ) async {
     debugPrint(
       '$serviceName: Database restore functionality requires app-specific implementation',
     );
-    return Result.error(
-      AppErrorFactory.fromException(
-        DriftDatabaseException(
-          'Database restore functionality not implemented yet',
-          boxName,
-        ),
-        null,
-      ),
+    return const Left(
+      UnexpectedFailure('Database restore functionality not implemented yet'),
     );
   }
 
   @override
-  Future<Result<void>> clearAllData({required bool confirm}) async {
+  Future<Either<Failure, void>> clearAllData({required bool confirm}) async {
     if (!confirm) {
-      return Result.error(
-        AppErrorFactory.fromException(
-          const DriftInitializationException(
-            'Clear all data operation requires explicit confirmation',
-          ),
-          null,
-        ),
+      return const Left(
+        ValidationFailure('Clear all data operation requires explicit confirmation'),
       );
     }
 
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
+      if (validationResult.isLeft()) {
         return validationResult;
       }
 
       final clearResult = await _driftManager.clearAllData();
-      if (clearResult.isError) {
-        return clearResult;
-      }
-
-      debugPrint('$serviceName: All data cleared successfully');
-      return Result.success(null);
-    } catch (e, stackTrace) {
+      return clearResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          debugPrint('$serviceName: All data cleared successfully');
+          return const Right(null);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Failed to clear all data - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to clear all data',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to clear all data'),
       );
     }
   }
 
   @override
-  Future<Result<void>> performMaintenance() async {
+  Future<Either<Failure, void>> performMaintenance() async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
+      if (validationResult.isLeft()) {
         return validationResult;
       }
 
       final vacuumResult = await _driftManager.vacuumAllDatabases();
-      if (vacuumResult.isError) {
-        return vacuumResult;
-      }
-
-      debugPrint('$serviceName: Maintenance completed - vacuumed all databases');
-      return Result.success(null);
-    } catch (e, stackTrace) {
+      return vacuumResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          debugPrint('$serviceName: Maintenance completed - vacuumed all databases');
+          return const Right(null);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Maintenance failed - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to perform maintenance',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to perform maintenance'),
       );
     }
   }
 
   @override
-  Future<Result<void>> dispose() async {
+  Future<Either<Failure, void>> dispose() async {
     try {
       final closeResult = await _driftManager.closeAllDatabases();
-      if (closeResult.isError) {
-        return closeResult;
-      }
+      return closeResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          _isInitialized = false;
+          _appName = null;
 
-      _isInitialized = false;
-      _appName = null;
-
-      debugPrint('$serviceName: Disposed successfully');
-      return Result.success(null);
-    } catch (e, stackTrace) {
+          debugPrint('$serviceName: Disposed successfully');
+          return const Right(null);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Failed to dispose - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to dispose storage service',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to dispose storage service'),
       );
     }
   }
 
   /// Valida se o serviço foi inicializado
-  Result<void> _validateInitialized() {
+  Either<Failure, void> _validateInitialized() {
     if (!_isInitialized) {
-      return Result.error(
-        AppErrorFactory.fromException(
-          const DriftInitializationException(
-            'Storage service not initialized. Call initialize() first.',
-          ),
-          null,
-        ),
+      return const Left(
+        ValidationFailure('Storage service not initialized. Call initialize() first.'),
       );
     }
-    return Result.success(null);
+    return const Right(null);
   }
 
   // ==================== IDatabaseStorageService Methods ====================
 
   @override
-  Future<Result<List<String>>> listDatabases() async {
+  Future<Either<Failure, List<String>>> listDatabases() async {
     return listBoxes(); // Alias for IBoxStorageService.listBoxes()
   }
 
   @override
-  Future<Result<bool>> databaseExists(String databaseName) async {
+  Future<Either<Failure, bool>> databaseExists(String databaseName) async {
     return boxExists(databaseName); // Alias for IBoxStorageService.boxExists()
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getDatabaseStatistics(String databaseName) async {
+  Future<Either<Failure, Map<String, dynamic>>> getDatabaseStatistics(String databaseName) async {
     return getBoxStatistics(databaseName); // Alias for IBoxStorageService.getBoxStatistics()
   }
 
   @override
-  Future<Result<void>> vacuumDatabase(String databaseName) async {
+  Future<Either<Failure, void>> vacuumDatabase(String databaseName) async {
     return compactBox(databaseName); // Alias for IBoxStorageService.compactBox()
   }
 
   @override
-  Future<Result<void>> deleteDatabase(String databaseName) async {
+  Future<Either<Failure, void>> deleteDatabase(String databaseName) async {
     return deleteBox(databaseName); // Alias for IBoxStorageService.deleteBox()
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> backupDatabase(String databaseName) async {
+  Future<Either<Failure, Map<String, dynamic>>> backupDatabase(String databaseName) async {
     return backupBox(databaseName); // Alias for IBoxStorageService.backupBox()
   }
 
   @override
-  Future<Result<void>> restoreDatabase(
+  Future<Either<Failure, void>> restoreDatabase(
     String databaseName,
     Map<String, dynamic> databaseData,
   ) async {
@@ -547,57 +466,47 @@ class CoreDriftStorageService implements IBoxStorageService, IDatabaseStorageSer
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getDatabaseInfo(String databaseName) async {
+  Future<Either<Failure, Map<String, dynamic>>> getDatabaseInfo(String databaseName) async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
-        return Result.error(validationResult.error!);
+      final validationError = validationResult.fold(
+        (failure) => failure,
+        (_) => null,
+      );
+      if (validationError != null) {
+        return Left(validationError);
       }
 
       final infoResult = await _driftManager.getDatabaseInfo(databaseName);
       return infoResult;
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('$serviceName: Failed to get database info - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to get info for database: $databaseName',
-            databaseName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to get info for database'),
       );
     }
   }
 
   @override
-  Future<Result<void>> vacuumAllDatabases() async {
+  Future<Either<Failure, void>> vacuumAllDatabases() async {
     try {
       final validationResult = _validateInitialized();
-      if (validationResult.isError) {
+      if (validationResult.isLeft()) {
         return validationResult;
       }
 
       final vacuumResult = await _driftManager.vacuumAllDatabases();
-      if (vacuumResult.isError) {
-        return vacuumResult;
-      }
-
-      debugPrint('$serviceName: All databases vacuumed successfully');
-      return Result.success(null);
-    } catch (e, stackTrace) {
+      return vacuumResult.fold(
+        (failure) => Left(failure),
+        (_) {
+          debugPrint('$serviceName: All databases vacuumed successfully');
+          return const Right(null);
+        },
+      );
+    } catch (e) {
       debugPrint('$serviceName: Failed to vacuum all databases - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to vacuum all databases',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
-        ),
+      return const Left(
+        UnexpectedFailure('Failed to vacuum all databases'),
       );
     }
   }

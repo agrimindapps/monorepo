@@ -10,7 +10,8 @@ import '../../../infrastructure/services/connectivity_service.dart';
 import '../../../infrastructure/services/device_identity_service.dart';
 import '../../../infrastructure/services/firebase_device_service.dart';
 import '../auth/auth_domain_providers.dart' show domainCurrentUserProvider;
-import '../premium/subscription_providers.dart' show currentAppIdProvider, featureLimitsProvider, FeatureLimits;
+import '../premium/subscription_providers.dart'
+    show currentAppIdProvider, featureLimitsProvider;
 
 /// Providers unificados para gerenciamento de dispositivos
 /// Consolida lógica de device management entre todos os apps do monorepo
@@ -59,7 +60,7 @@ final deviceRepositoryProvider = Provider<IDeviceRepository>((ref) {
   final localDataSource = ref.watch(deviceLocalDataSourceProvider);
   final remoteDataSource = ref.watch(firebaseDeviceServiceProvider);
   final connectivityService = ref.watch(connectivityServiceProvider);
-  
+
   return DeviceRepositoryImpl(
     localDataSource: localDataSource,
     remoteDataSource: remoteDataSource,
@@ -68,65 +69,60 @@ final deviceRepositoryProvider = Provider<IDeviceRepository>((ref) {
 });
 
 /// Provider para lista de dispositivos do usuário usando o repository unificado
-final userDevicesFromRepositoryProvider = FutureProvider<List<DeviceEntity>>((ref) async {
+final userDevicesFromRepositoryProvider = FutureProvider<List<DeviceEntity>>((
+  ref,
+) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return [];
-  
+
   final repository = ref.watch(deviceRepositoryProvider);
   final result = await repository.getUserDevices(userId);
-  
-  return result.fold(
-    (failure) {
-      if (kDebugMode) {
-        debugPrint('❌ userDevicesFromRepositoryProvider: ${failure.message}');
-      }
-      return [];
-    },
-    (devices) => devices,
-  );
+
+  return result.fold((failure) {
+    if (kDebugMode) {
+      debugPrint('❌ userDevicesFromRepositoryProvider: ${failure.message}');
+    }
+    return [];
+  }, (devices) => devices);
 });
 
 /// Provider para verificar se pode adicionar mais dispositivos
 final canAddMoreDevicesProvider = FutureProvider<bool>((ref) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return false;
-  
+
   final repository = ref.watch(deviceRepositoryProvider);
   final result = await repository.canAddMoreDevices(userId);
-  
-  return result.fold(
-    (failure) => false,
-    (canAdd) => canAdd,
-  );
+
+  return result.fold((failure) => false, (canAdd) => canAdd);
 });
 
 /// Provider para verificação detalhada de limite de dispositivos
-final deviceLimitCheckProvider = FutureProvider<DeviceLimitCheckResult?>((ref) async {
+final deviceLimitCheckProvider = FutureProvider<DeviceLimitCheckResult?>((
+  ref,
+) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return null;
-  
+
   final firebaseService = ref.watch(firebaseDeviceServiceProvider);
   final result = await firebaseService.checkDeviceLimit(userId);
-  
-  return result.fold(
-    (failure) {
-      if (kDebugMode) {
-        debugPrint('❌ deviceLimitCheckProvider: ${failure.message}');
-      }
-      return null;
-    },
-    (checkResult) => checkResult,
-  );
+
+  return result.fold((failure) {
+    if (kDebugMode) {
+      debugPrint('❌ deviceLimitCheckProvider: ${failure.message}');
+    }
+    return null;
+  }, (checkResult) => checkResult);
 });
 
 /// Provider para contagem de dispositivos por tipo (mobile/web)
 final deviceCountByTypeProvider = FutureProvider<Map<String, int>>((ref) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return {'mobile': 0, 'web': 0, 'total': 0};
-  
+
   final firebaseService = ref.watch(firebaseDeviceServiceProvider);
   final result = await firebaseService.getDeviceCountByType(userId);
-  
+
   return result.fold(
     (failure) => {'mobile': 0, 'web': 0, 'total': 0},
     (counts) => counts,
@@ -137,14 +133,11 @@ final deviceCountByTypeProvider = FutureProvider<Map<String, int>>((ref) async {
 final deviceStatisticsProvider = FutureProvider<DeviceStatistics?>((ref) async {
   final userId = ref.watch(domainCurrentUserProvider)?.id;
   if (userId == null) return null;
-  
+
   final repository = ref.watch(deviceRepositoryProvider);
   final result = await repository.getDeviceStatistics(userId);
-  
-  return result.fold(
-    (failure) => null,
-    (stats) => stats,
-  );
+
+  return result.fold((failure) => null, (stats) => stats);
 });
 
 /// Provider principal para informações do dispositivo atual
@@ -529,7 +522,9 @@ class DeviceManagementNotifier extends Notifier<DeviceManagementState> {
       );
       return true;
     } catch (e) {
-      state = const DeviceManagementError('Erro ao revogar outros dispositivos: \$e');
+      state = const DeviceManagementError(
+        'Erro ao revogar outros dispositivos: \$e',
+      );
       return false;
     }
   }

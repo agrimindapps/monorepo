@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 import 'tables/receituagro_tables.dart';
 
@@ -28,7 +29,7 @@ part 'receituagro_database.g.dart';
 ///
 /// // Observar mudanças
 /// db.select(db.diagnosticos).watch().listen((diagnosticos) {
-///   print('Diagnósticos atualizados: ${diagnosticos.length}');
+///   debugPrint('Diagnósticos atualizados: ${diagnosticos.length}');
 /// });
 /// ```
 @DriftDatabase(
@@ -99,19 +100,19 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     onCreate: (Migrator m) async {
       // Criar todas as tabelas
       await m.createAll();
-      print('✅ Receituagro Database: Tabelas criadas');
+      debugPrint('✅ Receituagro Database: Tabelas criadas');
     },
     onUpgrade: (Migrator m, int from, int to) async {
       // Migration from version 1 to 2: Add StaticDataVersion table
       if (from < 2) {
         await m.createTable(staticDataVersion);
-        print('⬆️ Migration v1→v2: StaticDataVersion table added');
+        debugPrint('⬆️ Migration v1→v2: StaticDataVersion table added');
       }
-      
+
       // Migration from version 2 to 3: Add UserSubscriptions table
       if (from < 3) {
         await m.createTable(userSubscriptions);
-        print('⬆️ Migration v2→v3: UserSubscriptions table added');
+        debugPrint('⬆️ Migration v2→v3: UserSubscriptions table added');
       }
     },
     beforeOpen: (details) async {
@@ -120,13 +121,13 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
 
       // Log da abertura do banco
       if (details.wasCreated) {
-        print(
+        debugPrint(
           '✅ Receituagro Database criado com sucesso! v${details.versionNow}',
         );
         // Popular dados estáticos após criação
         await _populateStaticDataIfNeeded();
       } else if (details.hadUpgrade) {
-        print(
+        debugPrint(
           '⬆️ Receituagro Database atualizado de v${details.versionBefore} para v${details.versionNow}',
         );
       }
@@ -145,11 +146,11 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     final count = culturasCount.read(culturas.id.count()) ?? 0;
 
     if (count > 0) {
-      print('ℹ️ Dados estáticos já populados ($count culturas)');
+      debugPrint('ℹ️ Dados estáticos já populados ($count culturas)');
       return;
     }
 
-    print('📦 Populando dados estáticos dos JSON assets...');
+    debugPrint('📦 Populando dados estáticos dos JSON assets...');
 
     // TODO: Implementar carregamento dos JSON assets
     // 1. Carregar assets/database/json/tbculturas/ → inserir em culturas
@@ -158,7 +159,7 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     // 4. Carregar assets/database/json/tbfitossanitarios/ → inserir em fitossanitarios
     // 5. Carregar assets/database/json/tbfitossanitariosinfo/ → inserir em fitossanitariosInfo
 
-    print('⚠️ Carregamento de dados estáticos ainda não implementado');
+    debugPrint('⚠️ Carregamento de dados estáticos ainda não implementado');
   }
 
   // ========== QUERIES ÚTEIS ==========

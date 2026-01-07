@@ -138,7 +138,7 @@ class _UnifiedFormFieldState extends State<UnifiedFormField>
       if (!mounted) return;
 
       setState(() {
-        _validationResult = UnifiedValidationResult.error(
+        _validationResult = UnifiedValidationLeft(
           'Erro na validação: $e',
         );
       });

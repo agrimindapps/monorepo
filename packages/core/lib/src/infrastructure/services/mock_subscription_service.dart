@@ -87,7 +87,7 @@ class MockSubscriptionService implements ISubscriptionRepository {
   Future<Either<Failure, List<ProductInfo>>> getAvailableProducts({
     required List<String> productIds,
   }) async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future<void>.delayed(const Duration(milliseconds: 800));
     // Return all products if no filter specified (backward compatibility)
     if (productIds.isEmpty) {
       return Right([
@@ -113,7 +113,7 @@ class MockSubscriptionService implements ISubscriptionRepository {
   Future<Either<Failure, SubscriptionEntity>> purchaseProduct({
     required String productId,
   }) async {
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network delay
+    await Future<void>.delayed(const Duration(seconds: 2)); // Simulate network delay
     
     final now = DateTime.now();
     final expirationDate = now.add(const Duration(days: 365)); // Default to 1 year
@@ -145,7 +145,7 @@ class MockSubscriptionService implements ISubscriptionRepository {
 
   @override
   Future<Either<Failure, List<SubscriptionEntity>>> restorePurchases() async {
-    await Future.delayed(const Duration(seconds: 1));
+    await Future<void>.delayed(const Duration(seconds: 1));
     if (_currentSubscription != null) {
       return Right([_currentSubscription!]);
     }

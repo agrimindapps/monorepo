@@ -1,4 +1,9 @@
+import 'package:core/core.dart';
+
 import '../../features/auth/utils/validation_helpers.dart';
+
+/// Type alias for validation results
+typedef ValidationResult = Either<String, dynamic>;
 
 /// Serviço responsável APENAS por validação de formulários
 /// Resolve violação SRP - separando validação do estado UI
@@ -15,83 +20,71 @@ class FormValidationService {
   /// Valida nome da planta
   ValidationResult validatePlantName(String? name) {
     if (name == null || name.trim().isEmpty) {
-      return ValidationResult.error('Nome é obrigatório');
+      return const Left('Nome é obrigatório');
     }
 
     final trimmedName = name.trim();
 
     if (trimmedName.length < minNameLength) {
-      return ValidationResult.error(
-        'Nome deve ter pelo menos $minNameLength caractere',
-      );
+      return const Left('Nome deve ter pelo menos $minNameLength caractere');
     }
 
     if (trimmedName.length > maxNameLength) {
-      return ValidationResult.error(
-        'Nome deve ter no máximo $maxNameLength caracteres',
-      );
+      return const Left('Nome deve ter no máximo $maxNameLength caracteres');
     }
     if (!_isValidPlantText(trimmedName)) {
-      return ValidationResult.error('Nome contém caracteres inválidos');
+      return const Left('Nome contém caracteres inválidos');
     }
 
-    return ValidationResult.success(
-      ValidationHelpers.sanitizePlantName(trimmedName),
-    );
+    return Right(ValidationHelpers.sanitizePlantName(trimmedName));
   }
 
   /// Valida espécie da planta
   ValidationResult validateSpecies(String? species) {
     if (species == null || species.trim().isEmpty) {
-      return ValidationResult.success(null); // Opcional
+      return const Right(null); // Opcional
     }
 
     final trimmedSpecies = species.trim();
 
     if (trimmedSpecies.length < minSpeciesLength) {
-      return ValidationResult.error(
+      return const Left(
         'Espécie deve ter pelo menos $minSpeciesLength caracteres',
       );
     }
 
     if (trimmedSpecies.length > maxSpeciesLength) {
-      return ValidationResult.error(
+      return const Left(
         'Espécie deve ter no máximo $maxSpeciesLength caracteres',
       );
     }
 
     if (!_isValidPlantText(trimmedSpecies)) {
-      return ValidationResult.error('Espécie contém caracteres inválidos');
+      return const Left('Espécie contém caracteres inválidos');
     }
 
-    return ValidationResult.success(
-      ValidationHelpers.sanitizePlantName(trimmedSpecies),
-    );
+    return Right(ValidationHelpers.sanitizePlantName(trimmedSpecies));
   }
 
   /// Valida notas
   ValidationResult validateNotes(String? notes) {
     if (notes == null || notes.trim().isEmpty) {
-      return ValidationResult.success(null); // Opcional
+      return const Right(null); // Opcional
     }
 
     final trimmedNotes = notes.trim();
 
     if (trimmedNotes.length > maxNotesLength) {
-      return ValidationResult.error(
-        'Notas devem ter no máximo $maxNotesLength caracteres',
-      );
+      return const Left('Notas devem ter no máximo $maxNotesLength caracteres');
     }
 
-    return ValidationResult.success(
-      ValidationHelpers.sanitizeNotes(trimmedNotes),
-    );
+    return Right(ValidationHelpers.sanitizeNotes(trimmedNotes));
   }
 
   /// Valida data de plantio
   ValidationResult validatePlantingDate(DateTime? plantingDate) {
     if (plantingDate == null) {
-      return ValidationResult.success(null); // Opcional
+      return const Right(null); // Opcional
     }
 
     final now = DateTime.now();
@@ -101,39 +94,33 @@ class FormValidationService {
     final minPastDate = DateTime(1900); // Limite mínimo razoável
 
     if (plantingDate.isAfter(maxFutureDate)) {
-      return ValidationResult.error(
+      return const Left(
         'Data de plantio não pode ser muito distante no futuro',
       );
     }
 
     if (plantingDate.isBefore(minPastDate)) {
-      return ValidationResult.error('Data de plantio inválida');
+      return const Left('Data de plantio inválida');
     }
 
-    return ValidationResult.success(plantingDate);
+    return Right(plantingDate);
   }
 
   /// Valida intervalo de cuidado em dias
   ValidationResult validateCareInterval(int? intervalDays, String careType) {
     if (intervalDays == null) {
-      return ValidationResult.success(
-        null,
-      ); // Opcional se o cuidado estiver desabilitado
+      return const Right(null); // Opcional se o cuidado estiver desabilitado
     }
 
     if (intervalDays < minIntervalDays) {
-      return ValidationResult.error(
-        '$careType deve ser pelo menos $minIntervalDays dia',
-      );
+      return Left('$careType deve ser pelo menos $minIntervalDays dia');
     }
 
     if (intervalDays > maxIntervalDays) {
-      return ValidationResult.error(
-        '$careType deve ser no máximo $maxIntervalDays dias',
-      );
+      return Left('$careType deve ser no máximo $maxIntervalDays dias');
     }
 
-    return ValidationResult.success(intervalDays);
+    return Right(intervalDays);
   }
 
   /// Valida intervalo específico de rega
@@ -172,18 +159,16 @@ class FormValidationService {
   /// Valida quantidade de água
   ValidationResult validateWaterAmount(String? waterAmount) {
     if (waterAmount == null || waterAmount.trim().isEmpty) {
-      return ValidationResult.success(null); // Opcional
+      return const Right(null); // Opcional
     }
 
     final trimmedAmount = waterAmount.trim();
 
     if (trimmedAmount.length > 50) {
-      return ValidationResult.error(
-        'Quantidade de água deve ter no máximo 50 caracteres',
-      );
+      return const Left('Quantidade de água deve ter no máximo 50 caracteres');
     }
 
-    return ValidationResult.success(trimmedAmount);
+    return Right(trimmedAmount);
   }
 
   /// Valida configuração de cuidado habilitada
@@ -193,13 +178,11 @@ class FormValidationService {
     required String careType,
   }) {
     if (!isEnabled) {
-      return ValidationResult.success(null); // Desabilitado é válido
+      return const Right(null); // Desabilitado é válido
     }
 
     if (intervalDays == null || intervalDays <= 0) {
-      return ValidationResult.error(
-        '$careType deve ter um intervalo válido quando habilitado',
-      );
+      return Left('$careType deve ter um intervalo válido quando habilitado');
     }
 
     return validateCareInterval(intervalDays, careType);
@@ -228,9 +211,7 @@ class FormValidationService {
         intervalDays: wateringIntervalDays,
         careType: 'Rega',
       );
-      if (result.hasError) {
-        errors['watering'] = result.error!;
-      }
+      result.fold((error) => errors['watering'] = error, (_) => null);
     }
     if (enableFertilizerCare == true) {
       final result = validateCareConfiguration(
@@ -238,9 +219,7 @@ class FormValidationService {
         intervalDays: fertilizingIntervalDays,
         careType: 'Fertilização',
       );
-      if (result.hasError) {
-        errors['fertilizing'] = result.error!;
-      }
+      result.fold((error) => errors['fertilizing'] = error, (_) => null);
     }
     if (enableSunlightCare == true) {
       final result = validateCareConfiguration(
@@ -248,9 +227,7 @@ class FormValidationService {
         intervalDays: sunlightIntervalDays,
         careType: 'Exposição solar',
       );
-      if (result.hasError) {
-        errors['sunlight'] = result.error!;
-      }
+      result.fold((error) => errors['sunlight'] = error, (_) => null);
     }
     if (enablePestInspection == true) {
       final result = validateCareConfiguration(
@@ -258,9 +235,7 @@ class FormValidationService {
         intervalDays: pestInspectionIntervalDays,
         careType: 'Inspeção de pragas',
       );
-      if (result.hasError) {
-        errors['pestInspection'] = result.error!;
-      }
+      result.fold((error) => errors['pestInspection'] = error, (_) => null);
     }
     if (enablePruning == true) {
       final result = validateCareConfiguration(
@@ -268,9 +243,7 @@ class FormValidationService {
         intervalDays: pruningIntervalDays,
         careType: 'Poda',
       );
-      if (result.hasError) {
-        errors['pruning'] = result.error!;
-      }
+      result.fold((error) => errors['pruning'] = error, (_) => null);
     }
     if (enableReplanting == true) {
       final result = validateCareConfiguration(
@@ -278,14 +251,13 @@ class FormValidationService {
         intervalDays: replantingIntervalDays,
         careType: 'Replantio',
       );
-      if (result.hasError) {
-        errors['replanting'] = result.error!;
-      }
+      result.fold((error) => errors['replanting'] = error, (_) => null);
     }
     final waterAmountResult = validateWaterAmount(waterAmount);
-    if (waterAmountResult.hasError) {
-      errors['waterAmount'] = waterAmountResult.error!;
-    }
+    waterAmountResult.fold(
+      (error) => errors['waterAmount'] = error,
+      (_) => null,
+    );
 
     return PlantCareValidationResult(errors);
   }
@@ -312,24 +284,19 @@ class FormValidationService {
   }) {
     final errors = <String, String>{};
     final nameResult = validatePlantName(name);
-    if (nameResult.hasError) {
-      errors['name'] = nameResult.error!;
-    }
+    nameResult.fold((error) => errors['name'] = error, (_) => null);
 
     final speciesResult = validateSpecies(species);
-    if (speciesResult.hasError) {
-      errors['species'] = speciesResult.error!;
-    }
+    speciesResult.fold((error) => errors['species'] = error, (_) => null);
 
     final notesResult = validateNotes(notes);
-    if (notesResult.hasError) {
-      errors['notes'] = notesResult.error!;
-    }
+    notesResult.fold((error) => errors['notes'] = error, (_) => null);
 
     final plantingDateResult = validatePlantingDate(plantingDate);
-    if (plantingDateResult.hasError) {
-      errors['plantingDate'] = plantingDateResult.error!;
-    }
+    plantingDateResult.fold(
+      (error) => errors['plantingDate'] = error,
+      (_) => null,
+    );
     final careValidation = validatePlantCareConfiguration(
       enableWateringCare: enableWateringCare,
       wateringIntervalDays: wateringIntervalDays,
@@ -353,11 +320,16 @@ class FormValidationService {
       errors: errors,
       sanitizedData: errors.isEmpty
           ? {
-              'name': nameResult.value,
-              'species': speciesResult.value,
-              'notes': notesResult.value,
-              'plantingDate': plantingDateResult.value,
-              'waterAmount': validateWaterAmount(waterAmount).value,
+              'name': nameResult.fold((_) => null, (value) => value),
+              'species': speciesResult.fold((_) => null, (value) => value),
+              'notes': notesResult.fold((_) => null, (value) => value),
+              'plantingDate': plantingDateResult.fold(
+                (_) => null,
+                (value) => value,
+              ),
+              'waterAmount': validateWaterAmount(
+                waterAmount,
+              ).fold((_) => null, (value) => value),
             }
           : null,
     );
@@ -368,25 +340,6 @@ class FormValidationService {
     final validPattern = RegExp(r'^[a-zA-ZÀ-ÿ0-9\s\-\(\)\.\,\&]+$');
     return validPattern.hasMatch(text);
   }
-}
-
-/// Resultado de validação individual
-class ValidationResult {
-  final bool isValid;
-  final String? error;
-  final dynamic value;
-
-  const ValidationResult._({required this.isValid, this.error, this.value});
-
-  factory ValidationResult.success(dynamic value) {
-    return ValidationResult._(isValid: true, value: value);
-  }
-
-  factory ValidationResult.error(String error) {
-    return ValidationResult._(isValid: false, error: error);
-  }
-
-  bool get hasError => error != null;
 }
 
 /// Resultado de validação de configurações de cuidado

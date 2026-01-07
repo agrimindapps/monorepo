@@ -4,99 +4,81 @@ import 'failure.dart';
 /// Base class for all ad-related failures
 /// Extends the core Failure class with ad-specific context
 abstract class AdsFailure extends Failure {
-  const AdsFailure({
-    required super.message,
-    super.code,
-    super.details,
-  });
+  const AdsFailure({required super.message, super.code, super.details});
 }
 
 /// Failure when ad fails to load
 /// Can include various Google Ads error codes
 class AdLoadFailure extends AdsFailure {
-  const AdLoadFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(
-    message: message,
-  );
+  const AdLoadFailure(String message, {super.code, super.details})
+    : super(message: message);
 
   /// Ad failed to load due to no inventory (no ads available)
   factory AdLoadFailure.noInventory() => const AdLoadFailure(
-        'Nenhum anúncio disponível no momento',
-        code: 'NO_INVENTORY',
-      );
+    'Nenhum anúncio disponível no momento',
+    code: 'NO_INVENTORY',
+  );
 
   /// Ad failed to load due to network error
   factory AdLoadFailure.networkError() => const AdLoadFailure(
-        'Erro de rede ao carregar anúncio',
-        code: 'NETWORK_ERROR',
-      );
+    'Erro de rede ao carregar anúncio',
+    code: 'NETWORK_ERROR',
+  );
 
   /// Ad failed to load due to invalid request
   factory AdLoadFailure.invalidRequest([String? details]) => AdLoadFailure(
-        'Requisição inválida para anúncio',
-        code: 'INVALID_REQUEST',
-        details: details,
-      );
+    'Requisição inválida para anúncio',
+    code: 'INVALID_REQUEST',
+    details: details,
+  );
 
   /// Ad failed to load - internal error
   factory AdLoadFailure.internalError([String? details]) => AdLoadFailure(
-        'Erro interno ao carregar anúncio',
-        code: 'INTERNAL_ERROR',
-        details: details,
-      );
+    'Erro interno ao carregar anúncio',
+    code: 'INTERNAL_ERROR',
+    details: details,
+  );
 
   /// Ad failed to load - timeout
   factory AdLoadFailure.timeout() => const AdLoadFailure(
-        'Tempo esgotado ao carregar anúncio',
-        code: 'TIMEOUT',
-      );
+    'Tempo esgotado ao carregar anúncio',
+    code: 'TIMEOUT',
+  );
 }
 
 /// Failure when ad fails to show
 class AdShowFailure extends AdsFailure {
-  const AdShowFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(
-    message: message,
-  );
+  const AdShowFailure(String message, {super.code, super.details})
+    : super(message: message);
 
   /// Cannot show ad because it's not loaded/ready
   factory AdShowFailure.notReady() => const AdShowFailure(
-        'Anúncio não está pronto para exibição',
-        code: 'AD_NOT_READY',
-      );
+    'Anúncio não está pronto para exibição',
+    code: 'AD_NOT_READY',
+  );
 
   /// Cannot show ad because another ad is already showing
   factory AdShowFailure.alreadyShowing() => const AdShowFailure(
-        'Já existe um anúncio sendo exibido',
-        code: 'AD_ALREADY_SHOWING',
-      );
+    'Já existe um anúncio sendo exibido',
+    code: 'AD_ALREADY_SHOWING',
+  );
 
   /// Ad failed to show due to internal error
   factory AdShowFailure.internalError([String? details]) => AdShowFailure(
-        'Erro ao exibir anúncio',
-        code: 'SHOW_ERROR',
-        details: details,
-      );
+    'Erro ao exibir anúncio',
+    code: 'SHOW_ERROR',
+    details: details,
+  );
 }
 
 /// Failure related to ad configuration
 class AdConfigFailure extends AdsFailure {
-  const AdConfigFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(
-          message: message,
-        );
+  const AdConfigFailure(String message, {super.code, super.details})
+    : super(message: message);
 
   /// Ad unit ID is invalid or missing
-  factory AdConfigFailure.invalidAdUnitId([String? adUnitId]) => AdConfigFailure(
+  factory AdConfigFailure.invalidAdUnitId([String? adUnitId]) =>
+      AdConfigFailure(
         'ID de unidade de anúncio inválido',
         code: 'INVALID_AD_UNIT_ID',
         details: adUnitId,
@@ -104,27 +86,22 @@ class AdConfigFailure extends AdsFailure {
 
   /// Ad configuration is missing or incomplete
   factory AdConfigFailure.missingConfiguration() => const AdConfigFailure(
-        'Configuração de anúncios ausente',
-        code: 'MISSING_CONFIG',
-      );
+    'Configuração de anúncios ausente',
+    code: 'MISSING_CONFIG',
+  );
 
   /// App ID is invalid or missing
   factory AdConfigFailure.invalidAppId([String? appId]) => AdConfigFailure(
-        'App ID inválido',
-        code: 'INVALID_APP_ID',
-        details: appId,
-      );
+    'App ID inválido',
+    code: 'INVALID_APP_ID',
+    details: appId,
+  );
 }
 
 /// Failure during ads initialization
 class AdInitializationFailure extends AdsFailure {
-  const AdInitializationFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(
-          message: message,
-        );
+  const AdInitializationFailure(String message, {super.code, super.details})
+    : super(message: message);
 
   /// Ads SDK failed to initialize
   factory AdInitializationFailure.sdkInitFailed([String? details]) =>
@@ -145,13 +122,8 @@ class AdInitializationFailure extends AdsFailure {
 /// Failure when frequency cap is reached
 /// Prevents showing too many ads to users
 class AdFrequencyCapFailure extends AdsFailure {
-  const AdFrequencyCapFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(
-          message: message,
-        );
+  const AdFrequencyCapFailure(String message, {super.code, super.details})
+    : super(message: message);
 
   /// Daily limit reached
   factory AdFrequencyCapFailure.dailyLimitReached() =>
@@ -169,9 +141,9 @@ class AdFrequencyCapFailure extends AdsFailure {
 
   /// Minimum interval not elapsed
   factory AdFrequencyCapFailure.tooSoon() => const AdFrequencyCapFailure(
-        'Intervalo mínimo entre anúncios não atingido',
-        code: 'TOO_SOON',
-      );
+    'Intervalo mínimo entre anúncios não atingido',
+    code: 'TOO_SOON',
+  );
 
   /// Hourly limit reached
   factory AdFrequencyCapFailure.hourlyLimitReached() =>
@@ -185,10 +157,7 @@ class AdFrequencyCapFailure extends AdsFailure {
 /// Premium users should not see ads
 class AdPremiumBlockFailure extends AdsFailure {
   const AdPremiumBlockFailure()
-      : super(
-          message: 'Usuário premium não vê anúncios',
-          code: 'PREMIUM_USER',
-        );
+    : super(message: 'Usuário premium não vê anúncios', code: 'PREMIUM_USER');
 }
 
 /// Extension to convert Google Ads error codes to our failures
@@ -205,11 +174,7 @@ extension GoogleAdsErrorCodeExtension on LoadAdError {
       case 3:
         return AdLoadFailure.noInventory();
       default:
-        return AdLoadFailure(
-          message,
-          code: code.toString(),
-          details: domain,
-        );
+        return AdLoadFailure(message, code: code.toString(), details: domain);
     }
   }
 
@@ -224,11 +189,7 @@ extension GoogleAdsErrorCodeExtension on LoadAdError {
 extension FullScreenContentErrorExtension on AdError {
   /// Convert AdError to AdShowFailure
   AdShowFailure toShowFailure() {
-    return AdShowFailure(
-      message,
-      code: code.toString(),
-      details: domain,
-    );
+    return AdShowFailure(message, code: code.toString(), details: domain);
   }
 }
 

@@ -51,7 +51,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     // Build dynamic sections based on selected category
     final allCalculators = [
       ..._financialCalculators,
-      ..._constructionCalculators
+      ..._constructionCalculators,
     ];
 
     return Scaffold(
@@ -66,48 +66,58 @@ class _HomePageState extends ConsumerState<HomePage> {
             scrolledUnderElevation: 1,
             backgroundColor: isDark ? const Color(0xFF1a1a1a) : Colors.white,
             surfaceTintColor: Colors.transparent,
-            title: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Icons.calculate_rounded,
-                    size: 22,
-                    color: Theme.of(context).colorScheme.primary,
+            centerTitle: true,
+            titleSpacing: 0,
+            automaticallyImplyLeading: false,
+            title: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1120),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Icon(
+                          Icons.calculate_rounded,
+                          size: 22,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Calculei',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      const Spacer(),
+                      // Theme toggle
+                      IconButton(
+                        icon: Icon(
+                          isDark ? Icons.light_mode : Icons.dark_mode,
+                          color: isDark ? Colors.white70 : Colors.black54,
+                        ),
+                        onPressed: () {
+                          ref.read(themeModeProvider.notifier).toggleTheme();
+                        },
+                        tooltip: isDark ? 'Modo Claro' : 'Modo Escuro',
+                      ),
+                      // Calculators Dropdown - using the new component
+                      _HomeCalculatorsDropdown(isDark: isDark),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 12),
-                Text(
-                  'Calculei',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              // Theme toggle
-              IconButton(
-                icon: Icon(
-                  isDark ? Icons.light_mode : Icons.dark_mode,
-                  color: isDark ? Colors.white70 : Colors.black54,
-                ),
-                onPressed: () {
-                  ref.read(themeModeProvider.notifier).toggleTheme();
-                },
-                tooltip: isDark ? 'Modo Claro' : 'Modo Escuro',
               ),
-              // Calculators Dropdown - using the new component
-              _HomeCalculatorsDropdown(isDark: isDark),
-              const SizedBox(width: 8),
-            ],
+            ),
           ),
 
           // Category Filter Bar
@@ -143,58 +153,89 @@ class _HomePageState extends ConsumerState<HomePage> {
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
             sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Favoritos Section
-                if (_selectedCategory == 'Favoritos') ...[
-                  _buildSectionTitle(context, 'Favoritos'),
-                  _buildGrid(
-                    context,
-                    allCalculators
-                        .where((item) => favorites.contains(item.route))
-                        .toList(),
-                    sectionTitle: 'Favoritos',
-                  ),
-                  if (favorites.isEmpty)
-                    _buildEmptyState('Nenhuma calculadora favoritada ainda',
-                        Icons.favorite_border),
-                ],
+              delegate: SliverChildListDelegate(
+                [
+                      // Favoritos Section
+                      if (_selectedCategory == 'Favoritos') ...[
+                        _buildSectionTitle(context, 'Favoritos'),
+                        _buildGrid(
+                          context,
+                          allCalculators
+                              .where((item) => favorites.contains(item.route))
+                              .toList(),
+                          sectionTitle: 'Favoritos',
+                        ),
+                        if (favorites.isEmpty)
+                          _buildEmptyState(
+                            'Nenhuma calculadora favoritada ainda',
+                            Icons.favorite_border,
+                          ),
+                      ],
 
-                // Recentes Section
-                if (_selectedCategory == 'Recentes') ...[
-                  _buildSectionTitle(context, 'Recentes'),
-                  _buildGrid(
-                    context,
-                    recents.map((route) {
-                      return allCalculators.firstWhere(
-                        (item) => item.route == route,
-                        orElse: () => allCalculators.first,
-                      );
-                    }).toList(),
-                    sectionTitle: 'Recentes',
-                  ),
-                  if (recents.isEmpty)
-                    _buildEmptyState('Nenhuma calculadora usada recentemente',
-                        Icons.history),
-                ],
+                      // Recentes Section
+                      if (_selectedCategory == 'Recentes') ...[
+                        _buildSectionTitle(context, 'Recentes'),
+                        _buildGrid(
+                          context,
+                          recents.map((route) {
+                            return allCalculators.firstWhere(
+                              (item) => item.route == route,
+                              orElse: () => allCalculators.first,
+                            );
+                          }).toList(),
+                          sectionTitle: 'Recentes',
+                        ),
+                        if (recents.isEmpty)
+                          _buildEmptyState(
+                            'Nenhuma calculadora usada recentemente',
+                            Icons.history,
+                          ),
+                      ],
 
-                // Regular Sections
-                if (_selectedCategory != 'Favoritos' &&
-                    _selectedCategory != 'Recentes') ...[
-                  if (_shouldShowSection('Financeiro', _financialCalculators))
-                    _buildSectionTitle(context, 'Financeiro'),
-                  if (_shouldShowSection('Financeiro', _financialCalculators))
-                    _buildGrid(context, _financialCalculators,
-                        sectionTitle: 'Financeiro'),
-                  if (_searchQuery.isEmpty) const SizedBox(height: 32),
-                  if (_shouldShowSection(
-                      'Construção', _constructionCalculators))
-                    _buildSectionTitle(context, 'Construção'),
-                  if (_shouldShowSection(
-                      'Construção', _constructionCalculators))
-                    _buildGrid(context, _constructionCalculators,
-                        sectionTitle: 'Construção'),
-                ],
-              ]),
+                      // Regular Sections
+                      if (_selectedCategory != 'Favoritos' &&
+                          _selectedCategory != 'Recentes') ...[
+                        if (_shouldShowSection(
+                          'Financeiro',
+                          _financialCalculators,
+                        ))
+                          _buildSectionTitle(context, 'Financeiro'),
+                        if (_shouldShowSection(
+                          'Financeiro',
+                          _financialCalculators,
+                        ))
+                          _buildGrid(
+                            context,
+                            _financialCalculators,
+                            sectionTitle: 'Financeiro',
+                          ),
+                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
+                        if (_shouldShowSection(
+                          'Construção',
+                          _constructionCalculators,
+                        ))
+                          _buildSectionTitle(context, 'Construção'),
+                        if (_shouldShowSection(
+                          'Construção',
+                          _constructionCalculators,
+                        ))
+                          _buildGrid(
+                            context,
+                            _constructionCalculators,
+                            sectionTitle: 'Construção',
+                          ),
+                      ],
+                    ]
+                    .map(
+                      (w) => Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1120),
+                          child: w,
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
 
@@ -207,7 +248,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   Widget _buildEmptyState(String message, IconData icon) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(48),
@@ -255,17 +296,20 @@ class _HomePageState extends ConsumerState<HomePage> {
           const SizedBox(width: 12),
           Text(
             title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGrid(BuildContext context, List<_CalculatorItem> items,
-      {String? sectionTitle}) {
+  Widget _buildGrid(
+    BuildContext context,
+    List<_CalculatorItem> items, {
+    String? sectionTitle,
+  }) {
     final filteredItems = items.where((item) {
       return _searchQuery.isEmpty ||
           (sectionTitle != null &&
@@ -291,10 +335,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             builder: (context, value, child) {
               return Transform.translate(
                 offset: Offset(0, 20 * (1 - value)),
-                child: Opacity(
-                  opacity: value,
-                  child: child,
-                ),
+                child: Opacity(opacity: value, child: child),
               );
             },
             child: Padding(
@@ -312,8 +353,8 @@ class _HomePageState extends ConsumerState<HomePage> {
         final crossAxisCount = constraints.maxWidth < 600
             ? 2
             : constraints.maxWidth < 900
-                ? 3
-                : 4;
+            ? 3
+            : 4;
 
         return GridView.builder(
           shrinkWrap: true,
@@ -333,10 +374,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               builder: (context, value, child) {
                 return Transform.translate(
                   offset: Offset(0, 20 * (1 - value)),
-                  child: Opacity(
-                    opacity: value,
-                    child: child,
-                  ),
+                  child: Opacity(opacity: value, child: child),
                 );
               },
               child: _CalculatorCard(item: filteredItems[index]),
@@ -464,24 +502,28 @@ class _CategoryFilterBar extends StatelessWidget {
 
     return Container(
       height: 64,
+      alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(vertical: 12),
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 12),
-        itemBuilder: (context, index) {
-          final (name, icon, color) = categories[index];
-          final isSelected = selectedCategory == name;
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1120),
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          itemCount: categories.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 12),
+          itemBuilder: (context, index) {
+            final (name, icon, color) = categories[index];
+            final isSelected = selectedCategory == name;
 
-          return _CategoryChip(
-            label: name,
-            icon: icon,
-            color: color,
-            isSelected: isSelected,
-            onTap: () => onCategorySelected(name),
-          );
-        },
+            return _CategoryChip(
+              label: name,
+              icon: icon,
+              color: color,
+              isSelected: isSelected,
+              onTap: () => onCategorySelected(name),
+            );
+          },
+        ),
       ),
     );
   }
@@ -515,7 +557,7 @@ class _CategoryChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? chipColor.withOpacity(0.15)
+              ? chipColor.withValues(alpha: 0.15)
               : (isDark ? Colors.grey[800] : Colors.grey[100]),
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
@@ -529,14 +571,18 @@ class _CategoryChip extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isSelected ? chipColor : (isDark ? Colors.grey[400] : Colors.grey),
+              color: isSelected
+                  ? chipColor
+                  : (isDark ? Colors.grey[400] : Colors.grey),
             ),
             const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? chipColor : (isDark ? Colors.grey[400] : Colors.grey),
+                color: isSelected
+                    ? chipColor
+                    : (isDark ? Colors.grey[400] : Colors.grey),
               ),
             ),
           ],
@@ -565,40 +611,48 @@ class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              onChanged: onChanged,
-              decoration: InputDecoration(
-                hintText: 'Buscar calculadora...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1120),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: controller,
+                onChanged: onChanged,
+                decoration: InputDecoration(
+                  hintText: 'Buscar calculadora...',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: onToggleView,
-            icon: Icon(
-              isGridView ? Icons.view_list : Icons.grid_view,
-              color: isDark ? Colors.white : Colors.black87,
+            const SizedBox(width: 8),
+            IconButton(
+              onPressed: onToggleView,
+              icon: Icon(
+                isGridView ? Icons.view_list : Icons.grid_view,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              tooltip: isGridView
+                  ? 'Visualização em lista'
+                  : 'Visualização em grade',
             ),
-            tooltip:
-                isGridView ? 'Visualização em lista' : 'Visualização em grade',
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -641,7 +695,7 @@ class _CalculatorListTile extends ConsumerWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: item.color.withOpacity(0.1),
+              color: item.color.withValues(alpha: 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -653,14 +707,10 @@ class _CalculatorListTile extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: item.color.withOpacity(0.15),
+                color: item.color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                item.icon,
-                size: 32,
-                color: item.color,
-              ),
+              child: Icon(item.icon, size: 32, color: item.color),
             ),
             const SizedBox(width: 16),
 
@@ -674,10 +724,8 @@ class _CalculatorListTile extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           item.title,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
                       if (item.isPopular)
@@ -688,8 +736,8 @@ class _CalculatorListTile extends ConsumerWidget {
                           ),
                           decoration: BoxDecoration(
                             color: item.isPopular
-                                ? Colors.red.withOpacity(0.1)
-                                : Colors.amber.withOpacity(0.1),
+                                ? Colors.red.withValues(alpha: 0.1)
+                                : Colors.amber.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
@@ -709,8 +757,8 @@ class _CalculatorListTile extends ConsumerWidget {
                   Text(
                     item.description,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.grey[400] : Colors.grey,
-                        ),
+                      color: isDark ? Colors.grey[400] : Colors.grey,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -725,7 +773,7 @@ class _CalculatorListTile extends ConsumerWidget {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: item.color.withOpacity(0.1),
+                            color: item.color.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -755,7 +803,9 @@ class _CalculatorListTile extends ConsumerWidget {
               },
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : (isDark ? Colors.grey[400] : Colors.grey),
+                color: isFavorite
+                    ? Colors.red
+                    : (isDark ? Colors.grey[400] : Colors.grey),
               ),
             ),
           ],
@@ -804,14 +854,16 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: widget.item.color.withOpacity(_isHovering ? 0.3 : 0.1),
+                color: widget.item.color.withValues(
+                  alpha: _isHovering ? 0.3 : 0.1,
+                ),
                 blurRadius: _isHovering ? 16 : 8,
                 offset: Offset(0, _isHovering ? 4 : 2),
               ),
             ],
             border: Border.all(
               color: _isHovering
-                  ? widget.item.color.withOpacity(0.5)
+                  ? widget.item.color.withValues(alpha: 0.5)
                   : Colors.transparent,
               width: 2,
             ),
@@ -828,7 +880,7 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: widget.item.color.withOpacity(0.15),
+                        color: widget.item.color.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
@@ -848,8 +900,8 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                             ),
                             decoration: BoxDecoration(
                               color: widget.item.isPopular
-                                  ? Colors.red.withOpacity(0.1)
-                                  : Colors.amber.withOpacity(0.1),
+                                  ? Colors.red.withValues(alpha: 0.1)
+                                  : Colors.amber.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -879,7 +931,9 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                                   ? Icons.favorite
                                   : Icons.favorite_border,
                               size: 20,
-                              color: isFavorite ? Colors.red : (isDark ? Colors.grey[400] : Colors.grey),
+                              color: isFavorite
+                                  ? Colors.red
+                                  : (isDark ? Colors.grey[400] : Colors.grey),
                             ),
                           ),
                         ),
@@ -893,8 +947,8 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                 Text(
                   widget.item.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -904,8 +958,8 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                 Text(
                   widget.item.description,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isDark ? Colors.grey[400] : Colors.grey,
-                      ),
+                    color: isDark ? Colors.grey[400] : Colors.grey,
+                  ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -923,7 +977,7 @@ class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: widget.item.color.withOpacity(0.1),
+                          color: widget.item.color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
@@ -953,7 +1007,8 @@ class _HomeCalculatorsDropdown extends StatefulWidget {
   const _HomeCalculatorsDropdown({required this.isDark});
 
   @override
-  State<_HomeCalculatorsDropdown> createState() => _HomeCalculatorsDropdownState();
+  State<_HomeCalculatorsDropdown> createState() =>
+      _HomeCalculatorsDropdownState();
 }
 
 class _HomeCalculatorsDropdownState extends State<_HomeCalculatorsDropdown> {
@@ -963,29 +1018,66 @@ class _HomeCalculatorsDropdownState extends State<_HomeCalculatorsDropdown> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDesktop = MediaQuery.of(context).size.width >= 800;
-    
+
     return MenuAnchor(
       controller: _menuController,
       menuChildren: [
         // Trabalhista Category
         _buildCategoryHeader('Trabalhista', Icons.work_outline, Colors.blue),
-        _buildMenuItem('Salário Líquido', '/calculators/financial/net-salary', Icons.monetization_on, Colors.orange),
-        _buildMenuItem('13º Salário', '/calculators/financial/thirteenth-salary', Icons.card_giftcard, Colors.green),
-        _buildMenuItem('Férias', '/calculators/financial/vacation', Icons.beach_access, Colors.blue),
-        _buildMenuItem('Horas Extras', '/calculators/financial/overtime', Icons.access_time, Colors.purple),
-        _buildMenuItem('Seguro Desemprego', '/calculators/financial/unemployment-insurance', Icons.work_off, Colors.red),
+        _buildMenuItem(
+          'Salário Líquido',
+          '/calculators/financial/net-salary',
+          Icons.monetization_on,
+          Colors.orange,
+        ),
+        _buildMenuItem(
+          '13º Salário',
+          '/calculators/financial/thirteenth-salary',
+          Icons.card_giftcard,
+          Colors.green,
+        ),
+        _buildMenuItem(
+          'Férias',
+          '/calculators/financial/vacation',
+          Icons.beach_access,
+          Colors.blue,
+        ),
+        _buildMenuItem(
+          'Horas Extras',
+          '/calculators/financial/overtime',
+          Icons.access_time,
+          Colors.purple,
+        ),
+        _buildMenuItem(
+          'Seguro Desemprego',
+          '/calculators/financial/unemployment-insurance',
+          Icons.work_off,
+          Colors.red,
+        ),
         const Divider(height: 8),
         // Financeiro Category
-        _buildCategoryHeader('Financeiro', Icons.account_balance_wallet, Colors.green),
-        _buildMenuItem('Reserva de Emergência', '/calculators/financial/emergency-reserve', Icons.savings, Colors.teal),
-        _buildMenuItem('À Vista vs Parcelado', '/calculators/financial/cash-vs-installment', Icons.payment, Colors.indigo),
+        _buildCategoryHeader(
+          'Financeiro',
+          Icons.account_balance_wallet,
+          Colors.green,
+        ),
+        _buildMenuItem(
+          'Reserva de Emergência',
+          '/calculators/financial/emergency-reserve',
+          Icons.savings,
+          Colors.teal,
+        ),
+        _buildMenuItem(
+          'À Vista vs Parcelado',
+          '/calculators/financial/cash-vs-installment',
+          Icons.payment,
+          Colors.indigo,
+        ),
       ],
       style: MenuStyle(
         elevation: WidgetStateProperty.all(8),
         shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         padding: WidgetStateProperty.all(
           const EdgeInsets.symmetric(vertical: 8),
@@ -1031,7 +1123,12 @@ class _HomeCalculatorsDropdownState extends State<_HomeCalculatorsDropdown> {
     );
   }
 
-  Widget _buildMenuItem(String title, String route, IconData icon, Color color) {
+  Widget _buildMenuItem(
+    String title,
+    String route,
+    IconData icon,
+    Color color,
+  ) {
     return MenuItemButton(
       onPressed: () {
         _menuController.close();

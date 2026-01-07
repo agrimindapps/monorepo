@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/error_header.dart';
 import '../../../../core/widgets/form_dialog.dart';
@@ -72,9 +72,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       final record = fuelNotifier.getFuelRecordById(widget.editFuelRecordId!);
 
       if (record != null) {
-        final formNotifier = ref.read(
-          fuelFormProvider(vehicleId).notifier,
-        );
+        final formNotifier = ref.read(fuelFormProvider(vehicleId).notifier);
         await formNotifier.loadFromFuelRecord(record);
       } else {
         throw Exception('Registro de abastecimento não encontrado');
@@ -117,9 +115,7 @@ class _AddFuelPageState extends ConsumerState<AddFuelPage>
       isLoading: formState.isLoading || _isSubmitting,
       confirmButtonText: 'Salvar',
       onCancel: () {
-        final formNotifier = ref.read(
-          fuelFormProvider(vehicleId).notifier,
-        );
+        final formNotifier = ref.read(fuelFormProvider(vehicleId).notifier);
         formNotifier.clearForm();
         Navigator.of(context).pop();
       },

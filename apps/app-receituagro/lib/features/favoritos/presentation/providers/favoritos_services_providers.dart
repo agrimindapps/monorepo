@@ -76,7 +76,6 @@ FavoritosService favoritosService(Ref ref) {
   return FavoritosService(
     dataResolver: ref.watch(favoritosDataResolverServiceProvider),
     validator: ref.watch(favoritosValidatorServiceProvider),
-    syncService: ref.watch(favoritosSyncServiceProvider),
     cache: ref.watch(favoritosCacheServiceProvider),
     factoryRegistry: ref.watch(favoritoEntityFactoryRegistryProvider),
     repository: ref.watch(favoritoRepositoryProvider),

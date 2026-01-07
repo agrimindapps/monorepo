@@ -1,4 +1,5 @@
 import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 
 /// Logger estruturado para operações de sincronização
@@ -224,10 +225,9 @@ class SyncLogger {
     if (!enableDebugLogs && level == LogLevel.debug) {
       return;
     }
-    final metadataStr =
-        metadata != null && metadata.isNotEmpty
-            ? ' | ${metadata.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
-            : '';
+    final metadataStr = metadata != null && metadata.isNotEmpty
+        ? ' | ${metadata.entries.map((e) => '${e.key}=${e.value}').join(', ')}'
+        : '';
     developer.log(
       '$message$metadataStr',
       name: '${appName.toUpperCase()}:${category.name.toUpperCase()}',

@@ -57,21 +57,21 @@ Future<void> main() async {
     }
 
     try {
-      print('🔐 MAIN: Initializing account deletion module...');
-      print('✅ MAIN: Account deletion module initialized successfully');
+      debugPrint('🔐 MAIN: Initializing account deletion module...');
+      debugPrint('✅ MAIN: Account deletion module initialized successfully');
     } catch (e) {
-      print('❌ MAIN: Account deletion initialization failed: $e');
+      debugPrint('❌ MAIN: Account deletion initialization failed: $e');
     }
 
     if (firebaseInitialized) {
       try {
-        print('🔄 MAIN: Forcing AgrihUrbi sync initialization...');
+        debugPrint('🔄 MAIN: Forcing AgrihUrbi sync initialization...');
         // AgrihUrbiSyncDIModule.init();
         // await AgrihUrbiSyncDIModule.initializeSyncService();
         // TODO: Refactor Sync Module
-        print('✅ MAIN: AgrihUrbi sync initialization completed successfully');
+        debugPrint('✅ MAIN: AgrihUrbi sync initialization completed successfully');
       } catch (e) {
-        print('❌ MAIN: Sync initialization failed: $e');
+        debugPrint('❌ MAIN: Sync initialization failed: $e');
       }
       await _initializeFirebaseServices(container);
     } else {

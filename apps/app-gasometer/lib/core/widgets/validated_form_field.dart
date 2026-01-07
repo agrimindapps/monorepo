@@ -129,7 +129,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
   late ValidationService _validationService;
 
   ValidationState _validationState = ValidationState.initial;
-  ValidationResult _lastValidationResult = ValidationResult.success();
+  ValidationResult _lastValidationResult = ValidationRight();
   Timer? _debounceTimer;
 
   late AnimationController _iconAnimationController;
@@ -177,7 +177,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       if (text.isEmpty) {
         setState(() {
           _validationState = ValidationState.initial;
-          _lastValidationResult = ValidationResult.success();
+          _lastValidationResult = ValidationRight();
         });
         widget.onValidationChanged?.call(_lastValidationResult);
       }
@@ -187,7 +187,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
     if (text.isEmpty && !widget.required) {
       setState(() {
         _validationState = ValidationState.initial;
-        _lastValidationResult = ValidationResult.success();
+        _lastValidationResult = ValidationRight();
       });
       widget.onValidationChanged?.call(_lastValidationResult);
       return;
@@ -208,8 +208,8 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
       if (widget.customValidator != null) {
         final error = widget.customValidator!(text);
         result = error != null
-            ? ValidationResult.error(error)
-            : ValidationResult.success();
+            ? ValidationLeft(error)
+            : ValidationRight();
       } else {
         result = _getValidationForType(text);
       }
@@ -233,7 +233,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
 
       setState(() {
         _validationState = ValidationState.invalid;
-        _lastValidationResult = ValidationResult.error('Erro na validação: $e');
+        _lastValidationResult = ValidationLeft('Erro na validação: $e');
       });
 
       widget.onValidationChanged?.call(_lastValidationResult);
@@ -243,7 +243,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
   ValidationResult _getValidationForType(String text) {
     switch (widget.validationType) {
       case ValidationType.none:
-        return ValidationResult.success();
+        return ValidationRight();
 
       case ValidationType.required:
         return _validationService.validateRequired(
@@ -323,7 +323,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
         );
 
       case ValidationType.custom:
-        return ValidationResult.success(); // Será tratado pelo customValidator
+        return ValidationRight(); // Será tratado pelo customValidator
     }
   }
 
@@ -338,7 +338,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
   void clearValidation() {
     setState(() {
       _validationState = ValidationState.initial;
-      _lastValidationResult = ValidationResult.success();
+      _lastValidationResult = ValidationRight();
     });
     widget.onValidationChanged?.call(_lastValidationResult);
   }
@@ -454,7 +454,7 @@ class _ValidatedFormFieldState extends State<ValidatedFormField>
                 _validationState == ValidationState.invalid) {
               setState(() {
                 _validationState = ValidationState.initial;
-                _lastValidationResult = ValidationResult.success();
+                _lastValidationResult = ValidationRight();
               });
             }
           },

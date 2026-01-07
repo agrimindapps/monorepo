@@ -9,7 +9,7 @@ import '../interfaces/i_drift_manager.dart';
 
 /// Implementação concreta do gerenciador de databases Drift
 /// Singleton pattern para garantir única instância no app
-/// 
+///
 /// Equivalente Drift do HiveManager
 class DriftManager implements IDriftManager {
   static DriftManager? _instance;
@@ -37,7 +37,7 @@ class DriftManager implements IDriftManager {
   Future<Either<Failure, void>> initialize(String appName) async {
     if (_isInitialized) {
       debugPrint('DriftManager: Already initialized for app: $_appName');
-      return Right(null);
+      return const Right(null);
     }
 
     try {
@@ -52,7 +52,7 @@ class DriftManager implements IDriftManager {
       debugPrint('DriftManager: Databases path: $_databasesPath');
 
       return const Right(null);
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('DriftManager: Initialization failed - $e');
       return const Left(
         CacheFailure(
@@ -64,7 +64,9 @@ class DriftManager implements IDriftManager {
   }
 
   @override
-  Future<Either<Failure, GeneratedDatabase>> getDatabase(String databaseName) async {
+  Future<Either<Failure, GeneratedDatabase>> getDatabase(
+    String databaseName,
+  ) async {
     try {
       if (!_isInitialized) {
         return const Left(
@@ -121,7 +123,7 @@ class DriftManager implements IDriftManager {
 
       debugPrint('DriftManager: Registered database: $databaseName');
       return const Right(null);
-    } catch (e, stackTrace) {
+    } catch (e) {
       return const Left(
         CacheFailure(
           'Failed to register database',
@@ -167,7 +169,9 @@ class DriftManager implements IDriftManager {
       for (final name in databaseNames) {
         final result = await closeDatabase(name);
         result.fold(
-          (failure) => debugPrint('DriftManager: Error closing database $name: $failure'),
+          (failure) => debugPrint(
+            'DriftManager: Error closing database $name: $failure',
+          ),
           (_) => null,
         );
       }
@@ -216,7 +220,7 @@ class DriftManager implements IDriftManager {
 
       debugPrint('DriftManager: All data cleared');
       return const Right(null);
-    } catch (e, stackTrace) {
+    } catch (e) {
       debugPrint('DriftManager: Failed to clear all data - $e');
       return const Left(
         CacheFailure(
@@ -262,7 +266,9 @@ class DriftManager implements IDriftManager {
       for (final databaseName in _openDatabases.keys) {
         final result = await vacuumDatabase(databaseName);
         result.fold(
-          (failure) => debugPrint('DriftManager: Error vacuuming database $databaseName: $failure'),
+          (failure) => debugPrint(
+            'DriftManager: Error vacuuming database $databaseName: $failure',
+          ),
           (_) => null,
         );
       }
@@ -297,17 +303,17 @@ class DriftManager implements IDriftManager {
       final database = _openDatabases[databaseName]!;
 
       // Obter informações via pragma SQLite
-      final versionResult = await database.customSelect(
-        'PRAGMA user_version',
-      ).getSingle();
+      final versionResult = await database
+          .customSelect('PRAGMA user_version')
+          .getSingle();
 
-      final pageSizeResult = await database.customSelect(
-        'PRAGMA page_size',
-      ).getSingle();
+      final pageSizeResult = await database
+          .customSelect('PRAGMA page_size')
+          .getSingle();
 
-      final pageCountResult = await database.customSelect(
-        'PRAGMA page_count',
-      ).getSingle();
+      final pageCountResult = await database
+          .customSelect('PRAGMA page_count')
+          .getSingle();
 
       final info = {
         'databaseName': databaseName,

@@ -46,14 +46,14 @@ class PlantsDomainOrchestrator {
       final result = await _getPlantsUseCase.call(const NoParams());
 
       return result.fold(
-        (failure) => PlantsLoadResult.error(failure.toString()),
+        (failure) => PlantsLoadResult.failure(failure.toString()),
         (plants) => PlantsLoadResult.success(plants),
       );
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ PlantsDomainOrchestrator: Error loading plants: $e');
       }
-      return PlantsLoadResult.error(e.toString());
+      return PlantsLoadResult.failure(e.toString());
     }
   }
 
@@ -62,7 +62,7 @@ class PlantsDomainOrchestrator {
     final result = await _getPlantByIdUseCase.call(id);
 
     return result.fold(
-      (failure) => PlantResult.error(failure.toString()),
+      (failure) => PlantResult.failure(failure.toString()),
       (plant) => PlantResult.success(plant),
     );
   }
@@ -76,7 +76,7 @@ class PlantsDomainOrchestrator {
     final result = await _addPlantUseCase.call(params);
 
     return result.fold(
-      (failure) => PlantOperationResult.error(failure.toString()),
+      (failure) => PlantOperationResult.failure(failure.toString()),
       (plant) {
         final updatedPlants = [plant, ...currentPlants];
         final sorted = _sortService.sortPlants(updatedPlants, sortBy);
@@ -97,7 +97,7 @@ class PlantsDomainOrchestrator {
     final result = await _updatePlantUseCase.call(params);
 
     return result.fold(
-      (failure) => PlantOperationResult.error(failure.toString()),
+      (failure) => PlantOperationResult.failure(failure.toString()),
       (updatedPlant) {
         final updatedPlants = currentPlants.map((p) {
           return p.id == updatedPlant.id ? updatedPlant : p;
@@ -122,7 +122,7 @@ class PlantsDomainOrchestrator {
     final result = await _deletePlantUseCase.call(id);
 
     return result.fold(
-      (failure) => PlantDeletionResult.error(failure.toString()),
+      (failure) => PlantDeletionResult.failure(failure.toString()),
       (_) {
         final updatedPlants = currentPlants.where((p) => p.id != id).toList();
         final updatedSearchResults = searchResults
@@ -225,7 +225,7 @@ class PlantsLoadResult {
     return PlantsLoadResult._(plants: plants, isSuccess: true);
   }
 
-  factory PlantsLoadResult.error(String error) {
+  factory PlantsLoadResult.failure(String error) {
     return PlantsLoadResult._(error: error, isSuccess: false);
   }
 }
@@ -241,7 +241,7 @@ class PlantResult {
     return PlantResult._(plant: plant, isSuccess: true);
   }
 
-  factory PlantResult.error(String error) {
+  factory PlantResult.failure(String error) {
     return PlantResult._(error: error, isSuccess: false);
   }
 }
@@ -270,7 +270,7 @@ class PlantOperationResult {
     );
   }
 
-  factory PlantOperationResult.error(String error) {
+  factory PlantOperationResult.failure(String error) {
     return PlantOperationResult._(error: error, isSuccess: false);
   }
 }
@@ -303,7 +303,7 @@ class PlantDeletionResult {
     );
   }
 
-  factory PlantDeletionResult.error(String error) {
+  factory PlantDeletionResult.failure(String error) {
     return PlantDeletionResult._(error: error, isSuccess: false);
   }
 }

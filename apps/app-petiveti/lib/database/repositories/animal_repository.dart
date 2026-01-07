@@ -29,11 +29,8 @@ import '../tables/animals_table.dart';
 
 class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   AnimalRepository(PetivetiDatabase db)
-      : _db = db,
-        super(
-          database: db,
-          table: db.animals,
-        );
+    : _db = db,
+      super(database: db, table: db.animals);
 
   final PetivetiDatabase _db;
 
@@ -46,7 +43,9 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   // ==================== QUERIES ESPECÍFICAS ====================
 
   /// Busca todos os animais ativos de um usuário
-  Future<Result<List<Animal>>> getActiveAnimalsByUser(String userId) async {
+  Future<Either<Failure, List<Animal>>> getActiveAnimalsByUser(
+    String userId,
+  ) async {
     return findWhere(
       (t) =>
           t.userId.equals(userId) &
@@ -76,7 +75,7 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   }
 
   /// Busca animais por espécie
-  Future<Result<List<Animal>>> getAnimalsBySpecies(
+  Future<Either<Failure, List<Animal>>> getAnimalsBySpecies(
     String userId,
     String species,
   ) async {
@@ -89,31 +88,30 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   }
 
   /// Busca animais por nome (like search)
-  Future<Result<List<Animal>>> searchAnimalsByName(
+  Future<Either<Failure, List<Animal>>> searchAnimalsByName(
     String userId,
     String query,
   ) async {
     try {
-      final results = await (_db.select(_db.animals)
-            ..where(
-              (t) =>
-                  t.userId.equals(userId) &
-                  t.isDeleted.equals(false) &
-                  t.name.like('%$query%'),
-            )
-            ..orderBy([(t) => OrderingTerm.asc(t.name)]))
-          .get();
+      final results =
+          await (_db.select(_db.animals)
+                ..where(
+                  (t) =>
+                      t.userId.equals(userId) &
+                      t.isDeleted.equals(false) &
+                      t.name.like('%$query%'),
+                )
+                ..orderBy([(t) => OrderingTerm.asc(t.name)]))
+              .get();
 
-      return Result.success(results);
-    } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Right(results);
+    } catch (e) {
+      return Left(CacheFailure(e.toString()));
     }
   }
 
   /// Conta animais ativos do usuário
-  Future<Result<int>> countActiveAnimalsByUser(String userId) async {
+  Future<Either<Failure, int>> countActiveAnimalsByUser(String userId) async {
     try {
       final count = _db.animals.id.count();
       final query = _db.selectOnly(_db.animals)
@@ -125,18 +123,16 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
-    } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(e, stackTrace),
-      );
+      return Right(result.read(count) ?? 0);
+    } catch (e) {
+      return Left(CacheFailure(e.toString()));
     }
   }
 
   // ==================== SOFT DELETE ====================
 
   /// Soft delete de animal
-  Future<Result<int>> softDelete(int animalId) async {
+  Future<Either<Failure, int>> softDelete(int animalId) async {
     return updateWhere(
       (t) => t.id.equals(animalId),
       AnimalsCompanion(
@@ -148,7 +144,7 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   }
 
   /// Restaura animal deletado
-  Future<Result<int>> restore(int animalId) async {
+  Future<Either<Failure, int>> restore(int animalId) async {
     return updateWhere(
       (t) => t.id.equals(animalId),
       AnimalsCompanion(
@@ -162,7 +158,10 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   // ==================== HELPERS ====================
 
   /// Atualiza peso do animal
-  Future<Result<int>> updateWeight(int animalId, double newWeight) async {
+  Future<Either<Failure, int>> updateWeight(
+    int animalId,
+    double newWeight,
+  ) async {
     return updateWhere(
       (t) => t.id.equals(animalId),
       AnimalsCompanion(
@@ -173,7 +172,10 @@ class AnimalRepository extends DriftRepositoryBase<Animal, Animals> {
   }
 
   /// Atualiza foto do animal
-  Future<Result<int>> updatePhoto(int animalId, String photoPath) async {
+  Future<Either<Failure, int>> updatePhoto(
+    int animalId,
+    String photoPath,
+  ) async {
     return updateWhere(
       (t) => t.id.equals(animalId),
       AnimalsCompanion(

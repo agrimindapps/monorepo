@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../../../database/repositories/plant_tasks_drift_repository.dart';
@@ -83,9 +82,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       if (kDebugMode) {
         debugPrint('❌ PlantTasksLocalDatasource: Erro ao buscar tasks: $e');
       }
-      throw CacheFailure(
-        'Erro ao buscar tarefas do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar tarefas do cache local: ${e.toString()}');
     }
   }
 
@@ -108,7 +105,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           '❌ PlantTasksLocalDatasource: Erro ao buscar tasks por plantId: $e',
         );
       }
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar tarefas por planta do cache local: ${e.toString()}',
       );
     }
@@ -125,9 +122,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           '❌ PlantTasksLocalDatasource: Erro ao buscar task por ID: $e',
         );
       }
-      throw CacheFailure(
-        'Erro ao buscar tarefa do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar tarefa do cache local: ${e.toString()}');
     }
   }
 
@@ -162,9 +157,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       if (kDebugMode) {
         debugPrint('❌ PlantTasksLocalDatasource: Erro ao salvar task: $e');
       }
-      throw CacheFailure(
-        'Erro ao salvar tarefa no cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao salvar tarefa no cache local: ${e.toString()}');
     }
   }
 
@@ -209,7 +202,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           );
         }
       }
-      throw CacheFailure(
+      throw Exception(
         'Erro ao salvar tarefas em lote no cache local: ${e.toString()}',
       );
     }
@@ -233,7 +226,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           debugPrint('❌ PlantTasksLocalDatasource: Erro ao atualizar task: $e');
         }
       }
-      throw CacheFailure(
+      throw Exception(
         'Erro ao atualizar tarefa no cache local: ${e.toString()}',
       );
     }
@@ -256,9 +249,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           debugPrint('❌ PlantTasksLocalDatasource: Erro ao deletar task: $e');
         }
       }
-      throw CacheFailure(
-        'Erro ao deletar tarefa do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao deletar tarefa do cache local: ${e.toString()}');
     }
   }
 
@@ -287,7 +278,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           );
         }
       }
-      throw CacheFailure(
+      throw Exception(
         'Erro ao deletar tarefas por planta do cache local: ${e.toString()}',
       );
     }
@@ -301,7 +292,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           .where((task) => task.status == TaskStatus.pending)
           .toList();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar tarefas pendentes do cache local: ${e.toString()}',
       );
     }
@@ -315,7 +306,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           .where((task) => task.status == TaskStatus.overdue)
           .toList();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar tarefas atrasadas do cache local: ${e.toString()}',
       );
     }
@@ -327,7 +318,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final allTasks = await getPlantTasks();
       return allTasks.where((task) => task.isDueToday).toList();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar tarefas de hoje do cache local: ${e.toString()}',
       );
     }
@@ -339,7 +330,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
       final allTasks = await getPlantTasks();
       return allTasks.where((task) => task.isDueSoon).toList();
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao buscar tarefas próximas do cache local: ${e.toString()}',
       );
     }
@@ -360,7 +351,7 @@ class PlantTasksLocalDatasourceImpl implements PlantTasksLocalDatasource {
           debugPrint('❌ PlantTasksLocalDatasource: Erro ao limpar cache: $e');
         }
       }
-      throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
+      throw Exception('Erro ao limpar cache local: ${e.toString()}');
     }
   }
 

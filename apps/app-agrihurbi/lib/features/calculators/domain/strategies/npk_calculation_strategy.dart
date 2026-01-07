@@ -193,7 +193,7 @@ class NPKCalculationStrategy implements INutritionCalculatorStrategy {
     }
 
     return errors.isEmpty
-        ? ValidationResult.success(sanitizedInputs)
+        ? ValidationRight(sanitizedInputs)
         : ValidationResult.failure(errors, warnings);
   }
 

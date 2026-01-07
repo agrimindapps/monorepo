@@ -35,7 +35,7 @@ PetivetiDatabase petivetiDatabase(Ref ref) {
 
 /// Provider do AnimalRepository
 ///
-/// Usa DriftRepositoryBase para CRUD com Result<T> e error handling.
+/// Usa DriftRepositoryBase para CRUD com Either<Failure, T> e error handling.
 @riverpod
 AnimalRepository animalRepository(Ref ref) {
   final db = ref.watch(petivetiDatabaseProvider);

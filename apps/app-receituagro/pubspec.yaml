@@ -16,11 +16,6 @@ dependencies:
     path: ../../packages/core
 
   collection: any
-
-  # Drift - SQL Database
-
-  # Dependencies inherited from core package (declared here to satisfy linter)
-
   http: any
   drift: any
   riverpod_annotation: any
@@ -39,6 +34,7 @@ dependencies:
   flutter_tts: any
   url_launcher: any
   share_plus: any
+
 dev_dependencies:
   build_runner: ^2.7.1
   drift_dev: ^2.29.0

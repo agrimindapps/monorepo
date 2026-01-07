@@ -87,7 +87,7 @@ class DataExportRepositoryImpl implements DataExportRepository {
 
       onProgress?.call(ExportProgress.completed());
 
-      return ExportResult.success(
+      return ExportRight(
         filePath: filePath,
         metadata: finalMetadata,
         processingTime: DateTime.now().difference(startTime),

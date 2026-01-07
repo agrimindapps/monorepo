@@ -157,7 +157,7 @@ class _PragaDetalhesPageState extends ConsumerState<PragaDetalhesPage>
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: tipoPraga.color.withOpacity(0.1),
+                color: tipoPraga.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: praga.imageUrl != null && praga.imageUrl!.isNotEmpty
@@ -185,7 +185,7 @@ class _PragaDetalhesPageState extends ConsumerState<PragaDetalhesPage>
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: tipoPraga.color.withOpacity(0.1),
+                      color: tipoPraga.color.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -247,7 +247,7 @@ class _PragaDetalhesPageState extends ConsumerState<PragaDetalhesPage>
       child: Icon(
         tipoPraga.icon,
         size: 64,
-        color: tipoPraga.color.withOpacity(0.5),
+        color: tipoPraga.color.withValues(alpha: 0.5),
       ),
     );
   }

@@ -3,12 +3,14 @@ import 'dart:math';
 import 'app_error.dart';
 import 'error_logger.dart';
 
+/// Legacy compatibility typedef
+typedef Either<L, R> = Result<R>;
+
 /// Result wrapper for operations that can fail
 class Result<T> {
-  const Result._({this.data, this.error, required this.isSuccess});
-
   /// Create a successful result
   const Result.success(T data) : this._(data: data, isSuccess: true);
+  const Result._({this.data, this.error, required this.isSuccess});
 
   /// Create a failed result
   const Result.failure(AppError error) : this._(error: error, isSuccess: false);
@@ -211,10 +213,9 @@ class ErrorHandler {
       () => Future.any([
         operation(),
         Future<void>.delayed(timeout).then(
-          (_) =>
-              throw TimeoutException(
-                'Operation timed out after ${timeout.inSeconds}s',
-              ),
+          (_) => throw TimeoutException(
+            'Operation timed out after ${timeout.inSeconds}s',
+          ),
         ),
       ]),
       policy: policy,

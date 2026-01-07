@@ -1,9 +1,8 @@
+import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 
-import 'package:dartz/dartz.dart';
 import '../../../../shared/utils/failure.dart';
-import '../exceptions/drift_exceptions.dart';
 import '../interfaces/i_drift_repository.dart';
 
 /// Repositório base para operações Drift
@@ -52,12 +51,14 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(id);
     } catch (e) {
       debugPrint('$tableName: Failed to insert - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
   @override
-  Future<Either<Failure, List<int>>> insertAll(List<Insertable<T>> items) async {
+  Future<Either<Failure, List<int>>> insertAll(
+    List<Insertable<T>> items,
+  ) async {
     try {
       final ids = <int>[];
 
@@ -75,7 +76,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(ids);
     } catch (e) {
       debugPrint('$tableName: Failed to insert all - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -92,7 +93,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(updated ? 1 : 0);
     } catch (e) {
       debugPrint('$tableName: Failed to update - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -115,7 +116,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(totalUpdated);
     } catch (e) {
       debugPrint('$tableName: Failed to update all - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -134,7 +135,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(deleted > 0);
     } catch (e) {
       debugPrint('$tableName: Failed to delete - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -155,7 +156,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(deleted);
     } catch (e) {
       debugPrint('$tableName: Failed to delete all - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -172,7 +173,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(deleted);
     } catch (e) {
       debugPrint('$tableName: Failed to clear - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -195,7 +196,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(item);
     } catch (e) {
       debugPrint('$tableName: Failed to get by id - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -206,7 +207,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(items);
     } catch (e) {
       debugPrint('$tableName: Failed to get all - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -224,7 +225,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(items);
     } catch (e) {
       debugPrint('$tableName: Failed to get page - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -240,7 +241,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(count);
     } catch (e) {
       debugPrint('$tableName: Failed to count - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -254,7 +255,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(item != null);
     } catch (e) {
       debugPrint('$tableName: Failed to check exists - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -277,7 +278,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(result);
     } catch (e) {
       debugPrint('$tableName: Transaction failed - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -301,9 +302,9 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       debugPrint(
         '$tableName: Raw query not fully supported, use typed queries instead',
       );
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     } catch (e) {
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -324,7 +325,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     List<dynamic>? whereArgs,
   }) async {
     // Não suportado - use typed queries
-    return Left(ServerFailure('Operation failed: \$e'));
+    return const Left(ServerFailure('Operation failed: \$e'));
   }
 
   @override
@@ -333,7 +334,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
     List<dynamic>? whereArgs,
   }) async {
     // Não suportado - use typed queries
-    return Left(ServerFailure('Operation failed: \$e'));
+    return const Left(ServerFailure('Operation failed: \$e'));
   }
 
   @override
@@ -362,7 +363,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(ids);
     } catch (e) {
       debugPrint('$tableName: Failed to get all IDs - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -396,10 +397,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<int> countAsync() async {
     try {
       final countResult = await count();
-      return countResult.fold(
-        (failure) => 0,
-        (count) => count,
-      );
+      return countResult.fold((failure) => 0, (count) => count);
     } catch (e) {
       debugPrint('$tableName: Error in countAsync - $e');
       return 0;
@@ -412,7 +410,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<Either<Failure, List<T>>> getByIds(List<dynamic> ids) async {
     try {
       if (ids.isEmpty) {
-        return Right([]);
+        return const Right([]);
       }
 
       final items = await (database.select(
@@ -425,7 +423,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(items);
     } catch (e) {
       debugPrint('$tableName: Failed to get items by IDs - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -433,19 +431,16 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<Either<Failure, List<T>>> findBy(bool Function(T) predicate) async {
     try {
       final allResult = await getAll();
-      return allResult.fold(
-        (failure) => Left(failure),
-        (allItems) {
-          final filteredItems = allItems.where(predicate).toList();
-          debugPrint(
-            '$tableName: Found ${filteredItems.length} items matching predicate',
-          );
-          return Right(filteredItems);
-        },
-      );
+      return allResult.fold((failure) => Left(failure), (allItems) {
+        final filteredItems = allItems.where(predicate).toList();
+        debugPrint(
+          '$tableName: Found ${filteredItems.length} items matching predicate',
+        );
+        return Right(filteredItems);
+      });
     } catch (e) {
       debugPrint('$tableName: Failed to findBy - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -453,17 +448,14 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
   Future<Either<Failure, T?>> findFirst(bool Function(T) predicate) async {
     try {
       final findResult = await findBy(predicate);
-      return findResult.fold(
-        (failure) => Left(failure),
-        (items) {
-          final firstItem = items.isNotEmpty ? items.first : null;
-          debugPrint('$tableName: Found first item: ${firstItem != null}');
-          return Right(firstItem);
-        },
-      );
+      return findResult.fold((failure) => Left(failure), (items) {
+        final firstItem = items.isNotEmpty ? items.first : null;
+        debugPrint('$tableName: Found first item: ${firstItem != null}');
+        return Right(firstItem);
+      });
     } catch (e) {
       debugPrint('$tableName: Failed to findFirst - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -481,12 +473,14 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(id);
     } catch (e) {
       debugPrint('$tableName: Failed to upsert - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
   @override
-  Future<Either<Failure, List<int>>> upsertAll(List<Insertable<T>> items) async {
+  Future<Either<Failure, List<int>>> upsertAll(
+    List<Insertable<T>> items,
+  ) async {
     try {
       final ids = <int>[];
 
@@ -504,7 +498,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(ids);
     } catch (e) {
       debugPrint('$tableName: Failed to upsert all - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -524,7 +518,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       );
     } catch (e) {
       debugPrint('$tableName: Failed to countBy - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -541,7 +535,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(items);
     } catch (e) {
       debugPrint('$tableName: Failed to findWhere - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 
@@ -563,7 +557,7 @@ abstract class DriftRepositoryBase<T extends DataClass, TTable extends Table>
       return Right(updated);
     } catch (e) {
       debugPrint('$tableName: Failed to updateWhere - $e');
-      return Left(ServerFailure('Operation failed: \$e'));
+      return const Left(ServerFailure('Operation failed: \$e'));
     }
   }
 }

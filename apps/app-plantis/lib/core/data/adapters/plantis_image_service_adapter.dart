@@ -36,13 +36,13 @@ class PlantisImageServiceAdapter {
   /// Pick single image from gallery (Cross-platform)
   Future<Either<Failure, PickedImage>> pickImageFromGallery() async {
     final result = await _coreImageService.pickImageFromGallery();
-    return result.toEither();
+    return result;
   }
 
   /// Pick single image from camera (Cross-platform)
   Future<Either<Failure, PickedImage>> pickImageFromCamera() async {
     final result = await _coreImageService.pickImageFromCamera();
-    return result.toEither();
+    return result;
   }
 
   /// Pick multiple images (Cross-platform)
@@ -52,7 +52,7 @@ class PlantisImageServiceAdapter {
     final result = await _coreImageService.pickMultipleImages(
       maxImages: maxImages,
     );
-    return result.toEither();
+    return result;
   }
 
   /// Upload single image (Cross-platform)
@@ -74,7 +74,7 @@ class PlantisImageServiceAdapter {
       uploadType: uploadType,
       onProgress: onProgress,
     );
-    return result.toEither();
+    return result;
   }
 
   /// Upload multiple images (Cross-platform)
@@ -92,13 +92,13 @@ class PlantisImageServiceAdapter {
           ? (int index, double progress) => onProgress(progress)
           : null,
     );
-    return result.toEither();
+    return result;
   }
 
   /// Delete image
   Future<Either<Failure, void>> deleteImage(String downloadUrl) async {
     final result = await _coreImageService.deleteImage(downloadUrl);
-    return result.toEither();
+    return result;
   }
 
   /// Delete multiple images
@@ -106,7 +106,7 @@ class PlantisImageServiceAdapter {
     List<String> downloadUrls,
   ) async {
     final result = await _coreImageService.deleteMultipleImages(downloadUrls);
-    return result.toEither();
+    return result;
   }
 
   /// Compress image (Cross-platform)
@@ -122,7 +122,7 @@ class PlantisImageServiceAdapter {
       maxHeight: maxHeight,
       quality: quality,
     );
-    return result.toEither();
+    return result;
   }
 
   /// Preload single image (ImagePreloaderService compatibility)

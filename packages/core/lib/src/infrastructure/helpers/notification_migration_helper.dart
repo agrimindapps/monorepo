@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 
 import '../../domain/entities/notification_entity.dart';
@@ -22,10 +23,13 @@ class NotificationMigrationHelper {
       if (kDebugMode) {
         debugPrint('🚀 Starting notification migration...');
       }
-      final pendingNotifications = await _legacyService.getPendingNotifications();
+      final pendingNotifications = await _legacyService
+          .getPendingNotifications();
 
       if (kDebugMode) {
-        debugPrint('📋 Found ${pendingNotifications.length} notifications to migrate');
+        debugPrint(
+          '📋 Found ${pendingNotifications.length} notifications to migrate',
+        );
       }
       for (final notification in pendingNotifications) {
         await _migrateNotification(notification, result);
@@ -58,10 +62,13 @@ class NotificationMigrationHelper {
       Map<String, dynamic> legacyData = {};
       if (notification.payload != null) {
         try {
-          legacyData = jsonDecode(notification.payload!) as Map<String, dynamic>;
+          legacyData =
+              jsonDecode(notification.payload!) as Map<String, dynamic>;
         } catch (e) {
           if (kDebugMode) {
-            debugPrint('⚠️ Failed to parse payload for notification ${notification.id}: $e');
+            debugPrint(
+              '⚠️ Failed to parse payload for notification ${notification.id}: $e',
+            );
           }
         }
       }
@@ -75,13 +82,21 @@ class NotificationMigrationHelper {
         importance: _mapLegacyImportance(legacyData),
         scheduledDate: _extractScheduledDate(legacyData),
       );
-      final success = await _enhancedService.scheduleNotification(enhancedNotification);
+      final success = await _enhancedService.scheduleNotification(
+        enhancedNotification,
+      );
 
       if (success) {
-        result.addSuccess(notification.id, 'Successfully migrated notification');
+        result.addSuccess(
+          notification.id,
+          'Successfully migrated notification',
+        );
         await _legacyService.cancelNotification(notification.id);
       } else {
-        result.addFailure(notification.id, 'Failed to schedule in enhanced service');
+        result.addFailure(
+          notification.id,
+          'Failed to schedule in enhanced service',
+        );
       }
     } catch (e) {
       result.addFailure(notification.id, 'Migration error: $e');
@@ -119,7 +134,9 @@ class NotificationMigrationHelper {
   ///
   /// [legacyData] - Legacy data that may contain priority info
   /// Returns enhanced priority entity
-  NotificationPriorityEntity _mapLegacyPriority(Map<String, dynamic> legacyData) {
+  NotificationPriorityEntity _mapLegacyPriority(
+    Map<String, dynamic> legacyData,
+  ) {
     final priorityStr = legacyData['priority'] as String?;
 
     switch (priorityStr?.toLowerCase()) {
@@ -140,7 +157,9 @@ class NotificationMigrationHelper {
   ///
   /// [legacyData] - Legacy data that may contain importance info
   /// Returns enhanced importance entity
-  NotificationImportanceEntity _mapLegacyImportance(Map<String, dynamic> legacyData) {
+  NotificationImportanceEntity _mapLegacyImportance(
+    Map<String, dynamic> legacyData,
+  ) {
     final importanceStr = legacyData['importance'] as String?;
 
     switch (importanceStr?.toLowerCase()) {
@@ -189,34 +208,51 @@ class NotificationMigrationHelper {
   ///
   /// [result] - Migration result to validate
   /// Returns validation result
-  Future<MigrationValidationResult> validateMigration(MigrationResult result) async {
+  Future<MigrationValidationResult> validateMigration(
+    MigrationResult result,
+  ) async {
     final validationResult = MigrationValidationResult();
 
     try {
-      final enhancedNotifications = await _enhancedService.getPendingNotifications();
-      final legacyNotifications = await _legacyService.getPendingNotifications();
+      final enhancedNotifications = await _enhancedService
+          .getPendingNotifications();
+      final legacyNotifications = await _legacyService
+          .getPendingNotifications();
 
       validationResult.enhancedNotificationCount = enhancedNotifications.length;
       validationResult.legacyNotificationCount = legacyNotifications.length;
       for (final successId in result.successIds) {
-        final hasInEnhanced = enhancedNotifications.any((n) => n.id == successId);
+        final hasInEnhanced = enhancedNotifications.any(
+          (n) => n.id == successId,
+        );
         final hasInLegacy = legacyNotifications.any((n) => n.id == successId);
 
         if (hasInEnhanced && !hasInLegacy) {
           validationResult.addValidNotification(successId);
         } else if (!hasInEnhanced && hasInLegacy) {
-          validationResult.addMigrationError(successId, 'Notification not found in enhanced service');
+          validationResult.addMigrationError(
+            successId,
+            'Notification not found in enhanced service',
+          );
         } else if (hasInEnhanced && hasInLegacy) {
-          validationResult.addMigrationWarning(successId, 'Notification exists in both services');
+          validationResult.addMigrationWarning(
+            successId,
+            'Notification exists in both services',
+          );
         } else {
-          validationResult.addMigrationError(successId, 'Notification missing from both services');
+          validationResult.addMigrationError(
+            successId,
+            'Notification missing from both services',
+          );
         }
       }
 
       validationResult.isValid = validationResult.errors.isEmpty;
 
       if (kDebugMode) {
-        debugPrint('🔍 Migration validation completed: ${validationResult.summary}');
+        debugPrint(
+          '🔍 Migration validation completed: ${validationResult.summary}',
+        );
       }
 
       return validationResult;
@@ -243,15 +279,20 @@ class NotificationMigrationHelper {
 
     for (final successId in result.successIds) {
       try {
-        final enhancedNotifications = await _enhancedService.getPendingNotifications();
-        final notification = enhancedNotifications.firstWhereOrNull((n) => n.id == successId);
+        final enhancedNotifications = await _enhancedService
+            .getPendingNotifications();
+        final notification = enhancedNotifications.firstWhereOrNull(
+          (n) => n.id == successId,
+        );
 
         if (notification != null) {
           Map<String, dynamic> legacyData = {};
           if (notification.payload != null) {
             try {
-              final enhancedPayload = jsonDecode(notification.payload!) as Map<String, dynamic>;
-              legacyData = enhancedPayload['legacyData'] as Map<String, dynamic>? ?? {};
+              final enhancedPayload =
+                  jsonDecode(notification.payload!) as Map<String, dynamic>;
+              legacyData =
+                  enhancedPayload['legacyData'] as Map<String, dynamic>? ?? {};
             } catch (e) {
               legacyData = {
                 'title': notification.title,
@@ -266,16 +307,24 @@ class NotificationMigrationHelper {
             payload: jsonEncode(legacyData),
             channelId: legacyData['channelId'] as String? ?? 'default',
           );
-          final success = await _legacyService.scheduleNotification(legacyNotification);
+          final success = await _legacyService.scheduleNotification(
+            legacyNotification,
+          );
 
           if (success) {
             await _enhancedService.cancelNotification(successId);
             rollbackResult.addSuccess(successId);
           } else {
-            rollbackResult.addFailure(successId, 'Failed to restore to legacy service');
+            rollbackResult.addFailure(
+              successId,
+              'Failed to restore to legacy service',
+            );
           }
         } else {
-          rollbackResult.addFailure(successId, 'Notification not found in enhanced service');
+          rollbackResult.addFailure(
+            successId,
+            'Notification not found in enhanced service',
+          );
         }
       } catch (e) {
         rollbackResult.addFailure(successId, 'Rollback error: $e');

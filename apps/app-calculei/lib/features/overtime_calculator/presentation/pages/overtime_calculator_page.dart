@@ -28,6 +28,7 @@ class OvertimeCalculatorPage extends ConsumerStatefulWidget {
 class _OvertimeCalculatorPageState
     extends ConsumerState<OvertimeCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
+  Key _formKeyId = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +85,7 @@ class _OvertimeCalculatorPageState
 
                           // Input Form
                           OvertimeInputForm(
+                            key: _formKeyId,
                             formKey: _formKey,
                             onCalculate: _handleCalculate,
                           ),
@@ -182,7 +184,9 @@ class _OvertimeCalculatorPageState
   }
 
   void _handleClear() {
-    _formKey.currentState?.reset();
+    setState(() {
+      _formKeyId = UniqueKey();
+    });
     ref
         .read(overtimeCalculatorProvider.notifier)
         .clearCalculation();

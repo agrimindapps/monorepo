@@ -1,16 +1,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
 import '../../shared/enums/log_level.dart';
 import '../../shared/utils/app_error.dart';
-import '../../shared/utils/result.dart';
+import '../../shared/utils/failure.dart';
 
 /// Enhanced Logging Service - Sistema avançado de logs
-/// 
+///
 /// Funcionalidades:
 /// - Múltiplos níveis de log (trace, debug, info, warning, error, critical)
 /// - Persistência local com rotação automática de arquivos
@@ -45,21 +46,21 @@ class EnhancedLoggingService {
   bool _initialized = false;
 
   /// Inicializa o logging service
-  Future<Result<void>> initialize({
+  Future<Either<Failure, void>> initialize({
     LogLevel minLevel = LogLevel.info,
     bool persistLogs = true,
     bool enableConsoleOutput = kDebugMode,
     bool enableStructuredLogging = true,
     List<String>? enabledCategories,
   }) async {
-    if (_initialized) return Result.success(null);
+    if (_initialized) return const Right(null);
 
     try {
       _minLevel = minLevel;
       _persistLogs = persistLogs;
       _enableConsoleOutput = enableConsoleOutput;
       _enableStructuredLogging = enableStructuredLogging;
-      
+
       if (enabledCategories != null) {
         _enabledCategories.addAll(enabledCategories);
       }
@@ -67,20 +68,22 @@ class EnhancedLoggingService {
       if (_persistLogs) {
         await _initializeFileLogging();
       }
-      await info('Enhanced Logging Service initialized', 
-                 category: 'SYSTEM', 
-                 metadata: {'minLevel': minLevel.name});
+      await info(
+        'Enhanced Logging Service initialized',
+        category: 'SYSTEM',
+        metadata: {'minLevel': minLevel.name},
+      );
 
       _initialized = true;
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         StorageError(
           message: 'Erro ao inicializar logging service: ${e.toString()}',
           code: 'LOGGING_INIT_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -93,11 +96,14 @@ class EnhancedLoggingService {
     Object? error,
     StackTrace? stackTrace,
   }) async {
-    await _log(LogLevel.trace, message, 
-              category: category, 
-              metadata: metadata, 
-              error: error, 
-              stackTrace: stackTrace);
+    await _log(
+      LogLevel.trace,
+      message,
+      category: category,
+      metadata: metadata,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Log de debug
@@ -108,11 +114,14 @@ class EnhancedLoggingService {
     Object? error,
     StackTrace? stackTrace,
   }) async {
-    await _log(LogLevel.debug, message, 
-              category: category, 
-              metadata: metadata, 
-              error: error, 
-              stackTrace: stackTrace);
+    await _log(
+      LogLevel.debug,
+      message,
+      category: category,
+      metadata: metadata,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Log informativo
@@ -123,11 +132,14 @@ class EnhancedLoggingService {
     Object? error,
     StackTrace? stackTrace,
   }) async {
-    await _log(LogLevel.info, message, 
-              category: category, 
-              metadata: metadata, 
-              error: error, 
-              stackTrace: stackTrace);
+    await _log(
+      LogLevel.info,
+      message,
+      category: category,
+      metadata: metadata,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Log de warning
@@ -139,11 +151,14 @@ class EnhancedLoggingService {
     StackTrace? stackTrace,
   }) async {
     _warningCount++;
-    await _log(LogLevel.warning, message, 
-              category: category, 
-              metadata: metadata, 
-              error: error, 
-              stackTrace: stackTrace);
+    await _log(
+      LogLevel.warning,
+      message,
+      category: category,
+      metadata: metadata,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Log de erro
@@ -156,11 +171,14 @@ class EnhancedLoggingService {
   }) async {
     _errorCount++;
     _lastError = DateTime.now();
-    await _log(LogLevel.error, message, 
-              category: category, 
-              metadata: metadata, 
-              error: error, 
-              stackTrace: stackTrace);
+    await _log(
+      LogLevel.error,
+      message,
+      category: category,
+      metadata: metadata,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Log crítico
@@ -173,11 +191,14 @@ class EnhancedLoggingService {
   }) async {
     _errorCount++;
     _lastError = DateTime.now();
-    await _log(LogLevel.critical, message, 
-              category: category, 
-              metadata: metadata, 
-              error: error, 
-              stackTrace: stackTrace);
+    await _log(
+      LogLevel.critical,
+      message,
+      category: category,
+      metadata: metadata,
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   /// Log de AppError estruturado
@@ -203,7 +224,10 @@ class EnhancedLoggingService {
   }
 
   /// Inicia tracking de performance
-  void startPerformanceTracking(String operation, {Map<String, dynamic>? metadata}) {
+  void startPerformanceTracking(
+    String operation, {
+    Map<String, dynamic>? metadata,
+  }) {
     _performanceTrackers[operation] = PerformanceTracker(
       operation: operation,
       startTime: DateTime.now(),
@@ -212,12 +236,15 @@ class EnhancedLoggingService {
   }
 
   /// Finaliza tracking de performance
-  Future<void> endPerformanceTracking(String operation, {Map<String, dynamic>? additionalMetadata}) async {
+  Future<void> endPerformanceTracking(
+    String operation, {
+    Map<String, dynamic>? additionalMetadata,
+  }) async {
     final tracker = _performanceTrackers.remove(operation);
     if (tracker == null) return;
 
     final duration = DateTime.now().difference(tracker.startTime);
-    
+
     final metadata = <String, dynamic>{
       'operation': operation,
       'durationMs': duration.inMilliseconds,
@@ -226,8 +253,10 @@ class EnhancedLoggingService {
       ...?tracker.metadata,
       ...?additionalMetadata,
     };
-    final level = duration.inMilliseconds > 5000 ? LogLevel.warning : LogLevel.info;
-    
+    final level = duration.inMilliseconds > 5000
+        ? LogLevel.warning
+        : LogLevel.info;
+
     await _log(
       level,
       'Performance: $operation completed in ${duration.inMilliseconds}ms',
@@ -237,7 +266,7 @@ class EnhancedLoggingService {
   }
 
   /// Busca logs por critérios
-  Future<Result<List<EnhancedLogEntry>>> searchLogs({
+  Future<Either<Failure, List<EnhancedLogEntry>>> searchLogs({
     LogLevel? minLevel,
     LogLevel? maxLevel,
     String? category,
@@ -248,17 +277,22 @@ class EnhancedLoggingService {
   }) async {
     if (!_initialized) {
       final initResult = await initialize();
-      if (initResult.isError) return Result.error(initResult.error!);
+      final left = initResult.fold((l) => l, (_) => null);
+      if (left != null) return Left(left);
     }
 
     try {
       List<EnhancedLogEntry> results = List.from(_memoryBuffer);
       if (minLevel != null) {
-        results = results.where((log) => log.level.index >= minLevel.index).toList();
+        results = results
+            .where((log) => log.level.index >= minLevel.index)
+            .toList();
       }
 
       if (maxLevel != null) {
-        results = results.where((log) => log.level.index <= maxLevel.index).toList();
+        results = results
+            .where((log) => log.level.index <= maxLevel.index)
+            .toList();
       }
 
       if (category != null) {
@@ -267,39 +301,47 @@ class EnhancedLoggingService {
 
       if (textQuery != null) {
         final query = textQuery.toLowerCase();
-        results = results.where((log) => 
-          log.message.toLowerCase().contains(query) ||
-          (log.metadata?.toString().toLowerCase().contains(query) ?? false)
-        ).toList();
+        results = results
+            .where(
+              (log) =>
+                  log.message.toLowerCase().contains(query) ||
+                  (log.metadata?.toString().toLowerCase().contains(query) ??
+                      false),
+            )
+            .toList();
       }
 
       if (startDate != null) {
-        results = results.where((log) => log.timestamp.isAfter(startDate)).toList();
+        results = results
+            .where((log) => log.timestamp.isAfter(startDate))
+            .toList();
       }
 
       if (endDate != null) {
-        results = results.where((log) => log.timestamp.isBefore(endDate)).toList();
+        results = results
+            .where((log) => log.timestamp.isBefore(endDate))
+            .toList();
       }
       results.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       if (limit != null && results.length > limit) {
         results = results.take(limit).toList();
       }
 
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         StorageError(
           message: 'Erro ao buscar logs: ${e.toString()}',
           code: 'LOG_SEARCH_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Exporta logs para arquivo
-  Future<Result<String>> exportLogs({
+  Future<Either<Failure, String>> exportLogs({
     LogLevel? minLevel,
     String? category,
     DateTime? startDate,
@@ -314,14 +356,14 @@ class EnhancedLoggingService {
         endDate: endDate,
       );
 
-      if (searchResult.isError) {
-        return Result.error(searchResult.error!);
-      }
+      final logs = searchResult.fold((failure) => null, (data) => data);
 
-      final logs = searchResult.data!;
+      if (logs == null) {
+        return Left(searchResult.fold((l) => l, (r) => throw Exception()));
+      }
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'logs_export_$timestamp.${format.extension}';
-      
+
       final tempDir = await getTemporaryDirectory();
       final exportFile = File(path.join(tempDir.path, fileName));
 
@@ -340,21 +382,21 @@ class EnhancedLoggingService {
 
       await exportFile.writeAsString(content);
 
-      return Result.success(exportFile.path);
+      return Right(exportFile.path);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         StorageError(
           message: 'Erro ao exportar logs: ${e.toString()}',
           code: 'LOG_EXPORT_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Limpa logs antigos
-  Future<Result<void>> clearLogs({
+  Future<Either<Failure, void>> clearLogs({
     Duration? olderThan,
     LogLevel? maxLevel,
     String? category,
@@ -374,29 +416,32 @@ class EnhancedLoggingService {
         await _cleanOldLogFiles(olderThan);
       }
 
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         StorageError(
           message: 'Erro ao limpar logs: ${e.toString()}',
           code: 'LOG_CLEAR_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
 
   /// Obtém estatísticas de logs
-  Future<Result<LoggingStats>> getStats() async {
+  Future<Either<Failure, LoggingStats>> getStats() async {
     try {
       final memoryLogs = _memoryBuffer.length;
-      
-      final categories = _memoryBuffer.map((log) => log.category).where((c) => c != null).toSet();
-      
+
+      final categories = _memoryBuffer
+          .map((log) => log.category)
+          .where((c) => c != null)
+          .toSet();
+
       int diskLogFiles = 0;
       int diskLogSize = 0;
-      
+
       if (_persistLogs && await _logsDir.exists()) {
         await for (final file in _logsDir.list()) {
           if (file is File && path.extension(file.path) == '.log') {
@@ -418,15 +463,15 @@ class EnhancedLoggingService {
         activePerformanceTrackers: _performanceTrackers.length,
       );
 
-      return Result.success(stats);
+      return Right(stats);
     } catch (e, stackTrace) {
-      return Result.error(
+      return Left(
         StorageError(
           message: 'Erro ao obter estatísticas: ${e.toString()}',
           code: 'LOG_STATS_ERROR',
           details: e.toString(),
           stackTrace: stackTrace,
-        ),
+        ).toFailure(),
       );
     }
   }
@@ -440,7 +485,9 @@ class EnhancedLoggingService {
     StackTrace? stackTrace,
   }) async {
     if (level.index < _minLevel.index) return;
-    if (category != null && _enabledCategories.isNotEmpty && !_enabledCategories.contains(category)) {
+    if (category != null &&
+        _enabledCategories.isNotEmpty &&
+        !_enabledCategories.contains(category)) {
       return;
     }
 
@@ -475,9 +522,9 @@ class EnhancedLoggingService {
     final prefix = '[${entry.level.name.toUpperCase()}]';
     final timestamp = entry.timestamp.toIso8601String();
     final category = entry.category != null ? '[${entry.category}]' : '';
-    
+
     final message = '$prefix $timestamp $category ${entry.message}';
-    
+
     switch (entry.level) {
       case LogLevel.error:
       case LogLevel.critical:
@@ -501,7 +548,8 @@ class EnhancedLoggingService {
       debugPrint('  Error: ${entry.error}');
     }
 
-    if (entry.stackTrace != null && (entry.level == LogLevel.error || entry.level == LogLevel.critical)) {
+    if (entry.stackTrace != null &&
+        (entry.level == LogLevel.error || entry.level == LogLevel.critical)) {
       debugPrint('  StackTrace: ${entry.stackTrace}');
     }
   }
@@ -509,7 +557,7 @@ class EnhancedLoggingService {
   Future<void> _initializeFileLogging() async {
     final appDir = await getApplicationDocumentsDirectory();
     _logsDir = Directory(path.join(appDir.path, _logsDirectory));
-    
+
     if (!await _logsDir.exists()) {
       await _logsDir.create(recursive: true);
     }
@@ -531,7 +579,8 @@ class EnhancedLoggingService {
       if (_enableStructuredLogging) {
         logLine = jsonEncode(entry.toMap());
       } else {
-        logLine = '${entry.timestamp.toIso8601String()} [${entry.level.name.toUpperCase()}] ${entry.category} ${entry.message}';
+        logLine =
+            '${entry.timestamp.toIso8601String()} [${entry.level.name.toUpperCase()}] ${entry.category} ${entry.message}';
         if (entry.error != null) {
           logLine += ' | Error: ${entry.error}';
         }
@@ -551,7 +600,9 @@ class EnhancedLoggingService {
           logFiles.add(entity);
         }
       }
-      logFiles.sort((a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()));
+      logFiles.sort(
+        (a, b) => a.lastModifiedSync().compareTo(b.lastModifiedSync()),
+      );
       while (logFiles.length >= _maxLogFiles) {
         await logFiles.removeAt(0).delete();
       }
@@ -565,7 +616,7 @@ class EnhancedLoggingService {
   Future<void> _cleanOldLogFiles(Duration olderThan) async {
     try {
       final cutoff = DateTime.now().subtract(olderThan);
-      
+
       await for (final entity in _logsDir.list()) {
         if (entity is File && path.extension(entity.path) == '.log') {
           final lastModified = await entity.lastModified();
@@ -604,10 +655,10 @@ class EnhancedLoggingService {
         log.error?.replaceAll('\n', '\\n') ?? '',
         log.metadata?.toString().replaceAll('\n', '\\n') ?? '',
       ].join(',');
-      
+
       buffer.writeln(row);
     }
-    
+
     return buffer.toString();
   }
 
@@ -615,11 +666,13 @@ class EnhancedLoggingService {
   Future<void> dispose() async {
     if (_persistLogs) {
       for (final tracker in _performanceTrackers.values) {
-        await endPerformanceTracking(tracker.operation, 
-                                    additionalMetadata: {'status': 'force_ended_on_dispose'});
+        await endPerformanceTracking(
+          tracker.operation,
+          additionalMetadata: {'status': 'force_ended_on_dispose'},
+        );
       }
     }
-    
+
     _performanceTrackers.clear();
     _memoryBuffer.clear();
     _initialized = false;
@@ -661,7 +714,9 @@ class EnhancedLogEntry {
   @override
   String toString() {
     final buffer = StringBuffer();
-    buffer.write('[${level.name.toUpperCase()}] ${timestamp.toIso8601String()}');
+    buffer.write(
+      '[${level.name.toUpperCase()}] ${timestamp.toIso8601String()}',
+    );
     if (category != null) buffer.write(' [$category]');
     buffer.write(' $message');
     if (error != null) buffer.write(' | Error: $error');
@@ -733,11 +788,11 @@ class LoggingStats {
   @override
   String toString() {
     return 'LoggingStats('
-           'total: $totalLogs, '
-           'errors: $errorCount, '
-           'warnings: $warningCount, '
-           'files: $diskLogFiles, '
-           'size: ${_formatBytes(diskLogSize)})';
+        'total: $totalLogs, '
+        'errors: $errorCount, '
+        'warnings: $warningCount, '
+        'files: $diskLogFiles, '
+        'size: ${_formatBytes(diskLogSize)})';
   }
 
   String _formatBytes(int bytes) {

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +21,9 @@ class Pipe extends PositionComponent with HasGameRef<FlappyBirdGame> {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     if (!gameRef.isPlaying) return;
-    
+
     position.x -= gameRef.gameSpeed * dt;
 
     if (position.x + size.x < 0) {
@@ -45,13 +43,13 @@ class Pipe extends PositionComponent with HasGameRef<FlappyBirdGame> {
     final rect = size.toRect();
     canvas.drawRect(rect, paint);
     canvas.drawRect(rect, borderPaint);
-    
+
     // Draw pipe cap
     final capHeight = 20.0;
-    final capRect = isTopPipe 
+    final capRect = isTopPipe
         ? Rect.fromLTWH(-2, size.y - capHeight, size.x + 4, capHeight)
         : Rect.fromLTWH(-2, 0, size.x + 4, capHeight);
-        
+
     canvas.drawRect(capRect, paint);
     canvas.drawRect(capRect, borderPaint);
   }

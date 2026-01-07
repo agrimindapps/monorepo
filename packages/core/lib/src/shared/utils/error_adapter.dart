@@ -3,9 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'app_error.dart';
 import 'failure.dart';
-import 'result.dart';
 
-/// Adaptador para converter entre o sistema antigo (Either<Failure, T>) e o novo (Result<T>)
+/// Adaptador para converter entre o sistema antigo (Either<Failure, T>) e o novo (Either<Failure, T>)
 /// Facilita a migração gradual do sistema de erros
 class ErrorAdapter {
   /// Converte Failure para AppError
@@ -18,36 +17,28 @@ class ErrorAdapter {
     return error.toFailure();
   }
 
-  /// Converte Either<Failure, T> para Result<T>
-  static Result<T> eitherToResult<T>(Either<Failure, T> either) {
-    return either.fold(
-      (failure) => Result.error(failureToAppError(failure)),
-      (success) => Result.success(success),
-    );
+  /// Retorna Either sem conversão (método legacy, mantido para compatibilidade)
+  static Either<Failure, T> eitherToResult<T>(Either<Failure, T> either) {
+    return either;
   }
 
-  /// Converte Result<T> para Either<Failure, T>
-  static Either<Failure, T> resultToEither<T>(Result<T> result) {
-    return result.fold(
-      (error) => Left(appErrorToFailure(error)),
-      (success) => Right(success),
-    );
+  /// Retorna Either sem conversão (método legacy, mantido para compatibilidade)
+  static Either<Failure, T> resultToEither<T>(Either<Failure, T> result) {
+    return result;
   }
 
-  /// Converte Future<Either<Failure, T>> para Future<Result<T>>
-  static Future<Result<T>> futureEitherToResult<T>(
+  /// Retorna Future<Either> sem conversão (método legacy, mantido para compatibilidade)
+  static Future<Either<Failure, T>> futureEitherToResult<T>(
     Future<Either<Failure, T>> futureEither,
   ) async {
-    final either = await futureEither;
-    return eitherToResult(either);
+    return futureEither;
   }
 
-  /// Converte Future<Result<T>> para Future<Either<Failure, T>>
+  /// Retorna Future<Either> sem conversão (método legacy, mantido para compatibilidade)
   static Future<Either<Failure, T>> futureResultToEither<T>(
-    Future<Result<T>> futureResult,
+    Future<Either<Failure, T>> futureResult,
   ) async {
-    final result = await futureResult;
-    return resultToEither(result);
+    return futureResult;
   }
 }
 
@@ -57,25 +48,26 @@ class RepositoryWrapper<T> {
 
   RepositoryWrapper(this._operation);
 
-  /// Executa a operação e retorna Result
-  Future<Result<T>> execute() async {
+  /// Executa a operação e retorna Either
+  Future<Either<Failure, T>> execute() async {
     try {
-      final either = await _operation();
-      return either.toResult();
+      return await _operation();
     } catch (error, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(error, stackTrace));
+      final appError = AppErrorFactory.fromException(error, stackTrace);
+      final failure = appError.toFailure();
+      return Left(failure);
     }
   }
 }
 
 /// Helper para migração gradual de UseCases
 abstract class MigratedUseCase<T, P> {
-  Future<Result<T>> executeNew(P params);
+  Future<Either<Failure, T>> executeNew(P params);
 
   /// Chamado para manter a compatibilidade com o sistema antigo
   Future<Either<Failure, T>> call(P params) async {
     final result = await executeNew(params);
-    return result.toEither();
+    return result;
   }
 }
 
@@ -96,15 +88,19 @@ mixin ErrorHandlingMixin on ChangeNotifier {
     }
   }
 
-  /// Define um erro
-  void setError(AppError error) {
-    _lastError = error;
+  /// Define um erro a partir de uma Failure ou AppError
+  void setError(dynamic error) {
+    if (error is AppError) {
+      _lastError = error;
+    } else if (error is Failure) {
+      _lastError = AppErrorFactory.fromFailure(error);
+    }
     _hasError = true;
     notifyListeners();
   }
 
   /// Executa uma operação e trata erros automaticamente
-  Future<T?> handleOperation<T>(Future<Result<T>> Function() operation) async {
+  Future<T?> handleOperation<T>(Future<Either<Failure, T>> Function() operation) async {
     clearError();
 
     final result = await operation();
@@ -115,19 +111,16 @@ mixin ErrorHandlingMixin on ChangeNotifier {
     }, (data) => data);
   }
 
-  /// Executa uma operação Either e converte para Result
+  /// Executa uma operação Either e trata erros
   Future<T?> handleEitherOperation<T>(
     Future<Either<Failure, T>> Function() operation,
   ) async {
-    return handleOperation(() async {
-      final either = await operation();
-      return either.toResult();
-    });
+    return handleOperation(operation);
   }
 
   /// Executa operação com callback de sucesso
   Future<T?> handleOperationWithCallback<T>(
-    Future<Result<T>> Function() operation, {
+    Future<Either<Failure, T>> Function() operation, {
     void Function(T data)? onSuccess,
     void Function(AppError error)? onError,
   }) async {
@@ -307,23 +300,15 @@ class ErrorLogger {
 }
 
 /// Extensões de compatibilidade retroativa
-extension ResultCompatExtensions<T> on Result<T> {
-  /// Converte para Either (compatibilidade)
-  Either<Failure, T> asEither() => toEither();
+extension ResultCompatExtensions<T> on Either<Failure, T> {
+  /// Retorna Either sem conversão (compatibilidade)
+  Either<Failure, T> asEither() => this;
 }
 
 extension EitherCompatExtensions<L extends Failure, R> on Either<L, R> {
-  /// Converte para Result (migração)
-  Result<R> asResult() => toResult();
-}
-
-extension FutureEitherCompatExtensions<L extends Failure, R>
-    on Future<Either<L, R>> {
-  /// Converte para Future<Result> (migração)
-  Future<Result<R>> asResult() => toResult();
-}
-
-extension FutureResultCompatExtensions<T> on Future<Result<T>> {
-  /// Converte para Future<Either> (compatibilidade)
-  Future<Either<Failure, T>> asEither() => toEither();
+  /// Retorna Either sem conversão (migração)
+  Either<Failure, R> asResult() => fold(
+    (failure) => Left(failure),
+    (right) => Right(right),
+  );
 }

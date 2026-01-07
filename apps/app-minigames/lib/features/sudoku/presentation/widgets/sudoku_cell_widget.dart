@@ -50,11 +50,11 @@ class SudokuCellWidget extends StatelessWidget {
 
     switch (cell.state) {
       case CellState.selected:
-        return theme.primaryColor.withOpacity(0.3);
+        return theme.primaryColor.withValues(alpha: 0.3);
       case CellState.highlighted:
-        return theme.primaryColor.withOpacity(0.1);
+        return theme.primaryColor.withValues(alpha: 0.1);
       case CellState.sameNumber:
-        return theme.primaryColor.withOpacity(0.2);
+        return theme.primaryColor.withValues(alpha: 0.2);
       case CellState.error:
         return Colors.red.shade200;
       case CellState.normal:

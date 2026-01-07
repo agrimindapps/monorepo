@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
@@ -21,14 +19,14 @@ class Tile extends PositionComponent {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    
+
     final paint = Paint()..color = _getTileColor(value);
     final rrect = RRect.fromRectAndRadius(
       size.toRect(),
       Radius.circular(cornerRadius),
     );
     canvas.drawRRect(rrect, paint);
-    
+
     // Draw text
     final textSpan = TextSpan(
       text: '$value',
@@ -38,12 +36,12 @@ class Tile extends PositionComponent {
         color: value <= 4 ? const Color(0xFF776E65) : Colors.white,
       ),
     );
-    
+
     final textPainter = TextPainter(
       text: textSpan,
       textDirection: TextDirection.ltr,
     );
-    
+
     textPainter.layout();
     textPainter.paint(
       canvas,
@@ -53,32 +51,26 @@ class Tile extends PositionComponent {
       ),
     );
   }
-  
+
   void updateValue(int newValue) {
     value = newValue;
   }
-  
+
   void merge() {
     add(
       ScaleEffect.by(
         Vector2.all(1.2),
-        EffectController(
-          duration: 0.1,
-          reverseDuration: 0.1,
-        ),
+        EffectController(duration: 0.1, reverseDuration: 0.1),
       ),
     );
   }
-  
+
   void spawn() {
     scale = Vector2.zero();
     add(
       ScaleEffect.to(
         Vector2.all(1.0),
-        EffectController(
-          duration: 0.2,
-          curve: Curves.easeOutBack,
-        ),
+        EffectController(duration: 0.2, curve: Curves.easeOutBack),
       ),
     );
   }

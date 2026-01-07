@@ -34,7 +34,7 @@ class ImageServiceAdapter implements IImageService {
       debugPrint('📷 [ImageServiceAdapter] pickFromGallery - Iniciando');
       final result = await _imageService.pickImageFromGallery();
       debugPrint(
-        '📷 [ImageServiceAdapter] pickFromGallery - pickImageFromGallery concluído: ${result.isSuccess ? "Sucesso" : "Erro"}',
+        '📷 [ImageServiceAdapter] pickFromGallery - pickImageFromGallery concluído: ${result.fold((_) => "Erro", (_) => "Sucesso")}',
       );
 
       return result.fold(
@@ -185,14 +185,14 @@ class ImageManagementService {
     const maxImages = 5; // Limite máximo de imagens por planta
 
     if (currentImages.length >= maxImages) {
-      return ImageListResult.error(
+      return ImageListResult.failure(
         'Máximo de $maxImages imagens permitidas por planta',
         currentImages,
       );
     }
 
     if (currentImages.contains(newImage)) {
-      return ImageListResult.error(
+      return ImageListResult.failure(
         'Esta imagem já foi adicionada',
         currentImages,
       );
@@ -209,7 +209,7 @@ class ImageManagementService {
   /// Remove imagem da lista
   ImageListResult removeImageFromList(List<String> currentImages, int index) {
     if (index < 0 || index >= currentImages.length) {
-      return ImageListResult.error('Índice da imagem inválido', currentImages);
+      return ImageListResult.failure('Índice da imagem inválido', currentImages);
     }
 
     final updatedList = List<String>.from(currentImages)..removeAt(index);
@@ -223,7 +223,7 @@ class ImageManagementService {
     String imageToRemove,
   ) {
     if (!currentImages.contains(imageToRemove)) {
-      return ImageListResult.error(
+      return ImageListResult.failure(
         'Imagem não encontrada na lista',
         currentImages,
       );
@@ -374,7 +374,7 @@ class ImageListResult {
     );
   }
 
-  factory ImageListResult.error(String message, List<String> currentImages) {
+  factory ImageListResult.failure(String message, List<String> currentImages) {
     return ImageListResult._(
       isSuccess: false,
       message: message,

@@ -1,5 +1,6 @@
+import 'package:dartz/dartz.dart';
 import '../../../../shared/utils/app_error.dart';
-import '../../../../shared/utils/result.dart';
+import '../../../../shared/utils/failure.dart';
 import '../exceptions/drift_exceptions.dart';
 
 /// Utilitários para conversão entre exceções Drift e AppError
@@ -46,16 +47,18 @@ class DriftResultAdapter {
   }
 
   /// Cria Result de sucesso
-  static Result<T> success<T>(T data) => Result.success(data);
+  static Either<Failure, T> success<T>(T data) => Right(data);
 
   /// Cria Result de erro a partir de DriftException
-  static Result<T> failure<T>(DriftException exception) {
-    return Result.error(fromDriftException(exception));
+  static Either<Failure, T> failure<T>(DriftException exception) {
+    final appError = fromDriftException(exception);
+    return Left(appError.toFailure());
   }
 
   /// Cria Result de erro a partir de Exception genérica
-  static Result<T> error<T>(Exception exception) {
-    return Result.error(fromException(exception));
+  static Either<Failure, T> error<T>(Exception exception) {
+    final appError = fromException(exception);
+    return Left(appError.toFailure());
   }
 
   /// Wrapper para executar código com tratamento de erro automático
@@ -66,10 +69,10 @@ class DriftResultAdapter {
   ///   return await database.select(table).get();
   /// });
   /// ```
-  static Future<Result<T>> execute<T>(Future<T> Function() operation) async {
+  static Future<Either<Failure, T>> execute<T>(Future<T> Function() operation) async {
     try {
       final result = await operation();
-      return Result.success(result);
+      return Right(result);
     } on DriftException catch (e) {
       return failure<T>(e);
     } catch (e) {
@@ -85,10 +88,10 @@ class DriftResultAdapter {
   ///   return database.isInitialized;
   /// });
   /// ```
-  static Result<T> executeSync<T>(T Function() operation) {
+  static Either<Failure, T> executeSync<T>(T Function() operation) {
     try {
       final result = operation();
-      return Result.success(result);
+      return Right(result);
     } on DriftException catch (e) {
       return failure<T>(e);
     } catch (e) {
@@ -98,54 +101,71 @@ class DriftResultAdapter {
 
   /// Converte lista de Results em Result de lista
   /// Útil para batch operations
-  /// 
+  ///
   /// Se qualquer Result falhar, retorna o primeiro erro
-  static Result<List<T>> combineResults<T>(List<Result<T>> results) {
+  static Either<Failure, List<T>> combineResults<T>(List<Either<Failure, T>> results) {
     final data = <T>[];
-    
+
     for (final result in results) {
-      if (result.isError) {
-        return Result.error(result.error!);
+      final hasError = result.fold(
+        (_) => true,
+        (_) => false,
+      );
+
+      if (hasError) {
+        return result.fold(
+          (failure) => Left(failure),
+          (_) => throw StateError('Unreachable'),
+        );
       }
-      data.add(result.data as T);
+
+      result.fold(
+        (_) => null,
+        (value) => data.add(value),
+      );
     }
-    
-    return Result.success(data);
+
+    return Right(data);
   }
 
   /// Converte Result em Future para uso com async/await
-  static Future<T> toFuture<T>(Result<T> result) async {
-    if (result.isSuccess) {
-      return result.data!;
-    }
-    throw Exception(result.error!.message);
+  static Future<T> toFuture<T>(Either<Failure, T> result) async {
+    return result.fold(
+      (failure) => throw Exception(failure.message),
+      (data) => data,
+    );
   }
 
   /// Executa operação com retry automático em caso de falha
-  /// 
+  ///
   /// [maxAttempts] número máximo de tentativas (padrão: 3)
   /// [delay] delay entre tentativas em milissegundos (padrão: 100ms)
-  static Future<Result<T>> executeWithRetry<T>(
+  static Future<Either<Failure, T>> executeWithRetry<T>(
     Future<T> Function() operation, {
     int maxAttempts = 3,
     int delayMs = 100,
   }) async {
     assert(maxAttempts > 0, 'maxAttempts must be greater than 0');
-    
+
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       final result = await execute(operation);
-      
-      if (result.isSuccess) {
+
+      final isSuccess = result.fold(
+        (_) => false,
+        (_) => true,
+      );
+
+      if (isSuccess) {
         return result;
       }
-      
+
       if (attempt < maxAttempts) {
         await Future<void>.delayed(Duration(milliseconds: delayMs));
       } else {
         return result;
       }
     }
-    
-    return Result.error(AppError.unknown('Unexpected error in retry logic'));
+
+    return const Left(UnexpectedFailure('Unexpected error in retry logic'));
   }
 }

@@ -1,5 +1,7 @@
+import 'package:dartz/dartz.dart';
+
 import '../../../infrastructure/services/account_deletion_service.dart';
-import '../../../shared/utils/result.dart';
+import '../../../shared/utils/failure.dart';
 import '../base_usecase.dart';
 
 /// A use case for account deletion, following the Clean Architecture principles.
@@ -17,7 +19,7 @@ class DeleteAccountUseCase
   }) : _accountDeletionService = accountDeletionService;
 
   @override
-  Future<Result<AccountDeletionResult>> call(NoParams params) async {
+  Future<Either<Failure, AccountDeletionResult>> call(NoParams params) async {
     return await _accountDeletionService.deleteAccount();
   }
 }
@@ -37,7 +39,7 @@ class GetAccountDeletionPreviewUseCase
   }) : _accountDeletionService = accountDeletionService;
 
   @override
-  Future<Result<Map<String, dynamic>>> call(NoParams params) async {
+  Future<Either<Failure, Map<String, dynamic>>> call(NoParams params) async {
     return await _accountDeletionService.getAccountDeletionPreview();
   }
 }

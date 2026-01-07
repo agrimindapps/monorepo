@@ -1,11 +1,12 @@
+import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../shared/utils/app_error.dart';
-import '../../shared/utils/result.dart';
+import '../../shared/utils/failure.dart';
 
 /// HTTP client service otimizado usando Dio
-/// 
+///
 /// Fornece funcionalidades avançadas como:
 /// - Interceptors para auth, logging, retry
 /// - Cache automático de requests
@@ -65,20 +66,22 @@ class HttpClientService {
       _dio.interceptors.add(_RetryInterceptor());
     }
     if (enableLogging && kDebugMode) {
-      _dio.interceptors.add(LogInterceptor(
-        requestHeader: true,
-        requestBody: true,
-        responseHeader: true,
-        responseBody: true,
-        error: true,
-        logPrint: (obj) => debugPrint(obj.toString()),
-      ));
+      _dio.interceptors.add(
+        LogInterceptor(
+          requestHeader: true,
+          requestBody: true,
+          responseHeader: true,
+          responseBody: true,
+          error: true,
+          logPrint: (obj) => debugPrint(obj.toString()),
+        ),
+      );
     }
     _dio.interceptors.add(_ErrorHandlerInterceptor());
   }
 
   /// GET request
-  Future<Result<T>> get<T>(
+  Future<Either<Failure, T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
@@ -93,18 +96,18 @@ class HttpClientService {
         cancelToken: cancelToken,
       );
 
-      final data = transformer != null 
+      final data = transformer != null
           ? transformer(response.data)
           : response.data as T;
 
-      return Result.success(data);
+      return Right(data);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
   /// POST request
-  Future<Result<T>> post<T>(
+  Future<Either<Failure, T>> post<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -121,18 +124,18 @@ class HttpClientService {
         cancelToken: cancelToken,
       );
 
-      final result = transformer != null 
+      final result = transformer != null
           ? transformer(response.data)
           : response.data as T;
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
   /// PUT request
-  Future<Result<T>> put<T>(
+  Future<Either<Failure, T>> put<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -149,18 +152,18 @@ class HttpClientService {
         cancelToken: cancelToken,
       );
 
-      final result = transformer != null 
+      final result = transformer != null
           ? transformer(response.data)
           : response.data as T;
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
   /// DELETE request
-  Future<Result<T>> delete<T>(
+  Future<Either<Failure, T>> delete<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -177,18 +180,18 @@ class HttpClientService {
         cancelToken: cancelToken,
       );
 
-      final result = transformer != null 
+      final result = transformer != null
           ? transformer(response.data)
           : response.data as T;
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
   /// PATCH request
-  Future<Result<T>> patch<T>(
+  Future<Either<Failure, T>> patch<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
@@ -205,18 +208,18 @@ class HttpClientService {
         cancelToken: cancelToken,
       );
 
-      final result = transformer != null 
+      final result = transformer != null
           ? transformer(response.data)
           : response.data as T;
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
   /// Download file
-  Future<Result<String>> download(
+  Future<Either<Failure, String>> download(
     String urlPath,
     String savePath, {
     ProgressCallback? onReceiveProgress,
@@ -234,14 +237,14 @@ class HttpClientService {
         options: options,
       );
 
-      return Result.success(savePath);
+      return Right(savePath);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
   /// Upload file
-  Future<Result<T>> upload<T>(
+  Future<Either<Failure, T>> upload<T>(
     String path,
     FormData formData, {
     ProgressCallback? onSendProgress,
@@ -258,13 +261,13 @@ class HttpClientService {
         cancelToken: cancelToken,
       );
 
-      final result = transformer != null 
+      final result = transformer != null
           ? transformer(response.data)
           : response.data as T;
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
-      return Result.failure(_handleError(e));
+      return Left(_handleError(e).toFailure());
     }
   }
 
@@ -303,7 +306,7 @@ class HttpClientService {
             details: error.message,
             severity: ErrorSeverity.medium,
           );
-        
+
         case DioExceptionType.badResponse:
           final statusCode = error.response?.statusCode ?? 0;
           final message = _getErrorMessage(statusCode, error.response?.data);
@@ -314,7 +317,7 @@ class HttpClientService {
             statusCode: statusCode,
             severity: _getSeverityFromStatusCode(statusCode),
           );
-        
+
         case DioExceptionType.cancel:
           return NetworkError(
             message: 'Requisição cancelada',
@@ -322,7 +325,7 @@ class HttpClientService {
             details: error.message,
             severity: ErrorSeverity.low,
           );
-        
+
         case DioExceptionType.connectionError:
           return NetworkError(
             message: 'Erro de conexão - Verifique sua internet',
@@ -330,7 +333,7 @@ class HttpClientService {
             details: error.message,
             severity: ErrorSeverity.high,
           );
-        
+
         case DioExceptionType.unknown:
           return NetworkError(
             message: 'Erro desconhecido: ${error.message}',
@@ -338,7 +341,7 @@ class HttpClientService {
             details: error.message,
             severity: ErrorSeverity.medium,
           );
-        
+
         default:
           return NetworkError(
             message: 'Erro na requisição: ${error.message}',
@@ -365,22 +368,29 @@ class HttpClientService {
 
   String _getErrorMessage(int statusCode, dynamic data) {
     if (data is Map<String, dynamic>) {
-      final message = data['message'] ?? 
-                     data['error'] ?? 
-                     data['detail'] ?? 
-                     data['msg'];
+      final message =
+          data['message'] ?? data['error'] ?? data['detail'] ?? data['msg'];
       if (message != null) return message.toString();
     }
     switch (statusCode) {
-      case 400: return 'Requisição inválida';
-      case 401: return 'Não autorizado - Faça login novamente';
-      case 403: return 'Acesso negado';
-      case 404: return 'Recurso não encontrado';
-      case 422: return 'Dados inválidos';
-      case 500: return 'Erro interno do servidor';
-      case 502: return 'Servidor indisponível';
-      case 503: return 'Serviço temporariamente indisponível';
-      default: return 'Erro HTTP: $statusCode';
+      case 400:
+        return 'Requisição inválida';
+      case 401:
+        return 'Não autorizado - Faça login novamente';
+      case 403:
+        return 'Acesso negado';
+      case 404:
+        return 'Recurso não encontrado';
+      case 422:
+        return 'Dados inválidos';
+      case 500:
+        return 'Erro interno do servidor';
+      case 502:
+        return 'Servidor indisponível';
+      case 503:
+        return 'Serviço temporariamente indisponível';
+      default:
+        return 'Erro HTTP: $statusCode';
     }
   }
 }
@@ -417,12 +427,16 @@ class _CacheInterceptor extends Interceptor {
     final cached = _cache[key];
 
     if (cached != null && !cached.isExpired) {
-      handler.resolve(Response<dynamic>(
-        requestOptions: options,
-        data: cached.data,
-        statusCode: 200,
-        headers: Headers.fromMap({'X-Cache': ['HIT']}),
-      ));
+      handler.resolve(
+        Response<dynamic>(
+          requestOptions: options,
+          data: cached.data,
+          statusCode: 200,
+          headers: Headers.fromMap({
+            'X-Cache': ['HIT'],
+          }),
+        ),
+      );
       return;
     }
 
@@ -430,8 +444,11 @@ class _CacheInterceptor extends Interceptor {
   }
 
   @override
-  void onResponse(Response<dynamic> response, ResponseInterceptorHandler handler) {
-    if (response.statusCode == 200 && 
+  void onResponse(
+    Response<dynamic> response,
+    ResponseInterceptorHandler handler,
+  ) {
+    if (response.statusCode == 200 &&
         response.requestOptions.method.toUpperCase() == 'GET') {
       final key = _getCacheKey(response.requestOptions);
       _cache[key] = CacheItem(response.data);
@@ -461,8 +478,10 @@ class _RetryInterceptor extends Interceptor {
 
     if ((retryCount as int) < _maxRetries && _shouldRetry(err)) {
       err.requestOptions.extra['retryCount'] = retryCount + 1;
-      await Future<void>.delayed(Duration(milliseconds: _retryDelay * (retryCount + 1)));
-      
+      await Future<void>.delayed(
+        Duration(milliseconds: _retryDelay * (retryCount + 1)),
+      );
+
       try {
         final response = await Dio().request<dynamic>(
           err.requestOptions.path,
@@ -474,11 +493,10 @@ class _RetryInterceptor extends Interceptor {
           data: err.requestOptions.data,
           queryParameters: err.requestOptions.queryParameters,
         );
-        
+
         handler.resolve(response);
         return;
-      } catch (e) {
-      }
+      } catch (e) {}
     }
 
     handler.next(err);
@@ -486,10 +504,10 @@ class _RetryInterceptor extends Interceptor {
 
   bool _shouldRetry(DioException err) {
     return err.type == DioExceptionType.connectionTimeout ||
-           err.type == DioExceptionType.sendTimeout ||
-           err.type == DioExceptionType.receiveTimeout ||
-           err.type == DioExceptionType.connectionError ||
-           (err.response?.statusCode != null && 
+        err.type == DioExceptionType.sendTimeout ||
+        err.type == DioExceptionType.receiveTimeout ||
+        err.type == DioExceptionType.connectionError ||
+        (err.response?.statusCode != null &&
             [500, 502, 503, 504].contains(err.response?.statusCode));
   }
 }
@@ -502,7 +520,7 @@ class _ErrorHandlerInterceptor extends Interceptor {
     debugPrint('URL: ${err.requestOptions.uri}');
     debugPrint('Status: ${err.response?.statusCode}');
     debugPrint('Data: ${err.response?.data}');
-    
+
     handler.next(err);
   }
 }
@@ -511,7 +529,7 @@ class _ErrorHandlerInterceptor extends Interceptor {
 class CacheItem {
   /// Dados armazenados no cache
   final dynamic data;
-  
+
   /// Timestamp de criação do item
   final DateTime timestamp;
 
@@ -520,6 +538,7 @@ class CacheItem {
 
   /// Verifica se o item de cache expirou
   bool get isExpired {
-    return DateTime.now().difference(timestamp).inSeconds > _CacheInterceptor._maxCacheAge;
+    return DateTime.now().difference(timestamp).inSeconds >
+        _CacheInterceptor._maxCacheAge;
   }
 }

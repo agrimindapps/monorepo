@@ -124,7 +124,7 @@ class LoginFormWidget extends ConsumerWidget {
 
   void _handleLogin(BuildContext context, WidgetRef ref) async {
     if (kDebugMode) {
-      print('🎯 LoginFormWidget: Iniciando login no ReceitaAgro');
+      debugPrint('🎯 LoginFormWidget: Iniciando login no ReceitaAgro');
     }
 
     final loginNotifier = ref.read(loginProvider.notifier);
@@ -135,14 +135,14 @@ class LoginFormWidget extends ConsumerWidget {
     final loginState = ref.read(loginProvider);
 
     if (kDebugMode) {
-      print(
+      debugPrint(
         '🔍 LoginFormWidget: Login state após auth - isAuthenticated: ${loginState.isAuthenticated}, errorMessage: ${loginState.errorMessage}',
       );
     }
 
     if (loginState.isAuthenticated && onLoginSuccess != null) {
       if (kDebugMode) {
-        print('✅ LoginFormWidget: Chamando onLoginSuccess callback');
+        debugPrint('✅ LoginFormWidget: Chamando onLoginSuccess callback');
       }
       // Dar tempo para o stream de auth emitir o novo estado
       await Future<void>.delayed(const Duration(milliseconds: 500));

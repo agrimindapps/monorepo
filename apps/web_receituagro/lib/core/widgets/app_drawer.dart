@@ -237,7 +237,7 @@ class AppDrawer extends ConsumerWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: isSelected ? item.color.withOpacity(0.2) : item.color.withOpacity(0.1),
+          color: isSelected ? item.color.withValues(alpha: 0.2) : item.color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -260,7 +260,7 @@ class AppDrawer extends ConsumerWidget {
         ),
       ),
       selected: isSelected,
-      selectedTileColor: item.color.withOpacity(0.1),
+      selectedTileColor: item.color.withValues(alpha: 0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),

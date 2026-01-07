@@ -66,6 +66,20 @@ class FinancialSyncResult {
   }
 }
 
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+FinancialSyncResult FinancialSyncRight({
+  required int attemptCount,
+  required Duration totalTime,
+  bool requiresManualReview = false,
+  List<String> warnings = const [],
+}) => FinancialSyncResult.success(
+  attemptCount: attemptCount,
+  totalTime: totalTime,
+  requiresManualReview: requiresManualReview,
+  warnings: warnings,
+);
+
 /// Sync queue item with priority
 class FinancialSyncQueueItem {
   FinancialSyncQueueItem({
@@ -230,8 +244,9 @@ class FinancialSyncService {
     if (_pendingSyncs.containsKey(entityId)) {
       return FinancialSyncStatus.syncing;
     }
-    final queueItem =
-        _syncQueue.where((item) => item.entity.id == entityId).firstOrNull;
+    final queueItem = _syncQueue
+        .where((item) => item.entity.id == entityId)
+        .firstOrNull;
     if (queueItem != null) {
       if (queueItem.retryCount > 0) {
         return FinancialSyncStatus.retrying;
@@ -264,11 +279,10 @@ class FinancialSyncService {
 
     try {
       _sortQueue();
-      final itemsToProcess =
-          _syncQueue
-              .where((item) => item.shouldRetry)
-              .take(_maxConcurrentSyncs)
-              .toList();
+      final itemsToProcess = _syncQueue
+          .where((item) => item.shouldRetry)
+          .take(_maxConcurrentSyncs)
+          .toList();
 
       final futures = itemsToProcess.map((item) => _processSyncItem(item));
       await Future.wait(futures, eagerError: false);
@@ -350,10 +364,7 @@ class FinancialSyncService {
           attemptCount: 1,
           totalTime: Duration.zero,
         ),
-        (_) => FinancialSyncResult.success(
-          attemptCount: 1,
-          totalTime: Duration.zero,
-        ),
+        (_) => FinancialSyncRight(attemptCount: 1, totalTime: Duration.zero),
       );
     } catch (e) {
       return FinancialSyncResult.failure(

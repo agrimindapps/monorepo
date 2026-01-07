@@ -28,6 +28,7 @@ class UnemploymentInsuranceCalculatorPage extends ConsumerStatefulWidget {
 class _UnemploymentInsuranceCalculatorPageState
     extends ConsumerState<UnemploymentInsuranceCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
+  Key _formKeyId = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +85,7 @@ class _UnemploymentInsuranceCalculatorPageState
 
                           // Input Form
                           UnemploymentInsuranceInputForm(
+                            key: _formKeyId,
                             formKey: _formKey,
                             onCalculate: _handleCalculate,
                           ),
@@ -182,7 +184,9 @@ class _UnemploymentInsuranceCalculatorPageState
   }
 
   void _handleClear() {
-    _formKey.currentState?.reset();
+    setState(() {
+      _formKeyId = UniqueKey();
+    });
     ref
         .read(unemploymentInsuranceCalculatorProvider.notifier)
         .clearCalculation();

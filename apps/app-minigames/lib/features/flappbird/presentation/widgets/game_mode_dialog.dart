@@ -26,7 +26,7 @@ class GameModeDialog extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.grey[900],
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.blue.withOpacity(0.3), width: 2),
+          border: Border.all(color: Colors.blue.withValues(alpha: 0.3), width: 2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -87,8 +87,8 @@ class GameModeDialog extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colors.blue.withOpacity(0.3),
-            Colors.purple.withOpacity(0.2),
+            Colors.blue.withValues(alpha: 0.3),
+            Colors.purple.withValues(alpha: 0.2),
           ],
         ),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -251,7 +251,7 @@ class _GameModeCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          color: isSelected ? _getModeColor(mode).withOpacity(0.3) : Colors.grey[850],
+          color: isSelected ? _getModeColor(mode).withValues(alpha: 0.3) : Colors.grey[850],
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? _getModeColor(mode) : Colors.grey[700]!,
@@ -260,7 +260,7 @@ class _GameModeCard extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: _getModeColor(mode).withOpacity(0.3),
+                    color: _getModeColor(mode).withValues(alpha: 0.3),
                     blurRadius: 8,
                     spreadRadius: 1,
                   ),
@@ -359,7 +359,7 @@ class GameModeInfoCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.3),
+                color: Colors.orange.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

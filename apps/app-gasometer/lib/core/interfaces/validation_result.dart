@@ -2,12 +2,6 @@
 library;
 
 class ValidationResult {
-  const ValidationResult._({
-    required this.isValid,
-    required this.message,
-    required this.severity,
-  });
-
   /// Creates a successful validation result
   factory ValidationResult.success() {
     return const ValidationResult._(
@@ -16,6 +10,11 @@ class ValidationResult {
       severity: ValidationSeverity.none,
     );
   }
+  const ValidationResult._({
+    required this.isValid,
+    required this.message,
+    required this.severity,
+  });
 
   /// Creates an error validation result
   factory ValidationResult.error(String message) {
@@ -124,6 +123,11 @@ class ValidationResult {
 
 /// Severity levels for validation results
 enum ValidationSeverity { none, info, warning, error }
+
+/// Helper functions for legacy compatibility
+ValidationResult ValidationRight() => ValidationResult.success();
+ValidationResult ValidationLeft(String message) =>
+    ValidationResult.error(message);
 
 /// Extensions for ValidationSeverity
 extension ValidationSeverityExtension on ValidationSeverity {

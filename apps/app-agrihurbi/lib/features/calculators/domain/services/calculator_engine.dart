@@ -58,7 +58,7 @@ class CalculatorEngine {
     try {
       final calculator = _registeredCalculators[calculatorId];
       if (calculator == null) {
-        return CalculationEngineResult.error(
+        return CalculationEngineLeft(
           CalculatorErrorHandler.handleConfigurationError(
             calculatorId,
             'Calculadora não encontrada',
@@ -106,7 +106,7 @@ class CalculatorEngine {
 
         session.complete(success: true, result: formattedResult);
 
-        return CalculationEngineResult.success(
+        return CalculationEngineRight(
           formattedResult,
           validationResult,
           session,
@@ -120,7 +120,7 @@ class CalculatorEngine {
         );
 
         session.complete(success: false, errors: [error.message]);
-        return CalculationEngineResult.error(error);
+        return CalculationEngineLeft(error);
       } finally {
         _activeSessions.remove(session);
       }
@@ -132,7 +132,7 @@ class CalculatorEngine {
         operationContext: 'engine_setup',
       );
 
-      return CalculationEngineResult.error(error);
+      return CalculationEngineLeft(error);
     }
   }
 
@@ -224,8 +224,8 @@ class CalculatorEngine {
 
       final parameter = calculator.parameters.firstWhere(
         (p) => p.id == parameterId,
-        orElse:
-            () => throw ArgumentError('Parâmetro não encontrado: $parameterId'),
+        orElse: () =>
+            throw ArgumentError('Parâmetro não encontrado: $parameterId'),
       );
 
       final value = parameters[parameterId];
@@ -295,12 +295,9 @@ class CalculatorEngine {
       );
     }
 
-    final formattedRecommendations =
-        result.recommendations?.isNotEmpty == true
-            ? ResultFormatterService.formatRecommendations(
-              result.recommendations!,
-            )
-            : <String>[];
+    final formattedRecommendations = result.recommendations?.isNotEmpty == true
+        ? ResultFormatterService.formatRecommendations(result.recommendations!)
+        : <String>[];
 
     return FormattedCalculationResult(
       calculatorId: calculator.id,
@@ -358,6 +355,18 @@ class CalculationEngineResult {
     return CalculationEngineResult._(isSuccess: false, error: error);
   }
 }
+
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+CalculationEngineResult CalculationEngineRight(
+  FormattedCalculationResult result,
+  ValidationBatchResult validation,
+  CalculationSession session,
+) => CalculationEngineResult.success(result, validation, session);
+
+// ignore: non_constant_identifier_names
+CalculationEngineResult CalculationEngineLeft(CalculatorError error) =>
+    CalculationEngineResult.error(error);
 
 /// Sessão de cálculo para tracking
 class CalculationSession {

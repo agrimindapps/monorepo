@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:flutter/foundation.dart';
 
 import '../../../../../database/repositories/tasks_drift_repository.dart';
@@ -42,7 +41,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       return await _driftRepo.getAllTasks();
     } catch (e) {
-      throw CacheFailure('Erro ao buscar tarefas locais: $e');
+      throw Exception('Erro ao buscar tarefas locais: $e');
     }
   }
 
@@ -51,7 +50,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       return await _driftRepo.getTasksByPlant(plantId);
     } catch (e) {
-      throw CacheFailure('Erro ao buscar tarefas por planta: $e');
+      throw Exception('Erro ao buscar tarefas por planta: $e');
     }
   }
 
@@ -66,7 +65,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       final tasks = await getTasks();
       return tasks.where((task) => task.status == status).toList();
     } catch (e) {
-      throw CacheFailure('Erro ao buscar tarefas por status: $e');
+      throw Exception('Erro ao buscar tarefas por status: $e');
     }
   }
 
@@ -78,7 +77,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
 
       return tasks.where((task) => task.dueDate.isBefore(now)).toList();
     } catch (e) {
-      throw CacheFailure('Erro ao buscar tarefas atrasadas: $e');
+      throw Exception('Erro ao buscar tarefas atrasadas: $e');
     }
   }
 
@@ -97,7 +96,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
           )
           .toList();
     } catch (e) {
-      throw CacheFailure('Erro ao buscar tarefas de hoje: $e');
+      throw Exception('Erro ao buscar tarefas de hoje: $e');
     }
   }
 
@@ -115,7 +114,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
           )
           .toList();
     } catch (e) {
-      throw CacheFailure('Erro ao buscar tarefas futuras: $e');
+      throw Exception('Erro ao buscar tarefas futuras: $e');
     }
   }
 
@@ -150,7 +149,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
         }
         return;
       }
-      throw CacheFailure('Erro ao cachear tarefa: $e');
+      throw Exception('Erro ao cachear tarefa: $e');
     }
   }
 
@@ -162,7 +161,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
         await cacheTask(task);
       }
     } catch (e) {
-      throw CacheFailure('Erro ao cachear tarefas: $e');
+      throw Exception('Erro ao cachear tarefas: $e');
     }
   }
 
@@ -171,7 +170,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       await _driftRepo.updateTask(task);
     } catch (e) {
-      throw CacheFailure('Erro ao atualizar tarefa: $e');
+      throw Exception('Erro ao atualizar tarefa: $e');
     }
   }
 
@@ -180,7 +179,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       await _driftRepo.deleteTask(id);
     } catch (e) {
-      throw CacheFailure('Erro ao deletar tarefa: $e');
+      throw Exception('Erro ao deletar tarefa: $e');
     }
   }
 
@@ -198,7 +197,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
       }
       return count;
     } catch (e) {
-      throw CacheFailure('Erro ao deletar tarefas por plantId: $e');
+      throw Exception('Erro ao deletar tarefas por plantId: $e');
     }
   }
 
@@ -207,7 +206,7 @@ class TasksLocalDataSourceImpl implements TasksLocalDataSource {
     try {
       await _driftRepo.clearAll();
     } catch (e) {
-      throw CacheFailure('Erro ao limpar cache de tarefas: $e');
+      throw Exception('Erro ao limpar cache de tarefas: $e');
     }
   }
 }

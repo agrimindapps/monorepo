@@ -746,10 +746,10 @@ class _PragaCadastroPageState extends ConsumerState<PragaCadastroPage> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _selectedTipoPraga.color.withOpacity(0.1),
+            color: _selectedTipoPraga.color.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: _selectedTipoPraga.color.withOpacity(0.3),
+              color: _selectedTipoPraga.color.withValues(alpha: 0.3),
             ),
           ),
           child: Row(

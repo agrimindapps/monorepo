@@ -111,7 +111,7 @@ class CreateTaskList extends _$CreateTaskList {
 
     state = await AsyncValue.guard(() async {
       result.fold(
-        (failure) => throw failure,
+        (failure) => throw Exception(failure.message),
         (id) => id,
       );
     });
@@ -137,7 +137,7 @@ class UpdateTaskList extends _$UpdateTaskList {
 
     state = await AsyncValue.guard(() async {
       result.fold(
-        (failure) => throw failure,
+        (failure) => throw Exception(failure.message),
         (success) => success,
       );
     });
@@ -160,7 +160,7 @@ class DeleteTaskList extends _$DeleteTaskList {
 
     state = await AsyncValue.guard(() async {
       result.fold(
-        (failure) => throw failure,
+        (failure) => throw Exception(failure.message),
         (success) => success,
       );
     });
@@ -183,7 +183,7 @@ class ShareTaskList extends _$ShareTaskList {
 
     state = await AsyncValue.guard(() async {
       result.fold(
-        (failure) => throw failure,
+        (failure) => throw Exception(failure.message),
         (success) => success,
       );
     });
@@ -206,7 +206,7 @@ class ArchiveTaskList extends _$ArchiveTaskList {
 
     state = await AsyncValue.guard(() async {
       result.fold(
-        (failure) => throw failure,
+        (failure) => throw Exception(failure.message),
         (success) => success,
       );
     });

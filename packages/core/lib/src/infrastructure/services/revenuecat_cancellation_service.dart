@@ -1,11 +1,10 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
-import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
-import '../../shared/utils/result.dart';
 
 /// Serviço para gerenciar cancelamento de assinaturas RevenueCat
 /// durante exclusão de conta
@@ -14,10 +13,10 @@ class RevenueCatCancellationService {
   ///
   /// NOTA: RevenueCat não cancela diretamente - ele trabalha com as stores.
   /// para o usuário cancelar manualmente nas lojas.
-  Future<Result<SubscriptionCancellationResult>>
+  Future<Either<Failure, SubscriptionCancellationResult>>
   handleSubscriptionCancellation() async {
     if (kIsWeb) {
-      return Result.success(
+      return Right(
         SubscriptionCancellationResult(
           hadActiveSubscription: false,
           message: 'Cancelamento de assinatura não aplicável na web',
@@ -40,7 +39,7 @@ class RevenueCatCancellationService {
             '⚠️ RevenueCatCancellationService: Error getting customer info: $e',
           );
         }
-        return Result.success(
+        return Right(
           SubscriptionCancellationResult(
             hadActiveSubscription: false,
             message: 'Não foi possível verificar assinaturas',
@@ -56,7 +55,7 @@ class RevenueCatCancellationService {
           debugPrint('✅ No active subscriptions to cancel');
         }
 
-        return Result.success(
+        return Right(
           SubscriptionCancellationResult(
             hadActiveSubscription: false,
             message: 'Nenhuma assinatura ativa encontrada',
@@ -93,7 +92,7 @@ class RevenueCatCancellationService {
         debugPrint('💡 User needs to cancel manually via store');
       }
 
-      return Result.success(
+      return Right(
         SubscriptionCancellationResult(
           hadActiveSubscription: true,
           activeSubscriptionIds: activeSubscriptions.toList(),
@@ -109,10 +108,8 @@ class RevenueCatCancellationService {
         debugPrint('❌ RevenueCatCancellationService: Unexpected error: $e');
       }
 
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro ao processar cancelamento de assinatura: $e'),
-        ),
+      return const Left(
+        UnexpectedFailure('Erro ao processar cancelamento de assinatura'),
       );
     }
   }
@@ -162,12 +159,12 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
 
   /// Obtém informações detalhadas sobre assinaturas ativas
   /// Útil para exibir antes da exclusão
-  Future<Result<Map<String, dynamic>>> getSubscriptionDetails() async {
+  Future<Either<Failure, Map<String, dynamic>>> getSubscriptionDetails() async {
     if (kIsWeb) {
-      return Result.success({
+      return const Right(<String, dynamic>{
         'hasActiveSubscription': false,
-        'activeSubscriptions': [],
-        'entitlements': {},
+        'activeSubscriptions': <String>[],
+        'entitlements': <String, dynamic>{},
         'latestExpirationDate': null,
       });
     }
@@ -202,16 +199,14 @@ da loja onde você realizou a compra (App Store ou Google Play Store).
         }
       }
 
-      return Result.success(details);
+      return Right(details);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ Error getting subscription details: $e');
       }
 
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro ao obter detalhes da assinatura: $e'),
-        ),
+      return const Left(
+        UnexpectedFailure('Erro ao obter detalhes da assinatura'),
       );
     }
   }

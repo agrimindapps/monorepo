@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/interfaces/i_disposable_service.dart';
-import '../../shared/utils/app_error.dart';
-import '../../shared/utils/result.dart';
+import '../../shared/utils/failure.dart';
 
 /// Enhanced Connectivity Service - Monitoramento avançado de conectividade
-/// 
+///
 /// Funcionalidades:
 /// - Monitoramento em tempo real da conectividade
 /// - Detecção de tipo de conexão (WiFi, Cellular, Ethernet)
@@ -25,11 +25,11 @@ class EnhancedConnectivityService implements IDisposableService {
   static const int _defaultPingPort = 53;
   static const Duration _defaultTimeout = Duration(seconds: 5);
   static const Duration _statusCacheDuration = Duration(seconds: 10);
-  
+
   final Connectivity _connectivity = Connectivity();
-  final StreamController<ConnectivityStatus> _statusController = 
+  final StreamController<ConnectivityStatus> _statusController =
       StreamController<ConnectivityStatus>.broadcast();
-  final StreamController<NetworkQuality> _qualityController = 
+  final StreamController<NetworkQuality> _qualityController =
       StreamController<NetworkQuality>.broadcast();
   ConnectivityStatus? _cachedStatus;
   DateTime? _lastStatusCheck;
@@ -49,13 +49,14 @@ class EnhancedConnectivityService implements IDisposableService {
   final int _maxMetricsHistory = 100;
 
   /// Stream de mudanças no status de conectividade
-  Stream<ConnectivityStatus> get onConnectivityChanged => _statusController.stream;
-  
+  Stream<ConnectivityStatus> get onConnectivityChanged =>
+      _statusController.stream;
+
   /// Stream de mudanças na qualidade da rede
   Stream<NetworkQuality> get onQualityChanged => _qualityController.stream;
 
   /// Inicializa o service de conectividade
-  Future<Result<void>> initialize({
+  Future<Either<Failure, void>> initialize({
     String? customPingHost,
     int? customPingPort,
     Duration? pingTimeout,
@@ -73,117 +74,127 @@ class EnhancedConnectivityService implements IDisposableService {
         onError: _handleConnectivityError,
       );
       final initialStatus = await getCurrentStatus();
-      if (initialStatus.isSuccess) {
-        _cachedStatus = initialStatus.data;
+      initialStatus.fold((_) {}, (status) {
+        _cachedStatus = status;
         _lastStatusCheck = DateTime.now();
         _statusController.add(_cachedStatus!);
-      }
+      });
       if (_qualityMonitoringEnabled) {
         _startQualityMonitoring();
       }
 
-      return Result.success(null);
-    } catch (e, stackTrace) {
-      return Result.error(
-        NetworkError(
-          message: 'Erro ao inicializar connectivity service: ${e.toString()}',
+      return const Right(null);
+    } catch (e) {
+      return Left(
+        NetworkFailure(
+          'Erro ao inicializar connectivity service: ${e.toString()}',
           code: 'CONNECTIVITY_INIT_ERROR',
           details: e.toString(),
-          stackTrace: stackTrace,
         ),
       );
     }
   }
 
   /// Obtém o status atual de conectividade
-  Future<Result<ConnectivityStatus>> getCurrentStatus({bool forceRefresh = false}) async {
-    if (!forceRefresh && 
-        _cachedStatus != null && 
+  Future<Either<Failure, ConnectivityStatus>> getCurrentStatus({
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh &&
+        _cachedStatus != null &&
         _lastStatusCheck != null &&
         DateTime.now().difference(_lastStatusCheck!) < _statusCacheDuration) {
-      return Result.success(_cachedStatus!);
+      return Right(_cachedStatus!);
     }
 
     try {
       final connectivityResults = await _connectivity.checkConnectivity();
       final hasRealConnection = await _checkRealConnectivity();
-      
+      final hasInternet = hasRealConnection.fold(
+        (_) => false,
+        (value) => value,
+      );
+
       final status = ConnectivityStatus(
         types: connectivityResults,
-        hasInternet: hasRealConnection.data ?? false,
+        hasInternet: hasInternet,
         timestamp: DateTime.now(),
-        isConnected: connectivityResults.isNotEmpty && 
-                     connectivityResults.first != ConnectivityResult.none &&
-                     (hasRealConnection.data ?? false),
+        isConnected:
+            connectivityResults.isNotEmpty &&
+            connectivityResults.first != ConnectivityResult.none &&
+            hasInternet,
       );
 
       _cachedStatus = status;
       _lastStatusCheck = DateTime.now();
 
-      return Result.success(status);
-    } catch (e, stackTrace) {
-      return Result.error(
-        NetworkError(
-          message: 'Erro ao verificar conectividade: ${e.toString()}',
+      return Right(status);
+    } catch (e) {
+      return Left(
+        NetworkFailure(
+          'Erro ao verificar conectividade: ${e.toString()}',
           code: 'CONNECTIVITY_CHECK_ERROR',
           details: e.toString(),
-          stackTrace: stackTrace,
         ),
       );
     }
   }
 
   /// Testa conectividade real fazendo ping
-  Future<Result<bool>> _checkRealConnectivity() async {
+  Future<Either<Failure, bool>> _checkRealConnectivity() async {
     try {
       final socket = await Socket.connect(
-        _pingHost, 
-        _pingPort, 
+        _pingHost,
+        _pingPort,
         timeout: _pingTimeout,
       );
-      
+
       await socket.close();
-      return Result.success(true);
+      return const Right(true);
     } catch (e) {
       final alternativeHosts = ['1.1.1.1', '208.67.222.222'];
-      
+
       for (final host in alternativeHosts) {
         try {
           final socket = await Socket.connect(
-            host, 
-            _pingPort, 
+            host,
+            _pingPort,
             timeout: _pingTimeout,
           );
           await socket.close();
-          return Result.success(true);
+          return const Right(true);
         } catch (_) {
           continue;
         }
       }
-      
-      return Result.success(false);
+
+      return const Right(false);
     }
   }
 
   /// Testa a qualidade da rede medindo latência
-  Future<Result<NetworkQuality>> checkNetworkQuality() async {
-    if (_cachedQuality != null && 
+  Future<Either<Failure, NetworkQuality>> checkNetworkQuality() async {
+    if (_cachedQuality != null &&
         _lastQualityCheck != null &&
-        DateTime.now().difference(_lastQualityCheck!) < const Duration(minutes: 2)) {
-      return Result.success(_cachedQuality!);
+        DateTime.now().difference(_lastQualityCheck!) <
+            const Duration(minutes: 2)) {
+      return Right(_cachedQuality!);
     }
 
     try {
       final measurements = <int>[];
       const testCount = 3;
-      
+
       for (int i = 0; i < testCount; i++) {
         final stopwatch = Stopwatch()..start();
-        
+
         final connectivityResult = await _checkRealConnectivity();
         stopwatch.stop();
-        
-        if (connectivityResult.data == true) {
+        final hasConnection = connectivityResult.fold(
+          (_) => false,
+          (value) => value,
+        );
+
+        if (hasConnection) {
           measurements.add(stopwatch.elapsedMilliseconds);
         } else {
           final quality = NetworkQuality(
@@ -192,50 +203,51 @@ class EnhancedConnectivityService implements IDisposableService {
             timestamp: DateTime.now(),
             isStable: false,
           );
-          
+
           _cachedQuality = quality;
           _lastQualityCheck = DateTime.now();
-          return Result.success(quality);
+          return Right(quality);
         }
         if (i < testCount - 1) {
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
       }
 
-      final averageLatency = measurements.isNotEmpty 
-          ? measurements.reduce((a, b) => a + b) / measurements.length 
+      final averageLatency = measurements.isNotEmpty
+          ? measurements.reduce((a, b) => a + b) / measurements.length
           : -1.0;
-      
+
       final quality = NetworkQuality(
         latency: averageLatency,
         quality: _determineQuality(averageLatency),
         timestamp: DateTime.now(),
         isStable: _isLatencyStable(measurements),
       );
-      _addMetric(NetworkMetric(
-        timestamp: DateTime.now(),
-        latency: averageLatency,
-        quality: quality.quality,
-      ));
+      _addMetric(
+        NetworkMetric(
+          timestamp: DateTime.now(),
+          latency: averageLatency,
+          quality: quality.quality,
+        ),
+      );
 
       _cachedQuality = quality;
       _lastQualityCheck = DateTime.now();
 
-      return Result.success(quality);
-    } catch (e, stackTrace) {
-      return Result.error(
-        NetworkError(
-          message: 'Erro ao medir qualidade da rede: ${e.toString()}',
+      return Right(quality);
+    } catch (e) {
+      return Left(
+        NetworkFailure(
+          'Erro ao medir qualidade da rede: ${e.toString()}',
           code: 'QUALITY_CHECK_ERROR',
           details: e.toString(),
-          stackTrace: stackTrace,
         ),
       );
     }
   }
 
   /// Força reconexão (útil para WiFi problemático)
-  Future<Result<void>> forceReconnection() async {
+  Future<Either<Failure, void>> forceReconnection() async {
     try {
       _cachedStatus = null;
       _lastStatusCheck = null;
@@ -243,25 +255,22 @@ class EnhancedConnectivityService implements IDisposableService {
       _lastQualityCheck = null;
 
       final newStatus = await getCurrentStatus(forceRefresh: true);
-      if (newStatus.isSuccess) {
-        _statusController.add(newStatus.data!);
-      }
+      newStatus.fold((_) {}, (status) => _statusController.add(status));
 
-      return Result.success(null);
-    } catch (e, stackTrace) {
-      return Result.error(
-        NetworkError(
-          message: 'Erro ao forçar reconexão: ${e.toString()}',
+      return const Right(null);
+    } catch (e) {
+      return Left(
+        NetworkFailure(
+          'Erro ao forçar reconexão: ${e.toString()}',
           code: 'FORCE_RECONNECTION_ERROR',
           details: e.toString(),
-          stackTrace: stackTrace,
         ),
       );
     }
   }
 
   /// Executa uma operação com retry automático baseado na conectividade
-  Future<Result<T>> executeWithRetry<T>(
+  Future<Either<Failure, T>> executeWithRetry<T>(
     Future<T> Function() operation, {
     int maxRetries = 3,
     Duration initialDelay = const Duration(seconds: 1),
@@ -274,86 +283,97 @@ class EnhancedConnectivityService implements IDisposableService {
     while (attempt < maxRetries) {
       if (waitForConnection) {
         final statusResult = await getCurrentStatus();
-        if (statusResult.isSuccess && !statusResult.data!.isConnected) {
+        final shouldWait = statusResult.fold(
+          (_) => false,
+          (status) => !status.isConnected,
+        );
+        if (shouldWait) {
           await _waitForConnection(timeout: const Duration(minutes: 2));
         }
       }
 
       try {
         final result = await operation();
-        return Result.success(result);
-      } catch (e, stackTrace) {
+        return Right(result);
+      } catch (e) {
         attempt++;
-        
+
         if (attempt >= maxRetries) {
-          return Result.error(
-            NetworkError(
-              message: 'Operação falhou após $maxRetries tentativas: ${e.toString()}',
+          return Left(
+            NetworkFailure(
+              'Operação falhou após $maxRetries tentativas: ${e.toString()}',
               code: 'RETRY_EXHAUSTED',
               details: 'Última tentativa: ${e.toString()}',
-              stackTrace: stackTrace,
             ),
           );
         }
         await Future<void>.delayed(delay);
-        delay = Duration(milliseconds: (delay.inMilliseconds * backoffMultiplier).round());
+        delay = Duration(
+          milliseconds: (delay.inMilliseconds * backoffMultiplier).round(),
+        );
       }
     }
 
-    return Result.error(
-      NetworkError(
-        message: 'Falha inesperada no retry loop',
+    return const Left(
+      NetworkFailure(
+        'Falha inesperada no retry loop',
         code: 'RETRY_LOOP_ERROR',
       ),
     );
   }
 
   /// Espera por conectividade com timeout
-  Future<Result<void>> waitForConnection({
+  Future<Either<Failure, void>> waitForConnection({
     Duration timeout = const Duration(minutes: 5),
   }) async {
     return _waitForConnection(timeout: timeout);
   }
 
   /// Obtém estatísticas de conectividade
-  Future<Result<ConnectivityStats>> getStats() async {
+  Future<Either<Failure, ConnectivityStats>> getStats() async {
     try {
-      final currentStatus = await getCurrentStatus();
-      final currentQuality = await checkNetworkQuality();
+      final currentStatusResult = await getCurrentStatus();
+      return await currentStatusResult.fold((failure) => Left(failure), (
+        currentStatus,
+      ) async {
+        final currentQualityResult = await checkNetworkQuality();
+        return currentQualityResult.fold((failure) => Left(failure), (
+          currentQuality,
+        ) {
+          final stats = ConnectivityStats(
+            currentStatus: currentStatus,
+            currentQuality: currentQuality,
+            connectionChanges: _connectionChanges,
+            lastConnectionChange: _lastConnectionChange,
+            metricsHistory: List.unmodifiable(_metrics),
+            averageLatency: _calculateAverageLatency(),
+            uptimePercentage: _calculateUptimePercentage(),
+          );
 
-      final stats = ConnectivityStats(
-        currentStatus: currentStatus.data,
-        currentQuality: currentQuality.data,
-        connectionChanges: _connectionChanges,
-        lastConnectionChange: _lastConnectionChange,
-        metricsHistory: List.unmodifiable(_metrics),
-        averageLatency: _calculateAverageLatency(),
-        uptimePercentage: _calculateUptimePercentage(),
-      );
-
-      return Result.success(stats);
-    } catch (e, stackTrace) {
-      return Result.error(
-        StorageError(
-          message: 'Erro ao obter estatísticas: ${e.toString()}',
+          return Right(stats);
+        });
+      });
+    } catch (e) {
+      return Left(
+        CacheFailure(
+          'Erro ao obter estatísticas: ${e.toString()}',
           code: 'STATS_ERROR',
-          stackTrace: stackTrace,
         ),
       );
     }
   }
 
   /// Limpa cache e força nova verificação
-  Future<Result<void>> clearCache() async {
+  Future<Either<Failure, void>> clearCache() async {
     try {
       _cachedStatus = null;
       _lastStatusCheck = null;
       _cachedQuality = null;
       _lastQualityCheck = null;
-      
-      return Result.success(null);
+
+      return const Right(null);
     } catch (e) {
-      return Result.success(null); // Falha não crítica
+      return const Right(null); // Falha não crítica
     }
   }
 
@@ -362,26 +382,35 @@ class EnhancedConnectivityService implements IDisposableService {
       _connectionChanges++;
       _lastConnectionChange = DateTime.now();
       final hasRealConnection = await _checkRealConnectivity();
-      
+      final hasInternet = hasRealConnection.fold(
+        (_) => false,
+        (value) => value,
+      );
+
       final status = ConnectivityStatus(
         types: results,
-        hasInternet: hasRealConnection.data ?? false,
+        hasInternet: hasInternet,
         timestamp: DateTime.now(),
-        isConnected: results.isNotEmpty && 
-                     results.first != ConnectivityResult.none &&
-                     (hasRealConnection.data ?? false),
+        isConnected:
+            results.isNotEmpty &&
+            results.first != ConnectivityResult.none &&
+            hasInternet,
       );
 
       _cachedStatus = status;
       _lastStatusCheck = DateTime.now();
 
       _statusController.add(status);
-      debugPrint('Conectividade mudou: ${status.isConnected ? 'Conectado' : 'Desconectado'} '
-                '(${results.map((r) => r.name).join(', ')})');
+      debugPrint(
+        'Conectividade mudou: ${status.isConnected ? 'Conectado' : 'Desconectado'} '
+        '(${results.map((r) => r.name).join(', ')})',
+      );
       if (!status.isConnected && _qualityCheckTimer != null) {
         _qualityCheckTimer?.cancel();
         _qualityCheckTimer = null;
-      } else if (status.isConnected && _qualityMonitoringEnabled && _qualityCheckTimer == null) {
+      } else if (status.isConnected &&
+          _qualityMonitoringEnabled &&
+          _qualityCheckTimer == null) {
         _startQualityMonitoring();
       }
     } catch (e) {
@@ -405,25 +434,27 @@ class EnhancedConnectivityService implements IDisposableService {
     _qualityCheckTimer?.cancel();
     _qualityCheckTimer = Timer.periodic(_qualityCheckInterval, (_) async {
       final qualityResult = await checkNetworkQuality();
-      if (qualityResult.isSuccess) {
-        _qualityController.add(qualityResult.data!);
-      }
+      qualityResult.fold((_) {}, (quality) => _qualityController.add(quality));
     });
   }
 
-  Future<Result<void>> _waitForConnection({required Duration timeout}) async {
-    final completer = Completer<Result<void>>();
+  Future<Either<Failure, void>> _waitForConnection({
+    required Duration timeout,
+  }) async {
+    final completer = Completer<Either<Failure, void>>();
     Timer? timeoutTimer;
     StreamSubscription<ConnectivityStatus>? subscription;
     timeoutTimer = Timer(timeout, () {
       subscription?.cancel();
       if (!completer.isCompleted) {
-        completer.complete(Result.error(
-          NetworkError(
-            message: 'Timeout aguardando conectividade',
-            code: 'WAIT_CONNECTION_TIMEOUT',
+        completer.complete(
+          const Left(
+            NetworkFailure(
+              'Timeout aguardando conectividade',
+              code: 'WAIT_CONNECTION_TIMEOUT',
+            ),
           ),
-        ));
+        );
       }
     });
     subscription = onConnectivityChanged.listen((status) {
@@ -431,15 +462,19 @@ class EnhancedConnectivityService implements IDisposableService {
         timeoutTimer?.cancel();
         subscription?.cancel();
         if (!completer.isCompleted) {
-          completer.complete(Result.success(null));
+          completer.complete(const Right(null));
         }
       }
     });
     final currentStatus = await getCurrentStatus();
-    if (currentStatus.isSuccess && currentStatus.data!.isConnected) {
+    final isConnected = currentStatus.fold(
+      (_) => false,
+      (status) => status.isConnected,
+    );
+    if (isConnected) {
       timeoutTimer.cancel();
       subscription.cancel();
-      return Result.success(null);
+      return const Right(null);
     }
 
     return completer.future;
@@ -456,12 +491,14 @@ class EnhancedConnectivityService implements IDisposableService {
 
   bool _isLatencyStable(List<int> measurements) {
     if (measurements.length < 2) return true;
-    
+
     final average = measurements.reduce((a, b) => a + b) / measurements.length;
-    final variance = measurements
-        .map((m) => (m - average) * (m - average))
-        .reduce((a, b) => a + b) / measurements.length;
-    
+    final variance =
+        measurements
+            .map((m) => (m - average) * (m - average))
+            .reduce((a, b) => a + b) /
+        measurements.length;
+
     final standardDeviation = sqrt(variance);
     return standardDeviation < (average * 0.3);
   }
@@ -475,24 +512,24 @@ class EnhancedConnectivityService implements IDisposableService {
 
   double _calculateAverageLatency() {
     if (_metrics.isEmpty) return 0.0;
-    
+
     final validLatencies = _metrics
         .where((m) => m.latency > 0)
         .map((m) => m.latency)
         .toList();
-    
+
     if (validLatencies.isEmpty) return 0.0;
-    
+
     return validLatencies.reduce((a, b) => a + b) / validLatencies.length;
   }
 
   double _calculateUptimePercentage() {
     if (_metrics.isEmpty) return 0.0;
-    
+
     final connectedMetrics = _metrics
         .where((m) => m.quality != ConnectionQuality.none)
         .length;
-    
+
     return (connectedMetrics / _metrics.length) * 100;
   }
 
@@ -543,13 +580,13 @@ class EnhancedConnectivityService implements IDisposableService {
 class ConnectivityStatus {
   /// Tipos de conectividade disponíveis
   final List<ConnectivityResult> types;
-  
+
   /// Se tem internet real (testado via ping)
   final bool hasInternet;
-  
+
   /// Timestamp da verificação
   final DateTime timestamp;
-  
+
   /// Se está efetivamente conectado
   final bool isConnected;
 
@@ -562,15 +599,16 @@ class ConnectivityStatus {
 
   /// Se está conectado via WiFi
   bool get isWiFi => types.contains(ConnectivityResult.wifi);
-  
+
   /// Se está conectado via dados móveis
   bool get isMobile => types.contains(ConnectivityResult.mobile);
-  
+
   /// Se está conectado via ethernet
   bool get isEthernet => types.contains(ConnectivityResult.ethernet);
-  
+
   /// Tipo de conexão principal
-  ConnectivityResult get primaryType => types.isNotEmpty ? types.first : ConnectivityResult.none;
+  ConnectivityResult get primaryType =>
+      types.isNotEmpty ? types.first : ConnectivityResult.none;
 
   Map<String, dynamic> toMap() {
     return {
@@ -595,13 +633,13 @@ class ConnectivityStatus {
 class NetworkQuality {
   /// Latência média em milissegundos
   final double latency;
-  
+
   /// Qualidade da conexão
   final ConnectionQuality quality;
-  
+
   /// Timestamp da medição
   final DateTime timestamp;
-  
+
   /// Se a latência é estável
   final bool isStable;
 
@@ -628,14 +666,7 @@ class NetworkQuality {
 }
 
 /// Qualidade da conexão
-enum ConnectionQuality {
-  none,
-  terrible,
-  poor,
-  fair,
-  good,
-  excellent,
-}
+enum ConnectionQuality { none, terrible, poor, fair, good, excellent }
 
 /// Métrica de rede
 class NetworkMetric {
@@ -693,9 +724,9 @@ class ConnectivityStats {
   @override
   String toString() {
     return 'ConnectivityStats('
-           'changes: $connectionChanges, '
-           'avg latency: ${averageLatency.toStringAsFixed(0)}ms, '
-           'uptime: ${uptimePercentage.toStringAsFixed(1)}%)';
+        'changes: $connectionChanges, '
+        'avg latency: ${averageLatency.toStringAsFixed(0)}ms, '
+        'uptime: ${uptimePercentage.toStringAsFixed(1)}%)';
   }
 }
 
@@ -703,14 +734,14 @@ class ConnectivityStats {
 double sqrt(double x) {
   if (x < 0) return double.nan;
   if (x == 0) return 0.0;
-  
+
   double guess = x / 2;
   double previous = 0;
-  
+
   while ((guess - previous).abs() > 0.0001) {
     previous = guess;
     guess = (guess + x / guess) / 2;
   }
-  
+
   return guess;
 }

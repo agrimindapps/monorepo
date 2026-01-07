@@ -28,6 +28,7 @@ class CashVsInstallmentCalculatorPage extends ConsumerStatefulWidget {
 class _CashVsInstallmentCalculatorPageState
     extends ConsumerState<CashVsInstallmentCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
+  Key _formKeyId = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -35,11 +36,7 @@ class _CashVsInstallmentCalculatorPageState
 
     return Scaffold(
       appBar: CalculatorAppBar(
-        actions: [
-          InfoAppBarAction(
-            onPressed: () => _showInfo(context),
-          ),
-        ],
+        actions: [InfoAppBarAction(onPressed: () => _showInfo(context))],
       ),
       body: SafeArea(
         child: Align(
@@ -56,9 +53,8 @@ class _CashVsInstallmentCalculatorPageState
                     padding: const EdgeInsets.only(bottom: 16.0),
                     child: Text(
                       'À Vista ou Parcelado?',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
                   ),
                   // Input Form Card
@@ -84,6 +80,7 @@ class _CashVsInstallmentCalculatorPageState
 
                           // Input Form
                           CashVsInstallmentInputForm(
+                            key: _formKeyId,
                             formKey: _formKey,
                             onCalculate: _handleCalculate,
                           ),
@@ -102,8 +99,9 @@ class _CashVsInstallmentCalculatorPageState
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton.icon(
-                                onPressed:
-                                    state.isLoading ? null : _handleSubmit,
+                                onPressed: state.isLoading
+                                    ? null
+                                    : _handleSubmit,
                                 icon: state.isLoading
                                     ? const SizedBox(
                                         width: 16,
@@ -176,21 +174,26 @@ class _CashVsInstallmentCalculatorPageState
       // The form's onSaved callbacks will trigger _submitForm()
       // which calls the onCalculate callback from the form widget
       _formKey.currentState!.save();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha os campos obrigatórios'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   void _handleCalculate(CalculateCashVsInstallmentParams params) {
     // Execute the calculation through the notifier
-    ref
-        .read(cashVsInstallmentCalculatorProvider.notifier)
-        .calculate(params);
+    ref.read(cashVsInstallmentCalculatorProvider.notifier).calculate(params);
   }
 
   void _handleClear() {
-    _formKey.currentState?.reset();
-    ref
-        .read(cashVsInstallmentCalculatorProvider.notifier)
-        .clearCalculation();
+    setState(() {
+      _formKeyId = UniqueKey();
+    });
+    ref.read(cashVsInstallmentCalculatorProvider.notifier).clearCalculation();
   }
 
   void _showInfo(BuildContext context) {

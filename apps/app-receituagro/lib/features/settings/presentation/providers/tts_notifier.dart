@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -58,7 +59,7 @@ class TtsNotifier extends _$TtsNotifier {
       await _service.setVolume(settings.volume);
     } catch (e) {
       // Log error but don't fail - TTS is non-critical feature
-      print('⚠️ Failed to apply TTS settings: $e');
+      debugPrint('⚠️ Failed to apply TTS settings: $e');
     }
   }
 
@@ -112,7 +113,9 @@ class TtsNotifier extends _$TtsNotifier {
       const userId = 'default';
       final saveResult = await _repository.saveSettings(userId, newSettings);
 
-      return saveResult.fold((failure) => throw failure, (_) {
+      return saveResult.fold((failure) => throw Exception(failure.message), (
+        _,
+      ) {
         // Apply new settings to TTS service
         _applySettingsToService(newSettings);
         return newSettings;

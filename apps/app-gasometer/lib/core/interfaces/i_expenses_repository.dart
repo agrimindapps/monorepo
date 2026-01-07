@@ -26,7 +26,10 @@ abstract class IExpensesRepository {
   Future<List<ExpenseEntity>> getExpensesByVehicle(String vehicleId);
 
   /// Get recent expenses for a vehicle (last N records)
-  Future<List<ExpenseEntity>> getRecentExpenses(String vehicleId, {int limit = 3});
+  Future<List<ExpenseEntity>> getRecentExpenses(
+    String vehicleId, {
+    int limit = 3,
+  });
 
   /// Get expenses by type
   Future<List<ExpenseEntity>> getExpensesByType(ExpenseType type);
@@ -79,7 +82,6 @@ abstract class IExpensesRepository {
 
 /// Paged result wrapper
 class PagedResult<T> {
-
   const PagedResult({
     required this.items,
     required this.currentPage,
@@ -99,16 +101,7 @@ class PagedResult<T> {
 }
 
 /// Sort options for expenses
-enum ExpenseSortBy {
-  date,
-  amount,
-  type,
-  description,
-  odometer,
-}
+enum ExpenseSortBy { date, amount, type, description, odometer }
 
 /// Sort order
-enum SortOrder {
-  ascending,
-  descending,
-}
+enum SortOrder { ascending, descending }

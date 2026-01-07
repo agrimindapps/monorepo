@@ -112,11 +112,11 @@ class _NetSalaryCalculatorPageState
       color: Theme.of(context)
           .colorScheme
           .surfaceContainerHighest
-          .withOpacity(0.3),
+          .withValues(alpha: 0.3),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
         ),
       ),
       child: Container(
@@ -128,7 +128,7 @@ class _NetSalaryCalculatorPageState
             Icon(
               Icons.calculate_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(

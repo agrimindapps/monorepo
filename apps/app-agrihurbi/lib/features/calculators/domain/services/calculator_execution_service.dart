@@ -23,7 +23,7 @@ class CalculatorExecutionService {
     try {
       final strategy = _strategyRegistry.getStrategy(strategyId);
       if (strategy == null) {
-        return CalculationExecutionResult.error(
+        return CalculationExecutionLeft(
           ExecutionError(
             type: ExecutionErrorType.strategyNotFound,
             message: 'Estratégia não encontrada: $strategyId',
@@ -57,7 +57,7 @@ class CalculatorExecutionService {
         inputs,
       );
 
-      return CalculationExecutionResult.success(
+      return CalculationExecutionRight(
         ExecutionSuccess(
           result: finalResult,
           strategyId: strategyId,
@@ -66,7 +66,7 @@ class CalculatorExecutionService {
         ),
       );
     } catch (e) {
-      return CalculationExecutionResult.error(
+      return CalculationExecutionLeft(
         ExecutionError(
           type: ExecutionErrorType.executionFailed,
           message: 'Erro durante execução: ${e.toString()}',
@@ -86,7 +86,7 @@ class CalculatorExecutionService {
     try {
       final strategy = _findBestStrategy(inputs, preferredStrategyType);
       if (strategy == null) {
-        return CalculationExecutionResult.error(
+        return CalculationExecutionLeft(
           ExecutionError(
             type: ExecutionErrorType.noCompatibleStrategy,
             message:
@@ -97,7 +97,7 @@ class CalculatorExecutionService {
       }
       return await executeWithStrategy(strategy.strategyId, inputs);
     } catch (e) {
-      return CalculationExecutionResult.error(
+      return CalculationExecutionLeft(
         ExecutionError(
           type: ExecutionErrorType.autoSelectionFailed,
           message: 'Erro na seleção automática de estratégia: ${e.toString()}',
@@ -141,7 +141,7 @@ class CalculatorExecutionService {
         );
 
         errors[request.id] = error;
-        results[request.id] = CalculationExecutionResult.error(error);
+        results[request.id] = CalculationExecutionLeft(error);
       }
     }
 
@@ -230,8 +230,8 @@ class CalculatorExecutionService {
       final preferredStrategies = allStrategies
           .where(
             (s) => s.runtimeType.toString().toLowerCase().contains(
-                  preferredType.toLowerCase(),
-                ),
+              preferredType.toLowerCase(),
+            ),
           )
           .toList();
 
@@ -281,6 +281,15 @@ class CalculationExecutionResult {
     );
   }
 }
+
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+CalculationExecutionResult CalculationExecutionRight(
+  ExecutionSuccess success,
+) => CalculationExecutionResult.success(success);
+// ignore: non_constant_identifier_names
+CalculationExecutionResult CalculationExecutionLeft(ExecutionError error) =>
+    CalculationExecutionResult.error(error);
 
 class ExecutionSuccess {
   final CalculationResult result;

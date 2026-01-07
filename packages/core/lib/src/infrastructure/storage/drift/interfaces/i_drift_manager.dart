@@ -1,26 +1,28 @@
+import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
-import '../../../../shared/utils/result.dart';
+
+import '../../../../shared/utils/failure.dart';
 
 /// Interface para gerenciamento centralizado do Drift
 /// Define contratos para inicialização, abertura e fechamento de databases
-/// 
+///
 /// Equivalente Drift do IHiveManager
 abstract class IDriftManager {
   /// Inicializa o Drift com configurações específicas do app
   /// [appName] usado para criar path único de armazenamento
-  Future<Result<void>> initialize(String appName);
+  Future<Either<Failure, void>> initialize(String appName);
 
   /// Obtém uma database do Drift, criando se necessário
   /// Retorna a database tipada ou erro se houver falha
-  Future<Result<GeneratedDatabase>> getDatabase(String databaseName);
+  Future<Either<Failure, GeneratedDatabase>> getDatabase(String databaseName);
 
   /// Fecha uma database específica e remove do cache
   /// Libera recursos de memória
-  Future<Result<void>> closeDatabase(String databaseName);
+  Future<Either<Failure, void>> closeDatabase(String databaseName);
 
   /// Fecha todas as databases abertas
   /// Útil para cleanup durante logout ou reset
-  Future<Result<void>> closeAllDatabases();
+  Future<Either<Failure, void>> closeAllDatabases();
 
   /// Verifica se uma database está aberta
   bool isDatabaseOpen(String databaseName);
@@ -33,17 +35,19 @@ abstract class IDriftManager {
 
   /// Limpa completamente todos os dados do Drift
   /// CUIDADO: Operação destrutiva
-  Future<Result<void>> clearAllData();
+  Future<Either<Failure, void>> clearAllData();
 
   /// Obtém estatísticas de uso das databases
   Map<String, int> getDatabaseStatistics();
 
   /// Executa VACUUM em uma database específica (otimização SQLite)
-  Future<Result<void>> vacuumDatabase(String databaseName);
+  Future<Either<Failure, void>> vacuumDatabase(String databaseName);
 
   /// Executa VACUUM em todas as databases abertas
-  Future<Result<void>> vacuumAllDatabases();
+  Future<Either<Failure, void>> vacuumAllDatabases();
 
   /// Obtém informações detalhadas de uma database
-  Future<Result<Map<String, dynamic>>> getDatabaseInfo(String databaseName);
+  Future<Either<Failure, Map<String, dynamic>>> getDatabaseInfo(
+    String databaseName,
+  );
 }

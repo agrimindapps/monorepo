@@ -25,23 +25,24 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
   @override
   Future<Either<Failure, List<RainGaugeEntity>>> getRainGauges() async {
     final result = await _rainGaugeRepository.getAll();
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar pluviômetros'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar pluviômetros')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   @override
   Future<Either<Failure, RainGaugeEntity>> getRainGaugeById(String id) async {
     final result = await _rainGaugeRepository.getById(id);
-    if (result.isSuccess) {
-      final gauge = result.data;
-      if (gauge == null) {
-        return const Left(CacheFailure('Pluviômetro não encontrado'));
-      }
-      return Right(RainGaugeModel.fromDrift(gauge).toEntity());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar pluviômetro'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar pluviômetro')),
+      (data) {
+        if (data == null) {
+          return const Left(CacheFailure('Pluviômetro não encontrado'));
+        }
+        return Right(RainGaugeModel.fromDrift(data).toEntity());
+      },
+    );
   }
 
   @override
@@ -50,10 +51,10 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
   ) async {
     final model = RainGaugeModel.fromEntity(rainGauge);
     final result = await _rainGaugeRepository.insert(model.toDriftCompanion());
-    if (result.isSuccess) {
-      return Right(rainGauge);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao criar pluviômetro'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao criar pluviômetro')),
+      (data) => Right(rainGauge),
+    );
   }
 
   @override
@@ -65,23 +66,23 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
       rainGauge.id,
       model.toDriftCompanion(),
     );
-    if (result.isSuccess) {
-      return Right(rainGauge);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao atualizar pluviômetro'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao atualizar pluviômetro')),
+      (data) => Right(rainGauge),
+    );
   }
 
   @override
   Future<Either<Failure, Unit>> deleteRainGauge(String id) async {
     // Primeiro, soft delete das medições associadas
     await _measurementRepository.softDeleteByRainGauge(id);
-    
+
     // Depois, soft delete do pluviômetro
     final result = await _rainGaugeRepository.softDelete(id);
-    if (result.isSuccess) {
-      return const Right(unit);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao excluir pluviômetro'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao excluir pluviômetro')),
+      (data) => const Right(unit),
+    );
   }
 
   @override
@@ -89,20 +90,20 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
     String groupId,
   ) async {
     final result = await _rainGaugeRepository.getByGroup(groupId);
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar pluviômetros por grupo'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar pluviômetros por grupo')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   @override
   Future<Either<Failure, List<RainGaugeEntity>>>
       getRainGaugesWithLocation() async {
     final result = await _rainGaugeRepository.getWithLocation();
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar pluviômetros com localização'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar pluviômetros com localização')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   // ==================== MEASUREMENTS ====================
@@ -111,10 +112,10 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
   Future<Either<Failure, List<RainfallMeasurementEntity>>>
       getMeasurements() async {
     final result = await _measurementRepository.getAll();
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar medições'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar medições')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   @override
@@ -122,14 +123,15 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
     String id,
   ) async {
     final result = await _measurementRepository.getById(id);
-    if (result.isSuccess) {
-      final measurement = result.data;
-      if (measurement == null) {
-        return const Left(CacheFailure('Medição não encontrada'));
-      }
-      return Right(RainfallMeasurementModel.fromDrift(measurement).toEntity());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar medição'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar medição')),
+      (data) {
+        if (data == null) {
+          return const Left(CacheFailure('Medição não encontrada'));
+        }
+        return Right(RainfallMeasurementModel.fromDrift(data).toEntity());
+      },
+    );
   }
 
   @override
@@ -139,10 +141,10 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
     final model = RainfallMeasurementModel.fromEntity(measurement);
     final result =
         await _measurementRepository.insert(model.toDriftCompanion());
-    if (result.isSuccess) {
-      return Right(measurement);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao criar medição'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao criar medição')),
+      (data) => Right(measurement),
+    );
   }
 
   @override
@@ -154,39 +156,39 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
       measurement.id,
       model.toDriftCompanion(),
     );
-    if (result.isSuccess) {
-      return Right(measurement);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao atualizar medição'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao atualizar medição')),
+      (data) => Right(measurement),
+    );
   }
 
   @override
   Future<Either<Failure, Unit>> deleteMeasurement(String id) async {
     final result = await _measurementRepository.softDelete(id);
-    if (result.isSuccess) {
-      return const Right(unit);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao excluir medição'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao excluir medição')),
+      (data) => const Right(unit),
+    );
   }
 
   @override
   Future<Either<Failure, List<RainfallMeasurementEntity>>>
       getMeasurementsByRainGauge(String rainGaugeId) async {
     final result = await _measurementRepository.getByRainGauge(rainGaugeId);
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar medições'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar medições')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   @override
   Future<Either<Failure, List<RainfallMeasurementEntity>>>
       getMeasurementsByPeriod(DateTime start, DateTime end) async {
     final result = await _measurementRepository.getByPeriod(start, end);
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar medições por período'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar medições por período')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   @override
@@ -201,10 +203,10 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
       start,
       end,
     );
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!.toEntities());
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar medições'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar medições')),
+      (data) => Right(data.toEntities()),
+    );
   }
 
   // ==================== STATISTICS ====================
@@ -230,42 +232,42 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
               effectiveStart,
               effectiveEnd,
             );
-      final total = totalResult.isSuccess ? (totalResult.data ?? 0.0) : 0.0;
+      final total = totalResult.fold((failure) => 0.0, (data) => data);
 
       // Média
       final avgResult = await _measurementRepository.getAverageByPeriod(
         effectiveStart,
         effectiveEnd,
       );
-      final average = avgResult.isSuccess ? (avgResult.data ?? 0.0) : 0.0;
+      final average = avgResult.fold((failure) => 0.0, (data) => data);
 
       // Máximo
       final maxResult = await _measurementRepository.getMaxByPeriod(
         effectiveStart,
         effectiveEnd,
       );
-      final max = maxResult.isSuccess ? (maxResult.data ?? 0.0) : 0.0;
+      final max = maxResult.fold((failure) => 0.0, (data) => data);
 
       // Mínimo
       final minResult = await _measurementRepository.getMinByPeriod(
         effectiveStart,
         effectiveEnd,
       );
-      final min = minResult.isSuccess ? (minResult.data ?? 0.0) : 0.0;
+      final min = minResult.fold((failure) => 0.0, (data) => data);
 
       // Contagem
       final countResult = rainGaugeId != null
           ? await _measurementRepository.countByRainGauge(rainGaugeId)
           : await _measurementRepository.countActive();
-      final count = countResult.isSuccess ? (countResult.data ?? 0) : 0;
+      final count = countResult.fold((failure) => 0, (data) => data);
 
       // Totais mensais
       final monthlyResult = await _measurementRepository.getMonthlyTotals(
         effectiveStart.year,
       );
-      final monthlyTotals = monthlyResult.isSuccess 
-          ? (monthlyResult.data ?? <int, double>{}) 
-          : <int, double>{};
+      final monthlyTotals = monthlyResult.fold(
+          (failure) => <int, double>{},
+          (data) => data);
 
       return Right(RainfallStatistics(
         totalAmount: total,
@@ -283,10 +285,10 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
   @override
   Future<Either<Failure, Map<int, double>>> getMonthlyTotals(int year) async {
     final result = await _measurementRepository.getMonthlyTotals(year);
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar totais mensais'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar totais mensais')),
+      (data) => Right(data),
+    );
   }
 
   @override
@@ -298,10 +300,10 @@ class PluviometerRepositoryImpl implements PluviometerRepository {
       startYear: startYear ?? DateTime.now().year - 5,
       endYear: endYear,
     );
-    if (result.isSuccess && result.data != null) {
-      return Right(result.data!);
-    }
-    return Left(CacheFailure(result.error?.message ?? 'Erro ao buscar totais anuais'));
+    return result.fold(
+      (failure) => const Left(CacheFailure('Erro ao buscar totais anuais')),
+      (data) => Right(data),
+    );
   }
 
   // ==================== EXPORT ====================

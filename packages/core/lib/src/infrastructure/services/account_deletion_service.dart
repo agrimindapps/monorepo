@@ -1,10 +1,9 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../domain/contracts/i_app_data_cleaner.dart';
 import '../../domain/repositories/i_auth_repository.dart';
-import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
-import '../../shared/utils/result.dart';
 
 /// Serviço centralizado de exclusão de contas
 /// Coordena a exclusão de conta Firebase com limpeza de dados específicos por app
@@ -23,7 +22,7 @@ class AccountDeletionService {
   /// 1. Limpa dados locais específicos do app
   /// 2. Remove conta do Firebase Authentication
   /// 3. Retorna resultado detalhado da operação
-  Future<Result<AccountDeletionResult>> deleteAccount() async {
+  Future<Either<Failure, AccountDeletionResult>> deleteAccount() async {
     try {
       if (kDebugMode) {
         debugPrint(
@@ -34,16 +33,14 @@ class AccountDeletionService {
       final deletionResult = AccountDeletionResult();
       final isLoggedIn = await _authRepository.isLoggedIn;
       if (!isLoggedIn) {
-        return Result.error(
-          AppErrorFactory.fromFailure(
-            const AuthenticationFailure('Usuário não está autenticado'),
-          ),
+        return const Left(
+          AuthenticationFailure('Usuário não está autenticado'),
         );
       }
       if (_appDataCleaner != null) {
         try {
-          final statsBeforeCleaning =
-              await _appDataCleaner.getDataStatsBeforeCleaning();
+          final statsBeforeCleaning = await _appDataCleaner
+              .getDataStatsBeforeCleaning();
           deletionResult.dataStatsBeforeCleaning = statsBeforeCleaning;
 
           if (kDebugMode) {
@@ -135,7 +132,7 @@ class AccountDeletionService {
             );
           }
 
-          return Result.error(AppErrorFactory.fromFailure(failure));
+          return Left(failure);
         },
         (_) {
           deletionResult.firebaseDeleteSuccess = true;
@@ -154,7 +151,7 @@ class AccountDeletionService {
             );
           }
 
-          return Result.success(deletionResult);
+          return Right(deletionResult);
         },
       );
     } catch (e) {
@@ -164,17 +161,14 @@ class AccountDeletionService {
         );
       }
 
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro inesperado durante exclusão: $e'),
-        ),
-      );
+      return Left(UnexpectedFailure('Erro inesperado durante exclusão: $e'));
     }
   }
 
   /// Obter estatísticas dos dados que serão excluídos
   /// Útil para mostrar confirmação detalhada ao usuário
-  Future<Result<Map<String, dynamic>>> getAccountDeletionPreview() async {
+  Future<Either<Failure, Map<String, dynamic>>>
+  getAccountDeletionPreview() async {
     try {
       final preview = <String, dynamic>{
         'hasDataCleaner': _appDataCleaner != null,
@@ -199,13 +193,9 @@ class AccountDeletionService {
         }
       }
 
-      return Result.success(preview);
+      return Right(preview);
     } catch (e) {
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro ao obter preview de exclusão: $e'),
-        ),
-      );
+      return Left(UnexpectedFailure('Erro ao obter preview de exclusão: $e'));
     }
   }
 }

@@ -25,15 +25,12 @@ class SettingsSwitchItem extends StatelessWidget {
 
     return ListTile(
       leading: Icon(icon, color: iconColor ?? theme.colorScheme.primary),
-      title: Text(
-        title,
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
       subtitle: Text(subtitle),
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: theme.colorScheme.primary,
+        activeThumbColor: theme.colorScheme.primary,
       ),
     );
   }

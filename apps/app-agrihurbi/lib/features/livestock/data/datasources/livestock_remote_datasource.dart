@@ -1,5 +1,3 @@
-import 'package:core/core.dart';
-
 import '../models/bovine_model.dart';
 import '../models/equine_model.dart';
 
@@ -27,7 +25,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
     try {
       return [];
     } catch (e) {
-      throw const ServerFailure('Erro ao buscar bovinos');
+      throw Exception('Erro ao buscar bovinos');
     }
   }
 
@@ -36,7 +34,7 @@ class LivestockRemoteDataSourceImpl implements LivestockRemoteDataSource {
     try {
       return null;
     } catch (e) {
-      throw const ServerFailure('Erro ao buscar bovino por ID');
+      throw Exception('Erro ao buscar bovino por ID');
     }
   }
 

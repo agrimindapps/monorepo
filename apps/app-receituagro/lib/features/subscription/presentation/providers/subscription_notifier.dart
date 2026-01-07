@@ -270,7 +270,7 @@ class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
             ref.invalidate(premiumProvider);
           } catch (e) {
             if (kDebugMode) {
-              print('Warning: Could not invalidate PremiumNotifier: $e');
+              debugPrint('Warning: Could not invalidate PremiumNotifier: $e');
             }
           }
         },
@@ -353,7 +353,7 @@ class SubscriptionManagementNotifier extends _$SubscriptionManagementNotifier {
               ref.invalidate(premiumProvider);
             } catch (e) {
               if (kDebugMode) {
-                print('Warning: Could not invalidate PremiumNotifier: $e');
+                debugPrint('Warning: Could not invalidate PremiumNotifier: $e');
               }
             }
           } else {

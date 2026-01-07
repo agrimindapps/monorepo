@@ -26,8 +26,8 @@ class RemoveFavoritoUseCase {
   /// );
   ///
   /// result.fold(
-  ///   (failure) => print('Erro: ${failure.message}'),
-  ///   (success) => print('✓ Removido dos favoritos'),
+  ///   (failure) => debugPrint('Erro: ${failure.message}'),
+  ///   (success) => debugPrint('✓ Removido dos favoritos'),
   /// );
   /// ```
   ///

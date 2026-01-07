@@ -54,7 +54,7 @@ class _CloudWidget extends StatelessWidget {
       width: size * 1.5,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.7),
+        color: Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(size / 2),
       ),
     );

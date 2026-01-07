@@ -40,9 +40,7 @@ class AppRouter {
 
       case '/login':
         // Public - Login page
-        return MaterialPageRoute(
-          builder: (_) => const LoginPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const LoginPage());
 
       // ========== PROTECTED ROUTES (Authentication required) ==========
 
@@ -128,9 +126,8 @@ class AppRouter {
           return _buildErrorRoute('ID da praga é obrigatório');
         }
         return MaterialPageRoute(
-          builder: (_) => PragaDetalhesPage(
-            pragaId: args['id'] as String,
-          ).requireAuth(),
+          builder: (_) =>
+              PragaDetalhesPage(pragaId: args['id'] as String).requireAuth(),
         );
 
       case '/pragas/new':
@@ -146,9 +143,8 @@ class AppRouter {
           return _buildErrorRoute('ID da praga é obrigatório');
         }
         return MaterialPageRoute(
-          builder: (_) => PragaCadastroPage(
-            pragaId: args['id'] as String,
-          ).requireWrite(),
+          builder: (_) =>
+              PragaCadastroPage(pragaId: args['id'] as String).requireWrite(),
         );
 
       // Admin routes
@@ -190,8 +186,10 @@ class AppRouter {
               const SizedBox(height: 16),
               Text(
                 'Página não encontrada',
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
@@ -337,7 +335,7 @@ class _CreateCulturaPlaceholder extends StatelessWidget {
 class _EditCulturaPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _EditCulturaPlaceholder();
+  const _EditCulturaPlaceholder({this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -364,7 +362,7 @@ class _EditCulturaPlaceholder extends StatelessWidget {
 class _PragaDetailsPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _PragaDetailsPlaceholder();
+  const _PragaDetailsPlaceholder({this.id});
 
   @override
   Widget build(BuildContext context) {
@@ -412,7 +410,7 @@ class _CreatePragaPlaceholder extends StatelessWidget {
 class _EditPragaPlaceholder extends StatelessWidget {
   final String? id;
 
-  const _EditPragaPlaceholder();
+  const _EditPragaPlaceholder({this.id});
 
   @override
   Widget build(BuildContext context) {

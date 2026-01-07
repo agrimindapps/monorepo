@@ -161,7 +161,7 @@ class OdometerDriftSyncAdapter
 
       // Validar campos obrigatórios
       if (entity.vehicleId.isEmpty) {
-        throw const ValidationFailure(
+        throw Exception(
           'Vehicle ID missing from Firestore document',
         );
       }
@@ -175,7 +175,7 @@ class OdometerDriftSyncAdapter
         stackTrace: stackTrace,
       );
 
-      throw ParseFailure('Failed to parse odometer from Firestore: $e');
+      throw Exception('Failed to parse odometer from Firestore: $e');
     }
   }
 

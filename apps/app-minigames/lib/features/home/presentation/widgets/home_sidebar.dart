@@ -29,10 +29,10 @@ class HomeSidebar extends ConsumerWidget {
         child: Container(
           width: isCollapsed ? 70 : 240,
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A2E).withOpacity(0.85),
+            color: const Color(0xFF1A1A2E).withValues(alpha: 0.85),
             border: Border(
               right: BorderSide(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -200,7 +200,7 @@ class _SectionHeader extends StatelessWidget {
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
-          color: Colors.white.withOpacity(0.5),
+          color: Colors.white.withValues(alpha: 0.5),
           fontSize: 11,
           fontWeight: FontWeight.bold,
           letterSpacing: 1.2,
@@ -256,7 +256,7 @@ class _SidebarItemState extends State<_SidebarItem> {
           ),
           decoration: BoxDecoration(
             color: isActive
-                ? Colors.white.withOpacity(0.1)
+                ? Colors.white.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             border: widget.isSelected
@@ -305,8 +305,8 @@ class _SidebarItemState extends State<_SidebarItem> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: widget.color?.withOpacity(0.2) ??
-                          Colors.white.withOpacity(0.1),
+                      color: widget.color?.withValues(alpha: 0.2) ??
+                          Colors.white.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(

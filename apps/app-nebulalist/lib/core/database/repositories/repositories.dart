@@ -5,9 +5,9 @@
 /// Eles NÃO são os mesmos que os repositories em features/*/data/repositories/.
 ///
 /// **Arquitetura:**
-/// - **Core Drift Repos** (aqui): Acesso direto ao DB com Result<T> pattern
+/// - **Core Drift Repos** (aqui): Acesso direto ao DB com Either<Failure, T> pattern
 ///   - Usados pelos DAOs e operações de baixo nível
-///   - Pattern: Result<T> do core package
+///   - Pattern: Either<Failure, T> do core package
 ///
 /// - **Feature Repos** (features/*/data/repositories/): Implementam interfaces do domain
 ///   - Usados pelos use cases via dependency injection

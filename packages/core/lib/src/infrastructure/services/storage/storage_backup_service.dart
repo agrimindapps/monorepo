@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:path/path.dart' as path;
 
-import '../../../shared/utils/app_error.dart';
-import '../../../shared/utils/result.dart';
+import '../../../shared/utils/failure.dart';
 
 /// Serviço de backup e restore para storage
 ///
@@ -14,9 +14,13 @@ import '../../../shared/utils/result.dart';
 /// - Backup scheduling
 /// - Validation
 class StorageBackupService {
+  /// Diretório onde os backups são armazenados
   final Directory backupDirectory;
+
+  /// Se deve criar backup automático a cada write
   final bool autoBackupOnWrite;
 
+  /// Construtor
   StorageBackupService({
     required this.backupDirectory,
     this.autoBackupOnWrite = false,
@@ -28,7 +32,7 @@ class StorageBackupService {
   /// [data]: dados a serem salvos no backup
   ///
   /// Retorna o caminho do arquivo de backup
-  Future<Result<String>> createBackup({
+  Future<Either<Failure, String>> createBackup({
     String? backupName,
     required Map<String, dynamic> data,
   }) async {
@@ -51,13 +55,12 @@ class StorageBackupService {
 
       await backupFile.writeAsString(jsonEncode(backupData));
 
-      return Result.success(backupFile.path);
-    } catch (e, stackTrace) {
-      return Result.error(
-        StorageBackupError(
-          message: 'Erro ao criar backup: ${e.toString()}',
+      return Right(backupFile.path);
+    } catch (e) {
+      return const Left(
+        CacheFailure(
+          'Erro ao criar backup',
           code: 'BACKUP_CREATE_ERROR',
-          stackTrace: stackTrace,
         ),
       );
     }
@@ -69,7 +72,7 @@ class StorageBackupService {
   /// [clearFirst]: se true, limpa dados existentes antes de restaurar
   ///
   /// Retorna os dados restaurados
-  Future<Result<Map<String, dynamic>>> restoreBackup(
+  Future<Either<Failure, Map<String, dynamic>>> restoreBackup(
     String backupPath, {
     bool clearFirst = true,
   }) async {
@@ -77,9 +80,9 @@ class StorageBackupService {
       final backupFile = File(backupPath);
 
       if (!await backupFile.exists()) {
-        return Result.error(
-          StorageBackupError(
-            message: 'Arquivo de backup não encontrado',
+        return const Left(
+          CacheFailure(
+            'Arquivo de backup não encontrado',
             code: 'BACKUP_FILE_NOT_FOUND',
           ),
         );
@@ -90,9 +93,9 @@ class StorageBackupService {
 
       // Validate backup structure
       if (!backupData.containsKey('data')) {
-        return Result.error(
-          StorageBackupError(
-            message: 'Backup inválido: estrutura incorreta',
+        return const Left(
+          CacheFailure(
+            'Backup inválido: estrutura incorreta',
             code: 'INVALID_BACKUP_STRUCTURE',
           ),
         );
@@ -100,14 +103,12 @@ class StorageBackupService {
 
       final data = backupData['data'] as Map<String, dynamic>;
 
-      return Result.success(data);
-    } catch (e, stackTrace) {
-      return Result.error(
-        StorageBackupError(
-          message: 'Erro ao restaurar backup: ${e.toString()}',
+      return Right(data);
+    } catch (e) {
+      return const Left(
+        CacheFailure(
+          'Erro ao restaurar backup',
           code: 'BACKUP_RESTORE_ERROR',
-          details: 'backupPath: $backupPath',
-          stackTrace: stackTrace,
         ),
       );
     }
@@ -116,7 +117,7 @@ class StorageBackupService {
   /// Cria backup incremental de um item específico
   ///
   /// Útil para auto-backup em writes
-  Future<Result<void>> createItemBackup({
+  Future<Either<Failure, void>> createItemBackup({
     required String key,
     required dynamic value,
     required String storageType,
@@ -138,19 +139,19 @@ class StorageBackupService {
 
       await backupFile.writeAsString(jsonEncode(backupData));
 
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
       // Backup failures não devem bloquear operação principal
       // Log warning mas retorna success
-      return Result.success(null);
+      return const Right(null);
     }
   }
 
   /// Remove backup de um item específico
-  Future<Result<void>> removeItemBackup(String key) async {
+  Future<Either<Failure, void>> removeItemBackup(String key) async {
     try {
       if (!await backupDirectory.exists()) {
-        return Result.success(null);
+        return const Right(null);
       }
 
       await for (final file in backupDirectory.list()) {
@@ -159,10 +160,10 @@ class StorageBackupService {
         }
       }
 
-      return Result.success(null);
+      return const Right(null);
     } catch (e) {
       // Backup cleanup failures não são críticos
-      return Result.success(null);
+      return const Right(null);
     }
   }
 
@@ -250,11 +251,19 @@ class StorageBackupService {
 
 /// Informações sobre um backup
 class BackupInfo {
+  /// Caminho completo do arquivo de backup
   final String path;
+
+  /// Nome do arquivo de backup
   final String name;
+
+  /// Tamanho do arquivo em bytes
   final int size;
+
+  /// Data de criação do backup
   final DateTime createdAt;
 
+  /// Construtor
   BackupInfo({
     required this.path,
     required this.name,
@@ -262,6 +271,7 @@ class BackupInfo {
     required this.createdAt,
   });
 
+  /// Formata o tamanho do arquivo para exibição
   String get sizeFormatted {
     if (size < 1024) return '${size}B';
     if (size < 1024 * 1024) return '${(size / 1024).toStringAsFixed(1)}KB';
@@ -271,33 +281,5 @@ class BackupInfo {
   @override
   String toString() {
     return 'BackupInfo(name: $name, size: $sizeFormatted, created: $createdAt)';
-  }
-}
-
-/// Erro de backup
-class StorageBackupError extends AppError {
-  StorageBackupError({
-    required super.message,
-    required super.code,
-    super.details,
-    super.stackTrace,
-  }) : super(category: ErrorCategory.storage);
-
-  @override
-  StorageBackupError copyWith({
-    String? message,
-    String? code,
-    String? details,
-    StackTrace? stackTrace,
-    DateTime? timestamp,
-    ErrorSeverity? severity,
-    ErrorCategory? category,
-  }) {
-    return StorageBackupError(
-      message: message ?? this.message,
-      code: code ?? this.code,
-      details: details ?? this.details,
-      stackTrace: stackTrace ?? this.stackTrace,
-    );
   }
 }

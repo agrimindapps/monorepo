@@ -161,14 +161,10 @@ class WebImageUploadManager {
           onProgress: onProgress,
         );
 
-        // Converte Result para Either
-        if (result.isSuccess) {
-          return Right(result.data!.downloadUrl);
-        } else {
-          return Left(
-            NetworkFailure(result.error?.message ?? 'Erro no upload'),
-          );
-        }
+        return result.fold(
+          (failure) => Left(NetworkFailure(failure.message)),
+          (imageUploadResult) => Right(imageUploadResult.downloadUrl),
+        );
       }
 
       // Em mobile/desktop, não deve chegar aqui (usaria WebImageUploadManager)

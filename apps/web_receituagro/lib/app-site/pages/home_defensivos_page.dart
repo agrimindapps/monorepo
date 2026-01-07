@@ -62,7 +62,7 @@ class _DefensivosListarPageState extends State<DefensivosListarPage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 60,
-        backgroundColor: Colors.white.withOpacity(0.95),
+        backgroundColor: Colors.white.withValues(alpha: 0.95),
         elevation: 1,
         centerTitle: false,
         title: Row(

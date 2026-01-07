@@ -2,36 +2,39 @@ import '../entities/calculation_result.dart';
 import '../entities/calculator_parameter.dart';
 
 /// Interface principal para Strategy Pattern das calculadoras
-/// 
+///
 /// Define contrato comum para todas as estratégias de cálculo,
 /// implementando Open/Closed Principle (OCP)
 abstract class ICalculatorStrategy {
   /// ID único da estratégia
   String get strategyId;
-  
+
   /// Nome da estratégia para exibição
   String get strategyName;
-  
+
   /// Descrição detalhada da estratégia
   String get description;
-  
+
   /// Parâmetros necessários para esta estratégia
   List<CalculatorParameter> get parameters;
-  
+
   /// Validações específicas da estratégia
   Future<ValidationResult> validateInputs(Map<String, dynamic> inputs);
-  
+
   /// Execução do cálculo principal
   Future<CalculationResult> executeCalculation(Map<String, dynamic> inputs);
-  
+
   /// Pós-processamento dos resultados (opcional)
-  Future<CalculationResult> postProcessResults(CalculationResult result, Map<String, dynamic> inputs) async {
+  Future<CalculationResult> postProcessResults(
+    CalculationResult result,
+    Map<String, dynamic> inputs,
+  ) async {
     return result;
   }
-  
+
   /// Verifica se a estratégia pode processar os dados fornecidos
   bool canProcess(Map<String, dynamic> inputs);
-  
+
   /// Obtém metadados da estratégia
   StrategyMetadata get metadata;
 }
@@ -39,14 +42,18 @@ abstract class ICalculatorStrategy {
 /// Interface específica para calculadoras de nutrição
 abstract class INutritionCalculatorStrategy extends ICalculatorStrategy {
   /// Calcula necessidades nutricionais básicas
-  Future<NutritionalRequirements> calculateNutritionalNeeds(Map<String, dynamic> inputs);
-  
+  Future<NutritionalRequirements> calculateNutritionalNeeds(
+    Map<String, dynamic> inputs,
+  );
+
   /// Calcula fornecimento do solo
   Future<SoilSupply> calculateSoilSupply(Map<String, dynamic> inputs);
-  
+
   /// Calcula fatores de eficiência
-  Future<EfficiencyFactors> calculateEfficiencyFactors(Map<String, dynamic> inputs);
-  
+  Future<EfficiencyFactors> calculateEfficiencyFactors(
+    Map<String, dynamic> inputs,
+  );
+
   /// Gera recomendações de fertilizantes
   Future<FertilizerRecommendations> generateFertilizerRecommendations(
     NutritionalRequirements needs,
@@ -58,11 +65,15 @@ abstract class INutritionCalculatorStrategy extends ICalculatorStrategy {
 /// Interface para calculadoras de irrigação
 abstract class IIrrigationCalculatorStrategy extends ICalculatorStrategy {
   /// Calcula necessidade hídrica
-  Future<WaterRequirement> calculateWaterRequirement(Map<String, dynamic> inputs);
-  
+  Future<WaterRequirement> calculateWaterRequirement(
+    Map<String, dynamic> inputs,
+  );
+
   /// Calcula evapotranspiração
-  Future<EvapotranspirationData> calculateEvapotranspiration(Map<String, dynamic> inputs);
-  
+  Future<EvapotranspirationData> calculateEvapotranspiration(
+    Map<String, dynamic> inputs,
+  );
+
   /// Gera cronograma de irrigação
   Future<IrrigationSchedule> generateIrrigationSchedule(
     WaterRequirement requirement,
@@ -74,10 +85,12 @@ abstract class IIrrigationCalculatorStrategy extends ICalculatorStrategy {
 abstract class ICropCalculatorStrategy extends ICalculatorStrategy {
   /// Calcula densidade de plantio
   Future<PlantingDensity> calculatePlantingDensity(Map<String, dynamic> inputs);
-  
+
   /// Calcula predição de colheita
-  Future<HarvestPrediction> calculateHarvestPrediction(Map<String, dynamic> inputs);
-  
+  Future<HarvestPrediction> calculateHarvestPrediction(
+    Map<String, dynamic> inputs,
+  );
+
   /// Calcula taxa de sementes
   Future<SeedRate> calculateSeedRate(Map<String, dynamic> inputs);
 }
@@ -85,11 +98,13 @@ abstract class ICropCalculatorStrategy extends ICalculatorStrategy {
 /// Interface para calculadoras de pecuária
 abstract class ILivestockCalculatorStrategy extends ICalculatorStrategy {
   /// Calcula necessidades alimentares
-  Future<FeedRequirements> calculateFeedRequirements(Map<String, dynamic> inputs);
-  
+  Future<FeedRequirements> calculateFeedRequirements(
+    Map<String, dynamic> inputs,
+  );
+
   /// Calcula ciclo reprodutivo
   Future<BreedingCycle> calculateBreedingCycle(Map<String, dynamic> inputs);
-  
+
   /// Calcula capacidade de pastejo
   Future<GrazingCapacity> calculateGrazingCapacity(Map<String, dynamic> inputs);
 }
@@ -98,10 +113,10 @@ abstract class ILivestockCalculatorStrategy extends ICalculatorStrategy {
 abstract class ISoilCalculatorStrategy extends ICalculatorStrategy {
   /// Analisa composição do solo
   Future<SoilComposition> analyzeSoilComposition(Map<String, dynamic> inputs);
-  
+
   /// Calcula drenagem
   Future<DrainageAnalysis> calculateDrainage(Map<String, dynamic> inputs);
-  
+
   /// Avalia qualidade do solo
   Future<SoilQuality> evaluateSoilQuality(Map<String, dynamic> inputs);
 }
@@ -112,14 +127,14 @@ class ValidationResult {
   final List<String> errors;
   final List<String> warnings;
   final Map<String, dynamic> sanitizedInputs;
-  
+
   const ValidationResult({
     required this.isValid,
     required this.errors,
     required this.warnings,
     required this.sanitizedInputs,
   });
-  
+
   factory ValidationResult.success(Map<String, dynamic> sanitizedInputs) {
     return ValidationResult(
       isValid: true,
@@ -128,8 +143,11 @@ class ValidationResult {
       sanitizedInputs: sanitizedInputs,
     );
   }
-  
-  factory ValidationResult.failure(List<String> errors, [List<String>? warnings]) {
+
+  factory ValidationResult.failure(
+    List<String> errors, [
+    List<String>? warnings,
+  ]) {
     return ValidationResult(
       isValid: false,
       errors: errors,
@@ -139,6 +157,14 @@ class ValidationResult {
   }
 }
 
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+ValidationResult ValidationRight(Map<String, dynamic> sanitizedInputs) =>
+    ValidationResult.success(sanitizedInputs);
+// ignore: non_constant_identifier_names
+ValidationResult ValidationLeft(List<String> errors) =>
+    ValidationResult.failure(errors);
+
 /// Metadados da estratégia
 class StrategyMetadata {
   final String version;
@@ -147,7 +173,7 @@ class StrategyMetadata {
   final String calculationMethod;
   final List<String> references;
   final DateTime lastUpdated;
-  
+
   const StrategyMetadata({
     required this.version,
     required this.supportedCrops,
@@ -164,7 +190,7 @@ class NutritionalRequirements {
   final double potassium;
   final double organicMatter;
   final Map<String, double> micronutrients;
-  
+
   const NutritionalRequirements({
     required this.nitrogen,
     required this.phosphorus,
@@ -180,7 +206,7 @@ class SoilSupply {
   final double availablePotassium;
   final double organicMatterContribution;
   final Map<String, double> micronutrientSupply;
-  
+
   const SoilSupply({
     required this.availableNitrogen,
     required this.availablePhosphorus,
@@ -195,7 +221,7 @@ class EfficiencyFactors {
   final double phosphorusEfficiency;
   final double potassiumEfficiency;
   final Map<String, double> micronutrientEfficiency;
-  
+
   const EfficiencyFactors({
     required this.nitrogenEfficiency,
     required this.phosphorusEfficiency,
@@ -209,7 +235,7 @@ class FertilizerRecommendations {
   final List<ApplicationTiming> schedule;
   final double estimatedCost;
   final List<String> applicationNotes;
-  
+
   const FertilizerRecommendations({
     required this.products,
     required this.schedule,
@@ -224,7 +250,7 @@ class FertilizerRecommendation {
   final String unit;
   final String nutrientContent;
   final List<String> applicationMethods;
-  
+
   const FertilizerRecommendation({
     required this.productName,
     required this.quantity,
@@ -240,7 +266,7 @@ class ApplicationTiming {
   final double phosphorusAmount;
   final double potassiumAmount;
   final String instructions;
-  
+
   const ApplicationTiming({
     required this.period,
     required this.nitrogenAmount,
@@ -255,7 +281,7 @@ class WaterRequirement {
   final double weeklyRequirement;
   final double seasonalRequirement;
   final String unit;
-  
+
   const WaterRequirement({
     required this.dailyRequirement,
     required this.weeklyRequirement,
@@ -269,7 +295,7 @@ class EvapotranspirationData {
   final double referenceEvapotranspiration;
   final double cropCoefficient;
   final DateTime calculatedFor;
-  
+
   const EvapotranspirationData({
     required this.cropEvapotranspiration,
     required this.referenceEvapotranspiration,
@@ -282,7 +308,7 @@ class IrrigationSchedule {
   final List<IrrigationEvent> events;
   final String frequency;
   final double totalWaterAmount;
-  
+
   const IrrigationSchedule({
     required this.events,
     required this.frequency,
@@ -295,7 +321,7 @@ class IrrigationEvent {
   final double waterAmount;
   final String method;
   final String notes;
-  
+
   const IrrigationEvent({
     required this.dateTime,
     required this.waterAmount,
@@ -309,7 +335,7 @@ class PlantingDensity {
   final double seedsPerMeter;
   final double rowSpacing;
   final double plantSpacing;
-  
+
   const PlantingDensity({
     required this.plantsPerHectare,
     required this.seedsPerMeter,
@@ -323,7 +349,7 @@ class HarvestPrediction {
   final double expectedYield;
   final String yieldUnit;
   final double confidenceLevel;
-  
+
   const HarvestPrediction({
     required this.estimatedHarvestDate,
     required this.expectedYield,
@@ -337,7 +363,7 @@ class SeedRate {
   final double seedsPerHectare;
   final double adjustedRate;
   final String adjustmentReason;
-  
+
   const SeedRate({
     required this.kgPerHectare,
     required this.seedsPerHectare,
@@ -351,7 +377,7 @@ class FeedRequirements {
   final Map<String, double> nutritionalComposition;
   final List<FeedComponent> feedComponents;
   final double estimatedCost;
-  
+
   const FeedRequirements({
     required this.dailyFeedAmount,
     required this.nutritionalComposition,
@@ -365,7 +391,7 @@ class FeedComponent {
   final double percentage;
   final double amount;
   final String unit;
-  
+
   const FeedComponent({
     required this.ingredient,
     required this.percentage,
@@ -379,7 +405,7 @@ class BreedingCycle {
   final DateTime expectedBirthDate;
   final int gestationPeriod;
   final List<String> breedingRecommendations;
-  
+
   const BreedingCycle({
     required this.nextBreedingDate,
     required this.expectedBirthDate,
@@ -393,7 +419,7 @@ class GrazingCapacity {
   final double carryingCapacity;
   final int rotationPeriod;
   final List<String> managementRecommendations;
-  
+
   const GrazingCapacity({
     required this.animalUnitsPerHectare,
     required this.carryingCapacity,
@@ -408,7 +434,7 @@ class SoilComposition {
   final double sandPercentage;
   final String textureClass;
   final Map<String, double> chemicalProperties;
-  
+
   const SoilComposition({
     required this.clayPercentage,
     required this.siltPercentage,
@@ -423,7 +449,7 @@ class DrainageAnalysis {
   final double infiltrationRate;
   final List<String> drainageIssues;
   final List<String> improvementRecommendations;
-  
+
   const DrainageAnalysis({
     required this.drainageClass,
     required this.infiltrationRate,
@@ -437,7 +463,7 @@ class SoilQuality {
   final Map<String, double> qualityFactors;
   final List<String> limitingFactors;
   final List<String> improvementSuggestions;
-  
+
   const SoilQuality({
     required this.qualityIndex,
     required this.qualityFactors,

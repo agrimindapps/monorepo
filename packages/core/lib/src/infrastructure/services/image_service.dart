@@ -1,11 +1,13 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../shared/utils/app_error.dart';
+import '../../shared/utils/failure.dart';
 import '../../shared/utils/result.dart';
 
 /// Configuração para o ImageService
@@ -98,13 +100,13 @@ class MultipleImageUploadResult {
 class PickedImage {
   /// Bytes da imagem
   final Uint8List bytes;
-  
+
   /// Nome do arquivo
   final String name;
-  
+
   /// Caminho do arquivo (pode ser vazio na Web)
   final String path;
-  
+
   /// MIME type da imagem
   final String mimeType;
 
@@ -117,10 +119,10 @@ class PickedImage {
 
   /// Tamanho em bytes
   int get sizeInBytes => bytes.length;
-  
+
   /// Tamanho em KB
   double get sizeInKB => sizeInBytes / 1024;
-  
+
   /// Tamanho em MB
   double get sizeInMB => sizeInKB / 1024;
 
@@ -144,7 +146,7 @@ class PickedImage {
   static Future<PickedImage> fromXFile(XFile xFile) async {
     final bytes = await xFile.readAsBytes();
     final mimeType = xFile.mimeType ?? _getMimeTypeFromPath(xFile.path);
-    
+
     return PickedImage(
       bytes: bytes,
       name: xFile.name,
@@ -157,7 +159,7 @@ class PickedImage {
   static PickedImage fromBase64(String base64Data, {String? fileName}) {
     String mimeType = 'image/jpeg';
     String base64String = base64Data;
-    
+
     if (base64Data.startsWith('data:')) {
       final mimeMatch = RegExp(r'data:([^;]+)').firstMatch(base64Data);
       if (mimeMatch != null) {
@@ -165,17 +167,13 @@ class PickedImage {
       }
       base64String = base64Data.split(',').last;
     }
-    
+
     final bytes = base64Decode(base64String);
     final ext = _getExtensionFromMimeType(mimeType);
-    final name = fileName ?? 'image_${DateTime.now().millisecondsSinceEpoch}$ext';
-    
-    return PickedImage(
-      bytes: bytes,
-      name: name,
-      path: '',
-      mimeType: mimeType,
-    );
+    final name =
+        fileName ?? 'image_${DateTime.now().millisecondsSinceEpoch}$ext';
+
+    return PickedImage(bytes: bytes, name: name, path: '', mimeType: mimeType);
   }
 
   static String _getMimeTypeFromPath(String path) {
@@ -189,11 +187,16 @@ class PickedImage {
 
   static String _getExtensionFromMimeType(String mimeType) {
     switch (mimeType.toLowerCase()) {
-      case 'image/png': return '.png';
-      case 'image/webp': return '.webp';
-      case 'image/gif': return '.gif';
-      case 'image/bmp': return '.bmp';
-      default: return '.jpg';
+      case 'image/png':
+        return '.png';
+      case 'image/webp':
+        return '.webp';
+      case 'image/gif':
+        return '.gif';
+      case 'image/bmp':
+        return '.bmp';
+      default:
+        return '.jpg';
     }
   }
 }
@@ -216,12 +219,12 @@ class ImageService {
        _firestore = firestore ?? FirebaseFirestore.instance;
 
   /// Selecionar imagem (Cross-platform)
-  Future<Result<PickedImage>> pickImage({
+  Future<Either<Failure, PickedImage>> pickImage({
     ImageSource source = ImageSource.gallery,
   }) async {
-    return ResultUtils.tryExecuteAsync(() async {
+    return EitherUtils.tryExecuteAsync(() async {
       debugPrint('📷 [ImageService] pickImage - Iniciando (source: $source)');
-      
+
       final XFile? xFile = await _picker.pickImage(
         source: source,
         maxWidth: config.maxWidth.toDouble(),
@@ -229,52 +232,67 @@ class ImageService {
         imageQuality: config.imageQuality,
       );
 
-      debugPrint('📷 [ImageService] pickImage - pickImage retornou: ${xFile != null ? "XFile válido" : "null"}');
+      debugPrint(
+        '📷 [ImageService] pickImage - pickImage retornou: ${xFile != null ? "XFile válido" : "null"}',
+      );
 
       if (xFile == null) {
-        debugPrint('📷 [ImageService] pickImage - Nenhuma imagem selecionada/capturada');
+        debugPrint(
+          '📷 [ImageService] pickImage - Nenhuma imagem selecionada/capturada',
+        );
         return Future.error(
-          ValidationError(
-            message: source == ImageSource.camera
+          ValidationFailure(
+            source == ImageSource.camera
                 ? 'Nenhuma imagem foi capturada'
                 : 'Nenhuma imagem foi selecionada',
           ),
         );
       }
 
-      debugPrint('📷 [ImageService] pickImage - Convertendo XFile para PickedImage...');
+      debugPrint(
+        '📷 [ImageService] pickImage - Convertendo XFile para PickedImage...',
+      );
       debugPrint('📷 [ImageService] pickImage - XFile path: ${xFile.path}');
       debugPrint('📷 [ImageService] pickImage - XFile name: ${xFile.name}');
-      
-      final pickedImage = await PickedImage.fromXFile(xFile);
-      debugPrint('📷 [ImageService] pickImage - PickedImage criado: ${pickedImage.sizeInKB.toStringAsFixed(2)} KB');
-      
-      final validationResult = validatePickedImage(pickedImage);
-      if (validationResult.isError) {
-        debugPrint('📷 [ImageService] pickImage - Validação falhou: ${validationResult.error?.message}');
-        return Future.error(validationResult.error!);
-      }
 
-      debugPrint('📷 [ImageService] pickImage - Imagem válida, retornando');
-      return pickedImage;
+      final pickedImage = await PickedImage.fromXFile(xFile);
+      debugPrint(
+        '📷 [ImageService] pickImage - PickedImage criado: ${pickedImage.sizeInKB.toStringAsFixed(2)} KB',
+      );
+
+      final validationResult = validatePickedImage(pickedImage);
+      return validationResult.fold(
+        (failure) {
+          debugPrint(
+            '📷 [ImageService] pickImage - Validação falhou: ${failure.message}',
+          );
+          return Future.error(failure);
+        },
+        (_) {
+          debugPrint('📷 [ImageService] pickImage - Imagem válida, retornando');
+          return pickedImage;
+        },
+      );
     });
   }
 
   /// Selecionar imagem da galeria
-  Future<Result<PickedImage>> pickImageFromGallery() async {
+  Future<Either<Failure, PickedImage>> pickImageFromGallery() async {
     debugPrint('📷 [ImageService] pickImageFromGallery - Chamando pickImage');
     return pickImage(source: ImageSource.gallery);
   }
 
   /// Capturar imagem da câmera
-  Future<Result<PickedImage>> pickImageFromCamera() async {
+  Future<Either<Failure, PickedImage>> pickImageFromCamera() async {
     debugPrint('📷 [ImageService] pickImageFromCamera - Chamando pickImage');
     return pickImage(source: ImageSource.camera);
   }
 
   /// Selecionar múltiplas imagens (Cross-platform)
-  Future<Result<List<PickedImage>>> pickMultipleImages({int? maxImages}) async {
-    return ResultUtils.tryExecuteAsync(() async {
+  Future<Either<Failure, List<PickedImage>>> pickMultipleImages({
+    int? maxImages,
+  }) async {
+    return EitherUtils.tryExecuteAsync(() async {
       final List<XFile> xFiles = await _picker.pickMultiImage(
         maxWidth: config.maxWidth.toDouble(),
         maxHeight: config.maxHeight.toDouble(),
@@ -283,7 +301,7 @@ class ImageService {
 
       if (xFiles.isEmpty) {
         return Future.error(
-          ValidationError(message: 'Nenhuma imagem foi selecionada'),
+          const ValidationFailure('Nenhuma imagem foi selecionada'),
         );
       }
 
@@ -294,8 +312,9 @@ class ImageService {
       for (final xFile in limitedFiles) {
         final pickedImage = await PickedImage.fromXFile(xFile);
         final validationResult = validatePickedImage(pickedImage);
-        if (validationResult.isError) {
-          return Future.error(validationResult.error!);
+        final error = validationResult.fold((failure) => failure, (_) => null);
+        if (error != null) {
+          return Future.error(error);
         }
         images.add(pickedImage);
       }
@@ -305,27 +324,29 @@ class ImageService {
   }
 
   /// Upload de imagem (Cross-platform)
-  Future<Result<ImageUploadResult>> uploadImage(
+  Future<Either<Failure, ImageUploadResult>> uploadImage(
     PickedImage image, {
     String? folder,
     String? fileName,
     String? uploadType,
     void Function(double)? onProgress,
   }) async {
-    return ResultUtils.tryExecuteAsync(() async {
+    return EitherUtils.tryExecuteAsync(() async {
       final validationResult = validatePickedImage(image);
-      if (validationResult.isError) {
-        return Future.error(validationResult.error!);
+      final error = validationResult.fold((failure) => failure, (_) => null);
+      if (error != null) {
+        return Future.error(error);
       }
 
       final targetFolder = _determineFolder(folder, uploadType);
-      final finalFileName = fileName ?? 
+      final finalFileName =
+          fileName ??
           '${_generateFirebaseId()}${image.extension.isNotEmpty ? image.extension : '.jpg'}';
-      
+
       final Reference storageRef = _storage.ref().child(
         '$targetFolder/$finalFileName',
       );
-      
+
       final SettableMetadata metadata = SettableMetadata(
         contentType: image.mimeType,
         customMetadata: {
@@ -337,14 +358,14 @@ class ImageService {
       );
 
       final UploadTask uploadTask = storageRef.putData(image.bytes, metadata);
-      
+
       if (onProgress != null) {
         uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
           final progress = snapshot.bytesTransferred / snapshot.totalBytes;
           onProgress(progress);
         });
       }
-      
+
       final TaskSnapshot snapshot = await uploadTask;
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
@@ -358,7 +379,7 @@ class ImageService {
   }
 
   /// Upload com retry logic
-  Future<Result<ImageUploadResult>> uploadImageWithRetry(
+  Future<Either<Failure, ImageUploadResult>> uploadImageWithRetry(
     PickedImage image, {
     String? folder,
     String? fileName,
@@ -380,11 +401,14 @@ class ImageService {
         onProgress: onProgress,
       );
 
-      if (result.isSuccess) {
+      if (result.isRight()) {
         return result;
       }
 
-      lastError = result.error;
+      lastError = result.fold(
+        (failure) => AppErrorFactory.fromFailure(failure),
+        (_) => null,
+      );
       attempt++;
 
       if (attempt < maxRetries) {
@@ -393,16 +417,16 @@ class ImageService {
       }
     }
 
-    return Result.error(
-      NetworkError(
-        message: 'Upload falhou após $maxRetries tentativas',
+    return Left(
+      NetworkFailure(
+        'Upload falhou após $maxRetries tentativas',
         details: lastError?.message,
       ),
     );
   }
 
   /// Upload de imagem diretamente de Base64
-  Future<Result<ImageUploadResult>> uploadImageFromBase64(
+  Future<Either<Failure, ImageUploadResult>> uploadImageFromBase64(
     String base64Data, {
     String? folder,
     String? fileName,
@@ -420,21 +444,20 @@ class ImageService {
         onProgress: onProgress,
       );
     } catch (e) {
-      return Result.error(
-        ValidationError(message: 'Erro ao processar Base64: $e'),
-      );
+      return Left(ValidationFailure('Erro ao processar Base64: $e'));
     }
   }
 
   /// Upload múltiplo de Base64
-  Future<Result<MultipleImageUploadResult>> uploadMultipleImagesFromBase64(
+  Future<Either<Failure, MultipleImageUploadResult>>
+  uploadMultipleImagesFromBase64(
     List<String> base64Images, {
     String? folder,
     String? uploadType,
     String mimeType = 'image/jpeg',
     void Function(int index, double progress)? onProgress,
   }) async {
-    return ResultUtils.tryExecuteAsync(() async {
+    return EitherUtils.tryExecuteAsync(() async {
       final List<ImageUploadResult> successful = [];
       final List<AppError> failed = [];
 
@@ -444,16 +467,15 @@ class ImageService {
           folder: folder,
           uploadType: uploadType,
           mimeType: mimeType,
-          onProgress: onProgress != null 
-              ? (progress) => onProgress(i, progress) 
+          onProgress: onProgress != null
+              ? (progress) => onProgress(i, progress)
               : null,
         );
 
-        if (uploadResult.isSuccess) {
-          successful.add(uploadResult.data!);
-        } else {
-          failed.add(uploadResult.error!);
-        }
+        uploadResult.fold(
+          (failure) => failed.add(AppErrorFactory.fromFailure(failure)),
+          (data) => successful.add(data),
+        );
       }
 
       return MultipleImageUploadResult(successful: successful, failed: failed);
@@ -461,13 +483,13 @@ class ImageService {
   }
 
   /// Upload de múltiplas imagens
-  Future<Result<MultipleImageUploadResult>> uploadMultipleImages(
+  Future<Either<Failure, MultipleImageUploadResult>> uploadMultipleImages(
     List<PickedImage> images, {
     String? folder,
     String? uploadType,
     void Function(int index, double progress)? onProgress,
   }) async {
-    return ResultUtils.tryExecuteAsync(() async {
+    return EitherUtils.tryExecuteAsync(() async {
       final List<ImageUploadResult> successful = [];
       final List<AppError> failed = [];
 
@@ -477,16 +499,15 @@ class ImageService {
           image,
           folder: folder,
           uploadType: uploadType,
-          onProgress: onProgress != null 
-              ? (progress) => onProgress(i, progress) 
+          onProgress: onProgress != null
+              ? (progress) => onProgress(i, progress)
               : null,
         );
 
-        if (uploadResult.isSuccess) {
-          successful.add(uploadResult.data!);
-        } else {
-          failed.add(uploadResult.error!);
-        }
+        uploadResult.fold(
+          (failure) => failed.add(AppErrorFactory.fromFailure(failure)),
+          (data) => successful.add(data),
+        );
       }
 
       return MultipleImageUploadResult(successful: successful, failed: failed);
@@ -494,17 +515,16 @@ class ImageService {
   }
 
   /// Deletar imagem do Firebase Storage
-  Future<Result<void>> deleteImage(String downloadUrl) async {
-    return ResultUtils.tryExecuteAsync(() async {
+  Future<Either<Failure, void>> deleteImage(String downloadUrl) async {
+    return EitherUtils.tryExecuteAsync(() async {
       try {
         final Reference ref = _storage.refFromURL(downloadUrl);
         await ref.delete();
       } catch (e) {
         return Future.error(
-          ExternalServiceError(
-            message: 'Erro ao deletar imagem do storage',
+          ServerFailure(
+            'Erro ao deletar imagem do storage',
             details: e.toString(),
-            serviceName: 'Firebase Storage',
           ),
         );
       }
@@ -512,17 +532,18 @@ class ImageService {
   }
 
   /// Deletar múltiplas imagens
-  Future<Result<List<AppError>>> deleteMultipleImages(
+  Future<Either<Failure, List<AppError>>> deleteMultipleImages(
     List<String> downloadUrls,
   ) async {
-    return ResultUtils.tryExecuteAsync(() async {
+    return EitherUtils.tryExecuteAsync(() async {
       final List<AppError> errors = [];
 
       for (final url in downloadUrls) {
         final result = await deleteImage(url);
-        if (result.isError) {
-          errors.add(result.error!);
-        }
+        result.fold(
+          (failure) => errors.add(AppErrorFactory.fromFailure(failure)),
+          (_) => null,
+        );
       }
 
       return errors;
@@ -530,33 +551,31 @@ class ImageService {
   }
 
   /// Validar PickedImage
-  Result<void> validatePickedImage(PickedImage image) {
+  Either<Failure, void> validatePickedImage(PickedImage image) {
     if (image.bytes.isEmpty) {
-      return Result.error(
-        ValidationError(message: 'Imagem está vazia'),
-      );
+      return const Left(ValidationFailure('Imagem está vazia'));
     }
 
     if (!_isValidImageFormat(image.name)) {
-      return Result.error(
-        ValidationError(
-          message: 'Formato de imagem não suportado. '
-              'Formatos aceitos: ${config.allowedFormats.join(', ')}',
+      return Left(
+        ValidationFailure(
+          'Formato de imagem não suportado. '
+          'Formatos aceitos: ${config.allowedFormats.join(', ')}',
         ),
       );
     }
 
     final maxSizeBytes = config.maxFileSizeInMB * 1024 * 1024;
     if (image.sizeInBytes > maxSizeBytes) {
-      return Result.error(
-        ValidationError(
-          message: 'Arquivo muito grande. '
-              'Tamanho máximo: ${config.maxFileSizeInMB}MB',
+      return Left(
+        ValidationFailure(
+          'Arquivo muito grande. '
+          'Tamanho máximo: ${config.maxFileSizeInMB}MB',
         ),
       );
     }
 
-    return Result.success(null);
+    return const Right(null);
   }
 
   bool _isValidImageFormat(String fileName) {
@@ -583,13 +602,13 @@ class ImageService {
   }
 
   /// Comprimir imagem (placeholder)
-  Future<Result<PickedImage>> compressImage(
+  Future<Either<Failure, PickedImage>> compressImage(
     PickedImage image, {
     int? maxWidth,
     int? maxHeight,
     int? quality,
   }) async {
-    return Result.success(image);
+    return Right(image);
   }
 }
 

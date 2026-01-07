@@ -2,7 +2,6 @@ import 'export_metadata.dart';
 
 /// Resultado de uma operação de exportação de dados
 class ExportResult {
-
   const ExportResult({
     required this.success,
     this.filePath,
@@ -37,7 +36,7 @@ class ExportResult {
   factory ExportResult.fromJson(Map<String, dynamic> json) => ExportResult(
     success: json['success'] as bool,
     filePath: json['file_path'] as String?,
-    metadata: json['metadata'] != null 
+    metadata: json['metadata'] != null
         ? ExportMetadata.fromJson(json['metadata'] as Map<String, dynamic>)
         : null,
     errorMessage: json['error_message'] as String?,
@@ -62,12 +61,23 @@ class ExportResult {
 
   @override
   bool operator ==(Object other) =>
-    identical(this, other) ||
-    other is ExportResult && 
-    success == other.success &&
-    filePath == other.filePath;
+      identical(this, other) ||
+      other is ExportResult &&
+          success == other.success &&
+          filePath == other.filePath;
 
   @override
   int get hashCode => Object.hash(success, filePath);
 }
 
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+ExportResult ExportRight({
+  required String filePath,
+  required ExportMetadata metadata,
+  required Duration processingTime,
+}) => ExportResult.success(
+  filePath: filePath,
+  metadata: metadata,
+  processingTime: processingTime,
+);

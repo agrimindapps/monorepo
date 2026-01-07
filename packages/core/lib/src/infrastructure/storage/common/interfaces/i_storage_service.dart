@@ -1,4 +1,5 @@
-import '../../../../shared/utils/result.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../shared/utils/failure.dart';
 
 /// Interface genérica para serviços de storage
 /// Define contratos básicos que qualquer implementação de storage deve seguir
@@ -11,55 +12,60 @@ abstract class IStorageService {
 
   /// Inicializa o serviço de storage
   /// [config] configurações específicas do serviço
-  Future<Result<void>> initialize(Map<String, dynamic>? config);
+  Future<Either<Failure, void>> initialize(Map<String, dynamic>? config);
 
   /// Verifica a saúde/integridade do serviço
-  Future<Result<Map<String, dynamic>>> healthCheck();
+  Future<Either<Failure, Map<String, dynamic>>> healthCheck();
 
   /// Obtém estatísticas gerais do storage
-  Future<Result<Map<String, dynamic>>> getStatistics();
+  Future<Either<Failure, Map<String, dynamic>>> getStatistics();
 
   /// Limpa todos os dados (operação destrutiva)
   /// [confirm] confirmação obrigatória para evitar acidentes
-  Future<Result<void>> clearAllData({required bool confirm});
+  Future<Either<Failure, void>> clearAllData({required bool confirm});
 
   /// Faz backup dos dados
   /// Retorna informações sobre o backup criado
-  Future<Result<Map<String, dynamic>>> backup();
+  Future<Either<Failure, Map<String, dynamic>>> backup();
 
   /// Restaura dados de um backup
   /// [backupData] dados do backup a serem restaurados
-  Future<Result<void>> restore(Map<String, dynamic> backupData);
+  Future<Either<Failure, void>> restore(Map<String, dynamic> backupData);
 
   /// Executa limpeza/manutenção do storage
-  Future<Result<void>> performMaintenance();
+  Future<Either<Failure, void>> performMaintenance();
 
   /// Fecha/destrói o serviço liberando recursos
-  Future<Result<void>> dispose();
+  Future<Either<Failure, void>> dispose();
 }
 
 /// Interface específica para storage baseado em box (como Hive)
 abstract class IBoxStorageService extends IStorageService {
   /// Lista todas as boxes disponíveis
-  Future<Result<List<String>>> listBoxes();
+  Future<Either<Failure, List<String>>> listBoxes();
 
   /// Verifica se uma box específica existe
-  Future<Result<bool>> boxExists(String boxName);
+  Future<Either<Failure, bool>> boxExists(String boxName);
 
   /// Obtém estatísticas de uma box específica
-  Future<Result<Map<String, dynamic>>> getBoxStatistics(String boxName);
+  Future<Either<Failure, Map<String, dynamic>>> getBoxStatistics(
+    String boxName,
+  );
 
   /// Compacta uma box específica
-  Future<Result<void>> compactBox(String boxName);
+  Future<Either<Failure, void>> compactBox(String boxName);
 
   /// Remove uma box específica
-  Future<Result<void>> deleteBox(String boxName);
+  Future<Either<Failure, void>> deleteBox(String boxName);
 
   /// Faz backup de uma box específica
-  Future<Result<Map<String, dynamic>>> backupBox(String boxName);
+  Future<Either<Failure, Map<String, dynamic>>> backupBox(String boxName);
 
   /// Restaura uma box específica
-  Future<Result<void>> restoreBox(String boxName, Map<String, dynamic> boxData);
+  Future<Either<Failure, void>> restoreBox(
+    String boxName,
+    Map<String, dynamic> boxData,
+  );
 }
 
 /// Interface para configuração de storage
@@ -80,5 +86,5 @@ abstract class IStorageConfig {
   Map<String, dynamic>? get syncConfig;
 
   /// Valida se a configuração é válida
-  Result<void> validate();
+  Either<Failure, void> validate();
 }

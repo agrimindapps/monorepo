@@ -237,7 +237,7 @@ class ProfileNotifier extends _$ProfileNotifier {
                   );
 
                   if (kDebugMode) {
-                    print(
+                    debugPrint(
                       '✅ ProfileNotifier: Upload bem-sucedido - ${profileImageResult.downloadUrl}',
                     );
                   }
@@ -251,7 +251,7 @@ class ProfileNotifier extends _$ProfileNotifier {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ ProfileNotifier: Erro no upload - $e');
+        debugPrint('❌ ProfileNotifier: Erro no upload - $e');
       }
       state = AsyncValue.data(
         currentState.copyWith(
@@ -387,7 +387,7 @@ class ProfileNotifier extends _$ProfileNotifier {
           );
 
           if (kDebugMode) {
-            print('✅ ProfileNotifier: Imagem deletada com sucesso');
+            debugPrint('✅ ProfileNotifier: Imagem deletada com sucesso');
           }
 
           return true;

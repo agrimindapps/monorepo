@@ -74,7 +74,7 @@ class ShadcnStyle {
       labelText: label,
       labelStyle: labelStyle,
       hintText: hint,
-      hintStyle: labelStyle.copyWith(color: mutedTextColor.withOpacity(0.8)),
+      hintStyle: labelStyle.copyWith(color: mutedTextColor.withValues(alpha: 0.8)),
       prefixText: prefix,
       suffixText: suffix,
       helperText: helperText,
@@ -236,7 +236,7 @@ class ShadcnStyle {
     activeTrackColor: textColor(context),
     inactiveTrackColor: borderColor(context),
     thumbColor: textColor(context),
-    overlayColor: textColor(context).withOpacity(0.12),
+    overlayColor: textColor(context).withValues(alpha: 0.12),
     tickMarkShape: const RoundSliderTickMarkShape(),
     valueIndicatorColor: textColor(context),
     valueIndicatorTextStyle: TextStyle(
@@ -246,11 +246,11 @@ class ShadcnStyle {
   );
 
   static Color chartBarColor(BuildContext context) =>
-      textColor(context).withOpacity(0.9);
+      textColor(context).withValues(alpha: 0.9);
   static Color chartLineColor(BuildContext context) =>
-      textColor(context).withOpacity(0.9);
+      textColor(context).withValues(alpha: 0.9);
   static Color chartAreaColor(BuildContext context) =>
-      textColor(context).withOpacity(0.1);
+      textColor(context).withValues(alpha: 0.1);
 
   // Dropdown Styles
   static InputDecoration dropdownDecoration(BuildContext context) =>

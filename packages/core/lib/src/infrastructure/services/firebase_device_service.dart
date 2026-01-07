@@ -848,7 +848,7 @@ class FirebaseOperationResult<T> {
   }
 
   /// Factory para criar resultado de erro
-  factory FirebaseOperationResult.error(
+  factory FirebaseOperationResult.failure(
     String error, {
     String? errorCode,
     Map<String, dynamic>? details,

@@ -1,4 +1,3 @@
-import 'package:core/core.dart' hide Column;
 import 'package:drift/drift.dart';
 
 import '../../core/data/models/planta_config_model.dart';
@@ -13,7 +12,7 @@ class PlantConfigsDriftRepository {
   Future<int> insertConfig(PlantaConfigModel model) async {
     final localPlantId = await _resolvePlantId(model.plantaId);
     if (localPlantId == null) {
-      throw CacheFailure('Plant not found for plantaId: ${model.plantaId}');
+      throw Exception('Plant not found for plantaId: ${model.plantaId}');
     }
 
     final companion = db.PlantConfigsCompanion.insert(

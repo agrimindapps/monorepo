@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:core/core.dart';
 import 'package:drift/drift.dart';
 
 import '../../../../database/agrihurbi_database.dart';
@@ -58,11 +57,11 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   @override
   Future<void> saveBovine(BovineModel bovine) async {
     try {
-      await _db.into(_db.bovines).insertOnConflictUpdate(
-            _bovineToCompanion(bovine),
-          );
+      await _db
+          .into(_db.bovines)
+          .insertOnConflictUpdate(_bovineToCompanion(bovine));
     } catch (e) {
-      throw CacheFailure('Error saving bovine: $e');
+      throw Exception('Error saving bovine: $e');
     }
   }
 
@@ -70,13 +69,14 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   Future<void> deleteBovine(String id) async {
     try {
       // Soft delete: apenas marca como inativo
-      await (_db.update(_db.bovines)..where((tbl) => tbl.id.equals(id)))
-          .write(BovinesCompanion(
-        isActive: const Value(false),
-        updatedAt: Value(DateTime.now()),
-      ));
+      await (_db.update(_db.bovines)..where((tbl) => tbl.id.equals(id))).write(
+        BovinesCompanion(
+          isActive: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
     } catch (e) {
-      throw CacheFailure('Error deleting bovine: $e');
+      throw Exception('Error deleting bovine: $e');
     }
   }
 
@@ -112,7 +112,7 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       final results = await query.get();
       return results.map(_bovineFromDrift).toList();
     } catch (e) {
-      throw CacheFailure('Error searching bovines: $e');
+      throw Exception('Error searching bovines: $e');
     }
   }
 
@@ -134,11 +134,11 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   @override
   Future<void> saveEquine(EquineModel equine) async {
     try {
-      await _db.into(_db.equines).insertOnConflictUpdate(
-            _equineToCompanion(equine),
-          );
+      await _db
+          .into(_db.equines)
+          .insertOnConflictUpdate(_equineToCompanion(equine));
     } catch (e) {
-      throw CacheFailure('Error saving equine: $e');
+      throw Exception('Error saving equine: $e');
     }
   }
 
@@ -146,13 +146,14 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
   Future<void> deleteEquine(String id) async {
     try {
       // Soft delete: apenas marca como inativo
-      await (_db.update(_db.equines)..where((tbl) => tbl.id.equals(id)))
-          .write(EquinesCompanion(
-        isActive: const Value(false),
-        updatedAt: Value(DateTime.now()),
-      ));
+      await (_db.update(_db.equines)..where((tbl) => tbl.id.equals(id))).write(
+        EquinesCompanion(
+          isActive: const Value(false),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
     } catch (e) {
-      throw CacheFailure('Error deleting equine: $e');
+      throw Exception('Error deleting equine: $e');
     }
   }
 
@@ -189,8 +190,9 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       }
 
       if (geneticInfluences != null && geneticInfluences.isNotEmpty) {
-        query
-            .where((tbl) => tbl.geneticInfluences.like('%$geneticInfluences%'));
+        query.where(
+          (tbl) => tbl.geneticInfluences.like('%$geneticInfluences%'),
+        );
       }
 
       query.orderBy([(tbl) => OrderingTerm.asc(tbl.commonName)]);
@@ -198,7 +200,7 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       final results = await query.get();
       return results.map(_equineFromDrift).toList();
     } catch (e) {
-      throw CacheFailure('Error searching equines: $e');
+      throw Exception('Error searching equines: $e');
     }
   }
 
@@ -211,7 +213,7 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       // Converter map para JSON string
       return _jsonEncode(jsonData);
     } catch (e) {
-      throw CacheFailure('Error exporting data: $e');
+      throw Exception('Error exporting data: $e');
     }
   }
 
@@ -221,7 +223,7 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
       final jsonData = _jsonDecode(backupData) as Map<String, dynamic>;
       await _db.importFromJson(jsonData);
     } catch (e) {
-      throw CacheFailure('Error importing data: $e');
+      throw Exception('Error importing data: $e');
     }
   }
 
@@ -368,6 +370,7 @@ class LivestockDriftLocalDataSource implements LivestockLocalDataSource {
     // In production, use actual JSON decoder
     // For now, using a simple approach - ideally use jsonDecode from dart:convert
     throw UnimplementedError(
-        'JSON decode not implemented - use dart:convert in production');
+      'JSON decode not implemented - use dart:convert in production',
+    );
   }
 }

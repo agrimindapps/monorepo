@@ -3,11 +3,7 @@ import 'package:equatable/equatable.dart';
 /// Classe base para representar falhas na aplicação
 /// Usado com Either<Failure, Success> para programação funcional
 abstract class Failure extends Equatable {
-  const Failure({
-    required this.message,
-    this.code,
-    this.details,
-  });
+  const Failure({required this.message, this.code, this.details});
 
   /// Mensagem de erro para o usuário
   final String message;
@@ -27,144 +23,96 @@ abstract class Failure extends Equatable {
 
 /// Falha de servidor/rede
 class ServerFailure extends Failure {
-  const ServerFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const ServerFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de cache/storage local
 class CacheFailure extends Failure {
-  const CacheFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const CacheFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de validação de dados
 class ValidationFailure extends Failure {
-  const ValidationFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const ValidationFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de autenticação
 class AuthFailure extends Failure {
-  const AuthFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const AuthFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de permissão/autorização
 class PermissionFailure extends Failure {
-  const PermissionFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const PermissionFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de conexão de rede
 class NetworkFailure extends Failure {
-  const NetworkFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const NetworkFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de parsing/conversão de dados
 class ParseFailure extends Failure {
-  const ParseFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const ParseFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha genérica/desconhecida
 class UnknownFailure extends Failure {
-  const UnknownFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const UnknownFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha específica do Firebase
 class FirebaseFailure extends Failure {
-  const FirebaseFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const FirebaseFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha específica do RevenueCat
 class RevenueCatFailure extends Failure {
-  const RevenueCatFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const RevenueCatFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de sincronização
 class SyncFailure extends Failure {
-  const SyncFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const SyncFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de recurso não encontrado
 class NotFoundFailure extends Failure {
-  const NotFoundFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const NotFoundFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Falha de autenticação específica
 class AuthenticationFailure extends AuthFailure {
-  const AuthenticationFailure(
-    super.message, {
-    super.code,
-    super.details,
-  });
+  const AuthenticationFailure(super.message, {super.code, super.details});
 }
 
 /// Falha inesperada/desconhecida
 class UnexpectedFailure extends UnknownFailure {
-  const UnexpectedFailure(
-    super.message, {
-    super.code,
-    super.details,
-  });
+  const UnexpectedFailure(super.message, {super.code, super.details});
 }
 
 /// Falha de limite atingido (free tier)
 class LimitReachedFailure extends Failure {
-  const LimitReachedFailure(
-    String message, {
-    super.code,
-    super.details,
-  }) : super(message: message);
+  const LimitReachedFailure(String message, {super.code, super.details})
+    : super(message: message);
 }
 
 /// Extensions para facilitar o uso
 extension FailureExtension on Failure {
   /// Retorna true se é uma falha de rede
-  bool get isNetworkFailure =>
-      this is NetworkFailure || this is ServerFailure;
+  bool get isNetworkFailure => this is NetworkFailure || this is ServerFailure;
 
   /// Retorna true se é uma falha de autenticação
   bool get isAuthFailure => this is AuthFailure;

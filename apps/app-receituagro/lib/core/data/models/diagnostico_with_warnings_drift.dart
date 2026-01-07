@@ -15,7 +15,7 @@ import '../../../database/receituagro_database.dart';
 /// );
 ///
 /// if (enriched.hasWarnings) {
-///   print('Avisos: ${enriched.warnings.join(", ")}');
+///   debugPrint('Avisos: ${enriched.warnings.join(", ")}');
 /// }
 /// ```
 class DiagnosticoWithWarningsDrift {

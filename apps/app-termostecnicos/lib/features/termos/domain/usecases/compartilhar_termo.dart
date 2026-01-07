@@ -14,7 +14,9 @@ class CompartilharTermo {
       buffer.writeln();
       buffer.writeln('App Termos Técnicos - Agrimind Soluções');
 
-      await Share.share(buffer.toString(), subject: termo.termo);
+      await SharePlus.instance.share(
+        ShareParams(text: buffer.toString(), subject: termo.termo),
+      );
 
       return const Right(unit);
     } catch (e) {

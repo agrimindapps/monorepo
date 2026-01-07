@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dartz/dartz.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
-import '../../shared/utils/result.dart';
 
 /// Serviço para exclusão completa de dados do Firestore e Storage
 /// Gerencia exclusão de documentos, subcoleções e arquivos armazenados
@@ -23,7 +22,7 @@ class FirestoreDeletionService {
   /// [userId] ID do usuário no Firebase Auth
   /// [subcollections] Lista de subcoleções a serem deletadas
   /// [deleteStorage] Se deve deletar arquivos do Storage (padrão: true)
-  Future<Result<FirestoreDeletionResult>> deleteUserData({
+  Future<Either<Failure, FirestoreDeletionResult>> deleteUserData({
     required String userId,
     List<String> subcollections = const [
       'tasks',
@@ -64,17 +63,13 @@ class FirestoreDeletionService {
         debugPrint('   Errors: ${result.errors.length}');
       }
 
-      return Result.success(result);
+      return Right(result);
     } catch (e) {
       if (kDebugMode) {
         debugPrint('❌ FirestoreDeletionService: Unexpected error: $e');
       }
 
-      return Result.error(
-        AppErrorFactory.fromFailure(
-          UnexpectedFailure('Erro ao deletar dados do Firestore: $e'),
-        ),
-      );
+      return Left(UnexpectedFailure('Erro ao deletar dados do Firestore: $e'));
     }
   }
 
@@ -116,12 +111,11 @@ class FirestoreDeletionService {
           );
         }
 
-        final snapshot =
-            await _firestore
-                .collection('users')
-                .doc(userId)
-                .collection(subcollection)
-                .get();
+        final snapshot = await _firestore
+            .collection('users')
+            .doc(userId)
+            .collection(subcollection)
+            .get();
 
         if (snapshot.docs.isEmpty) {
           if (kDebugMode) {
@@ -286,13 +280,12 @@ class FirestoreDeletionService {
       stats['hasUserDocument'] = userDoc.exists;
       for (final subcollection in subcollections) {
         try {
-          final snapshot =
-              await _firestore
-                  .collection('users')
-                  .doc(userId)
-                  .collection(subcollection)
-                  .count()
-                  .get();
+          final snapshot = await _firestore
+              .collection('users')
+              .doc(userId)
+              .collection(subcollection)
+              .count()
+              .get();
 
           final count = snapshot.count ?? 0;
           if (count > 0) {

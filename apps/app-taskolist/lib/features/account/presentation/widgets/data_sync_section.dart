@@ -30,7 +30,7 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
   Widget build(BuildContext context) {
     final syncService = ref.watch(taskManagerSyncServiceProvider);
     final isSyncing = _isSyncing || syncService.isSyncing;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -143,7 +143,7 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
     try {
       // Mostra loading
       if (!context.mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -168,11 +168,11 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
       // Busca todas as tarefas usando o use case
       final getTasks = ref.read(getTasksProvider);
       final result = await getTasks(const GetTasksParams());
-      
+
       await result.fold(
         (failure) async {
           if (!context.mounted) return;
-          
+
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -189,26 +189,32 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
             'version': '1.0',
             'app': 'Task Manager',
             'total_tasks': tasks.length,
-            'tasks': tasks.map((task) => {
-              'id': task.id,
-              'title': task.title,
-              'description': task.description ?? '',
-              'status': task.status.name,
-              'priority': task.priority.name,
-              'list_id': task.listId,
-              'due_date': task.dueDate?.toIso8601String(),
-              'reminder_date': task.reminderDate?.toIso8601String(),
-              'created_at': task.createdAt.toIso8601String(),
-              'updated_at': task.updatedAt.toIso8601String(),
-              'is_starred': task.isStarred,
-              'position': task.position,
-              'tags': task.tags,
-              'notes': task.notes ?? '',
-            }).toList(),
+            'tasks': tasks
+                .map(
+                  (task) => {
+                    'id': task.id,
+                    'title': task.title,
+                    'description': task.description ?? '',
+                    'status': task.status.name,
+                    'priority': task.priority.name,
+                    'list_id': task.listId,
+                    'due_date': task.dueDate?.toIso8601String(),
+                    'reminder_date': task.reminderDate?.toIso8601String(),
+                    'created_at': task.createdAt.toIso8601String(),
+                    'updated_at': task.updatedAt.toIso8601String(),
+                    'is_starred': task.isStarred,
+                    'position': task.position,
+                    'tags': task.tags,
+                    'notes': task.notes ?? '',
+                  },
+                )
+                .toList(),
           };
 
-          final jsonString = const JsonEncoder.withIndent('  ').convert(jsonData);
-          
+          final jsonString = const JsonEncoder.withIndent(
+            '  ',
+          ).convert(jsonData);
+
           // Salva arquivo temporário
           final directory = await getApplicationDocumentsDirectory();
           final timestamp = DateTime.now().millisecondsSinceEpoch;
@@ -216,21 +222,25 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
           await file.writeAsString(jsonString);
 
           if (!context.mounted) return;
-          
+
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
           // Compartilha arquivo
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            subject: 'Exportação de Tarefas - Task Manager',
-            text: 'Backup de ${tasks.length} tarefas em formato JSON',
+          await SharePlus.instance.share(
+            ShareParams(
+              files: [XFile(file.path)],
+              subject: 'Exportação de Tarefas - Task Manager',
+              text: 'Backup de ${tasks.length} tarefas em formato JSON',
+            ),
           );
 
           if (!context.mounted) return;
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('✅ ${tasks.length} tarefas exportadas com sucesso!'),
+              content: Text(
+                '✅ ${tasks.length} tarefas exportadas com sucesso!',
+              ),
               backgroundColor: AppColors.success,
               duration: const Duration(seconds: 3),
             ),
@@ -239,7 +249,7 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
       );
     } catch (e) {
       if (!context.mounted) return;
-      
+
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -255,7 +265,7 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
     try {
       // Mostra loading
       if (!context.mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Row(
@@ -280,11 +290,11 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
       // Busca todas as tarefas usando o use case
       final getTasks = ref.read(getTasksProvider);
       final result = await getTasks(const GetTasksParams());
-      
+
       await result.fold(
         (failure) async {
           if (!context.mounted) return;
-          
+
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -297,7 +307,7 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
         (tasks) async {
           // Converte para CSV
           final csvBuffer = StringBuffer();
-          
+
           // Header
           csvBuffer.writeln(
             'ID,Título,Descrição,Status,Prioridade,Lista,Data de Vencimento,'
@@ -331,21 +341,25 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
           await file.writeAsString(csvBuffer.toString());
 
           if (!context.mounted) return;
-          
+
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
           // Compartilha arquivo
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            subject: 'Exportação de Tarefas - Task Manager',
-            text: 'Planilha com ${tasks.length} tarefas em formato CSV',
+          await SharePlus.instance.share(
+            ShareParams(
+              files: [XFile(file.path)],
+              subject: 'Exportação de Tarefas - Task Manager',
+              text: 'Planilha com ${tasks.length} tarefas em formato CSV',
+            ),
           );
 
           if (!context.mounted) return;
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('✅ ${tasks.length} tarefas exportadas com sucesso!'),
+              content: Text(
+                '✅ ${tasks.length} tarefas exportadas com sucesso!',
+              ),
               backgroundColor: AppColors.success,
               duration: const Duration(seconds: 3),
             ),
@@ -354,7 +368,7 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
       );
     } catch (e) {
       if (!context.mounted) return;
-      
+
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -368,15 +382,18 @@ class _DataSyncSectionState extends ConsumerState<DataSyncSection> {
 
   String _escapeCsv(String value) {
     // Escapa aspas duplas e remove quebras de linha
-    return value.replaceAll('"', '""').replaceAll('\n', ' ').replaceAll('\r', '');
+    return value
+        .replaceAll('"', '""')
+        .replaceAll('\n', ' ')
+        .replaceAll('\r', '');
   }
 
   String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}/'
-           '${date.month.toString().padLeft(2, '0')}/'
-           '${date.year} '
-           '${date.hour.toString().padLeft(2, '0')}:'
-           '${date.minute.toString().padLeft(2, '0')}';
+        '${date.month.toString().padLeft(2, '0')}/'
+        '${date.year} '
+        '${date.hour.toString().padLeft(2, '0')}:'
+        '${date.minute.toString().padLeft(2, '0')}';
   }
 
   String _getStatusLabel(TaskStatus status) {

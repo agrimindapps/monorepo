@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert';
 
 import 'package:core/core.dart';
@@ -6,7 +7,7 @@ class LocalStorageService {
   Future<List<String>> setUltimoAcessado(String box, String id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey(box)) {
-      print('Shared Preferences $box não existe com esse nome');
+      debugPrint('Shared Preferences $box não existe com esse nome');
       return [];
     }
 
@@ -25,7 +26,7 @@ class LocalStorageService {
   Future<List<String>> initUltimoAcessado(String box, List<String> ids) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.containsKey(box)) {
-      print('Shared Preferences $box já existe com carga');
+      debugPrint('Shared Preferences $box já existe com carga');
       return [];
     }
 
@@ -36,7 +37,7 @@ class LocalStorageService {
   Future<List<String>> getUltimosAcessados(String box) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey(box)) {
-      print('Shared Preferences $box não existe com esse nome');
+      debugPrint('Shared Preferences $box não existe com esse nome');
       return [];
     }
 
@@ -64,7 +65,7 @@ class LocalStorageService {
   Future<bool> validFavorito(String box, String id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey(box)) {
-      print('Shared Preferences $box não existe com esse nome');
+      debugPrint('Shared Preferences $box não existe com esse nome');
       return false;
     }
 
@@ -77,7 +78,7 @@ class LocalStorageService {
   Future<List<String>> getFavoritos(String box) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey(box)) {
-      print('Shared Preferences $box não existe com esse nome');
+      debugPrint('Shared Preferences $box não existe com esse nome');
       return [];
     }
 
@@ -95,7 +96,7 @@ class LocalStorageService {
   Future<Map<String, dynamic>> carregar(String box) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!prefs.containsKey(box)) {
-      print('Shared Preferences $box não existe com esse nome');
+      debugPrint('Shared Preferences $box não existe com esse nome');
       return {};
     }
 

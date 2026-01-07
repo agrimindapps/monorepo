@@ -28,7 +28,6 @@ IAppSubscriptionRepository appSubscriptionRepository(Ref ref) {
   return SubscriptionRepositoryImpl(
     coreRepository,
     localStorageRepository,
-    errorService,
     subscriptionLocalRepo, // Drift cache para assinaturas
     null, // AuthService - será conectado quando necessário
   );

@@ -25,13 +25,10 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (parameter.required && _isEmpty(value)) {
-      return ValidationResult.error(
-        parameter.id,
-        '${parameter.name} é obrigatório',
-      );
+      return ValidationLeft(parameter.id, '${parameter.name} é obrigatório');
     }
     if (!parameter.required && _isEmpty(value)) {
-      return ValidationResult.success(parameter.id);
+      return ValidationRight(parameter.id);
     }
     final typeValidation = _validateByType(parameter, value);
     if (!typeValidation.isValid) {
@@ -50,7 +47,7 @@ class ParameterValidator {
       return customValidation;
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   /// Valida múltiplos parâmetros em batch
@@ -82,46 +79,46 @@ class ParameterValidator {
   /// Valida formato de coordenadas GPS
   static ValidationResult validateCoordinates(double? lat, double? lng) {
     if (lat == null || lng == null) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'coordinates',
         'Latitude e longitude são obrigatórias',
       );
     }
 
     if (lat < -90 || lat > 90) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'latitude',
         'Latitude deve estar entre -90 e 90 graus',
       );
     }
 
     if (lng < -180 || lng > 180) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'longitude',
         'Longitude deve estar entre -180 e 180 graus',
       );
     }
 
-    return ValidationResult.success('coordinates');
+    return ValidationRight('coordinates');
   }
 
   /// Valida range de valores
   static ValidationResult validateValueRange(double? min, double? max) {
     if (min == null || max == null) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'range',
         'Valores mínimo e máximo são obrigatórios',
       );
     }
 
     if (min >= max) {
-      return ValidationResult.error(
+      return ValidationLeft(
         'range',
         'Valor mínimo deve ser menor que o máximo',
       );
     }
 
-    return ValidationResult.success('range');
+    return ValidationRight('range');
   }
 
   /// Validação por tipo de dados
@@ -148,7 +145,7 @@ class ParameterValidator {
       case ParameterType.date:
         return _validateDate(parameter, value);
       default:
-        return ValidationResult.success(parameter.id);
+        return ValidationRight(parameter.id);
     }
   }
 
@@ -156,20 +153,20 @@ class ParameterValidator {
     CalculatorParameter parameter,
     dynamic value,
   ) {
-    if (value is int) return ValidationResult.success(parameter.id);
-    
+    if (value is int) return ValidationRight(parameter.id);
+
     if (value is String) {
       final parsed = int.tryParse(value);
       if (parsed == null) {
-        return ValidationResult.error(
+        return ValidationLeft(
           parameter.id,
           _typeErrorMessages[ParameterType.number]!,
         );
       }
-      return ValidationResult.success(parameter.id);
+      return ValidationRight(parameter.id);
     }
 
-    return ValidationResult.error(
+    return ValidationLeft(
       parameter.id,
       _typeErrorMessages[ParameterType.number]!,
     );
@@ -184,19 +181,19 @@ class ParameterValidator {
           parameter.type == ParameterType.volume ||
           parameter.type == ParameterType.weight) {
         if (value <= 0) {
-          return ValidationResult.error(
+          return ValidationLeft(
             parameter.id,
             _typeErrorMessages[parameter.type]!,
           );
         }
       }
-      return ValidationResult.success(parameter.id);
+      return ValidationRight(parameter.id);
     }
-    
+
     if (value is String) {
       final parsed = double.tryParse(value);
       if (parsed == null) {
-        return ValidationResult.error(
+        return ValidationLeft(
           parameter.id,
           _typeErrorMessages[ParameterType.decimal]!,
         );
@@ -205,17 +202,17 @@ class ParameterValidator {
           parameter.type == ParameterType.volume ||
           parameter.type == ParameterType.weight) {
         if (parsed <= 0) {
-          return ValidationResult.error(
+          return ValidationLeft(
             parameter.id,
             _typeErrorMessages[parameter.type]!,
           );
         }
       }
-      
-      return ValidationResult.success(parameter.id);
+
+      return ValidationRight(parameter.id);
     }
 
-    return ValidationResult.error(
+    return ValidationLeft(
       parameter.id,
       _typeErrorMessages[ParameterType.decimal]!,
     );
@@ -225,23 +222,25 @@ class ParameterValidator {
     CalculatorParameter parameter,
     dynamic value,
   ) {
-    final numValue = value is num ? value.toDouble() : double.tryParse(value.toString());
-    
+    final numValue = value is num
+        ? value.toDouble()
+        : double.tryParse(value.toString());
+
     if (numValue == null) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         _typeErrorMessages[ParameterType.percentage]!,
       );
     }
 
     if (numValue < 0 || numValue > 100) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         'Porcentagem deve estar entre 0 e 100',
       );
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static ValidationResult _validateText(
@@ -249,13 +248,13 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (value is! String || value.trim().isEmpty) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         _typeErrorMessages[ParameterType.text]!,
       );
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static ValidationResult _validateSelection(
@@ -263,17 +262,17 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (parameter.options == null || parameter.options!.isEmpty) {
-      return ValidationResult.success(parameter.id);
+      return ValidationRight(parameter.id);
     }
 
     if (!parameter.options!.contains(value.toString())) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         _typeErrorMessages[ParameterType.selection]!,
       );
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static ValidationResult _validateBoolean(
@@ -281,13 +280,13 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (value is! bool) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         _typeErrorMessages[ParameterType.boolean]!,
       );
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static ValidationResult _validateDate(
@@ -295,39 +294,41 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (value is! DateTime) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         _typeErrorMessages[ParameterType.date]!,
       );
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static ValidationResult _validateRange(
     CalculatorParameter parameter,
     dynamic value,
   ) {
-    if (value == null) return ValidationResult.success(parameter.id);
+    if (value == null) return ValidationRight(parameter.id);
 
-    final numValue = value is num ? value.toDouble() : double.tryParse(value.toString());
-    if (numValue == null) return ValidationResult.success(parameter.id);
+    final numValue = value is num
+        ? value.toDouble()
+        : double.tryParse(value.toString());
+    if (numValue == null) return ValidationRight(parameter.id);
 
     if (parameter.minValue != null && numValue < (parameter.minValue as num)) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         'Valor deve ser maior ou igual a ${parameter.minValue}',
       );
     }
 
     if (parameter.maxValue != null && numValue > (parameter.maxValue as num)) {
-      return ValidationResult.error(
+      return ValidationLeft(
         parameter.id,
         'Valor deve ser menor ou igual a ${parameter.maxValue}',
       );
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static ValidationResult _validateOptions(
@@ -335,7 +336,7 @@ class ParameterValidator {
     dynamic value,
   ) {
     if (parameter.type != ParameterType.selection) {
-      return ValidationResult.success(parameter.id);
+      return ValidationRight(parameter.id);
     }
 
     return _validateSelection(parameter, value);
@@ -347,10 +348,7 @@ class ParameterValidator {
   ) {
     if (parameter.id.contains('ph') && value is num) {
       if (value < 0 || value > 14) {
-        return ValidationResult.error(
-          parameter.id,
-          'pH deve estar entre 0 e 14',
-        );
+        return ValidationLeft(parameter.id, 'pH deve estar entre 0 e 14');
       }
     }
 
@@ -365,14 +363,14 @@ class ParameterValidator {
 
     if (parameter.id.contains('humidity') && value is num) {
       if (value < 0 || value > 100) {
-        return ValidationResult.error(
+        return ValidationLeft(
           parameter.id,
           'Umidade deve estar entre 0 e 100%',
         );
       }
     }
 
-    return ValidationResult.success(parameter.id);
+    return ValidationRight(parameter.id);
   }
 
   static bool _isEmpty(dynamic value) {
@@ -398,10 +396,7 @@ class ValidationResult {
   });
 
   factory ValidationResult.success(String parameterId) {
-    return ValidationResult._(
-      parameterId: parameterId,
-      isValid: true,
-    );
+    return ValidationResult._(parameterId: parameterId, isValid: true);
   }
 
   factory ValidationResult.error(String parameterId, String message) {
@@ -422,6 +417,15 @@ class ValidationResult {
 
   bool get hasWarning => warningMessage != null;
 }
+
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+ValidationResult ValidationRight(String parameterId) =>
+    ValidationResult.success(parameterId);
+
+// ignore: non_constant_identifier_names
+ValidationResult ValidationLeft(String parameterId, String message) =>
+    ValidationResult.error(parameterId, message);
 
 /// Resultado de validação em lote
 class ValidationBatchResult {

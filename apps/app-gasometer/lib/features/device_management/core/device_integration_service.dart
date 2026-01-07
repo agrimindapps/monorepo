@@ -8,17 +8,16 @@ import '../presentation/providers/vehicle_device_notifier.dart';
 /// Resultado da validação de dispositivo para o app-gasometer
 /// Wrapper simplificado para evitar conflitos com as múltiplas versões do core
 class GasometerDeviceValidationResult {
-  const GasometerDeviceValidationResult._({
-    required this.isSuccess,
-    this.errorMessage,
-    this.deviceEntity,
-  });
-
   factory GasometerDeviceValidationResult.success(DeviceEntity deviceEntity) =>
       GasometerDeviceValidationResult._(
         isSuccess: true,
         deviceEntity: deviceEntity,
       );
+  const GasometerDeviceValidationResult._({
+    required this.isSuccess,
+    this.errorMessage,
+    this.deviceEntity,
+  });
 
   factory GasometerDeviceValidationResult.failure(String errorMessage) =>
       GasometerDeviceValidationResult._(
@@ -33,19 +32,23 @@ class GasometerDeviceValidationResult {
   bool get isFailure => !isSuccess;
 }
 
+// Helper functions for legacy compatibility
+// ignore: non_constant_identifier_names
+GasometerDeviceValidationResult GasometerDeviceValidationRight(
+  DeviceEntity deviceEntity,
+) => GasometerDeviceValidationResult.success(deviceEntity);
+
 /// Serviço de integração do Device Management com o fluxo de autenticação
 class DeviceIntegrationService {
-
-  DeviceIntegrationService(
-    this._coreDeviceService,
-    this._deviceInfoPlugin,
-  );
+  DeviceIntegrationService(this._coreDeviceService, this._deviceInfoPlugin);
   final DeviceManagementService _coreDeviceService;
   final DeviceInfoPlugin _deviceInfoPlugin;
 
   /// Valida e registra dispositivo durante o login
   /// Retorna GasometerDeviceValidationResult
-  Future<GasometerDeviceValidationResult> validateDeviceForLogin(String userId) async {
+  Future<GasometerDeviceValidationResult> validateDeviceForLogin(
+    String userId,
+  ) async {
     try {
       if (kDebugMode) {
         debugPrint('🔄 DeviceIntegrationService: Validating device for login');
@@ -58,20 +61,26 @@ class DeviceIntegrationService {
       }
 
       final deviceEntity = deviceInfoResult.deviceEntity!;
-      final validationResult = await _coreDeviceService.validateDevice(deviceEntity);
+      final validationResult = await _coreDeviceService.validateDevice(
+        deviceEntity,
+      );
 
       return validationResult.fold(
         (failure) {
           if (kDebugMode) {
-            debugPrint('❌ DeviceIntegrationService: Device validation failed - ${failure.message}');
+            debugPrint(
+              '❌ DeviceIntegrationService: Device validation failed - ${failure.message}',
+            );
           }
           return GasometerDeviceValidationResult.failure(failure.message);
         },
         (validatedDevice) {
           if (kDebugMode) {
-            debugPrint('✅ DeviceIntegrationService: Device validated successfully');
+            debugPrint(
+              '✅ DeviceIntegrationService: Device validated successfully',
+            );
           }
-          return GasometerDeviceValidationResult.success(validatedDevice);
+          return GasometerDeviceValidationRight(validatedDevice);
         },
       );
     } catch (e) {
@@ -88,7 +97,9 @@ class DeviceIntegrationService {
   Future<void> updateDeviceActivity(String userId, String deviceUuid) async {
     try {
       if (kDebugMode) {
-        debugPrint('✅ DeviceIntegrationService: Device activity updated (handled by core)');
+        debugPrint(
+          '✅ DeviceIntegrationService: Device activity updated (handled by core)',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -152,9 +163,11 @@ class DeviceIntegrationService {
         );
       }
 
-      return _DeviceInfoResult.success(deviceEntity);
+      return _DeviceInfoRight(deviceEntity);
     } catch (e) {
-      return _DeviceInfoResult.failure('Erro ao obter informações do dispositivo: $e');
+      return _DeviceInfoResult.failure(
+        'Erro ao obter informações do dispositivo: $e',
+      );
     }
   }
 
@@ -162,7 +175,8 @@ class DeviceIntegrationService {
   Future<String> _generateDeviceUuid() async {
     if (Platform.isIOS) {
       final iosInfo = await _deviceInfoPlugin.iosInfo;
-      return iosInfo.identifierForVendor ?? 'ios-${DateTime.now().millisecondsSinceEpoch}';
+      return iosInfo.identifierForVendor ??
+          'ios-${DateTime.now().millisecondsSinceEpoch}';
     } else if (Platform.isAndroid) {
       final androidInfo = await _deviceInfoPlugin.androidInfo;
       return 'android-${androidInfo.id}-${androidInfo.fingerprint.hashCode}';
@@ -174,11 +188,11 @@ class DeviceIntegrationService {
   String _generateFriendlyName(AndroidDeviceInfo androidInfo) {
     final brand = _capitalizeFirst(androidInfo.brand);
     final model = androidInfo.model;
-    
+
     if (model.toLowerCase().startsWith(brand.toLowerCase())) {
       return model;
     }
-    
+
     return '$brand $model';
   }
 
@@ -191,11 +205,10 @@ class DeviceIntegrationService {
 
 /// Resultado interno da obtenção de informações do dispositivo
 class _DeviceInfoResult {
-
-  _DeviceInfoResult._(this.isSuccess, this.error, this.deviceEntity);
-
   factory _DeviceInfoResult.success(DeviceEntity deviceEntity) =>
       _DeviceInfoResult._(true, null, deviceEntity);
+
+  _DeviceInfoResult._(this.isSuccess, this.error, this.deviceEntity);
 
   factory _DeviceInfoResult.failure(String error) =>
       _DeviceInfoResult._(false, error, null);
@@ -205,3 +218,8 @@ class _DeviceInfoResult {
 
   bool get isFailure => !isSuccess;
 }
+
+// Helper functions for legacy compatibility
+// ignore: unused_element, non_constant_identifier_names
+_DeviceInfoResult _DeviceInfoRight(DeviceEntity deviceEntity) =>
+    _DeviceInfoResult.success(deviceEntity);

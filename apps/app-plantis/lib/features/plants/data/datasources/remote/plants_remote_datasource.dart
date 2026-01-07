@@ -55,9 +55,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
 
       return plants;
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao buscar plantas: ${e.message}');
+      throw Exception('Erro ao buscar plantas: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao buscar plantas: ${e.toString()}');
+      throw Exception('Erro inesperado ao buscar plantas: ${e.toString()}');
     }
   }
 
@@ -69,22 +69,22 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
       final doc = await _getPlantsCollection(userId).doc(id).get();
 
       if (!doc.exists) {
-        throw const ServerFailure('Planta não encontrada');
+        throw Exception('Planta não encontrada');
       }
 
       final data = doc.data() as Map<String, dynamic>;
       final plant = PlantModel.fromJson({...data, 'id': doc.id});
 
       if (plant.isDeleted) {
-        throw const ServerFailure('Planta não encontrada');
+        throw Exception('Planta não encontrada');
       }
 
       return plant;
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao buscar planta: ${e.message}');
+      throw Exception('Erro ao buscar planta: ${e.message}');
     } catch (e) {
       if (e is ServerFailure) rethrow;
-      throw ServerFailure('Erro inesperado ao buscar planta: ${e.toString()}');
+      throw Exception('Erro inesperado ao buscar planta: ${e.toString()}');
     }
   }
 
@@ -99,9 +99,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
       final docRef = await _getPlantsCollection(userId).add(plantData);
       return plant.copyWith(id: docRef.id, isDirty: false);
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao adicionar planta: ${e.message}');
+      throw Exception('Erro ao adicionar planta: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao adicionar planta: ${e.toString()}',
       );
     }
@@ -119,9 +119,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
 
       return plant.copyWith(isDirty: false);
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao atualizar planta: ${e.message}');
+      throw Exception('Erro ao atualizar planta: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao atualizar planta: ${e.toString()}',
       );
     }
@@ -154,9 +154,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
         }
       }
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro no batch sync de plantas: ${e.message}');
+      throw Exception('Erro no batch sync de plantas: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado no batch sync de plantas: ${e.toString()}',
       );
     }
@@ -173,9 +173,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
         'needsSync': false,
       });
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao deletar planta: ${e.message}');
+      throw Exception('Erro ao deletar planta: ${e.message}');
     } catch (e) {
-      throw ServerFailure('Erro inesperado ao deletar planta: ${e.toString()}');
+      throw Exception('Erro inesperado ao deletar planta: ${e.toString()}');
     }
   }
 
@@ -196,7 +196,7 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
       }).toList();
     } catch (e) {
       if (e is ServerFailure) rethrow;
-      throw ServerFailure('Erro inesperado ao buscar plantas: ${e.toString()}');
+      throw Exception('Erro inesperado ao buscar plantas: ${e.toString()}');
     }
   }
 
@@ -229,9 +229,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
 
       return plants;
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao buscar plantas por espaço: ${e.message}');
+      throw Exception('Erro ao buscar plantas por espaço: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao buscar plantas por espaço: ${e.toString()}',
       );
     }
@@ -258,9 +258,9 @@ class PlantsRemoteDatasourceImpl implements PlantsRemoteDatasource {
 
       await batch.commit();
     } on FirebaseException catch (e) {
-      throw ServerFailure('Erro ao sincronizar plantas: ${e.message}');
+      throw Exception('Erro ao sincronizar plantas: ${e.message}');
     } catch (e) {
-      throw ServerFailure(
+      throw Exception(
         'Erro inesperado ao sincronizar plantas: ${e.toString()}',
       );
     }

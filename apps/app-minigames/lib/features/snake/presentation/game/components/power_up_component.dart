@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
@@ -19,12 +18,12 @@ class PowerUpComponent extends PositionComponent {
     required this.boardOffset,
     required this.type,
   }) : super(
-          position: Vector2(
-            boardOffset.x + gridPosition.x * cellSize,
-            boardOffset.y + gridPosition.y * cellSize,
-          ),
-          size: Vector2(cellSize, cellSize),
-        );
+         position: Vector2(
+           boardOffset.x + gridPosition.x * cellSize,
+           boardOffset.y + gridPosition.y * cellSize,
+         ),
+         size: Vector2(cellSize, cellSize),
+       );
 
   @override
   void update(double dt) {
@@ -35,34 +34,32 @@ class PowerUpComponent extends PositionComponent {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    
+
     final scale = 0.8 + sin(_pulseTime) * 0.1;
     final center = Offset(size.x / 2, size.y / 2);
-    
+
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.scale(scale);
     canvas.translate(-center.dx, -center.dy);
-    
+
     // Draw background glow
     final glowPaint = Paint()
-      ..color = type.color.withOpacity(0.5)
+      ..color = type.color.withValues(alpha: 0.5)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
     canvas.drawCircle(center, size.x / 2, glowPaint);
-    
+
     // Draw circle border
     final borderPaint = Paint()
       ..color = type.color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     canvas.drawCircle(center, size.x / 2 - 2, borderPaint);
-    
+
     // Draw emoji text
     final textSpan = TextSpan(
       text: type.emoji,
-      style: TextStyle(
-        fontSize: size.x * 0.6,
-      ),
+      style: TextStyle(fontSize: size.x * 0.6),
     );
     final textPainter = TextPainter(
       text: textSpan,
@@ -71,9 +68,12 @@ class PowerUpComponent extends PositionComponent {
     textPainter.layout();
     textPainter.paint(
       canvas,
-      Offset(center.dx - textPainter.width / 2, center.dy - textPainter.height / 2),
+      Offset(
+        center.dx - textPainter.width / 2,
+        center.dy - textPainter.height / 2,
+      ),
     );
-    
+
     canvas.restore();
   }
 }

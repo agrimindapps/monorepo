@@ -1,5 +1,3 @@
-import 'package:core/core.dart' hide Column;
-
 import '../../../../../core/data/models/espaco_model.dart';
 import '../../../../../database/repositories/spaces_drift_repository.dart';
 import '../../models/space_model.dart';
@@ -41,9 +39,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       // Converter EspacoModel → SpaceModel
       return espacos.map(_espacoToSpaceModel).toList();
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao buscar espaços do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar espaços do cache local: ${e.toString()}');
     }
   }
 
@@ -54,9 +50,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
 
       return espaco != null ? _espacoToSpaceModel(espaco) : null;
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao buscar espaço do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao buscar espaço do cache local: ${e.toString()}');
     }
   }
 
@@ -66,9 +60,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final espaco = _spaceModelToEspaco(space);
       await _driftRepo.insertSpace(espaco);
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao salvar espaço no cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao salvar espaço no cache local: ${e.toString()}');
     }
   }
 
@@ -79,12 +71,10 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final success = await _driftRepo.updateSpace(espaco);
 
       if (!success) {
-        throw CacheFailure(
-          'Espaço não encontrado para atualização: ${space.id}',
-        );
+        throw Exception('Espaço não encontrado para atualização: ${space.id}');
       }
     } catch (e) {
-      throw CacheFailure(
+      throw Exception(
         'Erro ao atualizar espaço no cache local: ${e.toString()}',
       );
     }
@@ -96,12 +86,10 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
       final success = await _driftRepo.deleteSpace(id);
 
       if (!success) {
-        throw CacheFailure('Espaço não encontrado para exclusão: $id');
+        throw Exception('Espaço não encontrado para exclusão: $id');
       }
     } catch (e) {
-      throw CacheFailure(
-        'Erro ao deletar espaço do cache local: ${e.toString()}',
-      );
+      throw Exception('Erro ao deletar espaço do cache local: ${e.toString()}');
     }
   }
 
@@ -110,7 +98,7 @@ class SpacesLocalDatasourceImpl implements SpacesLocalDatasource {
     try {
       await _driftRepo.clearAll();
     } catch (e) {
-      throw CacheFailure('Erro ao limpar cache local: ${e.toString()}');
+      throw Exception('Erro ao limpar cache local: ${e.toString()}');
     }
   }
 

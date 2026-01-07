@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 // Package imports:
+import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
 import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
+import '../../../../shared/widgets/responsive_input_row.dart';
 
 /// Input form for 13th salary calculation
 class ThirteenthSalaryInputForm extends StatefulWidget {
@@ -39,11 +41,7 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   DateTime? _calculationDate;
 
   // Formatters
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
+  final _currencyFormatter = _CurrencyInputFormatter();
 
   final _dateFormatter = MaskTextInputFormatter(
     mask: '##/##/####',
@@ -85,158 +83,152 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Salary Input
-          TextFormField(
-            controller: _salaryController,
-            decoration: const InputDecoration(
-              labelText: 'Salário Bruto Mensal',
-              prefixText: 'R\$ ',
-              border: OutlineInputBorder(),
-              helperText: 'Ex: 3.000,00',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [_currencyFormatter],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe o salário';
-              }
-              final numericValue = _parseNumericValue(value);
-              if (numericValue <= 0) {
-                return 'Salário deve ser maior que zero';
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 16),
-
-          // Admission Date
-          TextFormField(
-            controller: _admissionDateController,
-            decoration: const InputDecoration(
-              labelText: 'Data de Admissão',
-              border: OutlineInputBorder(),
-              helperText: 'DD/MM/AAAA',
-              suffixIcon: Icon(Icons.calendar_today),
-            ),
-            keyboardType: TextInputType.datetime,
-            inputFormatters: [_dateFormatter],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe a data de admissão';
-              }
-              final date = _parseDate(value);
-              if (date == null) {
-                return 'Data inválida';
-              }
-              if (date.isAfter(DateTime.now())) {
-                return 'Data não pode ser futura';
-              }
-              return null;
-            },
-            onChanged: (value) {
-              final date = _parseDate(value);
-              if (date != null) {
-                setState(() {
-                  _admissionDate = date;
-                  _updateMonthsWorked();
-                });
-              }
-            },
-            onTap: () => _selectDate(context, true),
-          ),
-          const SizedBox(height: 16),
-
-          // Calculation Date
-          TextFormField(
-            controller: _calculationDateController,
-            decoration: const InputDecoration(
-              labelText: 'Data do Cálculo',
-              border: OutlineInputBorder(),
-              helperText: 'DD/MM/AAAA',
-              suffixIcon: Icon(Icons.calendar_today),
-            ),
-            keyboardType: TextInputType.datetime,
-            inputFormatters: [_dateFormatter],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe a data do cálculo';
-              }
-              final date = _parseDate(value);
-              if (date == null) {
-                return 'Data inválida';
-              }
-              return null;
-            },
-            onChanged: (value) {
-              final date = _parseDate(value);
-              if (date != null) {
-                setState(() {
-                  _calculationDate = date;
-                  _updateMonthsWorked();
-                });
-              }
-            },
-            onTap: () => _selectDate(context, false),
-          ),
-          const SizedBox(height: 16),
-
-          // Months Worked (auto-calculated)
-          TextFormField(
-            controller: _monthsController,
-            decoration: const InputDecoration(
-              labelText: 'Meses Trabalhados',
-              border: OutlineInputBorder(),
-              helperText: 'Calculado automaticamente',
-              suffixIcon: Icon(Icons.lock),
-            ),
-            enabled: false,
-          ),
-          const SizedBox(height: 16),
-
-          // Unjustified Absences
-          TextFormField(
-            controller: _absencesController,
-            decoration: const InputDecoration(
-              labelText: 'Faltas Não Justificadas',
-              border: OutlineInputBorder(),
-              helperText: 'Cada 15 faltas desconta 1 mês',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final absences = int.tryParse(value) ?? 0;
-                if (absences < 0) {
-                  return 'Valor não pode ser negativo';
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _salaryController,
+              decoration: const InputDecoration(
+                labelText: 'Salário Bruto Mensal',
+                prefixText: 'R\$ ',
+                border: OutlineInputBorder(),
+                helperText: 'Ex: 3.000,00',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [_currencyFormatter],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe o salário';
                 }
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
+                final numericValue = _parseNumericValue(value);
+                if (numericValue <= 0) {
+                  return 'Salário deve ser maior que zero';
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
+            right: TextFormField(
+              controller: _dependentsController,
+              decoration: const InputDecoration(
+                labelText: 'Número de Dependentes',
+                border: OutlineInputBorder(),
+                helperText: 'Para cálculo do IRRF',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final dependents = int.tryParse(value) ?? 0;
+                  if (dependents < 0) {
+                    return 'Valor não pode ser negativo';
+                  }
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
           ),
           const SizedBox(height: 16),
 
-          // Dependents
-          TextFormField(
-            controller: _dependentsController,
-            decoration: const InputDecoration(
-              labelText: 'Número de Dependentes',
-              border: OutlineInputBorder(),
-              helperText: 'Para cálculo do IRRF',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final dependents = int.tryParse(value) ?? 0;
-                if (dependents < 0) {
-                  return 'Valor não pode ser negativo';
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _admissionDateController,
+              decoration: const InputDecoration(
+                labelText: 'Data de Admissão',
+                border: OutlineInputBorder(),
+                helperText: 'DD/MM/AAAA',
+                suffixIcon: Icon(Icons.calendar_today),
+              ),
+              keyboardType: TextInputType.datetime,
+              inputFormatters: [_dateFormatter],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe a data de admissão';
                 }
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
+                final date = _parseDate(value);
+                if (date == null) {
+                  return 'Data inválida';
+                }
+                if (date.isAfter(DateTime.now())) {
+                  return 'Data não pode ser futura';
+                }
+                return null;
+              },
+              onChanged: (value) {
+                final date = _parseDate(value);
+                if (date != null) {
+                  setState(() {
+                    _admissionDate = date;
+                    _updateMonthsWorked();
+                  });
+                }
+              },
+              onTap: () => _selectDate(context, true),
+            ),
+            right: TextFormField(
+              controller: _calculationDateController,
+              decoration: const InputDecoration(
+                labelText: 'Data do Cálculo',
+                border: OutlineInputBorder(),
+                helperText: 'DD/MM/AAAA',
+                suffixIcon: Icon(Icons.calendar_today),
+              ),
+              keyboardType: TextInputType.datetime,
+              inputFormatters: [_dateFormatter],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe a data do cálculo';
+                }
+                final date = _parseDate(value);
+                if (date == null) {
+                  return 'Data inválida';
+                }
+                return null;
+              },
+              onChanged: (value) {
+                final date = _parseDate(value);
+                if (date != null) {
+                  setState(() {
+                    _calculationDate = date;
+                    _updateMonthsWorked();
+                  });
+                }
+              },
+              onTap: () => _selectDate(context, false),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _monthsController,
+              decoration: const InputDecoration(
+                labelText: 'Meses Trabalhados',
+                border: OutlineInputBorder(),
+                helperText: 'Calculado automaticamente',
+                suffixIcon: Icon(Icons.lock),
+              ),
+              enabled: false,
+            ),
+            right: TextFormField(
+              controller: _absencesController,
+              decoration: const InputDecoration(
+                labelText: 'Faltas Não Justificadas',
+                border: OutlineInputBorder(),
+                helperText: 'Cada 15 faltas desconta 1 mês',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final absences = int.tryParse(value) ?? 0;
+                  if (absences < 0) {
+                    return 'Valor não pode ser negativo';
+                  }
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -268,11 +260,13 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     // If admission is before current year, start from January 1st
     final yearStart = DateTime(calculation.year, 1, 1);
     final effectiveStart = admission.isAfter(yearStart) ? admission : yearStart;
-    
+
     // Calculate months difference properly
-    var months = (calculation.year - effectiveStart.year) * 12 +
-        calculation.month - effectiveStart.month;
-    
+    var months =
+        (calculation.year - effectiveStart.year) * 12 +
+        calculation.month -
+        effectiveStart.month;
+
     // If day of calculation is >= day of admission, count current month
     // Brazilian rule: work 15+ days in a month = count as full month
     if (calculation.day >= 15 && effectiveStart.day <= 15) {
@@ -280,7 +274,7 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     } else if (calculation.day >= effectiveStart.day) {
       months += 1;
     }
-    
+
     // Ensure months is between 1 and 12
     if (months < 1) {
       months = 1;
@@ -288,7 +282,7 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     if (months > 12) {
       months = 12;
     }
-    
+
     return months;
   }
 
@@ -352,7 +346,15 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   }
 
   void _submitForm() {
-    if (!widget.formKey.currentState!.validate()) return;
+    if (!widget.formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha os campos obrigatórios'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final params = CalculateThirteenthSalaryParams(
       grossSalary: _parseNumericValue(_salaryController.text),
@@ -365,5 +367,33 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     );
 
     widget.onCalculate(params);
+  }
+}
+
+class _CurrencyInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (newText.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final value = double.parse(newText) / 100;
+
+    final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: '');
+    final newString = formatter.format(value).trim();
+
+    return newValue.copyWith(
+      text: newString,
+      selection: TextSelection.collapsed(offset: newString.length),
+    );
   }
 }

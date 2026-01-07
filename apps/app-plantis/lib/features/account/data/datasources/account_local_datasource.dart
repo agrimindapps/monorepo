@@ -53,7 +53,7 @@ class AccountLocalDataSourceImpl implements AccountLocalDataSource {
       // Por enquanto retorna null, será implementado conforme necessário
       return null;
     } catch (e) {
-      throw CacheFailure('Erro ao buscar dados locais: $e');
+      throw Exception('Erro ao buscar dados locais: $e');
     }
   }
 
@@ -97,7 +97,7 @@ class AccountLocalDataSourceImpl implements AccountLocalDataSource {
 
       return totalCleared;
     } catch (e) {
-      throw CacheFailure('Erro ao limpar dados locais: $e');
+      throw Exception('Erro ao limpar dados locais: $e');
     }
   }
 
@@ -107,7 +107,7 @@ class AccountLocalDataSourceImpl implements AccountLocalDataSource {
       await clearLocalUserData();
       // Limpa também dados de configuração da conta se necessário
     } catch (e) {
-      throw CacheFailure('Erro ao limpar dados da conta: $e');
+      throw Exception('Erro ao limpar dados da conta: $e');
     }
   }
 }

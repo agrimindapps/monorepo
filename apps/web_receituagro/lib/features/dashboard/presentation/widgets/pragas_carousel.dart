@@ -147,7 +147,7 @@ class _PragasCarouselState extends State<PragasCarousel> {
                   child: Icon(
                     Icons.bug_report,
                     size: 120,
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                   ),
                 ),
 
@@ -170,7 +170,7 @@ class _PragasCarouselState extends State<PragasCarousel> {
                               height: 60,
                               width: 60,
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(
@@ -186,7 +186,7 @@ class _PragasCarouselState extends State<PragasCarousel> {
                           height: 60,
                           width: 60,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -218,7 +218,7 @@ class _PragasCarouselState extends State<PragasCarousel> {
                         style: TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -249,7 +249,7 @@ class _PragasCarouselState extends State<PragasCarousel> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

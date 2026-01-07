@@ -249,7 +249,7 @@ ThemeData darkTheme = ThemeData(
     todayForegroundColor: WidgetStateProperty.all(_textColor),
     backgroundColor: _surfaceColor,
     dayForegroundColor: WidgetStateProperty.all(_textColor),
-    dayOverlayColor: WidgetStateProperty.all(_primaryColor.withOpacity(0.2)),
+    dayOverlayColor: WidgetStateProperty.all(_primaryColor.withValues(alpha: 0.2)),
     dayShape: WidgetStateProperty.all(
       RoundedRectangleBorder(borderRadius: _borderRadius),
     ),
@@ -263,7 +263,7 @@ ThemeData darkTheme = ThemeData(
       color: _textColor,
     ),
     todayBackgroundColor: WidgetStateProperty.all(
-      _primaryColor.withOpacity(0.4),
+      _primaryColor.withValues(alpha: 0.4),
     ),
 
     elevation: 0,
@@ -333,7 +333,7 @@ ThemeData darkTheme = ThemeData(
     ),
     indicator: BoxDecoration(
       borderRadius: _borderRadius,
-      color: _primaryColor.withOpacity(0.4),
+      color: _primaryColor.withValues(alpha: 0.4),
     ),
     dividerColor: Colors.transparent,
   ),
@@ -343,7 +343,7 @@ ThemeData darkTheme = ThemeData(
     activeTrackColor: _primaryColor,
     inactiveTrackColor: _borderColor,
     thumbColor: _primaryColor,
-    overlayColor: _primaryColor.withOpacity(0.4),
+    overlayColor: _primaryColor.withValues(alpha: 0.4),
     valueIndicatorColor: _primaryColor,
     valueIndicatorTextStyle: const TextStyle(
       color: _backgroundColor,
@@ -357,7 +357,7 @@ ThemeData darkTheme = ThemeData(
   switchTheme: SwitchThemeData(
     thumbColor: WidgetStateProperty.all(_textColor),
     trackColor: WidgetStateProperty.all(_borderColor),
-    overlayColor: WidgetStateProperty.all(_primaryColor.withOpacity(0.4)),
+    overlayColor: WidgetStateProperty.all(_primaryColor.withValues(alpha: 0.4)),
     splashRadius: 24,
     materialTapTargetSize: MaterialTapTargetSize.padded,
   ),

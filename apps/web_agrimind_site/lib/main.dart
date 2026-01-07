@@ -25,14 +25,11 @@ class MyApp extends StatelessWidget {
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFF3ECF8E), // Supabase Green
           secondary: Color(0xFF66E3CE),
-          surface: Color(0xFF1E1E1E), // Dark cards
-          background: Color(0xFF121212),
+          surface: Color(0xFF1E1E1E),
           onPrimary: Colors.black,
           onSurface: Color(0xFFEDEDED),
         ),
-        textTheme: TextTheme(
-          bodyMedium: TextStyle(color: Color(0xFFEDEDED)),
-        ),
+        textTheme: TextTheme(bodyMedium: TextStyle(color: Color(0xFFEDEDED))),
       ),
       home: const App(),
     );

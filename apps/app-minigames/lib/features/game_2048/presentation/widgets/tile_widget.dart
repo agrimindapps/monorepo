@@ -84,7 +84,7 @@ class _TileWidgetState extends State<TileWidget>
             boxShadow: widget.tile.animationType == AnimationType.merge
                 ? [
                     BoxShadow(
-                      color: _getTileColor(widget.tile.value).withOpacity(0.5),
+                      color: _getTileColor(widget.tile.value).withValues(alpha: 0.5),
                       blurRadius: 8,
                       spreadRadius: 2,
                     ),

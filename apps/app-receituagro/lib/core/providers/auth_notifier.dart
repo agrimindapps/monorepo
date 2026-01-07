@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:core/core.dart'
-    hide AuthState, Column, analyticsServiceProvider, deviceIdentityServiceProvider;
+    hide
+        AuthState,
+        Column,
+        analyticsServiceProvider,
+        deviceIdentityServiceProvider;
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -47,7 +51,7 @@ class AuthNotifier extends _$AuthNotifier {
         _handleUserStateChange,
         onError: (Object error) {
           if (kDebugMode) {
-            print('❌ Auth Notifier: Error in user stream - $error');
+            debugPrint('❌ Auth Notifier: Error in user stream - $error');
           }
           final currentState = state.value;
           if (currentState != null) {
@@ -65,9 +69,9 @@ class AuthNotifier extends _$AuthNotifier {
         await _initializeUserSession(currentState!.currentUser!);
       }
 
-      if (kDebugMode) print('✅ Auth Notifier: Initialized successfully');
+      if (kDebugMode) debugPrint('✅ Auth Notifier: Initialized successfully');
     } catch (e) {
-      if (kDebugMode) print('❌ Auth Notifier: Initialization error - $e');
+      if (kDebugMode) debugPrint('❌ Auth Notifier: Initialization error - $e');
       final currentState = state.value;
       if (currentState != null) {
         state = AsyncValue.data(
@@ -134,7 +138,7 @@ class AuthNotifier extends _$AuthNotifier {
       }
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '✅ Auth Notifier: User session initialized for ${user.displayName}',
         );
       }
@@ -149,7 +153,7 @@ class AuthNotifier extends _$AuthNotifier {
         );
       }
       if (kDebugMode) {
-        print('❌ Auth Notifier: Session initialization error - $e');
+        debugPrint('❌ Auth Notifier: Session initialization error - $e');
       }
     }
   }
@@ -159,25 +163,29 @@ class AuthNotifier extends _$AuthNotifier {
 
     state = const AsyncValue.data(AuthState.initial());
 
-    if (kDebugMode) print('✅ Auth Notifier: Session cleared');
+    if (kDebugMode) debugPrint('✅ Auth Notifier: Session cleared');
   }
 
   Future<void> _handleDeviceLogin(UserEntity user) async {
     try {
       if (kDebugMode) {
-        print('🔄 Auth Notifier: Handling device login for user ${user.id}');
+        debugPrint(
+          '🔄 Auth Notifier: Handling device login for user ${user.id}',
+        );
       }
       final deviceInfo = await _deviceService.getCurrentDeviceEntity();
       _analytics.trackDeviceAdded(deviceInfo.platform);
 
       if (kDebugMode) {
-        print('✅ Auth Notifier: Device login detected for ${deviceInfo.name}');
-        print('   Device management handled by SettingsNotifier');
+        debugPrint(
+          '✅ Auth Notifier: Device login detected for ${deviceInfo.name}',
+        );
+        debugPrint('   Device management handled by SettingsNotifier');
       }
       await _syncUserProfile(user, deviceInfo);
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Auth Notifier: Device login handling error - $e');
+        debugPrint('❌ Auth Notifier: Device login handling error - $e');
       }
       _analytics.trackError('device_login_error', e.toString());
     }
@@ -198,7 +206,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔄 Auth Notifier: Triggering post-authentication sync for user ${user.displayName}',
         );
       }
@@ -214,7 +222,7 @@ class AuthNotifier extends _$AuthNotifier {
                     parameters: {'error': failure.message},
                   );
                   if (kDebugMode) {
-                    print(
+                    debugPrint(
                       '❌ Auth Notifier: Post-auth sync failed: ${failure.message}',
                     );
                   }
@@ -226,7 +234,7 @@ class AuthNotifier extends _$AuthNotifier {
                   );
 
                   if (kDebugMode) {
-                    print(
+                    debugPrint(
                       '✅ Auth Notifier: Post-auth sync completed successfully',
                     );
                   }
@@ -242,7 +250,7 @@ class AuthNotifier extends _$AuthNotifier {
                     );
 
                     if (kDebugMode) {
-                      print(
+                      debugPrint(
                         '✅ Auth Notifier: Anonymous to authenticated migration completed',
                       );
                     }
@@ -256,14 +264,14 @@ class AuthNotifier extends _$AuthNotifier {
                 error.toString(),
               );
               if (kDebugMode) {
-                print('❌ Auth Notifier: Post-auth sync exception: $error');
+                debugPrint('❌ Auth Notifier: Post-auth sync exception: $error');
               }
             }),
       );
     } catch (e) {
       _analytics.trackError('post_auth_sync_trigger_error', e.toString());
       if (kDebugMode) {
-        print('❌ Auth Notifier: Error triggering post-auth sync: $e');
+        debugPrint('❌ Auth Notifier: Error triggering post-auth sync: $e');
       }
     }
   }
@@ -275,7 +283,7 @@ class AuthNotifier extends _$AuthNotifier {
     if (currentState.currentUser == null ||
         currentState.currentUser!.isAnonymous) {
       if (kDebugMode) {
-        print('⚠️ Auth Notifier: Cannot sync - user not authenticated');
+        debugPrint('⚠️ Auth Notifier: Cannot sync - user not authenticated');
       }
       return false;
     }
@@ -290,7 +298,7 @@ class AuthNotifier extends _$AuthNotifier {
       );
 
       if (kDebugMode) {
-        print(
+        debugPrint(
           '🔄 Auth Notifier: Starting manual sync for user ${currentState.currentUser!.displayName}',
         );
       }
@@ -306,7 +314,9 @@ class AuthNotifier extends _$AuthNotifier {
             parameters: {'error': failure.message},
           );
           if (kDebugMode) {
-            print('❌ Auth Notifier: Manual sync failed: ${failure.message}');
+            debugPrint(
+              '❌ Auth Notifier: Manual sync failed: ${failure.message}',
+            );
           }
           return false;
         },
@@ -317,14 +327,14 @@ class AuthNotifier extends _$AuthNotifier {
           );
 
           if (kDebugMode) {
-            print('✅ Auth Notifier: Manual sync completed successfully');
+            debugPrint('✅ Auth Notifier: Manual sync completed successfully');
           }
           return true;
         },
       );
     } catch (e) {
       _analytics.trackError('manual_sync_exception', e.toString());
-      if (kDebugMode) print('❌ Auth Notifier: Manual sync exception: $e');
+      if (kDebugMode) debugPrint('❌ Auth Notifier: Manual sync exception: $e');
       return false;
     }
   }
@@ -906,11 +916,14 @@ class AuthNotifier extends _$AuthNotifier {
     }
   }
 
-  Future<void> _syncUserProfile(UserEntity user, DeviceEntity deviceInfo) async {
+  Future<void> _syncUserProfile(
+    UserEntity user,
+    DeviceEntity deviceInfo,
+  ) async {
     try {
       if (user.id.isEmpty) {
         if (kDebugMode) {
-          print(
+          debugPrint(
             '🔄 Auth Notifier: User ID inválido - pulando sincronização de perfil',
           );
         }
@@ -934,7 +947,7 @@ class AuthNotifier extends _$AuthNotifier {
       await updateResult.fold(
         (Failure failure) async {
           if (kDebugMode) {
-            print(
+            debugPrint(
               'Auth Notifier: Update falhou, tentando criar: ${failure.message}',
             );
           }
@@ -943,7 +956,7 @@ class AuthNotifier extends _$AuthNotifier {
           createResult.fold(
             (Failure createFailure) {
               if (kDebugMode) {
-                print(
+                debugPrint(
                   '❌ Auth Notifier: Erro na sincronização de perfil (create): ${createFailure.message}',
                 );
               }
@@ -954,7 +967,7 @@ class AuthNotifier extends _$AuthNotifier {
             },
             (String entityId) {
               if (kDebugMode) {
-                print(
+                debugPrint(
                   '✅ Auth Notifier: Perfil do usuário criado com sucesso: $entityId',
                 );
               }
@@ -963,13 +976,17 @@ class AuthNotifier extends _$AuthNotifier {
         },
         (_) {
           if (kDebugMode) {
-            print('✅ Auth Notifier: Perfil do usuário atualizado com sucesso');
+            debugPrint(
+              '✅ Auth Notifier: Perfil do usuário atualizado com sucesso',
+            );
           }
         },
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e');
+        debugPrint(
+          '❌ Auth Notifier: Erro ao sincronizar perfil do usuário: $e',
+        );
       }
       _analytics.trackError('user_profile_sync_error', e.toString());
     }

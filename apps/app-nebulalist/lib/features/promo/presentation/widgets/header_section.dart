@@ -16,9 +16,9 @@ class HeaderSection extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFF1A237E).withOpacity(0.95),
-            const Color(0xFF311B92).withOpacity(0.9),
-            const Color(0xFF4A148C).withOpacity(0.85),
+            const Color(0xFF1A237E).withValues(alpha: 0.95),
+            const Color(0xFF311B92).withValues(alpha: 0.9),
+            const Color(0xFF4A148C).withValues(alpha: 0.85),
           ],
         ),
       ),
@@ -45,10 +45,10 @@ class HeaderSection extends StatelessWidget {
                     width: isSmallScreen ? 80 : 120,
                     height: isSmallScreen ? 80 : 120,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),
@@ -69,7 +69,7 @@ class HeaderSection extends StatelessWidget {
                       letterSpacing: 1.5,
                       shadows: [
                         Shadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           offset: const Offset(0, 4),
                           blurRadius: 12,
                         ),
@@ -83,7 +83,7 @@ class HeaderSection extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: isSmallScreen ? 18 : 24,
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       fontWeight: FontWeight.w300,
                       letterSpacing: 0.5,
                     ),
@@ -97,7 +97,7 @@ class HeaderSection extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: isSmallScreen ? 14 : 16,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         height: 1.5,
                       ),
                     ),
@@ -184,17 +184,17 @@ class _NebulaPainter extends CustomPainter {
       _NebulaCircle(
         offset: Offset(size.width * 0.2, size.height * 0.3),
         radius: 150,
-        color: const Color(0xFF4A148C).withOpacity(0.3),
+        color: const Color(0xFF4A148C).withValues(alpha: 0.3),
       ),
       _NebulaCircle(
         offset: Offset(size.width * 0.7, size.height * 0.4),
         radius: 200,
-        color: const Color(0xFF311B92).withOpacity(0.2),
+        color: const Color(0xFF311B92).withValues(alpha: 0.2),
       ),
       _NebulaCircle(
         offset: Offset(size.width * 0.5, size.height * 0.7),
         radius: 180,
-        color: const Color(0xFF1A237E).withOpacity(0.25),
+        color: const Color(0xFF1A237E).withValues(alpha: 0.25),
       ),
     ];
 
@@ -205,7 +205,7 @@ class _NebulaPainter extends CustomPainter {
 
     // Draw stars
     final starPaint = Paint()
-      ..color = Colors.white.withOpacity(0.6)
+      ..color = Colors.white.withValues(alpha: 0.6)
       ..style = PaintingStyle.fill;
 
     for (int i = 0; i < 50; i++) {

@@ -114,7 +114,7 @@ class AdvancedHealthMonitoringService {
     _isInitialized = true;
 
     if (kDebugMode) {
-      print('🏥 Advanced Health Monitoring Service initialized');
+      debugPrint('🏥 Advanced Health Monitoring Service initialized');
     }
   }
 
@@ -653,7 +653,7 @@ class AdvancedHealthMonitoringService {
       },
     );
     if (kDebugMode) {
-      print('🚨 Health Alert: ${config.name} - ${config.condition}');
+      debugPrint('🚨 Health Alert: ${config.name} - ${config.condition}');
     }
   }
 

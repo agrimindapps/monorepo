@@ -53,10 +53,10 @@ class _HomeHeaderState extends ConsumerState<HomeHeader> {
             vertical: 12,
           ),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F0F1A).withOpacity(0.8),
+            color: const Color(0xFF0F0F1A).withValues(alpha: 0.8),
             border: Border(
               bottom: BorderSide(
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -115,7 +115,7 @@ class _HomeHeaderState extends ConsumerState<HomeHeader> {
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'O que vamos jogar hoje?',
-                    hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
                     prefixIcon: Icon(
                       Icons.search,
                       color: _isSearchFocused

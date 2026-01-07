@@ -51,7 +51,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         lastLoginAt: firebaseUser.metadata.lastSignInTime,
       );
     } catch (e) {
-      throw ServerFailure('Erro ao buscar dados remotos: $e');
+      throw Exception('Erro ao buscar dados remotos: $e');
     }
   }
 
@@ -76,7 +76,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
     try {
       await firebaseAuth.signOut();
     } catch (e) {
-      throw AuthFailure('Erro ao fazer logout: $e');
+      throw Exception('Erro ao fazer logout: $e');
     }
   }
 
@@ -109,7 +109,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
 
       return totalCleared;
     } catch (e) {
-      throw ServerFailure('Erro ao limpar dados remotos: $e');
+      throw Exception('Erro ao limpar dados remotos: $e');
     }
   }
 
@@ -128,7 +128,7 @@ class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         await currentUser.delete();
       }
     } catch (e) {
-      throw AuthFailure('Erro ao excluir conta: $e');
+      throw Exception('Erro ao excluir conta: $e');
     }
   }
 }

@@ -27,8 +27,8 @@ class AddFavoritoUseCase {
   ///
   /// final result = await addFavoritoUseCase(defensivo);
   /// result.fold(
-  ///   (failure) => print('Erro: ${failure.message}'),
-  ///   (success) => print('✓ Adicionado aos favoritos'),
+  ///   (failure) => debugPrint('Erro: ${failure.message}'),
+  ///   (success) => debugPrint('✓ Adicionado aos favoritos'),
   /// );
   /// ```
   ///

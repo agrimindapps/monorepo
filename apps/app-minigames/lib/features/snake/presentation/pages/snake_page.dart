@@ -196,7 +196,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
                   _game.restartGame();
                   setState(() {});
                 },
-                color: Colors.black.withOpacity(0.85),
+                color: Colors.black.withValues(alpha: 0.85),
                 isError: true,
               ),
 
@@ -210,7 +210,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
                   _game.startGame();
                   setState(() {});
                 },
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha: 0.6),
               ),
           ],
         ),

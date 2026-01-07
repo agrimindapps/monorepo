@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import '../../../../shared/widgets/responsive_input_row.dart';
 
 /// Input form for vacation calculation parameters
 class VacationInputForm extends StatefulWidget {
-  final void Function(double grossSalary, int vacationDays, bool sellVacationDays) onCalculate;
+  final void Function(
+    double grossSalary,
+    int vacationDays,
+    bool sellVacationDays,
+  )
+  onCalculate;
 
-  const VacationInputForm({
-    super.key,
-    required this.onCalculate,
-  });
+  const VacationInputForm({super.key, required this.onCalculate});
 
   @override
   State<VacationInputForm> createState() => _VacationInputFormState();
@@ -48,74 +51,68 @@ class _VacationInputFormState extends State<VacationInputForm> {
             children: [
               Text(
                 'Dados para Cálculo',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
 
-              // Salary Input
-              TextFormField(
-                controller: _salaryController,
-                decoration: const InputDecoration(
-                  labelText: 'Salário Bruto Mensal',
-                  prefixText: 'R\$ ',
-                  border: OutlineInputBorder(),
-                  helperText: 'Ex: 3.000,00',
+              // Salary and Vacation Days Row
+              ResponsiveInputRow(
+                left: TextFormField(
+                  controller: _salaryController,
+                  decoration: const InputDecoration(
+                    labelText: 'Salário Bruto Mensal',
+                    prefixText: 'R\$ ',
+                    border: OutlineInputBorder(),
+                    helperText: 'Ex: 3.000,00',
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [_currencyFormatter],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Informe o salário';
+                    }
+
+                    final numericValue = _parseNumericValue(value);
+                    if (numericValue <= 0) {
+                      return 'Salário deve ser maior que zero';
+                    }
+
+                    if (numericValue > 1000000) {
+                      return 'Salário muito alto';
+                    }
+
+                    return null;
+                  },
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  _currencyFormatter,
-                ],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Informe o salário';
-                  }
+                right: TextFormField(
+                  controller: _vacationDaysController,
+                  decoration: const InputDecoration(
+                    labelText: 'Dias de Férias',
+                    border: OutlineInputBorder(),
+                    helperText: 'De 1 a 30 dias',
+                    suffixText: 'dias',
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Informe os dias';
+                    }
 
-                  final numericValue = _parseNumericValue(value);
-                  if (numericValue <= 0) {
-                    return 'Salário deve ser maior que zero';
-                  }
+                    final days = int.tryParse(value);
+                    if (days == null || days < 1 || days > 30) {
+                      return 'Dias devem estar entre 1 e 30';
+                    }
 
-                  if (numericValue > 1000000) {
-                    return 'Salário muito alto';
-                  }
+                    if (_sellVacationDays && days < 10) {
+                      return 'Para vender dias, precisa ter pelo menos 10';
+                    }
 
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Vacation Days Input
-              TextFormField(
-                controller: _vacationDaysController,
-                decoration: const InputDecoration(
-                  labelText: 'Dias de Férias',
-                  border: OutlineInputBorder(),
-                  helperText: 'De 1 a 30 dias',
-                  suffixText: 'dias',
+                    return null;
+                  },
                 ),
-                keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Informe os dias';
-                  }
-
-                  final days = int.tryParse(value);
-                  if (days == null || days < 1 || days > 30) {
-                    return 'Dias devem estar entre 1 e 30';
-                  }
-
-                  if (_sellVacationDays && days < 10) {
-                    return 'Para vender dias, precisa ter pelo menos 10';
-                  }
-
-                  return null;
-                },
               ),
 
               const SizedBox(height: 16),
@@ -155,12 +152,20 @@ class _VacationInputFormState extends State<VacationInputForm> {
   }
 
   void _calculate() {
-    if (_formKey.currentState!.validate()) {
-      final grossSalary = _parseNumericValue(_salaryController.text);
-      final vacationDays = int.parse(_vacationDaysController.text);
-
-      widget.onCalculate(grossSalary, vacationDays, _sellVacationDays);
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha os campos obrigatórios'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
+
+    final grossSalary = _parseNumericValue(_salaryController.text);
+    final vacationDays = int.parse(_vacationDaysController.text);
+
+    widget.onCalculate(grossSalary, vacationDays, _sellVacationDays);
   }
 
   double _parseNumericValue(String value) {

@@ -5,16 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Project imports:
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/cash_vs_installment_calculation.dart';
 
 /// Card displaying cash vs installment calculation results
 class CashVsInstallmentResultCard extends StatelessWidget {
   final CashVsInstallmentCalculation calculation;
 
-  const CashVsInstallmentResultCard({
-    super.key,
-    required this.calculation,
-  });
+  const CashVsInstallmentResultCard({super.key, required this.calculation});
 
   @override
   Widget build(BuildContext context) {
@@ -33,18 +31,14 @@ class CashVsInstallmentResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green[700],
-                  size: 28,
-                ),
+                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado da Comparação',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      ),
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  ),
                 ),
               ],
             ),
@@ -56,7 +50,9 @@ class CashVsInstallmentResultCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: calculation.bestOption == 'À Vista'
-                    ? (isDark ? Colors.green[900]!.withOpacity(0.3) : Colors.green[50])
+                    ? (isDark
+                          ? Colors.green[900]!.withValues(alpha: 0.3)
+                          : Colors.green[50])
                     : (isDark ? Colors.grey[800] : Colors.grey[100]),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
@@ -77,8 +73,12 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                           Icon(
                             Icons.money_off,
                             color: calculation.bestOption == 'À Vista'
-                                ? (isDark ? Colors.green[400] : Colors.green[700])
-                                : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                                ? (isDark
+                                      ? Colors.green[400]
+                                      : Colors.green[700])
+                                : (isDark
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600]),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -88,8 +88,12 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               color: calculation.bestOption == 'À Vista'
-                                  ? (isDark ? Colors.green[300] : Colors.green[900])
-                                  : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                                  ? (isDark
+                                        ? Colors.green[300]
+                                        : Colors.green[900])
+                                  : (isDark
+                                        ? Colors.grey[300]
+                                        : Colors.grey[700]),
                             ),
                           ),
                         ],
@@ -137,7 +141,9 @@ class CashVsInstallmentResultCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: calculation.bestOption == 'Parcelado'
-                    ? (isDark ? Colors.green[900]!.withOpacity(0.3) : Colors.green[50])
+                    ? (isDark
+                          ? Colors.green[900]!.withValues(alpha: 0.3)
+                          : Colors.green[50])
                     : (isDark ? Colors.grey[800] : Colors.grey[100]),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
@@ -158,8 +164,12 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                           Icon(
                             Icons.credit_card,
                             color: calculation.bestOption == 'Parcelado'
-                                ? (isDark ? Colors.green[400] : Colors.green[700])
-                                : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                                ? (isDark
+                                      ? Colors.green[400]
+                                      : Colors.green[700])
+                                : (isDark
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600]),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -169,8 +179,12 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                               color: calculation.bestOption == 'Parcelado'
-                                  ? (isDark ? Colors.green[300] : Colors.green[900])
-                                  : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                                  ? (isDark
+                                        ? Colors.green[300]
+                                        : Colors.green[900])
+                                  : (isDark
+                                        ? Colors.grey[300]
+                                        : Colors.grey[700]),
                             ),
                           ),
                         ],
@@ -271,10 +285,7 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                     calculation.bestOption == 'À Vista'
                         ? 'Você economiza ${formatter.format(calculation.savingsOrAdditionalCost)} pagando à vista!'
                         : 'Parcelando, o custo adicional é de apenas ${formatter.format(calculation.savingsOrAdditionalCost)}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
                   ),
                 ],
               ),
@@ -286,11 +297,11 @@ class CashVsInstallmentResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.5),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: Theme.of(context).dividerColor,
-                ),
+                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,17 +329,23 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+            ShareButton(
+              text: ShareFormatter.formatCashVsInstallment(
+                cashPrice: calculation.cashPrice,
+                installmentPrice: calculation.installmentPrice,
+                installments: calculation.numberOfInstallments,
+                bestOption: calculation.bestOption,
+              ),
+              subject: 'À Vista ou Parcelado',
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildResultRow(
-    BuildContext context,
-    String label,
-    String value,
-  ) {
+  Widget _buildResultRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -359,7 +376,7 @@ class CashVsInstallmentResultCard extends StatelessWidget {
   TextStyle _detailTextStyle(BuildContext context) {
     return TextStyle(
       fontSize: 12,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
     );
   }
 }

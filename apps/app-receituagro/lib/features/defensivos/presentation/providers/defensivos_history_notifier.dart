@@ -177,8 +177,9 @@ class DefensivosHistoryNotifier extends _$DefensivosHistoryNotifier {
             .where((d) => d.idDefensivo == historyItem.id)
             .firstOrNull;
 
-        defensivo ??=
-            allDefensivos.where((d) => d.nome == historyItem.name).firstOrNull;
+        defensivo ??= allDefensivos
+            .where((d) => d.nome == historyItem.name)
+            .firstOrNull;
 
         if (defensivo != null) {
           historicDefensivos.add(defensivo);

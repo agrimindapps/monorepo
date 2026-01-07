@@ -150,7 +150,7 @@ class CacheManagementService {
     _isInitialized = true;
 
     if (kDebugMode) {
-      print('📦 Cache Management Service initialized');
+      debugPrint('📦 Cache Management Service initialized');
     }
   }
 
@@ -227,7 +227,7 @@ class CacheManagementService {
     }
 
     if (kDebugMode) {
-      print('📦 Created cache: $cacheKey with strategy: ${config.strategy}');
+      debugPrint('📦 Created cache: $cacheKey with strategy: ${config.strategy}');
     }
   }
 
@@ -265,7 +265,7 @@ class CacheManagementService {
       return entry.data as T;
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Cache get error for $cacheKey:$itemKey - $e');
+        debugPrint('❌ Cache get error for $cacheKey:$itemKey - $e');
       }
       _recordMiss(cacheKey, startTime);
       return null;
@@ -316,11 +316,11 @@ class CacheManagementService {
       }
 
       if (kDebugMode) {
-        print('📦 Cached $cacheKey:$itemKey (expires: $expiresAt)');
+        debugPrint('📦 Cached $cacheKey:$itemKey (expires: $expiresAt)');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Cache put error for $cacheKey:$itemKey - $e');
+        debugPrint('❌ Cache put error for $cacheKey:$itemKey - $e');
       }
     }
   }
@@ -343,7 +343,7 @@ class CacheManagementService {
       }
 
       if (kDebugMode) {
-        print('📦 Cleared cache: $cacheKey');
+        debugPrint('📦 Cleared cache: $cacheKey');
       }
     }
   }
@@ -355,7 +355,7 @@ class CacheManagementService {
     }
 
     if (kDebugMode) {
-      print('📦 Cleared all caches');
+      debugPrint('📦 Cleared all caches');
     }
   }
 
@@ -403,18 +403,18 @@ class CacheManagementService {
   Future<void> preloadCache() async {
     try {
       if (kDebugMode) {
-        print('📦 Starting cache preload...');
+        debugPrint('📦 Starting cache preload...');
       }
       await _preloadStaticData();
       await _preloadUserPreferences();
       await _preloadFrequentImages();
 
       if (kDebugMode) {
-        print('📦 Cache preload completed');
+        debugPrint('📦 Cache preload completed');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Cache preload failed: $e');
+        debugPrint('❌ Cache preload failed: $e');
       }
     }
   }
@@ -423,7 +423,7 @@ class CacheManagementService {
   Future<void> optimizeCaches() async {
     try {
       if (kDebugMode) {
-        print('📦 Starting cache optimization...');
+        debugPrint('📦 Starting cache optimization...');
       }
 
       for (final cacheKey in _memoryCaches.keys) {
@@ -437,11 +437,11 @@ class CacheManagementService {
       }
 
       if (kDebugMode) {
-        print('📦 Cache optimization completed');
+        debugPrint('📦 Cache optimization completed');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Cache optimization failed: $e');
+        debugPrint('❌ Cache optimization failed: $e');
       }
     }
   }
@@ -512,7 +512,7 @@ class CacheManagementService {
       await result.fold(
         (failure) async {
           if (kDebugMode) {
-            print('📦 No cached data found for $cacheKey');
+            debugPrint('📦 No cached data found for $cacheKey');
           }
         },
         (data) async {
@@ -533,14 +533,14 @@ class CacheManagementService {
             }
 
             if (kDebugMode) {
-              print('📦 Loaded ${cache.length} items from disk for $cacheKey');
+              debugPrint('📦 Loaded ${cache.length} items from disk for $cacheKey');
             }
           }
         },
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Failed to load cache from disk for $cacheKey: $e');
+        debugPrint('❌ Failed to load cache from disk for $cacheKey: $e');
       }
     }
   }
@@ -560,7 +560,7 @@ class CacheManagementService {
       );
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Failed to persist cache to disk for $cacheKey: $e');
+        debugPrint('❌ Failed to persist cache to disk for $cacheKey: $e');
       }
     }
   }
@@ -600,18 +600,18 @@ class CacheManagementService {
     }
 
     if (kDebugMode && expiredKeys.isNotEmpty) {
-      print('📦 Cleaned ${expiredKeys.length} expired entries from $cacheKey');
+      debugPrint('📦 Cleaned ${expiredKeys.length} expired entries from $cacheKey');
     }
   }
 
   void _collectAndLogStats() {
     if (kDebugMode) {
       final stats = getAllStats();
-      print('📦 Cache Statistics:');
+      debugPrint('📦 Cache Statistics:');
 
       for (final entry in stats.entries) {
         final stat = entry.value;
-        print(
+        debugPrint(
           '  ${entry.key}: ${stat.currentSize} items, '
           '${(stat.hitRatio * 100).toStringAsFixed(1)}% hit ratio, '
           '${stat.avgHitTime.inMicroseconds}μs avg',
@@ -661,7 +661,7 @@ class CacheManagementService {
     );
 
     if (kDebugMode) {
-      print('📦 Optimized $cacheKey size: $currentSize → $newSize');
+      debugPrint('📦 Optimized $cacheKey size: $currentSize → $newSize');
     }
   }
 

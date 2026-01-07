@@ -405,16 +405,15 @@ class RainfallMeasurementRepository {
   Future<Either<Failure, Map<int, double>>> getMonthlyTotals(int year) async {
     try {
       final monthlyTotals = <int, double>{};
-      
+
       for (int month = 1; month <= 12; month++) {
         final start = DateTime(year, month, 1);
         final end = DateTime(year, month + 1, 0, 23, 59, 59);
         final result = await getTotalByPeriod(start, end);
-        if (result.isSuccess && result.data != null) {
-          monthlyTotals[month] = result.data!;
-        } else {
-          monthlyTotals[month] = 0.0;
-        }
+        result.fold(
+          (failure) => monthlyTotals[month] = 0.0,
+          (total) => monthlyTotals[month] = total,
+        );
       }
 
       return Right(monthlyTotals);
@@ -436,11 +435,10 @@ class RainfallMeasurementRepository {
         final start = DateTime(year, 1, 1);
         final yearEnd = DateTime(year, 12, 31, 23, 59, 59);
         final result = await getTotalByPeriod(start, yearEnd);
-        if (result.isSuccess && result.data != null) {
-          yearlyTotals[year] = result.data!;
-        } else {
-          yearlyTotals[year] = 0.0;
-        }
+        result.fold(
+          (failure) => yearlyTotals[year] = 0.0,
+          (total) => yearlyTotals[year] = total,
+        );
       }
 
       return Right(yearlyTotals);

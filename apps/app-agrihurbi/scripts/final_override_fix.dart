@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+
 void main() {
   final files = [
     'lib/features/settings/data/models/settings_model.dart',
     'lib/features/news/data/models/commodity_price_model.dart',
-    'lib/features/news/data/models/news_article_model.dart'
+    'lib/features/news/data/models/news_article_model.dart',
   ];
 
   for (var filePath in files) {
@@ -20,6 +22,6 @@ void main() {
     );
 
     file.writeAsStringSync(content);
-    print('Processed: $filePath');
+    debugPrint('Processed: $filePath');
   }
 }

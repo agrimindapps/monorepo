@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 
 import 'tables/livestock_tables.dart';
 import 'tables/pluviometer_tables.dart';
@@ -29,12 +30,10 @@ part 'agrihurbi_database.g.dart'; // Será gerado pelo Drift
 ///
 /// // Observar mudanças
 /// db.select(db.bovines).watch().listen((bovines) {
-///   print('Bovines atualizados: ${bovines.length}');
+///   debugPrint('Bovines atualizados: ${bovines.length}');
 /// });
 /// ```
-@DriftDatabase(
-  tables: [Bovines, Equines, RainGauges, RainfallMeasurements],
-)
+@DriftDatabase(tables: [Bovines, Equines, RainGauges, RainfallMeasurements])
 class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
   AgrihurbiDatabase(super.e);
 
@@ -89,21 +88,22 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-          print('✅ Database created with schema version: $schemaVersion');
-        },
-        onUpgrade: (Migrator m, int from, int to) async {
-          print('🔄 Upgrading database from v$from to v$to');
-          // Implementar migrações aqui se necessário no futuro
-        },
-        beforeOpen: (details) async {
-          print(
-              '📝 Database open. Version: ${details.versionBefore} → ${details.versionNow}');
-          // Habilitar foreign keys
-          await customStatement('PRAGMA foreign_keys = ON');
-        },
+    onCreate: (Migrator m) async {
+      await m.createAll();
+      debugPrint('✅ Database created with schema version: $schemaVersion');
+    },
+    onUpgrade: (Migrator m, int from, int to) async {
+      debugPrint('🔄 Upgrading database from v$from to v$to');
+      // Implementar migrações aqui se necessário no futuro
+    },
+    beforeOpen: (details) async {
+      debugPrint(
+        '📝 Database open. Version: ${details.versionBefore} → ${details.versionNow}',
       );
+      // Habilitar foreign keys
+      await customStatement('PRAGMA foreign_keys = ON');
+    },
+  );
 
   // ========== CUSTOM QUERIES & HELPERS ==========
 
@@ -180,7 +180,7 @@ class AgrihurbiDatabase extends _$AgrihurbiDatabase with BaseDriftDatabase {
         }
       });
     } catch (e) {
-      print('❌ Error importing data: $e');
+      debugPrint('❌ Error importing data: $e');
       rethrow;
     }
   }

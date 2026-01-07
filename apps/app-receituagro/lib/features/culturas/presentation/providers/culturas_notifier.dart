@@ -1,4 +1,5 @@
 import 'package:core/core.dart' hide Column;
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/cultura_entity.dart';
@@ -78,7 +79,7 @@ class CulturasNotifier extends _$CulturasNotifier {
 
       result.fold(
         (Failure failure) {
-          print('Erro ao carregar grupos: ${failure.toString()}');
+          debugPrint('Erro ao carregar grupos: ${failure.toString()}');
         },
         (dynamic grupos) {
           final gruposList = grupos is List
@@ -88,7 +89,7 @@ class CulturasNotifier extends _$CulturasNotifier {
         },
       );
     } catch (e) {
-      print('Erro ao carregar grupos: $e');
+      debugPrint('Erro ao carregar grupos: $e');
     }
   }
 
@@ -103,9 +104,7 @@ class CulturasNotifier extends _$CulturasNotifier {
 
     try {
       final getCulturasUseCase = ref.read(getCulturasUseCaseProvider);
-      final result = await getCulturasUseCase.call(
-        SearchCulturasParams(query),
-      );
+      final result = await getCulturasUseCase.call(SearchCulturasParams(query));
 
       result.fold(
         (Failure failure) {

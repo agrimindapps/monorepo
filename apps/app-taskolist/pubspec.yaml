@@ -14,13 +14,6 @@ dependencies:
   core:
     path: ../../packages/core
   
-
-  # Drift - Local database (SQLite-based)
-  
-  # Share functionality
-  
-  # Date formatting
-  
   drift: any
   cloud_firestore: any
   riverpod_annotation: any

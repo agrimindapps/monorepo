@@ -27,65 +27,65 @@ class ListRepository {
   // ==================== CREATE ====================
 
   /// Insere uma nova lista
-  Future<Result<int>> insert(ListsCompanion list) async {
+  Future<Either<Failure, int>> insert(ListsCompanion list) async {
     try {
       final rowsAffected = await _db.into(_db.lists).insert(list);
-      return Result.success(rowsAffected);
+      return Right(rowsAffected);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Upsert (insert or update)
-  Future<Result<int>> upsert(ListsCompanion list) async {
+  Future<Either<Failure, int>> upsert(ListsCompanion list) async {
     try {
       final rowsAffected =
           await _db.into(_db.lists).insertOnConflictUpdate(list);
-      return Result.success(rowsAffected);
+      return Right(rowsAffected);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== READ ====================
 
   /// Busca lista por ID
-  Future<Result<ListRecord?>> getById(String id) async {
+  Future<Either<Failure, ListRecord?>> getById(String id) async {
     try {
       final result = await (_db.select(_db.lists)
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
-      return Result.success(result);
+      return Right(result);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca todas as listas
-  Future<Result<List<ListRecord>>> getAll() async {
+  Future<Either<Failure, List<ListRecord>>> getAll() async {
     try {
       final results = await _db.select(_db.lists).get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca listas do usuário
-  Future<Result<List<ListRecord>>> getByOwner(String ownerId) async {
+  Future<Either<Failure, List<ListRecord>>> getByOwner(String ownerId) async {
     try {
       final results = await (_db.select(_db.lists)
             ..where((t) => t.ownerId.equals(ownerId))
             ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca listas ativas (não arquivadas)
-  Future<Result<List<ListRecord>>> getActiveLists(String ownerId) async {
+  Future<Either<Failure, List<ListRecord>>> getActiveLists(String ownerId) async {
     try {
       final results = await (_db.select(_db.lists)
             ..where(
@@ -93,14 +93,14 @@ class ListRepository {
             )
             ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca listas favoritas
-  Future<Result<List<ListRecord>>> getFavoriteLists(String ownerId) async {
+  Future<Either<Failure, List<ListRecord>>> getFavoriteLists(String ownerId) async {
     try {
       final results = await (_db.select(_db.lists)
             ..where(
@@ -108,14 +108,14 @@ class ListRepository {
             )
             ..orderBy([(t) => OrderingTerm.desc(t.updatedAt)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Busca listas arquivadas
-  Future<Result<List<ListRecord>>> getArchivedLists(String ownerId) async {
+  Future<Either<Failure, List<ListRecord>>> getArchivedLists(String ownerId) async {
     try {
       final results = await (_db.select(_db.lists)
             ..where(
@@ -123,9 +123,9 @@ class ListRepository {
             )
             ..orderBy([(t) => OrderingTerm.desc(t.archivedAt)]))
           .get();
-      return Result.success(results);
+      return Right(results);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
@@ -168,19 +168,19 @@ class ListRepository {
   // ==================== UPDATE ====================
 
   /// Atualiza lista
-  Future<Result<int>> update(String id, ListsCompanion list) async {
+  Future<Either<Failure, int>> update(String id, ListsCompanion list) async {
     try {
       final updated = await (_db.update(_db.lists)
             ..where((t) => t.id.equals(id)))
           .write(list);
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Toggle favorito
-  Future<Result<int>> toggleFavorite(String id, bool isFavorite) async {
+  Future<Either<Failure, int>> toggleFavorite(String id, bool isFavorite) async {
     try {
       final updated = await (_db.update(_db.lists)
             ..where((t) => t.id.equals(id)))
@@ -190,14 +190,14 @@ class ListRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Arquivar lista
-  Future<Result<int>> archive(String id) async {
+  Future<Either<Failure, int>> archive(String id) async {
     try {
       final updated = await (_db.update(_db.lists)
             ..where((t) => t.id.equals(id)))
@@ -208,14 +208,14 @@ class ListRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Desarquivar lista
-  Future<Result<int>> unarchive(String id) async {
+  Future<Either<Failure, int>> unarchive(String id) async {
     try {
       final updated = await (_db.update(_db.lists)
             ..where((t) => t.id.equals(id)))
@@ -226,14 +226,14 @@ class ListRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Atualiza contadores de itens
-  Future<Result<int>> updateItemCounts(
+  Future<Either<Failure, int>> updateItemCounts(
     String id,
     int itemCount,
     int completedCount,
@@ -248,51 +248,51 @@ class ListRepository {
           updatedAt: Value(DateTime.now()),
         ),
       );
-      return Result.success(updated);
+      return Right(updated);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== DELETE ====================
 
   /// Deleta lista
-  Future<Result<int>> delete(String id) async {
+  Future<Either<Failure, int>> delete(String id) async {
     try {
       final deleted =
           await (_db.delete(_db.lists)..where((t) => t.id.equals(id))).go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Deleta todas as listas do usuário
-  Future<Result<int>> deleteAllByOwner(String ownerId) async {
+  Future<Either<Failure, int>> deleteAllByOwner(String ownerId) async {
     try {
       final deleted = await (_db.delete(_db.lists)
             ..where((t) => t.ownerId.equals(ownerId)))
           .go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Limpa todas as listas
-  Future<Result<int>> clear() async {
+  Future<Either<Failure, int>> clear() async {
     try {
       final deleted = await _db.delete(_db.lists).go();
-      return Result.success(deleted);
+      return Right(deleted);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   // ==================== CONTADORES ====================
 
   /// Conta listas do usuário
-  Future<Result<int>> countByOwner(String ownerId) async {
+  Future<Either<Failure, int>> countByOwner(String ownerId) async {
     try {
       final count = _db.lists.id.count();
       final query = _db.selectOnly(_db.lists)
@@ -300,14 +300,14 @@ class ListRepository {
         ..where(_db.lists.ownerId.equals(ownerId));
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
+      return Right(result.read(count) ?? 0);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 
   /// Conta listas ativas
-  Future<Result<int>> countActiveLists(String ownerId) async {
+  Future<Either<Failure, int>> countActiveLists(String ownerId) async {
     try {
       final count = _db.lists.id.count();
       final query = _db.selectOnly(_db.lists)
@@ -318,9 +318,9 @@ class ListRepository {
         );
 
       final result = await query.getSingle();
-      return Result.success(result.read(count) ?? 0);
+      return Right(result.read(count) ?? 0);
     } catch (e, stackTrace) {
-      return Result.error(AppErrorFactory.fromException(e, stackTrace));
+      return Left(AppErrorFactory.fromException(e, stackTrace).toFailure());
     }
   }
 }

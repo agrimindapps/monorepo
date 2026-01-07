@@ -7,6 +7,7 @@ import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
+import '../../../../shared/widgets/responsive_input_row.dart';
 
 /// Input form for emergency reserve calculation
 class EmergencyReserveInputForm extends StatefulWidget {
@@ -54,103 +55,99 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Monthly Expenses
-          TextFormField(
-            controller: _monthlyExpensesController,
-            decoration: const InputDecoration(
-              labelText: 'Despesas Mensais',
-              prefixText: 'R\$ ',
-              border: OutlineInputBorder(),
-              helperText: 'Total de gastos fixos e variáveis',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [_currencyFormatter],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe as despesas mensais';
-              }
-              final numericValue = _parseNumericValue(value);
-              if (numericValue <= 0) {
-                return 'Despesas devem ser maior que zero';
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 16),
-
-          // Extra Expenses
-          TextFormField(
-            controller: _extraExpensesController,
-            decoration: const InputDecoration(
-              labelText: 'Despesas Extras (opcional)',
-              prefixText: 'R\$ ',
-              border: OutlineInputBorder(),
-              helperText: 'Custos eventuais ou sazonais',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [_currencyFormatter],
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
-                final numericValue = _parseNumericValue(value);
-                if (numericValue < 0) {
-                  return 'Valor não pode ser negativo';
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _monthlyExpensesController,
+              decoration: const InputDecoration(
+                labelText: 'Despesas Mensais',
+                prefixText: 'R\$ ',
+                border: OutlineInputBorder(),
+                helperText: 'Total de gastos fixos e variáveis',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [_currencyFormatter],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe as despesas mensais';
                 }
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 16),
-
-          // Desired Months
-          TextFormField(
-            controller: _desiredMonthsController,
-            decoration: const InputDecoration(
-              labelText: 'Meses de Cobertura',
-              border: OutlineInputBorder(),
-              helperText: 'Recomendado: 6 a 12 meses',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Informe o número de meses';
-              }
-              final months = int.tryParse(value) ?? 0;
-              if (months <= 0) {
-                return 'Meses deve ser maior que zero';
-              }
-              if (months > 120) {
-                return 'Máximo 120 meses (10 anos)';
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
-          ),
-          const SizedBox(height: 16),
-
-          // Monthly Savings
-          TextFormField(
-            controller: _monthlySavingsController,
-            decoration: const InputDecoration(
-              labelText: 'Poupança Mensal (opcional)',
-              prefixText: 'R\$ ',
-              border: OutlineInputBorder(),
-              helperText: 'Quanto pode poupar por mês',
-            ),
-            keyboardType: TextInputType.number,
-            inputFormatters: [_currencyFormatter],
-            validator: (value) {
-              if (value != null && value.isNotEmpty) {
                 final numericValue = _parseNumericValue(value);
-                if (numericValue < 0) {
-                  return 'Valor não pode ser negativo';
+                if (numericValue <= 0) {
+                  return 'Despesas devem ser maior que zero';
                 }
-              }
-              return null;
-            },
-            onSaved: (_) => _submitForm(),
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
+            right: TextFormField(
+              controller: _extraExpensesController,
+              decoration: const InputDecoration(
+                labelText: 'Despesas Extras (opcional)',
+                prefixText: 'R\$ ',
+                border: OutlineInputBorder(),
+                helperText: 'Custos eventuais ou sazonais',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [_currencyFormatter],
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final numericValue = _parseNumericValue(value);
+                  if (numericValue < 0) {
+                    return 'Valor não pode ser negativo';
+                  }
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          ResponsiveInputRow(
+            left: TextFormField(
+              controller: _desiredMonthsController,
+              decoration: const InputDecoration(
+                labelText: 'Meses de Cobertura',
+                border: OutlineInputBorder(),
+                helperText: 'Recomendado: 6 a 12 meses',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Informe o número de meses';
+                }
+                final months = int.tryParse(value) ?? 0;
+                if (months <= 0) {
+                  return 'Meses deve ser maior que zero';
+                }
+                if (months > 120) {
+                  return 'Máximo 120 meses (10 anos)';
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
+            right: TextFormField(
+              controller: _monthlySavingsController,
+              decoration: const InputDecoration(
+                labelText: 'Poupança Mensal (opcional)',
+                prefixText: 'R\$ ',
+                border: OutlineInputBorder(),
+                helperText: 'Quanto pode poupar por mês',
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [_currencyFormatter],
+              validator: (value) {
+                if (value != null && value.isNotEmpty) {
+                  final numericValue = _parseNumericValue(value);
+                  if (numericValue < 0) {
+                    return 'Valor não pode ser negativo';
+                  }
+                }
+                return null;
+              },
+              onSaved: (_) => _submitForm(),
+            ),
           ),
         ],
       ),
@@ -163,7 +160,15 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
   }
 
   void _submitForm() {
-    if (!widget.formKey.currentState!.validate()) return;
+    if (!widget.formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha os campos obrigatórios'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
     final params = CalculateEmergencyReserveParams(
       monthlyExpenses: _parseNumericValue(_monthlyExpensesController.text),

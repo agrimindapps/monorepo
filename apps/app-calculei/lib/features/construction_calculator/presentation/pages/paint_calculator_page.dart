@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../providers/paint_calculator_provider.dart';
+import '../widgets/paint_result_card.dart';
 
 /// Paint calculator page
 class PaintCalculatorPage extends ConsumerStatefulWidget {
@@ -122,15 +124,12 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
                               runSpacing: 16,
                               children: [
                                 SizedBox(
-                                  width: 200,
-                                  child: TextFormField(
+                                  width: 250,
+                                  child: StandardInputField(
+                                    label: 'Área das Paredes',
                                     controller: _wallAreaController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Área das Paredes',
-                                      suffixText: 'm²',
-                                      border: OutlineInputBorder(),
-                                      helperText: 'Soma de todas as paredes',
-                                    ),
+                                    suffix: 'm²',
+                                    helperText: 'Soma de todas as paredes',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -148,15 +147,12 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 200,
-                                  child: TextFormField(
+                                  width: 250,
+                                  child: StandardInputField(
+                                    label: 'Área de Aberturas',
                                     controller: _openingsAreaController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Área de Aberturas',
-                                      suffixText: 'm²',
-                                      border: OutlineInputBorder(),
-                                      helperText: 'Portas e janelas',
-                                    ),
+                                    suffix: 'm²',
+                                    helperText: 'Portas e janelas',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -193,7 +189,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
                                 SizedBox(
                                   width: 200,
                                   child: DropdownButtonFormField<String>(
-                                    value: _paintType,
+                                    initialValue: _paintType,
                                     decoration: const InputDecoration(
                                       labelText: 'Tipo de Tinta',
                                       border: OutlineInputBorder(),
@@ -214,7 +210,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
                                 SizedBox(
                                   width: 150,
                                   child: DropdownButtonFormField<int>(
-                                    value: _coats,
+                                    initialValue: _coats,
                                     decoration: const InputDecoration(
                                       labelText: 'Demãos',
                                       border: OutlineInputBorder(),
@@ -237,13 +233,10 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
 
                             const SizedBox(height: 24),
 
-                            FilledButton.icon(
+                            CalculatorButton(
+                              label: 'Calcular',
+                              icon: Icons.calculate,
                               onPressed: _calculate,
-                              icon: const Icon(Icons.calculate),
-                              label: const Text('Calcular'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.all(16),
-                              ),
                             ),
                           ],
                         ),
@@ -255,7 +248,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
 
                   // Result Card
                   if (calculation.id.isNotEmpty) ...[
-                    _PaintResultCard(calculation: calculation),
+                    PaintResultCard(calculation: calculation),
                   ],
                 ],
               ),
@@ -303,199 +296,5 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
         );
       }
     }
-  }
-}
-
-class _PaintResultCard extends StatelessWidget {
-  final dynamic calculation;
-
-  const _PaintResultCard({required this.calculation});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // Main result highlight
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Total de Tinta',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${calculation.paintLiters.toStringAsFixed(1)} litros',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Recommended option
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.thumb_up, color: Colors.green),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Recomendado',
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          calculation.recommendedOption,
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Details
-            Text(
-              'Detalhes',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            _DetailRow(
-              label: 'Área das paredes',
-              value: '${calculation.wallArea.toStringAsFixed(1)} m²',
-            ),
-            _DetailRow(
-              label: 'Área de aberturas',
-              value: '${calculation.openingsArea.toStringAsFixed(1)} m²',
-            ),
-            _DetailRow(
-              label: 'Área líquida',
-              value: '${calculation.netArea.toStringAsFixed(1)} m²',
-            ),
-            _DetailRow(
-              label: 'Tipo de tinta',
-              value: calculation.paintType,
-            ),
-            _DetailRow(
-              label: 'Demãos',
-              value: '${calculation.coats}',
-            ),
-            _DetailRow(
-              label: 'Rendimento',
-              value: '${calculation.paintYield.toStringAsFixed(0)} m²/L',
-            ),
-
-            const SizedBox(height: 16),
-
-            // Note
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Latas disponíveis: 3,6L e 18L. O cálculo otimiza para menor desperdício.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
@@ -6,6 +7,10 @@ import '../providers/memory_game_notifier.dart';
 import '../widgets/game_stats_widget.dart';
 import '../widgets/memory_grid_widget.dart';
 import '../widgets/victory_dialog.dart';
+import '../../../../widgets/shared/responsive_game_container.dart';
+
+import '../../data/repositories/deck_repository.dart';
+import '../../domain/entities/deck_configuration.dart';
 
 class MemoryGamePage extends ConsumerStatefulWidget {
   const MemoryGamePage({super.key});
@@ -51,6 +56,11 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
               onPressed: () => notifier.togglePause(),
             ),
           IconButton(
+            icon: const Icon(Icons.style), // Card deck icon
+            tooltip: 'Trocar Baralho',
+            onPressed: () => _showDeckSelectionDialog(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () => notifier.restartGame(),
           ),
@@ -77,14 +87,17 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            GameStatsWidget(gameState: gameState),
-            const SizedBox(height: 16),
-            Expanded(
-              child: _buildGameContent(gameState, notifier),
-            ),
-          ],
+        child: ResponsiveGameContainer(
+          maxWidth: 900,
+          child: Column(
+            children: [
+              GameStatsWidget(gameState: gameState),
+              const SizedBox(height: 16),
+              Expanded(
+                child: _buildGameContent(gameState, notifier),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -145,11 +158,15 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
     return MemoryGridWidget(
       cards: gameState.cards,
       gridSize: gameState.difficulty.gridSize,
-      onCardTap: (cardId) => notifier.flipCard(cardId),
+      onCardTap: (cardId) {
+        HapticFeedback.lightImpact();
+        notifier.flipCard(cardId);
+      },
     );
   }
 
   void _showVictoryDialog(BuildContext context) {
+    HapticFeedback.heavyImpact(); // Celebration feedback
     final gameState = ref.read(memoryGameProvider);
     final notifier = ref.read(memoryGameProvider.notifier);
 
@@ -168,6 +185,42 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
           Navigator.of(context).pop();
           _showDifficultyDialog(context);
         },
+      ),
+    );
+  }
+
+  void _showDeckSelectionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Escolha o Baralho'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.grid_view, color: Colors.blue),
+                title: const Text('Clássico (Ícones)'),
+                subtitle: const Text('Padrão do jogo'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  ref.read(memoryGameProvider.notifier).changeDeck(null);
+                },
+              ),
+              const Divider(),
+              ...DeckRepository.availableDecks.map((deck) => ListTile(
+                    leading: const Icon(Icons.image, color: Colors.green),
+                    title: Text(deck.name),
+                    subtitle: Text('${deck.totalSprites} imagens'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      ref.read(memoryGameProvider.notifier).changeDeck(deck);
+                    },
+                  )),
+            ],
+          ),
+        ),
       ),
     );
   }

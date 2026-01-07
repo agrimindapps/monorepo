@@ -37,6 +37,15 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
   late double aiSpeed;
   late double ballSpeed;
 
+  // Track elapsed play time
+  double _elapsedSeconds = 0;
+
+  Duration get elapsedDuration =>
+      Duration(milliseconds: (_elapsedSeconds * 1000).round());
+
+  // Key state for smooth movement
+  final Set<LogicalKeyboardKey> _pressedKeys = {};
+
   @override
   Future<void> onLoad() async {
     // Set difficulty parameters
@@ -94,6 +103,18 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
     super.update(dt);
     
     if (!isPlaying || isGameOver) return;
+
+    _elapsedSeconds += dt;
+
+    // Handle Keyboard Input (Smooth Movement)
+    if (_pressedKeys.contains(LogicalKeyboardKey.arrowUp) || 
+        _pressedKeys.contains(LogicalKeyboardKey.keyW)) {
+      playerPaddle.moveUp(dt, 400);
+    }
+    if (_pressedKeys.contains(LogicalKeyboardKey.arrowDown) || 
+        _pressedKeys.contains(LogicalKeyboardKey.keyS)) {
+      playerPaddle.moveDown(dt, 400);
+    }
     
     // AI Logic
     _updateAI(dt);
@@ -103,12 +124,14 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
       // AI scored
       aiScore++;
       if (onAiScoreChanged != null) onAiScoreChanged!(aiScore);
+      HapticFeedback.mediumImpact();
       _resetBall(servingPlayer: true);
       _checkWinCondition();
     } else if (ball.position.x > size.x) {
       // Player scored
       playerScore++;
       if (onPlayerScoreChanged != null) onPlayerScoreChanged!(playerScore);
+      HapticFeedback.mediumImpact();
       _resetBall(servingPlayer: false);
       _checkWinCondition();
     }
@@ -135,21 +158,15 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
   
   void _checkWinCondition() {
     if (playerScore >= 11 || aiScore >= 11) {
+      HapticFeedback.heavyImpact();
       gameOver();
     }
   }
 
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowUp || event.logicalKey == LogicalKeyboardKey.keyW) {
-        playerPaddle.moveUp(0.1, 400); // Manual move for keyboard
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowDown || event.logicalKey == LogicalKeyboardKey.keyS) {
-        playerPaddle.moveDown(0.1, 400);
-      }
-    }
-    
-    // Continuous movement handling would be better in update() checking keysPressed
+    _pressedKeys.clear();
+    _pressedKeys.addAll(keysPressed);
     return KeyEventResult.handled;
   }
   
@@ -190,6 +207,7 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
     aiScore = 0;
     isGameOver = false;
     isPlaying = false;
+    _elapsedSeconds = 0;
     
     if (onPlayerScoreChanged != null) onPlayerScoreChanged!(0);
     if (onAiScoreChanged != null) onAiScoreChanged!(0);

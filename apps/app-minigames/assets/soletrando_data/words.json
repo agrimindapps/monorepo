@@ -1,0 +1,60 @@
+{
+  "categories": {
+    "fruits": [
+      {"word": "BANANA", "definition": "Fruta amarela alongada", "example": "Banana nanica"},
+      {"word": "LARANJA", "definition": "Fruta cítrica alaranjada", "example": "Suco de laranja"},
+      {"word": "ABACAXI", "definition": "Fruta tropical espinhosa", "example": "Abacaxi maduro"},
+      {"word": "MORANGO", "definition": "Fruta vermelha pequena", "example": "Morango com chantilly"},
+      {"word": "MANGA", "definition": "Fruta tropical amarela", "example": "Manga palmer"},
+      {"word": "MELANCIA", "definition": "Fruta grande e verde com polpa vermelha", "example": "Melancia gelada"},
+      {"word": "GOIABA", "definition": "Fruta tropical rosada", "example": "Goiabada cascão"},
+      {"word": "UVA", "definition": "Fruta pequena em cachos", "example": "Uva passa"},
+      {"word": "MAÇÃ", "definition": "Fruta vermelha redonda", "example": "Maçã verde"},
+      {"word": "PERA", "definition": "Fruta em formato de sino", "example": "Pera williams"},
+      {"word": "MAMÃO", "definition": "Fruta tropical alaranjada", "example": "Mamão papaia"},
+      {"word": "ABACATE", "definition": "Fruta verde cremosa", "example": "Vitamina de abacate"}
+    ],
+    "animals": [
+      {"word": "CACHORRO", "definition": "Animal doméstico canino", "example": "Melhor amigo do homem"},
+      {"word": "ELEFANTE", "definition": "Grande mamífero com tromba", "example": "Elefante africano"},
+      {"word": "GIRAFA", "definition": "Animal de pescoço longo", "example": "Girafa da savana"},
+      {"word": "LEOPARDO", "definition": "Felino manchado", "example": "Leopardo caçando"},
+      {"word": "PAPAGAIO", "definition": "Ave colorida que fala", "example": "Papagaio brasileiro"},
+      {"word": "GATO", "definition": "Felino doméstico", "example": "Gato siamês"},
+      {"word": "LEÃO", "definition": "Rei da selva", "example": "Leão africano"},
+      {"word": "TIGRE", "definition": "Felino listrado", "example": "Tigre de bengala"},
+      {"word": "COELHO", "definition": "Animal de orelhas longas", "example": "Coelho branco"},
+      {"word": "TARTARUGA", "definition": "Réptil com casco", "example": "Tartaruga marinha"},
+      {"word": "BALEIA", "definition": "Maior mamífero marinho", "example": "Baleia azul"},
+      {"word": "PINGUIM", "definition": "Ave que não voa do polo sul", "example": "Pinguim imperador"}
+    ],
+    "countries": [
+      {"word": "BRASIL", "definition": "Maior país da América do Sul", "example": "País do futebol"},
+      {"word": "ITÁLIA", "definition": "País em formato de bota", "example": "Terra da pizza"},
+      {"word": "ARGENTINA", "definition": "País sul-americano", "example": "Terra do tango"},
+      {"word": "PORTUGAL", "definition": "País europeu", "example": "Terra dos navegadores"},
+      {"word": "ESPANHA", "definition": "País da península ibérica", "example": "Terra do flamenco"},
+      {"word": "FRANÇA", "definition": "País europeu", "example": "Terra da Torre Eiffel"},
+      {"word": "ALEMANHA", "definition": "País da Europa central", "example": "Terra das cervejas"},
+      {"word": "JAPÃO", "definition": "País insular asiático", "example": "Terra do sol nascente"},
+      {"word": "CHINA", "definition": "País asiático mais populoso", "example": "Terra da Grande Muralha"},
+      {"word": "MÉXICO", "definition": "País norte-americano", "example": "Terra dos astecas"},
+      {"word": "PERU", "definition": "País sul-americano", "example": "Terra dos incas"},
+      {"word": "CHILE", "definition": "País alongado na América do Sul", "example": "Terra dos vinhos"}
+    ],
+    "professions": [
+      {"word": "MÉDICO", "definition": "Profissional da saúde", "example": "Médico cirurgião"},
+      {"word": "ENGENHEIRO", "definition": "Profissional de obras e projetos", "example": "Engenheiro civil"},
+      {"word": "PROFESSOR", "definition": "Profissional da educação", "example": "Professor universitário"},
+      {"word": "BOMBEIRO", "definition": "Combate incêndios", "example": "Bombeiro militar"},
+      {"word": "DESIGNER", "definition": "Profissional criativo", "example": "Designer gráfico"},
+      {"word": "ADVOGADO", "definition": "Profissional do direito", "example": "Advogado criminalista"},
+      {"word": "DENTISTA", "definition": "Cuida dos dentes", "example": "Dentista ortodontista"},
+      {"word": "ARQUITETO", "definition": "Projeta construções", "example": "Arquiteto paisagista"},
+      {"word": "ENFERMEIRO", "definition": "Profissional de enfermagem", "example": "Enfermeiro chefe"},
+      {"word": "POLICIAL", "definition": "Mantém a ordem pública", "example": "Policial militar"},
+      {"word": "JORNALISTA", "definition": "Profissional da comunicação", "example": "Jornalista investigativo"},
+      {"word": "VETERINÁRIO", "definition": "Cuida de animais", "example": "Veterinário de pequenos animais"}
+    ]
+  }
+}

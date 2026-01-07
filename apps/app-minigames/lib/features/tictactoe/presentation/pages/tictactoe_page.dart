@@ -4,6 +4,7 @@ import '../providers/tictactoe_game_notifier.dart';
 import '../widgets/game_board_widget.dart';
 import '../widgets/game_controls_widget.dart';
 import '../widgets/game_stats_widget.dart';
+import '../../../../widgets/shared/responsive_game_container.dart';
 
 /// Main page for TicTacToe game
 /// Uses Riverpod for state management
@@ -46,16 +47,14 @@ class TicTacToePage extends ConsumerWidget {
         ),
         child: gameState.when(
           data: (state) => SafeArea(
-            child: Center(
+            child: ResponsiveGameContainer(
+              // TicTacToe works best with a narrower layout
+              maxWidth: 500,
               child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 500),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Game Controls Card
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Game Controls Card
                         Card(
                           elevation: 8,
                           shape: RoundedRectangleBorder(
@@ -211,14 +210,13 @@ class TicTacToePage extends ConsumerWidget {
                               },
                             ),
                           ),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
           loading: () => const Center(
             child: CircularProgressIndicator(color: Colors.white),
           ),

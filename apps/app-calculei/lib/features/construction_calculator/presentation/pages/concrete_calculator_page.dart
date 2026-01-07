@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../providers/concrete_calculator_provider.dart';
+import '../widgets/concrete_result_card.dart';
 
 /// Concrete calculator page
 class ConcreteCalculatorPage extends ConsumerStatefulWidget {
@@ -131,14 +133,11 @@ class _ConcreteCalculatorPageState
                               runSpacing: 16,
                               children: [
                                 SizedBox(
-                                  width: 150,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Comprimento',
                                     controller: _lengthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Comprimento',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -156,14 +155,11 @@ class _ConcreteCalculatorPageState
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Largura',
                                     controller: _widthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Largura',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -181,14 +177,11 @@ class _ConcreteCalculatorPageState
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Altura/Espessura',
                                     controller: _heightController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Altura/Espessura',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -226,7 +219,7 @@ class _ConcreteCalculatorPageState
                                 SizedBox(
                                   width: 200,
                                   child: DropdownButtonFormField<String>(
-                                    value: _concreteType,
+                                    initialValue: _concreteType,
                                     decoration: const InputDecoration(
                                       labelText: 'Tipo',
                                       border: OutlineInputBorder(),
@@ -247,7 +240,7 @@ class _ConcreteCalculatorPageState
                                 SizedBox(
                                   width: 200,
                                   child: DropdownButtonFormField<String>(
-                                    value: _concreteStrength,
+                                    initialValue: _concreteStrength,
                                     decoration: const InputDecoration(
                                       labelText: 'Resistência',
                                       border: OutlineInputBorder(),
@@ -271,13 +264,10 @@ class _ConcreteCalculatorPageState
                             const SizedBox(height: 24),
 
                             // Calculate Button
-                            FilledButton.icon(
+                            CalculatorButton(
+                              label: 'Calcular',
+                              icon: Icons.calculate,
                               onPressed: _calculate,
-                              icon: const Icon(Icons.calculate),
-                              label: const Text('Calcular'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.all(16),
-                              ),
                             ),
                           ],
                         ),
@@ -289,7 +279,7 @@ class _ConcreteCalculatorPageState
 
                   // Result Card
                   if (calculation.id.isNotEmpty) ...[
-                    _ConcreteResultCard(calculation: calculation),
+                    ConcreteResultCard(calculation: calculation),
                   ],
                 ],
               ),
@@ -338,201 +328,5 @@ class _ConcreteCalculatorPageState
         );
       }
     }
-  }
-}
-
-class _ConcreteResultCard extends StatelessWidget {
-  final dynamic calculation;
-
-  const _ConcreteResultCard({required this.calculation});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // Volume highlight
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Volume Total',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${calculation.volume.toStringAsFixed(2)} m³',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            Text(
-              'Materiais Necessários',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Materials Grid
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                _MaterialItem(
-                  icon: Icons.inventory_2,
-                  label: 'Cimento',
-                  value: '${calculation.cementBags}',
-                  unit: 'sacos (50kg)',
-                  color: Colors.grey,
-                ),
-                _MaterialItem(
-                  icon: Icons.grain,
-                  label: 'Areia',
-                  value: calculation.sandCubicMeters.toStringAsFixed(2),
-                  unit: 'm³',
-                  color: Colors.amber,
-                ),
-                _MaterialItem(
-                  icon: Icons.circle,
-                  label: 'Brita',
-                  value: calculation.gravelCubicMeters.toStringAsFixed(2),
-                  unit: 'm³',
-                  color: Colors.blueGrey,
-                ),
-                _MaterialItem(
-                  icon: Icons.water_drop,
-                  label: 'Água',
-                  value: calculation.waterLiters.toStringAsFixed(0),
-                  unit: 'litros',
-                  color: Colors.blue,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Info
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 20,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Concreto ${calculation.concreteType} - ${calculation.concreteStrength}',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MaterialItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-
-  const _MaterialItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            unit,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

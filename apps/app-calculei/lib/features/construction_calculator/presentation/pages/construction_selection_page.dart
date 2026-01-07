@@ -138,28 +138,28 @@ class ConstructionCalculatorSelectionPage extends StatelessWidget {
   }
 
   static final List<_CalculatorInfo> _calculators = [
-    _CalculatorInfo(
+    const _CalculatorInfo(
       title: 'Concreto',
       description: 'Volume e materiais',
       icon: Icons.layers,
       color: Colors.grey,
       route: '/calculators/construction/concrete',
     ),
-    _CalculatorInfo(
+    const _CalculatorInfo(
       title: 'Tinta',
       description: 'Litros necessários',
       icon: Icons.format_paint,
       color: Colors.orange,
       route: '/calculators/construction/paint',
     ),
-    _CalculatorInfo(
+    const _CalculatorInfo(
       title: 'Piso',
       description: 'Peças e caixas',
       icon: Icons.grid_on,
       color: Colors.brown,
       route: '/calculators/construction/flooring',
     ),
-    _CalculatorInfo(
+    const _CalculatorInfo(
       title: 'Tijolos',
       description: 'Unidades e argamassa',
       icon: Icons.crop_square,

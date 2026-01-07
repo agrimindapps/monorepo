@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../widgets/appbar_widget.dart';
+import '../../../../widgets/shared/responsive_game_container.dart';
 import '../../domain/entities/enums.dart';
 import '../providers/caca_palavra_game_notifier.dart';
 import '../widgets/word_grid_widget.dart';
@@ -25,52 +26,56 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
 
     return Scaffold(
       body: SafeArea(
-        child: gameStateAsync.when(
-          data: (gameState) {
-            // Show victory dialog when game completes
-            if (gameState.isCompleted && !_hasShownVictoryDialog) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _showVictoryDialog(context, gameState);
-              });
-            }
+        child: ResponsiveGameContainer(
+          maxWidth: 900,
+          padding: EdgeInsets.zero,
+          child: gameStateAsync.when(
+            data: (gameState) {
+              // Show victory dialog when game completes
+              if (gameState.isCompleted && !_hasShownVictoryDialog) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  _showVictoryDialog(context, gameState);
+                });
+              }
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final isLandscape =
-                    MediaQuery.of(context).orientation == Orientation.landscape;
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final isLandscape =
+                      MediaQuery.of(context).orientation == Orientation.landscape;
 
-                if (isLandscape) {
-                  return _buildLandscapeLayout(
-                    context,
-                    gameState,
-                    highScoreAsync,
-                  );
-                } else {
-                  return _buildPortraitLayout(
-                    context,
-                    gameState,
-                    highScoreAsync,
-                  );
-                }
-              },
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                const SizedBox(height: 16),
-                Text('Erro: ${error.toString()}'),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref.invalidate(cacaPalavraGameProvider);
-                  },
-                  child: const Text('Tentar Novamente'),
-                ),
-              ],
+                  if (isLandscape) {
+                    return _buildLandscapeLayout(
+                      context,
+                      gameState,
+                      highScoreAsync,
+                    );
+                  } else {
+                    return _buildPortraitLayout(
+                      context,
+                      gameState,
+                      highScoreAsync,
+                    );
+                  }
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (error, stack) => Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                  const SizedBox(height: 16),
+                  Text('Erro: ${error.toString()}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      ref.invalidate(cacaPalavraGameProvider);
+                    },
+                    child: const Text('Tentar Novamente'),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -146,11 +151,11 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
           ),
         ),
 
-        const SizedBox(height: 16),
+                const SizedBox(height: 16),
 
-        // Grid
-        Expanded(
-          flex: 3,
+                // Grid
+                Expanded(
+                  flex: 3,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: WordGridWidget(

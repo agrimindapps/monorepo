@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../domain/entities/card_entity.dart';
 import '../../domain/entities/enums.dart';
+import 'sprite_widget.dart';
 
 class MemoryCardWidget extends StatefulWidget {
   final CardEntity card;
@@ -107,6 +108,8 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
   }
 
   Color _getCardColor() {
+    if (widget.card.isSprite) return Colors.white; // Background for sprite
+
     switch (widget.card.state) {
       case CardState.hidden:
         return Colors.blue;
@@ -117,13 +120,15 @@ class _MemoryCardWidgetState extends State<MemoryCardWidget>
     }
   }
 
-  Widget _buildCardContent() {
-    return Center(
-      child: Icon(
-        widget.card.icon,
-        color: Colors.white,
-        size: 30,
+  Widget _buildSpriteContent() {
+    return Padding(
+      padding: const EdgeInsets.all(4.0), // Padding inside the card
+      child: SpriteWidget(
+        assetPath: widget.card.spriteAsset!,
+        sourceRect: widget.card.spriteSource!,
+        fit: BoxFit.contain,
       ),
     );
   }
+}
 }

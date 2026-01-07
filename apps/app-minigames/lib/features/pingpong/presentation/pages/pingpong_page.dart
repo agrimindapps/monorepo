@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
 
 import '../../domain/entities/enums.dart';
+import '../../../../widgets/shared/responsive_game_container.dart';
 import '../widgets/score_display_widget.dart';
 import '../widgets/game_over_dialog.dart';
 import '../game/ping_pong_game.dart';
@@ -52,7 +53,10 @@ class _PingpongPageState extends ConsumerState<PingpongPage> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: !_gameStarted
+        child: ResponsiveGameContainer(
+          maxWidth: 800,
+          padding: EdgeInsets.zero,
+          child: !_gameStarted
             ? _buildMenu()
             : Stack(
                 children: [
@@ -82,7 +86,7 @@ class _PingpongPageState extends ConsumerState<PingpongPage> {
                     GameOverDialog(
                       playerWon: _playerScore > _aiScore,
                       finalScore: _playerScore * 100, // Simplified score
-                      gameDuration: Duration.zero, // TODO: Track duration
+                      gameDuration: _game.elapsedDuration,
                       highScore: null, // TODO: Get high score
                       onPlayAgain: () {
                         _game.restartGame();
@@ -117,6 +121,7 @@ class _PingpongPageState extends ConsumerState<PingpongPage> {
                   ),
                 ],
               ),
+        ),
       ),
     );
   }

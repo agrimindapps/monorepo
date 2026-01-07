@@ -20,6 +20,7 @@ class CheckMatchUseCase {
       bool isMatch = card1.matches(card2);
 
       if (isMatch) {
+        // Update both cards to matched state
         for (int i = 0; i < updatedCards.length; i++) {
           if (updatedCards[i].id == card1.id ||
               updatedCards[i].id == card2.id) {
@@ -37,13 +38,14 @@ class CheckMatchUseCase {
         return Right(
           currentState.copyWith(
             cards: updatedCards,
-            flippedCards: [],
+            flippedCards: [], // Clear flipped list
             matches: newMatches,
             moves: currentState.moves + 1,
             status: newStatus,
           ),
         );
       } else {
+        // NO MATCH: Reset cards to hidden
         for (int i = 0; i < updatedCards.length; i++) {
           if (updatedCards[i].id == card1.id ||
               updatedCards[i].id == card2.id) {
@@ -56,7 +58,7 @@ class CheckMatchUseCase {
         return Right(
           currentState.copyWith(
             cards: updatedCards,
-            flippedCards: [],
+            flippedCards: [], // Clear flipped list
             moves: currentState.moves + 1,
           ),
         );

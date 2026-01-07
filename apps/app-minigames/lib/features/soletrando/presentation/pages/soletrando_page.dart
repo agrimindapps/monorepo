@@ -8,6 +8,8 @@ import '../widgets/letter_keyboard_widget.dart';
 import '../widgets/victory_dialog.dart';
 import '../widgets/word_display_widget.dart';
 
+import '../../../../widgets/shared/responsive_game_container.dart';
+
 /// Main page for Soletrando spelling game
 class SoletrandoPage extends ConsumerStatefulWidget {
   const SoletrandoPage({super.key});
@@ -176,9 +178,12 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
                     ],
                   ),
                 )
-              : SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
+              : SafeArea(
+                  child: ResponsiveGameContainer(
+                    maxWidth: 800,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
                     children: [
                       // Game stats
                       GameStatsWidget(gameState: gameState),
@@ -210,6 +215,8 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
                     ],
                   ),
                 ),
+              ),
+            ),
     );
   }
 }

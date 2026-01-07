@@ -1,0 +1,35 @@
+{
+  "category": "Flutter & Dart",
+  "questions": [
+    {
+      "id": 1,
+      "question": "SDK de código aberto criado pelo Google para desenvolvimento de aplicativos multiplataforma",
+      "correctAnswer": "Flutter",
+      "options": ["Flutter", "React", "Angular", "Vue"]
+    },
+    {
+      "id": 2,
+      "question": "Elementos básicos de construção de interfaces no Flutter, tudo é um...",
+      "correctAnswer": "Widget",
+      "options": ["Widget", "Component", "Element", "View"]
+    },
+    {
+      "id": 3,
+      "question": "Método usado para atualizar o estado de um widget e reconstruir a interface",
+      "correctAnswer": "setState",
+      "options": ["setState", "updateUI", "refresh", "rebuild"]
+    },
+    {
+      "id": 4,
+      "question": "Qual linguagem de programação é utilizada pelo Flutter?",
+      "correctAnswer": "Dart",
+      "options": ["Dart", "Java", "Kotlin", "Swift"]
+    },
+    {
+      "id": 5,
+      "question": "Widget usado para criar uma lista com rolagem infinita ou eficiente",
+      "correctAnswer": "ListView.builder",
+      "options": ["ListView.builder", "Column", "SingleChildScrollView", "ListBody"]
+    }
+  ]
+}

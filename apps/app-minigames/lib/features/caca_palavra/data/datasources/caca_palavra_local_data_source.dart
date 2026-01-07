@@ -1,5 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../domain/entities/enums.dart';
 import '../models/high_score_model.dart';
 
@@ -12,8 +13,8 @@ class CacaPalavraLocalDataSource {
 
   CacaPalavraLocalDataSource(this.prefs);
 
-  /// Available words for the game
-  static const List<String> availableWords = [
+  /// Fallback words (used if asset fails to load)
+  static const List<String> _defaultWords = [
     'AMOR',
     'VIDA',
     'PAZ',
@@ -84,7 +85,14 @@ class CacaPalavraLocalDataSource {
 
   /// Gets list of available words
   Future<List<String>> getAvailableWords() async {
-    return List<String>.from(availableWords);
+    try {
+      final jsonString =
+          await rootBundle.loadString('assets/caca_palavra_data/words.json');
+      final decoded = jsonDecode(jsonString) as List<dynamic>;
+      return decoded.map((e) => e.toString().toUpperCase()).toList();
+    } catch (_) {
+      return List<String>.from(_defaultWords);
+    }
   }
 
   /// Saves difficulty preference

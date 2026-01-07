@@ -88,9 +88,6 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
     // Haptic feedback for selection
     HapticFeedback.selectionClick();
 
-    if (!_isMounted) return;
-    state = const AsyncValue.loading();
-
     // Select cell
     final selectCellUseCase = ref.read(selectCellUseCaseProvider);
     final selectResult = selectCellUseCase(

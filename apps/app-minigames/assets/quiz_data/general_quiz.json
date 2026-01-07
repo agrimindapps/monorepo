@@ -1,0 +1,35 @@
+{
+  "category": "Conhecimentos Gerais",
+  "questions": [
+    {
+      "id": 101,
+      "question": "Qual é o maior planeta do Sistema Solar?",
+      "correctAnswer": "Júpiter",
+      "options": ["Júpiter", "Saturno", "Terra", "Marte"]
+    },
+    {
+      "id": 102,
+      "question": "Quem pintou a Mona Lisa?",
+      "correctAnswer": "Leonardo da Vinci",
+      "options": ["Leonardo da Vinci", "Michelangelo", "Van Gogh", "Picasso"]
+    },
+    {
+      "id": 103,
+      "question": "Qual é o elemento químico com símbolo 'O'?",
+      "correctAnswer": "Oxigênio",
+      "options": ["Oxigênio", "Ouro", "Ósmio", "Prata"]
+    },
+    {
+      "id": 104,
+      "question": "Em que ano o homem pisou na Lua pela primeira vez?",
+      "correctAnswer": "1969",
+      "options": ["1969", "1959", "1979", "1965"]
+    },
+    {
+      "id": 105,
+      "question": "Qual é a capital da Austrália?",
+      "correctAnswer": "Camberra",
+      "options": ["Camberra", "Sydney", "Melbourne", "Perth"]
+    }
+  ]
+}

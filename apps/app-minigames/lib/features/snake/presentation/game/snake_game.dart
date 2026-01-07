@@ -240,6 +240,7 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
     // Check collisions
     if (_checkCollision(newX, newY)) {
+      HapticFeedback.heavyImpact();
       gameOver();
       return;
     }
@@ -308,6 +309,9 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
       if (onScoreChanged != null) {
         onScoreChanged!(score);
       }
+      
+      // Haptic feedback for eating
+      HapticFeedback.lightImpact();
 
       // Speed up slightly (base speed)
       _baseMoveInterval = max(0.05, _baseMoveInterval * 0.98);

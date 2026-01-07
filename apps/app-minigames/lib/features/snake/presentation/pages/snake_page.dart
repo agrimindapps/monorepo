@@ -16,6 +16,7 @@ import '../game/snake_game.dart';
 // Domain imports:
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/power_up.dart';
+import '../../../../widgets/shared/responsive_game_container.dart';
 
 /// Snake game page with Neon Arcade theme
 class SnakePage extends ConsumerStatefulWidget {
@@ -64,8 +65,8 @@ class _SnakePageState extends ConsumerState<SnakePage> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(snakeGameProvider);
     final notifier = ref.read(snakeGameProvider.notifier);
+    final highScore = notifier.highScore;
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212), // Dark background
@@ -129,11 +130,14 @@ class _SnakePageState extends ConsumerState<SnakePage> {
             ],
           ),
         ),
-        child: Stack(
-          children: [
-            GameWidget(
-              game: _game,
-            ),
+        child: ResponsiveGameContainer(
+          maxWidth: 600,
+          padding: EdgeInsets.zero,
+          child: Stack(
+            children: [
+              GameWidget(
+                game: _game,
+              ),
             
             Column(
               children: [
@@ -150,7 +154,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
                         _currentScore.toString(), 
                         Colors.greenAccent,
                       ),
-                      _buildGlassScoreCard('BEST', notifier.highScore.toString(), Colors.amberAccent),
+                      _buildGlassScoreCard('BEST', highScore.toString(), Colors.amberAccent),
                     ],
                   ),
                 ),
@@ -214,7 +218,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
               ),
           ],
         ),
-      ),
+      ),),
     );
   }
 
@@ -390,19 +394,19 @@ class _SnakePageState extends ConsumerState<SnakePage> {
     );
   }
 
-  Widget _buildMobileControls(dynamic notifier) {
+  Widget _buildMobileControls(SnakeGame game) {
     return Column(
       children: [
-        _buildControlButton(Icons.keyboard_arrow_up, () => notifier.changeDirection(Direction.up)),
+        _buildControlButton(Icons.keyboard_arrow_up, () => game.changeDirection(Direction.up)),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildControlButton(Icons.keyboard_arrow_left, () => notifier.changeDirection(Direction.left)),
+            _buildControlButton(Icons.keyboard_arrow_left, () => game.changeDirection(Direction.left)),
             const SizedBox(width: 60),
-            _buildControlButton(Icons.keyboard_arrow_right, () => notifier.changeDirection(Direction.right)),
+            _buildControlButton(Icons.keyboard_arrow_right, () => game.changeDirection(Direction.right)),
           ],
         ),
-        _buildControlButton(Icons.keyboard_arrow_down, () => notifier.changeDirection(Direction.down)),
+        _buildControlButton(Icons.keyboard_arrow_down, () => game.changeDirection(Direction.down)),
       ],
     );
   }

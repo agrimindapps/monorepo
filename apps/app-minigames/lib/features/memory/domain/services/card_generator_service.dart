@@ -4,14 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../entities/card_entity.dart';
 import '../entities/enums.dart';
+import '../entities/deck_configuration.dart';
 
 /// Service responsible for generating memory game cards
-///
-/// Handles:
-/// - Card pair generation
-/// - Theme selection (colors and icons)
-/// - Card shuffling
-/// - Position assignment
 class CardGeneratorService {
   final Random _random;
 
@@ -21,23 +16,25 @@ class CardGeneratorService {
   // Core Methods
   // ============================================================================
 
-  /// Generates a complete set of cards for given difficulty
-  ///
-  /// Creates pairs of cards with matching pairIds, colors, and icons
-  /// Returns shuffled list with assigned positions
-  List<CardEntity> generateCards(GameDifficulty difficulty) {
+  /// Generates a complete set of cards for given difficulty and optional deck config
+  List<CardEntity> generateCards(GameDifficulty difficulty, {DeckConfiguration? deckConfig}) {
     final totalPairs = difficulty.totalPairs;
     final List<CardEntity> cards = [];
 
     // Generate pairs
     for (int i = 0; i < totalPairs; i++) {
-      final theme = selectTheme(i);
-      final pair = createPair(
-        pairId: i,
-        color: theme.color,
-        icon: theme.icon,
-      );
-      cards.addAll(pair);
+      if (deckConfig != null) {
+        final pair = createSpritePair(i, deckConfig);
+        cards.addAll(pair);
+      } else {
+        final theme = selectTheme(i);
+        final pair = createPair(
+          pairId: i,
+          color: theme.color,
+          icon: theme.icon,
+        );
+        cards.addAll(pair);
+      }
     }
 
     // Shuffle cards
@@ -47,7 +44,45 @@ class CardGeneratorService {
     return assignPositions(shuffledCards);
   }
 
-  /// Creates a pair of matching cards
+  /// Creates a pair of cards using Sprite Sheet
+  List<CardEntity> createSpritePair(int pairId, DeckConfiguration config) {
+    // Calculate sprite position in grid
+    // If we need more pairs than available sprites, wrap around
+    final spriteIndex = pairId % config.totalSprites;
+    
+    final col = spriteIndex % config.columns;
+    final row = spriteIndex ~/ config.columns;
+    
+    final sourceRect = Rect.fromLTWH(
+      col * config.spriteWidth.toDouble(),
+      row * config.spriteHeight.toDouble(),
+      config.spriteWidth.toDouble(),
+      config.spriteHeight.toDouble(),
+    );
+
+    return [
+      CardEntity(
+        id: 'card_${pairId * 2}',
+        pairId: pairId,
+        color: Colors.white, // Default base color
+        icon: null,
+        spriteAsset: config.assetPath,
+        spriteSource: sourceRect,
+        position: pairId * 2,
+      ),
+      CardEntity(
+        id: 'card_${pairId * 2 + 1}',
+        pairId: pairId,
+        color: Colors.white,
+        icon: null,
+        spriteAsset: config.assetPath,
+        spriteSource: sourceRect,
+        position: pairId * 2 + 1,
+      ),
+    ];
+  }
+
+  /// Creates a pair of matching cards (Standard Icon Mode)
   List<CardEntity> createPair({
     required int pairId,
     required Color color,

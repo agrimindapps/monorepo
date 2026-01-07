@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/game_state.dart';
@@ -126,10 +127,21 @@ class TicTacToeGameNotifier extends _$TicTacToeGameNotifier {
             // Announce move for accessibility
             _announceMove(row, col, currentState.currentPlayer);
 
+            // Haptic feedback for move
+            HapticFeedback.lightImpact();
+
+
             // If game ended, handle end-game logic
             if (!finalState.isInProgress) {
               await _handleGameEnd(finalState);
               _announceGameResult(finalState);
+              
+              // Haptic feedback for game end
+              if (finalState.result == GameResult.xWins || finalState.result == GameResult.oWins) {
+                 HapticFeedback.heavyImpact();
+              } else {
+                 HapticFeedback.mediumImpact();
+              }
             } else if (finalState.gameMode == GameMode.vsComputer) {
               // Schedule AI move
               _scheduleAIMove();

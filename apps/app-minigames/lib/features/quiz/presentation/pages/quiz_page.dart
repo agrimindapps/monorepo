@@ -1,11 +1,9 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-
-// Package imports:
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// Presentation imports:
 import '../providers/quiz_game_notifier.dart';
+import '../../../../widgets/shared/responsive_game_container.dart';
 
 /// Quiz game page
 class QuizPage extends ConsumerWidget {
@@ -41,9 +39,11 @@ class QuizPage extends ConsumerWidget {
             return const Center(child: Text('Nenhuma questão disponível'));
           }
 
-          return Column(
-            children: [
-              // Header
+          return ResponsiveGameContainer(
+            maxWidth: 800, // Wider than TicTacToe but limited for readability
+            child: Column(
+              children: [
+                // Header
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Row(
@@ -95,7 +95,7 @@ class QuizPage extends ConsumerWidget {
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
-                    childAspectRatio: 2,
+                    childAspectRatio: 2.5,
                   ),
                   itemCount: question.options.length,
                   itemBuilder: (context, index) {
@@ -104,27 +104,38 @@ class QuizPage extends ConsumerWidget {
 
                     if (state.currentAnswerState.isCorrect && option == question.correctAnswer) {
                       buttonColor = Colors.green;
-                    } else if (state.currentAnswerState.isIncorrect && option == question.correctAnswer) {
-                      buttonColor = Colors.green;
+                    } else if (state.currentAnswerState.isIncorrect) {
+                      if (option == question.correctAnswer) {
+                        buttonColor = Colors.green;
+                      } else if (state.selectedAnswer == option) {
+                        buttonColor = Colors.red;
+                      }
                     }
 
                     return ElevatedButton(
                       onPressed: state.currentAnswerState.isNone
-                          ? () => notifier.selectAnswer(option)
+                          ? () {
+                              HapticFeedback.selectionClick();
+                              notifier.selectAnswer(option);
+                            }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: buttonColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                       ),
                       child: Text(
                         option,
                         textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     );
                   },
                 ),
               ),
             ],
-          );
+          ),
+        );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(child: Text('Erro: $error')),

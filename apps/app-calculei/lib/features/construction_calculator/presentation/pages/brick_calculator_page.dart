@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../../domain/entities/brick_calculation.dart';
 import '../providers/brick_calculator_provider.dart';
+import '../widgets/brick_result_card.dart';
 
 /// Brick calculator page
 class BrickCalculatorPage extends ConsumerStatefulWidget {
@@ -115,14 +117,11 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
                               runSpacing: 16,
                               children: [
                                 SizedBox(
-                                  width: 180,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Comprimento',
                                     controller: _wallLengthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Comprimento',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -140,14 +139,11 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 180,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Altura',
                                     controller: _wallHeightController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Altura',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -165,15 +161,12 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 180,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Aberturas',
                                     controller: _openingsAreaController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Aberturas',
-                                      suffixText: 'm²',
-                                      border: OutlineInputBorder(),
-                                      helperText: 'Portas/janelas',
-                                    ),
+                                    suffix: 'm²',
+                                    helperText: 'Portas/janelas',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -254,13 +247,10 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
 
                             const SizedBox(height: 24),
 
-                            FilledButton.icon(
+                            CalculatorButton(
+                              label: 'Calcular',
+                              icon: Icons.calculate,
                               onPressed: _calculate,
-                              icon: const Icon(Icons.calculate),
-                              label: const Text('Calcular'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.all(16),
-                              ),
                             ),
                           ],
                         ),
@@ -272,7 +262,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
 
                   // Result Card
                   if (calculation.id.isNotEmpty) ...[
-                    _BrickResultCard(calculation: calculation),
+                    BrickResultCard(calculation: calculation),
                   ],
                 ],
               ),
@@ -321,240 +311,5 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
         );
       }
     }
-  }
-}
-
-class _BrickResultCard extends StatelessWidget {
-  final BrickCalculation calculation;
-
-  const _BrickResultCard({required this.calculation});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // Main result
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'Total de ${calculation.brickType.displayName}',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${calculation.bricksWithWaste}',
-                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                  Text(
-                    'unidades (com ${calculation.wastePercentage.toInt()}% de perda)',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Materials
-            Text(
-              'Materiais para Argamassa',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                _MaterialItem(
-                  icon: Icons.inventory_2,
-                  label: 'Argamassa',
-                  value: '${calculation.mortarBags}',
-                  unit: 'sacos (20kg)',
-                  color: Colors.brown,
-                ),
-                _MaterialItem(
-                  icon: Icons.grain,
-                  label: 'Areia',
-                  value: calculation.sandCubicMeters.toStringAsFixed(2),
-                  unit: 'm³',
-                  color: Colors.amber,
-                ),
-                _MaterialItem(
-                  icon: Icons.inventory,
-                  label: 'Cimento',
-                  value: '${calculation.cementBags}',
-                  unit: 'sacos (50kg)',
-                  color: Colors.grey,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Details
-            Text(
-              'Detalhes',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            _DetailRow(
-              label: 'Área da parede',
-              value: '${calculation.wallArea.toStringAsFixed(1)} m²',
-            ),
-            _DetailRow(
-              label: 'Área de aberturas',
-              value: '${calculation.openingsArea.toStringAsFixed(1)} m²',
-            ),
-            _DetailRow(
-              label: 'Área líquida',
-              value: '${calculation.netArea.toStringAsFixed(1)} m²',
-            ),
-            _DetailRow(
-              label: 'Tijolos (sem perda)',
-              value: '${calculation.bricksNeeded}',
-            ),
-            _DetailRow(
-              label: 'Tipo de tijolo',
-              value: calculation.brickType.displayName,
-            ),
-            _DetailRow(
-              label: 'Dimensões',
-              value: calculation.brickType.dimensions,
-            ),
-            _DetailRow(
-              label: 'Consumo',
-              value: '${calculation.brickType.unitsPerSquareMeter} un/m²',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MaterialItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-
-  const _MaterialItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 20, color: color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            unit,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

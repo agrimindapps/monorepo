@@ -24,7 +24,7 @@ class SoletrandoRepositoryImpl implements SoletrandoRepository {
     required WordCategory category,
   }) async {
     try {
-      final word = wordsDataSource.getRandomWord(
+      final word = await wordsDataSource.getRandomWord(
         category: category,
         difficulty: difficulty,
       );

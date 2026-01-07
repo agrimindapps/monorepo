@@ -55,3 +55,7 @@ flutter:
   # Assets will be added during migration
   assets:
     - assets/
+    - assets/quiz_data/
+    - assets/memory_decks/
+    - assets/soletrando_data/
+    - assets/caca_palavra_data/

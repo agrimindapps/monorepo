@@ -52,6 +52,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     final allCalculators = [
       ..._financialCalculators,
       ..._constructionCalculators,
+      ..._healthCalculators,
+      ..._petCalculators,
+      ..._agricultureCalculators,
     ];
 
     return Scaffold(
@@ -224,6 +227,51 @@ class _HomePageState extends ConsumerState<HomePage> {
                             _constructionCalculators,
                             sectionTitle: 'Construção',
                           ),
+                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
+                        if (_shouldShowSection(
+                          'Saúde',
+                          _healthCalculators,
+                        ))
+                          _buildSectionTitle(context, 'Saúde'),
+                        if (_shouldShowSection(
+                          'Saúde',
+                          _healthCalculators,
+                        ))
+                          _buildGrid(
+                            context,
+                            _healthCalculators,
+                            sectionTitle: 'Saúde',
+                          ),
+                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
+                        if (_shouldShowSection(
+                          'Pet',
+                          _petCalculators,
+                        ))
+                          _buildSectionTitle(context, 'Pet'),
+                        if (_shouldShowSection(
+                          'Pet',
+                          _petCalculators,
+                        ))
+                          _buildGrid(
+                            context,
+                            _petCalculators,
+                            sectionTitle: 'Pet',
+                          ),
+                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
+                        if (_shouldShowSection(
+                          'Agricultura',
+                          _agricultureCalculators,
+                        ))
+                          _buildSectionTitle(context, 'Agricultura'),
+                        if (_shouldShowSection(
+                          'Agricultura',
+                          _agricultureCalculators,
+                        ))
+                          _buildGrid(
+                            context,
+                            _agricultureCalculators,
+                            sectionTitle: 'Agricultura',
+                          ),
                       ],
                     ]
                     .map(
@@ -278,6 +326,9 @@ class _HomePageState extends ConsumerState<HomePage> {
     Color color = Colors.grey;
     if (title == 'Financeiro') color = Colors.blue;
     if (title == 'Construção') color = Colors.deepOrange;
+    if (title == 'Saúde') color = Colors.green;
+    if (title == 'Pet') color = Colors.brown;
+    if (title == 'Agricultura') color = Colors.teal;
     if (title == 'Favoritos') color = Colors.red;
     if (title == 'Recentes') color = Colors.purple;
 
@@ -450,14 +501,237 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   final List<_CalculatorItem> _constructionCalculators = [
     _CalculatorItem(
-      title: 'Cálculos de Construção',
-      description: 'Diversos cálculos para sua obra',
-      icon: Icons.construction,
-      color: Colors.deepOrange,
-      route: '/calculators/construction/selection',
-      tags: ['Materiais', 'Medidas'],
+      title: 'Concreto',
+      description: 'Calcule volume e materiais para concreto',
+      icon: Icons.layers,
+      color: Colors.grey,
+      route: '/calculators/construction/concrete',
+      tags: ['Cimento', 'Areia', 'Brita'],
+      isPopular: true,
     ),
-    // Add more construction calculators here as they are implemented/routed
+    _CalculatorItem(
+      title: 'Tinta',
+      description: 'Quantidade de tinta para pintura',
+      icon: Icons.format_paint,
+      color: Colors.orange,
+      route: '/calculators/construction/paint',
+      tags: ['Parede', 'Litros'],
+    ),
+    _CalculatorItem(
+      title: 'Piso e Revestimento',
+      description: 'Peças, caixas e rejunte necessários',
+      icon: Icons.grid_on,
+      color: Colors.brown,
+      route: '/calculators/construction/flooring',
+      tags: ['Cerâmica', 'Porcelanato'],
+    ),
+    _CalculatorItem(
+      title: 'Tijolos e Blocos',
+      description: 'Tijolos e argamassa para alvenaria',
+      icon: Icons.crop_square,
+      color: Colors.red,
+      route: '/calculators/construction/brick',
+      tags: ['Alvenaria', 'Parede'],
+    ),
+  ];
+
+  final List<_CalculatorItem> _healthCalculators = [
+    _CalculatorItem(
+      title: 'IMC',
+      description: 'Índice de Massa Corporal',
+      icon: Icons.monitor_weight_outlined,
+      color: Colors.green,
+      route: '/calculators/health/bmi',
+      tags: ['Peso', 'Altura', 'Saúde'],
+      isPopular: true,
+    ),
+    _CalculatorItem(
+      title: 'Taxa Metabólica',
+      description: 'Calorias diárias necessárias',
+      icon: Icons.local_fire_department,
+      color: Colors.orange,
+      route: '/calculators/health/bmr',
+      tags: ['Calorias', 'Metabolismo'],
+      isPopular: true,
+    ),
+    _CalculatorItem(
+      title: 'Necessidade Hídrica',
+      description: 'Quantidade ideal de água por dia',
+      icon: Icons.water_drop,
+      color: Colors.blue,
+      route: '/calculators/health/water',
+      tags: ['Água', 'Hidratação'],
+    ),
+    _CalculatorItem(
+      title: 'Peso Ideal',
+      description: '4 fórmulas científicas',
+      icon: Icons.accessibility_new,
+      color: Colors.teal,
+      route: '/calculators/health/ideal-weight',
+      tags: ['Peso', 'Altura'],
+    ),
+    _CalculatorItem(
+      title: 'Gordura Corporal',
+      description: 'Percentual de gordura (US Navy)',
+      icon: Icons.pie_chart,
+      color: Colors.purple,
+      route: '/calculators/health/body-fat',
+      tags: ['Composição', 'Medidas'],
+    ),
+    _CalculatorItem(
+      title: 'Macronutrientes',
+      description: 'Carboidratos, proteínas e gorduras',
+      icon: Icons.pie_chart_outline,
+      color: Colors.amber,
+      route: '/calculators/health/macros',
+      tags: ['Dieta', 'Nutrição'],
+    ),
+    _CalculatorItem(
+      title: 'Proteínas Diárias',
+      description: 'Necessidade proteica por peso',
+      icon: Icons.restaurant,
+      color: Colors.red,
+      route: '/calculators/health/protein',
+      tags: ['Proteína', 'Dieta', 'Músculo'],
+    ),
+    _CalculatorItem(
+      title: 'Calorias Exercício',
+      description: 'Gasto calórico por atividade',
+      icon: Icons.directions_run,
+      color: Colors.deepOrange,
+      route: '/calculators/health/exercise-calories',
+      tags: ['Exercício', 'Calorias', 'Treino'],
+      isPopular: true,
+    ),
+    _CalculatorItem(
+      title: 'Cintura-Quadril',
+      description: 'Risco cardiovascular (RCQ)',
+      icon: Icons.straighten,
+      color: Colors.pink,
+      route: '/calculators/health/waist-hip',
+      tags: ['Medidas', 'Risco', 'Saúde'],
+    ),
+    _CalculatorItem(
+      title: 'Álcool no Sangue',
+      description: 'Concentração alcoólica (BAC)',
+      icon: Icons.local_bar,
+      color: Colors.brown,
+      route: '/calculators/health/blood-alcohol',
+      tags: ['Álcool', 'BAC', 'Segurança'],
+    ),
+    _CalculatorItem(
+      title: 'Volume Sanguíneo',
+      description: 'Estimativa por peso e altura',
+      icon: Icons.bloodtype,
+      color: Colors.red,
+      route: '/calculators/health/blood-volume',
+      tags: ['Sangue', 'Volume', 'Corpo'],
+    ),
+    _CalculatorItem(
+      title: 'Déficit Calórico',
+      description: 'Meta para perda ou ganho de peso',
+      icon: Icons.trending_down,
+      color: Colors.indigo,
+      route: '/calculators/health/caloric-deficit',
+      tags: ['Dieta', 'Emagrecimento', 'Meta'],
+    ),
+  ];
+
+  final List<_CalculatorItem> _petCalculators = [
+    _CalculatorItem(
+      title: 'Idade do Pet',
+      description: 'Idade em anos humanos',
+      icon: Icons.pets,
+      color: Colors.blue,
+      route: '/calculators/pet/age',
+      tags: ['Cachorro', 'Gato', 'Idade'],
+      isPopular: true,
+    ),
+    _CalculatorItem(
+      title: 'Gestação Pet',
+      description: 'Acompanhe a gravidez',
+      icon: Icons.child_friendly,
+      color: Colors.pink,
+      route: '/calculators/pet/pregnancy',
+      tags: ['Gravidez', 'Parto', 'Filhotes'],
+    ),
+    _CalculatorItem(
+      title: 'Condição Corporal',
+      description: 'BCS - Escore de condição física',
+      icon: Icons.fitness_center,
+      color: Colors.orange,
+      route: '/calculators/pet/body-condition',
+      tags: ['BCS', 'Peso', 'Nutrição'],
+      isPopular: true,
+    ),
+    _CalculatorItem(
+      title: 'Calorias Pet',
+      description: 'Necessidade calórica diária',
+      icon: Icons.restaurant,
+      color: Colors.green,
+      route: '/calculators/pet/caloric-needs',
+      tags: ['Ração', 'Alimentação', 'Calorias'],
+    ),
+    _CalculatorItem(
+      title: 'Dosagem Medicamento',
+      description: 'Dose por peso do animal',
+      icon: Icons.medication,
+      color: Colors.red,
+      route: '/calculators/pet/medication',
+      tags: ['Remédio', 'Veterinário', 'Dose'],
+    ),
+    _CalculatorItem(
+      title: 'Fluidoterapia',
+      description: 'Volume de fluidos IV',
+      icon: Icons.water_drop,
+      color: Colors.cyan,
+      route: '/calculators/pet/fluid-therapy',
+      tags: ['Soro', 'Desidratação', 'IV'],
+    ),
+    _CalculatorItem(
+      title: 'Peso Ideal Pet',
+      description: 'Meta de peso saudável',
+      icon: Icons.monitor_weight,
+      color: Colors.purple,
+      route: '/calculators/pet/ideal-weight',
+      tags: ['Peso', 'Obesidade', 'Dieta'],
+    ),
+    _CalculatorItem(
+      title: 'Conversão Unidades',
+      description: 'kg↔lb, °C↔°F e mais',
+      icon: Icons.swap_horiz,
+      color: Colors.grey,
+      route: '/calculators/pet/unit-conversion',
+      tags: ['Converter', 'Medidas', 'Unidades'],
+    ),
+  ];
+
+  final List<_CalculatorItem> _agricultureCalculators = [
+    _CalculatorItem(
+      title: 'Adubação NPK',
+      description: 'Calcule a necessidade de nutrientes',
+      icon: Icons.grass,
+      color: Colors.green,
+      route: '/calculators/agriculture/npk',
+      tags: ['Fertilizante', 'Nutrientes', 'Solo'],
+      isPopular: true,
+    ),
+    _CalculatorItem(
+      title: 'Taxa de Semeadura',
+      description: 'Quantidade de sementes por hectare',
+      icon: Icons.agriculture,
+      color: Colors.amber,
+      route: '/calculators/agriculture/seed-rate',
+      tags: ['Sementes', 'Plantio', 'Lavoura'],
+    ),
+    _CalculatorItem(
+      title: 'Irrigação',
+      description: 'Volume de água e tempo de irrigação',
+      icon: Icons.water,
+      color: Colors.blue,
+      route: '/calculators/agriculture/irrigation',
+      tags: ['Água', 'Pivô', 'Gotejo'],
+    ),
   ];
 }
 
@@ -498,6 +772,9 @@ class _CategoryFilterBar extends StatelessWidget {
       ('Recentes', Icons.history, Colors.purple),
       ('Financeiro', Icons.account_balance_wallet, Colors.blue),
       ('Construção', Icons.construction, Colors.deepOrange),
+      ('Saúde', Icons.favorite_border, Colors.green),
+      ('Pet', Icons.pets, Colors.brown),
+      ('Agricultura', Icons.agriculture, Colors.teal),
     ];
 
     return Container(

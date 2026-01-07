@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../ping_pong_game.dart';
 import 'paddle.dart';
@@ -43,10 +44,12 @@ class Ball extends PositionComponent with CollisionCallbacks, HasGameReference<P
       position.y = radius;
       velocity.y = -velocity.y;
       _spawnHitParticles(position + Vector2(radius, 0));
+      HapticFeedback.lightImpact();
     } else if (position.y + radius >= game.size.y) {
       position.y = game.size.y - radius;
       velocity.y = -velocity.y;
       _spawnHitParticles(position + Vector2(radius, radius * 2));
+      HapticFeedback.lightImpact();
     }
   }
 
@@ -136,9 +139,11 @@ class Ball extends PositionComponent with CollisionCallbacks, HasGameReference<P
       if (other.isPlayer) {
         position.x = other.position.x + other.size.x + radius + 1;
         _spawnHitParticles(position + Vector2(0, radius));
+        HapticFeedback.selectionClick();
       } else {
         position.x = other.position.x - radius - 1;
         _spawnHitParticles(position + Vector2(radius * 2, radius));
+        HapticFeedback.lightImpact();
       }
     }
   }

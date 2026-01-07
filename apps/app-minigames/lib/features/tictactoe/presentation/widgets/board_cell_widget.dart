@@ -6,18 +6,22 @@ class BoardCellWidget extends StatelessWidget {
   final Player player;
   final bool isWinningCell;
   final VoidCallback? onTap;
+  final FocusNode? focusNode;
 
   const BoardCellWidget({
     super.key,
     required this.player,
     this.isWinningCell = false,
     this.onTap,
+    this.focusNode,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      focusNode: focusNode,
+      borderRadius: BorderRadius.circular(16),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(

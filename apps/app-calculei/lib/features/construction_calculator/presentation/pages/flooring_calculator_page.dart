@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../providers/flooring_calculator_provider.dart';
+import '../widgets/flooring_result_card.dart';
 
 /// Flooring calculator page
 class FlooringCalculatorPage extends ConsumerStatefulWidget {
@@ -127,14 +129,11 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                               runSpacing: 16,
                               children: [
                                 SizedBox(
-                                  width: 180,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Comprimento',
                                     controller: _roomLengthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Comprimento',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -152,14 +151,11 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 180,
-                                  child: TextFormField(
+                                  width: 200,
+                                  child: StandardInputField(
+                                    label: 'Largura',
                                     controller: _roomWidthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Largura',
-                                      suffixText: 'm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'm',
                                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [
                                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -194,14 +190,11 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                               runSpacing: 16,
                               children: [
                                 SizedBox(
-                                  width: 150,
-                                  child: TextFormField(
+                                  width: 180,
+                                  child: StandardInputField(
+                                    label: 'Comprimento',
                                     controller: _tileLengthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Comprimento',
-                                      suffixText: 'cm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'cm',
                                     keyboardType: TextInputType.number,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly,
@@ -215,14 +208,11 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
-                                  child: TextFormField(
+                                  width: 180,
+                                  child: StandardInputField(
+                                    label: 'Largura',
                                     controller: _tileWidthController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Largura',
-                                      suffixText: 'cm',
-                                      border: OutlineInputBorder(),
-                                    ),
+                                    suffix: 'cm',
                                     keyboardType: TextInputType.number,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly,
@@ -236,13 +226,10 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                                   ),
                                 ),
                                 SizedBox(
-                                  width: 150,
-                                  child: TextFormField(
+                                  width: 180,
+                                  child: StandardInputField(
+                                    label: 'Peças/caixa',
                                     controller: _tilesPerBoxController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Peças/caixa',
-                                      border: OutlineInputBorder(),
-                                    ),
                                     keyboardType: TextInputType.number,
                                     inputFormatters: [
                                       FilteringTextInputFormatter.digitsOnly,
@@ -275,7 +262,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                                 SizedBox(
                                   width: 200,
                                   child: DropdownButtonFormField<String>(
-                                    value: _flooringType,
+                                    initialValue: _flooringType,
                                     decoration: const InputDecoration(
                                       labelText: 'Tipo de Piso',
                                       border: OutlineInputBorder(),
@@ -322,13 +309,10 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
 
                             const SizedBox(height: 24),
 
-                            FilledButton.icon(
+                            CalculatorButton(
+                              label: 'Calcular',
+                              icon: Icons.calculate,
                               onPressed: _calculate,
-                              icon: const Icon(Icons.calculate),
-                              label: const Text('Calcular'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.all(16),
-                              ),
                             ),
                           ],
                         ),
@@ -340,7 +324,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
 
                   // Result Card
                   if (calculation.id.isNotEmpty) ...[
-                    _FlooringResultCard(calculation: calculation),
+                    FlooringResultCard(calculation: calculation),
                   ],
                 ],
               ),
@@ -391,244 +375,5 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
         );
       }
     }
-  }
-}
-
-class _FlooringResultCard extends StatelessWidget {
-  final dynamic calculation;
-
-  const _FlooringResultCard({required this.calculation});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // Main results
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              alignment: WrapAlignment.center,
-              children: [
-                _ResultHighlight(
-                  label: 'Caixas',
-                  value: '${calculation.boxesNeeded}',
-                  icon: Icons.inventory_2,
-                  color: Colors.brown,
-                ),
-                _ResultHighlight(
-                  label: 'Peças',
-                  value: '${calculation.tilesWithWaste}',
-                  icon: Icons.grid_view,
-                  color: Colors.blue,
-                ),
-                _ResultHighlight(
-                  label: 'Área',
-                  value: '${calculation.roomArea.toStringAsFixed(1)} m²',
-                  icon: Icons.square_foot,
-                  color: Colors.green,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Materials
-            Text(
-              'Materiais Complementares',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                _MaterialChip(
-                  label: 'Rejunte',
-                  value: '${calculation.groutKg.toStringAsFixed(1)} kg',
-                  icon: Icons.format_color_fill,
-                ),
-                _MaterialChip(
-                  label: 'Argamassa',
-                  value: '${calculation.mortarKg.toStringAsFixed(1)} kg',
-                  icon: Icons.construction,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Details
-            Text(
-              'Detalhes',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            _DetailRow(
-              label: 'Peças (sem perda)',
-              value: '${calculation.tilesNeeded}',
-            ),
-            _DetailRow(
-              label: 'Peças (com perda)',
-              value: '${calculation.tilesWithWaste}',
-            ),
-            _DetailRow(
-              label: 'Perda considerada',
-              value: '${calculation.wastePercentage.toInt()}%',
-            ),
-            _DetailRow(
-              label: 'Área da peça',
-              value: '${(calculation.tileArea * 10000).toStringAsFixed(0)} cm²',
-            ),
-            _DetailRow(
-              label: 'Peças por caixa',
-              value: '${calculation.tilesPerBox}',
-            ),
-            _DetailRow(
-              label: 'Tipo de piso',
-              value: calculation.flooringType,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ResultHighlight extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color color;
-
-  const _ResultHighlight({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 120,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MaterialChip extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-
-  const _MaterialChip({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 20),
-          const SizedBox(width: 8),
-          Text('$label: ', style: Theme.of(context).textTheme.bodyMedium),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _DetailRow extends StatelessWidget {
-  final String label;
-  final String value;
-
-  const _DetailRow({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

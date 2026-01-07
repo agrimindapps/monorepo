@@ -1,11 +1,10 @@
+import 'package:dartz/dartz.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-import '../../../../shared/utils/app_error.dart';
-import '../../../../shared/utils/result.dart';
-import '../exceptions/drift_exceptions.dart';
+import '../../../../shared/utils/failure.dart';
 import '../interfaces/i_drift_manager.dart';
 
 /// Implementação concreta do gerenciador de databases Drift
@@ -35,10 +34,10 @@ class DriftManager implements IDriftManager {
   List<String> get openDatabaseNames => _openDatabases.keys.toList();
 
   @override
-  Future<Result<void>> initialize(String appName) async {
+  Future<Either<Failure, void>> initialize(String appName) async {
     if (_isInitialized) {
       debugPrint('DriftManager: Already initialized for app: $_appName');
-      return Result.success(null);
+      return Right(null);
     }
 
     try {
@@ -52,32 +51,26 @@ class DriftManager implements IDriftManager {
       debugPrint('DriftManager: Initialized successfully for app: $appName');
       debugPrint('DriftManager: Databases path: $_databasesPath');
 
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Initialization failed - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to initialize DriftManager',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return const Left(
+        CacheFailure(
+          'Failed to initialize DriftManager',
+          code: 'DRIFT_INIT_ERROR',
         ),
       );
     }
   }
 
   @override
-  Future<Result<GeneratedDatabase>> getDatabase(String databaseName) async {
+  Future<Either<Failure, GeneratedDatabase>> getDatabase(String databaseName) async {
     try {
       if (!_isInitialized) {
-        return Result.error(
-          AppErrorFactory.fromException(
-            const DriftInitializationException(
-              'DriftManager not initialized. Call initialize() first.',
-            ),
-            null,
+        return const Left(
+          CacheFailure(
+            'DriftManager not initialized. Call initialize() first.',
+            code: 'DRIFT_NOT_INITIALIZED',
           ),
         );
       }
@@ -85,46 +78,40 @@ class DriftManager implements IDriftManager {
       // Se já está aberta, retornar do cache
       if (_openDatabases.containsKey(databaseName)) {
         debugPrint('DriftManager: Returning cached database: $databaseName');
-        return Result.success(_openDatabases[databaseName]!);
+        return Right(_openDatabases[databaseName]!);
       }
 
       // Nota: Para obter database, o app precisa fornecer a instância
       // Este método é mais para validação e cache
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseNotFoundException(databaseName),
-          null,
+      return Left(
+        CacheFailure(
+          'Database not found: $databaseName',
+          code: 'DRIFT_DB_NOT_FOUND',
         ),
       );
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Failed to get database - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to get database',
-            databaseName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return Left(
+        CacheFailure(
+          'Failed to get database: $e',
+          code: 'DRIFT_GET_DB_ERROR',
+          details: stackTrace,
         ),
       );
     }
   }
 
   /// Registra uma database aberta (usado pelos apps)
-  Future<Result<void>> registerDatabase(
+  Future<Either<Failure, void>> registerDatabase(
     String databaseName,
     GeneratedDatabase database,
   ) async {
     try {
       if (!_isInitialized) {
-        return Result.error(
-          AppErrorFactory.fromException(
-            const DriftInitializationException(
-              'DriftManager not initialized',
-            ),
-            null,
+        return const Left(
+          CacheFailure(
+            'DriftManager not initialized',
+            code: 'DRIFT_NOT_INITIALIZED',
           ),
         );
       }
@@ -133,28 +120,23 @@ class DriftManager implements IDriftManager {
       _databaseStats[databaseName] = 0;
 
       debugPrint('DriftManager: Registered database: $databaseName');
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to register database',
-            databaseName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return const Left(
+        CacheFailure(
+          'Failed to register database',
+          code: 'DRIFT_REGISTER_ERROR',
         ),
       );
     }
   }
 
   @override
-  Future<Result<void>> closeDatabase(String databaseName) async {
+  Future<Either<Failure, void>> closeDatabase(String databaseName) async {
     try {
       if (!_openDatabases.containsKey(databaseName)) {
         debugPrint('DriftManager: Database not open: $databaseName');
-        return Result.success(null);
+        return const Right(null);
       }
 
       final database = _openDatabases[databaseName]!;
@@ -164,47 +146,41 @@ class DriftManager implements IDriftManager {
       _databaseStats.remove(databaseName);
 
       debugPrint('DriftManager: Closed database: $databaseName');
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Failed to close database - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to close database',
-            databaseName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return Left(
+        CacheFailure(
+          'Failed to close database: $e',
+          code: 'DRIFT_CLOSE_ERROR',
+          details: stackTrace,
         ),
       );
     }
   }
 
   @override
-  Future<Result<void>> closeAllDatabases() async {
+  Future<Either<Failure, void>> closeAllDatabases() async {
     try {
       final databaseNames = _openDatabases.keys.toList();
 
       for (final name in databaseNames) {
         final result = await closeDatabase(name);
-        if (result.isError) {
-          debugPrint('DriftManager: Error closing database $name');
-        }
+        result.fold(
+          (failure) => debugPrint('DriftManager: Error closing database $name: $failure'),
+          (_) => null,
+        );
       }
 
       debugPrint('DriftManager: Closed all databases');
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Failed to close all databases - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to close all databases',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return Left(
+        CacheFailure(
+          'Failed to close all databases: $e',
+          code: 'DRIFT_CLOSE_ALL_ERROR',
+          details: stackTrace,
         ),
       );
     }
@@ -221,13 +197,13 @@ class DriftManager implements IDriftManager {
   }
 
   @override
-  Future<Result<void>> clearAllData() async {
+  Future<Either<Failure, void>> clearAllData() async {
     try {
       if (!_isInitialized) {
-        return Result.error(
-          AppErrorFactory.fromException(
-            const DriftInitializationException('DriftManager not initialized'),
-            null,
+        return const Left(
+          CacheFailure(
+            'DriftManager not initialized',
+            code: 'DRIFT_NOT_INITIALIZED',
           ),
         );
       }
@@ -239,30 +215,26 @@ class DriftManager implements IDriftManager {
       _databaseStats.clear();
 
       debugPrint('DriftManager: All data cleared');
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Failed to clear all data - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to clear all data',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return const Left(
+        CacheFailure(
+          'Failed to clear all data',
+          code: 'DRIFT_CLEAR_DATA_ERROR',
         ),
       );
     }
   }
 
   @override
-  Future<Result<void>> vacuumDatabase(String databaseName) async {
+  Future<Either<Failure, void>> vacuumDatabase(String databaseName) async {
     try {
       if (!_openDatabases.containsKey(databaseName)) {
-        return Result.error(
-          AppErrorFactory.fromException(
-            DriftDatabaseNotFoundException(databaseName),
-            null,
+        return Left(
+          CacheFailure(
+            'Database not found: $databaseName',
+            code: 'DRIFT_DB_NOT_FOUND',
           ),
         );
       }
@@ -271,59 +243,53 @@ class DriftManager implements IDriftManager {
       await database.customStatement('VACUUM');
 
       debugPrint('DriftManager: Vacuumed database: $databaseName');
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Failed to vacuum database - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to vacuum database',
-            databaseName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return Left(
+        CacheFailure(
+          'Failed to vacuum database: $e',
+          code: 'DRIFT_VACUUM_ERROR',
+          details: stackTrace,
         ),
       );
     }
   }
 
   @override
-  Future<Result<void>> vacuumAllDatabases() async {
+  Future<Either<Failure, void>> vacuumAllDatabases() async {
     try {
       for (final databaseName in _openDatabases.keys) {
         final result = await vacuumDatabase(databaseName);
-        if (result.isError) {
-          debugPrint('DriftManager: Error vacuuming database $databaseName');
-        }
+        result.fold(
+          (failure) => debugPrint('DriftManager: Error vacuuming database $databaseName: $failure'),
+          (_) => null,
+        );
       }
 
       debugPrint('DriftManager: Vacuumed all databases');
-      return Result.success(null);
+      return const Right(null);
     } catch (e, stackTrace) {
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftInitializationException(
-            'Failed to vacuum all databases',
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return Left(
+        CacheFailure(
+          'Failed to vacuum all databases: $e',
+          code: 'DRIFT_VACUUM_ALL_ERROR',
+          details: stackTrace,
         ),
       );
     }
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getDatabaseInfo(
+  Future<Either<Failure, Map<String, dynamic>>> getDatabaseInfo(
     String databaseName,
   ) async {
     try {
       if (!_openDatabases.containsKey(databaseName)) {
-        return Result.error(
-          AppErrorFactory.fromException(
-            DriftDatabaseNotFoundException(databaseName),
-            null,
+        return Left(
+          CacheFailure(
+            'Database not found: $databaseName',
+            code: 'DRIFT_DB_NOT_FOUND',
           ),
         );
       }
@@ -357,18 +323,14 @@ class DriftManager implements IDriftManager {
             : null,
       };
 
-      return Result.success(info);
+      return Right(info);
     } catch (e, stackTrace) {
       debugPrint('DriftManager: Failed to get database info - $e');
-      return Result.error(
-        AppErrorFactory.fromException(
-          DriftDatabaseException(
-            'Failed to get database info',
-            databaseName,
-            originalError: e,
-            stackTrace: stackTrace,
-          ),
-          stackTrace,
+      return Left(
+        CacheFailure(
+          'Failed to get database info: $e',
+          code: 'DRIFT_GET_INFO_ERROR',
+          details: stackTrace,
         ),
       );
     }

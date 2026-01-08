@@ -12,6 +12,9 @@ class GamePageLayout extends StatefulWidget {
   final Widget? bottomWidget;
   final String? instructions;
   final double maxGameWidth;
+  /// If true, wraps content in SingleChildScrollView (for Flutter widgets)
+  /// If false, uses Expanded for Flame games that need full space
+  final bool scrollable;
   
   const GamePageLayout({
     super.key,
@@ -22,6 +25,7 @@ class GamePageLayout extends StatefulWidget {
     this.bottomWidget,
     this.instructions,
     this.maxGameWidth = 600,
+    this.scrollable = false,
   });
 
   @override
@@ -254,7 +258,10 @@ class _GamePageLayoutState extends State<GamePageLayout> {
 
   Widget _buildHeader(BuildContext context, bool isMobile, Color accentColor) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 8 : 16, 
+        vertical: isMobile ? 8 : 12,
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF1A1A2E).withValues(alpha: 0.9),
         border: Border(
@@ -267,100 +274,180 @@ class _GamePageLayoutState extends State<GamePageLayout> {
         children: [
           if (isMobile)
             IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white),
+              icon: const Icon(Icons.menu, color: Colors.white, size: 22),
               onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+              padding: const EdgeInsets.all(8),
+              constraints: const BoxConstraints(),
             ),
           
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () => context.pop(),
+            icon: Icon(Icons.arrow_back, color: Colors.white, size: isMobile ? 22 : 24),
+            onPressed: () => context.go('/'),
+            tooltip: 'Voltar ao Início',
+            padding: EdgeInsets.all(isMobile ? 8 : 12),
+            constraints: const BoxConstraints(),
+          ),
+          
+          SizedBox(width: isMobile ? 4 : 8),
+          
+          if (!isMobile) // Hide icon on mobile to save space
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: accentColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                Icons.sports_esports,
+                color: accentColor,
+                size: 20,
+              ),
+            ),
+          
+          SizedBox(width: isMobile ? 4 : 12),
+          
+          Flexible(
+            child: Text(
+              widget.title,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: isMobile ? 16 : 20,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           
           const SizedBox(width: 8),
           
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: accentColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.sports_esports,
-              color: accentColor,
-              size: 20,
-            ),
-          ),
-          
-          const SizedBox(width: 12),
-          
-          Text(
-            widget.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          
-          const Spacer(),
-          
-          if (widget.actions != null) ...widget.actions!,
+          if (widget.actions != null) 
+            ...widget.actions!.map((action) {
+              // Make action buttons more compact on mobile
+              if (isMobile && action is IconButton) {
+                return IconButton(
+                  icon: action.icon ?? const Icon(Icons.more_vert),
+                  onPressed: action.onPressed,
+                  tooltip: action.tooltip,
+                  color: Colors.white,
+                  iconSize: 22,
+                  padding: const EdgeInsets.all(8),
+                  constraints: const BoxConstraints(),
+                );
+              }
+              return action;
+            }),
         ],
       ),
     );
   }
 
   Widget _buildContent(BuildContext context, Color accentColor) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 800;
+    
+    // On mobile, use minimal/no padding and constraints for fullscreen
+    final effectivePadding = isMobile 
+        ? const EdgeInsets.all(8) 
+        : const EdgeInsets.all(24);
+    
+    final effectiveMaxWidth = isMobile 
+        ? screenWidth // Full width on mobile
+        : widget.maxGameWidth;
+    
+    // Mobile games should have minimal border radius for more screen space
+    final effectiveBorderRadius = isMobile ? 8.0 : 16.0;
+    
+    final gameContainer = Container(
+      constraints: BoxConstraints(
+        maxWidth: effectiveMaxWidth,
+      ),
+      decoration: BoxDecoration(
+        color: isMobile 
+            ? Colors.transparent // No background on mobile for more space
+            : const Color(0xFF1A1A2E).withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(effectiveBorderRadius),
+        border: isMobile 
+            ? null // No border on mobile
+            : Border.all(
+                color: accentColor.withValues(alpha: 0.2),
+              ),
+        boxShadow: isMobile 
+            ? null // No shadow on mobile
+            : [
+                BoxShadow(
+                  color: accentColor.withValues(alpha: 0.1),
+                  blurRadius: 20,
+                  spreadRadius: 2,
+                ),
+              ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(effectiveBorderRadius),
+        child: RepaintBoundary(
+          child: widget.child,
+        ),
+      ),
+    );
+
+    final bottomSection = widget.bottomWidget != null
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(height: isMobile ? 8 : 16),
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: effectiveMaxWidth,
+                ),
+                child: widget.bottomWidget!,
+              ),
+            ],
+          )
+        : const SizedBox.shrink();
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF0F0F1A),
       ),
-      child: CustomPaint(
-        painter: _BackgroundPatternPainter(),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Game container with max width
-                Container(
-                  constraints: BoxConstraints(
-                    maxWidth: widget.maxGameWidth,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1A1A2E).withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: accentColor.withValues(alpha: 0.2),
+      child: RepaintBoundary(
+        child: CustomPaint(
+          painter: isMobile ? null : _BackgroundPatternPainter(), // Skip pattern on mobile for performance
+          child: widget.scrollable
+              // Scrollable mode for Flutter widget games (TicTacToe, etc)
+              ? Center(
+                  child: SingleChildScrollView(
+                    padding: effectivePadding,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        gameContainer,
+                        bottomSection,
+                      ],
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accentColor.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        spreadRadius: 2,
+                  ),
+                )
+              // Non-scrollable mode for Flame games - fullscreen on mobile
+              : isMobile
+                  // Mobile: No padding, fullscreen game
+                  ? Column(
+                      children: [
+                        Expanded(child: gameContainer),
+                        bottomSection,
+                      ],
+                    )
+                  // Desktop: Centered with padding
+                  : Padding(
+                      padding: effectivePadding,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(child: gameContainer),
+                            bottomSection,
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: widget.child,
-                  ),
-                ),
-                
-                // Bottom widget (controls, info, etc)
-                if (widget.bottomWidget != null) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxWidth: widget.maxGameWidth,
                     ),
-                    child: widget.bottomWidget!,
-                  ),
-                ],
-              ],
-            ),
-          ),
         ),
       ),
     );

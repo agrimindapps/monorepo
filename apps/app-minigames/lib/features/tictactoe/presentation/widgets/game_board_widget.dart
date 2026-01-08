@@ -19,15 +19,17 @@ class GameBoardWidget extends StatefulWidget {
 }
 
 class _GameBoardWidgetState extends State<GameBoardWidget> {
-  // Focus nodes for keyboard navigation
+  // Focus nodes for keyboard navigation - separate from InkWell focus
   late List<List<FocusNode>> _focusNodes;
+  int _focusedRow = 0;
+  int _focusedCol = 0;
 
   @override
   void initState() {
     super.initState();
     _focusNodes = List.generate(
       3,
-      (row) => List.generate(3, (col) => FocusNode()),
+      (row) => List.generate(3, (col) => FocusNode(debugLabel: 'cell_$row$col')),
     );
   }
 
@@ -41,55 +43,77 @@ class _GameBoardWidgetState extends State<GameBoardWidget> {
     super.dispose();
   }
 
-  void _handleKeyEvent(int row, int col, RawKeyEvent event) {
-    if (event is RawKeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowRight && col < 2) {
-        _focusNodes[row][col + 1].requestFocus();
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft && col > 0) {
-        _focusNodes[row][col - 1].requestFocus();
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowDown && row < 2) {
-        _focusNodes[row + 1][col].requestFocus();
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowUp && row > 0) {
-        _focusNodes[row - 1][col].requestFocus();
+  KeyEventResult _handleKeyEvent(KeyEvent event) {
+    if (event is KeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowRight && _focusedCol < 2) {
+        setState(() => _focusedCol++);
+        _focusNodes[_focusedRow][_focusedCol].requestFocus();
+        return KeyEventResult.handled;
+      } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft && _focusedCol > 0) {
+        setState(() => _focusedCol--);
+        _focusNodes[_focusedRow][_focusedCol].requestFocus();
+        return KeyEventResult.handled;
+      } else if (event.logicalKey == LogicalKeyboardKey.arrowDown && _focusedRow < 2) {
+        setState(() => _focusedRow++);
+        _focusNodes[_focusedRow][_focusedCol].requestFocus();
+        return KeyEventResult.handled;
+      } else if (event.logicalKey == LogicalKeyboardKey.arrowUp && _focusedRow > 0) {
+        setState(() => _focusedRow--);
+        _focusNodes[_focusedRow][_focusedCol].requestFocus();
+        return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.enter ||
           event.logicalKey == LogicalKeyboardKey.space) {
         if (widget.gameState.isInProgress &&
-            widget.gameState.board[row][col].index == 2) {
-          widget.onCellTapped(row, col);
+            widget.gameState.board[_focusedRow][_focusedCol].index == 2) {
+          widget.onCellTapped(_focusedRow, _focusedCol);
+          return KeyEventResult.handled;
         }
       }
     }
+    return KeyEventResult.ignored;
   }
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: EdgeInsets.zero,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: 9,
-      itemBuilder: (context, index) {
-        final row = index ~/ 3;
-        final col = index % 3;
-        final isWinningCell = widget.gameState.winningLine?.contains(index) ?? false;
+    return Focus(
+      onKeyEvent: (node, event) => _handleKeyEvent(event),
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        itemCount: 9,
+        itemBuilder: (context, index) {
+          final row = index ~/ 3;
+          final col = index % 3;
+          final isWinningCell = widget.gameState.winningLine?.contains(index) ?? false;
+          final isFocused = row == _focusedRow && col == _focusedCol;
 
-        return RawKeyboardListener(
-          focusNode: _focusNodes[row][col],
-          onKey: (event) => _handleKeyEvent(row, col, event),
-          child: BoardCellWidget(
-            player: widget.gameState.board[row][col],
-            isWinningCell: isWinningCell,
+          return GestureDetector(
             onTap: widget.gameState.isInProgress && widget.gameState.board[row][col].index == 2
-                ? () => widget.onCellTapped(row, col)
+                ? () {
+                    setState(() {
+                      _focusedRow = row;
+                      _focusedCol = col;
+                    });
+                    _focusNodes[row][col].requestFocus();
+                    widget.onCellTapped(row, col);
+                  }
                 : null,
-            focusNode: _focusNodes[row][col],
-          ),
-        );
-      },
+            child: Focus(
+              focusNode: _focusNodes[row][col],
+              child: BoardCellWidget(
+                player: widget.gameState.board[row][col],
+                isWinningCell: isWinningCell,
+                isFocused: isFocused,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

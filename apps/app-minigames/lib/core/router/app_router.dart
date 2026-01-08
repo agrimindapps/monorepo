@@ -27,6 +27,7 @@ import 'package:app_minigames/features/batalha_naval/presentation/pages/batalha_
 import 'package:app_minigames/features/frogger/presentation/pages/frogger_page.dart';
 import 'package:app_minigames/features/tetris/presentation/pages/tetris_page.dart';
 import 'package:app_minigames/features/galaga/presentation/pages/galaga_page.dart';
+import 'package:app_minigames/features/centipede/presentation/pages/centipede_page.dart';
 
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -140,6 +141,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/galaga',
       builder: (context, state) => const GalagaPage(),
+    ),
+    GoRoute(
+      path: '/centipede',
+      builder: (context, state) => const CentipedePage(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

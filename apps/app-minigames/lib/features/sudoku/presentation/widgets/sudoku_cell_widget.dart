@@ -19,63 +19,94 @@ class SudokuCellWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: _getBackgroundColor(theme),
+          color: _getBackgroundColor(theme, isDark),
           border: Border(
             right: BorderSide(
-              color: cell.col % 3 == 2 ? Colors.black : Colors.grey.shade400,
+              color: isDark 
+                  ? (cell.col % 3 == 2 ? Colors.white70 : Colors.white24)
+                  : (cell.col % 3 == 2 ? Colors.black : Colors.grey.shade400),
               width: cell.col % 3 == 2 ? 2 : 0.5,
             ),
             bottom: BorderSide(
-              color: cell.row % 3 == 2 ? Colors.black : Colors.grey.shade400,
+              color: isDark 
+                  ? (cell.row % 3 == 2 ? Colors.white70 : Colors.white24)
+                  : (cell.row % 3 == 2 ? Colors.black : Colors.grey.shade400),
               width: cell.row % 3 == 2 ? 2 : 0.5,
             ),
           ),
         ),
         child: Center(
-          child: cell.isEmpty ? _buildNotes(theme) : _buildValue(theme),
+          child: cell.isEmpty ? _buildNotes(theme, isDark) : _buildValue(theme, isDark),
         ),
       ),
     );
   }
 
-  Color _getBackgroundColor(ThemeData theme) {
+  Color _getBackgroundColor(ThemeData theme, bool isDark) {
+    // Base colors for dark/light theme
+    final normalColor = isDark ? const Color(0xFF2A2A3E) : Colors.white;
+    final alternateColor = isDark ? const Color(0xFF1E1E2E) : const Color(0xFFF5F5F5);
+    
+    // Determine if this cell is in an alternate 3x3 box (checkerboard pattern for boxes)
+    final boxRow = cell.row ~/ 3;
+    final boxCol = cell.col ~/ 3;
+    final isAlternateBox = (boxRow + boxCol) % 2 == 1;
+    
     if (cell.hasConflict) {
-      return Colors.red.shade100;
+      return isDark ? const Color(0xFF5C2A2A) : Colors.red.shade100;
     }
 
     switch (cell.state) {
       case CellState.selected:
-        return theme.primaryColor.withValues(alpha: 0.3);
+        return isDark 
+            ? const Color(0xFF4A3C6E) // Purple highlight for selected
+            : theme.primaryColor.withValues(alpha: 0.3);
       case CellState.highlighted:
-        return theme.primaryColor.withValues(alpha: 0.1);
+        return isDark 
+            ? const Color(0xFF3A3A5E) // Subtle highlight for same row/col
+            : theme.primaryColor.withValues(alpha: 0.1);
       case CellState.sameNumber:
-        return theme.primaryColor.withValues(alpha: 0.2);
+        return isDark 
+            ? const Color(0xFF3A4A5E) // Blue-ish for same number
+            : theme.primaryColor.withValues(alpha: 0.2);
       case CellState.error:
-        return Colors.red.shade200;
+        return isDark ? const Color(0xFF5C2A2A) : Colors.red.shade200;
       case CellState.normal:
-        return Colors.white;
+        return isAlternateBox ? alternateColor : normalColor;
     }
   }
 
-  Widget _buildValue(ThemeData theme) {
+  Widget _buildValue(ThemeData theme, bool isDark) {
+    Color textColor;
+    
+    if (cell.isFixed) {
+      // Fixed numbers (original puzzle) - white/black depending on theme
+      textColor = isDark ? Colors.white : Colors.black;
+    } else if (cell.hasConflict) {
+      // Conflicting numbers - red
+      textColor = Colors.red.shade400;
+    } else {
+      // User-entered numbers - accent color
+      textColor = isDark ? const Color(0xFF9C7CF2) : theme.primaryColor;
+    }
+    
     return Text(
       cell.value.toString(),
       style: TextStyle(
         fontSize: cellSize * 0.5,
-        fontWeight: cell.isFixed ? FontWeight.bold : FontWeight.normal,
-        color: cell.isFixed
-            ? Colors.black
-            : (cell.hasConflict ? Colors.red : theme.primaryColor),
+        fontWeight: cell.isFixed ? FontWeight.bold : FontWeight.w500,
+        color: textColor,
       ),
     );
   }
 
-  Widget _buildNotes(ThemeData theme) {
+  Widget _buildNotes(ThemeData theme, bool isDark) {
     if (cell.notes.isEmpty) return const SizedBox();
 
     return GridView.count(
@@ -91,7 +122,7 @@ class SudokuCellWidget extends StatelessWidget {
                   number.toString(),
                   style: TextStyle(
                     fontSize: cellSize * 0.2,
-                    color: Colors.grey.shade600,
+                    color: isDark ? Colors.white54 : Colors.grey.shade600,
                   ),
                 )
               : null,

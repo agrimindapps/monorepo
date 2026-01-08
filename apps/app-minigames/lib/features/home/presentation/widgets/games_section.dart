@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../domain/entities/game_entity.dart';
 import 'game_card.dart';
 
-/// Section with title and grid of games
+/// Section with title and responsive grid of games
 class GamesSection extends StatelessWidget {
   final String title;
   final IconData? icon;
@@ -49,17 +50,21 @@ class GamesSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
               ],
-              Text(
-                title.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+              Flexible(
+                child: Text(
+                  title.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const Spacer(),
-              if (onSeeAll != null)
+              if (onSeeAll != null) ...[
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: onSeeAll,
                   child: Row(
@@ -82,21 +87,24 @@ class GamesSection extends StatelessWidget {
                     ],
                   ),
                 ),
+              ],
             ],
           ),
         ),
 
         const SizedBox(height: 12),
 
-        // Grid
+        // Responsive Grid
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
-            final calculatedCount = width < 400
+            
+            // Calculate column count based on width
+            final columnCount = width < 600
                 ? 2
-                : width < 700
+                : width < 1000
                     ? 3
-                    : width < 1000
+                    : width < 1400
                         ? 4
                         : crossAxisCount;
 
@@ -104,16 +112,16 @@ class GamesSection extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: calculatedCount,
+                crossAxisCount: columnCount,
                 mainAxisSpacing: 16,
                 crossAxisSpacing: 16,
-                childAspectRatio: isCompact ? 1.0 : 0.85,
+                childAspectRatio: isCompact || width < 500 ? 1.0 : 0.85,
               ),
               itemCount: games.length,
               itemBuilder: (context, index) {
                 return GameCard(
                   game: games[index],
-                  isCompact: isCompact,
+                  isCompact: isCompact || width < 500,
                 );
               },
             );

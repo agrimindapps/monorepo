@@ -15,6 +15,7 @@ class NumberPadWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -25,7 +26,7 @@ class NumberPadWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(5, (index) {
               final number = index + 1;
-              return _buildNumberButton(number, theme);
+              return _buildNumberButton(number, theme, isDark);
             }),
           ),
           const SizedBox(height: 8),
@@ -35,9 +36,9 @@ class NumberPadWidget extends StatelessWidget {
             children: [
               ...List.generate(4, (index) {
                 final number = index + 6;
-                return _buildNumberButton(number, theme);
+                return _buildNumberButton(number, theme, isDark);
               }),
-              _buildClearButton(theme),
+              _buildClearButton(isDark),
             ],
           ),
         ],
@@ -45,45 +46,64 @@ class NumberPadWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildNumberButton(int number, ThemeData theme) {
+  Widget _buildNumberButton(int number, ThemeData theme, bool isDark) {
+    // Colors for dark theme
+    final normalBgColor = isDark
+        ? const Color(0xFF4A3C6E) // Purple for dark theme
+        : theme.primaryColor;
+    final notesBgColor = isDark
+        ? const Color(0xFF2A2A3E) // Subtle dark for notes mode
+        : theme.primaryColor.withValues(alpha: 0.2);
+    final normalTextColor = Colors.white;
+    final notesTextColor = isDark
+        ? const Color(0xFF9C7CF2)
+        : theme.primaryColor;
+
     return SizedBox(
       width: 60,
       height: 60,
       child: ElevatedButton(
         onPressed: () => onNumberTap(number),
         style: ElevatedButton.styleFrom(
-          backgroundColor: notesMode
-              ? theme.primaryColor.withValues(alpha: 0.2)
-              : theme.primaryColor,
-          foregroundColor: notesMode ? theme.primaryColor : Colors.white,
+          backgroundColor: notesMode ? notesBgColor : normalBgColor,
+          foregroundColor: notesMode ? notesTextColor : normalTextColor,
           padding: EdgeInsets.zero,
+          elevation: notesMode ? 0 : 4,
+          shadowColor: isDark ? Colors.black54 : Colors.black26,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
+            side: notesMode
+                ? BorderSide(
+                    color: notesTextColor.withValues(alpha: 0.5),
+                    width: 1,
+                  )
+                : BorderSide.none,
           ),
         ),
         child: Text(
           number.toString(),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
-  Widget _buildClearButton(ThemeData theme) {
+  Widget _buildClearButton(bool isDark) {
     return SizedBox(
       width: 60,
       height: 60,
       child: ElevatedButton(
         onPressed: onClearTap,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red.shade400,
+          backgroundColor: isDark
+              ? const Color(0xFF5C3A3A) // Dark red for dark theme
+              : Colors.red.shade400,
           foregroundColor: Colors.white,
           padding: EdgeInsets.zero,
+          elevation: 4,
+          shadowColor: isDark ? Colors.black54 : Colors.black26,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: const Icon(Icons.backspace_outlined, size: 24),

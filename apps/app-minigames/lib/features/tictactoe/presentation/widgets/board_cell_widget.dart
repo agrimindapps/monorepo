@@ -5,44 +5,39 @@ import '../../domain/entities/enums.dart';
 class BoardCellWidget extends StatelessWidget {
   final Player player;
   final bool isWinningCell;
-  final VoidCallback? onTap;
-  final FocusNode? focusNode;
+  final bool isFocused;
 
   const BoardCellWidget({
     super.key,
     required this.player,
     this.isWinningCell = false,
-    this.onTap,
-    this.focusNode,
+    this.isFocused = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      focusNode: focusNode,
-      borderRadius: BorderRadius.circular(16),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          color: isWinningCell
-              ? player.color.withValues(alpha: 0.2)
-              : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            ),
-          ],
-          border: isWinningCell
-              ? Border.all(color: player.color, width: 3)
-              : null,
-        ),
-        child: Center(
-          child: _buildPlayerIcon(),
-        ),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: isWinningCell
+            ? player.color.withValues(alpha: 0.2)
+            : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: isWinningCell
+            ? Border.all(color: player.color, width: 3)
+            : isFocused
+                ? Border.all(color: const Color(0xFF6A11CB), width: 2)
+                : null,
+      ),
+      child: Center(
+        child: _buildPlayerIcon(),
       ),
     );
   }

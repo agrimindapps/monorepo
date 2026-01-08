@@ -18,6 +18,7 @@ class TowerPage extends ConsumerStatefulWidget {
 class _TowerPageState extends ConsumerState<TowerPage> {
   late TowerStackGame _game;
   int _currentScore = 0;
+  int _currentCombo = 0;
   bool _isGameOver = false;
 
   @override
@@ -25,31 +26,46 @@ class _TowerPageState extends ConsumerState<TowerPage> {
     super.initState();
     _game = TowerStackGame(
       onScoreChanged: (score) {
-        setState(() {
-          _currentScore = score;
-        });
+        if (mounted) {
+          setState(() {
+            _currentScore = score;
+          });
+        }
+      },
+      onComboChanged: (combo) {
+        if (mounted) {
+          setState(() {
+            _currentCombo = combo;
+          });
+        }
       },
       onGameOver: () {
-        setState(() {
-          _isGameOver = true;
-        });
-        // Save high score
-        final notifier = ref.read(towerGameProvider(MediaQuery.of(context).size.width).notifier);
-        notifier.saveScore(_currentScore);
+        if (mounted) {
+          setState(() {
+            _isGameOver = true;
+          });
+          // Save high score using deferred call to avoid build-time issues
+          Future.microtask(() {
+            if (mounted) {
+              final notifier = ref.read(towerGameProvider(0).notifier);
+              notifier.saveScore(_currentScore);
+            }
+          });
+        }
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    // Initialize provider to load high score
-    ref.watch(towerGameProvider(screenWidth));
-    final notifier = ref.read(towerGameProvider(screenWidth).notifier);
+    // Initialize provider to load high score (use 0 as dummy parameter)
+    ref.watch(towerGameProvider(0));
+    final notifier = ref.read(towerGameProvider(0).notifier);
 
     return GamePageLayout(
       title: 'Tower Stack',
       accentColor: const Color(0xFFE91E63),
+      scrollable: false, // Flame game needs Expanded, not ScrollView
       instructions: 'Empilhe os blocos!\n\n'
           '👆 Toque para soltar o bloco\n'
           '🎯 Alinhe perfeitamente para combo\n'
@@ -64,6 +80,7 @@ class _TowerPageState extends ConsumerState<TowerPage> {
             setState(() {
               _isGameOver = false;
               _currentScore = 0;
+              _currentCombo = 0;
             });
             _game.resetGame();
           },
@@ -116,6 +133,38 @@ class _TowerPageState extends ConsumerState<TowerPage> {
             ),
           ),
           
+          // Combo Indicator
+          if (_currentCombo > 0)
+            Positioned(
+              top: 100,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.8),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '🔥 Combo x$_currentCombo',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          
           // Start Instruction
           if (_currentScore == 0 && !_isGameOver)
             Center(
@@ -141,11 +190,12 @@ class _TowerPageState extends ConsumerState<TowerPage> {
             GameOverDialog(
               score: _currentScore,
               highScore: notifier.highScore,
-              combo: _game.combo,
+              combo: _currentCombo,
               onRestart: () {
                 setState(() {
                   _isGameOver = false;
                   _currentScore = 0;
+                  _currentCombo = 0;
                 });
                 _game.resetGame();
               },

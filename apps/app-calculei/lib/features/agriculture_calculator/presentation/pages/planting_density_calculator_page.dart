@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/planting_density_calculator.dart';
 
@@ -36,157 +35,133 @@ class _PlantingDensityCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Densidade de Plantio',
+      subtitle: 'Espaçamento e População',
+      icon: Icons.grid_4x4,
+      accentColor: CalculatorAccentColors.agriculture,
+      categoryName: 'Agricultura',
+      instructions: 'Calcule o espaçamento ideal e população de plantas por área.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              // Share handled by ShareButton in result card
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Row spacing and plant spacing
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
                 children: [
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.grid_4x4,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Densidade de Plantio',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Calcule o número de plantas por hectare e total para sua área '
-                            'baseado no espaçamento entre linhas e plantas.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'Espaçamento entre linhas',
-                                    controller: _rowSpacingController,
-                                    suffix: 'm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'Espaçamento entre plantas',
-                                    controller: _plantSpacingController,
-                                    suffix: 'm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Área total',
-                                    controller: _areaController,
-                                    suffix: 'ha',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'Custo por muda (opcional)',
-                                    controller: _costPerPlantController,
-                                    suffix: 'R\$',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            CalculatorButton(
-                              label: 'Calcular Densidade',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
+                  SizedBox(
+                    width: 180,
+                    child: _DarkInputField(
+                      label: 'Espaçamento entre linhas',
+                      controller: _rowSpacingController,
+                      suffix: 'm',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
                         ),
-                      ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  if (_result != null) _PlantingDensityResultCard(result: _result!),
+                  SizedBox(
+                    width: 180,
+                    child: _DarkInputField(
+                      label: 'Espaçamento entre plantas',
+                      controller: _plantSpacingController,
+                      suffix: 'm',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
+                    ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Area and cost
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Área total',
+                      controller: _areaController,
+                      suffix: 'ha',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 180,
+                    child: _DarkInputField(
+                      label: 'Custo por muda (opcional)',
+                      controller: _costPerPlantController,
+                      suffix: 'R\$',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 32),
+
+              // Calculate button
+              ElevatedButton.icon(
+                onPressed: _calculate,
+                icon: const Icon(Icons.calculate),
+                label: const Text('Calcular Densidade'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CalculatorAccentColors.agriculture,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              if (_result != null)
+                _PlantingDensityResultCard(result: _result!),
+            ],
           ),
         ),
       ),
@@ -194,7 +169,9 @@ class _PlantingDensityCalculatorPageState
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = PlantingDensityCalculator.calculate(
       rowSpacingM: double.parse(_rowSpacingController.text),
@@ -214,98 +191,152 @@ class _PlantingDensityResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.grass, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado da Densidade',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.grass, color: CalculatorAccentColors.agriculture),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado da Densidade',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                const Spacer(),
-                ShareButton(text: _formatShareText()),
-              ],
-            ),
-            const SizedBox(height: 20),
+              ),
+              const Spacer(),
+              ShareButton(
+                text: _formatShareText(),
+                icon: Icons.share_outlined,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Main results
+          Row(
+            children: [
+              Expanded(
+                child: _ResultBox(
+                  label: 'Plantas/ha',
+                  value: result.plantsPerHa.toString(),
+                  color: CalculatorAccentColors.agriculture,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ResultBox(
+                  label: 'Total de plantas',
+                  value: result.totalPlants.toString(),
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              Expanded(
+                child: _ResultBox(
+                  label: 'Área/planta',
+                  value: '${result.areaPerPlant} m²',
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ResultBox(
+                  label: 'Metros lineares/ha',
+                  value: '${result.linearMetersHa.toStringAsFixed(0)} m',
+                  color: Colors.purple,
+                ),
+              ),
+            ],
+          ),
+
+          if (result.estimatedCost > 0) ...[
+            const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
+                color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Column(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _ResultRow(
-                    label: 'Plantas por hectare',
-                    value: '${result.plantsPerHa}',
-                    highlight: true,
+                  Text(
+                    'Custo com mudas:',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
                   ),
-                  const Divider(height: 24),
-                  _ResultRow(
-                    label: 'Total de plantas',
-                    value: '${result.totalPlants}',
-                  ),
-                  const SizedBox(height: 8),
-                  _ResultRow(
-                    label: 'Área por planta',
-                    value: '${result.areaPerPlant} m²',
-                  ),
-                  const SizedBox(height: 8),
-                  _ResultRow(
-                    label: 'Metros lineares/ha',
-                    value: '${result.linearMetersHa.toStringAsFixed(0)} m',
+                  Text(
+                    'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: CalculatorAccentColors.agriculture,
+                    ),
                   ),
                 ],
               ),
             ),
-            if (result.estimatedCost > 0) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+          ],
+
+          const SizedBox(height: 16),
+
+          // Recommendations
+          if (result.recommendations.isNotEmpty) ...[
+            Text(
+              'Recomendações',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.9),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...result.recommendations.map(
+              (rec) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Custo estimado com mudas:'),
-                    Text(
-                      'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: colorScheme.primary,
+                    const Icon(
+                      Icons.check_circle,
+                      size: 18,
+                      color: CalculatorAccentColors.agriculture,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        rec,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-            const SizedBox(height: 16),
-            ExpansionTile(
-              title: const Text('Recomendações'),
-              leading: const Icon(Icons.tips_and_updates),
-              children: result.recommendations
-                  .map((rec) => ListTile(
-                        leading: const Icon(Icons.check, size: 20),
-                        title: Text(rec, style: const TextStyle(fontSize: 14)),
-                        dense: true,
-                      ))
-                  .toList(),
             ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -326,35 +357,131 @@ by Agrimind''';
   }
 }
 
-class _ResultRow extends StatelessWidget {
+class _ResultBox extends StatelessWidget {
   final String label;
   final String value;
-  final bool highlight;
+  final Color color;
 
-  const _ResultRow({
+  const _ResultBox({
     required this.label,
     required this.value,
-    this.highlight = false,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 12,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Dark theme input field widget
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: highlight ? 16 : 14,
-            fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: highlight ? 18 : 14,
-            fontWeight: FontWeight.bold,
-            color: highlight ? Theme.of(context).colorScheme.primary : null,
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.agriculture,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 2,
+              ),
+            ),
           ),
         ),
       ],

@@ -26,6 +26,8 @@ class GameControlsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -37,6 +39,7 @@ class GameControlsWidget extends StatelessWidget {
             label: 'Desfazer',
             onTap: canUndo ? onUndo : null,
             isActive: false,
+            isDark: isDark,
           ),
           // Redo
           _buildControlButton(
@@ -44,6 +47,7 @@ class GameControlsWidget extends StatelessWidget {
             label: 'Refazer',
             onTap: canRedo ? onRedo : null,
             isActive: false,
+            isDark: isDark,
           ),
           // Notes toggle
           _buildControlButton(
@@ -51,6 +55,7 @@ class GameControlsWidget extends StatelessWidget {
             label: 'Notas',
             onTap: onNotesToggle,
             isActive: notesMode,
+            isDark: isDark,
           ),
           // Hint
           _buildControlButton(
@@ -58,6 +63,7 @@ class GameControlsWidget extends StatelessWidget {
             label: 'Dica',
             onTap: canUseHint ? onHint : null,
             isActive: false,
+            isDark: isDark,
           ),
           // Restart
           _buildControlButton(
@@ -65,6 +71,7 @@ class GameControlsWidget extends StatelessWidget {
             label: 'Reiniciar',
             onTap: onRestart,
             isActive: false,
+            isDark: isDark,
           ),
         ],
       ),
@@ -76,29 +83,36 @@ class GameControlsWidget extends StatelessWidget {
     required String label,
     required VoidCallback? onTap,
     required bool isActive,
+    required bool isDark,
   }) {
+    final activeColor = isDark ? const Color(0xFF9C7CF2) : Colors.blue;
+    final inactiveColor = isDark ? Colors.white70 : Colors.grey.shade700;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
-      child: Opacity(
-        opacity: onTap == null ? 0.4 : 1.0,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 28,
-              color: isActive ? Colors.blue : Colors.grey.shade700,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 10,
-                color: isActive ? Colors.blue : Colors.grey.shade700,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Opacity(
+          opacity: onTap == null ? 0.4 : 1.0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 28,
+                color: isActive ? activeColor : inactiveColor,
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: isActive ? activeColor : inactiveColor,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

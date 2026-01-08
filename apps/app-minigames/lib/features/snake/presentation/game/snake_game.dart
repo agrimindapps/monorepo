@@ -29,7 +29,7 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
   // Game state
   List<SnakeSegment> snakeBody = [];
-  late Food food;
+  Food? food;
   List<PowerUpComponent> powerUpsOnBoard = [];
   List<ActivePowerUp> activePowerUps = [];
 
@@ -119,12 +119,13 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
       position = Point(random.nextInt(gridSize), random.nextInt(gridSize));
     } while (_isOccupied(position));
 
-    food = Food(
+    final newFood = Food(
       gridPosition: position,
       cellSize: cellSize,
       boardOffset: Vector2(boardOffsetX, boardOffsetY),
     );
-    add(food);
+    food = newFood;
+    add(newFood);
   }
 
   void _spawnPowerUp() {
@@ -152,7 +153,7 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
 
   bool _isOccupied(Point<int> pos) {
     if (snakeBody.any((s) => s.gridPosition == pos)) return true;
-    if (food.gridPosition == pos) return true;
+    if (food != null && food!.gridPosition == pos) return true;
     if (powerUpsOnBoard.any((p) => p.gridPosition == pos)) return true;
     return false;
   }
@@ -180,13 +181,13 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
     _updateGameSpeed();
 
     // Magnet effect
-    if (_hasActivePowerUp(PowerUpType.magnet)) {
+    if (_hasActivePowerUp(PowerUpType.magnet) && food != null) {
       // Logic to pull food could go here, but for grid snake it's tricky.
       // Instead, let's just say if we are within 3 cells, we eat it.
       final head = snakeBody.first.gridPosition;
       final dist =
-          (head.x - food.gridPosition.x).abs() +
-          (head.y - food.gridPosition.y).abs();
+          (head.x - food!.gridPosition.x).abs() +
+          (head.y - food!.gridPosition.y).abs();
       if (dist <= 3 && dist > 0) {
         // Move food one step closer? Or just eat it?
         // Let's keep it simple for now and just eat if very close
@@ -268,13 +269,13 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
     // If ate food, grow (don't remove tail)
     // If not, move tail to head position
 
-    bool ateFood = newX == food.gridPosition.x && newY == food.gridPosition.y;
+    bool ateFood = food != null && newX == food!.gridPosition.x && newY == food!.gridPosition.y;
 
     // Magnet check (eat if close)
-    if (!ateFood && _hasActivePowerUp(PowerUpType.magnet)) {
+    if (!ateFood && _hasActivePowerUp(PowerUpType.magnet) && food != null) {
       final dist =
-          (newX - food.gridPosition.x).abs() +
-          (newY - food.gridPosition.y).abs();
+          (newX - food!.gridPosition.x).abs() +
+          (newY - food!.gridPosition.y).abs();
       if (dist <= 2) {
         ateFood = true;
       }
@@ -296,7 +297,9 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
       add(newHead);
 
       // Remove old food and spawn new
-      food.removeFromParent();
+      if (food != null) {
+        food!.removeFromParent();
+      }
       _spawnFood();
 
       // Increase score

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/fertilizer_dosing_calculator.dart';
 
@@ -33,170 +32,124 @@ class _FertilizerDosingCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Dosagem de Fertilizantes',
+      subtitle: 'Aplicação de Nutrientes',
+      icon: Icons.agriculture,
+      accentColor: CalculatorAccentColors.agriculture,
+      categoryName: 'Agricultura',
+      instructions: 'Calcule a dosagem correta de fertilizantes para sua cultura e área.',
+      maxContentWidth: 600,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Fertilizer type selection
+              Text(
+                'Tipo de Fertilizante',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: FertilizerType.values.map((type) {
+                  final name = FertilizerDosingCalculator
+                      .getFertilizerName(type);
+                  final nutrient = FertilizerDosingCalculator
+                      .getNutrientName(type);
+                  final content = FertilizerDosingCalculator
+                      .getNutrientContent(type);
+                  return ChoiceChip(
+                    label: Text('$name ($nutrient ${content.toStringAsFixed(0)}%)'),
+                    selected: _fertilizerType == type,
+                    onSelected: (_) =>
+                        setState(() => _fertilizerType = type),
+                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
+                    labelStyle: TextStyle(
+                      color: _fertilizerType == type 
+                          ? Colors.white 
+                          : Colors.white.withValues(alpha: 0.7),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Area and desired rate
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.agriculture,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Dosagem de Fertilizantes',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Calcule a quantidade de produto comercial necessária baseado '
-                            'no teor de nutrientes e taxa desejada de aplicação.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Fertilizer type selection
-                            Text(
-                              'Tipo de Fertilizante',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: FertilizerType.values.map((type) {
-                                final name = FertilizerDosingCalculator
-                                    .getFertilizerName(type);
-                                final nutrient = FertilizerDosingCalculator
-                                    .getNutrientName(type);
-                                final content = FertilizerDosingCalculator
-                                    .getNutrientContent(type);
-                                return ChoiceChip(
-                                  label: Text('$name ($nutrient ${content.toStringAsFixed(0)}%)'),
-                                  selected: _fertilizerType == type,
-                                  onSelected: (_) =>
-                                      setState(() => _fertilizerType = type),
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Area and desired rate
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Área',
-                                    controller: _areaController,
-                                    suffix: 'ha',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Taxa desejada de nutriente',
-                                    controller: _desiredRateController,
-                                    suffix: 'kg/ha',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular Dosagem',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
+                  SizedBox(
+                    width: 180,
+                    child: _DarkInputField(
+                      label: 'Área',
+                      controller: _areaController,
+                      suffix: 'ha',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
                         ),
-                      ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  if (_result != null)
-                    _FertilizerDosingResultCard(
-                      result: _result!,
-                      fertilizerType: _fertilizerType,
+                  SizedBox(
+                    width: 220,
+                    child: _DarkInputField(
+                      label: 'Taxa desejada de nutriente',
+                      controller: _desiredRateController,
+                      suffix: 'kg/ha',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 32),
+
+              // Calculate button
+              ElevatedButton.icon(
+                onPressed: _calculate,
+                icon: const Icon(Icons.calculate),
+                label: const Text('Calcular Dosagem'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CalculatorAccentColors.agriculture,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              if (_result != null)
+                _FertilizerDosingResultCard(
+                  result: _result!,
+                  fertilizerType: _fertilizerType,
+                ),
+            ],
           ),
         ),
       ),
@@ -204,7 +157,9 @@ class _FertilizerDosingCalculatorPageState
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = FertilizerDosingCalculator.calculate(
       areaHa: double.parse(_areaController.text),
@@ -227,110 +182,149 @@ class _FertilizerDosingResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final fertilizerName =
         FertilizerDosingCalculator.getFertilizerName(fertilizerType);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.inventory_2, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado - $fertilizerName',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.inventory_2, color: Colors.white70),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado - $fertilizerName',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: _formatShareText(),
+              ),
+              const Spacer(),
+              ShareButton(
+                text: _formatShareText(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Main results
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                _ResultRow(
+                  label: 'Produto necessário',
+                  value: '${result.productKg.toStringAsFixed(1)} kg',
+                  highlight: true,
+                ),
+                Divider(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  height: 24,
+                ),
+                _ResultRow(
+                  label: 'Quantidade por hectare',
+                  value: '${result.productKgHa.toStringAsFixed(1)} kg/ha',
+                ),
+                const SizedBox(height: 8),
+                _ResultRow(
+                  label: 'Sacas (50kg)',
+                  value: '${result.bagsNeeded} sacas',
+                ),
+                const SizedBox(height: 8),
+                _ResultRow(
+                  label: 'Nutriente puro total',
+                  value: '${result.totalNutrientKg.toStringAsFixed(1)} kg',
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // Main results
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                children: [
-                  _ResultRow(
-                    label: 'Produto necessário',
-                    value: '${result.productKg.toStringAsFixed(1)} kg',
-                    highlight: true,
-                  ),
-                  const Divider(height: 24),
-                  _ResultRow(
-                    label: 'Quantidade por hectare',
-                    value: '${result.productKgHa.toStringAsFixed(1)} kg/ha',
-                  ),
-                  const SizedBox(height: 8),
-                  _ResultRow(
-                    label: 'Sacas (50kg)',
-                    value: '${result.bagsNeeded} sacas',
-                  ),
-                  const SizedBox(height: 8),
-                  _ResultRow(
-                    label: 'Nutriente puro total',
-                    value: '${result.totalNutrientKg.toStringAsFixed(1)} kg',
-                  ),
-                ],
+          const SizedBox(height: 16),
+
+          // Cost
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: CalculatorAccentColors.agriculture.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
               ),
             ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Custo estimado:',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 15,
+                  ),
+                ),
+                Text(
+                  'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Cost
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
+          // Tips
+          Text(
+            'Dicas de aplicação',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.9),
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...result.applicationTips.map(
+            (tip) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Custo estimado:'),
-                  Text(
-                    'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: colorScheme.primary,
+                  const Icon(
+                    Icons.check_circle,
+                    size: 18,
+                    color: CalculatorAccentColors.agriculture,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      tip,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Tips
-            ExpansionTile(
-              title: const Text('Dicas de aplicação'),
-              leading: const Icon(Icons.tips_and_updates),
-              children: result.applicationTips
-                  .map(
-                    (tip) => ListTile(
-                      leading: const Icon(Icons.check, size: 20),
-                      title: Text(tip, style: const TextStyle(fontSize: 14)),
-                      dense: true,
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -377,6 +371,7 @@ class _ResultRow extends StatelessWidget {
           style: TextStyle(
             fontSize: highlight ? 16 : 14,
             fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+            color: Colors.white.withValues(alpha: highlight ? 0.9 : 0.7),
           ),
         ),
         Text(
@@ -384,7 +379,98 @@ class _ResultRow extends StatelessWidget {
           style: TextStyle(
             fontSize: highlight ? 18 : 14,
             fontWeight: FontWeight.bold,
-            color: highlight ? Theme.of(context).colorScheme.primary : null,
+            color: highlight 
+                ? CalculatorAccentColors.agriculture 
+                : Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Dark theme input field widget
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              // ignore: prefer_const_constructors
+              borderSide: BorderSide(
+                color: CalculatorAccentColors.agriculture,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 2,
+              ),
+            ),
           ),
         ),
       ],

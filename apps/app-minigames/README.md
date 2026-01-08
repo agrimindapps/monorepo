@@ -377,3 +377,28 @@ Este projeto é propriedade de **Agrimind Soluções**.
 ![Migration](https://img.shields.io/badge/Migration-30%25-orange?style=flat-square)
 
 </div>
+
+---
+
+## 📱 Responsividade Mobile
+
+O app foi otimizado para proporcionar uma experiência fullscreen em dispositivos móveis:
+
+### Desktop vs Mobile
+
+| Aspecto | Desktop (≥800px) | Mobile (<800px) |
+|---------|------------------|-----------------|
+| Sidebar | Visível (240px) | Drawer (menu) |
+| Padding | 24px | 8px |
+| Game Width | Max 600px | Full width |
+| Borders | Sim (16px radius) | Mínimas (8px) |
+| Shadows | Sim | Não |
+| Background | Pattern visível | Transparente |
+| Header | Completo | Compacto |
+
+### Documentação Adicional
+
+- 📄 [KEYBOARD_CONTROLS.md](./KEYBOARD_CONTROLS.md) - Guia completo de controles
+- 📊 [GAMES_INPUT_SUMMARY.md](./GAMES_INPUT_SUMMARY.md) - Resumo de inputs
+- 📱 [MOBILE_RESPONSIVENESS.md](./MOBILE_RESPONSIVENESS.md) - Detalhes mobile
+

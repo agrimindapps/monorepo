@@ -44,44 +44,40 @@ class QuizImageLocalDataSourceImpl implements QuizImageLocalDataSource {
 
   @override
   List<QuizQuestionModel> getAvailableQuestions() {
+    // Using emoji flags instead of network images to avoid loading issues
     return const [
       QuizQuestionModel(
         id: '1',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/9/9a/Flag_of_Spain.svg',
+        imageUrl: 'emoji:🇪🇸',
         options: ['Itália', 'Espanha', 'França', 'Portugal', 'México'],
         correctAnswer: 'Espanha',
       ),
       QuizQuestionModel(
         id: '2',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/0/05/Flag_of_Brazil.svg',
+        imageUrl: 'emoji:🇧🇷',
         options: ['Argentina', 'Brasil', 'Colômbia', 'Uruguai', 'Venezuela'],
         correctAnswer: 'Brasil',
       ),
       QuizQuestionModel(
         id: '3',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/c/c3/Flag_of_France.svg',
+        imageUrl: 'emoji:🇫🇷',
         options: ['Alemanha', 'Holanda', 'França', 'Itália', 'Bélgica'],
         correctAnswer: 'França',
       ),
       QuizQuestionModel(
         id: '4',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/b/ba/Flag_of_Germany.svg',
+        imageUrl: 'emoji:🇩🇪',
         options: ['Bélgica', 'Alemanha', 'Áustria', 'Suíça', 'Polônia'],
         correctAnswer: 'Alemanha',
       ),
       QuizQuestionModel(
         id: '5',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/a/a4/Flag_of_the_United_States.svg',
+        imageUrl: 'emoji:🇺🇸',
         options: [
           'Canadá',
           'Reino Unido',
@@ -94,78 +90,56 @@ class QuizImageLocalDataSourceImpl implements QuizImageLocalDataSource {
       QuizQuestionModel(
         id: '6',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/9/9e/Flag_of_Japan.svg',
+        imageUrl: 'emoji:🇯🇵',
         options: ['China', 'Coreia do Sul', 'Japão', 'Vietnã', 'Tailândia'],
         correctAnswer: 'Japão',
       ),
       QuizQuestionModel(
         id: '7',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/0/0f/Flag_of_South_Korea.svg',
+        imageUrl: 'emoji:🇰🇷',
         options: ['Japão', 'Taiwan', 'Vietnã', 'Coreia do Sul', 'China'],
         correctAnswer: 'Coreia do Sul',
       ),
       QuizQuestionModel(
         id: '8',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/0/09/Flag_of_South_Korea.svg',
-        options: [
-          'Taiwan',
-          'Coreia do Norte',
-          'Indonésia',
-          'Coreia do Sul',
-          'Filipinas',
-        ],
-        correctAnswer: 'Coreia do Sul',
-      ),
-      QuizQuestionModel(
-        id: '9',
-        question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/f/fa/Flag_of_the_People%27s_Republic_of_China.svg',
+        imageUrl: 'emoji:🇨🇳',
         options: ['Vietnã', 'China', 'Hong Kong', 'Taiwan', 'Coreia do Norte'],
         correctAnswer: 'China',
       ),
       QuizQuestionModel(
-        id: '10',
+        id: '9',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/4/41/Flag_of_India.svg',
+        imageUrl: 'emoji:🇮🇳',
         options: ['Paquistão', 'Bangladesh', 'Nepal', 'Butão', 'Índia'],
         correctAnswer: 'Índia',
       ),
       QuizQuestionModel(
-        id: '11',
+        id: '10',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Ukraine.svg',
+        imageUrl: 'emoji:🇺🇦',
         options: ['Suécia', 'Ucrânia', 'Romênia', 'Eslováquia', 'Moldova'],
         correctAnswer: 'Ucrânia',
       ),
       QuizQuestionModel(
-        id: '12',
+        id: '11',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/f/f3/Flag_of_Russia.svg',
+        imageUrl: 'emoji:🇷🇺',
         options: ['Polônia', 'Eslováquia', 'Eslovênia', 'Rússia', 'Sérvia'],
         correctAnswer: 'Rússia',
       ),
       QuizQuestionModel(
-        id: '13',
+        id: '12',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/0/03/Flag_of_Italy.svg',
+        imageUrl: 'emoji:🇮🇹',
         options: ['México', 'Hungria', 'Itália', 'Irlanda', 'Bulgária'],
         correctAnswer: 'Itália',
       ),
       QuizQuestionModel(
-        id: '14',
+        id: '13',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_Argentina.svg',
+        imageUrl: 'emoji:🇦🇷',
         options: [
           'Uruguai',
           'Argentina',
@@ -176,10 +150,9 @@ class QuizImageLocalDataSourceImpl implements QuizImageLocalDataSource {
         correctAnswer: 'Argentina',
       ),
       QuizQuestionModel(
-        id: '15',
+        id: '14',
         question: 'Esta é a bandeira de qual país?',
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/8/88/Flag_of_Australia_%28converted%29.svg',
+        imageUrl: 'emoji:🇦🇺',
         options: [
           'Nova Zelândia',
           'Reino Unido',
@@ -188,6 +161,13 @@ class QuizImageLocalDataSourceImpl implements QuizImageLocalDataSource {
           'Tuvalu',
         ],
         correctAnswer: 'Austrália',
+      ),
+      QuizQuestionModel(
+        id: '15',
+        question: 'Esta é a bandeira de qual país?',
+        imageUrl: 'emoji:🇵🇹',
+        options: ['Espanha', 'Brasil', 'Portugal', 'Moçambique', 'Angola'],
+        correctAnswer: 'Portugal',
       ),
     ];
   }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/medication_dosage_calculator.dart';
+export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
 
 /// Página da calculadora de Dosagem de Medicamentos
 class MedicationDosageCalculatorPage extends StatefulWidget {
@@ -33,256 +33,232 @@ class _MedicationDosageCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Warning Card
-                  Card(
-                    color: Colors.orange.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.warning, color: Colors.orange),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'AVISO IMPORTANTE',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
-                                      ?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.orange.shade900,
-                                      ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Este cálculo é apenas informativo. NUNCA medique seu pet sem prescrição veterinária.',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.orange.shade900,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+    return CalculatorPageLayout(
+      title: 'Dosagem de Medicamentos',
+      subtitle: 'Cálculo de Dosagem',
+      icon: Icons.medication,
+      accentColor: CalculatorAccentColors.pet,
+      categoryName: 'Pet',
+      instructions: 'Calcule a dosagem correta de medicamentos veterinários baseado no peso do pet.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {},
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Warning Card
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.warning, color: Colors.orange),
+                    const SizedBox(width: 12),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.medication,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Cálculo de Dosagem',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
                           Text(
-                            'Calcule dosagens de medicamentos comuns baseadas no peso do pet.',
+                            'AVISO IMPORTANTE',
                             style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'Este cálculo é apenas informativo. NUNCA medique seu pet sem prescrição veterinária.',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
+                ),
+              ),
 
-                  const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Dados do pet',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Species
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _SpeciesButton(
-                                    label: 'Cachorro',
-                                    emoji: '🐕',
-                                    isSelected: _species == PetSpecies.dog,
-                                    onTap: () =>
-                                        setState(() => _species = PetSpecies.dog),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _SpeciesButton(
-                                    label: 'Gato',
-                                    emoji: '🐈',
-                                    isSelected: _species == PetSpecies.cat,
-                                    onTap: () =>
-                                        setState(() => _species = PetSpecies.cat),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Weight
-                            StandardInputField(
-                              label: 'Peso do pet',
-                              controller: _weightController,
-                              suffix: 'kg',
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d*\.?\d*'),
-                                ),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Obrigatório';
-                                }
-                                final num = double.tryParse(value);
-                                if (num == null || num <= 0 || num > 100) {
-                                  return 'Entre 0 e 100 kg';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Medication Type
-                            Text(
-                              'Medicamento',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 8),
-                            ...MedicationType.values.map((type) {
-                              return RadioListTile<MedicationType>(
-                                title: Text(
-                                  MedicationDosageCalculator
-                                      .getMedicationDescription(type),
-                                ),
-                                value: type,
-                                groupValue: _medicationType,
-                                onChanged: (value) =>
-                                    setState(() => _medicationType = value!),
-                                contentPadding: EdgeInsets.zero,
-                                dense: true,
-                              );
-                            }).toList(),
-
-                            const SizedBox(height: 16),
-
-                            // Frequency
-                            Text(
-                              'Frequência',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: DosageFrequency.values.map((freq) {
-                                return ChoiceChip(
-                                  label: Text(_getFrequencyLabel(freq)),
-                                  selected: _frequency == freq,
-                                  onSelected: (_) =>
-                                      setState(() => _frequency = freq),
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular Dosagem',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
+              // Species
+              Row(
+                children: [
+                  Expanded(
+                    child: _SpeciesButton(
+                      label: 'Cachorro',
+                      emoji: '🐕',
+                      isSelected: _species == PetSpecies.dog,
+                      onTap: () =>
+                          setState(() => _species = PetSpecies.dog),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null)
-                    _MedicationDosageResultCard(
-                      result: _result!,
-                      species: _species,
-                      weight: double.parse(_weightController.text),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _SpeciesButton(
+                      label: 'Gato',
+                      emoji: '🐈',
+                      isSelected: _species == PetSpecies.cat,
+                      onTap: () =>
+                          setState(() => _species = PetSpecies.cat),
                     ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Weight
+              _DarkInputField(
+                label: 'Peso do pet',
+                controller: _weightController,
+                suffix: 'kg',
+                keyboardType:
+                    const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                    RegExp(r'^\d*\.?\d*'),
+                  ),
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Obrigatório';
+                  }
+                  final num = double.tryParse(value);
+                  if (num == null || num <= 0 || num > 100) {
+                    return 'Entre 0 e 100 kg';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              // Medication Type
+              Text(
+                'Medicamento',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              ...MedicationType.values.map((type) {
+                return RadioListTile<MedicationType>(
+                  title: Text(
+                    MedicationDosageCalculator
+                        .getMedicationDescription(type),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 14,
+                    ),
+                  ),
+                  value: type,
+                  groupValue: _medicationType,
+                  onChanged: (value) =>
+                      setState(() => _medicationType = value!),
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  activeColor: CalculatorAccentColors.pet,
+                );
+              }).toList(),
+
+              const SizedBox(height: 24),
+
+              // Frequency
+              Text(
+                'Frequência',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: DosageFrequency.values.map((freq) {
+                  final isSelected = _frequency == freq;
+                  return ChoiceChip(
+                    label: Text(_getFrequencyLabel(freq)),
+                    selected: isSelected,
+                    onSelected: (_) =>
+                        setState(() => _frequency = freq),
+                    selectedColor: CalculatorAccentColors.pet.withValues(alpha: 0.3),
+                    backgroundColor: Colors.white.withValues(alpha: 0.08),
+                    labelStyle: TextStyle(
+                      color: isSelected
+                          ? CalculatorAccentColors.pet
+                          : Colors.white.withValues(alpha: 0.9),
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                    side: BorderSide(
+                      color: isSelected
+                          ? CalculatorAccentColors.pet
+                          : Colors.white.withValues(alpha: 0.2),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Calculate button
+              ElevatedButton(
+                onPressed: _calculate,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CalculatorAccentColors.pet,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.calculate),
+                    SizedBox(width: 8),
+                    Text(
+                      'Calcular Dosagem',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _MedicationDosageResultCard(
+                  result: _result!,
+                  species: _species,
+                  weight: double.parse(_weightController.text),
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -326,10 +302,12 @@ class _SpeciesButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.pet;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+      color: isSelected
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -339,8 +317,8 @@ class _SpeciesButton extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -354,8 +332,8 @@ class _SpeciesButton extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -379,27 +357,35 @@ class _MedicationDosageResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.pet;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assessment, color: accentColor),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: '''
+              ),
+              const Spacer(),
+              ShareButton(
+                text: '''
 📋 Dosagem de Medicamentos - Calculei App
 
 💊 Medicamento: ${result.medicationName}
@@ -417,158 +403,162 @@ _________________
 Calculado por Calculei
 by Agrimind
 https://calculei.com.br''',
-                ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Main result
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
             ),
-            const SizedBox(height: 20),
-
-            // Main result
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  const Text('💊', style: TextStyle(fontSize: 48)),
-                  const SizedBox(height: 8),
-                  Text(
-                    result.medicationName,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.onPrimaryContainer,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        result.dosePerAdministration.toStringAsFixed(1),
-                        style:
-                            Theme.of(context).textTheme.displayMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.primary,
-                                ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          ' mg',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    'por administração',
-                    style: TextStyle(
-                      color: colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Details
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  _DetailRow(
-                    label: 'Frequência',
-                    value: result.frequencyText,
-                  ),
-                  const Divider(height: 16),
-                  _DetailRow(
-                    label: 'Administrações/dia',
-                    value: '${result.administrationsPerDay}x',
-                  ),
-                  const Divider(height: 16),
-                  _DetailRow(
-                    label: 'Dose diária total',
-                    value: '${result.dailyDose.toStringAsFixed(1)} mg',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Observations
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade200),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(Icons.info, color: Colors.blue.shade700, size: 20),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.observations,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.blue.shade900,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Warnings
-            Text(
-              'Avisos Importantes',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            child: Column(
+              children: [
+                const Text('💊', style: TextStyle(fontSize: 48)),
+                const SizedBox(height: 8),
+                Text(
+                  result.medicationName,
+                  style: const TextStyle(
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.red.shade700,
+                    color: accentColor,
                   ),
-            ),
-            const SizedBox(height: 8),
-            ...result.warnings.map(
-              (warning) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Icon(
-                      Icons.warning,
-                      size: 18,
-                      color: warning.startsWith('⚠️') || warning.startsWith('🚨')
-                          ? Colors.red.shade700
-                          : Colors.orange.shade700,
+                    Text(
+                      result.dosePerAdministration.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
-                        warning,
-                        style: const TextStyle(fontSize: 14),
+                        ' mg',
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
                       ),
                     ),
                   ],
                 ),
+                Text(
+                  'por administração',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Details
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                _DetailRow(
+                  label: 'Frequência',
+                  value: result.frequencyText,
+                ),
+                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                _DetailRow(
+                  label: 'Administrações/dia',
+                  value: '${result.administrationsPerDay}x',
+                ),
+                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                _DetailRow(
+                  label: 'Dose diária total',
+                  value: '${result.dailyDose.toStringAsFixed(1)} mg',
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Observations
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.info, color: Colors.blue, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    result.observations,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Warnings
+          Text(
+            'Avisos Importantes',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: Colors.red.shade400,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...result.warnings.map(
+            (warning) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.warning,
+                    size: 18,
+                    color: warning.startsWith('⚠️') || warning.startsWith('🚨')
+                        ? Colors.red.shade400
+                        : Colors.orange,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      warning,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -585,10 +575,102 @@ class _DetailRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14)),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+        ),
         Text(
           value,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dark theme input field widget
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.pet,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
         ),
       ],
     );

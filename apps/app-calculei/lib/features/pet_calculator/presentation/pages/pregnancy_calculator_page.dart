@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/pregnancy_calculator.dart';
+export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
 
 /// Página da calculadora de Gestação de Pets
 class PregnancyCalculatorPage extends StatefulWidget {
@@ -24,186 +25,150 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Gestação Pet',
+      subtitle: 'Acompanhamento de Gestação',
+      icon: Icons.child_friendly,
+      accentColor: CalculatorAccentColors.pet,
+      categoryName: 'Pet',
+      instructions: 'Acompanhe o período gestacional do seu pet e saiba as datas importantes.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              final dateFormat = DateFormat('dd/MM/yyyy');
+              Share.share(
+                ShareFormatter.formatPregnancyCalculation(
+                  species: _isDog ? 'Cadela' : 'Gata',
+                  gestationDays: _result!.gestationDays,
+                  dueDate: dateFormat.format(_result!.estimatedDueDate),
+                  daysRemaining: _result!.daysRemaining,
+                  stage: PregnancyCalculator.getStageText(_result!.currentStage),
+                ),
+              );
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Species selection
+            Row(
+              children: [
+                Expanded(
+                  child: _SpeciesButton(
+                    label: 'Cadela',
+                    emoji: '🐕',
+                    isSelected: _isDog,
+                    onTap: () => setState(() => _isDog = true),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _SpeciesButton(
+                    label: 'Gata',
+                    emoji: '🐈',
+                    isSelected: !_isDog,
+                    onTap: () => setState(() => _isDog = false),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Mating date
+            Text(
+              'Data do acasalamento',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            InkWell(
+              onTap: _selectMatingDate,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.08),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: CalculatorAccentColors.pet,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      _dateFormat.format(_matingDate),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      'Alterar',
+                      style: TextStyle(
+                        color: CalculatorAccentColors.pet,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Calculate button
+            ElevatedButton(
+              onPressed: _calculate,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: CalculatorAccentColors.pet,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.child_friendly,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Acompanhamento de Gestação',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Acompanhe a gestação da sua pet, desde o acasalamento '
-                            'até o nascimento dos filhotes. Receba orientações '
-                            'para cada fase.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Icon(Icons.calculate),
+                  SizedBox(width: 8),
+                  Text(
+                    'Calcular',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Dados da gestação',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Species selection
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _SpeciesButton(
-                                  label: 'Cadela',
-                                  emoji: '🐕',
-                                  isSelected: _isDog,
-                                  onTap: () => setState(() => _isDog = true),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _SpeciesButton(
-                                  label: 'Gata',
-                                  emoji: '🐈',
-                                  isSelected: !_isDog,
-                                  onTap: () => setState(() => _isDog = false),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // Mating date
-                          Text(
-                            'Data do acasalamento',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                          ),
-                          const SizedBox(height: 8),
-                          InkWell(
-                            onTap: _selectMatingDate,
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .outline
-                                      .withValues(alpha: 0.5),
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.calendar_today,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    _dateFormat.format(_matingDate),
-                                    style: const TextStyle(fontSize: 16),
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    'Alterar',
-                                    style: TextStyle(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          CalculatorButton(
-                            label: 'Calcular',
-                            icon: Icons.calculate,
-                            onPressed: _calculate,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null)
-                    _PregnancyResultCard(
-                      result: _result!,
-                      isDog: _isDog,
-                      matingDate: _matingDate,
-                    ),
                 ],
               ),
             ),
-          ),
+
+            // Result
+            if (_result != null) ...[
+              const SizedBox(height: 32),
+              _PregnancyResultCard(
+                result: _result!,
+                isDog: _isDog,
+                matingDate: _matingDate,
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -248,10 +213,12 @@ class _SpeciesButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.pet;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+      color: isSelected
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -261,8 +228,8 @@ class _SpeciesButton extends StatelessWidget {
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -276,8 +243,8 @@ class _SpeciesButton extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -314,221 +281,222 @@ class _PregnancyResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.pet;
     final stageColor = _getStageColor(result.currentStage);
     final dateFormat = DateFormat('dd/MM/yyyy');
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Acompanhamento',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assessment, color: accentColor),
+              const SizedBox(width: 8),
+              Text(
+                'Acompanhamento',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatPregnancyCalculation(
-                    species: isDog ? 'Cadela' : 'Gata',
-                    gestationDays: result.gestationDays,
-                    dueDate: dateFormat.format(result.estimatedDueDate),
-                    daysRemaining: result.daysRemaining,
-                    stage: PregnancyCalculator.getStageText(result.currentStage),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Progress circle
+          Center(
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                SizedBox(
+                  width: 150,
+                  height: 150,
+                  child: CircularProgressIndicator(
+                    value: result.progressPercent / 100,
+                    strokeWidth: 12,
+                    backgroundColor: stageColor.withValues(alpha: 0.2),
+                    valueColor: AlwaysStoppedAnimation(stageColor),
                   ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      '${result.gestationDays}',
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: stageColor,
+                      ),
+                    ),
+                    Text(
+                      'dias',
+                      style: TextStyle(color: stageColor),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // Progress circle
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
+          const SizedBox(height: 16),
+
+          // Stage chip
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: stageColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                PregnancyCalculator.getStageText(result.currentStage),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Stage description
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: stageColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: stageColor.withValues(alpha: 0.3)),
+            ),
+            child: Text(
+              result.stageDescription,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: stageColor),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Due dates
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                _DetailRow(
+                  icon: Icons.event,
+                  label: 'Data prevista',
+                  value: dateFormat.format(result.estimatedDueDate),
+                  color: Colors.green,
+                ),
+                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                _DetailRow(
+                  icon: Icons.timer,
+                  label: 'Dias restantes',
+                  value: '${result.daysRemaining} dias',
+                  color: Colors.blue,
+                ),
+                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                _DetailRow(
+                  icon: Icons.date_range,
+                  label: 'Janela de parto',
+                  value:
+                      '${dateFormat.format(result.earliestDueDate)} - ${dateFormat.format(result.latestDueDate)}',
+                  color: Colors.orange,
+                ),
+              ],
+            ),
+          ),
+
+          // Warning for overdue
+          if (result.isOverdue) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.5)),
+              ),
+              child: const Row(
                 children: [
-                  SizedBox(
-                    width: 150,
-                    height: 150,
-                    child: CircularProgressIndicator(
-                      value: result.progressPercent / 100,
-                      strokeWidth: 12,
-                      backgroundColor: stageColor.withValues(alpha: 0.2),
-                      valueColor: AlwaysStoppedAnimation(stageColor),
+                  Icon(Icons.warning, color: Colors.red),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      '⚠️ Gestação prolongada! Consulte o veterinário imediatamente.',
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        '${result.gestationDays}',
-                        style:
-                            Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: stageColor,
-                                ),
-                      ),
-                      Text(
-                        'dias',
-                        style: TextStyle(color: stageColor),
-                      ),
-                    ],
                   ),
                 ],
               ),
             ),
+          ],
 
-            const SizedBox(height: 16),
-
-            // Stage chip
-            Center(
-              child: Chip(
-                label: Text(
-                  PregnancyCalculator.getStageText(result.currentStage),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                backgroundColor: stageColor,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Stage description
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: stageColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: stageColor.withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                result.stageDescription,
-                textAlign: TextAlign.center,
-                style: TextStyle(color: stageColor),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Due dates
-            _InfoRow(
-              icon: Icons.event,
-              label: 'Data prevista',
-              value: dateFormat.format(result.estimatedDueDate),
-              color: Colors.green,
-            ),
-            _InfoRow(
-              icon: Icons.timer,
-              label: 'Dias restantes',
-              value: '${result.daysRemaining} dias',
-              color: Colors.blue,
-            ),
-            _InfoRow(
-              icon: Icons.date_range,
-              label: 'Janela de parto',
-              value:
-                  '${dateFormat.format(result.earliestDueDate)} - ${dateFormat.format(result.latestDueDate)}',
-              color: Colors.orange,
-            ),
-
-            // Warning for overdue
-            if (result.isOverdue) ...[
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.warning, color: Colors.red),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        '⚠️ Gestação prolongada! Consulte o veterinário imediatamente.',
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-
-            // Upcoming milestones
-            if (result.upcomingMilestones.isNotEmpty) ...[
-              const SizedBox(height: 20),
-              Text(
-                'Próximos marcos',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              ...result.upcomingMilestones.map(
-                (milestone) => _MilestoneItem(
-                  milestone: milestone,
-                  matingDate: matingDate,
-                ),
-              ),
-            ],
-
-            // Care instructions
+          // Upcoming milestones
+          if (result.upcomingMilestones.isNotEmpty) ...[
             const SizedBox(height: 20),
-            ExpansionTile(
-              title: const Text('Instruções de cuidado'),
-              leading: const Icon(Icons.health_and_safety),
-              children: result.careInstructions
-                  .map(
-                    (instruction) => ListTile(
-                      leading: const Icon(Icons.check, size: 20),
-                      title: Text(instruction, style: const TextStyle(fontSize: 14)),
-                      dense: true,
-                    ),
-                  )
-                  .toList(),
+            Text(
+              'Próximos marcos',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
             ),
-
-            // Nutritional recommendations
-            ExpansionTile(
-              title: const Text('Alimentação'),
-              leading: const Icon(Icons.restaurant),
-              children: result.nutritionalRecommendations
-                  .map(
-                    (rec) => ListTile(
-                      leading: const Icon(Icons.restaurant_menu, size: 20),
-                      title: Text(rec, style: const TextStyle(fontSize: 14)),
-                      dense: true,
-                    ),
-                  )
-                  .toList(),
+            const SizedBox(height: 8),
+            ...result.upcomingMilestones.map(
+              (milestone) => _MilestoneItem(
+                milestone: milestone,
+                matingDate: matingDate,
+              ),
             ),
           ],
-        ),
+
+          // Care instructions
+          const SizedBox(height: 20),
+          _ExpandableSection(
+            title: 'Instruções de cuidado',
+            icon: Icons.health_and_safety,
+            items: result.careInstructions,
+          ),
+
+          // Nutritional recommendations
+          const SizedBox(height: 8),
+          _ExpandableSection(
+            title: 'Alimentação',
+            icon: Icons.restaurant,
+            items: result.nutritionalRecommendations,
+          ),
+        ],
       ),
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
+class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
   final Color color;
 
-  const _InfoRow({
+  const _DetailRow({
     required this.icon,
     required this.label,
     required this.value,
@@ -538,18 +506,28 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Icon(icon, size: 20, color: color),
           const SizedBox(width: 8),
-          Text(label),
-          const Spacer(),
           Text(
-            value,
+            label,
             style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
+              fontSize: 14,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
           ),
         ],
@@ -577,12 +555,14 @@ class _MilestoneItem extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: milestone.isImportant
-            ? Colors.amber.withValues(alpha: 0.1)
-            : Theme.of(context).colorScheme.surfaceContainerHighest,
+            ? Colors.amber.withValues(alpha: 0.15)
+            : Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: milestone.isImportant
-            ? Border.all(color: Colors.amber.withValues(alpha: 0.5))
-            : null,
+        border: Border.all(
+          color: milestone.isImportant
+              ? Colors.amber.withValues(alpha: 0.5)
+              : Colors.white.withValues(alpha: 0.1),
+        ),
       ),
       child: Row(
         children: [
@@ -608,16 +588,16 @@ class _MilestoneItem extends StatelessWidget {
               children: [
                 Text(
                   milestone.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
                 ),
                 Text(
                   milestone.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.7),
+                    color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -625,8 +605,111 @@ class _MilestoneItem extends StatelessWidget {
           ),
           Text(
             dateFormat.format(milestoneDate),
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              color: Colors.white.withValues(alpha: 0.9),
+            ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ExpandableSection extends StatefulWidget {
+  final String title;
+  final IconData icon;
+  final List<String> items;
+
+  const _ExpandableSection({
+    required this.title,
+    required this.icon,
+    required this.items,
+  });
+
+  @override
+  State<_ExpandableSection> createState() => _ExpandableSectionState();
+}
+
+class _ExpandableSectionState extends State<_ExpandableSection> {
+  bool _isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  Icon(
+                    widget.icon,
+                    size: 20,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    widget.title,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white.withValues(alpha: 0.9),
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (_isExpanded)
+            Container(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: widget.items
+                    .map(
+                      (item) => Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.check_circle,
+                              size: 16,
+                              color: CalculatorAccentColors.pet,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                item,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.white.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
         ],
       ),
     );

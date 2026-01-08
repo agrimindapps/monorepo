@@ -115,23 +115,43 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
 
           // Game grid with Flame
           Expanded(
-            child: Center(
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: _game != null
-                      ? GameWidget(
-                          game: _game!,
-                          key: ValueKey(gameState.boardSize),
-                        )
-                      : const Center(
-                          child: CircularProgressIndicator(
-                            color: Color(0xFFEDC22E),
-                          ),
-                        ),
-                ),
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Ensure we have valid constraints before rendering game
+                if (constraints.maxWidth <= 0 || constraints.maxHeight <= 0) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFFEDC22E),
+                    ),
+                  );
+                }
+
+                final size = constraints.maxWidth < constraints.maxHeight
+                    ? constraints.maxWidth
+                    : constraints.maxHeight;
+
+                return Center(
+                  child: SizedBox(
+                    width: size,
+                    height: size,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: _game != null
+                          ? RepaintBoundary(
+                              child: GameWidget(
+                                game: _game!,
+                                key: ValueKey(gameState.boardSize),
+                              ),
+                            )
+                          : const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFFEDC22E),
+                              ),
+                            ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         ],

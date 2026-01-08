@@ -15,33 +15,35 @@ class GameStatsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
           // Mode indicator (if not classic)
           if (gameState.gameMode != SudokuGameMode.classic) ...[
-            _buildModeIndicator(),
+            _buildModeIndicator(isDark),
             const SizedBox(height: 12),
           ],
 
           // Main stats row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: _buildStats(),
+            children: _buildStats(isDark),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildModeIndicator() {
+  Widget _buildModeIndicator(bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: _getModeColor().withValues(alpha: 0.1),
+        color: _getModeColor().withValues(alpha: isDark ? 0.2 : 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: _getModeColor().withValues(alpha: 0.3)),
+        border: Border.all(color: _getModeColor().withValues(alpha: 0.5)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -79,7 +81,7 @@ class GameStatsWidget extends StatelessWidget {
     }
   }
 
-  List<Widget> _buildStats() {
+  List<Widget> _buildStats(bool isDark) {
     final stats = <Widget>[];
 
     // Time stat - different based on mode
@@ -96,6 +98,7 @@ class GameStatsWidget extends StatelessWidget {
           icon: Icons.timer_outlined,
           label: 'Tempo',
           value: gameState.formattedTime,
+          isDark: isDark,
         ),
       );
     }
@@ -106,6 +109,7 @@ class GameStatsWidget extends StatelessWidget {
         icon: Icons.sports_score,
         label: 'Dificuldade',
         value: gameState.difficulty.label,
+        isDark: isDark,
       ),
     );
 
@@ -125,6 +129,7 @@ class GameStatsWidget extends StatelessWidget {
           icon: Icons.error_outline,
           label: 'Erros',
           value: gameState.mistakes.toString(),
+          isDark: isDark,
         ),
       );
     }
@@ -145,6 +150,7 @@ class GameStatsWidget extends StatelessWidget {
           icon: Icons.trending_up,
           label: 'Progresso',
           value: '${(gameState.progress * 100).toInt()}%',
+          isDark: isDark,
         ),
       );
     }
@@ -156,24 +162,30 @@ class GameStatsWidget extends StatelessWidget {
     required IconData icon,
     required String label,
     required String value,
+    required bool isDark,
   }) {
+    final iconColor = isDark ? Colors.white60 : Colors.grey.shade700;
+    final labelColor = isDark ? Colors.white54 : Colors.grey.shade600;
+    final valueColor = isDark ? Colors.white : Colors.black87;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 20, color: Colors.grey.shade700),
+        Icon(icon, size: 20, color: iconColor),
         const SizedBox(height: 4),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
+            color: valueColor,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey.shade600,
+            color: labelColor,
           ),
         ),
       ],

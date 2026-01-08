@@ -210,11 +210,23 @@ class _HomePageState extends ConsumerState<HomePage> {
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
-            final cardWidth = width < 600
-                ? width
-                : width < 900
-                    ? (width - 16) / 2
-                    : (width - 32) / 3;
+            
+            // On small screens, show cards vertically
+            if (width < 600) {
+              return Column(
+                children: games.take(3).map((game) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: GameCardFeatured(game: game),
+                  );
+                }).toList(),
+              );
+            }
+            
+            // On larger screens, show in grid
+            final cardWidth = width < 900
+                ? (width - 16) / 2
+                : (width - 32) / 3;
 
             return Wrap(
               spacing: 16,

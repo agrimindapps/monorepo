@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/soil_ph_calculator.dart';
 
@@ -35,203 +34,198 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Correção de pH',
+      subtitle: 'Calagem do Solo',
+      icon: Icons.science,
+      accentColor: CalculatorAccentColors.agriculture,
+      categoryName: 'Agricultura',
+      instructions: 'Calcule a quantidade de calcário necessária para correção do pH do solo.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              // Share handled by ShareButton in result card
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // pH values
+              Text(
+                'Valores de pH',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.science,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Calagem - Correção de pH',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Calcule a quantidade de calcário necessária para corrigir '
-                            'o pH do solo e melhorar a disponibilidade de nutrientes.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // pH values
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'pH atual',
-                                    controller: _currentPhController,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'pH alvo',
-                                    controller: _targetPhController,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Soil texture
-                            Text(
-                              'Textura do solo',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: SoilTexture.values.map((tex) {
-                                return ChoiceChip(
-                                  label: Text(SoilPhCalculator.getTextureName(tex)),
-                                  selected: _texture == tex,
-                                  onSelected: (_) =>
-                                      setState(() => _texture = tex),
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Area and PRNT
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Área',
-                                    controller: _areaController,
-                                    suffix: 'ha',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (v) =>
-                                        v?.isEmpty ?? true ? 'Obrigatório' : null,
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'PRNT do calcário',
-                                    controller: _prntController,
-                                    suffix: '%',
-                                    helperText: 'Poder de Neutralização',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular Calagem',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'pH atual',
+                      controller: _currentPhController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
                         ),
-                      ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  if (_result != null)
-                    _SoilPhResultCard(
-                      result: _result!,
-                      texture: _texture,
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'pH alvo',
+                      controller: _targetPhController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Soil texture
+              Text(
+                'Textura do solo',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: SoilTexture.values.map((tex) {
+                  return ChoiceChip(
+                    label: Text(SoilPhCalculator.getTextureName(tex)),
+                    selected: _texture == tex,
+                    onSelected: (_) {
+                      setState(() => _texture = tex);
+                    },
+                    backgroundColor: Colors.white.withValues(alpha: 0.05),
+                    selectedColor:
+                        CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
+                    labelStyle: TextStyle(
+                      color: _texture == tex
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.7),
+                    ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Area and PRNT
+              Text(
+                'Propriedades',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Área',
+                      controller: _areaController,
+                      suffix: 'ha',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 180,
+                    child: _DarkInputField(
+                      label: 'PRNT do calcário',
+                      controller: _prntController,
+                      suffix: '%',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (v) =>
+                          v?.isEmpty ?? true ? 'Obrigatório' : null,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 28),
+
+              // Calculate button
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate),
+                  label: const Text(
+                    'Calcular Calagem',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.agriculture,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              if (_result != null) ...[
+                const SizedBox(height: 24),
+                _SoilPhResultCard(
+                  result: _result!,
+                  texture: _texture,
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -239,7 +233,9 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = SoilPhCalculator.calculate(
       currentPh: double.parse(_currentPhController.text),
@@ -264,136 +260,197 @@ class _SoilPhResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Header
+        Row(
           children: [
-            Row(
+            const Icon(
+              Icons.grass,
+              color: CalculatorAccentColors.agriculture,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Recomendação de Calagem',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            ShareButton(
+              text: _formatShareText(),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+
+        if (result.limeNeededKg == 0) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.green.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
               children: [
-                Icon(Icons.grass, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Recomendação de Calagem',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 24,
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: _formatShareText(),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Solo já está no pH adequado!\nNão necessita calagem.',
+                    style: TextStyle(
+                      color: Colors.green[200],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-
-            if (result.limeNeededKg == 0) ...[
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+          ),
+        ] else ...[
+          // Main results
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: CalculatorAccentColors.agriculture.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Column(
+              children: [
+                _ResultBox(
+                  label: 'Calcário necessário',
+                  value: result.limeTons.toStringAsFixed(2),
+                  unit: 'toneladas',
+                  highlight: true,
                 ),
-                child: Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Solo já está no pH adequado!\nNão necessita calagem.',
-                        style: TextStyle(
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.bold,
-                        ),
+                const Divider(
+                  height: 24,
+                  color: Colors.white24,
+                ),
+                _ResultBox(
+                  label: 'Por hectare',
+                  value: result.limeKgHa.toStringAsFixed(0),
+                  unit: 'kg/ha',
+                ),
+                const SizedBox(height: 12),
+                _ResultBox(
+                  label: 'Correção de pH',
+                  value: '+${result.phDifference.toStringAsFixed(1)}',
+                  unit: 'unidades',
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Cost
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Custo estimado:',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: CalculatorAccentColors.agriculture,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Recommendations
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            child: ExpansionTile(
+              title: Text(
+                'Recomendações de aplicação',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              iconColor: Colors.white.withValues(alpha: 0.7),
+              collapsedIconColor: Colors.white.withValues(alpha: 0.7),
+              textColor: Colors.white.withValues(alpha: 0.9),
+              initiallyExpanded: true,
+              children: result.recommendations
+                  .map(
+                    (rec) => Padding(
+                      padding: const EdgeInsets.only(left: 16, bottom: 8, right: 16),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.check_circle,
+                            size: 18,
+                            color: Colors.green,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              rec,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.7),
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ] else ...[
-              // Main results
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    _ResultRow(
-                      label: 'Calcário necessário',
-                      value: '${result.limeTons.toStringAsFixed(2)} ton',
-                      highlight: true,
-                    ),
-                    const Divider(height: 24),
-                    _ResultRow(
-                      label: 'Por hectare',
-                      value: '${result.limeKgHa.toStringAsFixed(0)} kg/ha',
-                    ),
-                    const SizedBox(height: 8),
-                    _ResultRow(
-                      label: 'Correção de pH',
-                      value: '+${result.phDifference.toStringAsFixed(1)}',
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Cost
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Custo estimado:'),
-                    Text(
-                      'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Recommendations
-              ExpansionTile(
-                title: const Text('Recomendações de aplicação'),
-                leading: const Icon(Icons.lightbulb),
-                initiallyExpanded: true,
-                children: result.recommendations
-                    .map(
-                      (rec) => ListTile(
-                        leading: const Icon(Icons.check, size: 20),
-                        title: Text(rec, style: const TextStyle(fontSize: 14)),
-                        dense: true,
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          ],
-        ),
-      ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
+      ],
     );
   }
 
   String _formatShareText() {
     final textureName = SoilPhCalculator.getTextureName(texture);
-    
+
     if (result.limeNeededKg == 0) {
       return '''
 📋 Cálculo de Calagem - Calculei App
@@ -426,14 +483,16 @@ by Agrimind''';
   }
 }
 
-class _ResultRow extends StatelessWidget {
+class _ResultBox extends StatelessWidget {
   final String label;
   final String value;
+  final String unit;
   final bool highlight;
 
-  const _ResultRow({
+  const _ResultBox({
     required this.label,
     required this.value,
+    required this.unit,
     this.highlight = false,
   });
 
@@ -442,19 +501,134 @@ class _ResultRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                unit,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: highlight ? 22 : 18,
+                fontWeight: FontWeight.bold,
+                color: highlight
+                    ? CalculatorAccentColors.agriculture
+                    : Colors.white,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// Dark theme input field widget
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         Text(
           label,
           style: TextStyle(
-            fontSize: highlight ? 16 : 14,
-            fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: highlight ? 18 : 14,
-            fontWeight: FontWeight.bold,
-            color: highlight ? Theme.of(context).colorScheme.primary : null,
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.agriculture,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
         ),
       ],

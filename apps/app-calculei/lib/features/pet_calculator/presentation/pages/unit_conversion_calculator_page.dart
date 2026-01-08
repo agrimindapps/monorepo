@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/unit_conversion_calculator.dart';
 
 /// Página da calculadora de Conversão de Unidades
@@ -52,208 +51,226 @@ class _UnitConversionCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.swap_horiz,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Conversor Veterinário',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Converta unidades comuns em medicina veterinária: peso, comprimento, temperatura, volume e medicação.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+    const accentColor = CalculatorAccentColors.pet;
 
-                  const SizedBox(height: 24),
+    return CalculatorPageLayout(
+      title: 'Conversor Veterinário',
+      subtitle: 'Conversão de Unidades',
+      icon: Icons.swap_horiz,
+      accentColor: accentColor,
+      categoryName: 'Pet',
+      instructions: 'Converta unidades de medida comuns em medicina veterinária.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              Share.share('''
+📋 Conversão de Unidades - Calculei App
 
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+${_result!.conversionType}
+${_result!.fromValue.toStringAsFixed(2)} ${_result!.fromUnit} = ${_result!.toValue.toStringAsFixed(2)} ${_result!.toUnit}
+
+Fórmula: ${_result!.formula}
+
+_________________
+Calculado por Calculei
+by Agrimind
+https://calculei.com.br''');
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Unit Type Selection
+              Text(
+                'Tipo de Conversão',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: UnitType.values.map((type) {
+                  final isSelected = _unitType == type;
+                  return Material(
+                    color: isSelected
+                        ? accentColor.withValues(alpha: 0.15)
+                        : Colors.white.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _unitType = type;
+                          _result = null;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected
+                                ? accentColor
+                                : Colors.white.withValues(alpha: 0.2),
+                            width: isSelected ? 2 : 1,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
+                            Icon(
+                              _getUnitTypeIcon(type),
+                              size: 18,
+                              color: isSelected
+                                  ? accentColor
+                                  : Colors.white.withValues(alpha: 0.7),
+                            ),
+                            const SizedBox(width: 6),
                             Text(
-                              'Tipo de Conversão',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Unit Type Selection
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: UnitType.values.map((type) {
-                                return ChoiceChip(
-                                  label: Text(_getUnitTypeLabel(type)),
-                                  avatar: Icon(
-                                    _getUnitTypeIcon(type),
-                                    size: 18,
-                                  ),
-                                  selected: _unitType == type,
-                                  onSelected: (_) {
-                                    setState(() {
-                                      _unitType = type;
-                                      _result = null;
-                                    });
-                                  },
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // Value Input
-                            StandardInputField(
-                              label: 'Valor',
-                              controller: _valueController,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                decimal: true,
+                              _getUnitTypeLabel(type),
+                              style: TextStyle(
+                                fontWeight:
+                                    isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected
+                                    ? accentColor
+                                    : Colors.white.withValues(alpha: 0.7),
                               ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^-?\d*\.?\d*'),
-                                ),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Obrigatório';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Valor inválido';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // From/To Unit Selectors
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'De:',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildFromUnitDropdown(),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Icon(
-                                  Icons.arrow_forward,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Para:',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleSmall
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      _buildToUnitDropdown(),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Converter',
-                              icon: Icons.swap_horiz,
-                              onPressed: _calculate,
                             ),
                           ],
                         ),
                       ),
                     ),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Value Input
+              _DarkInputField(
+                label: 'Valor',
+                controller: _valueController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(
+                    RegExp(r'^-?\d*\.?\d*'),
                   ),
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Obrigatório';
+                  }
+                  if (double.tryParse(value) == null) {
+                    return 'Valor inválido';
+                  }
+                  return null;
+                },
+              ),
 
-                  const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-                  // Result
-                  if (_result != null)
-                    _UnitConversionResultCard(result: _result!),
+              // From/To Unit Selectors
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'De:',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildFromUnitDropdown(),
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 28, left: 12, right: 12),
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: accentColor,
+                      size: 20,
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Para:',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.7),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _buildToUnitDropdown(),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 32),
+
+              // Calculate button
+              ElevatedButton(
+                onPressed: _calculate,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.swap_horiz),
+                    SizedBox(width: 8),
+                    Text(
+                      'Converter',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _UnitConversionResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -261,16 +278,30 @@ class _UnitConversionCalculatorPageState
   }
 
   Widget _buildFromUnitDropdown() {
+    const accentColor = CalculatorAccentColors.pet;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButton<String>(
         value: _getFromUnitValue(),
         isExpanded: true,
         underline: const SizedBox(),
+        dropdownColor: const Color(0xFF1A1A2E),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: accentColor,
+        ),
         items: _getUnitOptions().map((String value) {
           return DropdownMenuItem<String>(
             value: value,
@@ -287,16 +318,30 @@ class _UnitConversionCalculatorPageState
   }
 
   Widget _buildToUnitDropdown() {
+    const accentColor = CalculatorAccentColors.pet;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: DropdownButton<String>(
         value: _getToUnitValue(),
         isExpanded: true,
         underline: const SizedBox(),
+        dropdownColor: const Color(0xFF1A1A2E),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: accentColor,
+        ),
         items: _getUnitOptions().map((String value) {
           return DropdownMenuItem<String>(
             value: value,
@@ -480,136 +525,126 @@ class _UnitConversionResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.pet;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assessment, color: accentColor),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: '''
-📋 Conversão de Unidades - Calculei App
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
-${result.conversionType}
-${result.fromValue.toStringAsFixed(2)} ${result.fromUnit} = ${result.toValue.toStringAsFixed(2)} ${result.toUnit}
-
-Fórmula: ${result.formula}
-
-_________________
-Calculado por Calculei
-by Agrimind
-https://calculei.com.br''',
+          // Main result
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: accentColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: accentColor.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      result.fromValue.toStringAsFixed(2),
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      result.fromUnit,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.7),
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Icon(
+                    Icons.arrow_forward,
+                    color: accentColor,
+                    size: 28,
+                  ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      result.toValue.toStringAsFixed(2),
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: accentColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      result.toUnit,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: accentColor.withValues(alpha: 0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // Main result
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Column(
-                        children: [
-                          Text(
-                            result.fromValue.toStringAsFixed(2),
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineMedium
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: colorScheme.onPrimaryContainer,
-                                ),
-                          ),
-                          Text(
-                            result.fromUnit,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: colorScheme.onPrimaryContainer
-                                  .withValues(alpha: 0.7),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Icon(
-                          Icons.arrow_forward,
-                          color: colorScheme.primary,
-                          size: 32,
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          Text(
-                            result.toValue.toStringAsFixed(2),
-                            style:
-                                Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: colorScheme.primary,
-                                    ),
-                          ),
-                          Text(
-                            result.toUnit,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: colorScheme.primary.withValues(alpha: 0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          const SizedBox(height: 16),
+
+          // Details
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(8),
             ),
-
-            const SizedBox(height: 16),
-
-            // Details
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _DetailRow(
-                    label: 'Tipo',
-                    value: result.conversionType,
-                  ),
-                  const Divider(height: 16),
-                  _DetailRow(
-                    label: 'Conversão',
-                    value: result.formula,
-                  ),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _DetailRow(
+                  label: 'Tipo',
+                  value: result.conversionType,
+                ),
+                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                _DetailRow(
+                  label: 'Conversão',
+                  value: result.formula,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -623,13 +658,116 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Dark theme input field widget
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14)),
         Text(
-          value,
-          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.pet,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 2,
+              ),
+            ),
+            errorStyle: const TextStyle(color: Colors.red),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+          validator: validator,
         ),
       ],
     );

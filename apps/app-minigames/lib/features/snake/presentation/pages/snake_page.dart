@@ -1,6 +1,3 @@
-// Dart imports:
-import 'dart:ui';
-
 // Flutter imports:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,13 +29,15 @@ class _SnakePageState extends ConsumerState<SnakePage> {
   late SnakeGame _game;
   int _currentScore = 0;
   List<ActivePowerUp> _activePowerUps = [];
+  bool _isGameOver = false;
+  bool _isPlaying = false;
 
   @override
   void initState() {
     super.initState();
     _game = SnakeGame(
       onScoreChanged: (score) {
-        if (mounted) {
+        if (mounted && _currentScore != score) {
           setState(() {
             _currentScore = score;
           });
@@ -46,19 +45,21 @@ class _SnakePageState extends ConsumerState<SnakePage> {
       },
       onActivePowerUpsChanged: (powerUps) {
         if (mounted) {
-          setState(() {
-            _activePowerUps = powerUps;
-          });
+          // Only update if list changed
+          if (_activePowerUps.length != powerUps.length) {
+            setState(() {
+              _activePowerUps = powerUps;
+            });
+          }
         }
       },
       onGameOver: () {
-        if (mounted) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              final notifier = ref.read(snakeGameProvider.notifier);
-              notifier.saveScore(_game.score);
-              setState(() {}); // Rebuild to show game over overlay
-            }
+        if (mounted && !_isGameOver) {
+          final notifier = ref.read(snakeGameProvider.notifier);
+          notifier.saveScore(_game.score);
+          setState(() {
+            _isGameOver = true;
+            _isPlaying = false;
           });
         }
       },
@@ -85,33 +86,44 @@ class _SnakePageState extends ConsumerState<SnakePage> {
           onPressed: () {
             HapticFeedback.mediumImpact();
             _game.restartGame();
+            setState(() {
+              _isGameOver = false;
+              _isPlaying = true;
+              _currentScore = 0;
+              _activePowerUps = [];
+            });
           },
           tooltip: 'Reiniciar',
         ),
         IconButton(
           icon: Icon(
-            !_game.isPlaying ? Icons.play_arrow : Icons.pause,
+            !_isPlaying ? Icons.play_arrow : Icons.pause,
             color: Colors.white,
           ),
           onPressed: () {
             HapticFeedback.selectionClick();
-            if (_game.isPlaying) {
+            if (_isPlaying) {
               _game.pauseGame();
-            } else {
+              setState(() => _isPlaying = false);
+            } else if (!_isGameOver) {
               _game.startGame();
+              setState(() => _isPlaying = true);
             }
-            setState(() {});
           },
           tooltip: 'Pausar/Continuar',
         ),
       ],
       child: Stack(
         children: [
+          // Game widget wrapped in RepaintBoundary for isolation
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: GameWidget(game: _game),
+            child: RepaintBoundary(
+              child: GameWidget(game: _game),
+            ),
           ),
         
+          // HUD layer
           Column(
             children: [
               // HUD (Heads Up Display)
@@ -120,8 +132,8 @@ class _SnakePageState extends ConsumerState<SnakePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildGlassScoreCard('SCORE', _currentScore.toString(), Colors.greenAccent),
-                    _buildGlassScoreCard('BEST', highScore.toString(), Colors.amberAccent),
+                    _buildScoreCard('SCORE', _currentScore.toString(), Colors.greenAccent),
+                    _buildScoreCard('BEST', highScore.toString(), Colors.amberAccent),
                   ],
                 ),
               ),
@@ -142,7 +154,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
           ),
 
           // Overlays
-          if (!_game.isPlaying && !_game.isGameOver && _currentScore == 0)
+          if (!_isPlaying && !_isGameOver && _currentScore == 0)
             _buildOverlay(
               context,
               title: 'NEON SNAKE',
@@ -150,11 +162,11 @@ class _SnakePageState extends ConsumerState<SnakePage> {
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 _game.startGame();
-                setState(() {});
+                setState(() => _isPlaying = true);
               },
             ),
 
-          if (_game.isGameOver)
+          if (_isGameOver)
             _buildOverlay(
               context,
               title: 'GAME OVER',
@@ -163,12 +175,17 @@ class _SnakePageState extends ConsumerState<SnakePage> {
               onPressed: () {
                 HapticFeedback.mediumImpact();
                 _game.restartGame();
-                setState(() {});
+                setState(() {
+                  _isGameOver = false;
+                  _isPlaying = true;
+                  _currentScore = 0;
+                  _activePowerUps = [];
+                });
               },
               isError: true,
             ),
 
-          if (!_game.isPlaying && !_game.isGameOver && _currentScore > 0)
+          if (!_isPlaying && !_isGameOver && _currentScore > 0)
             _buildOverlay(
               context,
               title: 'PAUSADO',
@@ -176,7 +193,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
               onPressed: () {
                 HapticFeedback.selectionClick();
                 _game.startGame();
-                setState(() {});
+                setState(() => _isPlaying = true);
               },
             ),
         ],
@@ -203,77 +220,65 @@ class _SnakePageState extends ConsumerState<SnakePage> {
   }
 
   Widget _buildPowerUpIndicator(ActivePowerUp powerUp) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: powerUp.type.color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: powerUp.type.color.withValues(alpha: 0.5),
-              width: 2,
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: powerUp.type.color.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: powerUp.type.color.withValues(alpha: 0.6),
+          width: 2,
+        ),
+      ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: 32,
+            height: 32,
+            child: CircularProgressIndicator(
+              value: powerUp.remainingPercent,
+              strokeWidth: 2,
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation<Color>(powerUp.type.color),
             ),
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: CircularProgressIndicator(
-                  value: powerUp.remainingPercent,
-                  strokeWidth: 2,
-                  backgroundColor: Colors.white.withValues(alpha: 0.1),
-                  valueColor: AlwaysStoppedAnimation<Color>(powerUp.type.color),
-                ),
-              ),
-              Text(powerUp.type.emoji, style: const TextStyle(fontSize: 14)),
-            ],
-          ),
-        ),
+          Text(powerUp.type.emoji, style: const TextStyle(fontSize: 14)),
+        ],
       ),
     );
   }
 
-  Widget _buildGlassScoreCard(String label, String value, Color accentColor) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+  Widget _buildScoreCard(String label, String value, Color accentColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1A2E).withValues(alpha: 0.9),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: accentColor,
+              letterSpacing: 1,
+            ),
           ),
-          child: Column(
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: accentColor,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+          const SizedBox(height: 2),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -286,55 +291,52 @@ class _SnakePageState extends ConsumerState<SnakePage> {
     required VoidCallback onPressed,
     bool isError = false,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        color: Colors.black.withValues(alpha: 0.8),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: isError ? Colors.redAccent : Colors.greenAccent,
-                    letterSpacing: 3,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                ],
-                const SizedBox(height: 32),
-                ElevatedButton(
-                  onPressed: onPressed,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isError ? Colors.redAccent : Colors.greenAccent,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  child: Text(
-                    buttonText,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-              ],
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F0F1A).withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: isError ? Colors.redAccent : Colors.greenAccent,
+                letterSpacing: 3,
+              ),
             ),
-          ),
+            if (subtitle != null) ...[
+              const SizedBox(height: 12),
+              Text(
+                subtitle,
+                style: const TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            ],
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: onPressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isError ? Colors.redAccent : Colors.greenAccent,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+              ),
+              child: Text(
+                buttonText,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

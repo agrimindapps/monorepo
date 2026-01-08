@@ -314,6 +314,18 @@ class GamesData {
       isNew: true,
       playerCount: 1,
     ),
+    GameEntity(
+      id: 'centipede',
+      name: 'Centipede',
+      description: 'Destrua a centopeia antes que ela te alcance!',
+      route: '/centipede',
+      icon: Icons.bug_report,
+      primaryColor: Color(0xFF00FF00),
+      secondaryColor: Color(0xFF00AA00),
+      category: GameCategory.arcade,
+      isNew: true,
+      playerCount: 1,
+    ),
   ];
 
   /// Get featured games

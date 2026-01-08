@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/body_condition_calculator.dart';
 
@@ -26,175 +25,132 @@ class _BodyConditionCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Calculadora de Condição Corporal',
+      subtitle: 'Escore ECC (1-9)',
+      icon: Icons.fitness_center_outlined,
+      accentColor: CalculatorAccentColors.pet,
+      categoryName: 'Pet',
+      instructions: 'Avalie a condição corporal do seu pet através de parâmetros físicos. '
+          'O ECC (1-9) indica se está abaixo, ideal, sobrepeso ou obeso.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {},
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Species selection
+              Text(
+                'Selecione a espécie',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.monitor_weight,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Avaliação de Peso Ideal',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onPrimaryContainer,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Avalie a condição corporal do seu pet através de parâmetros físicos. '
-                            'O ECC (1-9) indica se está abaixo, ideal, sobrepeso ou obeso.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Expanded(
+                    child: _SpeciesButton(
+                      label: 'Cachorro',
+                      emoji: '🐕',
+                      isSelected: _species == PetSpecies.dog,
+                      onTap: () =>
+                          setState(() => _species = PetSpecies.dog),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Avaliação Física',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Species selection
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _SpeciesButton(
-                                    label: 'Cachorro',
-                                    emoji: '🐕',
-                                    isSelected: _species == PetSpecies.dog,
-                                    onTap: () =>
-                                        setState(() => _species = PetSpecies.dog),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _SpeciesButton(
-                                    label: 'Gato',
-                                    emoji: '🐈',
-                                    isSelected: _species == PetSpecies.cat,
-                                    onTap: () =>
-                                        setState(() => _species = PetSpecies.cat),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            // Rib Palpation
-                            _buildScoreSelector(
-                              title: 'Palpação das Costelas',
-                              value: _ribPalpation,
-                              descriptions: BodyConditionCalculator
-                                  .parameterDescriptions['ribPalpation']!,
-                              onChanged: (value) =>
-                                  setState(() => _ribPalpation = value),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Waist Visibility
-                            _buildScoreSelector(
-                              title: 'Visibilidade da Cintura',
-                              value: _waistVisibility,
-                              descriptions: BodyConditionCalculator
-                                  .parameterDescriptions['waistVisibility']!,
-                              onChanged: (value) =>
-                                  setState(() => _waistVisibility = value),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Abdominal Profile
-                            _buildScoreSelector(
-                              title: 'Perfil Abdominal',
-                              value: _abdominalProfile,
-                              descriptions: BodyConditionCalculator
-                                  .parameterDescriptions['abdominalProfile']!,
-                              onChanged: (value) =>
-                                  setState(() => _abdominalProfile = value),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular ECC',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _SpeciesButton(
+                      label: 'Gato',
+                      emoji: '🐈',
+                      isSelected: _species == PetSpecies.cat,
+                      onTap: () =>
+                          setState(() => _species = PetSpecies.cat),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null)
-                    _BodyConditionResultCard(
-                      result: _result!,
-                      species: _species,
-                    ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Rib Palpation
+              _buildScoreSelector(
+                title: 'Palpação das Costelas',
+                value: _ribPalpation,
+                descriptions: BodyConditionCalculator
+                    .parameterDescriptions['ribPalpation']!,
+                onChanged: (value) =>
+                    setState(() => _ribPalpation = value),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Waist Visibility
+              _buildScoreSelector(
+                title: 'Visibilidade da Cintura',
+                value: _waistVisibility,
+                descriptions: BodyConditionCalculator
+                    .parameterDescriptions['waistVisibility']!,
+                onChanged: (value) =>
+                    setState(() => _waistVisibility = value),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Abdominal Profile
+              _buildScoreSelector(
+                title: 'Perfil Abdominal',
+                value: _abdominalProfile,
+                descriptions: BodyConditionCalculator
+                    .parameterDescriptions['abdominalProfile']!,
+                onChanged: (value) =>
+                    setState(() => _abdominalProfile = value),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular ECC',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.pet,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _BodyConditionResultCard(
+                  result: _result!,
+                  species: _species,
+                ),
+              ],
+            ],
           ),
         ),
       ),
@@ -212,9 +168,11 @@ class _BodyConditionCalculatorPageState
       children: [
         Text(
           title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.8),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 12),
         Row(
@@ -230,13 +188,13 @@ class _BodyConditionCalculatorPageState
                 height: 50,
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey[200],
+                      ? CalculatorAccentColors.pet
+                      : Colors.white.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.grey[400]!,
+                        ? CalculatorAccentColors.pet
+                        : Colors.white.withValues(alpha: 0.1),
                     width: 2,
                   ),
                 ),
@@ -246,7 +204,9 @@ class _BodyConditionCalculatorPageState
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: isSelected ? Colors.white : Colors.grey[700],
+                    color: isSelected 
+                        ? Colors.white 
+                        : Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
               ),
@@ -257,12 +217,15 @@ class _BodyConditionCalculatorPageState
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            color: Colors.white.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             descriptions[value - 1],
-            style: const TextStyle(fontSize: 13),
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
           ),
         ),
       ],
@@ -298,24 +261,26 @@ class _SpeciesButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.pet;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: isSelected 
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 16),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
             children: [
@@ -326,8 +291,8 @@ class _SpeciesButton extends StatelessWidget {
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -358,29 +323,36 @@ class _BodyConditionResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final color = _getClassificationColor(result.classification);
     final petEmoji = species == PetSpecies.dog ? '🐕' : '🐈';
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.assessment, color: color),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: '''
+              ),
+              const Spacer(),
+              ShareButton(
+                text: '''
 📋 Escore de Condição Corporal - Calculei App
 
 🐾 Espécie: ${species == PetSpecies.dog ? 'Cachorro' : 'Gato'}
@@ -393,114 +365,129 @@ _________________
 Calculado por Calculei
 by Agrimind
 https://calculei.com.br''',
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Main result
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color.withValues(alpha: 0.2),
+                  color.withValues(alpha: 0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: color.withValues(alpha: 0.5),
+                width: 2,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(petEmoji, style: const TextStyle(fontSize: 48)),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      result.bcs.toStringAsFixed(1),
+                      style: TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: color,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        ' / 9',
+                        style: TextStyle(fontSize: 20, color: color),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    result.classificationText,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // Main result
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withValues(alpha: 0.2),
-                    color.withValues(alpha: 0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: color.withValues(alpha: 0.5),
-                  width: 2,
-                ),
+          const SizedBox(height: 16),
+
+          // Description
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              result.description,
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withValues(alpha: 0.9),
               ),
-              child: Column(
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Recommendations
+          Text(
+            'Recomendações',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white.withValues(alpha: 0.9),
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...result.recommendations.map(
+            (rec) => Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(petEmoji, style: const TextStyle(fontSize: 48)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        result.bcs.toStringAsFixed(1),
-                        style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: color,
-                            ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: Text(
-                          ' / 9',
-                          style: TextStyle(fontSize: 20, color: color),
-                        ),
-                      ),
-                    ],
+                  Icon(
+                    Icons.check_circle,
+                    size: 18,
+                    color: color,
                   ),
-                  const SizedBox(height: 8),
-                  Chip(
-                    label: Text(
-                      result.classificationText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      rec,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
-                    backgroundColor: color,
                   ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Description
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                result.description,
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Recommendations
-            Text(
-              'Recomendações',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            ...result.recommendations.map(
-              (rec) => Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      size: 18,
-                      color: color,
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(rec, style: const TextStyle(fontSize: 14)),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

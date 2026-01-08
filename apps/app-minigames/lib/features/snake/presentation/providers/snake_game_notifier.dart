@@ -119,7 +119,11 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       final result = await _saveHighScoreUseCase(score: currentState.score);
       result.fold(
         (failure) {}, // Ignore failure
-        (_) => _highScore = currentState.score,
+        (_) {
+          if (ref.mounted) {
+            _highScore = currentState.score;
+          }
+        },
       );
     }
   }
@@ -131,13 +135,10 @@ class SnakeGameNotifier extends _$SnakeGameNotifier {
       result.fold(
         (failure) {}, // Ignore failure
         (_) {
+          if (!ref.mounted) return; // Check if provider is still mounted
           _highScore = score;
           _isNewHighScore = true;
-          // Update state if possible to reflect high score change in UI
-          if (state.value != null) {
-             // We can't easily update the whole state since it's complex, 
-             // but the high score is exposed via getter
-          }
+          // High score updated, accessible via getter
         },
       );
     }

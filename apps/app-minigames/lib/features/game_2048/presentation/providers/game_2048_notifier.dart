@@ -13,10 +13,30 @@ class Game2048Notifier extends _$Game2048Notifier {
 
   @override
   GameStateEntity build() {
-    // Load high score and initialize game
-    _loadHighScore();
+    // Initialize with default state - high score will be loaded async
+    final initialState = GameStateEntity.initial(boardSize: BoardSize.size4x4);
+    
+    // Schedule high score loading after build completes
+    Future.microtask(() => _loadHighScoreAsync(BoardSize.size4x4));
 
-    return GameStateEntity.initial(boardSize: BoardSize.size4x4);
+    return initialState;
+  }
+
+  /// Loads high score asynchronously after initialization
+  Future<void> _loadHighScoreAsync(BoardSize size) async {
+    final loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
+    final result = await loadHighScoreUseCase(size);
+
+    result.fold(
+      (failure) {
+        _currentBestScore = HighScoreEntity.empty(size);
+      },
+      (highScore) {
+        _currentBestScore = highScore;
+        // Only update state if it has been initialized
+        state = state.copyWith(bestScore: highScore.score);
+      },
+    );
   }
 
   /// Initializes a new game
@@ -24,7 +44,7 @@ class Game2048Notifier extends _$Game2048Notifier {
     final size = boardSize ?? BoardSize.size4x4;
 
     // Load high score for this board size
-    await _loadHighScore(size);
+    await _loadHighScoreAsync(size);
 
     // Create new game
     final restartUseCase = ref.read(restartGameUseCaseProvider);
@@ -39,24 +59,6 @@ class Game2048Notifier extends _$Game2048Notifier {
       },
       (newState) {
         state = newState;
-      },
-    );
-  }
-
-  /// Loads high score from storage
-  Future<void> _loadHighScore([BoardSize? boardSize]) async {
-    final size = boardSize ?? state.boardSize;
-
-    final loadHighScoreUseCase = ref.read(loadHighScoreUseCaseProvider);
-    final result = await loadHighScoreUseCase(size);
-
-    result.fold(
-      (failure) {
-        _currentBestScore = HighScoreEntity.empty(size);
-      },
-      (highScore) {
-        _currentBestScore = highScore;
-        state = state.copyWith(bestScore: highScore.score);
       },
     );
   }

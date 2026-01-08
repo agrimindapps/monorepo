@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
@@ -17,10 +18,12 @@ enum TowerGameStatus {
 class TowerStackGame extends FlameGame with TapCallbacks {
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onScoreChanged;
+  final ValueChanged<int>? onComboChanged;
 
   TowerStackGame({
     this.onGameOver,
     this.onScoreChanged,
+    this.onComboChanged,
   });
 
   TowerGameStatus status = TowerGameStatus.intro;
@@ -81,7 +84,11 @@ class TowerStackGame extends FlameGame with TapCallbacks {
     // Spawn first moving block
     spawnNextBlock();
     
-    if (onScoreChanged != null) onScoreChanged!(0);
+    // Notify score change after build completes
+    Future.microtask(() {
+      if (onScoreChanged != null) onScoreChanged!(0);
+      if (onComboChanged != null) onComboChanged!(0);
+    });
   }
   
   void spawnNextBlock() {
@@ -172,24 +179,30 @@ class TowerStackGame extends FlameGame with TapCallbacks {
     double newWidth = currentBlockWidth;
     double newX = blockLeft;
     
-    final tolerance = 5.0;
+    // Increased tolerance for easier perfect drops
+    final tolerance = 10.0;
     
-    if ((blockLeft - prevLeft).abs() < tolerance) {
+    if ((blockLeft - prevLeft).abs() < tolerance && (blockRight - prevRight).abs() < tolerance) {
       // Perfect drop!
       newX = prevLeft;
+      newWidth = prevBlock.size.x; // Match previous block exactly
       combo++;
+      if (onComboChanged != null) onComboChanged!(combo);
       
       // Visual feedback for perfect drop
       _spawnPerfectEffect(block.position + Vector2(block.size.x / 2, block.size.y / 2));
       
+      // Bonus points for perfect placement
+      score += 5;
+      
       // Grow block slightly if combo is high (bonus)
-      if (combo >= 5) {
-        newWidth = (newWidth + 10).clamp(0, initialBlockWidth);
-        // Also play special sound/effect here
+      if (combo >= 3) {
+        newWidth = (newWidth + 5).clamp(50, initialBlockWidth);
       }
     } else {
       // Not perfect, reset combo
       combo = 0;
+      if (onComboChanged != null) onComboChanged!(combo);
       
       if (blockLeft < prevLeft) {
         // Overhang on left
@@ -201,7 +214,18 @@ class TowerStackGame extends FlameGame with TapCallbacks {
         cutRight = blockRight - prevRight;
         newWidth -= cutRight;
         // X stays same
+      } else {
+        // Within bounds but not perfect - calculate actual overlap
+        newX = blockLeft.clamp(prevLeft, prevRight);
+        final overlapRight = blockRight.clamp(prevLeft, prevRight);
+        newWidth = overlapRight - newX;
       }
+    }
+    
+    // Check if block is too small
+    if (newWidth < 30) {
+      gameOver();
+      return;
     }
     
     // Update block
@@ -224,34 +248,55 @@ class TowerStackGame extends FlameGame with TapCallbacks {
     if (onScoreChanged != null) onScoreChanged!(score);
     _background.updateScore(score);
     
-    // Increase speed slightly
-    moveSpeed += 5;
+    // Increase speed slightly (but cap it)
+    moveSpeed = (moveSpeed + 8).clamp(200, 600);
     
     spawnNextBlock();
   }
   
   void _spawnPerfectEffect(Vector2 position) {
-    // Add a simple expanding ring effect
-    add(
-      ParticleSystemComponent(
-        position: position,
-        particle: ComputedParticle(
-          renderer: (canvas, particle) {
-            final paint = Paint()
-              ..color = Colors.white.withValues(alpha: 1 - particle.progress)
-              ..style = PaintingStyle.stroke
-              ..strokeWidth = 2;
-              
-            canvas.drawCircle(
-              Offset.zero,
-              50 * particle.progress,
-              paint,
-            );
-          },
-          lifespan: 0.5,
+    // Add expanding rings
+    for (int i = 0; i < 3; i++) {
+      add(
+        ParticleSystemComponent(
+          position: position,
+          particle: ComputedParticle(
+            renderer: (canvas, particle) {
+              final paint = Paint()
+                ..color = Colors.yellowAccent.withValues(alpha: 1 - particle.progress)
+                ..style = PaintingStyle.stroke
+                ..strokeWidth = 3;
+                
+              canvas.drawCircle(
+                Offset.zero,
+                (50 + i * 20) * particle.progress,
+                paint,
+              );
+            },
+            lifespan: 0.5 + i * 0.1,
+          ),
         ),
-      ),
-    );
+      );
+    }
+    
+    // Add sparkle particles
+    for (int i = 0; i < 8; i++) {
+      final angle = (i / 8) * math.pi * 2;
+      add(
+        ParticleSystemComponent(
+          position: position,
+          particle: AcceleratedParticle(
+            acceleration: Vector2(0, 200),
+            speed: Vector2(50 * math.cos(angle), 50 * math.sin(angle)),
+            child: CircleParticle(
+              radius: 3,
+              paint: Paint()..color = Colors.white,
+            ),
+            lifespan: 0.8,
+          ),
+        ),
+      );
+    }
   }
   
   void _spawnDebris(double x, double y, double w, double h, Color color) {

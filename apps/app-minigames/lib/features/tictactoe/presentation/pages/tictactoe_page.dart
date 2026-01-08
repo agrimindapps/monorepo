@@ -24,6 +24,7 @@ class TicTacToePage extends ConsumerWidget {
           '🏆 Faça 3 em linha para vencer\n'
           '🤖 Jogue contra a IA ou amigo',
       maxGameWidth: 500,
+      scrollable: true, // Flutter widget game needs scrolling
       actions: [
         IconButton(
           icon: const Icon(Icons.bar_chart, color: Colors.white),
@@ -32,51 +33,50 @@ class TicTacToePage extends ConsumerWidget {
         ),
       ],
       child: gameState.when(
-        data: (state) => SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFF6A11CB).withValues(alpha: 0.3),
-                  ),
-                ),
-                child: GameControlsWidget(
-                  gameState: state,
-                  onGameModeChanged: (mode) {
-                    ref.read(ticTacToeGameProvider.notifier).changeGameMode(mode);
-                  },
-                  onDifficultyChanged: (difficulty) {
-                    ref.read(ticTacToeGameProvider.notifier).changeDifficulty(difficulty);
-                  },
-                  onRestart: () {
-                    ref.read(ticTacToeGameProvider.notifier).restartGame();
-                  },
+        data: (state) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFF6A11CB).withValues(alpha: 0.3),
                 ),
               ),
-              const SizedBox(height: 20),
-              if (state.isInProgress)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        'Vez de: ',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+              child: GameControlsWidget(
+                gameState: state,
+                onGameModeChanged: (mode) {
+                  ref.read(ticTacToeGameProvider.notifier).changeGameMode(mode);
+                },
+                onDifficultyChanged: (difficulty) {
+                  ref.read(ticTacToeGameProvider.notifier).changeDifficulty(difficulty);
+                },
+                onRestart: () {
+                  ref.read(ticTacToeGameProvider.notifier).restartGame();
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            if (state.isInProgress)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'Vez de: ',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
+                    ),
                       Text(
                         state.currentPlayer.symbol,
                         style: TextStyle(
@@ -143,7 +143,6 @@ class TicTacToePage extends ConsumerWidget {
               ),
             ],
           ),
-        ),
         loading: () => const Center(
           child: CircularProgressIndicator(color: Color(0xFF6A11CB)),
         ),

@@ -20,34 +20,49 @@ class SudokuGridWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final gridSize = (screenWidth * 0.95).clamp(300.0, 500.0);
     final cellSize = gridSize / 9;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: gridSize,
       height: gridSize,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 2),
+        border: Border.all(
+          color: isDark ? Colors.white70 : Colors.black, 
+          width: 2,
+        ),
+        borderRadius: BorderRadius.circular(4),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Column(
-        children: List.generate(9, (row) {
-          return Expanded(
-            child: Row(
-              children: List.generate(9, (col) {
-                final cell = grid.getCell(row, col);
-                final isSelected = selectedCell?.row == row &&
-                    selectedCell?.col == col;
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(2),
+        child: Column(
+          children: List.generate(9, (row) {
+            return Expanded(
+              child: Row(
+                children: List.generate(9, (col) {
+                  final cell = grid.getCell(row, col);
+                  final isSelected = selectedCell?.row == row &&
+                      selectedCell?.col == col;
 
-                return Expanded(
-                  child: SudokuCellWidget(
-                    cell: cell,
-                    isSelected: isSelected,
-                    cellSize: cellSize,
-                    onTap: () => onCellTap(row, col),
-                  ),
-                );
-              }),
-            ),
-          );
-        }),
+                  return Expanded(
+                    child: SudokuCellWidget(
+                      cell: cell,
+                      isSelected: isSelected,
+                      cellSize: cellSize,
+                      onTap: () => onCellTap(row, col),
+                    ),
+                  );
+                }),
+              ),
+            );
+          }),
+        ),
       ),
     );
   }

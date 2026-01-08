@@ -27,65 +27,52 @@ class DiagnosticoRepository {
     return _db.select(_db.diagnosticos).watch();
   }
 
-  /// Busca diagnóstico por ID local
-  Future<Diagnostico?> findById(int id) async {
-    return await (_db.select(_db.diagnosticos)
-          ..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
-  }
-
-  /// Busca diagnóstico por Firebase ID (idReg)
-  Future<Diagnostico?> findByFirebaseId(String firebaseId) async {
-    return await (_db.select(_db.diagnosticos)
-          ..where((tbl) => tbl.firebaseId.equals(firebaseId)))
-        .getSingleOrNull();
-  }
-
-  /// Busca diagnóstico por idReg único
+  /// Busca diagnóstico por idReg único (PRIMARY KEY)
   Future<Diagnostico?> findByIdReg(String idReg) async {
     return await (_db.select(_db.diagnosticos)
           ..where((tbl) => tbl.idReg.equals(idReg)))
         .getSingleOrNull();
   }
 
-  /// Busca diagnósticos por defensivo
-  Future<List<Diagnostico>> findByDefensivo(int defensivoId) async {
+  /// Busca diagnósticos por defensivo (string FK)
+  Future<List<Diagnostico>> findByDefensivoId(String fkIdDefensivo) async {
     return await (_db.select(_db.diagnosticos)
-          ..where((tbl) => tbl.defensivoId.equals(defensivoId)))
+          ..where((tbl) => tbl.fkIdDefensivo.equals(fkIdDefensivo)))
         .get();
   }
 
-  /// Busca diagnósticos por cultura
-  Future<List<Diagnostico>> findByCultura(int culturaId) async {
+  /// Busca diagnósticos por cultura (string FK)
+  Future<List<Diagnostico>> findByCulturaId(String fkIdCultura) async {
     return await (_db.select(_db.diagnosticos)
-          ..where((tbl) => tbl.culturaId.equals(culturaId)))
+          ..where((tbl) => tbl.fkIdCultura.equals(fkIdCultura)))
         .get();
   }
 
-  /// Busca diagnósticos por praga
-  Future<List<Diagnostico>> findByPraga(int pragaId) async {
-    debugPrint('🔍 [DiagnosticoRepository] findByPraga chamado com pragaId: $pragaId');
+  /// Busca diagnósticos por praga (string FK)
+  Future<List<Diagnostico>> findByPragaId(String fkIdPraga) async {
+    debugPrint('🔍 [DiagnosticoRepository] findByPragaId chamado com fkIdPraga: $fkIdPraga');
     final results = await (_db.select(_db.diagnosticos)
-          ..where((tbl) => tbl.pragaId.equals(pragaId)))
+          ..where((tbl) => tbl.fkIdPraga.equals(fkIdPraga)))
         .get();
-    debugPrint('🔍 [DiagnosticoRepository] findByPraga retornou ${results.length} resultados');
+    debugPrint('🔍 [DiagnosticoRepository] findByPragaId retornou ${results.length} resultados');
     return results;
   }
 
   /// Busca diagnósticos com join completo (defensivo + cultura + praga)
+  /// NOTA: Joins agora usam string FKs
   Future<List<DiagnosticoEnriched>> findAllWithRelations() async {
     final query = _db.select(_db.diagnosticos).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defensivoId),
+        _db.fitossanitarios.idDefensivo.equalsExp(_db.diagnosticos.fkIdDefensivo),
       ),
       leftOuterJoin(
         _db.culturas,
-        _db.culturas.id.equalsExp(_db.diagnosticos.culturaId),
+        _db.culturas.idCultura.equalsExp(_db.diagnosticos.fkIdCultura),
       ),
       leftOuterJoin(
         _db.pragas,
-        _db.pragas.id.equalsExp(_db.diagnosticos.pragaId),
+        _db.pragas.idPraga.equalsExp(_db.diagnosticos.fkIdPraga),
       ),
     ]);
 
@@ -106,15 +93,15 @@ class DiagnosticoRepository {
     final query = _db.select(_db.diagnosticos).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defensivoId),
+        _db.fitossanitarios.idDefensivo.equalsExp(_db.diagnosticos.fkIdDefensivo),
       ),
       leftOuterJoin(
         _db.culturas,
-        _db.culturas.id.equalsExp(_db.diagnosticos.culturaId),
+        _db.culturas.idCultura.equalsExp(_db.diagnosticos.fkIdCultura),
       ),
       leftOuterJoin(
         _db.pragas,
-        _db.pragas.id.equalsExp(_db.diagnosticos.pragaId),
+        _db.pragas.idPraga.equalsExp(_db.diagnosticos.fkIdPraga),
       ),
     ]);
 
@@ -132,23 +119,23 @@ class DiagnosticoRepository {
 
   /// Busca diagnósticos enriquecidos por defensivo
   Future<List<DiagnosticoEnriched>> findByDefensivoWithRelations(
-    int defensivoId,
+    String fkIdDefensivo,
   ) async {
     final query = _db.select(_db.diagnosticos).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.diagnosticos.defensivoId),
+        _db.fitossanitarios.idDefensivo.equalsExp(_db.diagnosticos.fkIdDefensivo),
       ),
       leftOuterJoin(
         _db.culturas,
-        _db.culturas.id.equalsExp(_db.diagnosticos.culturaId),
+        _db.culturas.idCultura.equalsExp(_db.diagnosticos.fkIdCultura),
       ),
       leftOuterJoin(
         _db.pragas,
-        _db.pragas.id.equalsExp(_db.diagnosticos.pragaId),
+        _db.pragas.idPraga.equalsExp(_db.diagnosticos.fkIdPraga),
       ),
     ])
-      ..where(_db.diagnosticos.defensivoId.equals(defensivoId));
+      ..where(_db.diagnosticos.fkIdDefensivo.equals(fkIdDefensivo));
 
     final results = await query.get();
 
@@ -164,10 +151,10 @@ class DiagnosticoRepository {
 
   /// Conta total de diagnósticos
   Future<int> count() async {
-    final count = _db.diagnosticos.id.count();
-    final query = _db.selectOnly(_db.diagnosticos)..addColumns([count]);
+    final cnt = _db.diagnosticos.idReg.count();
+    final query = _db.selectOnly(_db.diagnosticos)..addColumns([cnt]);
     final result = await query.getSingle();
-    return result.read(count) ?? 0;
+    return result.read(cnt) ?? 0;
   }
 
   // ========== BULK INSERT (Para carga inicial de dados) ==========
@@ -220,17 +207,6 @@ class DiagnosticoRepository {
 
   /// Busca por ID ou ObjectId com múltiplos formatos
   Future<Diagnostico?> findByIdOrObjectId(String id) async {
-    // Tenta primeiro como Firebase ID
-    final byFirebase = await findByFirebaseId(id);
-    if (byFirebase != null) return byFirebase;
-    
-    // Tenta como ID local
-    final localId = int.tryParse(id);
-    if (localId != null) {
-      final byLocal = await findById(localId);
-      if (byLocal != null) return byLocal;
-    }
-    
     // Tenta como idReg
     return await findByIdReg(id);
   }

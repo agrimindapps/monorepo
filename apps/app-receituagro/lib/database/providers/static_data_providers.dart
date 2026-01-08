@@ -34,19 +34,19 @@ Future<bool> loadStaticData(Ref ref) async {
 /// Provider para verificar se os dados estáticos já foram carregados
 ///
 /// Verifica se a tabela de culturas tem dados.
-/// E verifica se a tabela de fitossanitários info tem dados válidos (modoAcao).
+/// E verifica se a tabela de fitossanitários tem dados válidos (nome).
 @riverpod
 Stream<bool> staticDataLoaded(Ref ref) {
   final db = ref.watch(databaseProvider);
 
-  // Verifica se temos registros de info com modo de ação preenchido
+  // Verifica se temos registros de fitossanitarios com nome preenchido
   // Isso garante que a migração/correção dos dados foi aplicada
-  final query = db.selectOnly(db.fitossanitariosInfo)
-    ..addColumns([db.fitossanitariosInfo.id.count()])
-    ..where(db.fitossanitariosInfo.modoAcao.isNotNull());
+  final query = db.selectOnly(db.fitossanitarios)
+    ..addColumns([db.fitossanitarios.idDefensivo.count()])
+    ..where(db.fitossanitarios.nome.isNotNull());
 
   return query.watchSingle().map((row) {
-    final count = row.read(db.fitossanitariosInfo.id.count()) ?? 0;
+    final count = row.read(db.fitossanitarios.idDefensivo.count()) ?? 0;
     return count > 100; // Limite arbitrário para garantir que temos dados suficientes
   });
 }

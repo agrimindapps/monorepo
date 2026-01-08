@@ -141,9 +141,9 @@ class ReceituagroDatabase extends _$ReceituagroDatabase with BaseDriftDatabase {
     // Verificar se já existem dados
     final culturasCount = await (selectOnly(
       culturas,
-    )..addColumns([culturas.id.count()])).getSingle();
+    )..addColumns([culturas.idCultura.count()])).getSingle();
 
-    final count = culturasCount.read(culturas.id.count()) ?? 0;
+    final count = culturasCount.read(culturas.idCultura.count()) ?? 0;
 
     if (count > 0) {
       debugPrint('ℹ️ Dados estáticos já populados ($count culturas)');

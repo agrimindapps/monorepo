@@ -42,7 +42,7 @@ class DatabaseInitialization {
   /// Verifica se o banco está acessível e retorna count de culturas
   static Future<int> _checkDatabase(ReceituagroDatabase db) async {
     try {
-      final countColumn = db.culturas.id.count();
+      final countColumn = db.culturas.idCultura.count();
       final query = db.selectOnly(db.culturas)
         ..addColumns([countColumn]);
 

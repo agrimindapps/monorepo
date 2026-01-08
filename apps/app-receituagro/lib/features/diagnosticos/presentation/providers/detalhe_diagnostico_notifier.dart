@@ -118,8 +118,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
         (diagnosticoEntity) async {
           if (diagnosticoEntity != null) {
             final driftRepository = ref.read(diagnosticoRepositoryProvider);
-            final diagnosticoDrift = await driftRepository.findById(
-              int.parse(diagnosticoId),
+            final diagnosticoDrift = await driftRepository.findByIdOrObjectId(
+              diagnosticoId,
             );
 
             // Fetch related data
@@ -139,11 +139,11 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
               debugPrint(
                 '🔍 [DetalheDiagnosticoNotifier] Buscando dados relacionados...',
               );
-              debugPrint('   defensivoId: ${diagnosticoDrift.defensivoId}');
-              debugPrint('   pragaId: ${diagnosticoDrift.pragaId}');
+              debugPrint('   fkIdDefensivo: ${diagnosticoDrift.fkIdDefensivo}');
+              debugPrint('   fkIdPraga: ${diagnosticoDrift.fkIdPraga}');
 
-              defensivo = await fitossanitariosRepo.findById(
-                diagnosticoDrift.defensivoId,
+              defensivo = await fitossanitariosRepo.findByIdDefensivo(
+                diagnosticoDrift.fkIdDefensivo,
               );
 
               // Fallback: Se não achou por ID, tenta pelo nome (Self-Healing)
@@ -175,31 +175,23 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
               );
 
               if (defensivo != null) {
-                // Tenta buscar Info pelo ID do defensivo (Foreign Key)
-                defensivoInfo = await fitossanitariosInfoRepo.findByDefensivoId(
-                  defensivo.id,
+                // Busca FitossanitariosInfo usando fkIdDefensivo (string FK)
+                defensivoInfo = await fitossanitariosInfoRepo.findByFkIdDefensivo(
+                  defensivo.idDefensivo,
                 );
-
-                // Se não achou, tenta buscar pelo ID da tabela (caso onde ID == DefensivoID)
-                defensivoInfo ??= await fitossanitariosInfoRepo.findById(
-                    defensivo.id,
-                  );
-
-                // Se ainda não achou, tenta pelo idDefensivo (String)
-                defensivoInfo ??= await fitossanitariosInfoRepo.findByIdReg(
-                    defensivo.idDefensivo,
-                  );
 
                 debugPrint(
                   '   defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}',
                 );
                 if (defensivoInfo != null) {
-                  debugPrint('   - formulacao: ${defensivoInfo.formulacao}');
-                  debugPrint('   - modoAcao: ${defensivoInfo.modoAcao}');
                   debugPrint('   - toxicidade: ${defensivoInfo.toxicidade}');
+                } else {
+                  debugPrint(
+                    '   ⚠️ FitossanitariosInfo NÃO ENCONTRADO para idDefensivo=${defensivo.idDefensivo}',
+                  );
                 }
               }
-              praga = await pragasRepo.findById(diagnosticoDrift.pragaId);
+              praga = await pragasRepo.findByIdPraga(diagnosticoDrift.fkIdPraga);
               debugPrint(
                 '   praga encontrada: ${praga != null ? praga.nome : "NULL"}',
               );
@@ -258,8 +250,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
     } catch (e) {
       try {
         final driftRepository = ref.read(diagnosticoRepositoryProvider);
-        final diagnosticoDrift = await driftRepository.findById(
-          int.parse(diagnosticoId),
+        final diagnosticoDrift = await driftRepository.findByIdOrObjectId(
+          diagnosticoId,
         );
         if (diagnosticoDrift != null) {
           final diagnostico = DiagnosticoMapper.fromDrift(diagnosticoDrift);
@@ -273,8 +265,8 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
           );
           final pragasRepo = ref.read(pragasRepositoryProvider);
 
-          final defensivo = await fitossanitariosRepo.findById(
-            diagnosticoDrift.defensivoId,
+          final defensivo = await fitossanitariosRepo.findByIdDefensivo(
+            diagnosticoDrift.fkIdDefensivo,
           );
           debugPrint(
             '🔍 [Fallback] defensivo encontrado: ${defensivo != null ? defensivo.nome : "NULL"}',
@@ -282,15 +274,15 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
 
           FitossanitariosInfoData? defensivoInfo;
           if (defensivo != null) {
-            // O id em FitossanitariosInfo é o mesmo id do Fitossanitario
-            defensivoInfo = await fitossanitariosInfoRepo.findById(
-              defensivo.id,
+            // Busca FitossanitariosInfo usando fkIdDefensivo
+            defensivoInfo = await fitossanitariosInfoRepo.findByFkIdDefensivo(
+              defensivo.idDefensivo,
             );
             debugPrint(
               '🔍 [Fallback] defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}',
             );
           }
-          final praga = await pragasRepo.findById(diagnosticoDrift.pragaId);
+          final praga = await pragasRepo.findByIdPraga(diagnosticoDrift.fkIdPraga);
           debugPrint(
             '🔍 [Fallback] praga encontrada: ${praga != null ? praga.nome : "NULL"}',
           );

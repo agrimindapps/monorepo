@@ -2,7 +2,7 @@ import '../../database/receituagro_database.dart';
 
 /// Extensão para Fitossanitario (Drift) com métodos display compatíveis com DefensivoModel
 extension FitossanitarioDriftExtension on Fitossanitario {
-  String get displayName => nomeComum?.isNotEmpty == true ? nomeComum! : nome;
+  String get displayName => nome;
 
   String get displayIngredient =>
       ingredienteAtivo?.isNotEmpty == true ? ingredienteAtivo! : nome;
@@ -14,17 +14,12 @@ extension FitossanitarioDriftExtension on Fitossanitario {
   String get displayFabricante =>
       fabricante?.isNotEmpty == true ? fabricante! : 'Não informado';
 
-  String get displayModoAcao => 'Não especificado';
+  /// Modo de ação agora está no próprio Fitossanitario
+  String get displayModoAcao => modoAcao ?? 'Não especificado';
 
-  /// Retorna modo de ação consultando a tabela FitossanitariosInfo
+  /// Retorna modo de ação (agora disponível direto no modelo)
   Future<String> getDisplayModoAcao() async {
-    try {
-      // TODO: Implementar consulta à tabela FitossanitariosInfo quando necessário
-      // Por enquanto retorna valor padrão
-      return 'Não especificado';
-    } catch (e) {
-      return 'Não especificado';
-    }
+    return modoAcao ?? 'Não especificado';
   }
 
   String get line1 => displayName;
@@ -38,27 +33,26 @@ extension FitossanitarioDriftExtension on Fitossanitario {
 
   /// Retorna classe de segurança baseada na toxicidade
   Future<String> getClasseSeguranca() async {
-    try {
-      // TODO: Implementar consulta à tabela FitossanitariosInfo para obter toxicidade
-      // Por enquanto retorna valor padrão
-      return 'Não classificado';
-    } catch (e) {
-      return 'Não classificado';
-    }
+    return classeToxico ?? 'Não classificado';
   }
 
   /// Converte para Map de String para dynamic para compatibilidade
   Map<String, dynamic> toDataMap() {
     return {
-      'id': id,
       'idDefensivo': idDefensivo,
       'nome': nome,
-      'nomeComum': nomeComum,
+      'nomeTecnico': nomeTecnico,
       'fabricante': fabricante,
-      'classe': classe,
       'classeAgronomica': classeAgronomica,
+      'classeAmbiental': classeAmbiental,
+      'classeToxico': classeToxico,
+      'modoAcao': modoAcao,
+      'formulacao': formulacao,
       'ingredienteAtivo': ingredienteAtivo,
       'registroMapa': registroMapa,
+      'corrosivo': corrosivo,
+      'inflamavel': inflamavel,
+      'quantProduto': quantProduto,
       'status': status,
       'comercializado': comercializado,
       'elegivel': elegivel,

@@ -49,10 +49,10 @@ class _DiagnosticoDefensivoListItemWidgetState
     try {
       final pragasRepository = ref.read(pragasRepositoryProvider);
       
-      // Para Diagnostico do Drift, pragaId é o ID inteiro da tabela Pragas
+      // Para Diagnostico do Drift, fkIdPraga é string PK
       if (widget.diagnostico is Diagnostico) {
         final diag = widget.diagnostico as Diagnostico;
-        final praga = await pragasRepository.findById(diag.pragaId);
+        final praga = await pragasRepository.findByIdPraga(diag.fkIdPraga);
 
         if (mounted) {
           setState(() {
@@ -61,18 +61,9 @@ class _DiagnosticoDefensivoListItemWidgetState
           });
         }
       } else if (widget.diagnostico is DiagnosticoEntity) {
-        // Para DiagnosticoEntity, idPraga é string (pode ser int ou idPraga original)
+        // Para DiagnosticoEntity, idPraga é string
         final diag = widget.diagnostico as DiagnosticoEntity;
-        Praga? praga;
-        
-        // Tenta primeiro como int (ID do banco)
-        final intId = int.tryParse(diag.idPraga);
-        if (intId != null) {
-          praga = await pragasRepository.findById(intId);
-        }
-        
-        // Se não encontrou, tenta como string (idPraga original)
-        praga ??= await pragasRepository.findByIdPraga(diag.idPraga);
+        final praga = await pragasRepository.findByIdPraga(diag.idPraga);
 
         if (mounted) {
           setState(() {
@@ -85,16 +76,7 @@ class _DiagnosticoDefensivoListItemWidgetState
         final idPraga = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
         if (idPraga != null) {
-          // Tenta primeiro como int (ID do banco)
-          final intId = int.tryParse(idPraga);
-          Praga? praga;
-          
-          if (intId != null) {
-            praga = await pragasRepository.findById(intId);
-          }
-          
-          // Se não encontrou, tenta como string (idPraga original)
-          praga ??= await pragasRepository.findByIdPraga(idPraga);
+          final praga = await pragasRepository.findByIdPraga(idPraga);
 
           if (mounted) {
             setState(() {
@@ -328,12 +310,13 @@ class _DiagnosticoDefensivoListItemWidgetState
             return diag.displayDosagem;
           case 'fkIdPraga':
           case 'idPraga':
-            return diag.pragaId.toString();
+            return diag.fkIdPraga;
           case 'fkIdCultura':
           case 'idCultura':
-            return diag.culturaId.toString();
+            return diag.fkIdCultura;
+          case 'fkIdDefensivo':
           case 'idDefensivo':
-            return diag.defensivoId.toString();
+            return diag.fkIdDefensivo;
           case 'nomePraga':
           case 'grupo':
             // Retorna null para forçar o carregamento via pragaId no initState/build

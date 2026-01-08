@@ -28,7 +28,8 @@ class DefensivoResolverStrategy implements IFavoritosDataResolverStrategy {
         'ingredienteAtivo': item.ingredienteAtivo ?? '',
         'fabricante': item.fabricante ?? '',
         'classeAgron': item.classeAgronomica ?? '',
-        'modoAcao': '', // Not available in Drift Fitossanitarios table
+        'modoAcao': item.modoAcao ?? '', // Now in Fitossanitarios table
+        'formulacao': item.formulacao ?? '', // Now in Fitossanitarios table
       };
     } catch (e) {
       return null;
@@ -82,11 +83,11 @@ class DiagnosticoResolverStrategy implements IFavoritosDataResolverStrategy {
       final item = await _repository.getByIdOrObjectId(id);
       if (item == null) return null;
 
-      // Fetch related data using FKs
-      final praga = await _pragasRepository.findById(item.pragaId);
+      // Fetch related data using FKs (string PKs)
+      final praga = await _pragasRepository.findByIdPraga(item.fkIdPraga);
       final defensivo =
-          await _fitossanitariosRepository.findById(item.defensivoId);
-      final cultura = await _culturasRepository.findById(item.culturaId);
+          await _fitossanitariosRepository.findByIdDefensivo(item.fkIdDefensivo);
+      final cultura = await _culturasRepository.findByIdCultura(item.fkIdCultura);
 
       return {
         'nomePraga': praga?.nome ?? '',
@@ -109,10 +110,7 @@ class CulturaResolverStrategy implements IFavoritosDataResolverStrategy {
   @override
   Future<Map<String, dynamic>?> resolveItemData(String id) async {
     try {
-      final idInt = int.tryParse(id);
-      if (idInt == null) return null;
-
-      final item = await _repository.findById(idInt);
+      final item = await _repository.findByIdCultura(id);
       if (item == null) return null;
 
       return {

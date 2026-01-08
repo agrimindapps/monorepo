@@ -14,53 +14,42 @@ class DiagnosticosRepository {
     return await _baseRepo.findAll();
   }
 
-  /// Busca por ID (Firebase ou local)
+  /// Busca por ID (idReg)
   Future<Diagnostico?> findByIdOrObjectId(String id) async {
-    // Tenta primeiro como Firebase ID
-    final byFirebase = await _baseRepo.findByFirebaseId(id);
-    if (byFirebase != null) return byFirebase;
-    
-    // Tenta como ID local
-    final localId = int.tryParse(id);
-    if (localId != null) {
-      return await _baseRepo.findById(localId);
-    }
-    
-    // Tenta como idReg
     return await _baseRepo.findByIdReg(id);
   }
 
-  /// Busca diagnósticos por defensivo
-  Future<List<Diagnostico>> findByDefensivo(int defensivoId) async {
-    return await _baseRepo.findByDefensivo(defensivoId);
+  /// Busca diagnósticos por defensivo (string FK)
+  Future<List<Diagnostico>> findByDefensivo(String fkIdDefensivo) async {
+    return await _baseRepo.findByDefensivoId(fkIdDefensivo);
   }
 
-  /// Busca diagnósticos por cultura
-  Future<List<Diagnostico>> findByCultura(int culturaId) async {
-    return await _baseRepo.findByCultura(culturaId);
+  /// Busca diagnósticos por cultura (string FK)
+  Future<List<Diagnostico>> findByCultura(String fkIdCultura) async {
+    return await _baseRepo.findByCulturaId(fkIdCultura);
   }
 
-  /// Busca diagnósticos por praga
-  Future<List<Diagnostico>> findByPraga(int pragaId) async {
-    return await _baseRepo.findByPraga(pragaId);
+  /// Busca diagnósticos por praga (string FK)
+  Future<List<Diagnostico>> findByPraga(String fkIdPraga) async {
+    return await _baseRepo.findByPragaId(fkIdPraga);
   }
 
   /// Busca diagnósticos pela combinação tripla
   Future<List<Diagnostico>> findByTriplaCombinacao({
-    int? defensivoId,
-    int? culturaId,
-    int? pragaId,
+    String? fkIdDefensivo,
+    String? fkIdCultura,
+    String? fkIdPraga,
   }) async {
     // Faz busca manual com filtros
     final all = await _baseRepo.findAll();
     return all.where((d) {
-      if (defensivoId != null && d.defensivoId != defensivoId) {
+      if (fkIdDefensivo != null && d.fkIdDefensivo != fkIdDefensivo) {
         return false;
       }
-      if (culturaId != null && d.culturaId != culturaId) {
+      if (fkIdCultura != null && d.fkIdCultura != fkIdCultura) {
         return false;
       }
-      if (pragaId != null && d.pragaId != pragaId) {
+      if (fkIdPraga != null && d.fkIdPraga != fkIdPraga) {
         return false;
       }
       return true;
@@ -79,8 +68,8 @@ class DiagnosticosRepository {
 
   /// Busca diagnósticos enriquecidos por defensivo
   Future<List<DiagnosticoEnriched>> findByDefensivoWithRelations(
-    int defensivoId,
+    String fkIdDefensivo,
   ) async {
-    return await _baseRepo.findByDefensivoWithRelations(defensivoId);
+    return await _baseRepo.findByDefensivoWithRelations(fkIdDefensivo);
   }
 }

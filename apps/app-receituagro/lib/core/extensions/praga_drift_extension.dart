@@ -10,24 +10,25 @@ extension PragaDriftExtension on Praga {
   String get displayType {
     switch (tipo?.toLowerCase()) {
       case 'inseto':
+      case '1':
         return 'Inseto';
       case 'fungo':
-        return 'Doença';
       case 'bacteria':
-        return 'Doença';
       case 'virus':
+      case '2':
         return 'Doença';
       case 'nematoide':
         return 'Nematoide';
       case 'planta daninha':
+      case '3':
         return 'Planta Daninha';
       default:
         return tipo?.isNotEmpty == true ? tipo! : 'Praga';
     }
   }
 
-  String get displayDescription =>
-      descricao?.isNotEmpty == true ? descricao! : 'Descrição não disponível';
+  /// Descrição não está mais no modelo Praga - consultar PragasInf
+  String get displayDescription => 'Consulte informações detalhadas';
 
   /// Retorna sintomas consultando a tabela PragasInf
   Future<String> getDisplaySintomas() async {
@@ -58,13 +59,16 @@ extension PragaDriftExtension on Praga {
   /// Converte para Map de String para dynamic para compatibilidade
   Map<String, dynamic> toDataMap() {
     return {
-      'id': id,
       'idPraga': idPraga,
       'nome': nome,
       'nomeLatino': nomeLatino,
       'tipo': tipo,
-      'imagemUrl': imagemUrl,
-      'descricao': descricao,
+      'status': status,
+      'dominio': dominio,
+      'reino': reino,
+      'familia': familia,
+      'genero': genero,
+      'especie': especie,
     };
   }
 }

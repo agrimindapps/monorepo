@@ -16,14 +16,15 @@ class CulturaMapper {
     );
   }
 
-  /// Converte Drift Cultura para Entity (updated for Drift migration)
+  /// Converte Drift Cultura para Entity (updated for new Drift schema)
+  /// New schema: Cultura has idCultura (PK), nome, status - no descricao/grupo
   static CulturaEntity fromDriftToEntity(Cultura drift) {
     return CulturaEntity(
       id: drift.idCultura,
       nome: drift.nome,
       grupo: null, // Drift Cultura doesn't have grupo field
-      descricao: drift.descricao,
-      isActive: true, // Assuming loaded cultures are active
+      descricao: null, // Drift Cultura doesn't have descricao field
+      isActive: drift.status,
     );
   }
 

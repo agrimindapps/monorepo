@@ -18,13 +18,7 @@ class CulturasRepository {
     return await query.get();
   }
 
-  /// Busca cultura por ID
-  Future<Cultura?> findById(int id) async {
-    final query = _db.select(_db.culturas)..where((tbl) => tbl.id.equals(id));
-    return await query.getSingleOrNull();
-  }
-
-  /// Busca cultura por ID da cultura (idCultura)
+  /// Busca cultura por idCultura (PRIMARY KEY)
   Future<Cultura?> findByIdCultura(String idCultura) async {
     final query = _db.select(_db.culturas)
       ..where((tbl) => tbl.idCultura.equals(idCultura));
@@ -38,19 +32,12 @@ class CulturasRepository {
     return await query.get();
   }
 
-  /// Busca culturas por família botânica
-  Future<List<Cultura>> findByFamilia(String familia) async {
-    final query = _db.select(_db.culturas)
-      ..where((tbl) => tbl.familia.equals(familia));
-    return await query.get();
-  }
-
   /// Conta o total de culturas
   Future<int> count() async {
     final query = _db.selectOnly(_db.culturas)
-      ..addColumns([_db.culturas.id.count()]);
+      ..addColumns([_db.culturas.idCultura.count()]);
     final result = await query.getSingle();
-    return result.read(_db.culturas.id.count())!;
+    return result.read(_db.culturas.idCultura.count())!;
   }
 
   /// Carrega dados do JSON e salva no banco Drift
@@ -70,9 +57,6 @@ class CulturasRepository {
         final companion = CulturasCompanion.insert(
           idCultura: item['idReg']?.toString() ?? '',
           nome: item['cultura']?.toString() ?? '',
-          nomeLatino: Value(item['nomeLatino']?.toString()),
-          descricao: Value(item['descricao']?.toString()),
-          familia: Value(item['familia']?.toString()),
         );
         await _db.into(_db.culturas).insert(companion);
       }

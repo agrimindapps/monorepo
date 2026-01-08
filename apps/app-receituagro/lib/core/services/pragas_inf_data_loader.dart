@@ -73,18 +73,6 @@ class PragasInfDataLoader {
         name: 'PragasInfDataLoader',
       );
 
-      // Buscar mapeamento de idPraga -> id
-      final pragasQuery = db.select(db.pragas);
-      final allPragas = await pragasQuery.get();
-      final pragaIdMap = <String, int>{};
-      for (final praga in allPragas) {
-        pragaIdMap[praga.idPraga] = praga.id;
-      }
-      developer.log(
-        '🔬 [PRAGAS_INF] Mapeamento de pragas criado: ${pragaIdMap.length} pragas',
-        name: 'PragasInfDataLoader',
-      );
-
       // Inserir em batch
       int insertedCount = 0;
       int skippedCount = 0;
@@ -99,22 +87,16 @@ class PragasInfDataLoader {
             continue;
           }
 
-          // Obter ID da praga (FK) - usar fkIdPraga ou idReg como fallback
-          final pragaId = pragaIdMap[fkIdPraga ?? idReg];
-          if (pragaId == null) {
-            skippedCount++;
-            continue;
-          }
-
+          // fkIdPraga é a FK para Pragas (string)
           batch.insert(
             db.pragasInf,
             PragasInfCompanion.insert(
               idReg: idReg,
-              pragaId: pragaId,
+              fkIdPraga: fkIdPraga ?? idReg,
+              descricao: Value(record['descrisao'] as String?), // typo no JSON
               sintomas: Value(record['sintomas'] as String?),
+              bioecologia: Value(record['bioecologia'] as String?),
               controle: Value(record['controle'] as String?),
-              danos: Value(record['descrisao'] as String?), // descrisao -> danos
-              condicoesFavoraveis: Value(record['bioecologia'] as String?),
             ),
           );
           insertedCount++;

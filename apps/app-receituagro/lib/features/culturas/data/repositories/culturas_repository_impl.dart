@@ -70,12 +70,8 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, CulturaEntity?>> getCulturaById(String id) async {
     try {
-      final idInt = int.tryParse(id);
-      if (idInt == null) {
-        return const Right(null);
-      }
-
-      final cultura = await _driftRepository.findById(idInt);
+      // New schema uses string idCultura as PK
+      final cultura = await _driftRepository.findByIdCultura(id);
       if (cultura == null) {
         return const Right(null);
       }
@@ -126,13 +122,9 @@ class CulturasRepositoryImpl implements ICulturasRepository {
   @override
   Future<Either<Failure, bool>> isCulturaActive(String culturaId) async {
     try {
-      final idInt = int.tryParse(culturaId);
-      if (idInt == null) {
-        return const Right(false);
-      }
-
-      final cultura = await _driftRepository.findById(idInt);
-      return Right(cultura != null);
+      // New schema uses string idCultura as PK
+      final cultura = await _driftRepository.findByIdCultura(culturaId);
+      return Right(cultura != null && cultura.status);
     } catch (e) {
       return Left(
         CacheFailure('Erro ao verificar status da cultura: ${e.toString()}'),

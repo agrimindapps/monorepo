@@ -52,11 +52,11 @@ class DiagnosticoWithWarningsDrift {
 
   /// Nome do defensivo (com fallback seguro)
   String get nomeDefensivo =>
-      defensivo?.nomeComum ?? defensivo?.nome ?? 'Defensivo não encontrado';
+      defensivo?.nome ?? 'Defensivo não encontrado';
 
   /// Nome técnico do defensivo (com fallback)
   String get nomeTecnicoDefensivo =>
-      defensivo?.nome ?? 'Nome técnico não disponível';
+      defensivo?.nomeTecnico ?? defensivo?.nome ?? 'Nome técnico não disponível';
 
   /// Nome da praga (com fallback seguro)
   String get nomePraga => praga?.nome ?? 'Praga não encontrada';
@@ -69,11 +69,11 @@ class DiagnosticoWithWarningsDrift {
   String get nomeCultura => cultura?.nome ?? 'Cultura não encontrada';
 
   /// Nome científico da cultura (com fallback)
-  String get nomeCientificoCultura =>
-      cultura?.nomeLatino ?? 'Nome científico não disponível';
+  /// NOTA: Cultura agora só tem nome e status, não tem nome científico
+  String get nomeCientificoCultura => 'N/A';
 
   /// Classe do defensivo (com fallback)
-  String get classeDefensivo => defensivo?.classe ?? 'Classe não especificada';
+  String get classeDefensivo => defensivo?.classeAgronomica ?? 'Classe não especificada';
 
   /// Fabricante do defensivo (com fallback)
   String get fabricanteDefensivo =>
@@ -82,6 +82,6 @@ class DiagnosticoWithWarningsDrift {
   /// Tipo da praga (com fallback)
   String get tipoPraga => praga?.tipo ?? 'Tipo não especificado';
 
-  /// Família da cultura (com fallback)
-  String get familiaCultura => cultura?.familia ?? 'Família não especificada';
+  /// Família da praga (com fallback)
+  String get familiaPraga => praga?.familia ?? 'Família não especificada';
 }

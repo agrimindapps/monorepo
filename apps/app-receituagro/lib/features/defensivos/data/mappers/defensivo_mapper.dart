@@ -109,7 +109,7 @@ class DefensivoMapper {
       id: drift.idDefensivo,
       nome: drift.nome,
       ingredienteAtivo: drift.ingredienteAtivo ?? '',
-      nomeComum: drift.nomeComum ?? drift.nome,
+      nomeComum: drift.nomeTecnico ?? drift.nome,
       classeAgronomica: drift.classeAgronomica,
       fabricante: drift.fabricante,
       modoAcao: modoAcao, // Use provided modoAcao
@@ -121,10 +121,10 @@ class DefensivoMapper {
   /// Converte lista de Fitossanitario para Entities
   static List<DefensivoEntity> fromDriftToEntityList(
     List<Fitossanitario> drifts, {
-    Map<int, String?>? infoMap,
+    Map<String, String?>? infoMap,
   }) {
     return drifts.map((drift) {
-      final modoAcao = infoMap?[drift.id];
+      final modoAcao = infoMap?[drift.idDefensivo];
       return fromDriftToEntity(drift, modoAcao: modoAcao);
     }).toList();
   }

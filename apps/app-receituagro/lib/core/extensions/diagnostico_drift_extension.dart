@@ -42,9 +42,9 @@ extension DiagnosticoDriftExtension on Diagnostico {
   }
 
   String get displayDosagem {
-    final minStr = dsMin?.trim() ?? '';
-    final maxStr = dsMax.trim();
-    final umStr = um.trim();
+    final minStr = dsMin ?? '';
+    final maxStr = dsMax ?? '';
+    final umStr = um ?? '';
     
     final min = double.tryParse(minStr);
     final max = double.tryParse(maxStr);
@@ -108,6 +108,8 @@ extension DiagnosticoDriftExtension on Diagnostico {
   }
 
   /// Converte para mapa de dados para exibição
+  /// NOTA: FitossanitariosInfo agora contém campos diferentes (embalagens, tecnologia, precaucoes)
+  /// Os campos de formulação, modoAcao, toxicidade agora estão em Fitossanitarios
   Future<Map<String, String>> toDataMap({
     Fitossanitario? defensivo,
     FitossanitariosInfoData? defensivoInfo,
@@ -118,15 +120,15 @@ extension DiagnosticoDriftExtension on Diagnostico {
       'vazaoTerrestre': displayVazaoTerrestre,
       'vazaoAerea': displayVazaoAerea,
       'intervaloAplicacao': displayIntervaloAplicacao,
-      'intervaloSeguranca': defensivoInfo?.carencia ?? 'Não informado',
-      'tecnologia': defensivoInfo?.informacoesAdicionais ?? 'N/A',
-      'formulacao': defensivoInfo?.formulacao ?? 'N/A',
-      'modoAcao': defensivoInfo?.modoAcao ?? 'N/A',
+      'intervaloSeguranca': 'N/A', // Campo removido na nova estrutura
+      'tecnologia': defensivoInfo?.tecnologia ?? 'N/A',
+      'formulacao': defensivo?.formulacao ?? 'N/A',
+      'modoAcao': defensivo?.modoAcao ?? 'N/A',
       'ingredienteAtivo': defensivo?.ingredienteAtivo ?? 'N/A',
-      'classificacaoToxicologica': defensivoInfo?.toxicidade ?? 'N/A',
+      'classificacaoToxicologica': defensivo?.classeToxico ?? 'N/A',
       'classeAgronomica': defensivo?.classeAgronomica ?? 'N/A',
-      'classificacaoAmbiental': 'N/A', // Campo não encontrado na tabela FitossanitariosInfo
-      'toxico': defensivoInfo?.toxicidade ?? 'N/A',
+      'classificacaoAmbiental': defensivo?.classeAmbiental ?? 'N/A',
+      'toxico': defensivo?.classeToxico ?? 'N/A',
       'mapa': defensivo?.registroMapa ?? 'N/A',
       'nomeDefensivo': defensivo?.nome ?? 'N/A',
       'fabricante': defensivo?.fabricante ?? 'N/A',

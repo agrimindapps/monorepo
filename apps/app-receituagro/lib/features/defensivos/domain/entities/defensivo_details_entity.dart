@@ -40,17 +40,17 @@ class DefensivoDetailsEntity {
   factory DefensivoDetailsEntity.fromDrift(Fitossanitario drift) {
     return DefensivoDetailsEntity(
       id: drift.idDefensivo,
-      nomeComum: drift.nomeComum ?? drift.nome,
+      nomeComum: drift.nomeTecnico ?? drift.nome,
       nomeTecnico: drift.nome,
       fabricante: drift.fabricante ?? 'Não informado',
       ingredienteAtivo: drift.ingredienteAtivo ?? 'Não informado',
       toxico: null, // Não disponível no Drift
       inflamavel: null, // Não disponível no Drift
       corrosivo: null, // Não disponível no Drift
-      modoAcao: null, // Não disponível no Drift
+      modoAcao: drift.modoAcao, // modoAcao is now in Fitossanitarios table
       classeAgronomica: drift.classeAgronomica,
       classAmbiental: null, // Não disponível no Drift
-      formulacao: null, // Não disponível no Drift
+      formulacao: drift.formulacao, // formulacao is now in Fitossanitarios table
       idReg: drift.registroMapa,
       mapa: drift.registroMapa,
     );

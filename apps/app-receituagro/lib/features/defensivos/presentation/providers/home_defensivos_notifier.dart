@@ -6,9 +6,7 @@ import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../core/services/access_history_service.dart';
 import '../../../../core/services/fitossanitarios_data_loader.dart';
 import '../../../../core/services/receituagro_random_extensions.dart';
-import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/fitossanitarios_info_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 
 part 'home_defensivos_notifier.g.dart';
@@ -136,8 +134,6 @@ class _HistoryData {
 class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
   FitossanitariosRepository get _repository =>
       ref.read(core_providers.fitossanitariosRepositoryProvider);
-  FitossanitariosInfoRepository get _infoRepository =>
-      ref.read(fitossanitariosInfoRepositoryProvider);
   AccessHistoryService get _historyService => AccessHistoryService();
 
   @override
@@ -199,11 +195,8 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
         }
       }
 
-      // Fetch info for modo de ação
-      final infos = await _infoRepository.findAll();
-      final infoMap = {for (var i in infos) i.defensivoId: i.modoAcao};
-
-      return _calculateStatistics(defensivos, infoMap: infoMap);
+      // modoAcao is now in Fitossanitarios table, no need for infoMap
+      return _calculateStatistics(defensivos);
     } catch (e) {
       return DefensivosStatistics.empty();
     }
@@ -324,11 +317,8 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
           }
         }
       }
-      // Fetch info for modo de ação
-      final infos = await _infoRepository.findAll();
-      final infoMap = {for (var i in infos) i.defensivoId: i.modoAcao};
-
-      final stats = _calculateStatistics(defensivos, infoMap: infoMap);
+      // modoAcao is now in Fitossanitarios table, no need for infoMap
+      final stats = _calculateStatistics(defensivos);
 
       state = AsyncValue.data(
         currentState
@@ -470,9 +460,8 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
   /// Calculate statistics from defensivos list
   DefensivosStatistics _calculateStatistics(
-    List<Fitossanitario> defensivos, {
-    Map<int, String?>? infoMap,
-  }) {
+    List<Fitossanitario> defensivos,
+  ) {
     final totalDefensivos = defensivos.length;
 
     // Fabricantes: valor único (normalizado para lowercase)
@@ -484,9 +473,10 @@ class HomeDefensivosNotifier extends _$HomeDefensivosNotifier {
 
     // Modo de Ação: separar por vírgula (normalizado para lowercase)
     // Exclui "não especificado" da contagem
+    // modoAcao is now in Fitossanitarios table
     final modosAcaoSet = <String>{};
     for (final defensivo in defensivos) {
-      final modoAcaoText = infoMap?[defensivo.id] ?? defensivo.displayModoAcao;
+      final modoAcaoText = defensivo.displayModoAcao;
       final modosAcao = _extrairModosAcao(modoAcaoText);
       modosAcaoSet.addAll(
         modosAcao

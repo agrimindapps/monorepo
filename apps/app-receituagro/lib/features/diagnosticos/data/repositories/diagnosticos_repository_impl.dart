@@ -13,29 +13,19 @@ import '../mappers/diagnostico_mapper.dart';
 
 /// Implementation of diagnosticos repository (Data Layer)
 ///
-/// REFACTORED: Interface Segregation Principle (ISP) applied
-/// - Originally had 30+ methods in single fat interface
-/// - Now split into 7 specialized interfaces:
-///   1. IDiagnosticosReadRepository (2 methods: CRUD)
-///   2. IDiagnosticosQueryRepository (5 methods: basic queries)
-///   3. IDiagnosticosSearchRepository (3 methods: advanced search)
-///   4. IDiagnosticosStatsRepository (3 methods: statistics)
-///   5. IDiagnosticosMetadataRepository (4 methods: lookup data)
-///   6. IDiagnosticosValidationRepository (2 methods: validation)
-///   7. IDiagnosticosRecommendationRepository (1 method: recommendations)
-///
-/// Implementation class provides all 7 interfaces.
-/// Services inject only the interfaces they need, reducing coupling.
+/// Updated for new string-based FK schema:
+/// - Diagnostico.fkIdCultura, fkIdPraga, fkIdDefensivo are strings
+/// - No need to resolve int IDs - direct string FK matching
 class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   final DiagnosticosRepository _repository;
   final FitossanitariosRepository _fitossanitariosRepository;
   final CulturasRepository _culturasRepository;
   final PragasRepository _pragasRepository;
 
-  // Caches para evitar queries repetidas
-  Map<int, Fitossanitario>? _fitossanitariosCache;
-  Map<int, Cultura>? _culturasCache;
-  Map<int, Praga>? _pragasCache;
+  // Caches para evitar queries repetidas (keyed by string ID)
+  Map<String, Fitossanitario>? _fitossanitariosCache;
+  Map<String, Cultura>? _culturasCache;
+  Map<String, Praga>? _pragasCache;
 
   DiagnosticosRepositoryImpl(
     this._repository,
@@ -44,27 +34,27 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     this._pragasRepository,
   );
 
-  /// Carrega caches de lookup tables
+  /// Carrega caches de lookup tables (keyed by string ID)
   Future<void> _ensureCachesLoaded() async {
     if (_fitossanitariosCache == null) {
       final fitossanitarios = await _fitossanitariosRepository.findAll();
-      _fitossanitariosCache = {for (var f in fitossanitarios) f.id: f};
+      _fitossanitariosCache = {for (var f in fitossanitarios) f.idDefensivo: f};
     }
     if (_culturasCache == null) {
       final culturas = await _culturasRepository.findAll();
-      _culturasCache = {for (var c in culturas) c.id: c};
+      _culturasCache = {for (var c in culturas) c.idCultura: c};
     }
     if (_pragasCache == null) {
       final pragas = await _pragasRepository.findAll();
-      _pragasCache = {for (var p in pragas) p.id: p};
+      _pragasCache = {for (var p in pragas) p.idPraga: p};
     }
   }
 
-  /// Enriquece uma entidade com nomes resolvidos
+  /// Enriquece uma entidade com nomes resolvidos (using string FK)
   DiagnosticoEntity _enrichEntity(DiagnosticoEntity entity, Diagnostico drift) {
-    final defensivo = _fitossanitariosCache?[drift.defensivoId];
-    final cultura = _culturasCache?[drift.culturaId];
-    final praga = _pragasCache?[drift.pragaId];
+    final defensivo = _fitossanitariosCache?[drift.fkIdDefensivo];
+    final cultura = _culturasCache?[drift.fkIdCultura];
+    final praga = _pragasCache?[drift.fkIdPraga];
 
     return entity.copyWith(
       nomeDefensivo: defensivo?.nome ?? 'Defensivo não encontrado',
@@ -140,29 +130,8 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         name: 'DiagnosticosRepository',
       );
 
-      // Resolve ID if it's not an integer
-      int? defensivoId = int.tryParse(idDefensivo);
-      if (defensivoId == null) {
-        final fitossanitario =
-            await _fitossanitariosRepository.findByIdDefensivo(idDefensivo);
-        if (fitossanitario != null) {
-          defensivoId = fitossanitario.id;
-          developer.log(
-            '✅ queryByDefensivo (Repository) - ID resolvido: $idDefensivo -> $defensivoId',
-            name: 'DiagnosticosRepository',
-          );
-        } else {
-          developer.log(
-            '⚠️ queryByDefensivo (Repository) - Fitossanitário não encontrado para ID: $idDefensivo',
-            name: 'DiagnosticosRepository',
-          );
-          return const Right([]);
-        }
-      }
-
-      final diagnosticosDrift = await _repository.findByDefensivo(
-        defensivoId,
-      );
+      // Direct string FK query - no need to resolve int IDs
+      final diagnosticosDrift = await _repository.findByDefensivoId(idDefensivo);
 
       developer.log(
         '✅ queryByDefensivo (Repository) - ${diagnosticosDrift.length} registros Drift encontrados',
@@ -195,19 +164,8 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String idCultura,
   ) async {
     try {
-      int? culturaId = int.tryParse(idCultura);
-      if (culturaId == null) {
-        final cultura = await _culturasRepository.findByIdCultura(idCultura);
-        if (cultura != null) {
-          culturaId = cultura.id;
-        } else {
-          return const Right([]);
-        }
-      }
-
-      final diagnosticosDrift = await _repository.findByCultura(
-        culturaId,
-      );
+      // Direct string FK query
+      final diagnosticosDrift = await _repository.findByCulturaId(idCultura);
       final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
@@ -226,47 +184,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
         name: 'DiagnosticosRepository',
       );
 
-      // Primeiro, tentar parsear como int (caso seja o ID numérico direto)
-      int? pragaId = int.tryParse(idPraga);
-      
-      if (pragaId != null) {
-        developer.log(
-          '✅ queryByPraga (Repository) - ID já é inteiro: $pragaId',
-          name: 'DiagnosticosRepository',
-        );
-      } else {
-        // ID não é inteiro, buscar pelo idPraga string na tabela de pragas
-        developer.log(
-          '🔍 queryByPraga (Repository) - ID não é int, buscando praga por idPraga string: "$idPraga"',
-          name: 'DiagnosticosRepository',
-        );
-        
-        final praga = await _pragasRepository.findByIdPraga(idPraga);
-        
-        if (praga != null) {
-          pragaId = praga.id;
-          developer.log(
-            '✅ queryByPraga (Repository) - Praga encontrada! nome: "${praga.nome}", id (int): $pragaId, idPraga (string): ${praga.idPraga}',
-            name: 'DiagnosticosRepository',
-          );
-        } else {
-          developer.log(
-            '⚠️ queryByPraga (Repository) - Praga NÃO encontrada para idPraga: "$idPraga"',
-            name: 'DiagnosticosRepository',
-          );
-          return const Right([]);
-        }
-      }
-
-      developer.log(
-        '🔍 queryByPraga (Repository) - Buscando diagnósticos com pragaId (int): $pragaId',
-        name: 'DiagnosticosRepository',
-      );
-      
-      final diagnosticosDrift = await _repository.findByPraga(pragaId);
+      // Direct string FK query
+      final diagnosticosDrift = await _repository.findByPragaId(idPraga);
       
       developer.log(
-        '✅ queryByPraga (Repository) - ${diagnosticosDrift.length} diagnósticos encontrados para pragaId: $pragaId',
+        '✅ queryByPraga (Repository) - ${diagnosticosDrift.length} diagnósticos encontrados para pragaId: $idPraga',
         name: 'DiagnosticosRepository',
       );
 
@@ -291,50 +213,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String? idPraga,
   }) async {
     try {
-      int? defensivoId;
-      if (idDefensivo != null) {
-        defensivoId = int.tryParse(idDefensivo);
-        if (defensivoId == null) {
-          final fitossanitario =
-              await _fitossanitariosRepository.findByIdDefensivo(idDefensivo);
-          if (fitossanitario != null) {
-            defensivoId = fitossanitario.id;
-          } else {
-            return const Right([]);
-          }
-        }
-      }
-
-      int? culturaId;
-      if (idCultura != null) {
-        culturaId = int.tryParse(idCultura);
-        if (culturaId == null) {
-          final cultura = await _culturasRepository.findByIdCultura(idCultura);
-          if (cultura != null) {
-            culturaId = cultura.id;
-          } else {
-            return const Right([]);
-          }
-        }
-      }
-
-      int? pragaId;
-      if (idPraga != null) {
-        pragaId = int.tryParse(idPraga);
-        if (pragaId == null) {
-          final praga = await _pragasRepository.findByIdPraga(idPraga);
-          if (praga != null) {
-            pragaId = praga.id;
-          } else {
-            return const Right([]);
-          }
-        }
-      }
-
+      // Direct string FK query
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        defensivoId: defensivoId,
-        culturaId: culturaId,
-        pragaId: pragaId,
+        fkIdDefensivo: idDefensivo,
+        fkIdCultura: idCultura,
+        fkIdPraga: idPraga,
       );
       final entities = await _mapAndEnrichList(diagnosticosDrift);
 
@@ -360,10 +243,10 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final patternLower = pattern.toLowerCase();
 
       final matchingDiagnosticos = allDiagnosticos.where((d) {
-        // Buscar nos nomes resolvidos
-        final defensivo = _fitossanitariosCache?[d.defensivoId];
-        final cultura = _culturasCache?[d.culturaId];
-        final praga = _pragasCache?[d.pragaId];
+        // Buscar nos nomes resolvidos (using string FK)
+        final defensivo = _fitossanitariosCache?[d.fkIdDefensivo];
+        final cultura = _culturasCache?[d.fkIdCultura];
+        final praga = _pragasCache?[d.fkIdPraga];
 
         return (defensivo?.nome.toLowerCase().contains(patternLower) ?? false) ||
             (cultura?.nome.toLowerCase().contains(patternLower) ?? false) ||
@@ -385,7 +268,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       await _ensureCachesLoaded();
       final defensivosList = _fitossanitariosCache!.values.map((f) => {
-            'id': f.id.toString(),
+            'id': f.idDefensivo,
             'nome': f.nome,
           }).toList();
 
@@ -400,7 +283,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       await _ensureCachesLoaded();
       final culturasList = _culturasCache!.values.map((c) => {
-            'id': c.id.toString(),
+            'id': c.idCultura,
             'nome': c.nome,
           }).toList();
 
@@ -415,7 +298,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     try {
       await _ensureCachesLoaded();
       final pragasList = _pragasCache!.values.map((p) => {
-            'id': p.id.toString(),
+            'id': p.idPraga,
             'nome': p.nome,
           }).toList();
 
@@ -451,9 +334,10 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     required String pragaId,
   }) async {
     try {
+      // Direct string FK query
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        culturaId: int.tryParse(culturaId),
-        pragaId: int.tryParse(pragaId),
+        fkIdCultura: culturaId,
+        fkIdPraga: pragaId,
       );
 
       final entities = await _mapAndEnrichList(diagnosticosDrift);
@@ -476,10 +360,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String? tipoAplicacao,
   }) async {
     try {
+      // Direct string FK query
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        defensivoId: int.tryParse(defensivo ?? ''),
-        culturaId: int.tryParse(cultura ?? ''),
-        pragaId: int.tryParse(praga ?? ''),
+        fkIdDefensivo: defensivo,
+        fkIdCultura: cultura,
+        fkIdPraga: praga,
       );
 
       var entities = await _mapAndEnrichList(diagnosticosDrift);
@@ -522,10 +407,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final similar = allDiagnosticos
           .where(
             (d) =>
-                d.firebaseId != diagnostico.id &&
-                d.id.toString() != diagnostico.id &&
-                (d.culturaId.toString() == diagnostico.idCultura ||
-                    d.pragaId.toString() == diagnostico.idPraga),
+                d.idReg != diagnostico.id &&
+                (d.fkIdCultura == diagnostico.idCultura ||
+                    d.fkIdPraga == diagnostico.idPraga),
           )
           .take(10)
           .toList();
@@ -555,9 +439,9 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final stats = {
         'total': diagnosticos.length,
         'totalDefensivos':
-            diagnosticos.map((e) => e.defensivoId).toSet().length,
-        'totalCulturas': diagnosticos.map((e) => e.culturaId).toSet().length,
-        'totalPragas': diagnosticos.map((e) => e.pragaId).toSet().length,
+            diagnosticos.map((e) => e.fkIdDefensivo).toSet().length,
+        'totalCulturas': diagnosticos.map((e) => e.fkIdCultura).toSet().length,
+        'totalPragas': diagnosticos.map((e) => e.fkIdPraga).toSet().length,
       };
 
       return Right(stats);
@@ -587,50 +471,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     String? praga,
   }) async {
     try {
-      int? defensivoId;
-      if (defensivo != null) {
-        defensivoId = int.tryParse(defensivo);
-        if (defensivoId == null) {
-          final fitossanitario =
-              await _fitossanitariosRepository.findByIdDefensivo(defensivo);
-          if (fitossanitario != null) {
-            defensivoId = fitossanitario.id;
-          } else {
-            return const Right(0);
-          }
-        }
-      }
-
-      int? culturaId;
-      if (cultura != null) {
-        culturaId = int.tryParse(cultura);
-        if (culturaId == null) {
-          final c = await _culturasRepository.findByIdCultura(cultura);
-          if (c != null) {
-            culturaId = c.id;
-          } else {
-            return const Right(0);
-          }
-        }
-      }
-
-      int? pragaId;
-      if (praga != null) {
-        pragaId = int.tryParse(praga);
-        if (pragaId == null) {
-          final p = await _pragasRepository.findByIdPraga(praga);
-          if (p != null) {
-            pragaId = p.id;
-          } else {
-            return const Right(0);
-          }
-        }
-      }
-
+      // Direct string FK query
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        defensivoId: defensivoId,
-        culturaId: culturaId,
-        pragaId: pragaId,
+        fkIdDefensivo: defensivo,
+        fkIdCultura: cultura,
+        fkIdPraga: praga,
       );
 
       return Right(diagnosticosDrift.length);
@@ -665,10 +510,11 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
     required String idPraga,
   }) async {
     try {
+      // Direct string FK query
       final diagnosticosDrift = await _repository.findByTriplaCombinacao(
-        defensivoId: int.tryParse(idDefensivo),
-        culturaId: int.tryParse(idCultura),
-        pragaId: int.tryParse(idPraga),
+        fkIdDefensivo: idDefensivo,
+        fkIdCultura: idCultura,
+        fkIdPraga: idPraga,
       );
 
       return Right(diagnosticosDrift.isNotEmpty);

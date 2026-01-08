@@ -11,8 +11,8 @@ import '../../database/receituagro_database.dart';
 /// Loader para carregar dados de informações de plantas daninhas do JSON para o SQLite
 ///
 /// NOTA: PlantasInf contém informações sobre plantas daninhas (pragas tipo 3),
-/// não informações sobre culturas agrícolas. O campo `culturaId` na tabela
-/// referencia a tabela `pragas` (por legado do schema original).
+/// não informações sobre culturas agrícolas. O campo `fkIdPraga` referencia
+/// a tabela `pragas` via string FK.
 class PlantasInfDataLoader {
   static bool _isLoaded = false;
 
@@ -77,19 +77,6 @@ class PlantasInfDataLoader {
         name: 'PlantasInfDataLoader',
       );
 
-      // Buscar mapeamento de idPraga -> id
-      // PlantasInf referencia pragas do tipo 3 (plantas daninhas)
-      final pragasQuery = db.select(db.pragas);
-      final allPragas = await pragasQuery.get();
-      final pragaIdMap = <String, int>{};
-      for (final praga in allPragas) {
-        pragaIdMap[praga.idPraga] = praga.id;
-      }
-      developer.log(
-        '🌿 [PLANTAS_INF] Mapeamento de pragas criado: ${pragaIdMap.length} pragas',
-        name: 'PlantasInfDataLoader',
-      );
-
       // Inserir em batch
       int insertedCount = 0;
       int skippedCount = 0;
@@ -104,19 +91,12 @@ class PlantasInfDataLoader {
             continue;
           }
 
-          // Obter ID da praga (FK) - usar fkIdPraga ou idReg como fallback
-          // O fkIdPraga no JSON corresponde ao idPraga na tabela Pragas
-          final pragaId = pragaIdMap[fkIdPraga ?? idReg];
-          if (pragaId == null) {
-            skippedCount++;
-            continue;
-          }
-
+          // fkIdPraga é a FK para Pragas (string)
           batch.insert(
             db.plantasInf,
             PlantasInfCompanion.insert(
               idReg: idReg,
-              culturaId: pragaId, // Usa pragaId como culturaId (legado do schema)
+              fkIdPraga: fkIdPraga ?? idReg,
               ciclo: Value(record['ciclo'] as String?),
               reproducao: Value(record['reproducao'] as String?),
               habitat: Value(record['habitat'] as String?),
@@ -128,18 +108,10 @@ class PlantasInfDataLoader {
               consistencia: Value(record['consistencia'] as String?),
               nervacao: Value(record['nervacao'] as String?),
               nervacaoComprimento: Value(record['nervacaoComprimento'] as String?),
-              margemFolha: Value(record['margemFolha'] as String?),
-              folha: Value(record['folha'] as String?),
-              base: Value(record['base'] as String?),
-              formaBase: Value(record['formaBase'] as String?),
-              apice: Value(record['apice'] as String?),
-              formaApice: Value(record['formaApice'] as String?),
-              tipoFlor: Value(record['tipoFlor'] as String?),
-              corFlor: Value(record['corFlor'] as String?),
+              inflorescencia: Value(record['inflorescencia'] as String?),
+              perianto: Value(record['perianto'] as String?),
               tipoFruto: Value(record['tipoFruto'] as String?),
-              corFruto: Value(record['corFruto'] as String?),
-              tipoSemente: Value(record['tipoSemente'] as String?),
-              corSemente: Value(record['corSemente'] as String?),
+              observacoes: Value(record['observacoes'] as String?),
             ),
           );
           insertedCount++;

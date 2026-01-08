@@ -26,14 +26,14 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
 
       // Busca defensivo
       Fitossanitario? defensivo;
-      if (defensivoId > 0) {
+      if (fkIdDefensivo.isNotEmpty) {
         // TODO: Implementar busca usando FitossanitariosRepository
-        // defensivo = await fitossanitariosRepo.findById(defensivoId!);
+        // defensivo = await fitossanitariosRepo.findByIdDefensivo(fkIdDefensivo);
         warnings.add(
-          'Busca de defensivo ainda não implementada (ID: $defensivoId)',
+          'Busca de defensivo ainda não implementada (FK: $fkIdDefensivo)',
         );
         developer.log(
-          'Defensivo lookup not implemented for diagnostico: $id',
+          'Defensivo lookup not implemented for diagnostico: $idReg',
           name: 'DiagnosticoEnrichmentDrift.enrichWithRelatedData',
           level: 800, // Warning
         );
@@ -41,12 +41,12 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
 
       // Busca praga
       Praga? praga;
-      if (pragaId > 0) {
+      if (fkIdPraga.isNotEmpty) {
         // TODO: Implementar busca usando PragasRepository
-        // praga = await pragasRepo.findById(pragaId!);
-        warnings.add('Busca de praga ainda não implementada (ID: $pragaId)');
+        // praga = await pragasRepo.findByIdPraga(fkIdPraga);
+        warnings.add('Busca de praga ainda não implementada (FK: $fkIdPraga)');
         developer.log(
-          'Praga lookup not implemented for diagnostico: $id',
+          'Praga lookup not implemented for diagnostico: $idReg',
           name: 'DiagnosticoEnrichmentDrift.enrichWithRelatedData',
           level: 800,
         );
@@ -54,14 +54,14 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
 
       // Busca cultura
       Cultura? cultura;
-      if (culturaId > 0) {
+      if (fkIdCultura.isNotEmpty) {
         // TODO: Implementar busca usando CulturasRepository
-        // cultura = await culturasRepo.findById(culturaId!);
+        // cultura = await culturasRepo.findByIdCultura(fkIdCultura);
         warnings.add(
-          'Busca de cultura ainda não implementada (ID: $culturaId)',
+          'Busca de cultura ainda não implementada (FK: $fkIdCultura)',
         );
         developer.log(
-          'Cultura lookup not implemented for diagnostico: $id',
+          'Cultura lookup not implemented for diagnostico: $idReg',
           name: 'DiagnosticoEnrichmentDrift.enrichWithRelatedData',
           level: 800,
         );
@@ -79,7 +79,7 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
       return Right(enriched);
     } catch (e) {
       developer.log(
-        'Error enriching diagnostico $id: $e',
+        'Error enriching diagnostico $idReg: $e',
         name: 'DiagnosticoEnrichmentDrift.enrichWithRelatedData',
         error: e,
         level: 1000, // Error
@@ -92,12 +92,12 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   Future<Either<Failure, DataWithWarnings<Fitossanitario?>>>
   enrichWithDefensivo() async {
     try {
-      if (defensivoId <= 0) {
+      if (fkIdDefensivo.isEmpty) {
         return const Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando FitossanitariosRepository
-      // final defensivo = await fitossanitariosRepo.findById(defensivoId!);
+      // final defensivo = await fitossanitariosRepo.findByIdDefensivo(fkIdDefensivo);
       final warnings = ['Busca de defensivo ainda não implementada'];
 
       return Right(
@@ -114,12 +114,12 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   /// Enriquece apenas com praga
   Future<Either<Failure, DataWithWarnings<Praga?>>> enrichWithPraga() async {
     try {
-      if (pragaId <= 0) {
+      if (fkIdPraga.isEmpty) {
         return const Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando PragasRepository
-      // final praga = await pragasRepo.findById(pragaId!);
+      // final praga = await pragasRepo.findByIdPraga(fkIdPraga);
       final warnings = ['Busca de praga ainda não implementada'];
 
       return Right(
@@ -137,12 +137,12 @@ extension DiagnosticoEnrichmentDriftExtension on Diagnostico {
   Future<Either<Failure, DataWithWarnings<Cultura?>>>
   enrichWithCultura() async {
     try {
-      if (culturaId <= 0) {
+      if (fkIdCultura.isEmpty) {
         return const Right(DataWithWarnings(data: null));
       }
 
       // TODO: Implementar busca usando CulturasRepository
-      // final cultura = await culturasRepo.findById(culturaId!);
+      // final cultura = await culturasRepo.findByIdCultura(fkIdCultura);
       final warnings = ['Busca de cultura ainda não implementada'];
 
       return Right(

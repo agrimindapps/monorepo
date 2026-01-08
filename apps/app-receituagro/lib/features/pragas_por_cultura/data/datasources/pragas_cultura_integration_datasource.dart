@@ -30,7 +30,7 @@ class PragasCulturaIntegrationDataSource {
   /// 2. Extrai pragas únicas
   /// 3. Conta quantos defensivos existem para cada praga
   ///
-  /// [culturaId]: ID da cultura (pode ser id local int ou idCultura string)
+  /// [culturaId]: ID da cultura (idCultura string from JSON)
   /// Returns: Lista consolidada com pragas e contagem de defensivos
   Future<List<dynamic>> getPragasPorCultura(String culturaId) async {
     try {
@@ -38,49 +38,38 @@ class PragasCulturaIntegrationDataSource {
         return [];
       }
 
-      // 1. Resolver culturaId para id interno (int)
-      int? culturaIdInt = int.tryParse(culturaId);
-      String? culturaNome;
-      
-      if (culturaIdInt == null) {
-        // É um idCultura string, buscar a cultura pelo idCultura
-        final cultura = await _culturasRepository.findByIdCultura(culturaId);
-        if (cultura == null) {
-          return [];
-        }
-        culturaIdInt = cultura.id;
-        culturaNome = cultura.nome;
-      } else {
-        // É um id int, buscar nome da cultura
-        final cultura = await _culturasRepository.findById(culturaIdInt);
-        culturaNome = cultura?.nome;
+      // 1. Buscar cultura pelo idCultura string
+      final cultura = await _culturasRepository.findByIdCultura(culturaId);
+      if (cultura == null) {
+        return [];
       }
+      final culturaNome = cultura.nome;
 
-      // 2. Buscar diagnósticos para esta cultura
-      final diagnosticos = await _diagnosticoRepository.findByCultura(culturaIdInt);
+      // 2. Buscar diagnósticos para esta cultura usando fkIdCultura string
+      final diagnosticos = await _diagnosticoRepository.findByCulturaId(culturaId);
       
       if (diagnosticos.isEmpty) {
         return [];
       }
 
       // 3. Agrupar por praga e contar defensivos
-      final Map<int, Map<String, dynamic>> pragasMap = {};
+      final Map<String, Map<String, dynamic>> pragasMap = {};
       
       for (final diagnostico in diagnosticos) {
-        final pragaId = diagnostico.pragaId;
+        final pragaId = diagnostico.fkIdPraga;
         
         if (!pragasMap.containsKey(pragaId)) {
-          // Buscar dados da praga
-          final praga = await _pragasRepository.findById(pragaId);
+          // Buscar dados da praga usando idPraga string
+          final praga = await _pragasRepository.findByIdPraga(pragaId);
           if (praga != null) {
             pragasMap[pragaId] = {
               'objectId': praga.idPraga,
-              'id': praga.id,
+              'id': praga.idPraga,
               'nome': praga.nome,
               'nomeCientifico': praga.nomeLatino ?? '',
               'tipoPraga': praga.tipo,
               'culturaId': culturaId,
-              'culturaNome': culturaNome ?? '',
+              'culturaNome': culturaNome,
               'totalDefensivos': 1,
               'praga': praga,
             };
@@ -100,7 +89,7 @@ class PragasCulturaIntegrationDataSource {
 
   /// Carrega defensivos para uma praga específica
   ///
-  /// [pragaId]: ID da praga
+  /// [pragaId]: ID da praga (idPraga string from JSON)
   /// Returns: Lista de defensivos disponíveis
   Future<List<dynamic>> getDefensivosForPraga(String pragaId) async {
     try {
@@ -124,8 +113,8 @@ class PragasCulturaIntegrationDataSource {
   /// Integra dados completos de praga + defensivos + diagnósticos
   ///
   /// Usado para tela detalhada
-  /// [pragaId]: ID da praga
-  /// [culturaId]: ID da cultura
+  /// [pragaId]: ID da praga (idPraga string)
+  /// [culturaId]: ID da cultura (idCultura string)
   Future<Map<String, dynamic>> getPragaCompleta(
     String pragaId,
     String culturaId,
@@ -135,7 +124,7 @@ class PragasCulturaIntegrationDataSource {
         throw Exception('pragaId e culturaId são obrigatórios');
       }
 
-      // Buscar praga
+      // Buscar praga by idPraga string
       final praga = await _pragasRepository.findByIdPraga(pragaId);
       if (praga == null) {
         throw Exception('Praga não encontrada');

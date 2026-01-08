@@ -44,12 +44,10 @@ class _DiagnosticoDefensivoCultureSectionWidgetState
     try {
       final culturaRepository = ref.read(culturasRepositoryProvider);
       for (final diagnostic in widget.diagnosticos!) {
-        final idCulturaStr = _getProperty(diagnostic, 'idCultura');
+        final idCulturaStr = _getProperty(diagnostic, 'fkIdCultura') ?? 
+                             _getProperty(diagnostic, 'idCultura');
         if (idCulturaStr != null) {
-          final idCultura = int.tryParse(idCulturaStr);
-          if (idCultura == null) continue;
-
-          final culturaData = await culturaRepository.findById(idCultura);
+          final culturaData = await culturaRepository.findByIdCultura(idCulturaStr);
           if (culturaData != null &&
               culturaData.nome.toLowerCase() == widget.cultura.toLowerCase()) {
             if (mounted) {

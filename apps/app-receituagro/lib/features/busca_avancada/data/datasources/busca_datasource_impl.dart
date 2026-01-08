@@ -35,46 +35,37 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
       final culturas = await _culturaRepo.findAll();
       final defensivos = await _fitossanitarioRepo.findAll();
 
-      // Build lookup maps
-      final pragasMap = {for (var p in pragas) p.id: p};
-      final culturasMap = {for (var c in culturas) c.id: c};
-      final defensivosMap = {for (var d in defensivos) d.id: d};
+      // Build lookup maps using string FK fields
+      final pragasMap = {for (var p in pragas) p.idPraga: p};
+      final culturasMap = {for (var c in culturas) c.idCultura: c};
+      final defensivosMap = {for (var d in defensivos) d.idDefensivo: d};
 
       var filtered = diagnosticos;
 
-      // Filter using ID fields (Drift foreign keys)
+      // Filter using FK fields (string foreign keys)
       if (culturaId != null) {
         filtered = filtered
-            .where((d) {
-              final cultura = culturasMap[d.culturaId];
-              return cultura?.idCultura == culturaId;
-            })
+            .where((d) => d.fkIdCultura == culturaId)
             .toList();
       }
 
       if (pragaId != null) {
         filtered = filtered
-            .where((d) {
-              final praga = pragasMap[d.pragaId];
-              return praga?.idPraga == pragaId;
-            })
+            .where((d) => d.fkIdPraga == pragaId)
             .toList();
       }
 
       if (defensivoId != null) {
         filtered = filtered
-            .where((d) {
-              final defensivo = defensivosMap[d.defensivoId];
-              return defensivo?.idDefensivo == defensivoId;
-            })
+            .where((d) => d.fkIdDefensivo == defensivoId)
             .toList();
       }
 
       // Map to output format, resolving relationships
       return filtered.map((d) {
-        final praga = pragasMap[d.pragaId];
-        final cultura = culturasMap[d.culturaId];
-        final defensivo = defensivosMap[d.defensivoId];
+        final praga = pragasMap[d.fkIdPraga];
+        final cultura = culturasMap[d.fkIdCultura];
+        final defensivo = defensivosMap[d.fkIdDefensivo];
 
         return {
           'id': d.idReg,
@@ -82,7 +73,7 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
           'titulo': praga?.nome ?? 'Praga desconhecida',
           'subtitulo': cultura?.nome ?? 'Cultura desconhecida',
           'descricao': '', // Diagnosticos table doesn't have descricao field
-          'imageUrl': praga?.imagemUrl ?? cultura?.imagemUrl,
+          'imageUrl': null, // Praga/Cultura tables don't have imagemUrl in new schema
           'metadata': {
             'culturaId': cultura?.idCultura ?? '',
             'pragaId': praga?.idPraga ?? '',
@@ -123,22 +114,22 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
         final culturas = await _culturaRepo.findAll();
         final defensivos = await _fitossanitarioRepo.findAll();
 
-        final pragasMap = {for (var p in pragas) p.id: p};
-        final culturasMap = {for (var c in culturas) c.id: c};
-        final defensivosMap = {for (var d in defensivos) d.id: d};
+        final pragasMap = {for (var p in pragas) p.idPraga: p};
+        final culturasMap = {for (var c in culturas) c.idCultura: c};
+        final defensivosMap = {for (var d in defensivos) d.idDefensivo: d};
 
         final filtered = diagnosticos.where((d) {
-          final praga = pragasMap[d.pragaId];
-          final cultura = culturasMap[d.culturaId];
+          final praga = pragasMap[d.fkIdPraga];
+          final cultura = culturasMap[d.fkIdCultura];
 
           return (praga?.nome.toLowerCase().contains(queryLower) ?? false) ||
                  (cultura?.nome.toLowerCase().contains(queryLower) ?? false);
         });
 
         results.addAll(filtered.map((d) {
-          final praga = pragasMap[d.pragaId];
-          final cultura = culturasMap[d.culturaId];
-          final defensivo = defensivosMap[d.defensivoId];
+          final praga = pragasMap[d.fkIdPraga];
+          final cultura = culturasMap[d.fkIdCultura];
+          final defensivo = defensivosMap[d.fkIdDefensivo];
 
           return {
             'id': d.idReg,
@@ -146,7 +137,7 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
             'titulo': praga?.nome ?? 'Praga desconhecida',
             'subtitulo': cultura?.nome ?? 'Cultura desconhecida',
             'descricao': '',
-            'imageUrl': praga?.imagemUrl ?? cultura?.imagemUrl,
+            'imageUrl': null,
             'metadata': {
               'culturaId': cultura?.idCultura ?? '',
               'pragaId': praga?.idPraga ?? '',
@@ -167,8 +158,8 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
               'tipo': 'praga',
               'titulo': p.nome,
               'subtitulo': p.nomeLatino ?? '',
-              'descricao': p.descricao ?? '',
-              'imageUrl': p.imagemUrl,
+              'descricao': '', // Praga doesn't have descricao in new schema
+              'imageUrl': null, // Praga doesn't have imagemUrl in new schema
               'metadata': <String, dynamic>{},
             }));
       }
@@ -182,7 +173,7 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
               'id': d.idDefensivo,
               'tipo': 'defensivo',
               'titulo': d.nome,
-              'subtitulo': d.nomeComum ?? '',
+              'subtitulo': d.nomeTecnico ?? '',
               'descricao': '',
               'imageUrl': null,
               'metadata': <String, dynamic>{},
@@ -198,9 +189,9 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
               'id': c.idCultura,
               'tipo': 'cultura',
               'titulo': c.nome,
-              'subtitulo': c.nomeLatino ?? '',
-              'descricao': c.descricao ?? '',
-              'imageUrl': c.imagemUrl,
+              'subtitulo': '', // Cultura doesn't have nomeLatino in new schema
+              'descricao': '', // Cultura doesn't have descricao in new schema
+              'imageUrl': null, // Cultura doesn't have imagemUrl in new schema
               'metadata': <String, dynamic>{},
             }));
       }
@@ -224,30 +215,25 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
 
       // Load related entities
       final pragas = await _pragasRepo.findAll();
-      final culturas = await _culturaRepo.findAll();
 
-      final pragasMap = {for (var p in pragas) p.id: p};
-      final culturasMap = {for (var c in culturas) c.id: c};
+      final pragasMap = {for (var p in pragas) p.idPraga: p};
 
       // Filter diagnosticos by culturaId
-      final filtered = diagnosticos.where((d) {
-        final cultura = culturasMap[d.culturaId];
-        return cultura?.idCultura == culturaId;
-      });
+      final filtered = diagnosticos.where((d) => d.fkIdCultura == culturaId);
 
       // Build unique pragas map
       final uniquePragasMap = <String, Map<String, dynamic>>{};
 
       for (final d in filtered) {
-        final praga = pragasMap[d.pragaId];
+        final praga = pragasMap[d.fkIdPraga];
         if (praga != null && !uniquePragasMap.containsKey(praga.idPraga)) {
           uniquePragasMap[praga.idPraga] = {
             'id': praga.idPraga,
             'tipo': 'praga',
             'titulo': praga.nome,
             'subtitulo': praga.nomeLatino ?? '',
-            'descricao': praga.descricao ?? '',
-            'imageUrl': praga.imagemUrl,
+            'descricao': '',
+            'imageUrl': null,
             'metadata': {'culturaId': culturaId},
           };
         }
@@ -267,29 +253,24 @@ class BuscaDatasourceImpl implements IBuscaDatasource {
       final diagnosticos = await _diagnosticoRepo.findAll();
 
       // Load related entities
-      final pragas = await _pragasRepo.findAll();
       final defensivos = await _fitossanitarioRepo.findAll();
 
-      final pragasMap = {for (var p in pragas) p.id: p};
-      final defensivosMap = {for (var d in defensivos) d.id: d};
+      final defensivosMap = {for (var d in defensivos) d.idDefensivo: d};
 
       // Filter diagnosticos by pragaId
-      final filtered = diagnosticos.where((d) {
-        final praga = pragasMap[d.pragaId];
-        return praga?.idPraga == pragaId;
-      });
+      final filtered = diagnosticos.where((d) => d.fkIdPraga == pragaId);
 
       // Build unique defensivos map
       final uniqueDefensivosMap = <String, Map<String, dynamic>>{};
 
       for (final d in filtered) {
-        final defensivo = defensivosMap[d.defensivoId];
+        final defensivo = defensivosMap[d.fkIdDefensivo];
         if (defensivo != null && !uniqueDefensivosMap.containsKey(defensivo.idDefensivo)) {
           uniqueDefensivosMap[defensivo.idDefensivo] = {
             'id': defensivo.idDefensivo,
             'tipo': 'defensivo',
             'titulo': defensivo.nome,
-            'subtitulo': defensivo.nomeComum ?? '',
+            'subtitulo': defensivo.nomeTecnico ?? '',
             'descricao': '',
             'imageUrl': null,
             'metadata': {'pragaId': pragaId},

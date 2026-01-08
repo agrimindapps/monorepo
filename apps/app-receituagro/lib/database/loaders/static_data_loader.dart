@@ -83,7 +83,8 @@ class StaticDataLoader {
     }
   }
 
-  /// Carrega informações complementares de plantas/culturas do JSON
+  /// Carrega informações complementares de plantas do JSON
+  /// NOTA: PlantasInf referencia Pragas (plantas daninhas são pragas tipo 3), não Culturas
   Future<void> loadPlantasInf() async {
     try {
       final jsonString = await rootBundle.loadString(
@@ -103,26 +104,15 @@ class StaticDataLoader {
         final idReg = data['idReg'] as String?;
         if (idReg == null) continue;
 
-        // Precisamos encontrar o culturaId correspondente
-        // O idReg no PlantasInf corresponde ao idCultura na tabela Culturas
-        final culturaQuery = db.select(db.culturas)
-          ..where((c) => c.idCultura.equals(idReg));
-        final cultura = await culturaQuery.getSingleOrNull();
-
-        if (cultura == null) {
-          developer.log(
-            'Cultura not found for idReg: $idReg, skipping plantas info',
-            name: 'StaticDataLoader',
-          );
-          continue;
-        }
+        // PlantasInf referencia Pragas via fkIdPraga (plantas daninhas = pragas tipo 3)
+        final fkIdPraga = data['fkIdPraga'] as String? ?? idReg;
 
         await db
             .into(db.plantasInf)
             .insert(
               PlantasInfCompanion.insert(
                 idReg: idReg,
-                culturaId: cultura.id,
+                fkIdPraga: fkIdPraga,
                 ciclo: Value(data['ciclo'] as String?),
                 reproducao: Value(data['reproducao'] as String?),
                 habitat: Value(data['habitat'] as String?),
@@ -136,18 +126,10 @@ class StaticDataLoader {
                 nervacaoComprimento: Value(
                   data['nervacaoComprimento'] as String?,
                 ),
-                margemFolha: Value(data['margemFolha'] as String?),
-                folha: Value(data['folha'] as String?),
-                base: Value(data['base'] as String?),
-                formaBase: Value(data['formaBase'] as String?),
-                apice: Value(data['apice'] as String?),
-                formaApice: Value(data['formaApice'] as String?),
-                tipoFlor: Value(data['tipoFlor'] as String?),
-                corFlor: Value(data['corFlor'] as String?),
+                inflorescencia: Value(data['inflorescencia'] as String?),
+                perianto: Value(data['perianto'] as String?),
                 tipoFruto: Value(data['tipoFruto'] as String?),
-                corFruto: Value(data['corFruto'] as String?),
-                tipoSemente: Value(data['tipoSemente'] as String?),
-                corSemente: Value(data['corSemente'] as String?),
+                observacoes: Value(data['observacoes'] as String?),
               ),
               mode: InsertMode.insertOrIgnore,
             );
@@ -222,7 +204,7 @@ class StaticDataLoader {
   Future<void> loadPragasInf() async {
     try {
       final jsonString = await rootBundle.loadString(
-        'assets/database/json/tbplantasinf/TBPLANTASINF.json',
+        'assets/database/json/tbpragasinf/TBPRAGASINF.json',
       );
       final jsonList = json.decode(jsonString) as List<dynamic>;
 
@@ -245,32 +227,19 @@ class StaticDataLoader {
         final idReg = data['idReg'] as String?;
         if (idReg == null) continue;
 
-        // Precisamos encontrar o pragaId correspondente
-        // O idReg no PragasInf corresponde ao idPraga na tabela Pragas
-        final pragaQuery = db.select(db.pragas)
-          ..where((p) => p.idPraga.equals(idReg));
-        final praga = await pragaQuery.getSingleOrNull();
-
-        if (praga == null) {
-          developer.log(
-            'Praga not found for idReg: $idReg, skipping info',
-            name: 'StaticDataLoader',
-          );
-          continue;
-        }
+        // fkIdPraga é a FK para Pragas (string)
+        final fkIdPraga = data['fkIdPraga'] as String? ?? idReg;
 
         await db
             .into(db.pragasInf)
             .insert(
               PragasInfCompanion.insert(
                 idReg: idReg,
-                pragaId: praga.id,
+                fkIdPraga: fkIdPraga,
+                descricao: Value(data['descrisao'] as String?), // typo no JSON
                 sintomas: Value(data['sintomas'] as String?),
+                bioecologia: Value(data['bioecologia'] as String?),
                 controle: Value(data['controle'] as String?),
-                danos: Value(data['danos'] as String?),
-                condicoesFavoraveis: Value(
-                  data['condicoesFavoraveis'] as String?,
-                ),
               ),
               mode: InsertMode.insertOrIgnore,
             );
@@ -311,11 +280,20 @@ class StaticDataLoader {
         for (final item in jsonList) {
           final data = item as Map<String, dynamic>;
 
-          // JSON: idReg, nomeComum (produto comercial)
-          // Drift: idDefensivo, nome, nomeComum, fabricante, classe, classeAgronomica, ingredienteAtivo, registroMapa, status, comercializado, elegivel
+          // JSON fields: idReg, nomeComum, nomeTecnico, formulacao, modoAcao, 
+          // toxico, classAmbiental, corrosivo, inflamavel, quantProduto
           final idReg = data['idReg'] as String?;
           final nomeComum = data['nomeComum'] as String?;
           final nomeTecnico = data['nomeTecnico'] as String?;
+          final formulacao = data['formulacao'] as String?;
+          final modoAcao = data['modoAcao'] as String?;
+          final toxico = data['toxico'] as String?;
+          final classAmbiental = data['classAmbiental'] as String?;
+          final corrosivo = data['corrosivo'] as String?;
+          final inflamavel = data['inflamavel'] as String?;
+          final quantProduto = data['quantProduto'] as String?;
+          
+          // Optional fields from extended JSON
           final fabricante = data['fabricante'] as String?;
           final classeAgronomica = data['classeAgronomica'] as String?;
           final ingredienteAtivo = data['ingredienteAtivo'] as String?;
@@ -332,22 +310,22 @@ class StaticDataLoader {
             continue;
           }
 
-          // Inferir classe
-          String? classe;
-          if (classeAgronomica != null) {
-            classe = classeAgronomica.toLowerCase();
-          }
-
-          // Inserir Fitossanitario
+          // Inserir Fitossanitario com todos os campos do JSON
           await db
               .into(db.fitossanitarios)
               .insert(
                 FitossanitariosCompanion.insert(
                   idDefensivo: idReg,
-                  nome: nomeTecnico ?? nomeComum,
-                  nomeComum: Value(nomeComum),
+                  nome: nomeComum,
+                  nomeTecnico: Value(nomeTecnico),
+                  formulacao: Value(formulacao),
+                  modoAcao: Value(modoAcao),
+                  classeToxico: Value(toxico),
+                  classeAmbiental: Value(classAmbiental),
+                  corrosivo: Value(corrosivo),
+                  inflamavel: Value(inflamavel),
+                  quantProduto: Value(quantProduto),
                   fabricante: Value(fabricante),
-                  classe: Value(classe),
                   classeAgronomica: Value(classeAgronomica),
                   ingredienteAtivo: Value(ingredienteAtivo),
                   registroMapa: Value(mapa),
@@ -357,49 +335,6 @@ class StaticDataLoader {
                 ),
                 mode: InsertMode.insertOrIgnore,
               );
-
-          // Tentar recuperar o ID inserido/existente para inserir Info
-          final defensivo = await (db.select(db.fitossanitarios)
-                ..where((t) => t.idDefensivo.equals(idReg)))
-              .getSingleOrNull();
-
-          if (defensivo != null) {
-            // Extrair dados para FitossanitariosInfo que estão neste JSON
-            final modoAcao = data['modoAcao'] as String?;
-            final formulacao = data['formulacao'] as String?;
-            final toxico = data['toxico'] as String?;
-
-            if (modoAcao != null || formulacao != null || toxico != null) {
-              // Verificar se já existe info
-              final existingInfo = await (db.select(db.fitossanitariosInfo)
-                    ..where((t) => t.idReg.equals(idReg)))
-                  .getSingleOrNull();
-
-              if (existingInfo == null) {
-                await db.into(db.fitossanitariosInfo).insert(
-                      FitossanitariosInfoCompanion.insert(
-                        idReg: idReg,
-                        defensivoId: defensivo.id,
-                        modoAcao: Value(modoAcao),
-                        formulacao: Value(formulacao),
-                        toxicidade: Value(toxico),
-                      ),
-                      mode: InsertMode.insertOrIgnore,
-                    );
-              } else {
-                // Atualizar campos se estiverem vazios ou se tivermos novos dados
-                await (db.update(db.fitossanitariosInfo)
-                      ..where((t) => t.idReg.equals(idReg)))
-                    .write(
-                  FitossanitariosInfoCompanion(
-                    modoAcao: Value(modoAcao ?? existingInfo.modoAcao),
-                    formulacao: Value(formulacao ?? existingInfo.formulacao),
-                    toxicidade: Value(toxico ?? existingInfo.toxicidade),
-                  ),
-                );
-              }
-            }
-          }
 
           loaded++;
         }
@@ -427,7 +362,7 @@ class StaticDataLoader {
   }
 
   /// Carrega informações de fitossanitários dos JSONs
-  /// NOTA: Não limpa dados existentes para preservar modoAcao carregado de TBFITOSSANITARIOS
+  /// TBFITOSSANITARIOSINFO contém dados detalhados: embalagens, tecnologia, precauções, etc.
   Future<void> loadFitossanitariosInfo() async {
     int fileIndex = 0;
     int totalLoaded = 0;
@@ -448,81 +383,24 @@ class StaticDataLoader {
           final idReg = data['idReg'] as String?;
           if (idReg == null) continue;
 
-          // CORREÇÃO: Usar fkIdDefensivo (não idReg) para buscar o Fitossanitario
-          // O idReg do Info é único para cada info, mas fkIdDefensivo é o ID do defensivo relacionado
-          final fkIdDefensivo = data['fkIdDefensivo'] as String?;
-          final defensivoIdToSearch = fkIdDefensivo ?? idReg; // Fallback para idReg se fkIdDefensivo não existir
+          // fkIdDefensivo é a FK para Fitossanitarios (string)
+          final fkIdDefensivo = data['fkIdDefensivo'] as String? ?? idReg;
 
-          // Encontrar o defensivoId correspondente
-          final defensivoQuery = db.select(db.fitossanitarios)
-            ..where((f) => f.idDefensivo.equals(defensivoIdToSearch));
-          final defensivo = await defensivoQuery.getSingleOrNull();
-
-          if (defensivo == null) {
-            continue;
-          }
-
-          // CORREÇÃO: Verificar se já existe info pelo defensivoId (mais confiável) ou idReg
-          // Primeiro tenta por defensivoId, depois por idReg
-          final existingByDefensivoId = await (db.select(db.fitossanitariosInfo)
-                ..where((t) => t.defensivoId.equals(defensivo.id)))
-              .getSingleOrNull();
-          
-          // Se não encontrou por defensivoId, tentar por idReg como fallback
-          final existingByIdReg = existingByDefensivoId == null
-              ? await (db.select(db.fitossanitariosInfo)
-                    ..where((t) => t.idReg.equals(idReg)))
-                  .getSingleOrNull()
-              : null;
-          
-          final existingInfo = existingByDefensivoId ?? existingByIdReg;
-
-          if (existingInfo != null) {
-            // Atualizar apenas campos que não sobrescrevem modoAcao existente
-            final newModoAcao = data['modoAcao'] as String?;
-            await (db.update(db.fitossanitariosInfo)
-                  ..where((t) => t.id.equals(existingInfo.id)))
-                .write(
-              FitossanitariosInfoCompanion(
-                // Preservar modoAcao se já existir e novo for nulo
-                modoAcao: Value(
-                  (newModoAcao != null && newModoAcao.isNotEmpty)
-                      ? newModoAcao
-                      : existingInfo.modoAcao,
+          // Inserir FitossanitariosInfo com todos os campos do JSON
+          await db.into(db.fitossanitariosInfo).insert(
+                FitossanitariosInfoCompanion.insert(
+                  idReg: idReg,
+                  fkIdDefensivo: fkIdDefensivo,
+                  embalagens: Value(data['embalagens'] as String?),
+                  tecnologia: Value(data['tecnologia'] as String?),
+                  precaucoesHumanas: Value(data['pHumanas'] as String?),
+                  precaucoesAmbientais: Value(data['pAmbiental'] as String?),
+                  manejoResistencia: Value(data['manejoResistencia'] as String?),
+                  compatibilidade: Value(data['compatibilidade'] as String?),
+                  manejoIntegrado: Value(data['manejoIntegrado'] as String?),
                 ),
-                formulacao: Value(
-                  data['formulacao'] as String? ?? existingInfo.formulacao,
-                ),
-                toxicidade: Value(
-                  data['toxicidade'] as String? ?? existingInfo.toxicidade,
-                ),
-                carencia: Value(
-                  data['carencia'] as String? ?? existingInfo.carencia,
-                ),
-                informacoesAdicionais: Value(
-                  data['informacoesAdicionais'] as String? ??
-                      existingInfo.informacoesAdicionais,
-                ),
-              ),
-            );
-          } else {
-            // Inserir novo registro com id igual ao id do Fitossanitario
-            await db.into(db.fitossanitariosInfo).insert(
-                  FitossanitariosInfoCompanion.insert(
-                    id: Value(defensivo.id),
-                    idReg: idReg,
-                    defensivoId: defensivo.id,
-                    modoAcao: Value(data['modoAcao'] as String?),
-                    formulacao: Value(data['formulacao'] as String?),
-                    toxicidade: Value(data['toxicidade'] as String?),
-                    carencia: Value(data['carencia'] as String?),
-                    informacoesAdicionais: Value(
-                      data['informacoesAdicionais'] as String?,
-                    ),
-                  ),
-                  mode: InsertMode.insertOrReplace,
-                );
-          }
+                mode: InsertMode.insertOrReplace,
+              );
           loaded++;
         }
 

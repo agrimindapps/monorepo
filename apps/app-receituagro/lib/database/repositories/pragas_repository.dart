@@ -17,13 +17,7 @@ class PragasRepository {
     return await query.get();
   }
 
-  /// Busca praga por ID
-  Future<Praga?> findById(int id) async {
-    final query = _db.select(_db.pragas)..where((tbl) => tbl.id.equals(id));
-    return await query.getSingleOrNull();
-  }
-
-  /// Busca praga por ID da praga (idPraga)
+  /// Busca praga por idPraga (PRIMARY KEY)
   Future<Praga?> findByIdPraga(String idPraga) async {
     final query = _db.select(_db.pragas)
       ..where((tbl) => tbl.idPraga.equals(idPraga));
@@ -45,7 +39,7 @@ class PragasRepository {
 
   /// Conta o total de pragas
   Future<int> count() async {
-    final countColumn = _db.pragas.id.count();
+    final countColumn = _db.pragas.idPraga.count();
     final query = _db.selectOnly(_db.pragas)
       ..addColumns([countColumn]);
     final result = await query.getSingle();
@@ -53,9 +47,6 @@ class PragasRepository {
   }
 
   /// Carrega dados do JSON e salva no banco Drift
-  ///
-  /// Recebe uma lista de Maps do JSON e insere no banco de dados.
-  /// Limpa os dados existentes antes de inserir.
   Future<void> loadFromJson(
     List<Map<String, dynamic>> jsonData,
     String version,
@@ -71,8 +62,6 @@ class PragasRepository {
           nome: item['nomeComum']?.toString() ?? '',
           nomeLatino: Value(item['nomeCientifico']?.toString()),
           tipo: Value(item['tipoPraga']?.toString()),
-          imagemUrl: Value(item['imagemUrl']?.toString()),
-          descricao: Value(item['descricao']?.toString()),
         );
         await _db.into(_db.pragas).insert(companion);
       }

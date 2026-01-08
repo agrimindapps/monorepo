@@ -7,12 +7,14 @@ import '../../domain/entities/diagnostico_entity.dart';
 class DiagnosticoMapper {
   const DiagnosticoMapper._();
 
+  /// Converts Drift Diagnostico to DiagnosticoEntity
+  /// New schema: uses idReg as PK, string FKs (fkIdDefensivo, fkIdCultura, fkIdPraga)
   static DiagnosticoEntity fromDrift(Diagnostico drift) {
     return DiagnosticoEntity(
-      id: drift.firebaseId ?? drift.id.toString(),
-      idDefensivo: drift.defensivoId.toString(),
-      idCultura: drift.culturaId.toString(),
-      idPraga: drift.pragaId.toString(),
+      id: drift.idReg,
+      idDefensivo: drift.fkIdDefensivo,
+      idCultura: drift.fkIdCultura,
+      idPraga: drift.fkIdPraga,
       nomeDefensivo: '', // Resolved via extension
       nomeCultura: '', // Resolved via extension
       nomePraga: '', // Resolved via extension
@@ -52,14 +54,13 @@ class DiagnosticoMapper {
   }
 
   /// Converts DiagnosticoEntity to Drift Diagnostico (static data)
-  /// Note: Diagnosticos is now a static/lookup table, not user data
+  /// New schema: uses string FKs (fkIdDefensivo, fkIdCultura, fkIdPraga)
   static DiagnosticosCompanion toDrift(DiagnosticoEntity entity) {
     return DiagnosticosCompanion(
-      firebaseId: Value(entity.id),
       idReg: Value(entity.id),
-      defensivoId: Value(int.tryParse(entity.idDefensivo) ?? 0),
-      culturaId: Value(int.tryParse(entity.idCultura) ?? 0),
-      pragaId: Value(int.tryParse(entity.idPraga) ?? 0),
+      fkIdDefensivo: Value(entity.idDefensivo),
+      fkIdCultura: Value(entity.idCultura),
+      fkIdPraga: Value(entity.idPraga),
       dsMin: Value(entity.dosagem.dosagemMinima?.toString()),
       dsMax: Value(entity.dosagem.dosagemMaxima.toString()),
       um: Value(entity.dosagem.unidadeMedida),

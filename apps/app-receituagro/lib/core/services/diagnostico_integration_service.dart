@@ -11,9 +11,9 @@ class DiagnosticoIntegrationService {
   final FitossanitariosRepository _fitossanitarioRepo;
   final CulturasRepository _culturaRepo;
   final PragasRepository _pragasRepo;
-  final Map<int, Fitossanitario> _defensivoCache = {};
-  final Map<int, Cultura> _culturaCache = {};
-  final Map<int, Praga> _pragaCache = {};
+  final Map<String, Fitossanitario> _defensivoCache = {};
+  final Map<String, Cultura> _culturaCache = {};
+  final Map<String, Praga> _pragaCache = {};
 
   DiagnosticoIntegrationService({
     required DiagnosticoRepository diagnosticoRepo,
@@ -28,13 +28,12 @@ class DiagnosticoIntegrationService {
   /// Obtém um diagnóstico completo com todos os dados relacionais
   Future<DiagnosticoDetalhado?> getDiagnosticoCompleto(String idReg) async {
     try {
-      // Buscar diagnóstico por idReg (NOTE: userId removed - static table)
       final diagnostico = await _diagnosticoRepo.findByIdReg(idReg);
       if (diagnostico == null) return null;
 
-      final defensivo = await _getDefensivoById(diagnostico.defensivoId);
-      final cultura = await _getCulturaById(diagnostico.culturaId);
-      final praga = await _getPragaById(diagnostico.pragaId);
+      final defensivo = await _getDefensivoByIdDefensivo(diagnostico.fkIdDefensivo);
+      final cultura = await _getCulturaByIdCultura(diagnostico.fkIdCultura);
+      final praga = await _getPragaByIdPraga(diagnostico.fkIdPraga);
 
       return DiagnosticoDetalhado(
         diagnostico: diagnostico,
@@ -50,14 +49,7 @@ class DiagnosticoIntegrationService {
   /// Busca diagnósticos por cultura com dados relacionais
   Future<List<DiagnosticoDetalhado>> buscarPorCultura(String culturaId) async {
     try {
-      // Parse culturaId para int
-      final culturaIdInt = int.tryParse(culturaId);
-      if (culturaIdInt == null) return [];
-
-      final diagnosticos = await _diagnosticoRepo.findByCultura(
-        
-        culturaIdInt,
-      );
+      final diagnosticos = await _diagnosticoRepo.findByCulturaId(culturaId);
       final List<DiagnosticoDetalhado> detalhados = [];
 
       for (final diagnostico in diagnosticos) {
@@ -76,14 +68,7 @@ class DiagnosticoIntegrationService {
   /// Busca diagnósticos por praga com dados relacionais
   Future<List<DiagnosticoDetalhado>> buscarPorPraga(String pragaId) async {
     try {
-      // Parse pragaId para int
-      final pragaIdInt = int.tryParse(pragaId);
-      if (pragaIdInt == null) return [];
-
-      final diagnosticos = await _diagnosticoRepo.findByPraga(
-        
-        pragaIdInt,
-      );
+      final diagnosticos = await _diagnosticoRepo.findByPragaId(pragaId);
       final List<DiagnosticoDetalhado> detalhados = [];
 
       for (final diagnostico in diagnosticos) {
@@ -104,14 +89,7 @@ class DiagnosticoIntegrationService {
     String defensivoId,
   ) async {
     try {
-      // Parse defensivoId para int
-      final defensivoIdInt = int.tryParse(defensivoId);
-      if (defensivoIdInt == null) return [];
-
-      final diagnosticos = await _diagnosticoRepo.findByDefensivo(
-        
-        defensivoIdInt,
-      );
+      final diagnosticos = await _diagnosticoRepo.findByDefensivoId(defensivoId);
       final List<DiagnosticoDetalhado> detalhados = [];
 
       for (final diagnostico in diagnosticos) {
@@ -134,32 +112,23 @@ class DiagnosticoIntegrationService {
     String? defensivoId,
   }) async {
     try {
-      final diagnosticos = await _diagnosticoRepo.findAll(); // Static data - no userId
+      final diagnosticos = await _diagnosticoRepo.findAll();
       List<Diagnostico> filtered = diagnosticos;
 
       if (culturaId != null && culturaId.isNotEmpty) {
-        final culturaIdInt = int.tryParse(culturaId);
-        if (culturaIdInt != null) {
-          filtered = filtered
-              .where((d) => d.culturaId == culturaIdInt)
-              .toList();
-        }
+        filtered = filtered
+            .where((d) => d.fkIdCultura == culturaId)
+            .toList();
       }
 
       if (pragaId != null && pragaId.isNotEmpty) {
-        final pragaIdInt = int.tryParse(pragaId);
-        if (pragaIdInt != null) {
-          filtered = filtered.where((d) => d.pragaId == pragaIdInt).toList();
-        }
+        filtered = filtered.where((d) => d.fkIdPraga == pragaId).toList();
       }
 
       if (defensivoId != null && defensivoId.isNotEmpty) {
-        final defensivoIdInt = int.tryParse(defensivoId);
-        if (defensivoIdInt != null) {
-          filtered = filtered
-              .where((d) => d.defensivoId == defensivoIdInt)
-              .toList();
-        }
+        filtered = filtered
+            .where((d) => d.fkIdDefensivo == defensivoId)
+            .toList();
       }
 
       final List<DiagnosticoDetalhado> detalhados = [];
@@ -184,7 +153,7 @@ class DiagnosticoIntegrationService {
 
       for (final defensivo in defensivos) {
         final diagnosticosRelacionados = await buscarPorDefensivo(
-          defensivo.id.toString(),
+          defensivo.idDefensivo,
         );
 
         defensivosCompletos.add(
@@ -201,38 +170,38 @@ class DiagnosticoIntegrationService {
     }
   }
 
-  Future<Fitossanitario?> _getDefensivoById(int id) async {
-    if (_defensivoCache.containsKey(id)) {
-      return _defensivoCache[id];
+  Future<Fitossanitario?> _getDefensivoByIdDefensivo(String idDefensivo) async {
+    if (_defensivoCache.containsKey(idDefensivo)) {
+      return _defensivoCache[idDefensivo];
     }
 
-    final defensivo = await _fitossanitarioRepo.findById(id);
+    final defensivo = await _fitossanitarioRepo.findByIdDefensivo(idDefensivo);
     if (defensivo != null) {
-      _defensivoCache[id] = defensivo;
+      _defensivoCache[idDefensivo] = defensivo;
     }
     return defensivo;
   }
 
-  Future<Cultura?> _getCulturaById(int id) async {
-    if (_culturaCache.containsKey(id)) {
-      return _culturaCache[id];
+  Future<Cultura?> _getCulturaByIdCultura(String idCultura) async {
+    if (_culturaCache.containsKey(idCultura)) {
+      return _culturaCache[idCultura];
     }
 
-    final cultura = await _culturaRepo.findById(id);
+    final cultura = await _culturaRepo.findByIdCultura(idCultura);
     if (cultura != null) {
-      _culturaCache[id] = cultura;
+      _culturaCache[idCultura] = cultura;
     }
     return cultura;
   }
 
-  Future<Praga?> _getPragaById(int id) async {
-    if (_pragaCache.containsKey(id)) {
-      return _pragaCache[id];
+  Future<Praga?> _getPragaByIdPraga(String idPraga) async {
+    if (_pragaCache.containsKey(idPraga)) {
+      return _pragaCache[idPraga];
     }
 
-    final praga = await _pragasRepo.findById(id);
+    final praga = await _pragasRepo.findByIdPraga(idPraga);
     if (praga != null) {
-      _pragaCache[id] = praga;
+      _pragaCache[idPraga] = praga;
     }
     return praga;
   }
@@ -256,7 +225,7 @@ class DiagnosticoIntegrationService {
 
 /// Modelo que representa um diagnóstico com todos os dados relacionais
 class DiagnosticoDetalhado {
-  final Diagnostico diagnostico; // Changed from DiagnosticoData
+  final Diagnostico diagnostico;
   final Fitossanitario? defensivo;
   final Cultura? cultura;
   final Praga? praga;
@@ -271,21 +240,25 @@ class DiagnosticoDetalhado {
   /// Getters para exibição com fallbacks seguros
   String get nomeDefensivo => defensivo?.nome ?? diagnostico.idReg;
   String get nomeComercialDefensivo => defensivo?.nome ?? 'N/A';
-  String get nomeTecnicoDefensivo => defensivo?.nome ?? 'N/A';
+  String get nomeTecnicoDefensivo => defensivo?.nomeTecnico ?? defensivo?.nome ?? 'N/A';
   String get nomeCultura => cultura?.nome ?? 'Cultura não encontrada';
   String get nomePraga => praga?.nome ?? 'Praga não encontrada';
-  String get nomeCientificoPraga => praga?.nome ?? 'N/A';
+  String get nomeCientificoPraga => praga?.nomeLatino ?? 'N/A';
 
   String get dosagem {
-    if (diagnostico.dsMin != null && diagnostico.dsMin!.isNotEmpty) {
-      return '${diagnostico.dsMin} - ${diagnostico.dsMax} ${diagnostico.um}';
+    final dsMin = diagnostico.dsMin;
+    final dsMax = diagnostico.dsMax ?? '';
+    final um = diagnostico.um ?? '';
+    
+    if (dsMin != null && dsMin.isNotEmpty) {
+      return '$dsMin - $dsMax $um'.trim();
     }
-    return '${diagnostico.dsMax} ${diagnostico.um}';
+    return '$dsMax $um'.trim();
   }
 
   String get fabricante => defensivo?.fabricante ?? 'N/A';
   String get classeAgronomica => defensivo?.classeAgronomica ?? 'N/A';
-  String get modoAcao => 'N/A'; // Informação não disponível na tabela principal
+  String get modoAcao => defensivo?.modoAcao ?? 'N/A';
   String get ingredienteAtivo => defensivo?.ingredienteAtivo ?? 'N/A';
 
   bool get hasInfoCompleta =>
@@ -293,8 +266,8 @@ class DiagnosticoDetalhado {
 
   /// Propriedades adicionais para widgets especializados
   bool get isCritico {
-    final dosageValue = double.tryParse(diagnostico.dsMax) ?? 0;
-    final isHighDosage = dosageValue > 1000; // Exemplo: dosagem > 1L/ha
+    final dosageValue = double.tryParse(diagnostico.dsMax ?? '0') ?? 0;
+    final isHighDosage = dosageValue > 1000;
     final hasCriticalMissingData =
         defensivo == null || cultura == null || praga == null;
 
@@ -310,13 +283,11 @@ class DiagnosticoDetalhado {
   }
 
   bool get temAplicacaoTerrestre {
-    // Informação não disponível na tabela principal do Drift
-    return true; // Default para terrestre
+    return diagnostico.minAplicacaoT != null || diagnostico.maxAplicacaoT != null;
   }
 
   bool get temAplicacaoAerea {
-    // Informação não disponível na tabela principal do Drift
-    return false; // Default para não aéreo
+    return diagnostico.minAplicacaoA != null || diagnostico.maxAplicacaoA != null;
   }
 
   List<Fitossanitario> get defensivos {

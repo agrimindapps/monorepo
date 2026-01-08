@@ -157,7 +157,7 @@ class DetalheDefensivoNotifier extends _$DetalheDefensivoNotifier {
     final defensivos = await _fitossanitarioRepository.findElegiveis();
     
     final defensivoData = defensivos
-        .where((d) => d.nomeComum == defensivoName || d.nome == defensivoName)
+        .where((d) => d.nomeTecnico == defensivoName || d.nome == defensivoName)
         .firstOrNull;
 
     if (defensivoData == null) {

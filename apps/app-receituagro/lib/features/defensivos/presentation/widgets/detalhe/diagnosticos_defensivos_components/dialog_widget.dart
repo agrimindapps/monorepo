@@ -70,9 +70,9 @@ class _DiagnosticoDefensivoDialogWidgetState
   /// Carrega dados da praga de forma isolada para evitar rebuilds
   Future<void> _loadPragaData() async {
     try {
-      final pragaId = _getProperty('pragaId', null) ?? _getProperty('idPraga', null);
+      final pragaId = _getProperty('fkIdPraga') ?? _getProperty('idPraga');
       if (pragaId != null && widget.pragasRepository != null) {
-        final praga = await widget.pragasRepository!.findById(int.parse(pragaId.toString()));
+        final praga = await widget.pragasRepository!.findByIdPraga(pragaId.toString());
         if (mounted) {
           setState(() {
             _pragaData = praga;
@@ -98,10 +98,9 @@ class _DiagnosticoDefensivoDialogWidgetState
             return diag.displayVazaoAerea;
           case 'intervaloDias':
             return diag.displayIntervaloAplicacao;
-          case 'pragaId':
           case 'fkIdPraga':
           case 'idPraga':
-            return diag.pragaId.toString();
+            return diag.fkIdPraga;
           case 'id':
           case 'idReg':
           case 'objectId':

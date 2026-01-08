@@ -65,11 +65,9 @@ class PragaInfoWidget extends ConsumerWidget {
   List<Widget> _buildInsectoInfoSections(DetalhePragaState data) {
     final pragaInfo = data.pragaInfo;
 
-    // Campos disponíveis em PragasInfData: sintomas, controle, danos, condicoesFavoraveis
+    // Campos disponíveis em PragasInfData: sintomas, controle (danos e condicoesFavoraveis removed)
     final sintomas = pragaInfo?.sintomas ?? 'Informação não disponível';
-    final danos = pragaInfo?.danos ?? 'Informação não disponível';
     final controle = pragaInfo?.controle ?? 'Informação não disponível';
-    final condicoesFavoraveis = pragaInfo?.condicoesFavoraveis ?? 'Informação não disponível';
 
     return [
       _buildInfoSection(
@@ -79,24 +77,6 @@ class PragaInfoWidget extends ConsumerWidget {
           _buildInfoItem('Sintomas', sintomas),
         ],
         sectionContent: 'Sintomas: $sintomas',
-      ),
-      SpacingTokens.gapMD,
-      _buildInfoSection(
-        'Danos',
-        Icons.bug_report,
-        [
-          _buildInfoItem('Danos Causados', danos),
-        ],
-        sectionContent: 'Danos: $danos',
-      ),
-      SpacingTokens.gapMD,
-      _buildInfoSection(
-        'Condições Favoráveis',
-        Icons.science,
-        [
-          _buildInfoItem('Condições que Favorecem', condicoesFavoraveis),
-        ],
-        sectionContent: 'Condições Favoráveis: $condicoesFavoraveis',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
@@ -114,22 +94,22 @@ class PragaInfoWidget extends ConsumerWidget {
   List<Widget> _buildPlantaInfoSections(DetalhePragaState data) {
     final plantaInfo = data.plantaInfo;
 
-    // Campos disponíveis em PlantasInfData conforme schema Drift
+    // Campos disponíveis em PlantasInfData conforme schema Drift (new schema)
     final ciclo = plantaInfo?.ciclo ?? '-';
     final reproducao = plantaInfo?.reproducao ?? '-';
     final habitat = plantaInfo?.habitat ?? '-';
     final adaptacoes = plantaInfo?.adaptacoes ?? '-';
     final altura = plantaInfo?.altura ?? '-';
-    final tipoFlor = plantaInfo?.tipoFlor ?? '-';
-    final corFlor = plantaInfo?.corFlor ?? '-';
     final filotaxia = plantaInfo?.filotaxia ?? '-';
     final formaLimbo = plantaInfo?.formaLimbo ?? '-';
     final superficie = plantaInfo?.superficie ?? '-';
     final consistencia = plantaInfo?.consistencia ?? '-';
     final nervacao = plantaInfo?.nervacao ?? '-';
     final nervacaoComprimento = plantaInfo?.nervacaoComprimento ?? '-';
+    final inflorescencia = plantaInfo?.inflorescencia ?? '-';
+    final perianto = plantaInfo?.perianto ?? '-';
     final tipoFruto = plantaInfo?.tipoFruto ?? '-';
-    final corFruto = plantaInfo?.corFruto ?? '-';
+    final observacoes = plantaInfo?.observacoes ?? '-';
 
     return [
       _buildInfoSection(
@@ -149,10 +129,10 @@ class PragaInfoWidget extends ConsumerWidget {
         'Informações das Flores',
         Icons.local_florist,
         [
-          _buildInfoItem('Tipo de Flor', tipoFlor),
-          _buildInfoItem('Cor da Flor', corFlor),
+          _buildInfoItem('Inflorescência', inflorescencia),
+          _buildInfoItem('Perianto', perianto),
         ],
-        sectionContent: 'Informações das Flores: Tipo: $tipoFlor. Cor: $corFlor',
+        sectionContent: 'Informações das Flores: Inflorescência: $inflorescencia. Perianto: $perianto',
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
@@ -170,13 +150,13 @@ class PragaInfoWidget extends ConsumerWidget {
       ),
       SpacingTokens.gapMD,
       _buildInfoSection(
-        'Fruto',
+        'Fruto e Observações',
         null,
         [
           _buildInfoItem('Tipo de Fruto', tipoFruto),
-          _buildInfoItem('Cor do Fruto', corFruto),
+          _buildInfoItem('Observações', observacoes),
         ],
-        sectionContent: 'Fruto: Tipo: $tipoFruto. Cor: $corFruto',
+        sectionContent: 'Fruto: Tipo: $tipoFruto. Observações: $observacoes',
       ),
     ];
   }

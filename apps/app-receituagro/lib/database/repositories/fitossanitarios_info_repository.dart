@@ -4,7 +4,8 @@ import '../receituagro_database.dart';
 
 /// Repositório de Informações de Fitossanitários usando Drift
 ///
-/// Gerencia todas as operações de leitura dos dados complementares de fitossanitários
+/// NOTA: FitossanitariosInfo contém dados detalhados: embalagens, tecnologia, precauções
+/// Os campos de formulação, modoAcao, toxicidade agora estão em Fitossanitarios
 /// 
 
 class FitossanitariosInfoRepository {
@@ -18,25 +19,26 @@ class FitossanitariosInfoRepository {
     return await query.get();
   }
 
-  /// Busca informação de fitossanitário por ID
-  Future<FitossanitariosInfoData?> findById(int id) async {
-    final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.id.equals(id));
-    return await query.getSingleOrNull();
-  }
-
-  /// Busca informação de fitossanitário por ID de registro (idReg)
+  /// Busca informação de fitossanitário por idReg (PRIMARY KEY)
   Future<FitossanitariosInfoData?> findByIdReg(String idReg) async {
     final query = _db.select(_db.fitossanitariosInfo)
       ..where((tbl) => tbl.idReg.equals(idReg));
     return await query.getSingleOrNull();
   }
 
-  /// Busca informações por ID do defensivo
-  Future<FitossanitariosInfoData?> findByDefensivoId(int defensivoId) async {
+  /// Busca informações por fkIdDefensivo (string FK)
+  Future<FitossanitariosInfoData?> findByFkIdDefensivo(String fkIdDefensivo) async {
     final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.defensivoId.equals(defensivoId));
+      ..where((tbl) => tbl.fkIdDefensivo.equals(fkIdDefensivo));
     return await query.getSingleOrNull();
+  }
+
+  /// Busca informações pelo idDefensivo do Fitossanitarios relacionado
+  /// Alias para findByFkIdDefensivo
+  Future<FitossanitariosInfoData?> findByFitossanitarioIdDefensivo(
+    String idDefensivo,
+  ) async {
+    return await findByFkIdDefensivo(idDefensivo);
   }
 
   /// Busca informações com join do fitossanitário
@@ -44,7 +46,7 @@ class FitossanitariosInfoRepository {
     final query = _db.select(_db.fitossanitariosInfo).join([
       leftOuterJoin(
         _db.fitossanitarios,
-        _db.fitossanitarios.id.equalsExp(_db.fitossanitariosInfo.defensivoId),
+        _db.fitossanitarios.idDefensivo.equalsExp(_db.fitossanitariosInfo.fkIdDefensivo),
       ),
     ]);
 
@@ -57,41 +59,9 @@ class FitossanitariosInfoRepository {
     }).toList();
   }
 
-  /// Busca informações por modo de ação (busca parcial)
-  Future<List<FitossanitariosInfoData>> findByModoAcao(String modoAcao) async {
-    final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.modoAcao.like('%$modoAcao%'));
-    return await query.get();
-  }
-
-  /// Busca informações por formulação
-  Future<List<FitossanitariosInfoData>> findByFormulacao(
-    String formulacao,
-  ) async {
-    final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.formulacao.like('%$formulacao%'));
-    return await query.get();
-  }
-
-  /// Busca informações por classe toxicológica
-  Future<List<FitossanitariosInfoData>> findByToxicidade(
-    String toxicidade,
-  ) async {
-    final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.toxicidade.equals(toxicidade));
-    return await query.get();
-  }
-
-  /// Busca informações por carência
-  Future<List<FitossanitariosInfoData>> findByCarencia(String carencia) async {
-    final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.carencia.equals(carencia));
-    return await query.get();
-  }
-
   /// Conta o total de informações de fitossanitários
   Future<int> count() async {
-    final countColumn = _db.fitossanitariosInfo.id.count();
+    final countColumn = _db.fitossanitariosInfo.idReg.count();
     final query = _db.selectOnly(_db.fitossanitariosInfo)
       ..addColumns([countColumn]);
     final result = await query.getSingle();
@@ -103,52 +73,18 @@ class FitossanitariosInfoRepository {
     return _db.select(_db.fitossanitariosInfo).watch();
   }
 
-  /// Observa mudanças em uma informação específica
-  Stream<FitossanitariosInfoData?> watchById(int id) {
+  /// Observa mudanças em uma informação específica por idReg
+  Stream<FitossanitariosInfoData?> watchByIdReg(String idReg) {
     final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.id.equals(id));
+      ..where((tbl) => tbl.idReg.equals(idReg));
     return query.watchSingleOrNull();
   }
 
-  /// Observa mudanças por defensivo
-  Stream<FitossanitariosInfoData?> watchByDefensivoId(int defensivoId) {
+  /// Observa mudanças por fkIdDefensivo
+  Stream<FitossanitariosInfoData?> watchByFkIdDefensivo(String fkIdDefensivo) {
     final query = _db.select(_db.fitossanitariosInfo)
-      ..where((tbl) => tbl.defensivoId.equals(defensivoId));
+      ..where((tbl) => tbl.fkIdDefensivo.equals(fkIdDefensivo));
     return query.watchSingleOrNull();
-  }
-
-  /// Conta todos os modos de ação únicos (separando por vírgula)
-  Future<int> countDistinctModosAcao() async {
-    final infos = await findAll();
-    final modosSet = <String>{};
-    
-    for (final info in infos) {
-      if (info.modoAcao != null && info.modoAcao!.isNotEmpty) {
-        // Split by comma and trim each value
-        final modos = info.modoAcao!.split(',').map((m) => m.trim()).where((m) => m.isNotEmpty);
-        modosSet.addAll(modos);
-      }
-    }
-    
-    return modosSet.length;
-  }
-
-  /// Retorna lista de todos os modos de ação únicos (separando por vírgula)
-  Future<List<String>> getDistinctModosAcao() async {
-    final infos = await findAll();
-    final modosSet = <String>{};
-    
-    for (final info in infos) {
-      if (info.modoAcao != null && info.modoAcao!.isNotEmpty) {
-        // Split by comma and trim each value
-        final modos = info.modoAcao!.split(',').map((m) => m.trim()).where((m) => m.isNotEmpty);
-        modosSet.addAll(modos);
-      }
-    }
-    
-    final modosList = modosSet.toList();
-    modosList.sort();
-    return modosList;
   }
 }
 

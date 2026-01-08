@@ -1,50 +1,43 @@
 import 'package:drift/drift.dart';
 
 /// ========== STATIC DATA TABLES ==========
+/// 
+/// IMPORTANTE: Tabelas estáticas carregadas de JSON.
+/// - Não usam autoIncrement (usam idReg do JSON como referência)
+/// - São READ-ONLY (dados de lookup)
+/// - FKs são strings que referenciam idReg de outras tabelas
 
 /// Tabela de Diagnósticos (Tabela de Junção/Relacionamento)
 ///
 /// Relaciona defensivos agrícolas com culturas e pragas, definindo
 /// dosagens e formas de aplicação recomendadas.
 ///
+/// JSON Source: TBDIAGNOSTICO*.json
 /// ⚠️ TABELA ESTÁTICA - Não pertence ao usuário, não sincroniza com Firebase.
-/// Dados carregados do Firebase apenas para leitura (lookup table).
 class Diagnosticos extends Table {
-  // ========== PRIMARY KEY ==========
-  IntColumn get id => integer().autoIncrement()();
+  // ========== PRIMARY KEY (idReg do JSON) ==========
+  /// ID de registro único (IdReg do JSON) - PRIMARY KEY
+  TextColumn get idReg => text()();
 
-  // ========== STATIC DATA ID (Firebase Reference) ==========
-  /// ID de referência no Firebase (apenas para lookup)
-  TextColumn get firebaseId => text().nullable()();
+  // ========== FOREIGN KEYS (strings que referenciam idReg) ==========
+  /// FK → Fitossanitarios.idDefensivo (fkIdDefensivo do JSON)
+  TextColumn get fkIdDefensivo => text()();
 
-  // ========== FOREIGN KEYS (NORMALIZED) ==========
-  /// ID do defensivo (FK → Fitossanitarios)
-  IntColumn get defensivoId => integer().references(
-    Fitossanitarios,
-    #id,
-    onDelete: KeyAction.restrict,
-  )();
+  /// FK → Culturas.idCultura (fkIdCultura do JSON)
+  TextColumn get fkIdCultura => text()();
 
-  /// ID da cultura (FK → Culturas)
-  IntColumn get culturaId =>
-      integer().references(Culturas, #id, onDelete: KeyAction.restrict)();
+  /// FK → Pragas.idPraga (fkIdPraga do JSON)
+  TextColumn get fkIdPraga => text()();
 
-  /// ID da praga (FK → Pragas)
-  IntColumn get pragaId =>
-      integer().references(Pragas, #id, onDelete: KeyAction.restrict)();
-
-  // ========== BUSINESS FIELDS ==========
-  /// ID de registro único (do Firebase)
-  TextColumn get idReg => text().unique()();
-
+  // ========== BUSINESS FIELDS (do JSON) ==========
   /// Dosagem mínima
   TextColumn get dsMin => text().nullable()();
 
   /// Dosagem máxima
-  TextColumn get dsMax => text()();
+  TextColumn get dsMax => text().nullable()();
 
   /// Unidade de medida
-  TextColumn get um => text()();
+  TextColumn get um => text().nullable()();
 
   /// Aplicação terrestre - mínimo
   TextColumn get minAplicacaoT => text().nullable()();
@@ -72,6 +65,12 @@ class Diagnosticos extends Table {
 
   /// Época de aplicação
   TextColumn get epocaAplicacao => text().nullable()();
+
+  /// Status do registro (do JSON)
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
+
+  @override
+  Set<Column> get primaryKey => {idReg};
 }
 
 /// ========== USER-GENERATED DATA TABLES ==========
@@ -211,225 +210,251 @@ class UserSubscriptions extends Table {
 /// ========== STATIC DATA TABLES (READ-ONLY) ==========
 
 /// Tabela de Culturas (Dados estáticos - JSON)
+/// JSON Source: TBCULTURAS0.json
 class Culturas extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  /// ID da cultura (idReg do JSON) - PRIMARY KEY
+  TextColumn get idCultura => text()();
 
-  /// ID da cultura (chave do JSON)
-  TextColumn get idCultura => text().unique()();
-
-  /// Nome da cultura
+  /// Nome da cultura (cultura do JSON)
   TextColumn get nome => text()();
 
-  /// Nome científico
-  TextColumn get nomeLatino => text().nullable()();
+  /// Status do registro
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
 
-  /// Família botânica
-  TextColumn get familia => text().nullable()();
-
-  /// URL da imagem
-  TextColumn get imagemUrl => text().nullable()();
-
-  /// Descrição
-  TextColumn get descricao => text().nullable()();
+  @override
+  Set<Column> get primaryKey => {idCultura};
 }
 
 /// Tabela de Pragas (Dados estáticos - JSON)
+/// JSON Source: TBPRAGAS0.json
 class Pragas extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  /// ID da praga (idReg do JSON) - PRIMARY KEY
+  TextColumn get idPraga => text()();
 
-  /// ID da praga (chave do JSON)
-  TextColumn get idPraga => text().unique()();
-
-  /// Nome comum
+  /// Nome comum (nomeComum do JSON)
   TextColumn get nome => text()();
 
-  /// Nome científico
+  /// Nome científico (nomeCientifico do JSON)
   TextColumn get nomeLatino => text().nullable()();
 
-  /// Tipo: 'inseto', 'fungo', 'bacteria', 'virus', 'nematoide', etc.
+  /// Tipo de praga: '1'=inseto, '2'=doença, '3'=planta daninha (tipoPraga do JSON)
   TextColumn get tipo => text().nullable()();
 
-  /// URL da imagem
-  TextColumn get imagemUrl => text().nullable()();
+  /// Status do registro
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
 
-  /// Descrição
-  TextColumn get descricao => text().nullable()();
+  // ========== CAMPOS TAXONOMIA (do JSON) ==========
+  TextColumn get dominio => text().nullable()();
+  TextColumn get reino => text().nullable()();
+  TextColumn get subReino => text().nullable()();
+  TextColumn get clado01 => text().nullable()();
+  TextColumn get clado02 => text().nullable()();
+  TextColumn get clado03 => text().nullable()();
+  TextColumn get superDivisao => text().nullable()();
+  TextColumn get divisao => text().nullable()();
+  TextColumn get subDivisao => text().nullable()();
+  TextColumn get classe => text().nullable()();
+  TextColumn get subClasse => text().nullable()();
+  TextColumn get superOrdem => text().nullable()();
+  TextColumn get ordem => text().nullable()();
+  TextColumn get subOrdem => text().nullable()();
+  TextColumn get infraOrdem => text().nullable()();
+  TextColumn get superFamilia => text().nullable()();
+  TextColumn get familia => text().nullable()();
+  TextColumn get subFamilia => text().nullable()();
+  TextColumn get tribo => text().nullable()();
+  TextColumn get subTribo => text().nullable()();
+  TextColumn get genero => text().nullable()();
+  TextColumn get especie => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {idPraga};
 }
 
 /// Tabela de Informações de Pragas (Dados estáticos - JSON)
+/// JSON Source: TBPRAGASINF*.json
 class PragasInf extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  /// ID de registro (idReg do JSON) - PRIMARY KEY
+  TextColumn get idReg => text()();
 
-  /// ID de registro (chave do JSON)
-  TextColumn get idReg => text().unique()();
+  /// FK → Pragas.idPraga (fkIdPraga do JSON)
+  TextColumn get fkIdPraga => text()();
 
-  /// FK → Pragas
-  IntColumn get pragaId =>
-      integer().references(Pragas, #id, onDelete: KeyAction.restrict)();
+  /// Status do registro
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
 
-  /// Sintomas
+  /// Descrição (descrisao do JSON - note o typo no JSON original)
+  TextColumn get descricao => text().nullable()();
+
+  /// Sintomas (sintomas do JSON)
   TextColumn get sintomas => text().nullable()();
 
-  /// Controle cultural
+  /// Bioecologia (bioecologia do JSON)
+  TextColumn get bioecologia => text().nullable()();
+
+  /// Controle (controle do JSON)
   TextColumn get controle => text().nullable()();
 
-  /// Danos causados
-  TextColumn get danos => text().nullable()();
-
-  /// Condições favoráveis
-  TextColumn get condicoesFavoraveis => text().nullable()();
+  @override
+  Set<Column> get primaryKey => {idReg};
 }
 
 /// Tabela de Fitossanitários/Defensivos (Dados estáticos - JSON)
+/// JSON Source: TBFITOSSANITARIOS*.json
 class Fitossanitarios extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  /// ID do defensivo (idReg do JSON) - PRIMARY KEY
+  TextColumn get idDefensivo => text()();
 
-  /// ID do defensivo (chave do JSON)
-  TextColumn get idDefensivo => text().unique()();
-
-  /// Nome comercial
+  /// Nome comercial (nomeComum do JSON)
   TextColumn get nome => text()();
 
-  /// Nome comum (produto comercial)
-  TextColumn get nomeComum => text().nullable()();
+  /// Nome técnico (nomeTecnico do JSON)
+  TextColumn get nomeTecnico => text().nullable()();
 
-  /// Fabricante
-  TextColumn get fabricante => text().nullable()();
-
-  /// Classe: 'herbicida', 'fungicida', 'inseticida', 'acaricida', etc.
-  TextColumn get classe => text().nullable()();
-
-  /// Classe agronômica
+  /// Classe agronômica: Herbicida, Fungicida, Inseticida, etc. (classeAgronomica do JSON)
   TextColumn get classeAgronomica => text().nullable()();
 
-  /// Ingrediente ativo
-  TextColumn get ingredienteAtivo => text().nullable()();
+  /// Fabricante (fabricante do JSON)
+  TextColumn get fabricante => text().nullable()();
 
-  /// Número de registro no MAPA
-  TextColumn get registroMapa => text().nullable()();
+  /// Classe ambiental (classAmbiental do JSON)
+  TextColumn get classeAmbiental => text().nullable()();
 
-  /// Status do produto (ativo/inativo)
-  BoolColumn get status => boolean().withDefault(const Constant(true))();
-
-  /// Se está sendo comercializado (0 = não, 1 = sim)
+  /// Se está sendo comercializado (comercializado do JSON)
   IntColumn get comercializado => integer().withDefault(const Constant(1))();
 
-  /// Se é elegível para uso
-  BoolColumn get elegivel => boolean().withDefault(const Constant(true))();
+  /// Indicação de corrosividade (corrosivo do JSON)
+  TextColumn get corrosivo => text().nullable()();
+
+  /// Indicação de inflamabilidade (inflamavel do JSON)
+  TextColumn get inflamavel => text().nullable()();
+
+  /// Formulação do produto (formulacao do JSON)
+  TextColumn get formulacao => text().nullable()();
+
+  /// Modo de ação (modoAcao do JSON)
+  TextColumn get modoAcao => text().nullable()();
+
+  /// Número de registro no MAPA (mapa do JSON)
+  TextColumn get registroMapa => text().nullable()();
+
+  /// Classe toxicológica (toxico do JSON)
+  TextColumn get classeToxico => text().nullable()();
+
+  /// Ingrediente ativo (ingredienteAtivo do JSON)
+  TextColumn get ingredienteAtivo => text().nullable()();
+
+  /// Quantidade do produto (quantProduto do JSON)
+  TextColumn get quantProduto => text().nullable()();
+
+  /// Status do produto (status do JSON)
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
+
+  /// Se é elegível para uso (elegivel do JSON)
+  BoolColumn get elegivel => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {idDefensivo};
 }
 
 /// Tabela de Informações de Fitossanitários (Dados estáticos - JSON)
+/// JSON Source: TBFITOSSANITARIOSINFO*.json
+/// Contém informações detalhadas como tecnologia de aplicação, precauções, etc.
 class FitossanitariosInfo extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  /// ID de registro (idReg do JSON) - PRIMARY KEY
+  TextColumn get idReg => text()();
 
-  /// ID de registro (chave do JSON)
-  TextColumn get idReg => text().unique()();
+  /// FK → Fitossanitarios.idDefensivo (fkIdDefensivo do JSON)
+  TextColumn get fkIdDefensivo => text()();
 
-  /// FK → Fitossanitarios
-  IntColumn get defensivoId => integer().references(
-    Fitossanitarios,
-    #id,
-    onDelete: KeyAction.restrict,
-  )();
+  /// Status do registro
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
 
-  /// Modo de ação
-  TextColumn get modoAcao => text().nullable()();
+  /// Embalagens disponíveis (embalagens do JSON)
+  TextColumn get embalagens => text().nullable()();
 
-  /// Formulação
-  TextColumn get formulacao => text().nullable()();
+  /// Tecnologia de aplicação (tecnologia do JSON)
+  TextColumn get tecnologia => text().nullable()();
 
-  /// Classe toxicológica
-  TextColumn get toxicidade => text().nullable()();
+  /// Precauções para humanos (pHumanas do JSON)
+  TextColumn get precaucoesHumanas => text().nullable()();
 
-  /// Carência (dias)
-  TextColumn get carencia => text().nullable()();
+  /// Precauções ambientais (pAmbiental do JSON)
+  TextColumn get precaucoesAmbientais => text().nullable()();
 
-  /// Informações adicionais
-  TextColumn get informacoesAdicionais => text().nullable()();
+  /// Manejo de resistência (manejoResistencia do JSON)
+  TextColumn get manejoResistencia => text().nullable()();
+
+  /// Compatibilidade com outros produtos (compatibilidade do JSON)
+  TextColumn get compatibilidade => text().nullable()();
+
+  /// Manejo integrado (manejoIntegrado do JSON)
+  TextColumn get manejoIntegrado => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {idReg};
 }
 
 /// Tabela de Informações de Plantas Daninhas (Dados estáticos - JSON)
-/// NOTA: PlantasInf contém informações sobre plantas daninhas (pragas tipo 3),
-/// não informações sobre culturas agrícolas.
+/// JSON Source: TBPLANTASINF0.json
+/// NOTA: PlantasInf contém informações sobre plantas daninhas (pragas tipo 3)
 class PlantasInf extends Table {
-  IntColumn get id => integer().autoIncrement()();
+  /// ID de registro (idReg do JSON) - PRIMARY KEY
+  TextColumn get idReg => text()();
 
-  /// ID de registro (chave do JSON)
-  TextColumn get idReg => text().unique()();
+  /// FK → Pragas.idPraga (fkIdPraga do JSON - plantas daninhas são pragas tipo 3)
+  TextColumn get fkIdPraga => text()();
 
-  /// FK → Pragas (plantas daninhas são pragas tipo 3)
-  /// CORREÇÃO: Alterado de culturaId para pragaId para refletir a relação correta
-  IntColumn get culturaId =>
-      integer().references(Pragas, #id, onDelete: KeyAction.restrict)();
+  /// Status do registro
+  BoolColumn get status => boolean().withDefault(const Constant(true))();
 
-  /// Ciclo da planta
+  /// Ciclo da planta (ciclo do JSON)
   TextColumn get ciclo => text().nullable()();
 
-  /// Tipo de reprodução
+  /// Tipo de reprodução (reproducao do JSON)
   TextColumn get reproducao => text().nullable()();
 
-  /// Habitat natural
+  /// Habitat natural (habitat do JSON)
   TextColumn get habitat => text().nullable()();
 
-  /// Adaptações específicas
+  /// Adaptações específicas (adaptacoes do JSON)
   TextColumn get adaptacoes => text().nullable()();
 
-  /// Altura média da planta
+  /// Altura média da planta (altura do JSON)
   TextColumn get altura => text().nullable()();
 
-  /// Filotaxia (arranjo das folhas)
+  /// Filotaxia - arranjo das folhas (filotaxia do JSON)
   TextColumn get filotaxia => text().nullable()();
 
-  /// Forma do limbo foliar
+  /// Forma do limbo foliar (formaLimbo do JSON)
   TextColumn get formaLimbo => text().nullable()();
 
-  /// Superfície das folhas
+  /// Superfície das folhas (superficie do JSON)
   TextColumn get superficie => text().nullable()();
 
-  /// Consistência das folhas
+  /// Consistência das folhas (consistencia do JSON)
   TextColumn get consistencia => text().nullable()();
 
-  /// Tipo de nervação
+  /// Tipo de nervação (nervacao do JSON)
   TextColumn get nervacao => text().nullable()();
 
-  /// Comprimento da nervação
+  /// Comprimento da nervação (nervacaoComprimento do JSON)
   TextColumn get nervacaoComprimento => text().nullable()();
 
-  /// Margem das folhas
-  TextColumn get margemFolha => text().nullable()();
+  /// Tipo de inflorescência (inflorescencia do JSON)
+  TextColumn get inflorescencia => text().nullable()();
 
-  /// Característica foliar
-  TextColumn get folha => text().nullable()();
+  /// Perianto (perianto do JSON)
+  TextColumn get perianto => text().nullable()();
 
-  /// Base da folha
-  TextColumn get base => text().nullable()();
-
-  /// Forma da base foliar
-  TextColumn get formaBase => text().nullable()();
-
-  /// Ápice foliar
-  TextColumn get apice => text().nullable()();
-
-  /// Forma do ápice
-  TextColumn get formaApice => text().nullable()();
-
-  /// Tipo de flor
-  TextColumn get tipoFlor => text().nullable()();
-
-  /// Cor da flor
-  TextColumn get corFlor => text().nullable()();
-
-  /// Tipo de fruto
+  /// Tipo de fruto (tipologiaFruto do JSON)
   TextColumn get tipoFruto => text().nullable()();
 
-  /// Cor do fruto
-  TextColumn get corFruto => text().nullable()();
+  /// Observações gerais (observacoes do JSON)
+  TextColumn get observacoes => text().nullable()();
 
-  /// Tipo de semente
-  TextColumn get tipoSemente => text().nullable()();
-
-  /// Cor da semente
-  TextColumn get corSemente => text().nullable()();
+  @override
+  Set<Column> get primaryKey => {idReg};
 }
 
 /// ========== APP SETTINGS TABLES ==========

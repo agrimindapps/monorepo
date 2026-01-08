@@ -55,9 +55,6 @@ class DiagnosticosDataLoader {
 
       if (diagnosticos.isNotEmpty) {
         final repository = ref.read(diagnosticoRepositoryProvider);
-        final fitossanitariosRepo = ref.read(fitossanitariosRepositoryProvider);
-        final culturasRepo = ref.read(culturasRepositoryProvider);
-        final pragasRepo = ref.read(pragasRepositoryProvider);
 
         // LIMPAR DADOS EXISTENTES antes de inserir novos
         // Isso garante que registros removidos do JSON sejam removidos do SQLite
@@ -66,53 +63,33 @@ class DiagnosticosDataLoader {
         }
         await repository.deleteAll();
 
-        // Load lookup maps
-        final List<Fitossanitario> fitossanitarios = await (fitossanitariosRepo
-            .findAll() as Future<List<Fitossanitario>>);
-        final List<Cultura> culturas =
-            await (culturasRepo.findAll() as Future<List<Cultura>>);
-        final List<Praga> pragas =
-            await (pragasRepo.findAll() as Future<List<Praga>>);
-
-        final defensivoMap = {
-          for (var f in fitossanitarios) f.idDefensivo: f.id
-        };
-        final culturaMap = {for (var c in culturas) c.idCultura: c.id};
-        final pragaMap = {for (var p in pragas) p.idPraga: p.id};
-
-        // Convert JSON to Companions with ID resolution
+        // Convert JSON to Companions - direct string FK insertion (no lookup needed)
         final List<DiagnosticosCompanion> batch = [];
 
         for (final d in diagnosticos) {
-          final defensivoIdStr = d['fkIdDefensivo'].toString();
-          final culturaIdStr = d['fkIdCultura'].toString();
-          final pragaIdStr = d['fkIdPraga'].toString();
+          final fkIdDefensivo = d['fkIdDefensivo'].toString();
+          final fkIdCultura = d['fkIdCultura'].toString();
+          final fkIdPraga = d['fkIdPraga'].toString();
 
-          final defensivoId = defensivoMap[defensivoIdStr];
-          final culturaId = culturaMap[culturaIdStr];
-          final pragaId = pragaMap[pragaIdStr];
-
-          if (defensivoId != null && culturaId != null && pragaId != null) {
-            batch.add(DiagnosticosCompanion(
-              idReg: Value(d['IdReg'].toString()),
-              defensivoId: Value(defensivoId),
-              culturaId: Value(culturaId),
-              pragaId: Value(pragaId),
-              // Chaves em camelCase conforme JSON original
-              dsMin: Value(d['dsMin']?.toString()),
-              dsMax: Value(d['dsMax']?.toString() ?? ''),
-              um: Value(d['um']?.toString() ?? ''),
-              minAplicacaoT: Value(d['minAplicacaoT']?.toString()),
-              maxAplicacaoT: Value(d['maxAplicacaoT']?.toString()),
-              umT: Value(d['umT']?.toString()),
-              minAplicacaoA: Value(d['minAplicacaoA']?.toString()),
-              maxAplicacaoA: Value(d['maxAplicacaoA']?.toString()),
-              umA: Value(d['umA']?.toString()),
-              intervalo: Value(d['intervalo']?.toString()),
-              intervalo2: Value(d['intervalo2']?.toString()),
-              epocaAplicacao: Value(d['epocaAplicacao']?.toString()),
-            ));
-          }
+          batch.add(DiagnosticosCompanion(
+            idReg: Value(d['IdReg'].toString()),
+            fkIdDefensivo: Value(fkIdDefensivo),
+            fkIdCultura: Value(fkIdCultura),
+            fkIdPraga: Value(fkIdPraga),
+            // Chaves em camelCase conforme JSON original
+            dsMin: Value(d['dsMin']?.toString()),
+            dsMax: Value(d['dsMax']?.toString() ?? ''),
+            um: Value(d['um']?.toString() ?? ''),
+            minAplicacaoT: Value(d['minAplicacaoT']?.toString()),
+            maxAplicacaoT: Value(d['maxAplicacaoT']?.toString()),
+            umT: Value(d['umT']?.toString()),
+            minAplicacaoA: Value(d['minAplicacaoA']?.toString()),
+            maxAplicacaoA: Value(d['maxAplicacaoA']?.toString()),
+            umA: Value(d['umA']?.toString()),
+            intervalo: Value(d['intervalo']?.toString()),
+            intervalo2: Value(d['intervalo2']?.toString()),
+            epocaAplicacao: Value(d['epocaAplicacao']?.toString()),
+          ));
         }
 
         if (batch.isNotEmpty) {
@@ -121,12 +98,12 @@ class DiagnosticosDataLoader {
 
           if (kDebugMode) {
             debugPrint(
-                '✓ DiagnosticosDataLoader: Inserted ${batch.length} items into database (skipped ${diagnosticos.length - batch.length} invalid references)');
+                '✓ DiagnosticosDataLoader: Inserted ${batch.length} items into database');
           }
         } else {
           if (kDebugMode) {
             debugPrint(
-                '⚠️ DiagnosticosDataLoader: No items with valid references found to insert');
+                '⚠️ DiagnosticosDataLoader: No items found to insert');
           }
         }
       } else {

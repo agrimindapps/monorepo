@@ -309,11 +309,8 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
   /// Resolve nome da cultura
   Future<String> _resolveCulturaNome(String idCultura) async {
     try {
-      final id = int.tryParse(idCultura);
-      if (id == null) return '';
-      
       final culturaRepo = ref.read(culturasRepositoryProvider);
-      final data = await culturaRepo.findById(id);
+      final data = await culturaRepo.findByIdCultura(idCultura);
       return data?.nome ?? '';
     } catch (_) {
       return '';
@@ -323,11 +320,8 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
   /// Resolve nome da praga
   Future<String> _resolvePragaNome(String idPraga) async {
     try {
-      final id = int.tryParse(idPraga);
-      if (id == null) return '';
-      
       final pragaRepo = ref.read(pragasRepositoryProvider);
-      final data = await pragaRepo.findById(id);
+      final data = await pragaRepo.findByIdPraga(idPraga);
       return data?.nome ?? '';
     } catch (_) {
       return '';
@@ -339,26 +333,10 @@ class DiagnosticosByEntity extends _$DiagnosticosByEntity {
     try {
       debugPrint('🔍 [DiagByEntity] _resolveDefensivoData: idDefensivo="$idDefensivo"');
       
-      // Tenta primeiro como int (ID numérico do banco)
-      final id = int.tryParse(idDefensivo);
-      if (id != null) {
-        final defensivoRepo = ref.read(fitossanitariosRepositoryProvider);
-        final data = await defensivoRepo.findById(id);
-        if (data != null) {
-          debugPrint('✅ [DiagByEntity] Defensivo encontrado por ID int: ${data.nome}');
-          final nome = data.nome;
-          final ingrediente = data.ingredienteAtivo?.isNotEmpty == true
-              ? data.ingredienteAtivo!
-              : 'Não especificado';
-          return (nome, ingrediente);
-        }
-      }
-      
-      // Tenta como string (idDefensivo original)
       final defensivoRepo = ref.read(fitossanitariosRepositoryProvider);
       final data = await defensivoRepo.findByIdDefensivo(idDefensivo);
       if (data != null) {
-        debugPrint('✅ [DiagByEntity] Defensivo encontrado por idDefensivo string: ${data.nome}');
+        debugPrint('✅ [DiagByEntity] Defensivo encontrado: ${data.nome}');
         final nome = data.nome;
         final ingrediente = data.ingredienteAtivo?.isNotEmpty == true
             ? data.ingredienteAtivo!

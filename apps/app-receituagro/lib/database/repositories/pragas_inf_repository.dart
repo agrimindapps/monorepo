@@ -18,12 +18,6 @@ class PragasInfRepository {
     return await query.get();
   }
 
-  /// Busca informação de praga por ID
-  Future<PragasInfData?> findById(int id) async {
-    final query = _db.select(_db.pragasInf)..where((tbl) => tbl.id.equals(id));
-    return await query.getSingleOrNull();
-  }
-
   /// Busca informação de praga por ID de registro (idReg)
   Future<PragasInfData?> findByIdReg(String idReg) async {
     final query = _db.select(_db.pragasInf)
@@ -31,17 +25,17 @@ class PragasInfRepository {
     return await query.getSingleOrNull();
   }
 
-  /// Busca informações por ID da praga
-  Future<PragasInfData?> findByPragaId(int pragaId) async {
+  /// Busca informações por ID da praga (fkIdPraga)
+  Future<PragasInfData?> findByPragaId(String pragaId) async {
     final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.pragaId.equals(pragaId));
+      ..where((tbl) => tbl.fkIdPraga.equals(pragaId));
     return await query.getSingleOrNull();
   }
 
   /// Busca informações com join da praga
   Future<List<PragaInfoWithPraga>> findAllWithPraga() async {
     final query = _db.select(_db.pragasInf).join([
-      leftOuterJoin(_db.pragas, _db.pragas.id.equalsExp(_db.pragasInf.pragaId)),
+      leftOuterJoin(_db.pragas, _db.pragas.idPraga.equalsExp(_db.pragasInf.fkIdPraga)),
     ]);
 
     final results = await query.get();
@@ -67,16 +61,16 @@ class PragasInfRepository {
     return await query.get();
   }
 
-  /// Busca informações por danos (busca parcial)
-  Future<List<PragasInfData>> findByDanos(String danos) async {
+  /// Busca informações por descrição (busca parcial)
+  Future<List<PragasInfData>> findByDescricao(String descricao) async {
     final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.danos.like('%$danos%'));
+      ..where((tbl) => tbl.descricao.like('%$descricao%'));
     return await query.get();
   }
 
   /// Conta o total de informações de pragas
   Future<int> count() async {
-    final countColumn = _db.pragasInf.id.count();
+    final countColumn = _db.pragasInf.idReg.count();
     final query = _db.selectOnly(_db.pragasInf)
       ..addColumns([countColumn]);
     final result = await query.getSingle();
@@ -89,15 +83,15 @@ class PragasInfRepository {
   }
 
   /// Observa mudanças em uma informação específica
-  Stream<PragasInfData?> watchById(int id) {
-    final query = _db.select(_db.pragasInf)..where((tbl) => tbl.id.equals(id));
+  Stream<PragasInfData?> watchByIdReg(String idReg) {
+    final query = _db.select(_db.pragasInf)..where((tbl) => tbl.idReg.equals(idReg));
     return query.watchSingleOrNull();
   }
 
   /// Observa mudanças por praga
-  Stream<PragasInfData?> watchByPragaId(int pragaId) {
+  Stream<PragasInfData?> watchByPragaId(String pragaId) {
     final query = _db.select(_db.pragasInf)
-      ..where((tbl) => tbl.pragaId.equals(pragaId));
+      ..where((tbl) => tbl.fkIdPraga.equals(pragaId));
     return query.watchSingleOrNull();
   }
 }

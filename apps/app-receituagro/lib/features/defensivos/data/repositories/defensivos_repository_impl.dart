@@ -41,9 +41,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
     this._filterService,
   );
 
-  Future<Map<int, String?>> _fetchInfoMap() async {
+  Future<Map<String, String?>> _fetchInfoMap() async {
     final infos = await _infoRepository.findAll();
-    return {for (var i in infos) i.defensivoId: i.modoAcao};
+    return {for (var i in infos) i.fkIdDefensivo: null}; // modoAcao is now in Fitossanitarios table
   }
 
   @override
@@ -98,10 +98,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return const Right(null);
       }
 
-      final info = await _infoRepository.findByDefensivoId(defensivo.id);
       final defensivoEntity = DefensivoMapper.fromDriftToEntity(
         defensivo,
-        modoAcao: info?.modoAcao,
+        modoAcao: defensivo.modoAcao, // modoAcao is now in Fitossanitarios table
       );
       return Right(defensivoEntity);
     } catch (e) {
@@ -327,10 +326,9 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
         return const Right(false);
       }
 
-      final info = await _infoRepository.findByDefensivoId(defensivo.id);
       final defensivoEntity = DefensivoMapper.fromDriftToEntity(
         defensivo,
-        modoAcao: info?.modoAcao,
+        modoAcao: defensivo.modoAcao, // modoAcao is now in Fitossanitarios table
       );
       // Delegate to query service
       final isActive = _queryService.isDefensivoActive([
@@ -398,9 +396,8 @@ class DefensivosRepositoryImpl implements IDefensivosRepository {
   getDefensivosCompletos() async {
     try {
       final allDrift = await _repository.findAll();
-      final infoMap = await _fetchInfoMap();
       final defensivosEntities = allDrift.map((drift) {
-        final modoAcao = infoMap[drift.id];
+        final modoAcao = drift.modoAcao; // modoAcao is now in Fitossanitarios table
         return DefensivoMapper.fromDriftToEntity(
           drift,
           modoAcao: modoAcao,

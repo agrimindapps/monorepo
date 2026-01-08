@@ -278,7 +278,7 @@ class DiagnosticoGroupingService {
   }) {
     return groupByCultura<Diagnostico>(
       diagnosticos,
-      (d) => d.culturaId.toString(),
+      (d) => d.fkIdCultura,
       (d) =>
           null, // Drift Diagnostico doesn't have nomeCultura, resolver will fill it
       sortItemsInGroup: sortByRelevance,
@@ -353,12 +353,12 @@ class DiagnosticoGroupingService {
   int _calculateDiagnosticoRelevanceScore(Diagnostico diagnostico) {
     int score = 0;
 
-    // Drift Diagnostico has IDs, not name fields
-    if (diagnostico.defensivoId > 0) score += 2;
-    if (diagnostico.culturaId > 0) score += 2;
-    if (diagnostico.pragaId > 0) score += 2;
-    if (diagnostico.dsMax.isNotEmpty) score += 1;
-    if (diagnostico.um.isNotEmpty) score += 1;
+    // Drift Diagnostico has string FK IDs
+    if (diagnostico.fkIdDefensivo.isNotEmpty) score += 2;
+    if (diagnostico.fkIdCultura.isNotEmpty) score += 2;
+    if (diagnostico.fkIdPraga.isNotEmpty) score += 2;
+    if (diagnostico.dsMax?.isNotEmpty == true) score += 1;
+    if (diagnostico.um?.isNotEmpty == true) score += 1;
 
     return score;
   }

@@ -16,14 +16,7 @@ class FitossanitariosRepository {
     return await query.get();
   }
 
-  /// Busca fitossanitário por ID
-  Future<Fitossanitario?> findById(int id) async {
-    final query = _db.select(_db.fitossanitarios)
-      ..where((tbl) => tbl.id.equals(id));
-    return await query.getSingleOrNull();
-  }
-
-  /// Busca fitossanitário por ID do defensivo (idDefensivo)
+  /// Busca fitossanitário por idDefensivo (PRIMARY KEY)
   Future<Fitossanitario?> findByIdDefensivo(String idDefensivo) async {
     final query = _db.select(_db.fitossanitarios)
       ..where((tbl) => tbl.idDefensivo.equals(idDefensivo));
@@ -37,15 +30,14 @@ class FitossanitariosRepository {
     return await query.get();
   }
 
-  /// Busca fitossanitários por classe
-  Future<List<Fitossanitario>> findByClasse(String classe) async {
+  /// Busca fitossanitários por classe agronômica
+  Future<List<Fitossanitario>> findByClasseAgronomica(String classeAgronomica) async {
     final query = _db.select(_db.fitossanitarios)
-      ..where((tbl) => tbl.classe.equals(classe));
+      ..where((tbl) => tbl.classeAgronomica.equals(classeAgronomica));
     return await query.get();
   }
 
   /// Busca fitossanitários elegíveis (apenas com status = true)
-  /// Nota: O campo elegivel foi removido do filtro pois todos os dados JSON têm elegivel=false
   Future<List<Fitossanitario>> findElegiveis() async {
     final query = _db.select(_db.fitossanitarios)
       ..where((tbl) => tbl.status.equals(true));
@@ -61,7 +53,7 @@ class FitossanitariosRepository {
 
   /// Conta o total de fitossanitários
   Future<int> count() async {
-    final countColumn = _db.fitossanitarios.id.count();
+    final countColumn = _db.fitossanitarios.idDefensivo.count();
     final query = _db.selectOnly(_db.fitossanitarios)
       ..addColumns([countColumn]);
     final result = await query.getSingle();
@@ -69,22 +61,6 @@ class FitossanitariosRepository {
   }
 
   /// Carrega fitossanitários a partir de dados JSON
-  ///
-  /// **Formato esperado do JSON:**
-  /// ```json
-  /// {
-  ///   "idReg": "string",
-  ///   "nomeComum": "string",
-  ///   "fabricante": "string",
-  ///   "classe": "string",
-  ///   "classeAgronomica": "string",
-  ///   "ingredienteAtivo": "string",
-  ///   "registroMapa": "string",
-  ///   "status": "boolean",
-  ///   "comercializado": "int",
-  ///   "elegivel": "boolean"
-  /// }
-  /// ```
   Future<void> loadFromJson(
     List<Map<String, dynamic>> jsonData,
     String version,
@@ -98,12 +74,18 @@ class FitossanitariosRepository {
         final companion = FitossanitariosCompanion.insert(
           idDefensivo: item['idReg'] as String,
           nome: item['nomeComum'] as String,
-          nomeComum: Value(item['nomeComum'] as String?),
+          nomeTecnico: Value(item['nomeTecnico'] as String?),
+          formulacao: Value(item['formulacao'] as String?),
+          modoAcao: Value(item['modoAcao'] as String?),
+          classeToxico: Value(item['toxico'] as String?),
+          classeAmbiental: Value(item['classAmbiental'] as String?),
+          corrosivo: Value(item['corrosivo'] as String?),
+          inflamavel: Value(item['inflamavel'] as String?),
+          quantProduto: Value(item['quantProduto'] as String?),
           fabricante: Value(item['fabricante'] as String?),
-          classe: Value(item['classe'] as String?),
           classeAgronomica: Value(item['classeAgronomica'] as String?),
           ingredienteAtivo: Value(item['ingredienteAtivo'] as String?),
-          registroMapa: Value(item['registroMapa'] as String?),
+          registroMapa: Value(item['mapa'] as String?),
           status: Value(
             item['status'] is bool
                 ? item['status'] as bool

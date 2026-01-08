@@ -5,9 +5,9 @@ extension DiagnosticoDetalhadoExtension on DiagnosticoDetalhado {
   /// Verifica se o diagnóstico tem todas as informações necessárias
   bool get isValid =>
       diagnostico.idReg.isNotEmpty &&
-      diagnostico.defensivoId > 0 &&
-      diagnostico.culturaId > 0 &&
-      diagnostico.pragaId > 0;
+      diagnostico.fkIdDefensivo.isNotEmpty &&
+      diagnostico.fkIdCultura.isNotEmpty &&
+      diagnostico.fkIdPraga.isNotEmpty;
 
   /// Retorna uma descrição resumida do diagnóstico
   String get descricaoResumida {
@@ -20,7 +20,8 @@ extension DiagnosticoDetalhadoExtension on DiagnosticoDetalhado {
   /// Verifica se é um diagnóstico crítico (baseado em critérios específicos)
   bool get isCritico {
     if (praga?.tipo == 'Crítica') return true;
-    final dosMaxDouble = double.tryParse(diagnostico.dsMax);
+    final dsMax = diagnostico.dsMax;
+    final dosMaxDouble = dsMax != null ? double.tryParse(dsMax) : null;
     if (dosMaxDouble != null && dosMaxDouble > 5.0) return true;
 
     return false;

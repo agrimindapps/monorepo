@@ -3,9 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/extensions/fitossanitario_drift_extension.dart';
 import '../../../../core/providers/core_providers.dart' as core_providers;
 import '../../../../core/services/fitossanitarios_data_loader.dart';
-import '../../../../database/providers/database_providers.dart';
 import '../../../../database/receituagro_database.dart';
-import '../../../../database/repositories/fitossanitarios_info_repository.dart';
 import '../../../../database/repositories/fitossanitarios_repository.dart';
 
 part 'defensivos_statistics_notifier.g.dart';
@@ -125,8 +123,6 @@ class DefensivosStatisticsState {
 class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
   FitossanitariosRepository get _repository =>
       ref.read(core_providers.fitossanitariosRepositoryProvider);
-  FitossanitariosInfoRepository get _infoRepository =>
-      ref.read(fitossanitariosInfoRepositoryProvider);
 
   @override
   Future<DefensivosStatisticsState> build() async {
@@ -152,8 +148,12 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
         }
       }
       
-      // Get distinct modos de ação from info repository
-      final totalModoAcao = await _infoRepository.countDistinctModosAcao();
+      // Get distinct modos de ação from Fitossanitarios table (modoAcao moved from info)
+      final totalModoAcao = defensivos
+          .map((d) => d.modoAcao)
+          .where((m) => m != null && m.isNotEmpty)
+          .toSet()
+          .length;
       final statistics = _calculateDefensivosStatistics(defensivos, totalModoAcao);
 
       return DefensivosStatisticsState(
@@ -188,7 +188,12 @@ class DefensivosStatisticsNotifier extends _$DefensivosStatisticsNotifier {
 
     try {
       var defensivos = await _repository.findElegiveis();
-      final totalModoAcao = await _infoRepository.countDistinctModosAcao();
+      // Get distinct modos de ação from Fitossanitarios table (modoAcao moved from info)
+      final totalModoAcao = defensivos
+          .map((d) => d.modoAcao)
+          .where((m) => m != null && m.isNotEmpty)
+          .toSet()
+          .length;
       final statistics = _calculateDefensivosStatistics(defensivos, totalModoAcao);
 
       state = AsyncValue.data(

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/bmr_calculator.dart';
 
 /// Página da calculadora de TMB (Taxa Metabólica Basal)
@@ -34,246 +32,190 @@ class _BmrCalculatorPageState extends State<BmrCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Calculadora de TMB',
+      subtitle: 'Taxa Metabólica Basal',
+      icon: Icons.local_fire_department,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: '1. Selecione seu gênero\n'
+          '2. Digite peso, altura e idade\n'
+          '3. Escolha seu nível de atividade física\n'
+          '4. Veja sua TMB e gasto energético total',
+      maxContentWidth: 700,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Gender selection
+              Text(
+                'Selecione o gênero',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.local_fire_department,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'O que é TMB?',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'A Taxa Metabólica Basal é a quantidade mínima de energia '
-                            '(calorias) que seu corpo precisa em repouso para manter '
-                            'funções vitais como respiração, circulação e digestão.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Masculino',
+                      icon: Icons.male,
+                      isSelected: _isMale,
+                      onTap: () => setState(() => _isMale = true),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Seus dados',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Gender selection
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Masculino',
-                                    icon: Icons.male,
-                                    isSelected: _isMale,
-                                    onTap: () => setState(() => _isMale = true),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Feminino',
-                                    icon: Icons.female,
-                                    isSelected: !_isMale,
-                                    onTap: () =>
-                                        setState(() => _isMale = false),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Inputs Row
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Peso',
-                                    controller: _weightController,
-                                    suffix: 'kg',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0 || num > 500) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Altura',
-                                    controller: _heightController,
-                                    suffix: 'cm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null ||
-                                          num < 50 ||
-                                          num > 300) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Idade',
-                                    controller: _ageController,
-                                    suffix: 'anos',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null || num < 1 || num > 120) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Activity Level
-                            Text(
-                              'Nível de atividade física',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            ...ActivityLevel.values.map(
-                              (level) => RadioListTile<ActivityLevel>(
-                                title: Text(
-                                  BmrCalculator.getActivityDescription(level),
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                                value: level,
-                                groupValue: _activityLevel,
-                                dense: true,
-                                onChanged: (value) {
-                                  if (value != null) {
-                                    setState(() => _activityLevel = value);
-                                  }
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            CalculatorButton(
-                              label: 'Calcular TMB',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Feminino',
+                      icon: Icons.female,
+                      isSelected: !_isMale,
+                      onTap: () => setState(() => _isMale = false),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null) _BmrResultCard(result: _result!),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Input fields
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Peso',
+                      controller: _weightController,
+                      suffix: 'kg',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = double.tryParse(value);
+                        if (num == null || num <= 0 || num > 500) {
+                          return 'Inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Altura',
+                      controller: _heightController,
+                      suffix: 'cm',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = int.tryParse(value);
+                        if (num == null || num < 50 || num > 300) {
+                          return 'Inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Idade',
+                      controller: _ageController,
+                      suffix: 'anos',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = int.tryParse(value);
+                        if (num == null || num < 1 || num > 120) {
+                          return 'Inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Activity Level
+              Text(
+                'Nível de atividade física',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...ActivityLevel.values.map(
+                (level) => _ActivityRadioTile(
+                  description: BmrCalculator.getActivityDescription(level),
+                  value: level,
+                  groupValue: _activityLevel,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _activityLevel = value);
+                    }
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular TMB',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _BmrResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -281,7 +223,9 @@ class _BmrCalculatorPageState extends State<BmrCalculatorPage> {
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = BmrCalculator.calculate(
       weightKg: double.parse(_weightController.text),
@@ -292,6 +236,88 @@ class _BmrCalculatorPageState extends State<BmrCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+}
+
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -310,24 +336,26 @@ class _GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.health;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: isSelected
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
             children: [
@@ -335,20 +363,111 @@ class _GenderButton extends StatelessWidget {
                 icon,
                 size: 32,
                 color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    ? accentColor
+                    : Colors.white.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 label,
                 style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 14,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Activity level radio tile with dark theme
+class _ActivityRadioTile extends StatelessWidget {
+  final String description;
+  final ActivityLevel value;
+  final ActivityLevel groupValue;
+  final ValueChanged<ActivityLevel?> onChanged;
+
+  const _ActivityRadioTile({
+    required this.description,
+    required this.value,
+    required this.groupValue,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = value == groupValue;
+    const accentColor = CalculatorAccentColors.health;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Material(
+        color: isSelected
+            ? accentColor.withValues(alpha: 0.1)
+            : Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(10),
+        child: InkWell(
+          onTap: () => onChanged(value),
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              border: Border.all(
+                color: isSelected
+                    ? accentColor
+                    : Colors.white.withValues(alpha: 0.1),
+                width: isSelected ? 2 : 1,
+              ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isSelected
+                          ? accentColor
+                          : Colors.white.withValues(alpha: 0.4),
+                      width: 2,
+                    ),
+                  ),
+                  child: isSelected
+                      ? Center(
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: accentColor,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: isSelected
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.7),
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -363,143 +482,150 @@ class _BmrResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.health;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatBmrCalculation(
-                    bmr: result.bmr,
-                    tdee: result.tdee,
-                    activityLevel: BmrCalculator.getActivityDescription(
-                      result.activityLevel,
-                    ),
-                    caloriesForWeightLoss: result.caloriesForWeightLoss,
-                    caloriesForWeightGain: result.caloriesForWeightGain,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Main results
-            Row(
-              children: [
-                Expanded(
-                  child: _ResultBox(
-                    label: 'TMB',
-                    value: '${result.bmr.toStringAsFixed(0)}',
-                    unit: 'kcal/dia',
-                    color: Colors.orange,
-                    icon: Icons.local_fire_department,
-                    description: 'Calorias em repouso',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _ResultBox(
-                    label: 'GET',
-                    value: '${result.tdee.toStringAsFixed(0)}',
-                    unit: 'kcal/dia',
-                    color: Colors.blue,
-                    icon: Icons.directions_run,
-                    description: 'Gasto energético total',
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Calorie targets
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Metas calóricas',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 12),
-                  _CalorieTarget(
-                    label: 'Para emagrecer',
-                    value: result.caloriesForWeightLoss,
-                    color: Colors.green,
-                    icon: Icons.trending_down,
-                  ),
-                  const SizedBox(height: 8),
-                  _CalorieTarget(
-                    label: 'Para manter',
-                    value: result.tdee,
-                    color: Colors.blue,
-                    icon: Icons.trending_flat,
-                  ),
-                  const SizedBox(height: 8),
-                  _CalorieTarget(
-                    label: 'Para ganhar peso',
-                    value: result.caloriesForWeightGain,
-                    color: Colors.orange,
-                    icon: Icons.trending_up,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Tips
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Déficit de 500 kcal/dia resulta em perda de ~0.5kg/semana. '
-                      'Nunca consuma menos que sua TMB.',
-                      style: TextStyle(
-                        color: colorScheme.onSecondaryContainer,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: accentColor.withValues(alpha: 0.3),
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          Row(
+            children: [
+              const Icon(
+                Icons.assessment,
+                color: accentColor,
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Resultados',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Main results
+          Row(
+            children: [
+              Expanded(
+                child: _ResultBox(
+                  label: 'TMB',
+                  value: result.bmr.toStringAsFixed(0),
+                  unit: 'kcal/dia',
+                  color: Colors.orange,
+                  icon: Icons.local_fire_department,
+                  description: 'Calorias em repouso',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ResultBox(
+                  label: 'GET',
+                  value: result.tdee.toStringAsFixed(0),
+                  unit: 'kcal/dia',
+                  color: Colors.blue,
+                  icon: Icons.directions_run,
+                  description: 'Gasto energético total',
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // Calorie targets
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Metas calóricas',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 14),
+                _CalorieTarget(
+                  label: 'Para emagrecer',
+                  value: result.caloriesForWeightLoss,
+                  color: Colors.green,
+                  icon: Icons.trending_down,
+                ),
+                const SizedBox(height: 10),
+                _CalorieTarget(
+                  label: 'Para manter',
+                  value: result.tdee,
+                  color: Colors.blue,
+                  icon: Icons.trending_flat,
+                ),
+                const SizedBox(height: 10),
+                _CalorieTarget(
+                  label: 'Para ganhar peso',
+                  value: result.caloriesForWeightGain,
+                  color: Colors.orange,
+                  icon: Icons.trending_up,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Tips
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 20,
+                  color: Colors.amber.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Déficit de 500 kcal/dia resulta em perda de ~0.5kg/semana. '
+                    'Nunca consuma menos que sua TMB.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 13,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -525,42 +651,50 @@ class _ResultBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: color.withValues(alpha: 0.4), width: 2),
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 8),
+          Icon(icon, color: color, size: 30),
+          const SizedBox(height: 10),
           Text(
             label,
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.bold,
-              fontSize: 12,
+              fontSize: 13,
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
+            style: TextStyle(
+              fontSize: 36,
+              fontWeight: FontWeight.bold,
+              color: color,
+              height: 1.0,
+            ),
           ),
+          const SizedBox(height: 2),
           Text(
             unit,
-            style: TextStyle(color: color.withValues(alpha: 0.8), fontSize: 12),
+            style: TextStyle(
+              color: color.withValues(alpha: 0.8),
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 6),
           Text(
             description,
             style: TextStyle(
-              color: color.withValues(alpha: 0.7),
-              fontSize: 10,
+              color: Colors.white.withValues(alpha: 0.6),
+              fontSize: 11,
             ),
             textAlign: TextAlign.center,
           ),
@@ -588,12 +722,21 @@ class _CalorieTarget extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
-        const SizedBox(width: 8),
-        Expanded(child: Text(label)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 14,
+            ),
+          ),
+        ),
         Text(
           '${value.toStringAsFixed(0)} kcal',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: 15,
             color: color,
           ),
         ),

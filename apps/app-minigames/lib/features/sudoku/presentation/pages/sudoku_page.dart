@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/achievement.dart';
 import '../providers/sudoku_notifier.dart';
@@ -56,116 +57,114 @@ class _SudokuPageState extends ConsumerState<SudokuPage> {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sudoku'),
-        actions: [
-          // Achievement button
-          IconButton(
-            icon: const Icon(Icons.emoji_events),
-            tooltip: 'Conquistas',
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (_) => const SudokuAchievementsDialogAdapter(),
-              );
-            },
-          ),
-          // New game button
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Novo Jogo',
-            onPressed: _showGameModeDialog,
-          ),
-          // Quick difficulty menu
-          PopupMenuButton<GameDifficulty>(
-            icon: const Icon(Icons.settings),
-            tooltip: 'Dificuldade',
-            onSelected: (difficulty) {
-              ref.read(sudokuGameProvider.notifier).startNewGame(
-                    difficulty,
-                    gameMode: gameState.gameMode,
-                  );
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: GameDifficulty.easy,
-                child: Text('Fácil'),
-              ),
-              const PopupMenuItem(
-                value: GameDifficulty.medium,
-                child: Text('Médio'),
-              ),
-              const PopupMenuItem(
-                value: GameDifficulty.hard,
-                child: Text('Difícil'),
-              ),
-            ],
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Game stats
-            GameStatsWidget(gameState: gameState),
-
-            const SizedBox(height: 16),
-
-            // Sudoku grid
-            Expanded(
-              child: Center(
-                child: SudokuGridWidget(
-                  grid: gameState.grid,
-                  selectedCell: gameState.selectedCell,
-                  onCellTap: (row, col) {
-                    ref.read(sudokuGameProvider.notifier).selectCell(row, col);
-                  },
-                ),
-              ),
+    return GamePageLayout(
+      title: 'Sudoku',
+      accentColor: const Color(0xFF673AB7),
+      instructions: 'Preencha o tabuleiro 9x9!\n\n'
+          '🔢 Cada linha: números 1-9\n'
+          '📊 Cada coluna: números 1-9\n'
+          '⬜ Cada bloco 3x3: números 1-9\n'
+          '📝 Use notas para marcar possibilidades',
+      maxGameWidth: 600,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events, color: Colors.white),
+          tooltip: 'Conquistas',
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (_) => const SudokuAchievementsDialogAdapter(),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.add, color: Colors.white),
+          tooltip: 'Novo Jogo',
+          onPressed: _showGameModeDialog,
+        ),
+        PopupMenuButton<GameDifficulty>(
+          icon: const Icon(Icons.tune, color: Colors.white),
+          tooltip: 'Dificuldade',
+          onSelected: (difficulty) {
+            ref.read(sudokuGameProvider.notifier).startNewGame(
+                  difficulty,
+                  gameMode: gameState.gameMode,
+                );
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: GameDifficulty.easy,
+              child: Text('Fácil'),
             ),
-
-            const SizedBox(height: 16),
-
-            // Number pad
-            NumberPadWidget(
-              notesMode: gameState.notesMode,
-              onNumberTap: (number) {
-                ref.read(sudokuGameProvider.notifier).placeNumber(number);
-              },
-              onClearTap: () {
-                ref.read(sudokuGameProvider.notifier).clearCell();
-              },
+            const PopupMenuItem(
+              value: GameDifficulty.medium,
+              child: Text('Médio'),
             ),
-
-            const SizedBox(height: 8),
-
-            // Game controls with undo/redo
-            GameControlsWidget(
-              notesMode: gameState.notesMode,
-              canUseHint: gameState.canUseHint,
-              canUndo: gameState.canUndo,
-              canRedo: gameState.canRedo,
-              onNotesToggle: () {
-                ref.read(sudokuGameProvider.notifier).toggleNotesMode();
-              },
-              onHint: () {
-                ref.read(sudokuGameProvider.notifier).getHint();
-              },
-              onRestart: () {
-                _showRestartDialog();
-              },
-              onUndo: () {
-                ref.read(sudokuGameProvider.notifier).undo();
-              },
-              onRedo: () {
-                ref.read(sudokuGameProvider.notifier).redo();
-              },
+            const PopupMenuItem(
+              value: GameDifficulty.hard,
+              child: Text('Difícil'),
             ),
-
-            const SizedBox(height: 16),
           ],
         ),
+      ],
+      child: Column(
+        children: [
+          // Game stats
+          GameStatsWidget(gameState: gameState),
+
+          const SizedBox(height: 12),
+
+          // Sudoku grid
+          Expanded(
+            child: Center(
+              child: SudokuGridWidget(
+                grid: gameState.grid,
+                selectedCell: gameState.selectedCell,
+                onCellTap: (row, col) {
+                  ref.read(sudokuGameProvider.notifier).selectCell(row, col);
+                },
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Number pad
+          NumberPadWidget(
+            notesMode: gameState.notesMode,
+            onNumberTap: (number) {
+              ref.read(sudokuGameProvider.notifier).placeNumber(number);
+            },
+            onClearTap: () {
+              ref.read(sudokuGameProvider.notifier).clearCell();
+            },
+          ),
+
+          const SizedBox(height: 8),
+
+          // Game controls with undo/redo
+          GameControlsWidget(
+            notesMode: gameState.notesMode,
+            canUseHint: gameState.canUseHint,
+            canUndo: gameState.canUndo,
+            canRedo: gameState.canRedo,
+            onNotesToggle: () {
+              ref.read(sudokuGameProvider.notifier).toggleNotesMode();
+            },
+            onHint: () {
+              ref.read(sudokuGameProvider.notifier).getHint();
+            },
+            onRestart: () {
+              _showRestartDialog();
+            },
+            onUndo: () {
+              ref.read(sudokuGameProvider.notifier).undo();
+            },
+            onRedo: () {
+              ref.read(sudokuGameProvider.notifier).redo();
+            },
+          ),
+        ],
       ),
     );
   }

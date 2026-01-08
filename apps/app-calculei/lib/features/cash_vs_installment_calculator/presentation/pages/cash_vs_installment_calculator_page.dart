@@ -1,11 +1,7 @@
-// Flutter imports:
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
-// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_cash_vs_installment_usecase.dart';
 import '../providers/cash_vs_installment_calculator_provider.dart';
 import '../widgets/cash_vs_installment_input_form.dart';
@@ -34,136 +30,100 @@ class _CashVsInstallmentCalculatorPageState
   Widget build(BuildContext context) {
     final state = ref.watch(cashVsInstallmentCalculatorProvider);
 
-    return Scaffold(
-      appBar: CalculatorAppBar(
-        actions: [InfoAppBarAction(onPressed: () => _showInfo(context))],
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Page Title
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      'À Vista ou Parcelado?',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  // Input Form Card
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Compare à vista vs parcelado',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: ShadcnStyle.textColor,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Input Form
-                          CashVsInstallmentInputForm(
-                            key: _formKeyId,
-                            formKey: _formKey,
-                            onCalculate: _handleCalculate,
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Action Buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton.icon(
-                                onPressed: _handleClear,
-                                icon: const Icon(Icons.clear),
-                                label: const Text('Limpar'),
-                                style: ShadcnStyle.textButtonStyle,
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton.icon(
-                                onPressed: state.isLoading
-                                    ? null
-                                    : _handleSubmit,
-                                icon: state.isLoading
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(Icons.calculate),
-                                label: Text(
-                                  state.isLoading
-                                      ? 'Calculando...'
-                                      : 'Calcular',
-                                ),
-                                style: ShadcnStyle.primaryButtonStyle,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Error Message
-                  if (state.errorMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Card(
-                      color: Colors.red.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error, color: Colors.red),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                state.errorMessage!,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  // Result Card
-                  if (state.calculation != null) ...[
-                    const SizedBox(height: 24),
-                    AnimatedOpacity(
-                      opacity: state.calculation != null ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 500),
-                      child: CashVsInstallmentResultCard(
-                        calculation: state.calculation!,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+    return CalculatorPageLayout(
+      title: 'À Vista ou Parcelado?',
+      subtitle: 'Compare as opções de pagamento',
+      icon: Icons.compare_arrows_outlined,
+      accentColor: CalculatorAccentColors.financial,
+      categoryName: 'Financeiro',
+      instructions: 'Informe o preço à vista, valor parcelado e taxa de juros '
+          'para descobrir qual é a melhor opção financeira. A calculadora '
+          'considera o valor do dinheiro no tempo.',
+      maxContentWidth: 800,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.info_outline, color: Colors.white70),
+          onPressed: () => _showInfo(context),
+          tooltip: 'Informações',
+        ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Input Form
+            CashVsInstallmentInputForm(
+              key: _formKeyId,
+              formKey: _formKey,
+              onCalculate: _handleCalculate,
             ),
-          ),
+
+            const SizedBox(height: 24),
+
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _DarkTextButton(
+                  onPressed: _handleClear,
+                  icon: Icons.clear,
+                  label: 'Limpar',
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: state.isLoading ? null : _handleSubmit,
+                    icon: state.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.calculate_rounded),
+                    label: Text(
+                      state.isLoading ? 'Calculando...' : 'Calcular',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CalculatorAccentColors.financial,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Error Message
+            if (state.errorMessage != null) ...[
+              const SizedBox(height: 20),
+              _DarkErrorCard(message: state.errorMessage!),
+            ],
+
+            // Result Card
+            if (state.calculation != null) ...[
+              const SizedBox(height: 24),
+              AnimatedOpacity(
+                opacity: state.calculation != null ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                child: CashVsInstallmentResultCard(
+                  calculation: state.calculation!,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -223,6 +183,72 @@ class _CashVsInstallmentCalculatorPageState
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Dark themed text button for the calculator
+class _DarkTextButton extends StatelessWidget {
+  final VoidCallback onPressed;
+  final IconData icon;
+  final String label;
+
+  const _DarkTextButton({
+    required this.onPressed,
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 18),
+      label: Text(label),
+      style: TextButton.styleFrom(
+        foregroundColor: Colors.white70,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+    );
+  }
+}
+
+/// Dark themed error card
+class _DarkErrorCard extends StatelessWidget {
+  final String message;
+
+  const _DarkErrorCard({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: Colors.red.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red.shade300,
+            size: 22,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: Colors.red.shade300,
+                fontSize: 14,
+              ),
+            ),
           ),
         ],
       ),

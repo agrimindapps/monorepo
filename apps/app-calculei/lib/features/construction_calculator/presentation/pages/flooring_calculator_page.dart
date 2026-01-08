@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../providers/flooring_calculator_provider.dart';
 import '../widgets/flooring_result_card.dart';
 
@@ -49,287 +49,216 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
   Widget build(BuildContext context) {
     final calculation = ref.watch(flooringCalculatorProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadora de Piso'),
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+    return CalculatorPageLayout(
+      title: 'Calculadora de Pisos',
+      subtitle: 'Revestimentos e Acabamentos',
+      icon: Icons.grid_on,
+      accentColor: CalculatorAccentColors.construction,
+      categoryName: 'Construção',
+      instructions: 'Informe as dimensões do ambiente e o tamanho das peças. '
+          'Defina a perda e quantidade de peças por caixa para receber o cálculo completo de peças, caixas e rejunte necessários.',
+      maxContentWidth: 800,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.grid_on,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Como funciona',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '• Informe as dimensões do ambiente (m)\n'
-                            '• Informe o tamanho das peças (cm)\n'
-                            '• Defina a perda e peças por caixa\n'
-                            '• Receba quantidade de peças, caixas e rejunte',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    'Dimensões do Ambiente',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 16),
 
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Dimensões do Ambiente',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Comprimento',
-                                    controller: _roomLengthController,
-                                    suffix: 'm',
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Largura',
-                                    controller: _roomWidthController,
-                                    suffix: 'm',
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Text(
-                              'Dimensões da Peça',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'Comprimento',
-                                    controller: _tileLengthController,
-                                    suffix: 'cm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'Largura',
-                                    controller: _tileWidthController,
-                                    suffix: 'cm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 180,
-                                  child: StandardInputField(
-                                    label: 'Peças/caixa',
-                                    controller: _tilesPerBoxController,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Text(
-                              'Configurações',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: DropdownButtonFormField<String>(
-                                    initialValue: _flooringType,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Tipo de Piso',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    items: _flooringTypes.map((type) {
-                                      return DropdownMenuItem(
-                                        value: type,
-                                        child: Text(type),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _flooringType = value ?? 'Porcelanato';
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Perda: ${_wastePercentage.toInt()}%',
-                                        style: Theme.of(context).textTheme.bodyMedium,
-                                      ),
-                                      Slider(
-                                        value: _wastePercentage,
-                                        min: 5,
-                                        max: 20,
-                                        divisions: 15,
-                                        label: '${_wastePercentage.toInt()}%',
-                                        onChanged: (value) {
-                                          setState(() {
-                                            _wastePercentage = value;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      SizedBox(
+                        width: 200,
+                        child: _DarkInputField(
+                          label: 'Comprimento',
+                          controller: _roomLengthController,
+                          suffix: 'm',
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                           ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Obrigatório';
+                            final num = double.tryParse(value);
+                            if (num == null || num <= 0) return 'Inválido';
+                            return null;
+                          },
                         ),
                       ),
+                      SizedBox(
+                        width: 200,
+                        child: _DarkInputField(
+                          label: 'Largura',
+                          controller: _roomWidthController,
+                          suffix: 'm',
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Obrigatório';
+                            final num = double.tryParse(value);
+                            if (num == null || num <= 0) return 'Inválido';
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Text(
+                    'Dimensões da Peça',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      SizedBox(
+                        width: 180,
+                        child: _DarkInputField(
+                          label: 'Comprimento',
+                          controller: _tileLengthController,
+                          suffix: 'cm',
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Obrigatório';
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 180,
+                        child: _DarkInputField(
+                          label: 'Largura',
+                          controller: _tileWidthController,
+                          suffix: 'cm',
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Obrigatório';
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 180,
+                        child: _DarkInputField(
+                          label: 'Peças/caixa',
+                          controller: _tilesPerBoxController,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) return 'Obrigatório';
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Text(
+                    'Configurações',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Flooring type dropdown
+                  _DarkDropdownField(
+                    label: 'Tipo de Piso',
+                    value: _flooringType,
+                    items: _flooringTypes,
+                    onChanged: (value) => setState(() => _flooringType = value!),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Waste slider
+                  Text(
+                    'Perda: ${_wastePercentage.toInt()}%',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: CalculatorAccentColors.construction,
+                      thumbColor: CalculatorAccentColors.construction,
+                      overlayColor: CalculatorAccentColors.construction.withValues(alpha: 0.2),
+                      inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+                    ),
+                    child: Slider(
+                      value: _wastePercentage,
+                      min: 5,
+                      max: 20,
+                      divisions: 15,
+                      label: '${_wastePercentage.toInt()}%',
+                      onChanged: (value) => setState(() => _wastePercentage = value),
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Result Card
-                  if (calculation.id.isNotEmpty) ...[
-                    FlooringResultCard(calculation: calculation),
-                  ],
+                  SizedBox(
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: _calculate,
+                      icon: const Icon(Icons.calculate_rounded),
+                      label: const Text(
+                        'Calcular',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: CalculatorAccentColors.construction,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
+
+            if (calculation.id.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              FlooringResultCard(calculation: calculation),
+            ],
+          ],
         ),
       ),
     );
@@ -375,5 +304,173 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
         );
       }
     }
+  }
+}
+
+/// Dark themed input field
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final String? helperText;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.helperText,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            helperText!,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 11,
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.construction,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dark themed dropdown field
+class _DarkDropdownField extends StatelessWidget {
+  final String label;
+  final String value;
+  final List<String> items;
+  final ValueChanged<String?> onChanged;
+
+  const _DarkDropdownField({
+    required this.label,
+    required this.value,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<String>(
+          value: value,
+          dropdownColor: const Color(0xFF1A1A2E),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.construction,
+                width: 2,
+              ),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+          items: items.map((item) {
+            return DropdownMenuItem(
+              value: item,
+              child: Text(item),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ],
+    );
   }
 }

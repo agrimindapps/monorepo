@@ -17,6 +17,7 @@ class GamesData {
       isFeatured: true,
       isNew: false,
       playerCount: 1,
+      assetPath: 'assets/images/thumbnails/snake.png',
     ),
     GameEntity(
       id: '2048',
@@ -30,6 +31,7 @@ class GamesData {
       isFeatured: true,
       isNew: false,
       playerCount: 1,
+      assetPath: 'assets/images/thumbnails/2048.png',
     ),
     GameEntity(
       id: 'tictactoe',
@@ -43,6 +45,7 @@ class GamesData {
       isFeatured: true,
       isNew: false,
       playerCount: 2,
+      assetPath: 'assets/images/thumbnails/tictactoe.png',
     ),
     GameEntity(
       id: 'memory',
@@ -56,6 +59,7 @@ class GamesData {
       isFeatured: true,
       isNew: false,
       playerCount: 1,
+      assetPath: 'assets/images/thumbnails/memory.png',
     ),
     GameEntity(
       id: 'campo-minado',
@@ -68,6 +72,7 @@ class GamesData {
       category: GameCategory.strategy,
       isNew: false,
       playerCount: 1,
+      assetPath: 'assets/images/thumbnails/campo-minado.png',
     ),
     GameEntity(
       id: 'sudoku',
@@ -330,9 +335,11 @@ class GamesData {
     if (query.isEmpty) return allGames;
     final lowerQuery = query.toLowerCase();
     return allGames
-        .where((g) =>
-            g.name.toLowerCase().contains(lowerQuery) ||
-            g.description.toLowerCase().contains(lowerQuery))
+        .where(
+          (g) =>
+              g.name.toLowerCase().contains(lowerQuery) ||
+              g.description.toLowerCase().contains(lowerQuery),
+        )
         .toList();
   }
 

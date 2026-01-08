@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/game_page_layout.dart';
 import '../providers/tictactoe_game_notifier.dart';
 import '../widgets/game_board_widget.dart';
 import '../widgets/game_controls_widget.dart';
 import '../widgets/game_stats_widget.dart';
-import '../../../../widgets/shared/responsive_game_container.dart';
 
 /// Main page for TicTacToe game
 /// Uses Riverpod for state management
@@ -15,194 +15,158 @@ class TicTacToePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gameState = ref.watch(ticTacToeGameProvider);
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text(
-          'Jogo da Velha',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+    return GamePageLayout(
+      title: 'Jogo da Velha',
+      accentColor: const Color(0xFF6A11CB),
+      instructions: 'Três em linha vence!\n\n'
+          '❌ Jogador X começa\n'
+          '⭕ Alternância de turnos\n'
+          '🏆 Faça 3 em linha para vencer\n'
+          '🤖 Jogue contra a IA ou amigo',
+      maxGameWidth: 500,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.bar_chart, color: Colors.white),
+          onPressed: () => _showStatsDialog(context, ref),
+          tooltip: 'Ver Estatísticas',
         ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            onPressed: () => _showStatsDialog(context, ref),
-            tooltip: 'Ver Estatísticas',
-          ),
-        ],
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6A11CB),
-              Color(0xFF2575FC),
+      ],
+      child: gameState.when(
+        data: (state) => SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: const Color(0xFF6A11CB).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: GameControlsWidget(
+                  gameState: state,
+                  onGameModeChanged: (mode) {
+                    ref.read(ticTacToeGameProvider.notifier).changeGameMode(mode);
+                  },
+                  onDifficultyChanged: (difficulty) {
+                    ref.read(ticTacToeGameProvider.notifier).changeDifficulty(difficulty);
+                  },
+                  onRestart: () {
+                    ref.read(ticTacToeGameProvider.notifier).restartGame();
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              if (state.isInProgress)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Vez de: ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        state.currentPlayer.symbol,
+                        style: TextStyle(
+                          color: state.currentPlayer.color,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (!state.isInProgress)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        state.result.message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          ref.read(ticTacToeGameProvider.notifier).restartGame();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6A11CB),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Jogar Novamente'),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 20),
+              AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  child: GameBoardWidget(
+                    gameState: state,
+                    onCellTapped: (row, col) {
+                      ref.read(ticTacToeGameProvider.notifier).makeMove(row, col);
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ),
-        child: gameState.when(
-          data: (state) => SafeArea(
-            child: ResponsiveGameContainer(
-              maxWidth: 500,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Card(
-                      elevation: 8,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      color: Colors.white.withValues(alpha: 0.9),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: GameControlsWidget(
-                          gameState: state,
-                          onGameModeChanged: (mode) {
-                            ref.read(ticTacToeGameProvider.notifier).changeGameMode(mode);
-                          },
-                          onDifficultyChanged: (difficulty) {
-                            ref.read(ticTacToeGameProvider.notifier).changeDifficulty(difficulty);
-                          },
-                          onRestart: () {
-                            ref.read(ticTacToeGameProvider.notifier).restartGame();
-                          },
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (state.isInProgress)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Vez de: ',
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.grey[800],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            Text(
-                              state.currentPlayer.symbol,
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: state.currentPlayer.color,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (!state.isInProgress)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              state.result.message,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: () {
-                                ref.read(ticTacToeGameProvider.notifier).restartGame();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                              ),
-                              icon: const Icon(Icons.refresh),
-                              label: const Text('Jogar Novamente'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    const SizedBox(height: 24),
-                    AspectRatio(
-                      aspectRatio: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: GameBoardWidget(
-                          gameState: state,
-                          onCellTapped: (row, col) {
-                            ref.read(ticTacToeGameProvider.notifier).makeMove(row, col);
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF6A11CB)),
+        ),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.white),
+              const SizedBox(height: 16),
+              Text(
+                'Erro: $error',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white70),
               ),
-            ),
-          ),
-          loading: () => const Center(
-            child: CircularProgressIndicator(color: Colors.white),
-          ),
-          error: (error, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error_outline, size: 48, color: Colors.white),
-                const SizedBox(height: 16),
-                Text(
-                  'Erro: $error',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(ticTacToeGameProvider),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF6A11CB),
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    ref.invalidate(ticTacToeGameProvider);
-                  },
-                  child: const Text('Tentar Novamente'),
-                ),
-              ],
-            ),
+                child: const Text('Tentar Novamente'),
+              ),
+            ],
           ),
         ),
       ),

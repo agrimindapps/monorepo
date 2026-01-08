@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../providers/concrete_calculator_provider.dart';
 import '../widgets/concrete_result_card.dart';
@@ -54,9 +55,7 @@ class _ConcreteCalculatorPageState
     final calculation = ref.watch(concreteCalculatorProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadora de Concreto'),
-      ),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

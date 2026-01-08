@@ -1,13 +1,7 @@
-// Flutter imports:
-// Project imports:
-import 'package:app_calculei/core/presentation/widgets/calculator_layout.dart';
 import 'package:flutter/material.dart';
-// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/data/calculator_content_repository.dart';
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/educational_tabs.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
 import '../providers/net_salary_calculator_provider.dart';
 import '../widgets/net_salary_input_form.dart';
@@ -30,124 +24,141 @@ class _NetSalaryCalculatorPageState
   Widget build(BuildContext context) {
     final state = ref.watch(netSalaryCalculatorProvider);
 
-    return CalculatorLayout(
-      pageTitle: 'Calculadora de Salário Líquido',
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.info_outline),
-          onPressed: () => _showInfo(context),
-        ),
-      ],
-      inputForm: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Dados do Cálculo',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 24),
+    return CalculatorPageLayout(
+      title: 'Calculadora de Salário Líquido',
+      subtitle: 'Descontos e Valor Líquido',
+      icon: Icons.account_balance_wallet_outlined,
+      accentColor: CalculatorAccentColors.labor,
+      categoryName: 'Trabalhista',
+      instructions: 'Calcule seu salário líquido após descontos obrigatórios e voluntários. '
+          'Informe salário bruto, dependentes e descontos aplicáveis. '
+          'Inclui cálculo de INSS e IRRF conforme tabelas 2024.',
+      maxContentWidth: 700,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Input Form
+            NetSalaryInputForm(
+              formKey: _formKey,
+              onCalculate: _handleCalculate,
+            ),
 
-              // Input Form
-              NetSalaryInputForm(
-                formKey: _formKey,
-                onCalculate: _handleCalculate,
-              ),
+            const SizedBox(height: 24),
 
-              const SizedBox(height: 24),
-
-              // Calculator Button
-              CalculatorButton(
-                label: 'Calcular salário líquido',
-                icon: Icons.calculate,
-                onPressed: _handleSubmit,
-                isLoading: state.isLoading,
-              ),
-
-              // Error Message
-              if (state.errorMessage != null) ...[
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade100),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.red),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          state.errorMessage!,
-                          style: const TextStyle(color: Colors.red),
+            // Calculate Button
+            SizedBox(
+              height: 52,
+              child: ElevatedButton.icon(
+                onPressed: state.isLoading ? null : _handleSubmit,
+                icon: state.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
                         ),
-                      ),
-                    ],
+                      )
+                    : const Icon(Icons.calculate_rounded),
+                label: Text(
+                  state.isLoading ? 'Calculando...' : 'Calcular Salário Líquido',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ],
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: CalculatorAccentColors.labor,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  elevation: 0,
+                  disabledBackgroundColor:
+                      CalculatorAccentColors.labor.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+
+            // Error Message
+            if (state.errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.red.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        state.errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
-          ),
+
+            // Result Card or Empty State
+            const SizedBox(height: 32),
+            if (state.calculation != null)
+              NetSalaryResultCard(calculation: state.calculation!)
+            else
+              _buildEmptyState(context),
+          ],
         ),
       ),
-      resultCard: state.calculation != null
-          ? NetSalaryResultCard(calculation: state.calculation!)
-          : _buildEmptyState(context),
     );
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Card(
-      elevation: 0,
-      color: Theme.of(context)
-          .colorScheme
-          .surfaceContainerHighest
-          .withValues(alpha: 0.3),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+    return Container(
+      padding: const EdgeInsets.all(48),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
         ),
       ),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.calculate_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.calculate_outlined,
+            size: 64,
+            color: CalculatorAccentColors.labor.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'O resultado aparecerá aqui',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 16),
-            Text(
-              'O resultado aparecerá aqui',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Preencha os dados acima e clique em calcular.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 14,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Preencha os dados ao lado e clique em calcular.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -160,103 +171,5 @@ class _NetSalaryCalculatorPageState
 
   void _handleCalculate(CalculateNetSalaryParams params) {
     ref.read(netSalaryCalculatorProvider.notifier).calculate(params);
-  }
-
-  void _showInfo(BuildContext context) {
-    // Check if educational content exists
-    if (CalculatorContentRepository.hasContent(
-        '/calculators/financial/net-salary')) {
-      _showEducationalDialog(context);
-    } else {
-      _showSimpleInfoDialog(context);
-    }
-  }
-
-  void _showEducationalDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
-          child: Column(
-            children: [
-              // Dialog Header
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(28),
-                    topRight: Radius.circular(28),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.school_outlined,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Saiba Mais',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer,
-                            ),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => Navigator.of(dialogContext).pop(),
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Educational Content
-              Expanded(
-                child: EducationalTabs(
-                  content: CalculatorContentRepository.getContent(
-                      '/calculators/financial/net-salary')!,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showSimpleInfoDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Sobre o Salário Líquido'),
-        content: const SingleChildScrollView(
-          child: Text(
-            'O salário líquido é o valor que você efetivamente recebe após os descontos obrigatórios e voluntários.\n\n'
-            'Descontos obrigatórios:\n'
-            '• INSS: Calculado progressivamente até 14% sobre o salário bruto\n'
-            '• IRRF: Imposto de Renda Retido na Fonte, calculado após INSS\n\n'
-            'Descontos voluntários:\n'
-            '• Vale Transporte: Máximo 6% do salário bruto\n'
-            '• Plano de Saúde: Valor definido pela empresa\n'
-            '• Outros descontos: Empréstimos, adiantamentos, etc.\n\n'
-            'Dependentes reduzem a base de cálculo do IRRF em R\$ 189,59 cada.\n\n'
-            'Este cálculo é baseado nas tabelas de 2024 do governo federal.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
   }
 }

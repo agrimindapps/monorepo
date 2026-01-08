@@ -1,6 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/game_page_layout.dart';
 import '../providers/campo_minado_game_notifier.dart';
 import '../widgets/game_header_widget.dart';
 import '../game/minesweeper_game.dart';
@@ -80,59 +81,44 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
       },
     );
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFC6C6C6),
-      appBar: AppBar(
-        title: const Text(
-          'Campo Minado',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+    return GamePageLayout(
+      title: 'Campo Minado',
+      accentColor: const Color(0xFF607D8B),
+      instructions: 'Encontre todas as minas sem detonar!\n\n'
+          '👆 Toque para revelar célula\n'
+          '👆🏻 Toque longo para bandeira\n'
+          '🔢 Números = minas adjacentes\n'
+          '🚩 Marque todas as minas para vencer!',
+      maxGameWidth: 600,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events, color: Colors.white),
+          onPressed: () => _showAchievementsDialog(context),
+          tooltip: 'Conquistas',
         ),
-        backgroundColor: const Color(0xFFC6C6C6),
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.emoji_events),
-            onPressed: () => _showAchievementsDialog(context),
-            tooltip: 'Conquistas',
-          ),
-          IconButton(
-            icon: const Icon(Icons.help_outline),
-            onPressed: () => _showHelpDialog(context),
-            tooltip: 'Como Jogar',
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () => _showSettingsDialog(context),
-            tooltip: 'Configurações',
+        IconButton(
+          icon: const Icon(Icons.tune, color: Colors.white),
+          onPressed: () => _showSettingsDialog(context),
+          tooltip: 'Dificuldade',
+        ),
+      ],
+      child: Column(
+        children: [
+          // Game header with controls and info
+          const GameHeaderWidget(),
+
+          const SizedBox(height: 16),
+
+          // Main minefield grid
+          Expanded(
+            child: Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: GameWidget(game: _game),
+              ),
+            ),
           ),
         ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Game header with controls and info
-              const GameHeaderWidget(),
-
-              const SizedBox(height: 16),
-
-              // Main minefield grid
-              Expanded(
-                child: Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: GameWidget(game: _game),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -142,56 +128,6 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
       context: context,
       barrierDismissible: false,
       builder: (context) => CampoMinadoGameOverDialogAdapter(status: status),
-    );
-  }
-
-  void _showHelpDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Como Jogar'),
-          content: const SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '🎯 Objetivo',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                SizedBox(height: 4),
-                Text('Encontre todas as minas sem detonar nenhuma.'),
-                SizedBox(height: 12),
-                Text(
-                  '🎮 Controles',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                SizedBox(height: 4),
-                Text('• Toque para revelar uma célula'),
-                Text('• Toque longo para marcar/desmarcar mina'),
-                Text('• Toque duplo em números revelados para revelar vizinhos seguros'),
-                SizedBox(height: 12),
-                Text(
-                  '💡 Dicas',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                SizedBox(height: 4),
-                Text('• Números mostram quantas minas estão adjacentes'),
-                Text('• Use bandeiras para marcar minas suspeitas'),
-                Text('• Comece pelos cantos e bordas'),
-                Text('• Use o toque duplo para jogar mais rápido'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Entendi!'),
-            ),
-          ],
-        );
-      },
     );
   }
 

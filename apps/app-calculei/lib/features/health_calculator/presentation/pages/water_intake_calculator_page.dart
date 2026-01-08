@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/water_intake_calculator.dart';
 
 /// Página da calculadora de Necessidade Hídrica
@@ -31,195 +29,132 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.water_drop,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Hidratação adequada',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'A quantidade ideal de água varia conforme seu peso, '
-                            'nível de atividade física e clima. A fórmula base é '
-                            '35ml por kg de peso corporal.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Seus dados',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Weight input
-                            StandardInputField(
-                              label: 'Peso',
-                              controller: _weightController,
-                              suffix: 'kg',
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d*\.?\d*'),
-                                ),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Obrigatório';
-                                }
-                                final num = double.tryParse(value);
-                                if (num == null || num <= 0 || num > 500) {
-                                  return 'Valor inválido';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Activity Level
-                            Text(
-                              'Nível de atividade física',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: WaterActivityLevel.values.map((level) {
-                                final isSelected = _activityLevel == level;
-                                return ChoiceChip(
-                                  label: Text(
-                                    WaterIntakeCalculator.getActivityDescription(
-                                        level),
-                                  ),
-                                  selected: isSelected,
-                                  onSelected: (_) =>
-                                      setState(() => _activityLevel = level),
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Climate
-                            Text(
-                              'Clima',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: ClimateType.values.map((climate) {
-                                final isSelected = _climate == climate;
-                                return ChoiceChip(
-                                  label: Text(
-                                    WaterIntakeCalculator.getClimateDescription(
-                                        climate),
-                                  ),
-                                  selected: isSelected,
-                                  onSelected: (_) =>
-                                      setState(() => _climate = climate),
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null) _WaterResultCard(result: _result!),
+    return CalculatorPageLayout(
+      title: 'Ingestão de Água',
+      subtitle: 'Calcule sua hidratação diária',
+      icon: Icons.water_drop,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: 'Digite seu peso e selecione seu nível de atividade física e clima. '
+          'O cálculo base usa 35ml por kg de peso, ajustado conforme suas condições.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              // Share result
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Weight input
+              _DarkInputField(
+                label: 'Peso',
+                controller: _weightController,
+                suffix: 'kg',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Obrigatório';
+                  }
+                  final num = double.tryParse(value);
+                  if (num == null || num <= 0 || num > 500) {
+                    return 'Valor inválido';
+                  }
+                  return null;
+                },
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Activity Level
+              Text(
+                'Nível de atividade física',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: WaterActivityLevel.values.map((level) {
+                  final isSelected = _activityLevel == level;
+                  return _ActivityChip(
+                    label: WaterIntakeCalculator.getActivityDescription(level),
+                    isSelected: isSelected,
+                    onTap: () => setState(() => _activityLevel = level),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Climate
+              Text(
+                'Clima',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ClimateType.values.map((climate) {
+                  final isSelected = _climate == climate;
+                  return _ActivityChip(
+                    label: WaterIntakeCalculator.getClimateDescription(climate),
+                    isSelected: isSelected,
+                    onTap: () => setState(() => _climate = climate),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular Hidratação',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _WaterResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -227,7 +162,9 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = WaterIntakeCalculator.calculate(
       weightKg: double.parse(_weightController.text),
@@ -239,6 +176,139 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
   }
 }
 
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dark themed activity/climate chip selector
+class _ActivityChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ActivityChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    const accentColor = CalculatorAccentColors.health;
+
+    return Material(
+      color: isSelected 
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
+              width: isSelected ? 2 : 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontSize: 14,
+              color: isSelected
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _WaterResultCard extends StatelessWidget {
   final WaterIntakeResult result;
 
@@ -246,187 +316,204 @@ class _WaterResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const resultColor = CalculatorAccentColors.health;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: resultColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Main result - daily liters
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  resultColor.withValues(alpha: 0.3),
+                  resultColor.withValues(alpha: 0.15),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: resultColor, width: 2),
+            ),
+            child: Column(
               children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
+                const Icon(
+                  Icons.water_drop,
+                  color: resultColor,
+                  size: 48,
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatWaterIntakeCalculation(
-                    baseLiters: result.baseLiters,
-                    adjustedLiters: result.adjustedLiters,
-                    glasses: result.glassesOf250ml,
-                    bottles: result.bottlesOf500ml,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Main result
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.blue.shade300,
-                    Colors.blue.shade600,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.water_drop,
-                    color: Colors.white,
-                    size: 48,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${result.adjustedLiters.toStringAsFixed(1)}L',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                  ),
-                  Text(
-                    'por dia',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Details
-            Row(
-              children: [
-                Expanded(
-                  child: _WaterDetailCard(
-                    icon: Icons.local_drink,
-                    value: '${result.glassesOf250ml}',
-                    label: 'copos de 250ml',
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _WaterDetailCard(
-                    icon: Icons.sports_bar,
-                    value: '${result.bottlesOf500ml}',
-                    label: 'garrafas de 500ml',
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Base vs Adjusted
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Column(
-                    children: [
-                      Text(
-                        'Base',
-                        style: TextStyle(
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        '${result.baseLiters}L',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: colorScheme.primary,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        'Ajustado',
-                        style: TextStyle(
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        '${result.adjustedLiters}L',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Tips
-            Text(
-              'Dicas de hidratação',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  '${result.adjustedLiters.toStringAsFixed(1)}L',
+                  style: const TextStyle(
+                    fontSize: 48,
                     fontWeight: FontWeight.bold,
+                    color: resultColor,
                   ),
+                ),
+                Text(
+                  'por dia',
+                  style: TextStyle(
+                    color: resultColor.withValues(alpha: 0.9),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            ...WaterIntakeCalculator.getHydrationTips().map(
-              (tip) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Details - glasses and bottles
+          Row(
+            children: [
+              Expanded(
+                child: _WaterDetailCard(
+                  icon: Icons.local_drink,
+                  value: '${result.glassesOf250ml}',
+                  label: 'copos de 250ml',
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _WaterDetailCard(
+                  icon: Icons.sports_bar,
+                  value: '${result.bottlesOf500ml}',
+                  label: 'garrafas de 500ml',
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Base vs Adjusted comparison
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      'Base',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      '${result.baseLiters}L',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+                const Icon(
+                  Icons.arrow_forward,
+                  color: resultColor,
+                ),
+                Column(
+                  children: [
+                    Text(
+                      'Ajustado',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.6),
+                        fontSize: 12,
+                      ),
+                    ),
+                    Text(
+                      '${result.adjustedLiters}L',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: resultColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Tips section
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
                     Icon(
-                      Icons.check_circle_outline,
-                      size: 16,
-                      color: Colors.blue,
+                      Icons.tips_and_updates_outlined,
+                      size: 18,
+                      color: Colors.amber.withValues(alpha: 0.9),
                     ),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        tip,
-                        style: const TextStyle(fontSize: 13),
+                    Text(
+                      'Dicas de hidratação',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 10),
+                ...WaterIntakeCalculator.getHydrationTips().map(
+                  (tip) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 16,
+                          color: resultColor.withValues(alpha: 0.8),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            tip,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -445,28 +532,31 @@ class _WaterDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const accentColor = CalculatorAccentColors.health;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.1),
+        color: accentColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
-          Icon(icon, color: Colors.blue),
+          Icon(icon, color: accentColor),
           const SizedBox(height: 8),
           Text(
             value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
+            style: const TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: accentColor,
+            ),
           ),
           Text(
             label,
             style: TextStyle(
-              color: Colors.blue.withValues(alpha: 0.8),
+              color: accentColor.withValues(alpha: 0.8),
               fontSize: 12,
             ),
             textAlign: TextAlign.center,

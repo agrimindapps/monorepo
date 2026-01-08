@@ -8,10 +8,7 @@ import '../../domain/entities/game_entity.dart';
 class GameCardFeatured extends StatefulWidget {
   final GameEntity game;
 
-  const GameCardFeatured({
-    super.key,
-    required this.game,
-  });
+  const GameCardFeatured({super.key, required this.game});
 
   @override
   State<GameCardFeatured> createState() => _GameCardFeaturedState();
@@ -39,7 +36,9 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: game.primaryColor.withValues(alpha: _isHovered ? 0.6 : 0.4),
+                  color: game.primaryColor.withValues(
+                    alpha: _isHovered ? 0.6 : 0.4,
+                  ),
                   blurRadius: _isHovered ? 30 : 15,
                   offset: const Offset(0, 8),
                 ),
@@ -50,20 +49,40 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Background gradient
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          game.primaryColor.withValues(alpha: 0.9),
-                          game.secondaryColor,
-                          game.secondaryColor.withValues(alpha: 0.8),
-                        ],
+                  // Background image and gradient
+                  if (game.assetPath != null)
+                    Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(game.assetPath!, fit: BoxFit.cover),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Colors.black.withValues(alpha: 0.6),
+                                Colors.black.withValues(alpha: 0.8),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            game.primaryColor.withValues(alpha: 0.9),
+                            game.secondaryColor,
+                            game.secondaryColor.withValues(alpha: 0.8),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
 
                   // Decorative circles
                   Positioned(
@@ -170,7 +189,9 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                                   borderRadius: BorderRadius.circular(25),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.2),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.2,
+                                      ),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     ),
@@ -201,36 +222,44 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
                         ),
 
                         // Right side - Icon
-                        Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: Hero(
-                              tag: 'game_icon_featured_${game.id}',
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(30),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withValues(alpha: 0.15),
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.white.withValues(alpha: 0.3),
-                                        width: 2,
-                                      ),
+                        if (game.assetPath == null)
+                          Expanded(
+                            flex: 2,
+                            child: Center(
+                              child: Hero(
+                                tag: 'game_icon_featured_${game.id}',
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(
+                                      sigmaX: 10,
+                                      sigmaY: 10,
                                     ),
-                                    child: Icon(
-                                      game.icon,
-                                      size: 60,
-                                      color: Colors.white,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(30),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.15,
+                                        ),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.3,
+                                          ),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        game.icon,
+                                        size: 60,
+                                        color: Colors.white,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -263,11 +292,7 @@ class _FeaturedBadge extends StatelessWidget {
   final IconData? icon;
   final Color color;
 
-  const _FeaturedBadge({
-    required this.text,
-    this.icon,
-    required this.color,
-  });
+  const _FeaturedBadge({required this.text, this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {

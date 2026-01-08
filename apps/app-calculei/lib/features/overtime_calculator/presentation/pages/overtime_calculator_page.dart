@@ -1,22 +1,13 @@
-// Flutter imports:
-// Project imports:
-import 'package:app_calculei/core/style/shadcn_style.dart';
 import 'package:flutter/material.dart';
-// Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../providers/overtime_calculator_provider.dart';
 import '../widgets/overtime_input_form.dart';
 import '../widgets/overtime_result_card.dart';
 
 /// Page for calculating overtime (Horas Extras)
-///
-/// Follows Clean Architecture:
-/// - Presentation layer only
-/// - Uses Riverpod for state management
-/// - Delegates business logic to use cases
 class OvertimeCalculatorPage extends ConsumerStatefulWidget {
   const OvertimeCalculatorPage({super.key});
 
@@ -34,136 +25,112 @@ class _OvertimeCalculatorPageState
   Widget build(BuildContext context) {
     final state = ref.watch(overtimeCalculatorProvider);
 
-    return Scaffold(
-      appBar: CalculatorAppBar(
-        actions: [InfoAppBarAction(onPressed: () => _showInfo(context))],
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Page Title
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: Text(
-                      'Calculadora de Horas Extras',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  // Input Form Card
-                  Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Calcule suas horas extras',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: ShadcnStyle.textColor,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Input Form
-                          OvertimeInputForm(
-                            key: _formKeyId,
-                            formKey: _formKey,
-                            onCalculate: _handleCalculate,
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Action Buttons
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton.icon(
-                                onPressed: _handleClear,
-                                icon: const Icon(Icons.clear),
-                                label: const Text('Limpar'),
-                                style: ShadcnStyle.textButtonStyle,
-                              ),
-                              const SizedBox(width: 16),
-                              ElevatedButton.icon(
-                                onPressed: state.isLoading
-                                    ? null
-                                    : _handleSubmit,
-                                icon: state.isLoading
-                                    ? const SizedBox(
-                                        width: 16,
-                                        height: 16,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
-                                      )
-                                    : const Icon(Icons.calculate),
-                                label: Text(
-                                  state.isLoading
-                                      ? 'Calculando...'
-                                      : 'Calcular',
-                                ),
-                                style: ShadcnStyle.primaryButtonStyle,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Error Message
-                  if (state.errorMessage != null) ...[
-                    const SizedBox(height: 16),
-                    Card(
-                      color: Colors.red.shade50,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.error, color: Colors.red),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                state.errorMessage!,
-                                style: const TextStyle(color: Colors.red),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-
-                  // Result Card
-                  if (state.calculation != null) ...[
-                    const SizedBox(height: 24),
-                    AnimatedOpacity(
-                      opacity: state.calculation != null ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 500),
-                      child: OvertimeResultCard(
-                        calculation: state.calculation!,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
+    return CalculatorPageLayout(
+      title: 'Calculadora de Horas Extras',
+      subtitle: 'Horas Trabalhadas + Adicionais',
+      icon: Icons.access_time_outlined,
+      accentColor: CalculatorAccentColors.labor,
+      categoryName: 'Trabalhista',
+      instructions: 'Calcule o valor das horas extras trabalhadas. '
+          'Informe seu salário base, horas trabalhadas e os adicionais aplicáveis. '
+          'O cálculo inclui DSR, reflexos e descontos.',
+      maxContentWidth: 700,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Input Form
+            OvertimeInputForm(
+              key: _formKeyId,
+              formKey: _formKey,
+              onCalculate: _handleCalculate,
             ),
-          ),
+
+            const SizedBox(height: 24),
+
+            // Action Buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton.icon(
+                  onPressed: _handleClear,
+                  icon: const Icon(Icons.clear),
+                  label: const Text('Limpar'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white.withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: state.isLoading ? null : _handleSubmit,
+                    icon: state.isLoading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.calculate_rounded),
+                    label: Text(
+                      state.isLoading ? 'Calculando...' : 'Calcular',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CalculatorAccentColors.labor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      elevation: 0,
+                      disabledBackgroundColor: CalculatorAccentColors.labor
+                          .withValues(alpha: 0.5),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Error Message
+            if (state.errorMessage != null) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.red.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.error_outline, color: Colors.red),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        state.errorMessage!,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Result Card
+            if (state.calculation != null) ...[
+              const SizedBox(height: 32),
+              OvertimeResultCard(calculation: state.calculation!),
+            ],
+          ],
         ),
       ),
     );
@@ -184,35 +151,5 @@ class _OvertimeCalculatorPageState
       _formKeyId = UniqueKey();
     });
     ref.read(overtimeCalculatorProvider.notifier).clearCalculation();
-  }
-
-  void _showInfo(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Sobre Horas Extras'),
-        content: const SingleChildScrollView(
-          child: Text(
-            'Horas extras são as horas trabalhadas além da jornada normal de trabalho.\n\n'
-            'Tipos de horas extras:\n'
-            '• 50%: Dias normais (segunda a sábado até 22h)\n'
-            '• 100%: Domingos, feriados e noturnas\n\n'
-            'Adicional noturno: Geralmente 20% (22h às 5h)\n\n'
-            'Reflexos das horas extras:\n'
-            '• DSR: Descanso Semanal Remunerado\n'
-            '• Férias: 1/3 do valor das horas extras\n'
-            '• 13º salário: 1/12 por mês trabalhado\n\n'
-            'Os valores calculados incluem os descontos de INSS e IRRF sobre o total bruto.\n\n'
-            'Este cálculo é baseado na legislação trabalhista brasileira de 2024.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Fechar'),
-          ),
-        ],
-      ),
-    );
   }
 }

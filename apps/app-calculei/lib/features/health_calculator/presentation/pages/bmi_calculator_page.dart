@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/bmi_calculator.dart';
 
 /// Página da calculadora de IMC (Índice de Massa Corporal)
@@ -31,193 +29,134 @@ class _BmiCalculatorPageState extends State<BmiCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Calculadora de IMC',
+      subtitle: 'Índice de Massa Corporal',
+      icon: Icons.monitor_weight_outlined,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: 'Digite seu peso em kg e altura em cm para calcular seu IMC. '
+          'O resultado mostrará sua classificação e faixa de peso ideal.',
+      maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              // Share result
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Gender selection
+              Text(
+                'Selecione o gênero',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.monitor_weight_outlined,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Índice de Massa Corporal',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'O IMC é uma medida internacional usada para calcular '
-                            'se uma pessoa está no peso ideal. A fórmula considera '
-                            'peso e altura, com classificações diferentes por gênero.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Masculino',
+                      icon: Icons.male,
+                      isSelected: _gender == Gender.male,
+                      onTap: () => setState(() => _gender = Gender.male),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Seus dados',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Gender selection
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Masculino',
-                                    icon: Icons.male,
-                                    isSelected: _gender == Gender.male,
-                                    onTap: () =>
-                                        setState(() => _gender = Gender.male),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Feminino',
-                                    icon: Icons.female,
-                                    isSelected: _gender == Gender.female,
-                                    onTap: () =>
-                                        setState(() => _gender = Gender.female),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Inputs Row
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Peso',
-                                    controller: _weightController,
-                                    suffix: 'kg',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0 || num > 500) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Altura',
-                                    controller: _heightController,
-                                    suffix: 'cm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null || num < 50 || num > 300) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular IMC',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Feminino',
+                      icon: Icons.female,
+                      isSelected: _gender == Gender.female,
+                      onTap: () => setState(() => _gender = Gender.female),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null) _BmiResultCard(result: _result!),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Input fields
+              Row(
+                children: [
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Peso',
+                      controller: _weightController,
+                      suffix: 'kg',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Obrigatório';
+                        final num = double.tryParse(value);
+                        if (num == null || num <= 0 || num > 500) return 'Valor inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Altura',
+                      controller: _heightController,
+                      suffix: 'cm',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Obrigatório';
+                        final num = int.tryParse(value);
+                        if (num == null || num < 50 || num > 300) return 'Valor inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular IMC',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _BmiResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -237,6 +176,88 @@ class _BmiCalculatorPageState extends State<BmiCalculatorPage> {
   }
 }
 
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _GenderButton extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -252,24 +273,26 @@ class _GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = CalculatorAccentColors.health;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: isSelected 
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
             children: [
@@ -277,17 +300,18 @@ class _GenderButton extends StatelessWidget {
                 icon,
                 size: 32,
                 color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    ? accentColor
+                    : Colors.white.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 label,
                 style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 14,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -315,142 +339,136 @@ class _BmiResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final classificationColor = _getClassificationColor(result.classification);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: classificationColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        children: [
+          // IMC Value
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: classificationColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: classificationColor, width: 2),
+            ),
+            child: Column(
               children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
                 Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                  result.bmi.toStringAsFixed(1),
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: classificationColor,
+                  ),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatBmiCalculation(
-                    bmi: result.bmi,
-                    classification: result.classificationText,
-                    minIdealWeight: result.minIdealWeight,
-                    maxIdealWeight: result.maxIdealWeight,
+                Text(
+                  'IMC',
+                  style: TextStyle(
+                    color: classificationColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // IMC Value
-            Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                decoration: BoxDecoration(
-                  color: classificationColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: classificationColor, width: 2),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      result.bmi.toStringAsFixed(1),
-                      style:
-                          Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: classificationColor,
-                              ),
-                    ),
-                    Text(
-                      'IMC',
-                      style: TextStyle(
-                        color: classificationColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+          const SizedBox(height: 16),
+
+          // Classification chip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: classificationColor,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              result.classificationText,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontSize: 14,
               ),
             ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-            // Classification
-            Center(
-              child: Chip(
-                label: Text(
-                  result.classificationText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+          // Ideal weight range
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.straighten,
+                  size: 20,
+                  color: Colors.white.withValues(alpha: 0.7),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Peso ideal: ${result.minIdealWeight} - ${result.maxIdealWeight} kg',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
-                backgroundColor: classificationColor,
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Recommendation
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Ideal weight range
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.straighten, size: 20),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Peso ideal: ${result.minIdealWeight} - ${result.maxIdealWeight} kg',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Recommendation
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.recommendation,
-                      style: TextStyle(color: colorScheme.onSecondaryContainer),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 20,
+                  color: Colors.amber.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    result.recommendation,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      height: 1.4,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // IMC Scale
-            _BmiScaleIndicator(currentBmi: result.bmi),
-          ],
-        ),
+          // IMC Scale
+          _BmiScaleIndicator(currentBmi: result.bmi),
+        ],
       ),
     );
   }
@@ -468,33 +486,21 @@ class _BmiScaleIndicator extends StatelessWidget {
       children: [
         Text(
           'Escala de IMC',
-          style: Theme.of(context).textTheme.titleSmall,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(6),
           child: Row(
             children: [
-              _ScaleSegment(
-                label: '<18.5',
-                color: Colors.orange,
-                flex: 185,
-              ),
-              _ScaleSegment(
-                label: '18.5-24.9',
-                color: Colors.green,
-                flex: 64,
-              ),
-              _ScaleSegment(
-                label: '25-29.9',
-                color: Colors.amber,
-                flex: 50,
-              ),
-              _ScaleSegment(
-                label: '30+',
-                color: Colors.red,
-                flex: 100,
-              ),
+              _ScaleSegment(label: '<18.5', color: Colors.orange, flex: 185),
+              _ScaleSegment(label: '18.5-24.9', color: Colors.green, flex: 64),
+              _ScaleSegment(label: '25-29.9', color: Colors.amber, flex: 50),
+              _ScaleSegment(label: '30+', color: Colors.red, flex: 100),
             ],
           ),
         ),
@@ -519,7 +525,7 @@ class _ScaleSegment extends StatelessWidget {
     return Expanded(
       flex: flex,
       child: Container(
-        height: 24,
+        height: 28,
         color: color,
         child: Center(
           child: Text(

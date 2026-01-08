@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../ping_pong_game.dart';
 
 class Paddle extends PositionComponent
-    with CollisionCallbacks, HasGameRef<PingPongGame> {
+    with CollisionCallbacks, HasGameReference<PingPongGame> {
   final bool isPlayer;
 
   Paddle({
@@ -39,12 +39,12 @@ class Paddle extends PositionComponent
 
   void moveUp(double dt, double speed) {
     position.y -= speed * dt;
-    clampPosition(gameRef.size.y);
+    clampPosition(game.size.y);
   }
 
   void moveDown(double dt, double speed) {
     position.y += speed * dt;
-    clampPosition(gameRef.size.y);
+    clampPosition(game.size.y);
   }
 
   void clampPosition(double screenHeight) {
@@ -57,6 +57,6 @@ class Paddle extends PositionComponent
   }
 
   void reset() {
-    position.y = gameRef.size.y / 2 - size.y / 2;
+    position.y = game.size.y / 2 - size.y / 2;
   }
 }

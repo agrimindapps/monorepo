@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/enums.dart';
 import '../game/game_2048.dart';
 import '../providers/game_2048_notifier.dart';
@@ -65,89 +66,75 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('2048'),
-        centerTitle: true,
-        backgroundColor: const Color(0xFF8F7A66),
-        foregroundColor: Colors.white,
-        actions: [
-          PopupMenuButton<BoardSize>(
-            icon: const Icon(Icons.grid_4x4),
-            tooltip: 'Tamanho do tabuleiro',
-            onSelected: (size) {
-              notifier.changeBoardSize(size);
-              // Game will be re-initialized in build
-            },
-            itemBuilder: (context) => BoardSize.values.map((size) {
-              return PopupMenuItem(
-                value: size,
-                child: Row(
-                  children: [
-                    if (gameState.boardSize == size)
-                      const Icon(Icons.check, size: 18),
-                    if (gameState.boardSize == size) const SizedBox(width: 8),
-                    Text(size.label),
-                  ],
-                ),
-              );
-            }).toList(),
+    return GamePageLayout(
+      title: '2048',
+      accentColor: const Color(0xFFEDC22E),
+      instructions: 'Deslize para combinar números!\n\n'
+          '👆 Deslize em qualquer direção\n'
+          '🔢 Números iguais se combinam\n'
+          '🎯 Alcance 2048 para vencer!',
+      maxGameWidth: 500,
+      actions: [
+        PopupMenuButton<BoardSize>(
+          icon: const Icon(Icons.grid_4x4, color: Colors.white),
+          tooltip: 'Tamanho do tabuleiro',
+          onSelected: (size) {
+            notifier.changeBoardSize(size);
+          },
+          itemBuilder: (context) => BoardSize.values.map((size) {
+            return PopupMenuItem(
+              value: size,
+              child: Row(
+                children: [
+                  if (gameState.boardSize == size)
+                    const Icon(Icons.check, size: 18),
+                  if (gameState.boardSize == size) const SizedBox(width: 8),
+                  Text(size.label),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          tooltip: 'Reiniciar',
+          onPressed: () => _showRestartConfirmation(context),
+        ),
+      ],
+      child: Column(
+        children: [
+          // Controls (score, moves, restart)
+          GameControlsWidget(
+            score: gameState.score,
+            bestScore: gameState.bestScore,
+            moves: gameState.moves,
+            onRestart: () => _showRestartConfirmation(context),
           ),
-        ],
-      ),
-      backgroundColor: const Color(0xFFFAF8EF),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: Column(
-              children: [
-                // Controls (score, moves, restart)
-                GameControlsWidget(
-                  score: gameState.score,
-                  bestScore: gameState.bestScore,
-                  moves: gameState.moves,
-                  onRestart: () => _showRestartConfirmation(context),
-                ),
 
-                const SizedBox(height: 24),
+          const SizedBox(height: 16),
 
-                // Instructions
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    'Deslize para combinar números e alcançar 2048!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey[700],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Game grid with Flame
-                Expanded(
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: GameWidget(
+          // Game grid with Flame
+          Expanded(
+            child: Center(
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: _game != null
+                      ? GameWidget(
                           game: _game!,
-                          key: ValueKey(gameState.boardSize), // Force rebuild on resize
+                          key: ValueKey(gameState.boardSize),
+                        )
+                      : const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFFEDC22E),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ),
-
-                const SizedBox(height: 24),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

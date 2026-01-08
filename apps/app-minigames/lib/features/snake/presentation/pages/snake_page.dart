@@ -9,6 +9,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
 
+// Core imports:
+import '../../../../core/widgets/game_page_layout.dart';
+
 // Presentation imports:
 import '../providers/snake_game_notifier.dart';
 import '../game/snake_game.dart';
@@ -16,7 +19,6 @@ import '../game/snake_game.dart';
 // Domain imports:
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/power_up.dart';
-import '../../../../widgets/shared/responsive_game_container.dart';
 
 /// Snake game page with Neon Arcade theme
 class SnakePage extends ConsumerStatefulWidget {
@@ -68,157 +70,117 @@ class _SnakePageState extends ConsumerState<SnakePage> {
     final notifier = ref.read(snakeGameProvider.notifier);
     final highScore = notifier.highScore;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF121212), // Dark background
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'NEON SNAKE',
-          style: TextStyle(
-            fontFamily: 'Orbitron', // Assuming a techy font, or fallback
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2,
+    return GamePageLayout(
+      title: 'Neon Snake',
+      accentColor: Colors.greenAccent,
+      instructions: 'Coma para crescer!\n\n'
+          '🍎 Coma as frutas\n'
+          '⚡ Colete power-ups\n'
+          '🚫 Não bata nas paredes\n'
+          '🐍 Não morda a si mesmo!',
+      maxGameWidth: 600,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          onPressed: () {
+            HapticFeedback.mediumImpact();
+            _game.restartGame();
+          },
+          tooltip: 'Reiniciar',
+        ),
+        IconButton(
+          icon: Icon(
+            !_game.isPlaying ? Icons.play_arrow : Icons.pause,
             color: Colors.white,
-            shadows: [
-              Shadow(
-                color: Colors.greenAccent,
-                blurRadius: 10,
+          ),
+          onPressed: () {
+            HapticFeedback.selectionClick();
+            if (_game.isPlaying) {
+              _game.pauseGame();
+            } else {
+              _game.startGame();
+            }
+            setState(() {});
+          },
+          tooltip: 'Pausar/Continuar',
+        ),
+      ],
+      child: Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: GameWidget(game: _game),
+          ),
+        
+          Column(
+            children: [
+              // HUD (Heads Up Display)
+              Padding(
+                padding: const EdgeInsets.all(12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildGlassScoreCard('SCORE', _currentScore.toString(), Colors.greenAccent),
+                    _buildGlassScoreCard('BEST', highScore.toString(), Colors.amberAccent),
+                  ],
+                ),
               ),
+              
+              // Active Power-Ups Bar
+              if (_activePowerUps.isNotEmpty)
+                _buildActivePowerUpsBar(_activePowerUps),
+
+              const Spacer(),
+
+              // Mobile Controls
+              if (MediaQuery.of(context).size.width < 800)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildMobileControls(_game),
+                ),
             ],
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              HapticFeedback.mediumImpact();
-              _game.restartGame();
-            },
-            tooltip: 'Reiniciar',
-          ),
-          IconButton(
-            icon: Icon(
-              !_game.isPlaying
-                  ? Icons.play_arrow
-                  : Icons.pause,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              HapticFeedback.selectionClick();
-              if (_game.isPlaying) {
-                _game.pauseGame();
-              } else {
+
+          // Overlays
+          if (!_game.isPlaying && !_game.isGameOver && _currentScore == 0)
+            _buildOverlay(
+              context,
+              title: 'NEON SNAKE',
+              buttonText: 'INICIAR',
+              onPressed: () {
+                HapticFeedback.mediumImpact();
                 _game.startGame();
-              }
-              setState(() {});
-            },
-            tooltip: 'Pausar/Continuar',
-          ),
+                setState(() {});
+              },
+            ),
+
+          if (_game.isGameOver)
+            _buildOverlay(
+              context,
+              title: 'GAME OVER',
+              subtitle: 'SCORE: $_currentScore',
+              buttonText: 'TENTAR NOVAMENTE',
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                _game.restartGame();
+                setState(() {});
+              },
+              isError: true,
+            ),
+
+          if (!_game.isPlaying && !_game.isGameOver && _currentScore > 0)
+            _buildOverlay(
+              context,
+              title: 'PAUSADO',
+              buttonText: 'CONTINUAR',
+              onPressed: () {
+                HapticFeedback.selectionClick();
+                _game.startGame();
+                setState(() {});
+              },
+            ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            center: Alignment.center,
-            radius: 1.5,
-            colors: [
-              Color(0xFF1A1A2E),
-              Color(0xFF0F0F1A),
-            ],
-          ),
-        ),
-        child: ResponsiveGameContainer(
-          maxWidth: 600,
-          padding: EdgeInsets.zero,
-          child: Stack(
-            children: [
-              GameWidget(
-                game: _game,
-              ),
-            
-            Column(
-              children: [
-                SizedBox(height: MediaQuery.of(context).padding.top + 60),
-                
-                // HUD (Heads Up Display)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildGlassScoreCard(
-                        'SCORE', 
-                        _currentScore.toString(), 
-                        Colors.greenAccent,
-                      ),
-                      _buildGlassScoreCard('BEST', highScore.toString(), Colors.amberAccent),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 10),
-
-                // Active Power-Ups Bar
-                if (_activePowerUps.isNotEmpty)
-                  _buildActivePowerUpsBar(_activePowerUps),
-
-                const Spacer(),
-
-                // Mobile Controls
-                if (MediaQuery.of(context).size.width < 800)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 32, top: 16),
-                    child: _buildMobileControls(_game),
-                  ),
-              ],
-            ),
-
-            // Overlays
-            if (!_game.isPlaying && !_game.isGameOver && _currentScore == 0)
-              _buildOverlay(
-                context,
-                title: 'NEON SNAKE',
-                buttonText: 'START GAME',
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  _game.startGame();
-                  setState(() {});
-                },
-              ),
-
-            if (_game.isGameOver)
-              _buildOverlay(
-                context,
-                title: 'GAME OVER',
-                subtitle: 'SCORE: $_currentScore',
-                buttonText: 'TRY AGAIN',
-                onPressed: () {
-                  HapticFeedback.mediumImpact();
-                  _game.restartGame();
-                  setState(() {});
-                },
-                color: Colors.black.withValues(alpha: 0.85),
-                isError: true,
-              ),
-
-            if (!_game.isPlaying && !_game.isGameOver && _currentScore > 0)
-              _buildOverlay(
-                context,
-                title: 'PAUSED',
-                buttonText: 'RESUME',
-                onPressed: () {
-                  HapticFeedback.selectionClick();
-                  _game.startGame();
-                  setState(() {});
-                },
-                color: Colors.black.withValues(alpha: 0.6),
-              ),
-          ],
-        ),
-      ),),
     );
   }
 
@@ -227,7 +189,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
     if (activeOnes.isEmpty) return const SizedBox.shrink();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: activeOnes
@@ -242,15 +204,15 @@ class _SnakePageState extends ConsumerState<SnakePage> {
 
   Widget _buildPowerUpIndicator(ActivePowerUp powerUp) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(10),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
         child: Container(
-          width: 48,
-          height: 48,
+          width: 40,
+          height: 40,
           decoration: BoxDecoration(
             color: powerUp.type.color.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
               color: powerUp.type.color.withValues(alpha: 0.5),
               width: 2,
@@ -259,22 +221,17 @@ class _SnakePageState extends ConsumerState<SnakePage> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // Circular progress indicator
               SizedBox(
-                width: 40,
-                height: 40,
+                width: 32,
+                height: 32,
                 child: CircularProgressIndicator(
                   value: powerUp.remainingPercent,
-                  strokeWidth: 3,
+                  strokeWidth: 2,
                   backgroundColor: Colors.white.withValues(alpha: 0.1),
                   valueColor: AlwaysStoppedAnimation<Color>(powerUp.type.color),
                 ),
               ),
-              // Emoji
-              Text(
-                powerUp.type.emoji,
-                style: const TextStyle(fontSize: 18),
-              ),
+              Text(powerUp.type.emoji, style: const TextStyle(fontSize: 14)),
             ],
           ),
         ),
@@ -284,14 +241,14 @@ class _SnakePageState extends ConsumerState<SnakePage> {
 
   Widget _buildGlassScoreCard(String label, String value, Color accentColor) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
           ),
           child: Column(
@@ -299,20 +256,19 @@ class _SnakePageState extends ConsumerState<SnakePage> {
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: accentColor,
-                  letterSpacing: 1.5,
+                  letterSpacing: 1,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 value,
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontFamily: 'Monospace',
                 ),
               ),
             ],
@@ -328,66 +284,56 @@ class _SnakePageState extends ConsumerState<SnakePage> {
     String? subtitle,
     required String buttonText,
     required VoidCallback onPressed,
-    Color? color,
     bool isError = false,
   }) {
-    return Container(
-      color: color ?? Colors.black.withValues(alpha: 0.7),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: isError ? Colors.redAccent : Colors.greenAccent,
-                  shadows: [
-                    BoxShadow(
-                      color: (isError ? Colors.redAccent : Colors.greenAccent).withValues(alpha: 0.5),
-                      blurRadius: 20,
-                    ),
-                  ],
-                  letterSpacing: 4,
-                ),
-              ),
-              if (subtitle != null) ...[
-                const SizedBox(height: 16),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.8),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
                 Text(
-                  subtitle,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w300,
+                  title,
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: isError ? Colors.redAccent : Colors.greenAccent,
+                    letterSpacing: 3,
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 12),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 20, color: Colors.white),
+                  ),
+                ],
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: onPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isError ? Colors.redAccent : Colors.greenAccent,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: Text(
+                    buttonText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ],
-              const SizedBox(height: 40),
-              ElevatedButton(
-                onPressed: onPressed,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isError ? Colors.redAccent : Colors.greenAccent,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 10,
-                  shadowColor: (isError ? Colors.redAccent : Colors.greenAccent).withValues(alpha: 0.5),
-                ),
-                child: Text(
-                  buttonText,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -402,7 +348,7 @@ class _SnakePageState extends ConsumerState<SnakePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildControlButton(Icons.keyboard_arrow_left, () => game.changeDirection(Direction.left)),
-            const SizedBox(width: 60),
+            const SizedBox(width: 50),
             _buildControlButton(Icons.keyboard_arrow_right, () => game.changeDirection(Direction.right)),
           ],
         ),
@@ -413,26 +359,19 @@ class _SnakePageState extends ConsumerState<SnakePage> {
 
   Widget _buildControlButton(IconData icon, VoidCallback onPressed) {
     return Container(
-      margin: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.1),
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.3),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: IconButton(
-        icon: Icon(icon, color: Colors.white, size: 32),
+        icon: Icon(icon, color: Colors.white, size: 28),
         onPressed: () {
           HapticFeedback.lightImpact();
           onPressed();
         },
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
       ),
     );
   }

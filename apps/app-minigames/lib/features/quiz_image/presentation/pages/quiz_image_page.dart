@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/enums.dart';
 import '../providers/quiz_image_notifier.dart';
 import '../widgets/question_card_widget.dart';
@@ -21,12 +22,16 @@ class QuizImagePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final gameStateAsync = ref.watch(quizImageProvider(difficulty));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quiz de Bandeiras'),
-        centerTitle: true,
-      ),
-      body: gameStateAsync.when(
+    return GamePageLayout(
+      title: 'Quiz de Bandeiras',
+      accentColor: const Color(0xFF3F51B5),
+      instructions: 'Identifique a bandeira!\n\n'
+          '🏳️ Observe a imagem da bandeira\n'
+          '⏱️ Tempo limitado por questão\n'
+          '✅ Escolha o país correto\n'
+          '🎯 10 questões por partida',
+      maxGameWidth: 700,
+      child: gameStateAsync.when(
         data: (gameState) {
           // Ready state - show start button
           if (gameState.gameState == GameStateEnum.ready) {
@@ -35,8 +40,7 @@ class QuizImagePage extends ConsumerWidget {
 
           // Game over state - show results
           if (gameState.gameState == GameStateEnum.gameOver) {
-            final notifier =
-                ref.read(quizImageProvider(difficulty).notifier);
+            final notifier = ref.read(quizImageProvider(difficulty).notifier);
             return Center(
               child: ResultsWidget(
                 score: gameState.correctAnswers,
@@ -51,33 +55,30 @@ class QuizImagePage extends ConsumerWidget {
           return _buildQuizView(context, ref, gameState);
         },
         loading: () => const Center(
-          child: CircularProgressIndicator(),
+          child: CircularProgressIndicator(color: Color(0xFF3F51B5)),
         ),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: Colors.red,
-              ),
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
               const SizedBox(height: 16),
-              Text(
+              const Text(
                 'Erro ao carregar jogo',
-                style: Theme.of(context).textTheme.titleLarge,
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               const SizedBox(height: 8),
               Text(
                 error.toString(),
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: const TextStyle(color: Colors.white70),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: () {
-                  ref.invalidate(quizImageProvider(difficulty));
-                },
+                onPressed: () => ref.invalidate(quizImageProvider(difficulty)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3F51B5),
+                ),
                 child: const Text('Tentar Novamente'),
               ),
             ],
@@ -92,39 +93,36 @@ class QuizImagePage extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.flag,
-            size: 100,
-            color: Colors.blue,
-          ),
+          const Icon(Icons.flag, size: 80, color: Color(0xFF3F51B5)),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             'Quiz de Bandeiras',
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             'Dificuldade: ${_getDifficultyName(difficulty)}',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Text(
             '10 questões • ${difficulty.timeLimit}s por questão',
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: const TextStyle(color: Colors.white54, fontSize: 14),
           ),
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () {
-              ref
-                  .read(quizImageProvider(difficulty).notifier)
-                  .startGame();
+              ref.read(quizImageProvider(difficulty).notifier).startGame();
             },
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 16,
+              backgroundColor: const Color(0xFF3F51B5),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
             ),
             child: const Row(
@@ -132,10 +130,7 @@ class QuizImagePage extends ConsumerWidget {
               children: [
                 Icon(Icons.play_arrow),
                 SizedBox(width: 8),
-                Text(
-                  'Começar',
-                  style: TextStyle(fontSize: 18),
-                ),
+                Text('Começar', style: TextStyle(fontSize: 18)),
               ],
             ),
           ),
@@ -144,11 +139,7 @@ class QuizImagePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildQuizView(
-    BuildContext context,
-    WidgetRef ref,
-    dynamic gameState,
-  ) {
+  Widget _buildQuizView(BuildContext context, WidgetRef ref, dynamic gameState) {
     final question = gameState.currentQuestion;
     final currentIndex = gameState.currentQuestionIndex;
     final totalQuestions = gameState.questions.length;
@@ -157,8 +148,11 @@ class QuizImagePage extends ConsumerWidget {
       children: [
         // Progress indicator
         Container(
-          padding: const EdgeInsets.all(16),
-          color: Colors.blue.shade50,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF3F51B5).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Column(
             children: [
               Row(
@@ -167,24 +161,30 @@ class QuizImagePage extends ConsumerWidget {
                   Text(
                     'Questão ${currentIndex + 1} de $totalQuestions',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                   Text(
                     'Acertos: ${gameState.correctAnswers}',
                     style: const TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.bold,
+                      color: Color(0xFF4CAF50),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              LinearProgressIndicator(
-                value: gameState.progress,
-                backgroundColor: Colors.grey.shade200,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: LinearProgressIndicator(
+                  value: gameState.progress,
+                  backgroundColor: Colors.white24,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF3F51B5)),
+                  minHeight: 6,
+                ),
               ),
               const SizedBox(height: 12),
               TimerWidget(
@@ -195,44 +195,38 @@ class QuizImagePage extends ConsumerWidget {
           ),
         ),
 
+        const SizedBox(height: 16),
+
         // Question and answers
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               children: [
                 QuestionCardWidget(question: question),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    children: List.generate(
-                      question.options.length,
-                      (index) {
-                        final option = question.options[index];
-                        final isSelected =
-                            gameState.currentSelectedAnswer == option;
-                        final isCorrect = question.correctAnswer == option;
-
-                        return AnswerOptionWidget(
-                          text: option,
-                          index: index,
-                          answerState: gameState.currentAnswerState,
-                          isSelected: isSelected,
-                          isCorrectAnswer: isCorrect,
-                          onTap: gameState.currentAnswerState ==
-                                  AnswerState.unanswered
-                              ? () {
-                                  ref
-                                      .read(quizImageProvider(difficulty)
-                                          .notifier)
-                                      .selectAnswer(option);
-                                }
-                              : null,
-                        );
-                      },
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 16),
+                ...List.generate(
+                  question.options.length,
+                  (index) {
+                    final option = question.options[index];
+                    final isSelected = gameState.currentSelectedAnswer == option;
+                    final isCorrect = question.correctAnswer == option;
+
+                    return AnswerOptionWidget(
+                      text: option,
+                      index: index,
+                      answerState: gameState.currentAnswerState,
+                      isSelected: isSelected,
+                      isCorrectAnswer: isCorrect,
+                      onTap: gameState.currentAnswerState == AnswerState.unanswered
+                          ? () {
+                              ref
+                                  .read(quizImageProvider(difficulty).notifier)
+                                  .selectAnswer(option);
+                            }
+                          : null,
+                    );
+                  },
+                ),
               ],
             ),
           ),

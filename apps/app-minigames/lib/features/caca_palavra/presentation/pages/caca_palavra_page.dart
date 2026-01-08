@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../widgets/appbar_widget.dart';
-import '../../../../widgets/shared/responsive_game_container.dart';
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/enums.dart';
 import '../providers/caca_palavra_game_notifier.dart';
 import '../widgets/word_grid_widget.dart';
@@ -22,150 +21,132 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
   @override
   Widget build(BuildContext context) {
     final gameStateAsync = ref.watch(cacaPalavraGameProvider);
-    final highScoreAsync = ref.watch(cacaPalavraHighScoreProvider);
 
-    return Scaffold(
-      body: SafeArea(
-        child: ResponsiveGameContainer(
-          maxWidth: 900,
-          padding: EdgeInsets.zero,
-          child: gameStateAsync.when(
-            data: (gameState) {
-              // Show victory dialog when game completes
-              if (gameState.isCompleted && !_hasShownVictoryDialog) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _showVictoryDialog(context, gameState);
-                });
-              }
-
-              return LayoutBuilder(
-                builder: (context, constraints) {
-                  final isLandscape =
-                      MediaQuery.of(context).orientation == Orientation.landscape;
-
-                  if (isLandscape) {
-                    return _buildLandscapeLayout(
-                      context,
-                      gameState,
-                      highScoreAsync,
-                    );
-                  } else {
-                    return _buildPortraitLayout(
-                      context,
-                      gameState,
-                      highScoreAsync,
-                    );
-                  }
-                },
-              );
-            },
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (error, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Erro: ${error.toString()}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      ref.invalidate(cacaPalavraGameProvider);
-                    },
-                    child: const Text('Tentar Novamente'),
-                  ),
-                ],
-              ),
+    return GamePageLayout(
+      title: 'Caça-Palavras',
+      accentColor: const Color(0xFF4CAF50),
+      instructions: 'Toque em letras adjacentes para formar palavras.\n\n'
+          '📝 Palavras podem estar em qualquer direção\n'
+          '🔍 Horizontal, vertical ou diagonal\n'
+          '✨ Toque na lista para destacar no grid\n'
+          '🏆 Encontre todas para vencer!',
+      maxGameWidth: 900,
+      actions: [
+        PopupMenuButton<GameDifficulty>(
+          icon: const Icon(Icons.tune, color: Colors.white),
+          tooltip: 'Dificuldade',
+          onSelected: (difficulty) => _changeDifficulty(difficulty),
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: GameDifficulty.easy,
+              child: Text('Fácil (8x8)'),
             ),
+            const PopupMenuItem(
+              value: GameDifficulty.medium,
+              child: Text('Médio (10x10)'),
+            ),
+            const PopupMenuItem(
+              value: GameDifficulty.hard,
+              child: Text('Difícil (12x12)'),
+            ),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          tooltip: 'Novo Jogo',
+          onPressed: () {
+            _hasShownVictoryDialog = false;
+            ref.read(cacaPalavraGameProvider.notifier).restartGame();
+          },
+        ),
+      ],
+      child: gameStateAsync.when(
+        data: (gameState) {
+          // Show victory dialog when game completes
+          if (gameState.isCompleted && !_hasShownVictoryDialog) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _showVictoryDialog(context, gameState);
+            });
+          }
+
+          return _buildGameContent(context, gameState);
+        },
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+        ),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Erro: ${error.toString()}',
+                style: const TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.invalidate(cacaPalavraGameProvider),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                ),
+                child: const Text('Tentar Novamente'),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
-  Widget _buildPortraitLayout(
-    BuildContext context,
-    gameState,
-    highScoreAsync,
-  ) {
+  Widget _buildGameContent(BuildContext context, dynamic gameState) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: PageHeaderWidget(
-            title: 'Caça-Palavras',
-            subtitle: 'Encontre palavras escondidas na grade',
-            icon: Icons.search,
-            showBackButton: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.help_outline),
-                onPressed: () => _showInstructionsDialog(context),
-                tooltip: 'Instruções',
-              ),
-              PopupMenuButton<GameDifficulty>(
-                icon: const Icon(Icons.settings),
-                tooltip: 'Dificuldade',
-                onSelected: (difficulty) => _changeDifficulty(difficulty),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: GameDifficulty.easy,
-                    child: Text('Fácil (8x8)'),
-                  ),
-                  const PopupMenuItem(
-                    value: GameDifficulty.medium,
-                    child: Text('Médio (10x10)'),
-                  ),
-                  const PopupMenuItem(
-                    value: GameDifficulty.hard,
-                    child: Text('Difícil (12x12)'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
         // Progress indicator
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Row(
             children: [
-              const Text('Progresso:'),
+              const Icon(Icons.track_changes, color: Color(0xFF4CAF50), size: 20),
               const SizedBox(width: 12),
               Expanded(
-                child: LinearProgressIndicator(
-                  value: gameState.progress,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: gameState.progress,
+                    backgroundColor: Colors.white24,
+                    valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF4CAF50)),
+                    minHeight: 8,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Text(
                 '${gameState.foundWordsCount}/${gameState.words.length}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
               ),
             ],
           ),
         ),
 
-                const SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-                // Grid
-                Expanded(
-                  flex: 3,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: WordGridWidget(
-              gameState: gameState,
-              onCellTap: (row, col) {
-                ref
-                    .read(cacaPalavraGameProvider.notifier)
-                    .handleCellTap(row, col);
-              },
-            ),
+        // Grid
+        Expanded(
+          flex: 3,
+          child: WordGridWidget(
+            gameState: gameState,
+            onCellTap: (row, col) {
+              ref.read(cacaPalavraGameProvider.notifier).handleCellTap(row, col);
+            },
           ),
         ),
 
@@ -174,168 +155,27 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
         // Word list
         Expanded(
           flex: 2,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+              ),
+            ),
             child: WordListWidget(
               words: gameState.words,
               onWordTap: (index) {
-                ref
-                    .read(cacaPalavraGameProvider.notifier)
-                    .handleWordTap(index);
+                ref.read(cacaPalavraGameProvider.notifier).handleWordTap(index);
               },
             ),
           ),
         ),
-
-        // New game button
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: ElevatedButton.icon(
-            onPressed: () {
-              _hasShownVictoryDialog = false;
-              ref
-                  .read(cacaPalavraGameProvider.notifier)
-                  .restartGame();
-            },
-            icon: const Icon(Icons.refresh),
-            label: const Text('Novo Jogo'),
-          ),
-        ),
       ],
     );
   }
 
-  Widget _buildLandscapeLayout(
-    BuildContext context,
-    gameState,
-    highScoreAsync,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Header (compact)
-        Padding(
-          padding: const EdgeInsets.all(12),
-          child: PageHeaderWidget(
-            title: 'Caça-Palavras',
-            subtitle: 'Encontre palavras escondidas',
-            icon: Icons.search,
-            showBackButton: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.help_outline),
-                onPressed: () => _showInstructionsDialog(context),
-                tooltip: 'Instruções',
-              ),
-              PopupMenuButton<GameDifficulty>(
-                icon: const Icon(Icons.settings),
-                tooltip: 'Dificuldade',
-                onSelected: (difficulty) => _changeDifficulty(difficulty),
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: GameDifficulty.easy,
-                    child: Text('Fácil (8x8)'),
-                  ),
-                  const PopupMenuItem(
-                    value: GameDifficulty.medium,
-                    child: Text('Médio (10x10)'),
-                  ),
-                  const PopupMenuItem(
-                    value: GameDifficulty.hard,
-                    child: Text('Difícil (12x12)'),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-
-        // Progress indicator (compact)
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Row(
-            children: [
-              const Text('Progresso:'),
-              const SizedBox(width: 12),
-              Expanded(
-                child: LinearProgressIndicator(
-                  value: gameState.progress,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '${gameState.foundWordsCount}/${gameState.words.length}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-
-        // Main content row
-        Expanded(
-          child: Row(
-            children: [
-              // Grid (left)
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 8, bottom: 16),
-                  child: WordGridWidget(
-                    gameState: gameState,
-                    onCellTap: (row, col) {
-                      ref
-                          .read(cacaPalavraGameProvider.notifier)
-                          .handleCellTap(row, col);
-                    },
-                  ),
-                ),
-              ),
-
-              // Word list and button (right)
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8, right: 16, bottom: 16),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: WordListWidget(
-                          words: gameState.words,
-                          onWordTap: (index) {
-                            ref
-                                .read(cacaPalavraGameProvider.notifier)
-                                .handleWordTap(index);
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            _hasShownVictoryDialog = false;
-                            ref
-                                .read(cacaPalavraGameProvider.notifier)
-                                .restartGame();
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Novo Jogo'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showVictoryDialog(BuildContext context, gameState) {
+  void _showVictoryDialog(BuildContext context, dynamic gameState) {
     _hasShownVictoryDialog = true;
 
     final notifier = ref.read(cacaPalavraGameProvider.notifier);
@@ -359,48 +199,6 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
           Navigator.pop(context); // Close dialog
           Navigator.pop(context); // Exit game
         },
-      ),
-    );
-  }
-
-  void _showInstructionsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Como Jogar'),
-        content: const SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '1. Toque em letras adjacentes para formar uma palavra',
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '2. As palavras podem estar em qualquer direção: horizontal, vertical ou diagonal',
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '3. Encontre todas as palavras da lista para completar o jogo',
-                style: TextStyle(fontSize: 14),
-              ),
-              SizedBox(height: 8),
-              Text(
-                '4. Toque em uma palavra da lista para destacá-la no grid',
-                style: TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Entendi'),
-          ),
-        ],
       ),
     );
   }

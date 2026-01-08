@@ -5,6 +5,20 @@ import 'package:flutter/material.dart';
 // Package imports:
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+/// ============================================================================
+/// DEPRECATED WIDGETS - Use CalculatorAppBar instead
+/// ============================================================================
+///
+/// This file contains deprecated AppBar components kept for backward compatibility.
+///
+/// **STANDARD AppBar:** /lib/core/presentation/widgets/calculator_app_bar.dart
+/// **Migration Guide:** /lib/widgets/README_APPBAR.md
+///
+/// All new code should use CalculatorAppBar.
+/// ============================================================================
+
+/// DEPRECATED: Use CalculatorAppBar from core/presentation/widgets/calculator_app_bar.dart
+@Deprecated('Use CalculatorAppBar instead. See /lib/widgets/README_APPBAR.md')
 class PageHeaderWidget extends ConsumerWidget {
   final String title;
   final String? subtitle;
@@ -31,7 +45,11 @@ class PageHeaderWidget extends ConsumerWidget {
 
     // Use zero padding to eliminate any extra space contributing to overflow
     final padding = outerPadding ?? EdgeInsets.zero;
-    final isDark = ref.watch(themeModeProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final brightness = Theme.of(context).brightness;
+    final isDark =
+        themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system && brightness == Brightness.dark);
 
     return Padding(
       padding: padding,
@@ -161,6 +179,8 @@ class PageHeaderWidget extends ConsumerWidget {
   }
 }
 
+/// DEPRECATED: Use CalculatorAppBar from core/presentation/widgets/calculator_app_bar.dart
+@Deprecated('Use CalculatorAppBar instead. See /lib/widgets/README_APPBAR.md')
 class CustomLocalAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool centerTitle;
@@ -186,6 +206,8 @@ class CustomLocalAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
+/// DEPRECATED: Use standard Card widget with theme-aware styling
+@Deprecated('Use Card widget with Theme.of(context) styling instead')
 class ContentCardWidget extends ConsumerWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -199,7 +221,11 @@ class ContentCardWidget extends ConsumerWidget {
   });
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = ref.watch(themeModeProvider);
+    final themeMode = ref.watch(themeModeProvider);
+    final brightness = Theme.of(context).brightness;
+    final isDark =
+        themeMode == ThemeMode.dark ||
+        (themeMode == ThemeMode.system && brightness == Brightness.dark);
 
     return Container(
       width: double.infinity,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import '../../../../core/presentation/widgets/calculator_input_field.dart';
 import '../providers/paint_calculator_provider.dart';
 import '../widgets/paint_result_card.dart';
@@ -45,9 +46,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
     final calculation = ref.watch(paintCalculatorProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadora de Tinta'),
-      ),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

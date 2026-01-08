@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/enums.dart';
 import '../providers/soletrando_game_notifier.dart';
 import '../widgets/game_stats_widget.dart';
 import '../widgets/letter_keyboard_widget.dart';
 import '../widgets/victory_dialog.dart';
 import '../widgets/word_display_widget.dart';
-
-import '../../../../widgets/shared/responsive_game_container.dart';
 
 /// Main page for Soletrando spelling game
 class SoletrandoPage extends ConsumerStatefulWidget {
@@ -146,22 +145,31 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Soletrando'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _showSettingsDialog,
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _startNewGame,
-          ),
-        ],
-      ),
-      body: gameState.status == GameStatus.initial
-          ? const Center(child: CircularProgressIndicator())
+    return GamePageLayout(
+      title: 'Soletrando',
+      accentColor: const Color(0xFFFF9800),
+      instructions: 'Adivinhe a palavra letra por letra!\n\n'
+          '🔤 Toque nas letras\n'
+          '💡 Use dicas se precisar\n'
+          '❤️ Cuidado com os erros!\n'
+          '⏱️ Tempo limitado',
+      maxGameWidth: 700,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.tune, color: Colors.white),
+          tooltip: 'Configurações',
+          onPressed: _showSettingsDialog,
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          tooltip: 'Reiniciar',
+          onPressed: _startNewGame,
+        ),
+      ],
+      child: gameState.status == GameStatus.initial
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFFFF9800)),
+            )
           : gameState.status == GameStatus.error
               ? Center(
                   child: Column(
@@ -169,42 +177,44 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
                     children: [
                       const Icon(Icons.error, size: 64, color: Colors.red),
                       const SizedBox(height: 16),
-                      const Text('Erro ao carregar jogo'),
+                      const Text(
+                        'Erro ao carregar jogo',
+                        style: TextStyle(color: Colors.white70),
+                      ),
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: _startNewGame,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFFF9800),
+                        ),
                         child: const Text('Tentar Novamente'),
                       ),
                     ],
                   ),
                 )
-              : SafeArea(
-                  child: ResponsiveGameContainer(
-                    maxWidth: 800,
-                    child: SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
+              : SingleChildScrollView(
+                  child: Column(
                     children: [
                       // Game stats
                       GameStatsWidget(gameState: gameState),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       // Word display
                       WordDisplayWidget(gameState: gameState),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       // Hint button
                       ElevatedButton.icon(
                         onPressed: gameState.canUseHint ? _useHint : null,
                         icon: const Icon(Icons.lightbulb),
-                        label: Text(
-                          'Dica (${gameState.hintsRemaining})',
-                        ),
+                        label: Text('Dica (${gameState.hintsRemaining})'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.amber,
+                          foregroundColor: Colors.black,
+                          disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       // Letter keyboard
                       LetterKeyboardWidget(
@@ -215,8 +225,6 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
                     ],
                   ),
                 ),
-              ),
-            ),
     );
   }
 }

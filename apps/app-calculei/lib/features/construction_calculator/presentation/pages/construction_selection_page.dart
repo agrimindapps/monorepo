@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
+
 /// Selection page for construction calculators
 class ConstructionCalculatorSelectionPage extends StatelessWidget {
   const ConstructionCalculatorSelectionPage({super.key});
@@ -8,10 +10,7 @@ class ConstructionCalculatorSelectionPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calculadoras de Construção'),
-        centerTitle: true,
-      ),
+      appBar: const CalculatorAppBar(),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
 
+import '../../../../core/widgets/game_page_layout.dart';
 import '../providers/tower_game_notifier.dart';
 import '../game/tower_stack_game.dart';
 import '../widgets/game_over_dialog.dart';
@@ -46,14 +47,38 @@ class _TowerPageState extends ConsumerState<TowerPage> {
     ref.watch(towerGameProvider(screenWidth));
     final notifier = ref.read(towerGameProvider(screenWidth).notifier);
 
-    return Scaffold(
-      body: Stack(
+    return GamePageLayout(
+      title: 'Tower Stack',
+      accentColor: const Color(0xFFE91E63),
+      instructions: 'Empilhe os blocos!\n\n'
+          '👆 Toque para soltar o bloco\n'
+          '🎯 Alinhe perfeitamente para combo\n'
+          '📏 Blocos desalinhados diminuem\n'
+          '🏗️ Construa a torre mais alta!',
+      maxGameWidth: 500,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          tooltip: 'Reiniciar',
+          onPressed: () {
+            setState(() {
+              _isGameOver = false;
+              _currentScore = 0;
+            });
+            _game.resetGame();
+          },
+        ),
+      ],
+      child: Stack(
         children: [
-          GameWidget(game: _game),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: GameWidget(game: _game),
+          ),
           
           // Score Display
           Positioned(
-            top: 50,
+            top: 16,
             left: 0,
             right: 0,
             child: Column(
@@ -61,7 +86,7 @@ class _TowerPageState extends ConsumerState<TowerPage> {
                 Text(
                   '$_currentScore',
                   style: const TextStyle(
-                    fontSize: 64,
+                    fontSize: 48,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                     shadows: [
@@ -74,9 +99,9 @@ class _TowerPageState extends ConsumerState<TowerPage> {
                   ),
                 ),
                 Text(
-                  'Best: ${notifier.highScore}',
+                  'Recorde: ${notifier.highScore}',
                   style: const TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     color: Colors.white70,
                     shadows: [
                       Shadow(
@@ -93,19 +118,20 @@ class _TowerPageState extends ConsumerState<TowerPage> {
           
           // Start Instruction
           if (_currentScore == 0 && !_isGameOver)
-            const Center(
-              child: Text(
-                'Tap to Place Block',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 10,
-                      color: Colors.black,
-                    ),
-                  ],
+            Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text(
+                  'Toque para Soltar',
+                  style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -125,16 +151,6 @@ class _TowerPageState extends ConsumerState<TowerPage> {
               },
               onExit: () => Navigator.of(context).pop(),
             ),
-            
-          // Back Button
-          Positioned(
-            top: 40,
-            left: 16,
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
         ],
       ),
     );

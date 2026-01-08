@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../providers/memory_game_notifier.dart';
 import '../widgets/game_stats_widget.dart';
 import '../widgets/memory_grid_widget.dart';
 import '../widgets/victory_dialog.dart';
-import '../../../../widgets/shared/responsive_game_container.dart';
 
 import '../../data/repositories/deck_repository.dart';
-import '../../domain/entities/deck_configuration.dart';
 
 class MemoryGamePage extends ConsumerStatefulWidget {
   const MemoryGamePage({super.key});
@@ -41,64 +40,67 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
       });
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Jogo da Memória - ${gameState.difficulty.label}'),
-        actions: [
-          if (gameState.status == GameStatus.playing ||
-              gameState.status == GameStatus.paused)
-            IconButton(
-              icon: Icon(
-                gameState.status == GameStatus.paused
-                    ? Icons.play_arrow
-                    : Icons.pause,
-              ),
-              onPressed: () => notifier.togglePause(),
+    return GamePageLayout(
+      title: 'Jogo da Memória',
+      accentColor: const Color(0xFF9C27B0),
+      instructions: 'Encontre todos os pares!\n\n'
+          '🃏 Toque para virar cartas\n'
+          '🔄 Memorize as posições\n'
+          '⏱️ Menor tempo = maior pontuação\n'
+          '🏆 Complete com menos tentativas!',
+      maxGameWidth: 800,
+      actions: [
+        if (gameState.status == GameStatus.playing ||
+            gameState.status == GameStatus.paused)
+          IconButton(
+            icon: Icon(
+              gameState.status == GameStatus.paused
+                  ? Icons.play_arrow
+                  : Icons.pause,
+              color: Colors.white,
             ),
-          IconButton(
-            icon: const Icon(Icons.style), // Card deck icon
-            tooltip: 'Trocar Baralho',
-            onPressed: () => _showDeckSelectionDialog(context),
+            onPressed: () => notifier.togglePause(),
           ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => notifier.restartGame(),
-          ),
-          PopupMenuButton<GameDifficulty>(
-            icon: const Icon(Icons.settings),
-            onSelected: (difficulty) {
-              notifier.changeDifficulty(difficulty);
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: GameDifficulty.easy,
-                child: Text('Fácil (4x4)'),
-              ),
-              const PopupMenuItem(
-                value: GameDifficulty.medium,
-                child: Text('Médio (6x6)'),
-              ),
-              const PopupMenuItem(
-                value: GameDifficulty.hard,
-                child: Text('Difícil (8x8)'),
-              ),
-            ],
+        IconButton(
+          icon: const Icon(Icons.style, color: Colors.white),
+          tooltip: 'Trocar Baralho',
+          onPressed: () => _showDeckSelectionDialog(context),
+        ),
+        PopupMenuButton<GameDifficulty>(
+          icon: const Icon(Icons.tune, color: Colors.white),
+          tooltip: 'Dificuldade',
+          onSelected: (difficulty) {
+            notifier.changeDifficulty(difficulty);
+          },
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: GameDifficulty.easy,
+              child: Text('Fácil (4x4)'),
+            ),
+            const PopupMenuItem(
+              value: GameDifficulty.medium,
+              child: Text('Médio (6x6)'),
+            ),
+            const PopupMenuItem(
+              value: GameDifficulty.hard,
+              child: Text('Difícil (8x8)'),
+            ),
+          ],
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, color: Colors.white),
+          tooltip: 'Reiniciar',
+          onPressed: () => notifier.restartGame(),
+        ),
+      ],
+      child: Column(
+        children: [
+          GameStatsWidget(gameState: gameState),
+          const SizedBox(height: 16),
+          Expanded(
+            child: _buildGameContent(gameState, notifier),
           ),
         ],
-      ),
-      body: SafeArea(
-        child: ResponsiveGameContainer(
-          maxWidth: 900,
-          child: Column(
-            children: [
-              GameStatsWidget(gameState: gameState),
-              const SizedBox(height: 16),
-              Expanded(
-                child: _buildGameContent(gameState, notifier),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -117,10 +119,14 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
             Text(
               'Erro: ${gameState.errorMessage}',
               textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white70),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => notifier.restartGame(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF9C27B0),
+              ),
               child: const Text('Tentar Novamente'),
             ),
           ],
@@ -130,7 +136,7 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
 
     if (gameState.cards.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(color: Color(0xFF9C27B0)),
       );
     }
 
@@ -139,15 +145,22 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.pause_circle_outline, size: 64),
+            const Icon(Icons.pause_circle_outline, size: 64, color: Colors.white70),
             const SizedBox(height: 16),
             const Text(
               'Jogo Pausado',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => notifier.togglePause(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF9C27B0),
+              ),
               child: const Text('Continuar'),
             ),
           ],

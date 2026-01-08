@@ -16,6 +16,7 @@ class GameEntity {
   final int playerCount; // 1 = single, 2 = multiplayer
   final int? highScore;
   final DateTime? lastPlayed;
+  final String? assetPath;
 
   const GameEntity({
     required this.id,
@@ -31,6 +32,7 @@ class GameEntity {
     this.playerCount = 1,
     this.highScore,
     this.lastPlayed,
+    this.assetPath,
   });
 
   GameEntity copyWith({
@@ -47,6 +49,7 @@ class GameEntity {
     int? playerCount,
     int? highScore,
     DateTime? lastPlayed,
+    String? assetPath,
   }) {
     return GameEntity(
       id: id ?? this.id,
@@ -62,6 +65,7 @@ class GameEntity {
       playerCount: playerCount ?? this.playerCount,
       highScore: highScore ?? this.highScore,
       lastPlayed: lastPlayed ?? this.lastPlayed,
+      assetPath: assetPath ?? this.assetPath,
     );
   }
 }

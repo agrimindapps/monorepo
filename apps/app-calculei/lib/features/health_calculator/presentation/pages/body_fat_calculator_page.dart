@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/body_fat_calculator.dart';
 
 /// Página da calculadora de Gordura Corporal
@@ -37,317 +35,214 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Gordura Corporal',
+      subtitle: 'Método US Navy',
+      icon: Icons.pie_chart,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: '1. Selecione seu gênero\n'
+          '2. Informe peso e altura\n'
+          '3. Meça as circunferências (cintura no nível do umbigo, pescoço abaixo do pomo de adão, quadril na parte mais larga)\n'
+          '4. Calcule para ver seu percentual de gordura corporal',
+      maxContentWidth: 700,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Gender selection
+              Text(
+                'Selecione o gênero',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.pie_chart,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Método US Navy',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Calcula o percentual de gordura corporal usando medidas de '
-                            'circunferência. É o método mais preciso sem equipamentos '
-                            'especializados.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Masculino',
+                      icon: Icons.male,
+                      isSelected: _isMale,
+                      onTap: () => setState(() => _isMale = true),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Seus dados',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Gender selection
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Masculino',
-                                    icon: Icons.male,
-                                    isSelected: _isMale,
-                                    onTap: () => setState(() => _isMale = true),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Feminino',
-                                    icon: Icons.female,
-                                    isSelected: !_isMale,
-                                    onTap: () =>
-                                        setState(() => _isMale = false),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Basic measurements
-                            Text(
-                              'Medidas básicas',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Peso',
-                                    controller: _weightController,
-                                    suffix: 'kg',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0 || num > 500) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Altura',
-                                    controller: _heightController,
-                                    suffix: 'cm',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null ||
-                                          num < 50 ||
-                                          num > 300) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 20),
-
-                            // Circumference measurements
-                            Text(
-                              'Circunferências',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Cintura',
-                                    controller: _waistController,
-                                    suffix: 'cm',
-                                    hint: 'No umbigo',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null ||
-                                          num < 40 ||
-                                          num > 200) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: StandardInputField(
-                                    label: 'Pescoço',
-                                    controller: _neckController,
-                                    suffix: 'cm',
-                                    hint: 'Abaixo do pomo',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null ||
-                                          num < 20 ||
-                                          num > 80) {
-                                        return 'Inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                if (!_isMale)
-                                  SizedBox(
-                                    width: 150,
-                                    child: StandardInputField(
-                                      label: 'Quadril',
-                                      controller: _hipController,
-                                      suffix: 'cm',
-                                      hint: 'Parte mais larga',
-                                      keyboardType:
-                                          const TextInputType.numberWithOptions(
-                                        decimal: true,
-                                      ),
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.allow(
-                                          RegExp(r'^\d*\.?\d*'),
-                                        ),
-                                      ],
-                                      validator: (value) {
-                                        if (!_isMale) {
-                                          if (value == null || value.isEmpty) {
-                                            return 'Obrigatório';
-                                          }
-                                          final num = double.tryParse(value);
-                                          if (num == null ||
-                                              num < 50 ||
-                                              num > 200) {
-                                            return 'Inválido';
-                                          }
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Feminino',
+                      icon: Icons.female,
+                      isSelected: !_isMale,
+                      onTap: () => setState(() => _isMale = false),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null) _BodyFatResultCard(result: _result!, isMale: _isMale),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Basic measurements
+              Text(
+                'Medidas básicas',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Peso',
+                      controller: _weightController,
+                      suffix: 'kg',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Obrigatório';
+                        final num = double.tryParse(value);
+                        if (num == null || num <= 0 || num > 500) return 'Valor inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Altura',
+                      controller: _heightController,
+                      suffix: 'cm',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Obrigatório';
+                        final num = int.tryParse(value);
+                        if (num == null || num < 50 || num > 300) return 'Valor inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Circumference measurements
+              Text(
+                'Circunferências',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: [
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Cintura',
+                      controller: _waistController,
+                      suffix: 'cm',
+                      hint: 'No umbigo',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Obrigatório';
+                        final num = double.tryParse(value);
+                        if (num == null || num < 40 || num > 200) return 'Inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    width: 150,
+                    child: _DarkInputField(
+                      label: 'Pescoço',
+                      controller: _neckController,
+                      suffix: 'cm',
+                      hint: 'Abaixo do pomo',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Obrigatório';
+                        final num = double.tryParse(value);
+                        if (num == null || num < 20 || num > 80) return 'Inválido';
+                        return null;
+                      },
+                    ),
+                  ),
+                  if (!_isMale)
+                    SizedBox(
+                      width: 150,
+                      child: _DarkInputField(
+                        label: 'Quadril',
+                        controller: _hipController,
+                        suffix: 'cm',
+                        hint: 'Parte mais larga',
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                        ],
+                        validator: (value) {
+                          if (!_isMale) {
+                            if (value == null || value.isEmpty) return 'Obrigatório';
+                            final num = double.tryParse(value);
+                            if (num == null || num < 50 || num > 200) return 'Inválido';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular Gordura Corporal',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _BodyFatResultCard(result: _result!, isMale: _isMale),
+              ],
+            ],
           ),
         ),
       ),
@@ -375,6 +270,95 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
   }
 }
 
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.hint,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.3),
+              fontSize: 14,
+            ),
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _GenderButton extends StatelessWidget {
   final String label;
   final IconData icon;
@@ -390,24 +374,26 @@ class _GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = CalculatorAccentColors.health;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: isSelected 
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
             children: [
@@ -415,17 +401,18 @@ class _GenderButton extends StatelessWidget {
                 icon,
                 size: 32,
                 color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    ? accentColor
+                    : Colors.white.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 label,
                 style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 14,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -454,147 +441,164 @@ class _BodyFatResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final categoryColor = _getCategoryColor(result.category);
+    final classificationColor = _getCategoryColor(result.category);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatBodyFatCalculation(
-                    bodyFatPercentage: result.bodyFatPercentage,
-                    category: result.categoryText,
-                    fatMassKg: result.fatMassKg,
-                    leanMassKg: result.leanMassKg,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // Main result
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: categoryColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: categoryColor.withValues(alpha: 0.3),
-                  width: 2,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    '${result.bodyFatPercentage}%',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: categoryColor,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Gordura Corporal',
-                    style: TextStyle(color: categoryColor),
-                  ),
-                  const SizedBox(height: 12),
-                  Chip(
-                    label: Text(
-                      result.categoryText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    backgroundColor: categoryColor,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Body composition
-            Row(
-              children: [
-                Expanded(
-                  child: _CompositionCard(
-                    label: 'Massa Gorda',
-                    value: '${result.fatMassKg} kg',
-                    icon: Icons.water_drop,
-                    color: Colors.orange,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _CompositionCard(
-                    label: 'Massa Magra',
-                    value: '${result.leanMassKg} kg',
-                    icon: Icons.fitness_center,
-                    color: Colors.blue,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // Reference ranges
-            Text(
-              'Faixas de referência (${isMale ? 'Homens' : 'Mulheres'})',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            _BodyFatRangeChart(
-              ranges: BodyFatCalculator.getRanges(isMale),
-              currentValue: result.bodyFatPercentage,
-            ),
-
-            const SizedBox(height: 16),
-
-            // Recommendation
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.recommendation,
-                      style: TextStyle(color: colorScheme.onSecondaryContainer),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: classificationColor.withValues(alpha: 0.3),
         ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Title
+          Row(
+            children: [
+              Icon(Icons.assessment, color: CalculatorAccentColors.health),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // Main result
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: classificationColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: classificationColor, width: 2),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '${result.bodyFatPercentage}%',
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: classificationColor,
+                  ),
+                ),
+                Text(
+                  'Gordura Corporal',
+                  style: TextStyle(
+                    color: classificationColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Classification chip
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: classificationColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                result.categoryText,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Body composition
+          Row(
+            children: [
+              Expanded(
+                child: _CompositionCard(
+                  label: 'Massa Gorda',
+                  value: '${result.fatMassKg} kg',
+                  icon: Icons.water_drop,
+                  color: Colors.orange,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _CompositionCard(
+                  label: 'Massa Magra',
+                  value: '${result.leanMassKg} kg',
+                  icon: Icons.fitness_center,
+                  color: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 16),
+
+          // Reference ranges
+          Text(
+            'Faixas de referência (${isMale ? 'Homens' : 'Mulheres'})',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.7),
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _BodyFatRangeChart(
+            ranges: BodyFatCalculator.getRanges(isMale),
+            currentValue: result.bodyFatPercentage,
+          ),
+
+          const SizedBox(height: 16),
+
+          // Recommendation
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 20,
+                  color: Colors.amber.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    result.recommendation,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/presentation/widgets/calculator_app_bar.dart';
+
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
@@ -8,8 +10,8 @@ class SettingsPage extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Configurações'),
+      appBar: const CalculatorAppBar(
+        showCalculatorsDropdown: false,
       ),
       body: Center(
         child: Column(

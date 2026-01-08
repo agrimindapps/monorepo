@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/calorias_exercicio_calculator.dart';
 
 /// Página da calculadora de calorias por exercício
@@ -31,159 +29,96 @@ class _CaloriasExercicioCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.fitness_center,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Gasto Calórico em Exercícios',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Estime quantas calorias você queima em diferentes tipos '
-                            'de exercícios. Baseado em valores MET (Equivalente Metabólico '
-                            'de Tarefa) para intensidades médias.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Dados do exercício',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Exercise type selection
-                            Text(
-                              'Tipo de exercício',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 8),
-
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: ExerciseType.values.map((type) {
-                                return _ExerciseTypeChip(
-                                  type: type,
-                                  isSelected: _exerciseType == type,
-                                  onTap: () =>
-                                      setState(() => _exerciseType = type),
-                                );
-                              }).toList(),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Duration input
-                            SizedBox(
-                              width: 200,
-                              child: StandardInputField(
-                                label: 'Duração',
-                                controller: _durationController,
-                                suffix: 'minutos',
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Obrigatório';
-                                  }
-                                  final num = int.tryParse(value);
-                                  if (num == null || num <= 0 || num > 600) {
-                                    return 'Valor inválido';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular Calorias',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null)
-                    _ExerciseCaloriesResultCard(result: _result!),
-                ],
+    return CalculatorPageLayout(
+      title: 'Calorias por Exercício',
+      subtitle: 'Gasto Calórico em Atividades Físicas',
+      icon: Icons.directions_run,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions:
+          'Selecione o tipo de exercício e a duração para estimar '
+          'quantas calorias você queima. Baseado em valores MET (Equivalente '
+          'Metabólico de Tarefa) para intensidades médias.',
+      maxContentWidth: 600,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Exercise type selection
+              Text(
+                'Selecione o tipo de exercício',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ExerciseType.values.map((type) {
+                  return _ExerciseTypeChip(
+                    type: type,
+                    isSelected: _exerciseType == type,
+                    onTap: () => setState(() => _exerciseType = type),
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Duration input
+              _DarkInputField(
+                label: 'Duração',
+                controller: _durationController,
+                suffix: 'minutos',
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Obrigatório';
+                  }
+                  final num = int.tryParse(value);
+                  if (num == null || num <= 0 || num > 600) {
+                    return 'Valor inválido (1-600 minutos)';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular Calorias',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _ExerciseCaloriesResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -191,7 +126,9 @@ class _CaloriasExercicioCalculatorPageState
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = CaloriasExercicioCalculator.calculate(
       exerciseType: _exerciseType,
@@ -199,6 +136,88 @@ class _CaloriasExercicioCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+}
+
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -226,14 +245,39 @@ class _ExerciseTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.health;
 
-    return FilterChip(
-      label: Text(_getTypeName(type)),
-      selected: isSelected,
-      onSelected: (_) => onTap(),
-      selectedColor: colorScheme.primaryContainer,
-      checkmarkColor: colorScheme.primary,
+    return Material(
+      color: isSelected
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
+              width: isSelected ? 2 : 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            _getTypeName(type),
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontSize: 14,
+              color: isSelected
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.7),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -256,166 +300,145 @@ class _ExerciseCaloriesResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Calories burned - main result
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.orange.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.orange, width: 2),
+            ),
+            child: Column(
               children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                Icon(
+                  _getExerciseIcon(result.exerciseType),
+                  size: 48,
+                  color: Colors.orange,
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatGeneric(
-                    title: 'Calorias por Exercício',
-                    data: {
-                      '🏃 Exercício': result.exerciseTypeName,
-                      '⏱️ Duração': '${result.durationMinutes} minutos',
-                      '🔥 Calorias queimadas':
-                          '${result.calories.toStringAsFixed(0)} kcal',
-                      '📊 Valor MET': result.metValue.toStringAsFixed(1),
-                    },
+                const SizedBox(height: 8),
+                Text(
+                  result.calories.toStringAsFixed(0),
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+                const Text(
+                  'kcal queimadas',
+                  style: TextStyle(
+                    color: Colors.orange,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // Calories burned
-            Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.orange, width: 2),
+          const SizedBox(height: 16),
+
+          // Exercise info
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _InfoColumn(
+                  icon: Icons.fitness_center,
+                  label: 'Exercício',
+                  value: result.exerciseTypeName,
                 ),
-                child: Column(
-                  children: [
-                    Icon(
-                      _getExerciseIcon(result.exerciseType),
-                      size: 48,
-                      color: Colors.orange,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${result.calories.toStringAsFixed(0)}',
-                      style:
-                          Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange,
-                              ),
-                    ),
-                    Text(
-                      'kcal queimadas',
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                _InfoColumn(
+                  icon: Icons.access_time,
+                  label: 'Duração',
+                  value: '${result.durationMinutes} min',
                 ),
-              ),
+                _InfoColumn(
+                  icon: Icons.speed,
+                  label: 'MET',
+                  value: result.metValue.toStringAsFixed(1),
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Exercise info
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _InfoColumn(
-                        icon: Icons.fitness_center,
-                        label: 'Exercício',
-                        value: result.exerciseTypeName,
-                      ),
-                      _InfoColumn(
-                        icon: Icons.access_time,
-                        label: 'Duração',
-                        value: '${result.durationMinutes} min',
-                      ),
-                      _InfoColumn(
-                        icon: Icons.speed,
-                        label: 'MET',
-                        value: result.metValue.toStringAsFixed(1),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+          // Recommendation
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
             ),
-
-            const SizedBox(height: 16),
-
-            // Recommendation
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.recommendation,
-                      style: TextStyle(color: colorScheme.onSecondaryContainer),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 20,
+                  color: Colors.amber.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    result.recommendation,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      height: 1.4,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            const SizedBox(height: 12),
+          const SizedBox(height: 12),
 
-            // Info note
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, size: 16),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Valores são estimativas médias. O gasto real varia com peso, intensidade e condicionamento.',
-                      style: Theme.of(context).textTheme.bodySmall,
+          // Info note
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.03),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 16,
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Valores são estimativas médias. O gasto real varia com peso, intensidade e condicionamento.',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.6),
+                      fontSize: 12,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -436,18 +459,22 @@ class _InfoColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 20),
+        Icon(icon, size: 20, color: Colors.white.withValues(alpha: 0.7)),
         const SizedBox(height: 4),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 12,
+          ),
         ),
         Text(
           value,
-          style: Theme.of(context)
-              .textTheme
-              .titleSmall
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ],
     );

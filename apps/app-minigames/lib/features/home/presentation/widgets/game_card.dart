@@ -9,11 +9,7 @@ class GameCard extends StatefulWidget {
   final GameEntity game;
   final bool isCompact;
 
-  const GameCard({
-    super.key,
-    required this.game,
-    this.isCompact = false,
-  });
+  const GameCard({super.key, required this.game, this.isCompact = false});
 
   @override
   State<GameCard> createState() => _GameCardState();
@@ -40,7 +36,9 @@ class _GameCardState extends State<GameCard> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: game.primaryColor.withValues(alpha: _isHovered ? 0.5 : 0.3),
+                  color: game.primaryColor.withValues(
+                    alpha: _isHovered ? 0.5 : 0.3,
+                  ),
                   blurRadius: _isHovered ? 20 : 10,
                   offset: const Offset(0, 4),
                 ),
@@ -50,28 +48,47 @@ class _GameCardState extends State<GameCard> {
               borderRadius: BorderRadius.circular(16),
               child: Stack(
                 children: [
-                  // Background gradient
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          game.primaryColor,
-                          game.secondaryColor,
-                        ],
+                  // Background gradient or Image
+                  if (game.assetPath != null)
+                    Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(game.assetPath!, fit: BoxFit.cover),
+                        // Dark overlay for readability
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withValues(alpha: 0.2),
+                                Colors.black.withValues(alpha: 0.8),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    )
+                  else ...[
+                    // Background gradient
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [game.primaryColor, game.secondaryColor],
+                        ),
                       ),
                     ),
-                  ),
-
-                  // Pattern overlay
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: _PatternPainter(
-                        color: Colors.white.withValues(alpha: 0.05),
+                    // Pattern overlay
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _PatternPainter(
+                          color: Colors.white.withValues(alpha: 0.05),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
 
                   // Content
                   Padding(
@@ -83,10 +100,7 @@ class _GameCardState extends State<GameCard> {
                         Row(
                           children: [
                             if (game.isNew)
-                              const _Badge(
-                                text: 'NOVO',
-                                color: Colors.green,
-                              ),
+                              const _Badge(text: 'NOVO', color: Colors.green),
                             if (game.playerCount > 1) ...[
                               if (game.isNew) const SizedBox(width: 6),
                               _Badge(
@@ -116,33 +130,43 @@ class _GameCardState extends State<GameCard> {
                         const Spacer(),
 
                         // Icon
-                        Center(
-                          child: Hero(
-                            tag: 'game_icon_${game.id}',
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(100),
-                              child: BackdropFilter(
-                                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                                child: Container(
-                                  padding: EdgeInsets.all(widget.isCompact ? 16 : 24),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.2),
-                                      width: 1.5,
-                                    ),
+                        if (game.assetPath == null)
+                          Center(
+                            child: Hero(
+                              tag: 'game_icon_${game.id}',
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: BackdropFilter(
+                                  filter: ImageFilter.blur(
+                                    sigmaX: 10,
+                                    sigmaY: 10,
                                   ),
-                                  child: Icon(
-                                    game.icon,
-                                    size: widget.isCompact ? 40 : 56,
-                                    color: Colors.white,
+                                  child: Container(
+                                    padding: EdgeInsets.all(
+                                      widget.isCompact ? 16 : 24,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      game.icon,
+                                      size: widget.isCompact ? 40 : 56,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
 
                         const Spacer(),
 
@@ -201,11 +225,7 @@ class _Badge extends StatelessWidget {
   final IconData? icon;
   final Color color;
 
-  const _Badge({
-    required this.text,
-    this.icon,
-    required this.color,
-  });
+  const _Badge({required this.text, this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -260,11 +280,7 @@ class _PatternPainter extends CustomPainter {
 
     const spacing = 20.0;
     for (var i = 0.0; i < size.width + size.height; i += spacing) {
-      canvas.drawLine(
-        Offset(i, 0),
-        Offset(0, i),
-        paint,
-      );
+      canvas.drawLine(Offset(i, 0), Offset(0, i), paint);
     }
   }
 

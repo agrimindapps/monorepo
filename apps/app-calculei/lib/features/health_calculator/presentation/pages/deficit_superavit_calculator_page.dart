@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/deficit_superavit_calculator.dart';
 
@@ -36,255 +35,211 @@ class _DeficitSuperavitCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+    return CalculatorPageLayout(
+      title: 'Déficit/Superávit Calórico',
+      subtitle: 'Planejamento de Calorias',
+      icon: Icons.trending_down,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: 'Informe seu peso atual, peso meta, prazo desejado e TDEE '
+          'para calcular quantas calorias você deve consumir diariamente. '
+          'Baseado em 1kg de gordura ≈ 7700 kcal.',
+      maxContentWidth: 700,
+      actions: [
+        if (_result != null)
+          ShareButton(
+            text: ShareFormatter.formatGeneric(
+              title: 'Déficit/Superávit Calórico',
+              data: {
+                '🎯 Objetivo': _result!.goalText,
+                '🍽️ Calorias diárias':
+                    '${_result!.dailyCalories.toStringAsFixed(0)} kcal',
+                '📊 ${_result!.goal == WeightGoal.loss ? "Déficit" : "Superávit"}':
+                    '${_result!.dailyChange.toStringAsFixed(0)} kcal/dia',
+                '⚖️ Mudança semanal':
+                    '${_result!.weeklyWeightChange}kg/semana',
+                '✅ Status': _result!.isHealthy ? 'Saudável' : 'Ajustar',
+              },
+            ),
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Inputs Row 1
+              Row(
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.show_chart,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Planejamento de Calorias',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Calcula quantas calorias você deve consumir diariamente '
-                            'para atingir seu peso meta no prazo desejado. Baseado em '
-                            '1kg de gordura ≈ 7700 kcal.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Peso atual',
+                      controller: _currentWeightController,
+                      suffix: 'kg',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = double.tryParse(value);
+                        if (num == null || num <= 0 || num > 500) {
+                          return 'Valor inválido';
+                        }
+                        return null;
+                      },
                     ),
                   ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Peso meta',
+                      controller: _targetWeightController,
+                      suffix: 'kg',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d*\.?\d*'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = double.tryParse(value);
+                        if (num == null || num <= 0 || num > 500) {
+                          return 'Valor inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
 
-                  const SizedBox(height: 24),
+              const SizedBox(height: 16),
 
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Seus dados',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
+              // Inputs Row 2
+              Row(
+                children: [
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Prazo',
+                      controller: _weeksController,
+                      suffix: 'semanas',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = int.tryParse(value);
+                        if (num == null || num <= 0 || num > 104) {
+                          return 'Valor inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'TDEE',
+                      controller: _tdeeController,
+                      suffix: 'kcal/dia',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = int.tryParse(value);
+                        if (num == null || num < 1000 || num > 5000) {
+                          return 'Valor inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
 
-                            // Inputs Row 1
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Peso atual',
-                                    controller: _currentWeightController,
-                                    suffix: 'kg',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0 || num > 500) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Peso meta',
-                                    controller: _targetWeightController,
-                                    suffix: 'kg',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0 || num > 500) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
+              const SizedBox(height: 16),
 
-                            const SizedBox(height: 16),
-
-                            // Inputs Row 2
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Prazo',
-                                    controller: _weeksController,
-                                    suffix: 'semanas',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null || num <= 0 || num > 104) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'TDEE',
-                                    controller: _tdeeController,
-                                    suffix: 'kcal/dia',
-                                    helperText: 'Gasto energético total diário',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null ||
-                                          num < 1000 ||
-                                          num > 5000) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            // TDEE info
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.info_outline, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      'Não sabe seu TDEE? Use a calculadora de TMB primeiro!',
-                                      style:
-                                          Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular Calorias',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
+              // TDEE info
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Não sabe seu TDEE? Use a calculadora de TMB primeiro!',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 13,
                         ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null)
-                    _CaloricBalanceResultCard(result: _result!),
-                ],
+                  ],
+                ),
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular Calorias',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _CaloricBalanceResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -292,7 +247,9 @@ class _DeficitSuperavitCalculatorPageState
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = DeficitSuperavitCalculator.calculate(
       currentWeightKg: double.parse(_currentWeightController.text),
@@ -302,6 +259,88 @@ class _DeficitSuperavitCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+}
+
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -328,242 +367,256 @@ class _CaloricBalanceResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final goalColor = _getGoalColor(result.goal);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: goalColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Daily calories
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            decoration: BoxDecoration(
+              color: goalColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: goalColor, width: 2),
+            ),
+            child: Column(
               children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                Icon(
+                  _getGoalIcon(result.goal),
+                  size: 48,
+                  color: goalColor,
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatGeneric(
-                    title: 'Déficit/Superávit Calórico',
-                    data: {
-                      '🎯 Objetivo': result.goalText,
-                      '🍽️ Calorias diárias':
-                          '${result.dailyCalories.toStringAsFixed(0)} kcal',
-                      '📊 ${result.goal == WeightGoal.loss ? "Déficit" : "Superávit"}':
-                          '${result.dailyChange.toStringAsFixed(0)} kcal/dia',
-                      '⚖️ Mudança semanal':
-                          '${result.weeklyWeightChange}kg/semana',
-                      '✅ Status': result.isHealthy ? 'Saudável' : 'Ajustar',
-                    },
+                const SizedBox(height: 8),
+                Text(
+                  result.dailyCalories.toStringAsFixed(0),
+                  style: TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: goalColor,
+                  ),
+                ),
+                Text(
+                  'kcal por dia',
+                  style: TextStyle(
+                    color: goalColor,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // Daily calories
-            Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                decoration: BoxDecoration(
-                  color: goalColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: goalColor, width: 2),
-                ),
-                child: Column(
-                  children: [
-                    Icon(
-                      _getGoalIcon(result.goal),
-                      size: 48,
-                      color: goalColor,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${result.dailyCalories.toStringAsFixed(0)}',
-                      style:
-                          Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: goalColor,
-                              ),
-                    ),
-                    Text(
-                      'kcal por dia',
-                      style: TextStyle(
-                        color: goalColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+          const SizedBox(height: 16),
+
+          // Goal chip
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: goalColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                result.goalText,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 14,
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Goal chip
-            Center(
-              child: Chip(
-                label: Text(
-                  result.goalText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+          // Summary stats
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _InfoColumn(
+                  icon: result.goal == WeightGoal.loss
+                      ? Icons.remove_circle
+                      : Icons.add_circle,
+                  label: result.goal == WeightGoal.loss
+                      ? 'Déficit'
+                      : 'Superávit',
+                  value: '${result.dailyChange.toStringAsFixed(0)} kcal',
+                ),
+                _InfoColumn(
+                  icon: Icons.calendar_today,
+                  label: 'Por semana',
+                  value: '${result.weeklyWeightChange}kg',
+                ),
+                _InfoColumn(
+                  icon: result.isHealthy
+                      ? Icons.check_circle
+                      : Icons.warning,
+                  label: 'Status',
+                  value: result.isHealthy ? 'Saudável' : 'Revisar',
+                  valueColor: result.isHealthy ? Colors.green : Colors.orange,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Warning/status
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: result.isHealthy
+                  ? Colors.green.withValues(alpha: 0.15)
+                  : Colors.orange.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: result.isHealthy ? Colors.green : Colors.orange,
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  result.isHealthy ? Icons.check_circle : Icons.warning,
+                  color: result.isHealthy ? Colors.green : Colors.orange,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    result.warning,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-                backgroundColor: goalColor,
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Recommendation
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
               ),
             ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.lightbulb_outline,
+                  size: 20,
+                  color: Colors.amber.withValues(alpha: 0.9),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    result.recommendation,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
 
-            const SizedBox(height: 16),
+          const SizedBox(height: 16),
 
-            // Summary stats
+          // Macros tip
+          if (result.goal != WeightGoal.maintenance)
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
+                color: Colors.white.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _InfoColumn(
-                        icon: result.goal == WeightGoal.loss
-                            ? Icons.remove_circle
-                            : Icons.add_circle,
-                        label: result.goal == WeightGoal.loss
-                            ? 'Déficit'
-                            : 'Superávit',
-                        value: '${result.dailyChange.toStringAsFixed(0)} kcal',
-                      ),
-                      _InfoColumn(
-                        icon: Icons.calendar_today,
-                        label: 'Por semana',
-                        value: '${result.weeklyWeightChange}kg',
-                      ),
-                      _InfoColumn(
-                        icon: result.isHealthy
-                            ? Icons.check_circle
-                            : Icons.warning,
-                        label: 'Status',
-                        value: result.isHealthy ? 'Saudável' : 'Revisar',
-                        valueColor: result.isHealthy ? Colors.green : Colors.orange,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Warning/status
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: result.isHealthy
-                    ? Colors.green.shade50
-                    : Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: result.isHealthy ? Colors.green : Colors.orange,
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    result.isHealthy ? Icons.check_circle : Icons.warning,
-                    color: result.isHealthy ? Colors.green : Colors.orange,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.warning,
-                      style: TextStyle(
-                        color: result.isHealthy
-                            ? Colors.green.shade900
-                            : Colors.orange.shade900,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Recommendation
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.lightbulb_outline,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.recommendation,
-                      style: TextStyle(color: colorScheme.onSecondaryContainer),
+                  Text(
+                    'Dicas importantes:',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
                     ),
                   ),
+                  const SizedBox(height: 8),
+                  if (result.goal == WeightGoal.loss) ...[
+                    Text(
+                      '• Alta proteína preserva massa muscular',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      '• Treine força 3-4x por semana',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      '• Reavalie a cada 2-4 semanas',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ] else ...[
+                    Text(
+                      '• Combine com treino de força intenso',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      '• Proteína: 1.6-2.2g por kg de peso',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                    Text(
+                      '• Ganho lento = mais músculo, menos gordura',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Macros tip
-            if (result.goal != WeightGoal.maintenance)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Dicas importantes:',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 8),
-                    if (result.goal == WeightGoal.loss) ...[
-                      const Text('• Alta proteína preserva massa muscular'),
-                      const Text('• Treine força 3-4x por semana'),
-                      const Text('• Reavalie a cada 2-4 semanas'),
-                    ] else ...[
-                      const Text('• Combine com treino de força intenso'),
-                      const Text('• Proteína: 1.6-2.2g por kg de peso'),
-                      const Text('• Ganho lento = mais músculo, menos gordura'),
-                    ],
-                  ],
-                ),
-              ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -586,18 +639,26 @@ class _InfoColumn extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, size: 20),
+        Icon(
+          icon,
+          size: 20,
+          color: Colors.white.withValues(alpha: 0.7),
+        ),
         const SizedBox(height: 4),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 13,
+          ),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: valueColor,
-              ),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+            color: valueColor ?? Colors.white.withValues(alpha: 0.9),
+          ),
         ),
       ],
     );

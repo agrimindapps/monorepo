@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/alcool_sangue_calculator.dart';
-import '../../domain/calculators/bmi_calculator.dart';
+import '../../domain/calculators/bmi_calculator.dart' show Gender;
 
 /// Página da calculadora de álcool no sangue
 class AlcoolSangueCalculatorPage extends StatefulWidget {
@@ -37,289 +36,233 @@ class _AlcoolSangueCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.local_bar,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Concentração de Álcool no Sangue',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Estima o BAC (Blood Alcohol Concentration) usando a fórmula '
-                            'de Widmark. ATENÇÃO: Esta é apenas uma estimativa. Não dirija '
-                            'após consumir qualquer quantidade de álcool.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+    return CalculatorPageLayout(
+      title: 'Álcool no Sangue',
+      subtitle: 'Blood Alcohol Concentration (BAC)',
+      icon: Icons.local_bar,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: 'Estima o BAC usando a fórmula de Widmark. '
+          'ATENÇÃO: Esta é apenas uma estimativa. Não dirija após consumir qualquer quantidade de álcool.',
+      maxContentWidth: 700,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              // Share is handled in result card
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Warning Card
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: Colors.red.withValues(alpha: 0.3),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Warning Card
-                  Card(
-                    color: Colors.red.shade50,
-                    child: Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.warning, color: Colors.red),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'NUNCA dirija após consumir álcool. Lei Seca: 0 tolerância no Brasil.',
-                              style: TextStyle(
-                                color: Colors.red.shade900,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Informações',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Gender selection
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Masculino',
-                                    icon: Icons.male,
-                                    isSelected: _gender == Gender.male,
-                                    onTap: () =>
-                                        setState(() => _gender = Gender.male),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: _GenderButton(
-                                    label: 'Feminino',
-                                    icon: Icons.female,
-                                    isSelected: _gender == Gender.female,
-                                    onTap: () =>
-                                        setState(() => _gender = Gender.female),
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Weight input
-                            SizedBox(
-                              width: 200,
-                              child: StandardInputField(
-                                label: 'Peso',
-                                controller: _weightController,
-                                suffix: 'kg',
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d*'),
-                                  ),
-                                ],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Obrigatório';
-                                  }
-                                  final num = double.tryParse(value);
-                                  if (num == null || num <= 0 || num > 500) {
-                                    return 'Valor inválido';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Drink type selection
-                            Text(
-                              'Tipo de bebida',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(height: 8),
-
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 8,
-                              children: [
-                                _DrinkTypeChip(
-                                  type: DrinkType.beer,
-                                  label: '🍺 Cerveja (350ml)',
-                                  isSelected: _drinkType == DrinkType.beer,
-                                  onTap: () =>
-                                      setState(() => _drinkType = DrinkType.beer),
-                                ),
-                                _DrinkTypeChip(
-                                  type: DrinkType.wine,
-                                  label: '🍷 Vinho (150ml)',
-                                  isSelected: _drinkType == DrinkType.wine,
-                                  onTap: () =>
-                                      setState(() => _drinkType = DrinkType.wine),
-                                ),
-                                _DrinkTypeChip(
-                                  type: DrinkType.spirits,
-                                  label: '🥃 Destilado (45ml)',
-                                  isSelected: _drinkType == DrinkType.spirits,
-                                  onTap: () => setState(
-                                      () => _drinkType = DrinkType.spirits),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            // Inputs Row
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Número de doses',
-                                    controller: _drinksController,
-                                    suffix: 'doses',
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = int.tryParse(value);
-                                      if (num == null || num <= 0 || num > 50) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 200,
-                                  child: StandardInputField(
-                                    label: 'Horas desde 1ª dose',
-                                    controller: _hoursController,
-                                    suffix: 'horas',
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'^\d*\.?\d*'),
-                                      ),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num < 0 || num > 48) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular BAC',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Colors.red, size: 20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'NUNCA dirija após consumir álcool. Lei Seca: 0 tolerância no Brasil.',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
                         ),
                       ),
                     ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Gender selection
+              Text(
+                'Selecione o gênero',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Masculino',
+                      icon: Icons.male,
+                      isSelected: _gender == Gender.male,
+                      onTap: () => setState(() => _gender = Gender.male),
+                    ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null) _BacResultCard(result: _result!),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _GenderButton(
+                      label: 'Feminino',
+                      icon: Icons.female,
+                      isSelected: _gender == Gender.female,
+                      onTap: () => setState(() => _gender = Gender.female),
+                    ),
+                  ),
                 ],
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Weight input
+              _DarkInputField(
+                label: 'Peso',
+                controller: _weightController,
+                suffix: 'kg',
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Obrigatório';
+                  }
+                  final num = double.tryParse(value);
+                  if (num == null || num <= 0 || num > 500) {
+                    return 'Valor inválido';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              // Drink type selection
+              Text(
+                'Tipo de bebida',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  _DrinkTypeChip(
+                    type: DrinkType.beer,
+                    label: '🍺 Cerveja (350ml)',
+                    isSelected: _drinkType == DrinkType.beer,
+                    onTap: () => setState(() => _drinkType = DrinkType.beer),
+                  ),
+                  _DrinkTypeChip(
+                    type: DrinkType.wine,
+                    label: '🍷 Vinho (150ml)',
+                    isSelected: _drinkType == DrinkType.wine,
+                    onTap: () => setState(() => _drinkType = DrinkType.wine),
+                  ),
+                  _DrinkTypeChip(
+                    type: DrinkType.spirits,
+                    label: '🥃 Destilado (45ml)',
+                    isSelected: _drinkType == DrinkType.spirits,
+                    onTap: () => setState(() => _drinkType = DrinkType.spirits),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Inputs Row
+              Row(
+                children: [
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Número de doses',
+                      controller: _drinksController,
+                      suffix: 'doses',
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = int.tryParse(value);
+                        if (num == null || num <= 0 || num > 50) {
+                          return 'Valor inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _DarkInputField(
+                      label: 'Horas desde 1ª dose',
+                      controller: _hoursController,
+                      suffix: 'horas',
+                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Obrigatório';
+                        }
+                        final num = double.tryParse(value);
+                        if (num == null || num < 0 || num > 48) {
+                          return 'Valor inválido';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular BAC',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _BacResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -327,7 +270,9 @@ class _AlcoolSangueCalculatorPageState
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = AlcoolSangueCalculator.calculate(
       weightKg: double.parse(_weightController.text),
@@ -338,6 +283,88 @@ class _AlcoolSangueCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+}
+
+/// Dark themed input field for the calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -356,24 +383,26 @@ class _GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.health;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
-      borderRadius: BorderRadius.circular(12),
+      color: isSelected 
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: const EdgeInsets.symmetric(vertical: 18),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.5),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
             children: [
@@ -381,17 +410,18 @@ class _GenderButton extends StatelessWidget {
                 icon,
                 size: 32,
                 color: isSelected
-                    ? colorScheme.primary
-                    : colorScheme.onSurface.withValues(alpha: 0.7),
+                    ? accentColor
+                    : Colors.white.withValues(alpha: 0.6),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 6),
               Text(
                 label,
                 style: TextStyle(
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 14,
                   color: isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurface.withValues(alpha: 0.7),
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -417,14 +447,53 @@ class _DrinkTypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.health;
 
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onTap(),
-      selectedColor: colorScheme.primaryContainer,
-      checkmarkColor: colorScheme.primary,
+    return Material(
+      color: isSelected
+          ? accentColor.withValues(alpha: 0.2)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
+              width: isSelected ? 2 : 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isSelected)
+                const Padding(
+                  padding: EdgeInsets.only(right: 6),
+                  child: Icon(
+                    Icons.check_circle,
+                    size: 16,
+                    color: CalculatorAccentColors.health,
+                  ),
+                ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  color: isSelected
+                      ? accentColor
+                      : Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -446,183 +515,217 @@ class _BacResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     final levelColor = _getLevelColor(result.level);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Resultado',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: levelColor.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header with share
+          Row(
+            children: [
+              const Icon(Icons.assessment, color: CalculatorAccentColors.health),
+              const SizedBox(width: 8),
+              Text(
+                'Resultado',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.9),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatGeneric(
-                    title: 'Álcool no Sangue',
-                    data: {
-                      '📊 BAC': '${result.bac.toStringAsFixed(3)} g/dL',
-                      '🏷️ Nível': result.levelText,
-                      '⚠️ Pode dirigir?': result.canDrive ? 'Sim' : 'NÃO',
-                      '💡 Aviso': result.warning,
-                    },
+              ),
+              const Spacer(),
+              ShareButton(
+                text: ShareFormatter.formatGeneric(
+                  title: 'Álcool no Sangue',
+                  data: {
+                    '📊 BAC': '${result.bac.toStringAsFixed(3)} g/dL',
+                    '🏷️ Nível': result.levelText,
+                    '⚠️ Pode dirigir?': result.canDrive ? 'Sim' : 'NÃO',
+                    '💡 Aviso': result.warning,
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // BAC Value
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              decoration: BoxDecoration(
+                color: levelColor.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: levelColor, width: 2),
+              ),
+              child: Column(
+                children: [
+                  Text(
+                    result.bac.toStringAsFixed(3),
+                    style: TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: levelColor,
+                    ),
+                  ),
+                  Text(
+                    'g/dL',
+                    style: TextStyle(
+                      color: levelColor,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Level chip
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: levelColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                result.levelText,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // Can drive indicator
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: result.canDrive
+                  ? Colors.green.withValues(alpha: 0.15)
+                  : Colors.red.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: result.canDrive ? Colors.green : Colors.red,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  result.canDrive ? Icons.check_circle : Icons.cancel,
+                  color: result.canDrive ? Colors.green : Colors.red,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    result.canDrive
+                        ? 'Abaixo do limite legal'
+                        : 'PROIBIDO DIRIGIR',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: result.canDrive ? Colors.green : Colors.red,
+                    ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+          ),
 
-            // BAC Value
-            Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                decoration: BoxDecoration(
-                  color: levelColor.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: levelColor, width: 2),
-                ),
-                child: Column(
+          const SizedBox(height: 16),
+
+          // Effects
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Text(
-                      result.bac.toStringAsFixed(3),
-                      style:
-                          Theme.of(context).textTheme.displayMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: levelColor,
-                              ),
+                    Icon(
+                      Icons.psychology_outlined,
+                      size: 18,
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
+                    const SizedBox(width: 8),
                     Text(
-                      'g/dL',
+                      'Efeitos esperados',
                       style: TextStyle(
-                        color: levelColor,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Level
-            Center(
-              child: Chip(
-                label: Text(
-                  result.levelText,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                const SizedBox(height: 8),
+                Text(
+                  result.effects,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.7),
+                    height: 1.4,
                   ),
                 ),
-                backgroundColor: levelColor,
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Warning
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
               ),
             ),
-
-            const SizedBox(height: 16),
-
-            // Can drive indicator
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: result.canDrive
-                    ? Colors.green.shade50
-                    : Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: result.canDrive ? Colors.green : Colors.red,
-                  width: 2,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.warning_amber_rounded,
+                  size: 20,
+                  color: Colors.amber.withValues(alpha: 0.9),
                 ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    result.canDrive ? Icons.check_circle : Icons.cancel,
-                    color: result.canDrive ? Colors.green : Colors.red,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.canDrive
-                          ? 'Abaixo do limite legal'
-                          : 'PROIBIDO DIRIGIR',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: result.canDrive ? Colors.green : Colors.red,
-                      ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    result.warning,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontWeight: FontWeight.w500,
+                      height: 1.4,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-
-            const SizedBox(height: 16),
-
-            // Effects
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Efeitos esperados:',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(result.effects),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Warning
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: colorScheme.secondaryContainer.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.warning,
-                    size: 20,
-                    color: colorScheme.secondary,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      result.warning,
-                      style: TextStyle(
-                        color: colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

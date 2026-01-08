@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
-import '../../../../shared/widgets/share_button.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/macronutrients_calculator.dart';
 
 /// Página da calculadora de Macronutrientes
@@ -31,169 +29,111 @@ class _MacronutrientsCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CalculatorAppBar(
-      ),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.pie_chart_outline,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Distribuição de Macros',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Calcula a distribuição ideal de carboidratos, proteínas '
-                            'e gorduras baseado nas suas calorias diárias e objetivo.',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Calorias diárias',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Use a calculadora de TMB para descobrir suas calorias',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.6),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-
-                            StandardInputField(
-                              label: 'Calorias',
-                              controller: _caloriesController,
-                              suffix: 'kcal',
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Obrigatório';
-                                }
-                                final num = int.tryParse(value);
-                                if (num == null || num < 500 || num > 10000) {
-                                  return 'Entre 500 e 10000 kcal';
-                                }
-                                return null;
-                              },
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Text(
-                              'Seu objetivo',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                            ),
-                            const SizedBox(height: 12),
-                            
-                            ...DietGoal.values.map((goal) {
-                              final isSelected = _selectedGoal == goal;
-                              final distribution =
-                                  MacronutrientsCalculator.defaultDistributions[goal]!;
-                              
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: _GoalOption(
-                                  goal: goal,
-                                  isSelected: isSelected,
-                                  distribution: distribution,
-                                  onTap: () =>
-                                      setState(() => _selectedGoal = goal),
-                                ),
-                              );
-                            }),
-
-                            const SizedBox(height: 16),
-
-                            CalculatorButton(
-                              label: 'Calcular Macros',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Result
-                  if (_result != null) _MacroResultCard(result: _result!),
+    return CalculatorPageLayout(
+      title: 'Macronutrientes',
+      subtitle: 'Distribuição de Carboidratos, Proteínas e Gorduras',
+      icon: Icons.restaurant,
+      accentColor: CalculatorAccentColors.health,
+      categoryName: 'Saúde',
+      instructions: 'Informe suas calorias diárias e objetivo para calcular a distribuição ideal de macronutrientes (carboidratos, proteínas e gorduras).',
+      maxContentWidth: 700,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () {
+              // TODO: Implement share
+            },
+            tooltip: 'Compartilhar',
+          ),
+      ],
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Calories input
+              _DarkInputField(
+                label: 'Calorias diárias',
+                controller: _caloriesController,
+                suffix: 'kcal',
+                keyboardType: TextInputType.number,
+                hint: 'Ex: 2000',
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
                 ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Obrigatório';
+                  }
+                  final num = int.tryParse(value);
+                  if (num == null || num < 500 || num > 10000) {
+                    return 'Entre 500 e 10000 kcal';
+                  }
+                  return null;
+                },
               ),
-            ),
+
+              const SizedBox(height: 24),
+
+              // Goal selection
+              Text(
+                'Selecione seu objetivo',
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              ...DietGoal.values.map((goal) {
+                final isSelected = _selectedGoal == goal;
+                final distribution =
+                    MacronutrientsCalculator.defaultDistributions[goal]!;
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: _GoalOption(
+                    goal: goal,
+                    isSelected: isSelected,
+                    distribution: distribution,
+                    onTap: () => setState(() => _selectedGoal = goal),
+                  ),
+                );
+              }),
+
+              const SizedBox(height: 24),
+
+              // Calculate button
+              SizedBox(
+                height: 52,
+                child: ElevatedButton.icon(
+                  onPressed: _calculate,
+                  icon: const Icon(Icons.calculate_rounded),
+                  label: const Text(
+                    'Calcular Distribuição',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CalculatorAccentColors.health,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+
+              // Result
+              if (_result != null) ...[
+                const SizedBox(height: 32),
+                _MacroResultCard(result: _result!),
+              ],
+            ],
           ),
         ),
       ),
@@ -201,7 +141,9 @@ class _MacronutrientsCalculatorPageState
   }
 
   void _calculate() {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
     final result = MacronutrientsCalculator.calculate(
       dailyCalories: double.parse(_caloriesController.text),
@@ -212,6 +154,95 @@ class _MacronutrientsCalculatorPageState
   }
 }
 
+/// Dark themed input field
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final String? hint;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.hint,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.3),
+            ),
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.health,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Goal option card with dark theme
 class _GoalOption extends StatelessWidget {
   final DietGoal goal;
   final bool isSelected;
@@ -237,21 +268,23 @@ class _GoalOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    const accentColor = CalculatorAccentColors.health;
 
     return Material(
-      color: isSelected ? colorScheme.primaryContainer : colorScheme.surface,
+      color: isSelected
+          ? accentColor.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             border: Border.all(
               color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline.withValues(alpha: 0.3),
+                  ? accentColor
+                  : Colors.white.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -260,7 +293,10 @@ class _GoalOption extends StatelessWidget {
             children: [
               Icon(
                 _getGoalIcon(),
-                color: isSelected ? colorScheme.primary : colorScheme.onSurface,
+                size: 24,
+                color: isSelected
+                    ? accentColor
+                    : Colors.white.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -271,26 +307,29 @@ class _GoalOption extends StatelessWidget {
                       MacronutrientsCalculator.getGoalDescription(goal),
                       style: TextStyle(
                         fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.normal,
+                            isSelected ? FontWeight.bold : FontWeight.w500,
+                        fontSize: 14,
                         color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurface,
+                            ? accentColor
+                            : Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
+                    const SizedBox(height: 2),
                     Text(
                       'C: ${distribution.carbsPercent}% | P: ${distribution.proteinPercent}% | G: ${distribution.fatPercent}%',
                       style: TextStyle(
                         fontSize: 12,
-                        color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Colors.white.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
                 ),
               ),
               if (isSelected)
-                Icon(
+                const Icon(
                   Icons.check_circle,
-                  color: colorScheme.primary,
+                  color: accentColor,
+                  size: 22,
                 ),
             ],
           ),
@@ -300,6 +339,7 @@ class _GoalOption extends StatelessWidget {
   }
 }
 
+/// Result card with dark theme
 class _MacroResultCard extends StatelessWidget {
   final MacronutrientsResult result;
 
@@ -307,131 +347,176 @@ class _MacroResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.assessment, color: colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  'Sua distribuição',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: CalculatorAccentColors.health.withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          Row(
+            children: [
+              const Icon(
+                Icons.assessment,
+                color: CalculatorAccentColors.health,
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Distribuição Calculada',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white.withValues(alpha: 0.95),
                 ),
-                const Spacer(),
-                ShareButton(
-                  text: ShareFormatter.formatMacronutrientsCalculation(
-                    totalCalories: result.totalCalories,
-                    carbsGrams: result.carbsGrams,
-                    carbsPercent: result.carbsPercent,
-                    proteinGrams: result.proteinGrams,
-                    proteinPercent: result.proteinPercent,
-                    fatGrams: result.fatGrams,
-                    fatPercent: result.fatPercent,
-                    goal: MacronutrientsCalculator.getGoalDescription(result.goal),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
 
-            // Total calories
-            Center(
+          // Total calories
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              decoration: BoxDecoration(
+                color: CalculatorAccentColors.health.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: CalculatorAccentColors.health,
+                  width: 2,
+                ),
+              ),
               child: Column(
                 children: [
                   Text(
-                    '${result.totalCalories.toStringAsFixed(0)}',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: colorScheme.primary,
-                        ),
+                    result.totalCalories.toStringAsFixed(0),
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: CalculatorAccentColors.health,
+                    ),
                   ),
-                  Text(
+                  const Text(
                     'kcal/dia',
-                    style: TextStyle(color: colorScheme.primary),
+                    style: TextStyle(
+                      color: CalculatorAccentColors.health,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
             ),
+          ),
 
-            const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-            // Macro bars
-            _MacroBar(
-              label: 'Carboidratos',
-              grams: result.carbsGrams,
-              calories: result.carbsCalories,
-              percent: result.carbsPercent,
-              color: Colors.amber,
+          // Macro bars
+          _MacroBar(
+            label: 'Carboidratos',
+            grams: result.carbsGrams,
+            calories: result.carbsCalories,
+            percent: result.carbsPercent,
+            color: Colors.amber,
+          ),
+          const SizedBox(height: 12),
+          _MacroBar(
+            label: 'Proteínas',
+            grams: result.proteinGrams,
+            calories: result.proteinCalories,
+            percent: result.proteinPercent,
+            color: Colors.red,
+          ),
+          const SizedBox(height: 12),
+          _MacroBar(
+            label: 'Gorduras',
+            grams: result.fatGrams,
+            calories: result.fatCalories,
+            percent: result.fatPercent,
+            color: Colors.blue,
+          ),
+
+          const SizedBox(height: 24),
+
+          // Pie chart visualization
+          _MacroPieChart(result: result),
+
+          const SizedBox(height: 20),
+
+          // Tips section
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.amber.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: Colors.amber.withValues(alpha: 0.2),
+              ),
             ),
-            const SizedBox(height: 12),
-            _MacroBar(
-              label: 'Proteínas',
-              grams: result.proteinGrams,
-              calories: result.proteinCalories,
-              percent: result.proteinPercent,
-              color: Colors.red,
-            ),
-            const SizedBox(height: 12),
-            _MacroBar(
-              label: 'Gorduras',
-              grams: result.fatGrams,
-              calories: result.fatCalories,
-              percent: result.fatPercent,
-              color: Colors.blue,
-            ),
-
-            const SizedBox(height: 20),
-
-            // Pie chart visualization
-            _MacroPieChart(result: result),
-
-            const SizedBox(height: 16),
-
-            // Tips
-            Text(
-              'Dicas para ${MacronutrientsCalculator.getGoalDescription(result.goal)}',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            ...MacronutrientsCalculator.getTipsForGoal(result.goal).map(
-              (tip) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
                     Icon(
-                      Icons.check_circle_outline,
-                      size: 16,
-                      color: colorScheme.primary,
+                      Icons.lightbulb_outline,
+                      size: 20,
+                      color: Colors.amber.withValues(alpha: 0.9),
                     ),
                     const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        tip,
-                        style: const TextStyle(fontSize: 13),
+                    Text(
+                      'Dicas para ${MacronutrientsCalculator.getGoalDescription(result.goal)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Colors.white.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                ...MacronutrientsCalculator.getTipsForGoal(result.goal).map(
+                  (tip) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.check_circle_outline,
+                          size: 16,
+                          color: CalculatorAccentColors.health,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            tip,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
+/// Macro bar indicator with dark theme
 class _MacroBar extends StatelessWidget {
   final String label;
   final double grams;
@@ -457,33 +542,38 @@ class _MacroBar extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.w500),
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
             ),
             Text(
               '${grams.toStringAsFixed(0)}g (${calories.toStringAsFixed(0)} kcal)',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                fontSize: 13,
+                color: Colors.white.withValues(alpha: 0.6),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Stack(
           children: [
             Container(
-              height: 24,
+              height: 26,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
+                color: color.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(13),
               ),
             ),
             FractionallySizedBox(
               widthFactor: percent / 100,
               child: Container(
-                height: 24,
+                height: 26,
                 decoration: BoxDecoration(
                   color: color,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(13),
                 ),
                 child: Center(
                   child: Text(
@@ -504,6 +594,7 @@ class _MacroBar extends StatelessWidget {
   }
 }
 
+/// Pie chart visualization with dark theme
 class _MacroPieChart extends StatelessWidget {
   final MacronutrientsResult result;
 
@@ -511,36 +602,44 @@ class _MacroPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 120,
-          height: 120,
-          child: CustomPaint(
-            painter: _PieChartPainter(
-              carbsPercent: result.carbsPercent,
-              proteinPercent: result.proteinPercent,
-              fatPercent: result.fatPercent,
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.03),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 120,
+            height: 120,
+            child: CustomPaint(
+              painter: _PieChartPainter(
+                carbsPercent: result.carbsPercent,
+                proteinPercent: result.proteinPercent,
+                fatPercent: result.fatPercent,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 24),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _LegendItem(color: Colors.amber, label: 'Carbs'),
-            const SizedBox(height: 8),
-            _LegendItem(color: Colors.red, label: 'Proteínas'),
-            const SizedBox(height: 8),
-            _LegendItem(color: Colors.blue, label: 'Gorduras'),
-          ],
-        ),
-      ],
+          const SizedBox(width: 28),
+          const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _LegendItem(color: Colors.amber, label: 'Carboidratos'),
+              SizedBox(height: 10),
+              _LegendItem(color: Colors.red, label: 'Proteínas'),
+              SizedBox(height: 10),
+              _LegendItem(color: Colors.blue, label: 'Gorduras'),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
+/// Legend item for pie chart
 class _LegendItem extends StatelessWidget {
   final Color color;
   final String label;
@@ -552,20 +651,28 @@ class _LegendItem extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 16,
-          height: 16,
+          width: 18,
+          height: 18,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(5),
           ),
         ),
-        const SizedBox(width: 8),
-        Text(label),
+        const SizedBox(width: 10),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.white.withValues(alpha: 0.8),
+          ),
+        ),
       ],
     );
   }
 }
 
+/// Custom painter for pie chart with white center for dark background
 class _PieChartPainter extends CustomPainter {
   final int carbsPercent;
   final int proteinPercent;
@@ -581,11 +688,11 @@ class _PieChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = size.width / 2;
-    
+
     final paint = Paint()..style = PaintingStyle.fill;
-    
-    double startAngle = -1.5708; // -90 degrees in radians
-    
+
+    var startAngle = -1.5708; // -90 degrees in radians
+
     // Carbs
     paint.color = Colors.amber;
     final carbsSweep = (carbsPercent / 100) * 6.2832; // 2*pi
@@ -597,7 +704,7 @@ class _PieChartPainter extends CustomPainter {
       paint,
     );
     startAngle += carbsSweep;
-    
+
     // Protein
     paint.color = Colors.red;
     final proteinSweep = (proteinPercent / 100) * 6.2832;
@@ -609,7 +716,7 @@ class _PieChartPainter extends CustomPainter {
       paint,
     );
     startAngle += proteinSweep;
-    
+
     // Fat
     paint.color = Colors.blue;
     final fatSweep = (fatPercent / 100) * 6.2832;
@@ -620,9 +727,9 @@ class _PieChartPainter extends CustomPainter {
       true,
       paint,
     );
-    
-    // Inner circle (donut effect)
-    paint.color = Colors.white;
+
+    // Inner circle (donut effect) - dark color for dark background
+    paint.color = const Color(0xFF1A1A2E);
     canvas.drawCircle(center, radius * 0.5, paint);
   }
 

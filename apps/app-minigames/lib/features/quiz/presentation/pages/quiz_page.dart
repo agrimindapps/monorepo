@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../providers/quiz_game_notifier.dart';
 
 /// Quiz game page
@@ -52,7 +53,31 @@ class QuizPage extends ConsumerWidget {
             );
           }
 
-          return Column(
+          return EscKeyboardWrapper(
+            onEscPressed: () {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (_) => AlertDialog(
+                  title: const Text('Pausado'),
+                  content: const Text('Pressione ESC para continuar ou Reiniciar'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Continuar'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        notifier.restartGame();
+                      },
+                      child: const Text('Reiniciar'),
+                    ),
+                  ],
+                ),
+              );
+            },
+            child: Column(
             children: [
               // Header
               Container(
@@ -194,6 +219,7 @@ class QuizPage extends ConsumerWidget {
                 ),
               ),
             ],
+            ),
           );
         },
         loading: () => const Center(

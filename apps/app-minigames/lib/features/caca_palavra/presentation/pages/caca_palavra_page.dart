@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/enums.dart';
 import '../providers/caca_palavra_game_notifier.dart';
 import '../widgets/word_grid_widget.dart';
@@ -100,10 +101,34 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
   }
 
   Widget _buildGameContent(BuildContext context, dynamic gameState) {
-    return Column(
-      children: [
-        // Progress indicator
-        Container(
+    return EscKeyboardWrapper(
+      onEscPressed: () {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            title: const Text('Pausado'),
+            content: const Text('Pressione ESC para continuar ou Reiniciar'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Continuar'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  ref.read(cacaPalavraGameProvider.notifier).restartGame();
+                },
+                child: const Text('Reiniciar'),
+              ),
+            ],
+          ),
+        );
+      },
+      child: Column(
+        children: [
+          // Progress indicator
+          Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: const Color(0xFF4CAF50).withValues(alpha: 0.1),
@@ -172,6 +197,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
           ),
         ),
       ],
+      ),
     );
   }
 

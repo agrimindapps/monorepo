@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/enums.dart';
 import '../providers/soletrando_game_notifier.dart';
 import '../widgets/game_stats_widget.dart';
@@ -192,37 +193,62 @@ class _SoletrandoPageState extends ConsumerState<SoletrandoPage> {
                     ],
                   ),
                 )
-              : SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      // Game stats
-                      GameStatsWidget(gameState: gameState),
-                      const SizedBox(height: 20),
+              : EscKeyboardWrapper(
+                  onEscPressed: () {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => AlertDialog(
+                        title: const Text('Pausado'),
+                        content: const Text('Pressione ESC para continuar ou Reiniciar'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text('Continuar'),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              _startNewGame();
+                            },
+                            child: const Text('Reiniciar'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        // Game stats
+                        GameStatsWidget(gameState: gameState),
+                        const SizedBox(height: 20),
 
-                      // Word display
-                      WordDisplayWidget(gameState: gameState),
-                      const SizedBox(height: 20),
+                        // Word display
+                        WordDisplayWidget(gameState: gameState),
+                        const SizedBox(height: 20),
 
-                      // Hint button
-                      ElevatedButton.icon(
-                        onPressed: gameState.canUseHint ? _useHint : null,
-                        icon: const Icon(Icons.lightbulb),
-                        label: Text('Dica (${gameState.hintsRemaining})'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.amber,
-                          foregroundColor: Colors.black,
-                          disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
+                        // Hint button
+                        ElevatedButton.icon(
+                          onPressed: gameState.canUseHint ? _useHint : null,
+                          icon: const Icon(Icons.lightbulb),
+                          label: Text('Dica (${gameState.hintsRemaining})'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber,
+                            foregroundColor: Colors.black,
+                            disabledBackgroundColor: Colors.grey.withValues(alpha: 0.3),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
-                      // Letter keyboard
-                      LetterKeyboardWidget(
-                        guessedLetters: gameState.guessedLetters,
-                        onLetterPressed: _onLetterPressed,
-                        enabled: gameState.isActive,
-                      ),
-                    ],
+                        // Letter keyboard
+                        LetterKeyboardWidget(
+                          guessedLetters: gameState.guessedLetters,
+                          onLetterPressed: _onLetterPressed,
+                          enabled: gameState.isActive,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
     );

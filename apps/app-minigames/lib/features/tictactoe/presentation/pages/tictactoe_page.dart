@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../providers/tictactoe_game_notifier.dart';
 import '../widgets/game_board_widget.dart';
 import '../widgets/game_controls_widget.dart';
@@ -33,9 +34,33 @@ class TicTacToePage extends ConsumerWidget {
         ),
       ],
       child: gameState.when(
-        data: (state) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+        data: (state) => EscKeyboardWrapper(
+          onEscPressed: () {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => AlertDialog(
+                title: const Text('Pausado'),
+                content: const Text('Pressione ESC para continuar ou Reiniciar'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Continuar'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      ref.read(ticTacToeGameProvider.notifier).restartGame();
+                    },
+                    child: const Text('Reiniciar'),
+                  ),
+                ],
+              ),
+            );
+          },
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -142,6 +167,7 @@ class TicTacToePage extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
           ),
         loading: () => const Center(
           child: CircularProgressIndicator(color: Color(0xFF6A11CB)),

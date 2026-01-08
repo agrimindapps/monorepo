@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/achievement.dart';
 import '../providers/sudoku_notifier.dart';
@@ -107,64 +108,89 @@ class _SudokuPageState extends ConsumerState<SudokuPage> {
           ],
         ),
       ],
-      child: Column(
-        children: [
-          // Game stats
-          GameStatsWidget(gameState: gameState),
+      child: EscKeyboardWrapper(
+        onEscPressed: () {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => AlertDialog(
+              title: const Text('Pausado'),
+              content: const Text('Pressione ESC para continuar ou Reiniciar'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Continuar'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ref.read(sudokuGameProvider.notifier).restartGame();
+                  },
+                  child: const Text('Reiniciar'),
+                ),
+              ],
+            ),
+          );
+        },
+        child: Column(
+          children: [
+            // Game stats
+            GameStatsWidget(gameState: gameState),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // Sudoku grid
-          Expanded(
-            child: Center(
-              child: SudokuGridWidget(
-                grid: gameState.grid,
-                selectedCell: gameState.selectedCell,
-                onCellTap: (row, col) {
-                  ref.read(sudokuGameProvider.notifier).selectCell(row, col);
-                },
+            // Sudoku grid
+            Expanded(
+              child: Center(
+                child: SudokuGridWidget(
+                  grid: gameState.grid,
+                  selectedCell: gameState.selectedCell,
+                  onCellTap: (row, col) {
+                    ref.read(sudokuGameProvider.notifier).selectCell(row, col);
+                  },
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // Number pad
-          NumberPadWidget(
-            notesMode: gameState.notesMode,
-            onNumberTap: (number) {
-              ref.read(sudokuGameProvider.notifier).placeNumber(number);
-            },
-            onClearTap: () {
-              ref.read(sudokuGameProvider.notifier).clearCell();
-            },
-          ),
+            // Number pad
+            NumberPadWidget(
+              notesMode: gameState.notesMode,
+              onNumberTap: (number) {
+                ref.read(sudokuGameProvider.notifier).placeNumber(number);
+              },
+              onClearTap: () {
+                ref.read(sudokuGameProvider.notifier).clearCell();
+              },
+            ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          // Game controls with undo/redo
-          GameControlsWidget(
-            notesMode: gameState.notesMode,
-            canUseHint: gameState.canUseHint,
-            canUndo: gameState.canUndo,
-            canRedo: gameState.canRedo,
-            onNotesToggle: () {
-              ref.read(sudokuGameProvider.notifier).toggleNotesMode();
-            },
-            onHint: () {
-              ref.read(sudokuGameProvider.notifier).getHint();
-            },
-            onRestart: () {
-              _showRestartDialog();
-            },
-            onUndo: () {
-              ref.read(sudokuGameProvider.notifier).undo();
-            },
-            onRedo: () {
-              ref.read(sudokuGameProvider.notifier).redo();
-            },
-          ),
-        ],
+            // Game controls with undo/redo
+            GameControlsWidget(
+              notesMode: gameState.notesMode,
+              canUseHint: gameState.canUseHint,
+              canUndo: gameState.canUndo,
+              canRedo: gameState.canRedo,
+              onNotesToggle: () {
+                ref.read(sudokuGameProvider.notifier).toggleNotesMode();
+              },
+              onHint: () {
+                ref.read(sudokuGameProvider.notifier).getHint();
+              },
+              onRestart: () {
+                _showRestartDialog();
+              },
+              onUndo: () {
+                ref.read(sudokuGameProvider.notifier).undo();
+              },
+              onRedo: () {
+                ref.read(sudokuGameProvider.notifier).redo();
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

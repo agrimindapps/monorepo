@@ -63,16 +63,8 @@ class _DiagnosticoDialogWidgetState
       
       // Tenta buscar por ID do defensivo
       if (widget.diagnostico.defensivoId.isNotEmpty) {
-        // Primeiro tenta como int (ID do banco)
-        final intId = int.tryParse(widget.diagnostico.defensivoId);
-        Fitossanitario? defensivo;
-        
-        if (intId != null) {
-          defensivo = await defensivoRepository.findById(intId);
-        }
-        
-        // Se não encontrou, tenta como string (idDefensivo original)
-        defensivo ??= await defensivoRepository.findByIdDefensivo(widget.diagnostico.defensivoId);
+        // Busca pelo idDefensivo (String PK)
+        Fitossanitario? defensivo = await defensivoRepository.findByIdDefensivo(widget.diagnostico.defensivoId);
         
         if (mounted) {
           setState(() {

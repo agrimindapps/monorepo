@@ -166,7 +166,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                       : throw Exception('Defensivo não encontrado'),
                 );
                 debugPrint(
-                  '✅ [DetalheDiagnosticoNotifier] Defensivo recuperado por nome: ${defensivo.nome} (ID: ${defensivo.id})',
+                  '✅ [DetalheDiagnosticoNotifier] Defensivo recuperado por nome: ${defensivo.nome} (ID: ${defensivo.idDefensivo})',
                 );
               }
 
@@ -184,7 +184,7 @@ class DetalheDiagnosticoNotifier extends _$DetalheDiagnosticoNotifier {
                   '   defensivoInfo encontrado: ${defensivoInfo != null ? "SIM" : "NULL"}',
                 );
                 if (defensivoInfo != null) {
-                  debugPrint('   - toxicidade: ${defensivoInfo.toxicidade}');
+                  debugPrint('   - classe tóxico: ${defensivo.classeToxico}');
                 } else {
                   debugPrint(
                     '   ⚠️ FitossanitariosInfo NÃO ENCONTRADO para idDefensivo=${defensivo.idDefensivo}',

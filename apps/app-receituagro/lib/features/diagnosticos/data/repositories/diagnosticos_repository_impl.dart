@@ -131,7 +131,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       );
 
       // Direct string FK query - no need to resolve int IDs
-      final diagnosticosDrift = await _repository.findByDefensivoId(idDefensivo);
+      final diagnosticosDrift = await _repository.findByDefensivo(idDefensivo);
 
       developer.log(
         '✅ queryByDefensivo (Repository) - ${diagnosticosDrift.length} registros Drift encontrados',
@@ -165,7 +165,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
   ) async {
     try {
       // Direct string FK query
-      final diagnosticosDrift = await _repository.findByCulturaId(idCultura);
+      final diagnosticosDrift = await _repository.findByCultura(idCultura);
       final entities = await _mapAndEnrichList(diagnosticosDrift);
 
       return Right(entities);
@@ -185,7 +185,7 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       );
 
       // Direct string FK query
-      final diagnosticosDrift = await _repository.findByPragaId(idPraga);
+      final diagnosticosDrift = await _repository.findByPraga(idPraga);
       
       developer.log(
         '✅ queryByPraga (Repository) - ${diagnosticosDrift.length} diagnósticos encontrados para pragaId: $idPraga',
@@ -315,8 +315,8 @@ class DiagnosticosRepositoryImpl implements IDiagnosticosRepository {
       final unidades = <String>{};
 
       for (final d in diagnosticos) {
-        if (d.um.isNotEmpty) {
-          unidades.add(d.um);
+        if (d.um?.isNotEmpty ?? false) {
+          unidades.add(d.um!);
         }
       }
 

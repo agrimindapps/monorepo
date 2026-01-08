@@ -20,8 +20,8 @@ class DiagnosticoMapper {
       nomePraga: '', // Resolved via extension
       dosagem: DosagemEntity(
         dosagemMinima: double.tryParse(drift.dsMin ?? '0'),
-        dosagemMaxima: double.tryParse(drift.dsMax) ?? 0.0,
-        unidadeMedida: drift.um,
+        dosagemMaxima: double.tryParse(drift.dsMax ?? '0') ?? 0.0,
+        unidadeMedida: drift.um ?? '',
       ),
       aplicacao: AplicacaoEntity(
         terrestre: drift.minAplicacaoT != null

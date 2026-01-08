@@ -168,7 +168,7 @@ class _DiagnosticoDefensivoDialogWidgetState
   void _navigateToPraga(BuildContext context) {
     final nomePraga = _pragaData?.nome ?? _getProperty('nomePraga', 'grupo');
     final nomeCientifico = _pragaData?.nomeLatino ?? _getProperty('nomeComumPraga', 'nomeComum');
-    final idPraga = _pragaData?.id.toString() ?? _getProperty('fkIdPraga') ?? _getProperty('idPraga');
+    final idPraga = _pragaData?.idPraga ?? _getProperty('fkIdPraga') ?? _getProperty('idPraga');
 
     if (nomePraga != null) {
       Navigator.of(context).pushNamed(

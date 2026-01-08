@@ -244,11 +244,10 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Resolve o nome da cultura pelo ID usando o repository
   Future<String> _resolveCulturaNome(String idCultura) async {
     try {
-      final idCulturaInt = int.tryParse(idCultura);
-      if (idCulturaInt == null) return 'Não especificado';
+      if (idCultura.isEmpty) return 'Não especificado';
 
       final culturaRepository = ref.read(culturasRepositoryProvider);
-      final culturaData = await culturaRepository.findById(idCulturaInt);
+      final culturaData = await culturaRepository.findByIdCultura(idCultura);
       if (culturaData != null && culturaData.nome.isNotEmpty) {
         return culturaData.nome;
       }
@@ -260,14 +259,13 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
 
   /// Resolve o nome da praga pelo ID usando o repository
   /// 
-  /// NOTA: idPraga aqui é na verdade o pragaId (FK int) convertido para string
+  /// NOTA: idPraga aqui é o idPraga (String PK)
   Future<String> _resolvePragaNome(String idPraga) async {
     try {
-      final pragaIdInt = int.tryParse(idPraga);
-      if (pragaIdInt == null) return '';
+      if (idPraga.isEmpty) return '';
       
       final pragasRepository = ref.read(pragasRepositoryProvider);
-      final pragaData = await pragasRepository.findById(pragaIdInt);
+      final pragaData = await pragasRepository.findByIdPraga(idPraga);
       if (pragaData != null && pragaData.nome.isNotEmpty) {
         return pragaData.nome;
       }
@@ -281,11 +279,10 @@ class DiagnosticosPragaNotifier extends _$DiagnosticosPragaNotifier {
   /// Retorna (nome, ingredienteAtivo)
   Future<(String, String)> _resolveDefensivoData(String idDefensivo) async {
     try {
-      final defensivoIdInt = int.tryParse(idDefensivo);
-      if (defensivoIdInt == null) return ('', 'Não especificado');
+      if (idDefensivo.isEmpty) return ('', 'Não especificado');
       
       final defensivoRepository = ref.read(fitossanitariosRepositoryProvider);
-      final defensivoData = await defensivoRepository.findById(defensivoIdInt);
+      final defensivoData = await defensivoRepository.findByIdDefensivo(idDefensivo);
       
       if (defensivoData != null) {
         final nome = defensivoData.nome;

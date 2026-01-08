@@ -155,7 +155,7 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       if (pragaDrift != null) {
         if (kDebugMode) {
           debugPrint(
-            '✅ [DETALHE_PRAGA] Praga encontrada: id=${pragaDrift.id}, idPraga=${pragaDrift.idPraga}',
+            '✅ [DETALHE_PRAGA] Praga encontrada: idPraga=${pragaDrift.idPraga}',
           );
         }
 
@@ -248,7 +248,6 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       PragasInfData? pragaInfo;
       PlantasInfData? plantaInfo;
 
-      final pragaId = currentState.pragaData!.id;
       final pragaIdPraga = currentState.pragaData!.idPraga;
       final pragaTipo = currentState.pragaData!.tipo;
 
@@ -261,12 +260,12 @@ class DetalhePragaNotifier extends _$DetalhePragaNotifier {
       if (pragaTipo == '1' || pragaTipo == '2') {
         // Tipo 1 = Inseto, Tipo 2 = Doença -> usa PragasInf
         final pragasInfRepo = ref.read(db.pragasInfRepositoryProvider);
-        pragaInfo = await pragasInfRepo.findByPragaId(pragaId);
+        pragaInfo = await pragasInfRepo.findByPragaId(pragaIdPraga);
         pragaInfo ??= await pragasInfRepo.findByIdReg(pragaIdPraga);
       } else if (pragaTipo == '3') {
-        // Tipo 3 = Planta Daninha -> usa PlantasInf
+        // Tipo 3 = Planta Daninha -> usa PlantasInf (refs pragas!)
         final plantasInfRepo = ref.read(db.plantasInfRepositoryProvider);
-        plantaInfo = await plantasInfRepo.findByCulturaId(pragaId);
+        plantaInfo = await plantasInfRepo.findByPragaId(pragaIdPraga);
         plantaInfo ??= await plantasInfRepo.findByIdReg(pragaIdPraga);
       }
 

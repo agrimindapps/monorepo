@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/user_preferences_providers.dart';
-import '../../../../core/theme/theme_providers.dart';
+
+// Modern dark theme colors matching calculator pages
+const _backgroundColor = Color(0xFF0F0F1A);
+const _surfaceColor = Color(0xFF1A1A2E);
+const _sidebarColor = Color(0xFF16162A);
+const _primaryAccent = Color(0xFF4CAF50);
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -14,41 +19,86 @@ class HomePage extends ConsumerStatefulWidget {
 
 class _HomePageState extends ConsumerState<HomePage> {
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _searchQuery = '';
   String _selectedCategory = 'Todos';
+  String _selectedFilter = '';
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
-  void _toggleViewMode() {
-    ref.read(viewModeProvider.notifier).toggle();
-  }
+  List<_CalculatorItem> _getFilteredCalculators(
+    List<_CalculatorItem> allCalculators,
+    List<String> favorites,
+    List<String> recents,
+  ) {
+    var items = <_CalculatorItem>[];
 
-  bool _shouldShowSection(String sectionTitle, List<_CalculatorItem> items) {
-    // Filter by category first
-    if (_selectedCategory != 'Todos' && sectionTitle != _selectedCategory) {
-      return false;
+    // Apply filter first
+    if (_selectedFilter == 'Favoritos') {
+      items = allCalculators.where((c) => favorites.contains(c.route)).toList();
+    } else if (_selectedFilter == 'Recentes') {
+      items = recents
+          .map((route) => allCalculators.firstWhere(
+                (c) => c.route == route,
+                orElse: () => allCalculators.first,
+              ))
+          .toList();
+    } else if (_selectedFilter == 'Popular') {
+      items = allCalculators.where((c) => c.isPopular).toList();
+    } else if (_selectedCategory != 'Todos') {
+      // Filter by category
+      switch (_selectedCategory) {
+        case 'Financeiro':
+          items = _financialCalculators;
+          break;
+        case 'Construção':
+          items = _constructionCalculators;
+          break;
+        case 'Saúde':
+          items = _healthCalculators;
+          break;
+        case 'Pet':
+          items = _petCalculators;
+          break;
+        case 'Agricultura':
+          items = _agricultureCalculators;
+          break;
+        default:
+          items = allCalculators;
+      }
+    } else {
+      items = allCalculators;
     }
 
-    // Then filter by search
-    if (_searchQuery.isEmpty) return true;
-    if (sectionTitle.toLowerCase().contains(_searchQuery)) return true;
-    return items.any((item) => item.title.toLowerCase().contains(_searchQuery));
+    // Apply search
+    if (_searchQuery.isNotEmpty) {
+      items = items.where((item) {
+        return item.title.toLowerCase().contains(_searchQuery) ||
+            item.description.toLowerCase().contains(_searchQuery) ||
+            item.tags.any((t) => t.toLowerCase().contains(_searchQuery));
+      }).toList();
+    }
+
+    return items;
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = ref.watch(currentThemeModeProvider) == ThemeMode.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 800;
+
     final favoritesAsync = ref.watch(favoriteCalculatorsProvider);
     final recentsAsync = ref.watch(recentCalculatorsProvider);
 
     final favorites = favoritesAsync.value ?? [];
     final recents = recentsAsync.value ?? [];
 
-    // Build dynamic sections based on selected category
     final allCalculators = [
       ..._financialCalculators,
       ..._constructionCalculators,
@@ -57,264 +107,266 @@ class _HomePageState extends ConsumerState<HomePage> {
       ..._agricultureCalculators,
     ];
 
+    final filteredCalculators =
+        _getFilteredCalculators(allCalculators, favorites, recents);
+
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          // New Modern AppBar - Fixed logo and app name
-          SliverAppBar(
-            floating: true,
-            snap: true,
-            pinned: true,
-            elevation: 0,
-            scrolledUnderElevation: 1,
-            backgroundColor: isDark ? const Color(0xFF1a1a1a) : Colors.white,
-            surfaceTintColor: Colors.transparent,
-            centerTitle: true,
-            titleSpacing: 0,
-            automaticallyImplyLeading: false,
-            title: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1120),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          Icons.calculate_rounded,
-                          size: 22,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        'Calculei',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: isDark ? Colors.white : Colors.black87,
-                        ),
-                      ),
-                      const Spacer(),
-                      // Theme toggle
-                      IconButton(
-                        icon: Icon(
-                          isDark ? Icons.light_mode : Icons.dark_mode,
-                          color: isDark ? Colors.white70 : Colors.black54,
-                        ),
-                        onPressed: () {
-                          ref.read(themeModeProvider.notifier).toggleTheme();
-                        },
-                        tooltip: isDark ? 'Modo Claro' : 'Modo Escuro',
-                      ),
-                      // Calculators Dropdown - using the new component
-                      _HomeCalculatorsDropdown(isDark: isDark),
-                    ],
+      key: _scaffoldKey,
+      backgroundColor: _backgroundColor,
+      drawer: isMobile ? _buildDrawer(favorites.length, recents.length) : null,
+      body: Row(
+        children: [
+          // Sidebar (desktop only)
+          if (!isMobile) _buildSidebar(favorites.length, recents.length),
+
+          // Main content
+          Expanded(
+            child: Column(
+              children: [
+                // Top header with search
+                _buildTopHeader(isMobile),
+
+                // Content
+                Expanded(
+                  child: _buildMainContent(
+                    filteredCalculators,
+                    allCalculators,
+                    favorites,
                   ),
                 ),
-              ),
+              ],
             ),
           ),
-
-          // Category Filter Bar
-          SliverToBoxAdapter(
-            child: _CategoryFilterBar(
-              selectedCategory: _selectedCategory,
-              onCategorySelected: (category) {
-                setState(() {
-                  _selectedCategory = category;
-                });
-              },
-            ),
-          ),
-
-          // Search Bar with suggestions
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _SearchBarDelegate(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase();
-                });
-              },
-              isDark: isDark,
-              onToggleView: _toggleViewMode,
-              isGridView: ref.watch(viewModeProvider).value == 'grid',
-              allCalculators: allCalculators,
-            ),
-          ),
-
-          // Content
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                      // Favoritos Section
-                      if (_selectedCategory == 'Favoritos') ...[
-                        _buildSectionTitle(context, 'Favoritos'),
-                        _buildGrid(
-                          context,
-                          allCalculators
-                              .where((item) => favorites.contains(item.route))
-                              .toList(),
-                          sectionTitle: 'Favoritos',
-                        ),
-                        if (favorites.isEmpty)
-                          _buildEmptyState(
-                            'Nenhuma calculadora favoritada ainda',
-                            Icons.favorite_border,
-                          ),
-                      ],
-
-                      // Recentes Section
-                      if (_selectedCategory == 'Recentes') ...[
-                        _buildSectionTitle(context, 'Recentes'),
-                        _buildGrid(
-                          context,
-                          recents.map((route) {
-                            return allCalculators.firstWhere(
-                              (item) => item.route == route,
-                              orElse: () => allCalculators.first,
-                            );
-                          }).toList(),
-                          sectionTitle: 'Recentes',
-                        ),
-                        if (recents.isEmpty)
-                          _buildEmptyState(
-                            'Nenhuma calculadora usada recentemente',
-                            Icons.history,
-                          ),
-                      ],
-
-                      // Regular Sections
-                      if (_selectedCategory != 'Favoritos' &&
-                          _selectedCategory != 'Recentes') ...[
-                        if (_shouldShowSection(
-                          'Financeiro',
-                          _financialCalculators,
-                        ))
-                          _buildSectionTitle(context, 'Financeiro'),
-                        if (_shouldShowSection(
-                          'Financeiro',
-                          _financialCalculators,
-                        ))
-                          _buildGrid(
-                            context,
-                            _financialCalculators,
-                            sectionTitle: 'Financeiro',
-                          ),
-                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
-                        if (_shouldShowSection(
-                          'Construção',
-                          _constructionCalculators,
-                        ))
-                          _buildSectionTitle(context, 'Construção'),
-                        if (_shouldShowSection(
-                          'Construção',
-                          _constructionCalculators,
-                        ))
-                          _buildGrid(
-                            context,
-                            _constructionCalculators,
-                            sectionTitle: 'Construção',
-                          ),
-                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
-                        if (_shouldShowSection(
-                          'Saúde',
-                          _healthCalculators,
-                        ))
-                          _buildSectionTitle(context, 'Saúde'),
-                        if (_shouldShowSection(
-                          'Saúde',
-                          _healthCalculators,
-                        ))
-                          _buildGrid(
-                            context,
-                            _healthCalculators,
-                            sectionTitle: 'Saúde',
-                          ),
-                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
-                        if (_shouldShowSection(
-                          'Pet',
-                          _petCalculators,
-                        ))
-                          _buildSectionTitle(context, 'Pet'),
-                        if (_shouldShowSection(
-                          'Pet',
-                          _petCalculators,
-                        ))
-                          _buildGrid(
-                            context,
-                            _petCalculators,
-                            sectionTitle: 'Pet',
-                          ),
-                        if (_searchQuery.isEmpty) const SizedBox(height: 32),
-                        if (_shouldShowSection(
-                          'Agricultura',
-                          _agricultureCalculators,
-                        ))
-                          _buildSectionTitle(context, 'Agricultura'),
-                        if (_shouldShowSection(
-                          'Agricultura',
-                          _agricultureCalculators,
-                        ))
-                          _buildGrid(
-                            context,
-                            _agricultureCalculators,
-                            sectionTitle: 'Agricultura',
-                          ),
-                      ],
-                    ]
-                    .map(
-                      (w) => Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1120),
-                          child: w,
-                        ),
-                      ),
-                    )
-                    .toList(),
-              ),
-            ),
-          ),
-
-          // Bottom Padding
-          const SliverToBoxAdapter(child: SizedBox(height: 80)),
         ],
       ),
     );
   }
 
-  Widget _buildEmptyState(String message, IconData icon) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildDrawer(int favoritesCount, int recentsCount) {
+    return Drawer(
+      backgroundColor: _sidebarColor,
+      child: _buildSidebarContent(favoritesCount, recentsCount),
+    );
+  }
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(48),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 64,
-              color: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              message,
-              style: TextStyle(
-                color: isDark ? Colors.grey.shade500 : Colors.grey.shade400,
-                fontSize: 16,
+  Widget _buildSidebar(int favoritesCount, int recentsCount) {
+    return Container(
+      width: 260,
+      decoration: BoxDecoration(
+        color: _sidebarColor,
+        border: Border(
+          right: BorderSide(
+            color: Colors.white.withValues(alpha: 0.08),
+          ),
+        ),
+      ),
+      child: _buildSidebarContent(favoritesCount, recentsCount),
+    );
+  }
+
+  Widget _buildSidebarContent(int favoritesCount, int recentsCount) {
+    final popularCount =
+        [..._financialCalculators, ..._constructionCalculators, ..._healthCalculators, ..._petCalculators, ..._agricultureCalculators]
+            .where((c) => c.isPopular)
+            .length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Logo header
+        Container(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [_primaryAccent, _primaryAccent.withValues(alpha: 0.7)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.calculate_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
-              textAlign: TextAlign.center,
+              const SizedBox(width: 12),
+              const Text(
+                'Calculei',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const Divider(color: Colors.white10, height: 1),
+
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Quick filters section
+                _buildSidebarSection('FILTROS RÁPIDOS'),
+                _buildFilterItem(
+                  'Favoritos',
+                  Icons.favorite,
+                  Colors.red,
+                  favoritesCount,
+                  isFilter: true,
+                ),
+                _buildFilterItem(
+                  'Recentes',
+                  Icons.history,
+                  Colors.purple,
+                  recentsCount,
+                  isFilter: true,
+                ),
+                _buildFilterItem(
+                  'Popular',
+                  Icons.star,
+                  Colors.amber,
+                  popularCount,
+                  isFilter: true,
+                ),
+
+                const SizedBox(height: 24),
+
+                // Categories section
+                _buildSidebarSection('CATEGORIAS'),
+                _buildCategoryItem(
+                  'Todos',
+                  Icons.apps,
+                  null,
+                  _financialCalculators.length +
+                      _constructionCalculators.length +
+                      _healthCalculators.length +
+                      _petCalculators.length +
+                      _agricultureCalculators.length,
+                ),
+                _buildCategoryItem(
+                  'Financeiro',
+                  Icons.account_balance_wallet,
+                  Colors.blue,
+                  _financialCalculators.length,
+                ),
+                _buildCategoryItem(
+                  'Construção',
+                  Icons.construction,
+                  Colors.orange,
+                  _constructionCalculators.length,
+                ),
+                _buildCategoryItem(
+                  'Saúde',
+                  Icons.favorite_border,
+                  Colors.pink,
+                  _healthCalculators.length,
+                ),
+                _buildCategoryItem(
+                  'Pet',
+                  Icons.pets,
+                  Colors.brown,
+                  _petCalculators.length,
+                ),
+                _buildCategoryItem(
+                  'Agricultura',
+                  Icons.agriculture,
+                  Colors.teal,
+                  _agricultureCalculators.length,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSidebarSection(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.4),
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterItem(
+    String label,
+    IconData icon,
+    Color color,
+    int count, {
+    bool isFilter = false,
+  }) {
+    final isSelected = _selectedFilter == label;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          if (isSelected) {
+            _selectedFilter = '';
+          } else {
+            _selectedFilter = label;
+            _selectedCategory = 'Todos';
+          }
+        });
+        if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: isSelected
+              ? Border.all(color: color.withValues(alpha: 0.3))
+              : null,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? color : Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? color.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  color: isSelected ? color : Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ],
         ),
@@ -322,117 +374,418 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
-    Color color = Colors.grey;
-    if (title == 'Financeiro') color = Colors.blue;
-    if (title == 'Construção') color = Colors.deepOrange;
-    if (title == 'Saúde') color = Colors.green;
-    if (title == 'Pet') color = Colors.brown;
-    if (title == 'Agricultura') color = Colors.teal;
-    if (title == 'Favoritos') color = Colors.red;
-    if (title == 'Recentes') color = Colors.purple;
+  Widget _buildCategoryItem(
+    String label,
+    IconData icon,
+    Color? color,
+    int count,
+  ) {
+    final isSelected = _selectedCategory == label && _selectedFilter.isEmpty;
+    final itemColor = color ?? _primaryAccent;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20, top: 4),
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedCategory = label;
+          _selectedFilter = '';
+        });
+        if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? itemColor.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: isSelected
+              ? Border.all(color: itemColor.withValues(alpha: 0.3))
+              : null,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? itemColor : Colors.white.withValues(alpha: 0.5),
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: isSelected
+                      ? Colors.white
+                      : Colors.white.withValues(alpha: 0.8),
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? itemColor.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  color: isSelected
+                      ? itemColor
+                      : Colors.white.withValues(alpha: 0.6),
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopHeader(bool isMobile) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 32,
+        vertical: 16,
+      ),
+      decoration: BoxDecoration(
+        color: _surfaceColor.withValues(alpha: 0.5),
+        border: Border(
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+      ),
       child: Row(
         children: [
-          Container(
-            width: 4,
-            height: 24,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
+          // Menu button (mobile only)
+          if (isMobile) ...[
+            IconButton(
+              icon: const Icon(Icons.menu, color: Colors.white),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
+            const SizedBox(width: 8),
+          ],
+
+          // Search bar
+          Expanded(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 500),
+              decoration: BoxDecoration(
+                color: _backgroundColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  setState(() => _searchQuery = value.toLowerCase());
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'O que vamos calcular hoje?',
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.white.withValues(alpha: 0.4),
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+
+          const SizedBox(width: 16),
+
+          // View toggle
+          Container(
+            decoration: BoxDecoration(
+              color: _backgroundColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildViewToggleButton(
+                  Icons.grid_view,
+                  ref.watch(viewModeProvider).value == 'grid',
+                  () => ref.read(viewModeProvider.notifier).setMode('grid'),
+                ),
+                _buildViewToggleButton(
+                  Icons.view_list,
+                  ref.watch(viewModeProvider).value != 'grid',
+                  () => ref.read(viewModeProvider.notifier).setMode('list'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildGrid(
-    BuildContext context,
-    List<_CalculatorItem> items, {
-    String? sectionTitle,
-  }) {
-    final filteredItems = items.where((item) {
-      return _searchQuery.isEmpty ||
-          (sectionTitle != null &&
-              sectionTitle.toLowerCase().contains(_searchQuery)) ||
-          item.title.toLowerCase().contains(_searchQuery);
-    }).toList();
+  Widget _buildViewToggleButton(IconData icon, bool isSelected, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isSelected ? _primaryAccent.withValues(alpha: 0.2) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          icon,
+          size: 20,
+          color: isSelected ? _primaryAccent : Colors.white.withValues(alpha: 0.5),
+        ),
+      ),
+    );
+  }
 
-    if (filteredItems.isEmpty) return const SizedBox.shrink();
+  Widget _buildMainContent(
+    List<_CalculatorItem> filteredCalculators,
+    List<_CalculatorItem> allCalculators,
+    List<String> favorites,
+  ) {
+    final viewMode = ref.watch(viewModeProvider).value;
+    final isGridView = viewMode == 'grid';
 
-    final viewModeAsync = ref.watch(viewModeProvider);
-    final isGridView = viewModeAsync.value == 'grid';
+    // Get section title
+    var sectionTitle = 'TODAS AS CALCULADORAS';
+    var sectionIcon = Icons.apps;
+    var sectionColor = _primaryAccent;
 
-    if (!isGridView) {
-      // List view with stagger animation
-      return Column(
-        children: filteredItems.asMap().entries.map((entry) {
-          final index = entry.key;
-          final item = entry.value;
-          return TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: Duration(milliseconds: 300 + (index * 50)),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, 20 * (1 - value)),
-                child: Opacity(opacity: value, child: child),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _CalculatorListTile(item: item),
-            ),
-          );
-        }).toList(),
-      );
+    if (_selectedFilter == 'Favoritos') {
+      sectionTitle = 'FAVORITOS';
+      sectionIcon = Icons.favorite;
+      sectionColor = Colors.red;
+    } else if (_selectedFilter == 'Recentes') {
+      sectionTitle = 'RECENTES';
+      sectionIcon = Icons.history;
+      sectionColor = Colors.purple;
+    } else if (_selectedFilter == 'Popular') {
+      sectionTitle = 'POPULARES';
+      sectionIcon = Icons.star;
+      sectionColor = Colors.amber;
+    } else if (_selectedCategory != 'Todos') {
+      sectionTitle = _selectedCategory.toUpperCase();
+      switch (_selectedCategory) {
+        case 'Financeiro':
+          sectionIcon = Icons.account_balance_wallet;
+          sectionColor = Colors.blue;
+          break;
+        case 'Construção':
+          sectionIcon = Icons.construction;
+          sectionColor = Colors.orange;
+          break;
+        case 'Saúde':
+          sectionIcon = Icons.favorite_border;
+          sectionColor = Colors.pink;
+          break;
+        case 'Pet':
+          sectionIcon = Icons.pets;
+          sectionColor = Colors.brown;
+          break;
+        case 'Agricultura':
+          sectionIcon = Icons.agriculture;
+          sectionColor = Colors.teal;
+          break;
+      }
     }
 
-    // Grid view
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth < 600
-            ? 2
-            : constraints.maxWidth < 900
-            ? 3
-            : 4;
+    return Stack(
+      children: [
+        // Background pattern
+        CustomPaint(
+          painter: _HomeBackgroundPainter(),
+          size: Size.infinite,
+        ),
 
-        return GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+        // Content
+        CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            // Section header
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: sectionColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(sectionIcon, color: sectionColor, size: 20),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      sectionTitle,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        '${filteredCalculators.length}',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Empty state
+            if (filteredCalculators.isEmpty)
+              SliverToBoxAdapter(
+                child: _buildEmptyState(),
+              ),
+
+            // Grid/List content
+            if (filteredCalculators.isNotEmpty)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+                sliver: isGridView
+                    ? _buildGridView(filteredCalculators, favorites)
+                    : _buildListView(filteredCalculators, favorites),
+              ),
+
+            // Bottom padding
+            const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    var message = 'Nenhuma calculadora encontrada';
+    var subtitle = 'Tente ajustar os filtros ou busca';
+    var icon = Icons.search_off;
+
+    if (_selectedFilter == 'Favoritos') {
+      message = 'Nenhum favorito ainda';
+      subtitle = 'Toque no ❤️ em qualquer calculadora';
+      icon = Icons.favorite_border;
+    } else if (_selectedFilter == 'Recentes') {
+      message = 'Nenhuma calculadora recente';
+      subtitle = 'Use uma calculadora para aparecer aqui';
+      icon = Icons.history;
+    }
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(64),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: const BoxDecoration(
+                color: _surfaceColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 48,
+                color: Colors.white.withValues(alpha: 0.3),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              message,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.5),
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridView(List<_CalculatorItem> items, List<String> favorites) {
+    return SliverLayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.crossAxisExtent;
+        final crossAxisCount = width < 500
+            ? 2
+            : width < 800
+                ? 3
+                : width < 1100
+                    ? 4
+                    : 5;
+
+        return SliverGrid(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: 16,
             mainAxisSpacing: 16,
             childAspectRatio: 0.85,
           ),
-          itemCount: filteredItems.length,
-          itemBuilder: (context, index) {
-            return TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: Duration(milliseconds: 300 + (index * 50)),
-              curve: Curves.easeOutCubic,
-              builder: (context, value, child) {
-                return Transform.translate(
-                  offset: Offset(0, 20 * (1 - value)),
-                  child: Opacity(opacity: value, child: child),
-                );
-              },
-              child: _CalculatorCard(item: filteredItems[index]),
-            );
-          },
+          delegate: SliverChildBuilderDelegate(
+            (context, index) {
+              final item = items[index];
+              return _ModernCalculatorCard(
+                item: item,
+                isFavorite: favorites.contains(item.route),
+              );
+            },
+            childCount: items.length,
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildListView(List<_CalculatorItem> items, List<String> favorites) {
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) {
+          final item = items[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: _ModernCalculatorListTile(
+              item: item,
+              isFavorite: favorites.contains(item.route),
+            ),
+          );
+        },
+        childCount: items.length,
+      ),
     );
   }
 
@@ -800,6 +1153,7 @@ class _HomePageState extends ConsumerState<HomePage> {
   ];
 }
 
+// Data model
 class _CalculatorItem {
   final String title;
   final String description;
@@ -820,210 +1174,209 @@ class _CalculatorItem {
   });
 }
 
-class _CategoryFilterBar extends StatelessWidget {
-  final String selectedCategory;
-  final ValueChanged<String> onCategorySelected;
-
-  const _CategoryFilterBar({
-    required this.selectedCategory,
-    required this.onCategorySelected,
-  });
-
+// Background painter
+class _HomeBackgroundPainter extends CustomPainter {
   @override
-  Widget build(BuildContext context) {
-    final categories = [
-      ('Todos', Icons.apps, null),
-      ('Favoritos', Icons.favorite, Colors.red),
-      ('Recentes', Icons.history, Colors.purple),
-      ('Financeiro', Icons.account_balance_wallet, Colors.blue),
-      ('Construção', Icons.construction, Colors.deepOrange),
-      ('Saúde', Icons.favorite_border, Colors.green),
-      ('Pet', Icons.pets, Colors.brown),
-      ('Agricultura', Icons.agriculture, Colors.teal),
-    ];
+  void paint(Canvas canvas, Size size) {
+    const spacing = 80.0;
+    final symbols = ['+', '−', '×', '÷', '%', '=', '√', 'π'];
+    var symbolIndex = 0;
 
-    return Container(
-      height: 64,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1120),
-        child: ListView.separated(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          itemCount: categories.length,
-          separatorBuilder: (context, index) => const SizedBox(width: 12),
-          itemBuilder: (context, index) {
-            final (name, icon, color) = categories[index];
-            final isSelected = selectedCategory == name;
-
-            return _CategoryChip(
-              label: name,
-              icon: icon,
-              color: color,
-              isSelected: isSelected,
-              onTap: () => onCategorySelected(name),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final Color? color;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _CategoryChip({
-    required this.label,
-    required this.icon,
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chipColor = color ?? Colors.grey;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? chipColor.withValues(alpha: 0.15)
-              : (isDark ? Colors.grey[800] : Colors.grey[100]),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: isSelected ? chipColor : Colors.transparent,
-            width: 2,
+    for (var y = 0.0; y < size.height; y += spacing) {
+      for (var x = 0.0; x < size.width; x += spacing) {
+        TextPainter(
+          text: TextSpan(
+            text: symbols[symbolIndex % symbols.length],
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.015),
+              fontSize: 28,
+              fontWeight: FontWeight.w300,
+            ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isSelected
-                  ? chipColor
-                  : (isDark ? Colors.grey[400] : Colors.grey),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected
-                    ? chipColor
-                    : (isDark ? Colors.grey[400] : Colors.grey),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+          textDirection: TextDirection.ltr,
+        )
+          ..layout()
+          ..paint(canvas, Offset(x, y));
+        symbolIndex++;
+      }
+    }
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-class _SearchBarDelegate extends SliverPersistentHeaderDelegate {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final bool isDark;
-  final VoidCallback onToggleView;
-  final bool isGridView;
-  final List<_CalculatorItem> allCalculators;
+// Modern Calculator Card
+class _ModernCalculatorCard extends ConsumerStatefulWidget {
+  final _CalculatorItem item;
+  final bool isFavorite;
 
-  _SearchBarDelegate({
-    required this.controller,
-    required this.onChanged,
-    required this.isDark,
-    required this.onToggleView,
-    required this.isGridView,
-    required this.allCalculators,
+  const _ModernCalculatorCard({
+    required this.item,
+    required this.isFavorite,
   });
 
   @override
-  Widget build(
-    BuildContext context,
-    double shrinkOffset,
-    bool overlapsContent,
-  ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Theme.of(context).scaffoldBackgroundColor,
-      alignment: Alignment.center,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 1120),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                onChanged: onChanged,
-                decoration: InputDecoration(
-                  hintText: 'Buscar calculadora...',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+  ConsumerState<_ModernCalculatorCard> createState() =>
+      _ModernCalculatorCardState();
+}
+
+class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
+  bool _isHovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovering = true),
+      onExit: (_) => setState(() => _isHovering = false),
+      child: GestureDetector(
+        onTap: () {
+          ref.read(recentCalculatorsProvider.notifier).addRecent(widget.item.route);
+          context.go(widget.item.route);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                widget.item.color.withValues(alpha: _isHovering ? 0.3 : 0.2),
+                widget.item.color.withValues(alpha: _isHovering ? 0.15 : 0.08),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: _isHovering
+                  ? widget.item.color.withValues(alpha: 0.5)
+                  : Colors.white.withValues(alpha: 0.08),
+              width: _isHovering ? 2 : 1,
+            ),
+          ),
+          child: Stack(
+            children: [
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top row with badges
+                    Row(
+                      children: [
+                        if (widget.item.isPopular)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.9),
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text(
+                              'POPULAR',
+                              style: TextStyle(
+                                color: Colors.black87,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        const Spacer(),
+                        // Favorite button
+                        InkWell(
+                          onTap: () {
+                            ref
+                                .read(favoriteCalculatorsProvider.notifier)
+                                .toggle(widget.item.route);
+                          },
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              widget.isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              size: 18,
+                              color: widget.isFavorite
+                                  ? Colors.red
+                                  : Colors.white.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const Spacer(),
+
+                    // Center icon
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          widget.item.icon,
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Title
+                    Text(
+                      widget.item.title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    // Description
+                    Text(
+                      widget.item.description,
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 11,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: onToggleView,
-              icon: Icon(
-                isGridView ? Icons.view_list : Icons.grid_view,
-                color: isDark ? Colors.white : Colors.black87,
-              ),
-              tooltip: isGridView
-                  ? 'Visualização em lista'
-                  : 'Visualização em grade',
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
-
-  @override
-  double get maxExtent => 72;
-
-  @override
-  double get minExtent => 72;
-
-  @override
-  bool shouldRebuild(covariant _SearchBarDelegate oldDelegate) {
-    return oldDelegate.isDark != isDark || oldDelegate.isGridView != isGridView;
-  }
 }
 
-// List Tile version of Calculator Card
-class _CalculatorListTile extends ConsumerWidget {
+// Modern List Tile
+class _ModernCalculatorListTile extends ConsumerWidget {
   final _CalculatorItem item;
+  final bool isFavorite;
 
-  const _CalculatorListTile({required this.item});
+  const _ModernCalculatorListTile({
+    required this.item,
+    required this.isFavorite,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final favoritesAsync = ref.watch(favoriteCalculatorsProvider);
-    final favorites = favoritesAsync.value ?? [];
-    final isFavorite = favorites.contains(item.route);
-
     return InkWell(
       onTap: () {
         ref.read(recentCalculatorsProvider.notifier).addRecent(item.route);
@@ -1033,30 +1386,21 @@ class _CalculatorListTile extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDark ? Colors.grey[800] : Colors.white,
+          color: _surfaceColor,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: item.color.withValues(alpha: 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
         ),
         child: Row(
           children: [
-            // Icon
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: item.color.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(item.icon, size: 32, color: item.color),
+              child: Icon(item.icon, color: item.color, size: 28),
             ),
             const SizedBox(width: 16),
-
-            // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1066,8 +1410,11 @@ class _CalculatorListTile extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           item.title,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                       if (item.isPopular)
@@ -1077,19 +1424,15 @@ class _CalculatorListTile extends ConsumerWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: item.isPopular
-                                ? Colors.red.withValues(alpha: 0.1)
-                                : Colors.amber.withValues(alpha: 0.1),
+                            color: Colors.amber.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: Text(
-                            item.isPopular ? 'Popular' : 'Novo',
+                          child: const Text(
+                            'Popular',
                             style: TextStyle(
+                              color: Colors.amber,
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: item.isPopular
-                                  ? Colors.red
-                                  : Colors.amber.shade700,
                             ),
                           ),
                         ),
@@ -1098,424 +1441,27 @@ class _CalculatorListTile extends ConsumerWidget {
                   const SizedBox(height: 4),
                   Text(
                     item.description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: isDark ? Colors.grey[400] : Colors.grey,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                      fontSize: 13,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (item.tags.isNotEmpty) ...[
-                    const SizedBox(height: 8),
-                    Wrap(
-                      spacing: 4,
-                      children: item.tags.take(3).map((tag) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: item.color.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            tag,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: item.color,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
                 ],
               ),
             ),
-
             const SizedBox(width: 12),
-
-            // Favorite Button
             IconButton(
               onPressed: () {
-                ref
-                    .read(favoriteCalculatorsProvider.notifier)
-                    .toggle(item.route);
+                ref.read(favoriteCalculatorsProvider.notifier).toggle(item.route);
               },
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite
-                    ? Colors.red
-                    : (isDark ? Colors.grey[400] : Colors.grey),
+                color: isFavorite ? Colors.red : Colors.white.withValues(alpha: 0.4),
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CalculatorCard extends ConsumerStatefulWidget {
-  final _CalculatorItem item;
-
-  const _CalculatorCard({required this.item});
-
-  @override
-  ConsumerState<_CalculatorCard> createState() => _CalculatorCardState();
-}
-
-class _CalculatorCardState extends ConsumerState<_CalculatorCard> {
-  bool _isHovering = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final favoritesAsync = ref.watch(favoriteCalculatorsProvider);
-    final favorites = favoritesAsync.value ?? [];
-    final isFavorite = favorites.contains(widget.item.route);
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovering = true),
-      onExit: (_) => setState(() => _isHovering = false),
-      child: GestureDetector(
-        onTap: () {
-          // Track as recent
-          ref
-              .read(recentCalculatorsProvider.notifier)
-              .addRecent(widget.item.route);
-          // Navigate
-          context.go(widget.item.route);
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          transform: Matrix4.identity()..scale(_isHovering ? 1.02 : 1.0),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.grey[800] : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: widget.item.color.withValues(
-                  alpha: _isHovering ? 0.3 : 0.1,
-                ),
-                blurRadius: _isHovering ? 16 : 8,
-                offset: Offset(0, _isHovering ? 4 : 2),
-              ),
-            ],
-            border: Border.all(
-              color: _isHovering
-                  ? widget.item.color.withValues(alpha: 0.5)
-                  : Colors.transparent,
-              width: 2,
-            ),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Icon, Badge, and Favorite Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: widget.item.color.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        widget.item.icon,
-                        size: 28,
-                        color: widget.item.color,
-                      ),
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.item.isPopular)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: widget.item.isPopular
-                                  ? Colors.red.withValues(alpha: 0.1)
-                                  : Colors.amber.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              widget.item.isPopular ? 'Popular' : 'Novo',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: widget.item.isPopular
-                                    ? Colors.red
-                                    : Colors.amber.shade700,
-                              ),
-                            ),
-                          ),
-                        if (widget.item.isPopular) const SizedBox(width: 4),
-                        // Favorite Button
-                        InkWell(
-                          onTap: () {
-                            ref
-                                .read(favoriteCalculatorsProvider.notifier)
-                                .toggle(widget.item.route);
-                          },
-                          borderRadius: BorderRadius.circular(20),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Icon(
-                              isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              size: 20,
-                              color: isFavorite
-                                  ? Colors.red
-                                  : (isDark ? Colors.grey[400] : Colors.grey),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const Spacer(),
-
-                // Title
-                Text(
-                  widget.item.title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-
-                // Description
-                Text(
-                  widget.item.description,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: isDark ? Colors.grey[400] : Colors.grey,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 12),
-
-                // Tags
-                if (widget.item.tags.isNotEmpty)
-                  Wrap(
-                    spacing: 4,
-                    runSpacing: 4,
-                    children: widget.item.tags.take(2).map((tag) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: widget.item.color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          tag,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: widget.item.color,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Calculators dropdown for home page
-class _HomeCalculatorsDropdown extends StatefulWidget {
-  final bool isDark;
-
-  const _HomeCalculatorsDropdown({required this.isDark});
-
-  @override
-  State<_HomeCalculatorsDropdown> createState() =>
-      _HomeCalculatorsDropdownState();
-}
-
-class _HomeCalculatorsDropdownState extends State<_HomeCalculatorsDropdown> {
-  final _menuController = MenuController();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDesktop = MediaQuery.of(context).size.width >= 800;
-
-    return MenuAnchor(
-      controller: _menuController,
-      menuChildren: [
-        // Trabalhista Category
-        _buildCategoryHeader('Trabalhista', Icons.work_outline, Colors.blue),
-        _buildMenuItem(
-          'Salário Líquido',
-          '/calculators/financial/net-salary',
-          Icons.monetization_on,
-          Colors.orange,
-        ),
-        _buildMenuItem(
-          '13º Salário',
-          '/calculators/financial/thirteenth-salary',
-          Icons.card_giftcard,
-          Colors.green,
-        ),
-        _buildMenuItem(
-          'Férias',
-          '/calculators/financial/vacation',
-          Icons.beach_access,
-          Colors.blue,
-        ),
-        _buildMenuItem(
-          'Horas Extras',
-          '/calculators/financial/overtime',
-          Icons.access_time,
-          Colors.purple,
-        ),
-        _buildMenuItem(
-          'Seguro Desemprego',
-          '/calculators/financial/unemployment-insurance',
-          Icons.work_off,
-          Colors.red,
-        ),
-        const Divider(height: 8),
-        // Financeiro Category
-        _buildCategoryHeader(
-          'Financeiro',
-          Icons.account_balance_wallet,
-          Colors.green,
-        ),
-        _buildMenuItem(
-          'Reserva de Emergência',
-          '/calculators/financial/emergency-reserve',
-          Icons.savings,
-          Colors.teal,
-        ),
-        _buildMenuItem(
-          'À Vista vs Parcelado',
-          '/calculators/financial/cash-vs-installment',
-          Icons.payment,
-          Colors.indigo,
-        ),
-      ],
-      style: MenuStyle(
-        elevation: WidgetStateProperty.all(8),
-        shape: WidgetStateProperty.all(
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 8),
-        ),
-      ),
-      child: isDesktop
-          ? _buildDesktopButton(theme)
-          : IconButton(
-              icon: Icon(
-                Icons.calculate,
-                color: widget.isDark ? Colors.white70 : Colors.black54,
-              ),
-              onPressed: () {
-                if (_menuController.isOpen) {
-                  _menuController.close();
-                } else {
-                  _menuController.open();
-                }
-              },
-              tooltip: 'Calculadoras',
-            ),
-    );
-  }
-
-  Widget _buildCategoryHeader(String name, IconData icon, Color color) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-      child: Row(
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 8),
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: color,
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMenuItem(
-    String title,
-    String route,
-    IconData icon,
-    Color color,
-  ) {
-    return MenuItemButton(
-      onPressed: () {
-        _menuController.close();
-        context.go(route);
-      },
-      leadingIcon: Icon(icon, size: 20, color: color),
-      child: Text(title),
-    );
-  }
-
-  Widget _buildDesktopButton(ThemeData theme) {
-    return MouseRegion(
-      child: GestureDetector(
-        onTap: () {
-          if (_menuController.isOpen) {
-            _menuController.close();
-          } else {
-            _menuController.open();
-          }
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primary,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Calculadoras',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: theme.colorScheme.onPrimary,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 20,
-                color: theme.colorScheme.onPrimary,
-              ),
-            ],
-          ),
         ),
       ),
     );

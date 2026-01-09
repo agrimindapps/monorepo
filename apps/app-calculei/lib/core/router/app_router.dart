@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../core/layout/responsive_shell.dart';
 import '../../features/cash_vs_installment_calculator/presentation/pages/cash_vs_installment_calculator_page.dart';
@@ -60,11 +60,17 @@ import '../../features/financial_calculator/presentation/pages/financial_selecti
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
-// App router configuration
-final appRouter = GoRouter(
-  navigatorKey: rootNavigatorKey,
-  initialLocation: '/home',
-  routes: [
+/// Provider para o GoRouter com Analytics integrado
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final analyticsObserver = ref.watch(
+    analyticsRouteObserverFamilyProvider('calculei_'),
+  );
+
+  return GoRouter(
+    navigatorKey: rootNavigatorKey,
+    initialLocation: '/home',
+    observers: [analyticsObserver],
+    routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return ResponsiveShell(navigationShell: navigationShell);
@@ -351,3 +357,10 @@ final appRouter = GoRouter(
     ),
   ),
 );
+});
+
+/// Mantido para compatibilidade - usar appRouterProvider quando possível
+/// @deprecated Use appRouterProvider em Consumer widgets
+GoRouter get appRouter => throw UnsupportedError(
+      'Use appRouterProvider com ref.watch/read dentro de Consumer widgets',
+    );

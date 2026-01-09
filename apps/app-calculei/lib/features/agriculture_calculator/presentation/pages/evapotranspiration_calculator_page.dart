@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/evapotranspiration_calculator.dart';
@@ -143,19 +144,11 @@ class _EvapotranspirationCalculatorPageState
 
               const SizedBox(height: 32),
 
-              // Calculate button
-              ElevatedButton.icon(
-                onPressed: _calculate,
-                icon: const Icon(Icons.calculate),
-                label: const Text('Calcular ETo'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.agriculture,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               const SizedBox(height: 24),
@@ -182,6 +175,16 @@ class _EvapotranspirationCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _temperatureController.text = '28';
+    _humidityController.text = '60';
+    _windSpeedController.text = '10';
+    _solarRadiationController.text = '20';
+    setState(() {
+      _result = null;
+    });
   }
 }
 

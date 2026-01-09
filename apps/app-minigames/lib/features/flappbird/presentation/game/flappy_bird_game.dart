@@ -6,12 +6,13 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/background.dart';
 import 'components/bird.dart';
 import 'components/ground.dart';
 import 'components/pipe_manager.dart';
 
-class FlappyBirdGame extends FlameGame with TapCallbacks, KeyboardEvents, HasCollisionDetection {
+class FlappyBirdGame extends FlameGame with TapCallbacks, KeyboardEvents, HasCollisionDetection, EscPauseHandler {
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onScoreChanged;
 
@@ -101,11 +102,12 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, KeyboardEvents, HasCol
 
   void gameOver() {
     if (isGameOver) return;
-    
+
     isGameOver = true;
+    super.isGameOver = true; // Update EscPauseHandler
     isPlaying = false;
     overlays.add('GameOver');
-    
+
     if (onGameOver != null) {
       onGameOver!();
     }
@@ -114,6 +116,7 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, KeyboardEvents, HasCol
   void restartGame() {
     score = 0;
     isGameOver = false;
+    super.isGameOver = false; // Update EscPauseHandler
     isPlaying = false;
     
     if (onScoreChanged != null) {
@@ -127,7 +130,13 @@ class FlappyBirdGame extends FlameGame with TapCallbacks, KeyboardEvents, HasCol
     overlays.add('Start');
     
     // Wait for next tap to start
-    pauseGame(); 
+    pauseGame();
+  }
+
+  @override
+  void restartFromPause() {
+    overlays.remove('PauseMenu');
+    restartGame();
   }
 
   void increaseScore() {

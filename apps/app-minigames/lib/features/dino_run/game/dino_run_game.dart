@@ -5,6 +5,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/dino_player.dart';
 import 'components/ground.dart';
 import 'components/obstacle_manager.dart';
@@ -13,7 +14,7 @@ import 'components/parallax_background.dart';
 import 'components/score_text.dart';
 
 class DinoRunGame extends FlameGame
-    with TapCallbacks, KeyboardEvents, HasCollisionDetection {
+    with TapCallbacks, KeyboardEvents, HasCollisionDetection, EscPauseHandler {
   // Callbacks for Flutter UI
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onScoreChanged;
@@ -189,6 +190,7 @@ class DinoRunGame extends FlameGame
     if (isGameOver) return;
 
     isGameOver = true;
+    super.isGameOver = true; // Update EscPauseHandler
     isPlaying = false;
 
     HapticFeedback.heavyImpact();
@@ -208,6 +210,7 @@ class DinoRunGame extends FlameGame
 
   void reset() {
     isGameOver = false;
+    super.isGameOver = false; // Update EscPauseHandler
     isPlaying = false;
     score = 0;
     gameSpeed = 1.0;
@@ -227,5 +230,11 @@ class DinoRunGame extends FlameGame
     scoreText.setNightMode(false);
 
     overlays.remove('GameOver');
+  }
+
+  @override
+  void restartFromPause() {
+    overlays.remove('PauseMenu');
+    reset();
   }
 }

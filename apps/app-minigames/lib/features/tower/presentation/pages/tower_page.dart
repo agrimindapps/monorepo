@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../providers/tower_game_notifier.dart';
 import '../game/tower_stack_game.dart';
 import '../widgets/game_over_dialog.dart';
@@ -90,7 +91,19 @@ class _TowerPageState extends ConsumerState<TowerPage> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: GameWidget(game: _game),
+            child: GameWidget(
+              game: _game,
+              overlayBuilderMap: {
+                'PauseMenu': (context, game) {
+                  final towerGame = game as TowerStackGame;
+                  return PauseMenuOverlay(
+                    onContinue: towerGame.resumeGame,
+                    onRestart: towerGame.restartFromPause,
+                    accentColor: const Color(0xFFE91E63),
+                  );
+                },
+              },
+            ),
           ),
           
           // Score Display

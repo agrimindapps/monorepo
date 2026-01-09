@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/yield_prediction_calculator.dart';
 
@@ -74,20 +76,12 @@ class _YieldPredictionCalculatorPageState
                 spacing: 8,
                 runSpacing: 8,
                 children: CropType.values.map((crop) {
-                  return ChoiceChip(
-                    label: Text(YieldPredictionCalculator.getCropName(crop)),
-                    selected: _cropType == crop,
-                    onSelected: (_) {
-                      setState(() => _cropType = crop);
-                    },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture
-                        .withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _cropType == crop
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                  final isSelected = _cropType == crop;
+                  return DarkChoiceChip(
+                    label: YieldPredictionCalculator.getCropName(crop),
+                    isSelected: isSelected,
+                    onSelected: () => setState(() => _cropType = crop),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -152,19 +146,11 @@ class _YieldPredictionCalculatorPageState
 
               const SizedBox(height: 32),
 
-              // Calculate button
-              ElevatedButton.icon(
-                onPressed: _calculate,
-                icon: const Icon(Icons.calculate),
-                label: const Text('Calcular'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.agriculture,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               const SizedBox(height: 24),
@@ -191,6 +177,16 @@ class _YieldPredictionCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _areaController.text = '10';
+    _yieldController.text = '5000';
+    _lossController.text = '5';
+    setState(() {
+      _cropType = CropType.corn;
+      _result = null;
+    });
   }
 }
 

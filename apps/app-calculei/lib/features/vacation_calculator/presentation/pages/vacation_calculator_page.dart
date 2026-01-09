@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../providers/vacation_calculator_provider.dart';
 import '../widgets/calculation_result_card.dart';
@@ -153,25 +154,12 @@ class _VacationCalculatorPageState
 
               const SizedBox(height: 24),
 
-              // Calculate button
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _calculate,
-                  icon: const Icon(Icons.calculate_rounded),
-                  label: const Text(
-                    'Calcular Férias',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CalculatorAccentColors.labor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+              // Action Buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _handleClear,
+                accentColor: CalculatorAccentColors.labor,
+                isLoading: false,
               ),
 
               // Result
@@ -216,6 +204,15 @@ class _VacationCalculatorPageState
         );
       }
     }
+  }
+
+  void _handleClear() {
+    _grossSalaryController.clear();
+    _vacationDaysController.clear();
+    setState(() {
+      _sellVacationDays = false;
+    });
+    ref.read(vacationCalculatorProvider.notifier).reset();
   }
 }
 

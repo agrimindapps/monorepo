@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/brick_calculation.dart';
 import '../providers/brick_calculator_provider.dart';
@@ -197,25 +198,11 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
 
                   const SizedBox(height: 24),
 
-                  // Calculate button
-                  SizedBox(
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: _calculate,
-                      icon: const Icon(Icons.calculate_rounded),
-                      label: const Text(
-                        'Calcular',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CalculatorAccentColors.construction,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 0,
-                      ),
-                    ),
+                  // Action buttons
+                  CalculatorActionButtons(
+                    onCalculate: _calculate,
+                    onClear: _clear,
+                    accentColor: CalculatorAccentColors.construction,
                   ),
                 ],
               ),
@@ -270,6 +257,17 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
         );
       }
     }
+  }
+
+  void _clear() {
+    _wallLengthController.clear();
+    _wallHeightController.clear();
+    _openingsAreaController.text = '0';
+    setState(() {
+      _brickType = BrickType.ceramic6Holes;
+      _wastePercentage = 5;
+    });
+    ref.read(brickCalculatorProvider.notifier).reset();
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../game/frogger_game.dart';
 
 class FroggerPage extends StatelessWidget {
@@ -23,6 +24,16 @@ class FroggerPage extends StatelessWidget {
           backgroundBuilder: (context) => Container(
             color: const Color(0xFF1A1A2E),
           ),
+          overlayBuilderMap: {
+            'PauseMenu': (context, game) {
+              final typedGame = game as FroggerGame;
+              return PauseMenuOverlay(
+                onContinue: typedGame.resumeGame,
+                onRestart: typedGame.restartFromPause,
+                accentColor: const Color(0xFF4CAF50),
+              );
+            },
+          },
         ),
       ),
     );

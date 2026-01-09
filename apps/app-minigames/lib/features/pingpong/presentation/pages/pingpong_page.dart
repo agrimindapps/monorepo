@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../domain/entities/enums.dart';
 import '../widgets/score_display_widget.dart';
 import '../widgets/game_over_dialog.dart';
@@ -240,6 +241,16 @@ class _PingpongPageState extends ConsumerState<PingpongPage> {
                       backgroundBuilder: (_) => Container(
                         color: const Color(0xFF1A1A1A),
                       ),
+                      overlayBuilderMap: {
+                        'PauseMenu': (context, game) {
+                          final typedGame = game as PingPongGame;
+                          return PauseMenuOverlay(
+                            onContinue: typedGame.resumeGame,
+                            onRestart: typedGame.restartFromPause,
+                            accentColor: const Color(0xFF00BCD4),
+                          );
+                        },
+                      },
                     ),
                   )
                 : Container(

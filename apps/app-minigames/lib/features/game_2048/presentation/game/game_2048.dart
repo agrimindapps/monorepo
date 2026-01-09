@@ -7,10 +7,11 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import '../../domain/entities/enums.dart';
 import 'components/tile.dart';
 
-class Game2048 extends FlameGame with KeyboardEvents, DragCallbacks {
+class Game2048 extends FlameGame with KeyboardEvents, DragCallbacks, EscPauseHandler {
   final int gridSize;
   final Function(int) onScoreChanged;
   final VoidCallback onGameOver;
@@ -151,8 +152,14 @@ class Game2048 extends FlameGame with KeyboardEvents, DragCallbacks {
   
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Handle ESC pause first (from mixin)
+    final pauseResult = handleEscPause(event);
+    if (pauseResult == KeyEventResult.handled) {
+      return pauseResult;
+    }
+
     if (isAnimating) return KeyEventResult.ignored;
-    
+
     if (event is KeyDownEvent) {
       if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         move(Direction.up);
@@ -334,5 +341,9 @@ class Game2048 extends FlameGame with KeyboardEvents, DragCallbacks {
     tiles.clear();
     _spawnInitialTiles();
     isAnimating = false;
+  }
+
+  void restartFromPause() {
+    restart();
   }
 }

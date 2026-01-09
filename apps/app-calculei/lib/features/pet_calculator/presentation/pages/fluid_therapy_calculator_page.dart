@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/fluid_therapy_calculator.dart';
@@ -178,30 +179,10 @@ class _FluidTherapyCalculatorPageState
               const SizedBox(height: 32),
 
               // Calculate button
-              ElevatedButton(
-                onPressed: _calculate,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.pet,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calculate),
-                    SizedBox(width: 8),
-                    Text(
-                      'Calcular Fluidoterapia',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.pet,
               ),
 
               if (_result != null) ...[
@@ -257,6 +238,14 @@ class _FluidTherapyCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _weightController.clear();
+    _dehydrationController.clear();
+    setState(() {
+      _result = null;
+    });
   }
 }
 

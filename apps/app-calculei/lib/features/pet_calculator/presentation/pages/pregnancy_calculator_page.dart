@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/pregnancy_calculator.dart';
@@ -133,30 +134,10 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
             const SizedBox(height: 32),
 
             // Calculate button
-            ElevatedButton(
-              onPressed: _calculate,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CalculatorAccentColors.pet,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.calculate),
-                  SizedBox(width: 8),
-                  Text(
-                    'Calcular',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+            CalculatorActionButtons(
+              onCalculate: _calculate,
+              onClear: _clear,
+              accentColor: CalculatorAccentColors.pet,
             ),
 
             // Result
@@ -195,6 +176,14 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    setState(() {
+      _isDog = true;
+      _matingDate = DateTime.now().subtract(const Duration(days: 30));
+      _result = null;
+    });
   }
 }
 

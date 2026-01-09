@@ -5,7 +5,9 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/particles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/block.dart';
 import 'components/background.dart';
 
@@ -15,7 +17,7 @@ enum TowerGameStatus {
   gameOver,
 }
 
-class TowerStackGame extends FlameGame with TapCallbacks {
+class TowerStackGame extends FlameGame with TapCallbacks, KeyboardEvents, EscPauseHandler {
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onScoreChanged;
   final ValueChanged<int>? onComboChanged;
@@ -141,17 +143,46 @@ class TowerStackGame extends FlameGame with TapCallbacks {
   }
 
   @override
+  KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Handle ESC pause first (from mixin)
+    final pauseResult = handleEscPause(event);
+    if (pauseResult == KeyEventResult.handled) {
+      return pauseResult;
+    }
+
+    // Space to place block
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
+      if (status == TowerGameStatus.intro) {
+        status = TowerGameStatus.playing;
+        return KeyEventResult.handled;
+      }
+
+      if (status == TowerGameStatus.gameOver) {
+        resetGame();
+        return KeyEventResult.handled;
+      }
+
+      if (status == TowerGameStatus.playing && currentBlock != null) {
+        placeBlock();
+        return KeyEventResult.handled;
+      }
+    }
+
+    return KeyEventResult.ignored;
+  }
+
+  @override
   void onTapUp(TapUpEvent event) {
     if (status == TowerGameStatus.intro) {
       status = TowerGameStatus.playing;
       return;
     }
-    
+
     if (status == TowerGameStatus.gameOver) {
       resetGame();
       return;
     }
-    
+
     if (status == TowerGameStatus.playing && currentBlock != null) {
       placeBlock();
     }
@@ -311,12 +342,27 @@ class TowerStackGame extends FlameGame with TapCallbacks {
   
   void gameOver() {
     status = TowerGameStatus.gameOver;
-    
+    super.isGameOver = true;
+
     // Make current block fall
     if (currentBlock != null) {
       currentBlock!.isDebris = true;
     }
-    
+
     if (onGameOver != null) onGameOver!();
+  }
+
+  void restartFromPause() {
+    resetGame();
+  }
+
+  // Override to handle status properly
+  @override
+  void resumeGame() {
+    // Don't resume if in intro or game over
+    if (status == TowerGameStatus.intro || status == TowerGameStatus.gameOver) {
+      return;
+    }
+    super.resumeGame();
   }
 }

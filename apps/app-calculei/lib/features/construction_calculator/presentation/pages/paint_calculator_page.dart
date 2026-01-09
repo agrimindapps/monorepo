@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/presentation/widgets/calculator_app_bar.dart';
-import '../../../../core/presentation/widgets/calculator_input_field.dart';
+import '../../../../core/widgets/calculator_action_buttons.dart';
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../providers/paint_calculator_provider.dart';
 import '../widgets/paint_result_card.dart';
 
@@ -45,214 +45,160 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
   Widget build(BuildContext context) {
     final calculation = ref.watch(paintCalculatorProvider);
 
-    return Scaffold(
-      appBar: const CalculatorAppBar(),
-      body: SafeArea(
-        child: Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 1120),
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+    return CalculatorPageLayout(
+      title: 'Calculadora de Tinta',
+      subtitle: 'Litros e Latas',
+      icon: Icons.format_paint,
+      accentColor: CalculatorAccentColors.construction,
+      categoryName: 'Construção',
+      instructions: 'Informe a área total das paredes (m²). '
+          'Desconte portas e janelas (opcional). '
+          'Escolha o tipo de tinta e demãos. '
+          'Receba a quantidade em litros e latas.',
+      maxContentWidth: 800,
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Input Form
+            Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Info Card
-                  Card(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.format_paint,
-                                color: Theme.of(context).colorScheme.onPrimaryContainer,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(
-                                'Como funciona',
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            '• Informe a área total das paredes (m²)\n'
-                            '• Desconte portas e janelas (opcional)\n'
-                            '• Escolha o tipo de tinta e demãos\n'
-                            '• Receba a quantidade em litros e latas',
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onPrimaryContainer
-                                  .withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    'Áreas',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 16),
 
-                  const SizedBox(height: 24),
-
-                  // Input Form
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Áreas',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 250,
-                                  child: StandardInputField(
-                                    label: 'Área das Paredes',
-                                    controller: _wallAreaController,
-                                    suffix: 'm²',
-                                    helperText: 'Soma de todas as paredes',
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Obrigatório';
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num <= 0) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 250,
-                                  child: StandardInputField(
-                                    label: 'Área de Aberturas',
-                                    controller: _openingsAreaController,
-                                    suffix: 'm²',
-                                    helperText: 'Portas e janelas',
-                                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                                    ],
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return null;
-                                      }
-                                      final num = double.tryParse(value);
-                                      if (num == null || num < 0) {
-                                        return 'Valor inválido';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            Text(
-                              'Configurações',
-                              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            Wrap(
-                              spacing: 16,
-                              runSpacing: 16,
-                              children: [
-                                SizedBox(
-                                  width: 200,
-                                  child: DropdownButtonFormField<String>(
-                                    initialValue: _paintType,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Tipo de Tinta',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    items: _paintTypes.map((type) {
-                                      return DropdownMenuItem(
-                                        value: type,
-                                        child: Text(type),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _paintType = value ?? 'Acrílica';
-                                      });
-                                    },
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 150,
-                                  child: DropdownButtonFormField<int>(
-                                    initialValue: _coats,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Demãos',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    items: [1, 2, 3, 4, 5].map((coats) {
-                                      return DropdownMenuItem(
-                                        value: coats,
-                                        child: Text('$coats demão${coats > 1 ? 's' : ''}'),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _coats = value ?? 2;
-                                      });
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                            const SizedBox(height: 24),
-
-                            CalculatorButton(
-                              label: 'Calcular',
-                              icon: Icons.calculate,
-                              onPressed: _calculate,
-                            ),
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: [
+                      SizedBox(
+                        width: 250,
+                        child: _DarkInputField(
+                          label: 'Área das Paredes',
+                          controller: _wallAreaController,
+                          suffix: 'm²',
+                          helperText: 'Soma de todas as paredes',
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                          ],
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Obrigatório';
+                            }
+                            final num = double.tryParse(value);
+                            if (num == null || num <= 0) {
+                              return 'Inválido';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 250,
+                        child: _DarkInputField(
+                          label: 'Área de Aberturas',
+                          controller: _openingsAreaController,
+                          suffix: 'm²',
+                          helperText: 'Portas e janelas',
+                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                           ],
                         ),
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Text(
+                    'Tipo de Tinta',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Paint Type Selection
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _paintTypes.map((type) {
+                      final isSelected = _paintType == type;
+                      return _SelectionChip(
+                        label: type,
+                        isSelected: isSelected,
+                        onSelected: () {
+                          setState(() {
+                            _paintType = type;
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  Text(
+                    'Demãos: $_coats',
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      activeTrackColor: CalculatorAccentColors.construction,
+                      thumbColor: CalculatorAccentColors.construction,
+                      overlayColor: CalculatorAccentColors.construction.withValues(alpha: 0.2),
+                      inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
+                    ),
+                    child: Slider(
+                      value: _coats.toDouble(),
+                      min: 1,
+                      max: 5,
+                      divisions: 4,
+                      label: '$_coats demão${_coats > 1 ? 's' : ''}',
+                      onChanged: (value) {
+                        setState(() {
+                          _coats = value.toInt();
+                        });
+                      },
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Result Card
-                  if (calculation.id.isNotEmpty) ...[
-                    PaintResultCard(calculation: calculation),
-                  ],
+                  // Action buttons
+                  CalculatorActionButtons(
+                    onCalculate: _calculate,
+                    onClear: _clear,
+                    accentColor: CalculatorAccentColors.construction,
+                  ),
                 ],
               ),
             ),
-          ),
+
+            // Result Card
+            if (calculation.id.isNotEmpty) ...[
+              const SizedBox(height: 32),
+              PaintResultCard(calculation: calculation),
+            ],
+          ],
         ),
       ),
     );
@@ -295,5 +241,158 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
         );
       }
     }
+  }
+
+  void _clear() {
+    _wallAreaController.clear();
+    _openingsAreaController.text = '0';
+    setState(() {
+      _coats = 2;
+      _paintType = 'Acrílica';
+    });
+    ref.read(paintCalculatorProvider.notifier).reset();
+  }
+}
+
+/// Dark themed input field for construction calculator
+class _DarkInputField extends StatelessWidget {
+  final String label;
+  final TextEditingController controller;
+  final String? suffix;
+  final String? helperText;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
+  final String? Function(String?)? validator;
+
+  const _DarkInputField({
+    required this.label,
+    required this.controller,
+    this.suffix,
+    this.helperText,
+    this.keyboardType,
+    this.inputFormatters,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            helperText!,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 11,
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixText: suffix,
+            suffixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 16,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: CalculatorAccentColors.construction,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Selection chip for paint type
+class _SelectionChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+  final VoidCallback onSelected;
+
+  const _SelectionChip({
+    required this.label,
+    required this.isSelected,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: isSelected
+          ? CalculatorAccentColors.construction.withValues(alpha: 0.15)
+          : Colors.white.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onSelected,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: isSelected
+                  ? CalculatorAccentColors.construction
+                  : Colors.white.withValues(alpha: 0.1),
+              width: isSelected ? 2 : 1,
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+              fontSize: 14,
+              color: isSelected
+                  ? CalculatorAccentColors.construction
+                  : Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

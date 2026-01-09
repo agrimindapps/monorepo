@@ -404,7 +404,8 @@ class SnakeGame extends FlameGame with KeyboardEvents, TapCallbacks {
       } else if (event.logicalKey == LogicalKeyboardKey.arrowRight ||
           event.logicalKey == LogicalKeyboardKey.keyD) {
         if (currentDirection != Direction.left) nextDirection = Direction.right;
-      } else if (event.logicalKey == LogicalKeyboardKey.space) {
+      } else if (event.logicalKey == LogicalKeyboardKey.space ||
+          event.logicalKey == LogicalKeyboardKey.escape) {
         if (isPlaying) {
           pauseGame();
         } else {

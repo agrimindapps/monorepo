@@ -14,25 +14,11 @@ class App extends ConsumerStatefulWidget {
 
 class _AppState extends ConsumerState<App> {
   @override
-  void initState() {
-    super.initState();
-    // TODO: Initialize app-specific services
-    // - Analytics
-    // - RemoteConfig
-    // - Notifications
-  }
-
-  @override
-  void dispose() {
-    // TODO: Dispose resources
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final themeMode = ref.watch(currentThemeModeProvider);
     final lightThemeData = ref.watch(lightThemeProvider);
     final darkThemeData = ref.watch(darkThemeProvider);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'Calculei - Calculadoras Financeiras e Trabalhistas',
@@ -40,7 +26,7 @@ class _AppState extends ConsumerState<App> {
       theme: lightThemeData,
       darkTheme: darkThemeData,
       themeMode: themeMode,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

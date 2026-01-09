@@ -4,31 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/theme_providers.dart';
 
-class App extends ConsumerStatefulWidget {
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  ConsumerState<App> createState() => _AppState();
-}
-
-class _AppState extends ConsumerState<App> {
-  @override
-  void initState() {
-    super.initState();
-    // TODO: Initialize app-specific services (game leaderboards, etc.)
-  }
-
-  @override
-  void dispose() {
-    // TODO: Dispose resources
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(currentThemeModeProvider);
     final lightThemeData = ref.watch(lightThemeProvider);
     final darkThemeData = ref.watch(darkThemeProvider);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'MiniGames',
@@ -36,7 +20,7 @@ class _AppState extends ConsumerState<App> {
       theme: lightThemeData,
       darkTheme: darkThemeData,
       themeMode: themeMode,
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

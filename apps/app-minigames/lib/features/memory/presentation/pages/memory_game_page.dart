@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state_entity.dart';
 import '../providers/memory_game_notifier.dart';
@@ -40,16 +41,20 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
       });
     }
 
-    return GamePageLayout(
-      title: 'Jogo da Memória',
-      accentColor: const Color(0xFF9C27B0),
-      instructions: 'Encontre todos os pares!\n\n'
-          '🃏 Toque para virar cartas\n'
-          '🔄 Memorize as posições\n'
-          '⏱️ Menor tempo = maior pontuação\n'
-          '🏆 Complete com menos tentativas!',
-      maxGameWidth: 800,
-      actions: [
+    return EscKeyboardWrapper(
+      onEscPressed: () {
+        ref.read(memoryGameProvider.notifier).togglePause();
+      },
+      child: GamePageLayout(
+        title: 'Jogo da Memória',
+        accentColor: const Color(0xFF9C27B0),
+        instructions: 'Encontre todos os pares!\n\n'
+            '🃏 Toque para virar cartas\n'
+            '🔄 Memorize as posições\n'
+            '⏱️ Menor tempo = maior pontuação\n'
+            '🏆 Complete com menos tentativas!',
+        maxGameWidth: 800,
+        actions: [
         if (gameState.status == GameStatus.playing ||
             gameState.status == GameStatus.paused)
           IconButton(
@@ -101,6 +106,7 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
             child: _buildGameContent(gameState, notifier),
           ),
         ],
+      ),
       ),
     );
   }

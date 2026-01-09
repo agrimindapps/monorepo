@@ -72,4 +72,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'calculei-52e71.firebasestorage.app',
     iosBundleId: 'com.example.appCalculei',
   );
+
 }

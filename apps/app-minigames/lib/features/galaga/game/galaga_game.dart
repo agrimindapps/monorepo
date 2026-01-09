@@ -3,12 +3,13 @@ import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/player_ship.dart';
 import 'components/bullet.dart';
 import 'components/enemy_manager.dart';
 import 'components/star_background.dart';
 
-class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallbacks, HasCollisionDetection {
+class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallbacks, HasCollisionDetection, EscPauseHandler {
   late GalagaPlayerShip player;
   late EnemyManager enemyManager;
   late TextComponent scoreText;
@@ -110,13 +111,19 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
   
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Handle ESC pause first (from mixin)
+    final pauseResult = handleEscPause(event);
+    if (pauseResult == KeyEventResult.handled) {
+      return pauseResult;
+    }
+
     if (isGameOver) {
       if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
         restartGame();
       }
       return KeyEventResult.handled;
     }
-    
+
     // Movement
     if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
       player.moveLeft();
@@ -125,12 +132,12 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
     } else {
       player.stopMoving();
     }
-    
+
     // Shooting
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.space) {
       shoot();
     }
-    
+
     return KeyEventResult.handled;
   }
   
@@ -210,6 +217,7 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
   
   void gameOver() {
     isGameOver = true;
+    super.isGameOver = true;
     
     add(RectangleComponent(
       position: Vector2(size.x / 2 - 120, size.y / 2 - 80),
@@ -273,15 +281,20 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
     lives = 3;
     wave = 1;
     isGameOver = false;
+    super.isGameOver = false;
     shootCooldown = 0;
-    
+
     add(RectangleComponent(
       size: size,
       paint: Paint()..color = const Color(0xFF000011),
     ));
     add(StarBackground(screenSize: size));
-    
+
     _setupGame();
     _setupUI();
+  }
+
+  void restartFromPause() {
+    restartGame();
   }
 }

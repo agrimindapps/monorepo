@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../domain/entities/enums.dart';
 import '../game/game_2048.dart';
 import '../providers/game_2048_notifier.dart';
@@ -141,6 +142,16 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
                               child: GameWidget(
                                 game: _game!,
                                 key: ValueKey(gameState.boardSize),
+                                overlayBuilderMap: {
+                                  'PauseMenu': (context, game) {
+                                    final typedGame = game as Game2048;
+                                    return PauseMenuOverlay(
+                                      onContinue: typedGame.resumeGame,
+                                      onRestart: typedGame.restartFromPause,
+                                      accentColor: const Color(0xFFEDC22E),
+                                    );
+                                  },
+                                },
                               ),
                             )
                           : const Center(

@@ -1,1 +1,45 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"minigames-33fe5","appId":"1:1015632283781:android:7cd6fef76e8539361541ec","fileOutput":"android/app/google-services.json"}},"ios":{"default":{"projectId":"minigames-33fe5","appId":"1:1015632283781:ios:e720007c53a4e6c11541ec","uploadDebugSymbols":true,"fileOutput":"ios/Runner/GoogleService-Info.plist"}},"dart":{"lib/firebase_options.dart":{"projectId":"minigames-33fe5","configurations":{"android":"1:1015632283781:android:7cd6fef76e8539361541ec","ios":"1:1015632283781:ios:e720007c53a4e6c11541ec","web":"1:1015632283781:web:9b8729e960d061ee1541ec"}}}}}}
+{
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "minigames-33fe5",
+          "appId": "1:1015632283781:android:7cd6fef76e8539361541ec",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "minigames-33fe5",
+          "appId": "1:1015632283781:ios:e720007c53a4e6c11541ec",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "minigames-33fe5",
+          "configurations": {
+            "android": "1:1015632283781:android:7cd6fef76e8539361541ec",
+            "ios": "1:1015632283781:ios:e720007c53a4e6c11541ec",
+            "web": "1:1015632283781:web:9b8729e960d061ee1541ec"
+          }
+        }
+      }
+    }
+  }
+}

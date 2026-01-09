@@ -4,12 +4,13 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/bullet.dart';
 import 'components/invader_manager.dart';
 import 'components/player_ship.dart';
 
 class SpaceInvadersGame extends FlameGame
-    with TapCallbacks, PanDetector, KeyboardEvents, HasCollisionDetection {
+    with TapCallbacks, PanDetector, KeyboardEvents, HasCollisionDetection, EscPauseHandler {
   late PlayerShip player;
   late InvaderManager invaderManager;
 
@@ -103,6 +104,12 @@ class SpaceInvadersGame extends FlameGame
 
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Handle ESC pause first (from mixin)
+    final pauseResult = handleEscPause(event);
+    if (pauseResult == KeyEventResult.handled) {
+      return pauseResult;
+    }
+
     if (isGameOver || isGameWon) return KeyEventResult.ignored;
 
     if (keysPressed.contains(LogicalKeyboardKey.arrowLeft)) {
@@ -134,11 +141,13 @@ class SpaceInvadersGame extends FlameGame
 
   void gameOver() {
     isGameOver = true;
+    super.isGameOver = true;
     overlays.add('GameOver');
   }
 
   void gameWon() {
     isGameWon = true;
+    super.isGameOver = true;
     overlays.add('GameWon');
   }
 
@@ -152,9 +161,14 @@ class SpaceInvadersGame extends FlameGame
     score = 0;
     lives = 3;
     isGameOver = false;
+    super.isGameOver = false;
     isGameWon = false;
     overlays.remove('GameOver');
     overlays.remove('GameWon');
     _setupGame();
+  }
+
+  void restartFromPause() {
+    reset();
   }
 }

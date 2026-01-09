@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../providers/flooring_calculator_provider.dart';
 import '../widgets/flooring_result_card.dart';
@@ -231,24 +232,11 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
 
                   const SizedBox(height: 24),
 
-                  SizedBox(
-                    height: 52,
-                    child: ElevatedButton.icon(
-                      onPressed: _calculate,
-                      icon: const Icon(Icons.calculate_rounded),
-                      label: const Text(
-                        'Calcular',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: CalculatorAccentColors.construction,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        elevation: 0,
-                      ),
-                    ),
+                  // Action buttons
+                  CalculatorActionButtons(
+                    onCalculate: _calculate,
+                    onClear: _clear,
+                    accentColor: CalculatorAccentColors.construction,
                   ),
                 ],
               ),
@@ -304,6 +292,19 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
         );
       }
     }
+  }
+
+  void _clear() {
+    _roomLengthController.clear();
+    _roomWidthController.clear();
+    _tileLengthController.text = '60';
+    _tileWidthController.text = '60';
+    _tilesPerBoxController.text = '6';
+    setState(() {
+      _wastePercentage = 10;
+      _flooringType = 'Porcelanato';
+    });
+    ref.read(flooringCalculatorProvider.notifier).reset();
   }
 }
 

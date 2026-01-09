@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/body_condition_calculator.dart';
@@ -122,24 +123,10 @@ class _BodyConditionCalculatorPageState
               const SizedBox(height: 24),
 
               // Calculate button
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _calculate,
-                  icon: const Icon(Icons.calculate_rounded),
-                  label: const Text(
-                    'Calcular ECC',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CalculatorAccentColors.pet,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.pet,
               ),
 
               // Result
@@ -243,6 +230,16 @@ class _BodyConditionCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    setState(() {
+      _species = PetSpecies.dog;
+      _ribPalpation = 3;
+      _waistVisibility = 3;
+      _abdominalProfile = 3;
+      _result = null;
+    });
   }
 }
 

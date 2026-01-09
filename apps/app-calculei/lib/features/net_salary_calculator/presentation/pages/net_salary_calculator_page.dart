@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
 import '../providers/net_salary_calculator_provider.dart';
@@ -19,6 +20,7 @@ class NetSalaryCalculatorPage extends ConsumerStatefulWidget {
 class _NetSalaryCalculatorPageState
     extends ConsumerState<NetSalaryCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
+  Key _formKeyId = UniqueKey();
 
   @override
   Widget build(BuildContext context) {
@@ -41,45 +43,19 @@ class _NetSalaryCalculatorPageState
           children: [
             // Input Form
             NetSalaryInputForm(
+              key: _formKeyId,
               formKey: _formKey,
               onCalculate: _handleCalculate,
             ),
 
             const SizedBox(height: 24),
 
-            // Calculate Button
-            SizedBox(
-              height: 52,
-              child: ElevatedButton.icon(
-                onPressed: state.isLoading ? null : _handleSubmit,
-                icon: state.isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.calculate_rounded),
-                label: Text(
-                  state.isLoading ? 'Calculando...' : 'Calcular Salário Líquido',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.labor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 0,
-                  disabledBackgroundColor:
-                      CalculatorAccentColors.labor.withValues(alpha: 0.5),
-                ),
-              ),
+            // Action Buttons
+            CalculatorActionButtons(
+              onCalculate: _handleSubmit,
+              onClear: _handleClear,
+              accentColor: CalculatorAccentColors.labor,
+              isLoading: state.isLoading,
             ),
 
             // Error Message
@@ -171,5 +147,12 @@ class _NetSalaryCalculatorPageState
 
   void _handleCalculate(CalculateNetSalaryParams params) {
     ref.read(netSalaryCalculatorProvider.notifier).calculate(params);
+  }
+
+  void _handleClear() {
+    setState(() {
+      _formKeyId = UniqueKey();
+    });
+    ref.read(netSalaryCalculatorProvider.notifier).clearCalculation();
   }
 }

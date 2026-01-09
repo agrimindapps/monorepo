@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../game/dino_run_game.dart';
 
 class DinoRunPage extends ConsumerStatefulWidget {
@@ -107,6 +108,11 @@ class _DinoRunPageState extends ConsumerState<DinoRunPage> {
                   child: GameWidget<DinoRunGame>(
                     game: _game!,
                     overlayBuilderMap: {
+                      'PauseMenu': (context, game) => PauseMenuOverlay(
+                        onContinue: game.resumeGame,
+                        onRestart: game.restartFromPause,
+                        accentColor: const Color(0xFF535353),
+                      ),
                       'GameOver': (context, game) =>
                           _buildGameOverOverlay(context, game),
                     },

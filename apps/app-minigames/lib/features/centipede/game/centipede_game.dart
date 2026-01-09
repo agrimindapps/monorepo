@@ -6,6 +6,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/player.dart';
 import 'components/centipede.dart';
 import 'components/mushroom.dart';
@@ -22,7 +23,7 @@ import 'components/spider.dart';
 /// - Spider provides bonus points
 /// - Clear all centipede segments to win wave
 class CentipedeGame extends FlameGame
-    with TapCallbacks, PanDetector, KeyboardEvents, HasCollisionDetection {
+    with TapCallbacks, PanDetector, KeyboardEvents, HasCollisionDetection, EscPauseHandler {
   
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onScoreChanged;
@@ -232,6 +233,12 @@ class CentipedeGame extends FlameGame
 
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Handle ESC pause first (from mixin)
+    final pauseResult = handleEscPause(event);
+    if (pauseResult == KeyEventResult.handled) {
+      return pauseResult;
+    }
+
     if (isGameOver || isPaused) return KeyEventResult.ignored;
 
     const moveSpeed = 8.0;
@@ -285,6 +292,7 @@ class CentipedeGame extends FlameGame
 
   void gameOver() {
     isGameOver = true;
+    super.isGameOver = true;
     HapticFeedback.heavyImpact();
     onGameOver?.call();
   }
@@ -314,6 +322,7 @@ class CentipedeGame extends FlameGame
     lives = 3;
     wave = 1;
     isGameOver = false;
+    super.isGameOver = false;
     isPaused = false;
     _spiderSpawnTimer = 0;
     _setupGame();
@@ -321,6 +330,20 @@ class CentipedeGame extends FlameGame
 
   void togglePause() {
     isPaused = !isPaused;
+  }
+
+  // Required by EscPauseHandler mixin
+  void restartFromPause() {
+    restart();
+  }
+
+  // Override resumeGame to use togglePause
+  @override
+  void resumeGame() {
+    if (isPaused) {
+      togglePause();
+    }
+    super.resumeGame();
   }
 
   // Getters for mushroom collision detection

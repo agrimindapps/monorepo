@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
 import '../providers/emergency_reserve_calculator_provider.dart';
@@ -62,48 +63,11 @@ class _EmergencyReserveCalculatorPageState
             const SizedBox(height: 24),
 
             // Action Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _DarkTextButton(
-                  onPressed: _handleClear,
-                  icon: Icons.clear,
-                  label: 'Limpar',
-                ),
-                const SizedBox(width: 16),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: state.isLoading ? null : _handleSubmit,
-                    icon: state.isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.calculate_rounded),
-                    label: Text(
-                      state.isLoading ? 'Calculando...' : 'Calcular',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CalculatorAccentColors.financial,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                    ),
-                  ),
-                ),
-              ],
+            CalculatorActionButtons(
+              onCalculate: _handleSubmit,
+              onClear: _handleClear,
+              accentColor: CalculatorAccentColors.financial,
+              isLoading: state.isLoading,
             ),
 
             // Error Message
@@ -176,32 +140,6 @@ class _EmergencyReserveCalculatorPageState
             child: const Text('Fechar'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Dark themed text button for the calculator
-class _DarkTextButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final String label;
-
-  const _DarkTextButton({
-    required this.onPressed,
-    required this.icon,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label),
-      style: TextButton.styleFrom(
-        foregroundColor: Colors.white70,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/unit_conversion_calculator.dart';
 
@@ -239,30 +240,10 @@ https://calculei.com.br''');
               const SizedBox(height: 32),
 
               // Calculate button
-              ElevatedButton(
-                onPressed: _calculate,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.swap_horiz),
-                    SizedBox(width: 8),
-                    Text(
-                      'Converter',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.pet,
               ),
 
               // Result
@@ -515,6 +496,24 @@ https://calculei.com.br''');
     };
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _valueController.clear();
+    setState(() {
+      _unitType = UnitType.weight;
+      _fromWeightUnit = WeightUnit.kg;
+      _toWeightUnit = WeightUnit.lb;
+      _fromLengthUnit = LengthUnit.cm;
+      _toLengthUnit = LengthUnit.inch;
+      _fromTempUnit = TemperatureUnit.celsius;
+      _toTempUnit = TemperatureUnit.fahrenheit;
+      _fromVolumeUnit = VolumeUnit.ml;
+      _toVolumeUnit = VolumeUnit.oz;
+      _fromMedUnit = MedicationUnit.mg;
+      _toMedUnit = MedicationUnit.mcg;
+      _result = null;
+    });
   }
 }
 

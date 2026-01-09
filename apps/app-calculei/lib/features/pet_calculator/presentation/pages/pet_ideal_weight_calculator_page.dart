@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/pet_ideal_weight_calculator.dart';
 export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
@@ -99,27 +101,13 @@ class _PetIdealWeightCalculatorPageState
                   runSpacing: 8,
                   children: BreedSize.values.map((size) {
                     final isSelected = _breedSize == size;
-                    return ChoiceChip(
-                      label: Text(
-                        PetIdealWeightCalculator
-                            .getBreedSizeDescription(size),
-                      ),
-                      selected: isSelected,
-                      onSelected: (_) =>
+                    return DarkChoiceChip(
+                      label: PetIdealWeightCalculator
+                          .getBreedSizeDescription(size),
+                      isSelected: isSelected,
+                      onSelected: () =>
                           setState(() => _breedSize = size),
-                      selectedColor: CalculatorAccentColors.pet.withValues(alpha: 0.3),
-                      backgroundColor: Colors.white.withValues(alpha: 0.08),
-                      labelStyle: TextStyle(
-                        color: isSelected
-                            ? CalculatorAccentColors.pet
-                            : Colors.white.withValues(alpha: 0.9),
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                      ),
-                      side: BorderSide(
-                        color: isSelected
-                            ? CalculatorAccentColors.pet
-                            : Colors.white.withValues(alpha: 0.2),
-                      ),
+                      accentColor: CalculatorAccentColors.pet,
                     );
                   }).toList(),
                 ),
@@ -223,30 +211,10 @@ class _PetIdealWeightCalculatorPageState
               const SizedBox(height: 32),
 
               // Calculate button
-              ElevatedButton(
-                onPressed: _calculate,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.pet,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calculate),
-                    SizedBox(width: 8),
-                    Text(
-                      'Calcular Peso Ideal',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.pet,
               ),
 
               if (_result != null) ...[
@@ -282,6 +250,16 @@ class _PetIdealWeightCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _weightController.clear();
+    setState(() {
+      _species = PetSpecies.dog;
+      _breedSize = BreedSize.medium;
+      _bcsScore = 5;
+      _result = null;
+    });
   }
 }
 

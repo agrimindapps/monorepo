@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/weight_gain_calculator.dart';
 
@@ -75,18 +77,12 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                   spacing: 8,
                   runSpacing: 8,
                   children: AnimalType.values.map((type) {
-                    return ChoiceChip(
-                      label: Text(WeightGainCalculator.getAnimalName(type)),
-                      selected: _animalType == type,
-                      onSelected: (_) =>
+                    return DarkChoiceChip(
+                      label: WeightGainCalculator.getAnimalName(type),
+                      isSelected: _animalType == type,
+                      onSelected: () =>
                           setState(() => _animalType = type),
-                      backgroundColor: Colors.white.withValues(alpha: 0.05),
-                      selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                      labelStyle: TextStyle(
-                        color: _animalType == type
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.7),
-                      ),
+                      accentColor: CalculatorAccentColors.agriculture,
                     );
                   }).toList(),
                 ),
@@ -149,28 +145,11 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                 ),
                 const SizedBox(height: 28),
 
-                // Calculate button
-                SizedBox(
-                  height: 52,
-                  child: ElevatedButton.icon(
-                    onPressed: _calculate,
-                    icon: const Icon(Icons.calculate_rounded),
-                    label: const Text(
-                      'Calcular Ganho',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CalculatorAccentColors.agriculture,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 4,
-                    ),
-                  ),
+                // Action buttons
+                CalculatorActionButtons(
+                  onCalculate: _calculate,
+                  onClear: _clear,
+                  accentColor: CalculatorAccentColors.agriculture,
                 ),
 
                 // Result card
@@ -202,6 +181,16 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _initialWeightController.text = '250';
+    _targetWeightController.text = '450';
+    _dailyGainController.text = '1.2';
+    setState(() {
+      _animalType = AnimalType.cattle;
+      _result = null;
+    });
   }
 }
 

@@ -33,7 +33,7 @@ class ExpenseReceiptImageManager {
 
       return await _validateAndProcessImage(image);
     } catch (e) {
-      return ImageSelectionLeft('Erro ao selecionar imagem: $e');
+      return ImageSelectionResult.error('Erro ao selecionar imagem: $e');
     }
   }
 
@@ -53,7 +53,7 @@ class ExpenseReceiptImageManager {
 
       return await _validateAndProcessImage(image);
     } catch (e) {
-      return ImageSelectionLeft('Erro ao capturar imagem: $e');
+      return ImageSelectionResult.error('Erro ao capturar imagem: $e');
     }
   }
 
@@ -63,7 +63,7 @@ class ExpenseReceiptImageManager {
       // Valida formato
       final extension = image.path.split('.').last.toLowerCase();
       if (!supportedFormats.contains(extension)) {
-        return ImageSelectionLeft(
+        return ImageSelectionResult.error(
           'Formato não suportado. Use: ${supportedFormats.join(", ")}',
         );
       }
@@ -72,19 +72,19 @@ class ExpenseReceiptImageManager {
       final size = await image.length();
       if (size > maxImageSizeBytes) {
         final sizeMB = size / (1024 * 1024);
-        return ImageSelectionLeft(
+        return ImageSelectionResult.error(
           'Imagem muito grande (${sizeMB.toStringAsFixed(1)}MB). '
           'Tamanho máximo: 5MB',
         );
       }
 
-      return ImageSelectionRight(
+      return ImageSelectionResult.success(
         path: image.path,
         sizeBytes: size,
         format: extension,
       );
     } catch (e) {
-      return ImageSelectionLeft('Erro ao processar imagem: $e');
+      return ImageSelectionResult.error('Erro ao processar imagem: $e');
     }
   }
 
@@ -151,7 +151,6 @@ class ExpenseReceiptImageManager {
 
 /// Resultado da seleção de imagem
 class ImageSelectionResult {
-
   const ImageSelectionResult._({
     // ignore: sort_constructors_first
     required this.isSuccess,
@@ -186,7 +185,7 @@ class ImageSelectionResult {
   /// Criação de resultado cancelado
   factory ImageSelectionResult.cancelled() {
     // ignore: sort_constructors_first
-    return ImageSelectionResult._(isSuccess: false, isCancelled: true);
+    return const ImageSelectionResult._(isSuccess: false, isCancelled: true);
   }
   final bool isSuccess;
   final String? path;

@@ -5,12 +5,13 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import '../../domain/entities/enums.dart';
 import 'components/ball.dart';
 import 'components/paddle.dart';
 import 'components/court.dart';
 
-class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection {
+class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection, EscPauseHandler {
   final VoidCallback? onGameOver;
   final ValueChanged<int>? onPlayerScoreChanged;
   final ValueChanged<int>? onAiScoreChanged;
@@ -165,6 +166,12 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
 
   @override
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
+    // Handle ESC pause first (from mixin)
+    final pauseResult = handleEscPause(event);
+    if (pauseResult == KeyEventResult.handled) {
+      return pauseResult;
+    }
+
     _pressedKeys.clear();
     _pressedKeys.addAll(keysPressed);
     return KeyEventResult.handled;
@@ -192,11 +199,12 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
 
   void gameOver() {
     if (isGameOver) return;
-    
+
     isGameOver = true;
+    super.isGameOver = true;
     isPlaying = false;
     pauseEngine();
-    
+
     if (onGameOver != null) {
       onGameOver!();
     }
@@ -206,18 +214,23 @@ class PingPongGame extends FlameGame with KeyboardEvents, HasCollisionDetection 
     playerScore = 0;
     aiScore = 0;
     isGameOver = false;
+    super.isGameOver = false;
     isPlaying = false;
     _elapsedSeconds = 0;
-    
+
     if (onPlayerScoreChanged != null) onPlayerScoreChanged!(0);
     if (onAiScoreChanged != null) onAiScoreChanged!(0);
 
     ball.reset(servingPlayer: true);
     playerPaddle.reset();
     aiPaddle.reset();
-    
+
     resumeEngine();
     // Wait for user to start
-    pauseGame(); 
+    pauseGame();
+  }
+
+  void restartFromPause() {
+    restartGame();
   }
 }

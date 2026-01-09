@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/tetromino.dart';
 import '../providers/tetris_controller.dart';
 
@@ -66,17 +67,22 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(tetrisControllerProvider);
-    
-    return GamePageLayout(
-      title: 'Tetris',
-      accentColor: const Color(0xFF9C27B0),
-      instructions: 'Use as setas ou botões para controlar.\n\n'
-          '⬅️➡️ Mover\n'
-          '⬆️ Rotacionar\n'
-          '⬇️ Descer rápido\n'
-          '⏬ Hard drop',
-      maxGameWidth: 450,
-      actions: [
+
+
+    return EscKeyboardWrapper(
+      onEscPressed: () {
+        ref.read(tetrisControllerProvider.notifier).togglePause();
+      },
+      child: GamePageLayout(
+        title: 'Tetris',
+        accentColor: const Color(0xFF9C27B0),
+        instructions: 'Use as setas ou botões para controlar.\n\n'
+            '⬅️➡️ Mover\n'
+            '⬆️ Rotacionar\n'
+            '⬇️ Descer rápido\n'
+            '⏬ Hard drop',
+        maxGameWidth: 450,
+        actions: [
         IconButton(
           icon: Icon(
             state.isPaused ? Icons.play_arrow : Icons.pause,
@@ -140,6 +146,7 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

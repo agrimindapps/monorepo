@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../providers/campo_minado_game_notifier.dart';
 import '../widgets/game_header_widget.dart';
 import '../game/minesweeper_game.dart';
@@ -81,11 +82,15 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
       },
     );
 
-    return GamePageLayout(
-      title: 'Campo Minado',
-      accentColor: const Color(0xFF607D8B),
-      instructions: 'Encontre todas as minas sem detonar!\n\n'
-          '👆 Toque para revelar célula\n'
+    return EscKeyboardWrapper(
+      onEscPressed: () {
+        ref.read(campoMinadoGameProvider.notifier).togglePause();
+      },
+      child: GamePageLayout(
+        title: 'Campo Minado',
+        accentColor: const Color(0xFF607D8B),
+        instructions: 'Encontre todas as minas sem detonar!\n\n'
+            '👆 Toque para revelar célula\n'
           '👆🏻 Toque longo para bandeira\n'
           '🔢 Números = minas adjacentes\n'
           '🚩 Marque todas as minas para vencer!',
@@ -119,6 +124,7 @@ class _CampoMinadoPageState extends ConsumerState<CampoMinadoPage>
             ),
           ),
         ],
+      ),
       ),
     );
   }

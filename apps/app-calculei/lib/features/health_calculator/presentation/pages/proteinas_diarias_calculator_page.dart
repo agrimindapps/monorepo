@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/proteinas_diarias_calculator.dart';
 
@@ -95,25 +96,11 @@ class _ProteinasDiariasCalculatorPageState
 
               const SizedBox(height: 24),
 
-              // Calculate button
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _calculate,
-                  icon: const Icon(Icons.calculate_rounded),
-                  label: const Text(
-                    'Calcular Proteínas',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CalculatorAccentColors.health,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.health,
               ),
 
               // Result
@@ -159,6 +146,14 @@ class _ProteinasDiariasCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _weightController.clear();
+    setState(() {
+      _activityLevel = ActivityLevel.moderate;
+      _result = null;
+    });
   }
 }
 

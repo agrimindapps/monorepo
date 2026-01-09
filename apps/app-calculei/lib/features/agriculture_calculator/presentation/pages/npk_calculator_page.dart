@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/npk_calculator.dart';
 
@@ -78,19 +80,13 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: CropType.values.map((crop) {
-                  return ChoiceChip(
-                    label: Text(NpkCalculator.getCropName(crop)),
-                    selected: _crop == crop,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: NpkCalculator.getCropName(crop),
+                    isSelected: _crop == crop,
+                    onSelected: () {
                       setState(() => _crop = crop);
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _crop == crop 
-                          ? Colors.white 
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -153,19 +149,13 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: SoilTexture.values.map((tex) {
-                  return ChoiceChip(
-                    label: Text(NpkCalculator.getSoilName(tex)),
-                    selected: _texture == tex,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: NpkCalculator.getSoilName(tex),
+                    isSelected: _texture == tex,
+                    onSelected: () {
                       setState(() => _texture = tex);
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _texture == tex 
-                          ? Colors.white 
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -227,19 +217,11 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
 
               const SizedBox(height: 32),
 
-              // Calculate button
-              ElevatedButton.icon(
-                onPressed: _calculate,
-                icon: const Icon(Icons.calculate),
-                label: const Text('Calcular'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.agriculture,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               const SizedBox(height: 24),
@@ -270,6 +252,20 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _yieldController.text = '8';
+    _areaController.text = '10';
+    _soilNController.text = '20';
+    _soilPController.text = '10';
+    _soilKController.text = '80';
+    _omController.text = '3';
+    setState(() {
+      _crop = CropType.corn;
+      _texture = SoilTexture.loam;
+      _result = null;
+    });
   }
 }
 

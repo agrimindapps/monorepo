@@ -7,6 +7,7 @@ import 'package:flame/game.dart';
 
 // Core imports:
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 
 // Presentation imports:
 import '../providers/flappbird_notifier.dart';
@@ -71,6 +72,11 @@ class _FlappbirdPageState extends ConsumerState<FlappbirdPage> {
           child: GameWidget(
             game: _game,
             overlayBuilderMap: {
+              'PauseMenu': (context, FlappyBirdGame game) => PauseMenuOverlay(
+                onContinue: game.resumeGame,
+                onRestart: game.restartFromPause,
+                accentColor: const Color(0xFF4CAF50),
+              ),
               'Score': (context, FlappyBirdGame game) {
                 return ScoreDisplayWidget(
                   score: _currentScore,

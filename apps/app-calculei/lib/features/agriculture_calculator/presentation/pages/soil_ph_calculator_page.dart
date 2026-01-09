@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/soil_ph_calculator.dart';
 
@@ -122,20 +124,13 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: SoilTexture.values.map((tex) {
-                  return ChoiceChip(
-                    label: Text(SoilPhCalculator.getTextureName(tex)),
-                    selected: _texture == tex,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: SoilPhCalculator.getTextureName(tex),
+                    isSelected: _texture == tex,
+                    onSelected: () {
                       setState(() => _texture = tex);
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor:
-                        CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _texture == tex
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -193,29 +188,11 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
 
               const SizedBox(height: 28),
 
-              // Calculate button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: _calculate,
-                  icon: const Icon(Icons.calculate),
-                  label: const Text(
-                    'Calcular Calagem',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CalculatorAccentColors.agriculture,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               if (_result != null) ...[
@@ -246,6 +223,17 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _currentPhController.text = '5.2';
+    _targetPhController.text = '6.5';
+    _areaController.text = '10';
+    _prntController.text = '90';
+    setState(() {
+      _texture = SoilTexture.loam;
+      _result = null;
+    });
   }
 }
 

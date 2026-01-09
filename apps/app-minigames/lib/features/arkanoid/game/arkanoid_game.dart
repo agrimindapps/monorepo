@@ -5,11 +5,12 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/ball.dart';
 import 'components/brick.dart';
 import 'components/paddle.dart';
 
-class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollisionDetection, KeyboardEvents {
+class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollisionDetection, KeyboardEvents, EscPauseHandler {
   late Paddle paddle;
   late Ball ball;
   
@@ -136,8 +137,17 @@ class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollis
   }
 
   void reset() {
+    isGameOver = false;
+    isGameWon = false;
+    super.isGameOver = false; // Update EscPauseHandler
     overlays.remove('GameOver');
     overlays.remove('GameWon');
     setupGame();
+  }
+
+  @override
+  void restartFromPause() {
+    overlays.remove('PauseMenu');
+    reset();
   }
 }

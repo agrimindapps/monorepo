@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/caloric_needs_calculator.dart';
 
@@ -130,22 +132,11 @@ class _CaloricNeedsCalculatorPageState
                 spacing: 8,
                 runSpacing: 8,
                 children: LifeStage.values.map((stage) {
-                  return ChoiceChip(
-                    label: Text(_getLifeStageLabel(stage)),
-                    selected: _lifeStage == stage,
-                    onSelected: (_) => setState(() => _lifeStage = stage),
-                    selectedColor: CalculatorAccentColors.pet.withValues(alpha: 0.3),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    labelStyle: TextStyle(
-                      color: _lifeStage == stage
-                          ? CalculatorAccentColors.pet
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
-                    side: BorderSide(
-                      color: _lifeStage == stage
-                          ? CalculatorAccentColors.pet
-                          : Colors.white.withValues(alpha: 0.1),
-                    ),
+                  return DarkChoiceChip(
+                    label: _getLifeStageLabel(stage),
+                    isSelected: _lifeStage == stage,
+                    onSelected: () => setState(() => _lifeStage = stage),
+                    accentColor: CalculatorAccentColors.pet,
                   );
                 }).toList(),
               ),
@@ -166,22 +157,11 @@ class _CaloricNeedsCalculatorPageState
                 spacing: 8,
                 runSpacing: 8,
                 children: ActivityLevel.values.map((level) {
-                  return ChoiceChip(
-                    label: Text(_getActivityLabel(level)),
-                    selected: _activityLevel == level,
-                    onSelected: (_) => setState(() => _activityLevel = level),
-                    selectedColor: CalculatorAccentColors.pet.withValues(alpha: 0.3),
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    labelStyle: TextStyle(
-                      color: _activityLevel == level
-                          ? CalculatorAccentColors.pet
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
-                    side: BorderSide(
-                      color: _activityLevel == level
-                          ? CalculatorAccentColors.pet
-                          : Colors.white.withValues(alpha: 0.1),
-                    ),
+                  return DarkChoiceChip(
+                    label: _getActivityLabel(level),
+                    isSelected: _activityLevel == level,
+                    onSelected: () => setState(() => _activityLevel = level),
+                    accentColor: CalculatorAccentColors.pet,
                   );
                 }).toList(),
               ),
@@ -222,30 +202,10 @@ class _CaloricNeedsCalculatorPageState
               const SizedBox(height: 32),
 
               // Calculate button
-              ElevatedButton(
-                onPressed: _calculate,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.pet,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.calculate),
-                    SizedBox(width: 8),
-                    Text(
-                      'Calcular Calorias',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.pet,
               ),
 
               if (_result != null) ...[
@@ -293,6 +253,17 @@ class _CaloricNeedsCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _weightController.clear();
+    setState(() {
+      _species = PetSpecies.dog;
+      _lifeStage = LifeStage.adult;
+      _activityLevel = ActivityLevel.moderate;
+      _isNeutered = false;
+      _result = null;
+    });
   }
 }
 

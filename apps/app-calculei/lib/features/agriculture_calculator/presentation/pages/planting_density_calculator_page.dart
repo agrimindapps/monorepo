@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/planting_density_calculator.dart';
@@ -142,19 +143,11 @@ class _PlantingDensityCalculatorPageState
 
               const SizedBox(height: 32),
 
-              // Calculate button
-              ElevatedButton.icon(
-                onPressed: _calculate,
-                icon: const Icon(Icons.calculate),
-                label: const Text('Calcular Densidade'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.agriculture,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               const SizedBox(height: 24),
@@ -181,6 +174,16 @@ class _PlantingDensityCalculatorPageState
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _rowSpacingController.text = '0.9';
+    _plantSpacingController.text = '0.2';
+    _areaController.text = '10';
+    _costPerPlantController.text = '0';
+    setState(() {
+      _result = null;
+    });
   }
 }
 

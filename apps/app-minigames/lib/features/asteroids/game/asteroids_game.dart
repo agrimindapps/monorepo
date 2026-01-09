@@ -6,12 +6,13 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/asteroid.dart';
 import 'components/ship.dart';
 import 'components/laser.dart';
 
 class AsteroidsGame extends FlameGame
-    with TapCallbacks, KeyboardEvents, HasCollisionDetection {
+    with TapCallbacks, KeyboardEvents, HasCollisionDetection, EscPauseHandler {
   late Ship ship;
   final Random _random = Random();
 
@@ -155,6 +156,7 @@ class AsteroidsGame extends FlameGame
     lives--;
     if (lives <= 0) {
       isGameOver = true;
+      super.isGameOver = true; // Update EscPauseHandler
       overlays.add('GameOver');
     } else {
       // Respawn ship at center
@@ -166,7 +168,14 @@ class AsteroidsGame extends FlameGame
     score = 0;
     lives = 3;
     isGameOver = false;
+    super.isGameOver = false; // Update EscPauseHandler
     overlays.remove('GameOver');
     _setupGame();
+  }
+
+  @override
+  void restartFromPause() {
+    overlays.remove('PauseMenu');
+    reset();
   }
 }

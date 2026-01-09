@@ -1,5 +1,5 @@
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:app_minigames/features/home/presentation/pages/home_page.dart';
 import 'package:app_minigames/features/tower/presentation/pages/tower_page.dart';
@@ -32,11 +32,17 @@ import 'package:app_minigames/features/centipede/presentation/pages/centipede_pa
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
-// App router configuration
-final appRouter = GoRouter(
-  navigatorKey: rootNavigatorKey,
-  initialLocation: '/',
-  routes: [
+/// Provider para o GoRouter com Analytics integrado
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final analyticsObserver = ref.watch(
+    analyticsRouteObserverFamilyProvider('minigames_'),
+  );
+
+  return GoRouter(
+    navigatorKey: rootNavigatorKey,
+    initialLocation: '/',
+    observers: [analyticsObserver],
+    routes: [
     GoRoute(
       path: '/',
       builder: (context, state) => const HomePage(),
@@ -153,3 +159,10 @@ final appRouter = GoRouter(
     ),
   ),
 );
+});
+
+/// Mantido para compatibilidade - usar appRouterProvider quando possível
+/// @deprecated Use appRouterProvider em Consumer widgets
+GoRouter get appRouter => throw UnsupportedError(
+      'Use appRouterProvider com ref.watch/read dentro de Consumer widgets',
+    );

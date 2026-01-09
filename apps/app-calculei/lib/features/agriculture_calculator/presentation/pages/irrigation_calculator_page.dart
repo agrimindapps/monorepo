@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/irrigation_calculator.dart';
 
@@ -72,19 +74,13 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: IrrigationCropType.values.map((crop) {
-                  return ChoiceChip(
-                    label: Text(IrrigationCalculator.getCropName(crop)),
-                    selected: _crop == crop,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: IrrigationCalculator.getCropName(crop),
+                    isSelected: _crop == crop,
+                    onSelected: () {
                       setState(() => _crop = crop);
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _crop == crop
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -105,19 +101,13 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: CropStage.values.map((stage) {
-                  return ChoiceChip(
-                    label: Text(IrrigationCalculator.getStageName(stage)),
-                    selected: _stage == stage,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: IrrigationCalculator.getStageName(stage),
+                    isSelected: _stage == stage,
+                    onSelected: () {
                       setState(() => _stage = stage);
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _stage == stage
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -138,19 +128,13 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: IrrigationSystem.values.map((sys) {
-                  return ChoiceChip(
-                    label: Text(IrrigationCalculator.getSystemName(sys)),
-                    selected: _system == sys,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: IrrigationCalculator.getSystemName(sys),
+                    isSelected: _system == sys,
+                    onSelected: () {
                       setState(() => _system = sys);
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _system == sys
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -203,19 +187,11 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
 
               const SizedBox(height: 32),
 
-              // Calculate button
-              ElevatedButton.icon(
-                onPressed: _calculate,
-                icon: const Icon(Icons.calculate),
-                label: const Text('Calcular'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.agriculture,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               const SizedBox(height: 24),
@@ -248,6 +224,18 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _etoController.text = '5';
+    _areaController.text = '10';
+    _flowController.text = '10000';
+    setState(() {
+      _crop = IrrigationCropType.corn;
+      _stage = CropStage.mid;
+      _system = IrrigationSystem.sprinkler;
+      _result = null;
+    });
   }
 }
 

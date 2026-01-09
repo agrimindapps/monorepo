@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../game/asteroids_game.dart';
 
 class AsteroidsPage extends StatelessWidget {
@@ -23,6 +24,11 @@ class AsteroidsPage extends StatelessWidget {
         child: GameWidget<AsteroidsGame>(
           game: AsteroidsGame(),
           overlayBuilderMap: {
+            'PauseMenu': (context, game) => PauseMenuOverlay(
+              onContinue: game.resumeGame,
+              onRestart: game.restartFromPause,
+              accentColor: const Color(0xFF00BCD4),
+            ),
             'GameOver': (context, game) => Center(
               child: Container(
                 padding: const EdgeInsets.all(24),

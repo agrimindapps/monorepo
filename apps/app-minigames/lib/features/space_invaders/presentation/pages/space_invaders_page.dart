@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../game/space_invaders_game.dart';
 
 class SpaceInvadersPage extends StatelessWidget {
@@ -22,6 +23,11 @@ class SpaceInvadersPage extends StatelessWidget {
         child: GameWidget<SpaceInvadersGame>(
           game: SpaceInvadersGame(),
           overlayBuilderMap: {
+            'PauseMenu': (context, game) => PauseMenuOverlay(
+              onContinue: game.resumeGame,
+              onRestart: game.restartFromPause,
+              accentColor: const Color(0xFF4CAF50),
+            ),
             'GameOver': (context, game) => _buildOverlay(
               'Game Over',
               'Score: ${game.score}',

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/seed_rate_calculator.dart';
 
@@ -93,22 +95,16 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                 spacing: 8,
                 runSpacing: 8,
                 children: SeedCropType.values.map((crop) {
-                  return ChoiceChip(
-                    label: Text(SeedRateCalculator.getCropName(crop)),
-                    selected: _crop == crop,
-                    onSelected: (_) {
+                  return DarkChoiceChip(
+                    label: SeedRateCalculator.getCropName(crop),
+                    isSelected: _crop == crop,
+                    onSelected: () {
                       setState(() {
                         _crop = crop;
                         _updateDefaults();
                       });
                     },
-                    backgroundColor: Colors.white.withValues(alpha: 0.05),
-                    selectedColor: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-                    labelStyle: TextStyle(
-                      color: _crop == crop 
-                          ? Colors.white 
-                          : Colors.white.withValues(alpha: 0.7),
-                    ),
+                    accentColor: CalculatorAccentColors.agriculture,
                   );
                 }).toList(),
               ),
@@ -224,19 +220,11 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
 
               const SizedBox(height: 32),
 
-              // Calculate button
-              ElevatedButton.icon(
-                onPressed: _calculate,
-                icon: const Icon(Icons.calculate),
-                label: const Text('Calcular'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: CalculatorAccentColors.agriculture,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.agriculture,
               ),
 
               const SizedBox(height: 24),
@@ -265,6 +253,19 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _crop = SeedCropType.corn;
+    _updateDefaults();
+    _germinationController.text = '85';
+    _purityController.text = '98';
+    _lossesController.text = '8';
+    _areaController.text = '10';
+    _marginController.text = '5';
+    setState(() {
+      _result = null;
+    });
   }
 }
 

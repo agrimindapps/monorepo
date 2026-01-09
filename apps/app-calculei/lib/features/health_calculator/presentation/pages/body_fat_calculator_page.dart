@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/calculators/body_fat_calculator.dart';
 
@@ -216,25 +217,11 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
 
               const SizedBox(height: 24),
 
-              // Calculate button
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _calculate,
-                  icon: const Icon(Icons.calculate_rounded),
-                  label: const Text(
-                    'Calcular Gordura Corporal',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CalculatorAccentColors.health,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+              // Action buttons
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.health,
               ),
 
               // Result
@@ -267,6 +254,18 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _weightController.clear();
+    _heightController.clear();
+    _waistController.clear();
+    _neckController.clear();
+    _hipController.clear();
+    setState(() {
+      _isMale = true;
+      _result = null;
+    });
   }
 }
 

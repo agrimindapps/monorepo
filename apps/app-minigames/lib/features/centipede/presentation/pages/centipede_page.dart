@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../game/centipede_game.dart';
 import '../providers/centipede_providers.dart';
 import '../widgets/game_over_overlay.dart';
@@ -85,7 +86,19 @@ class _CentipedePageState extends ConsumerState<CentipedePage> {
           // Game
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: GameWidget(game: _game),
+            child: GameWidget(
+              game: _game,
+              overlayBuilderMap: {
+                'PauseMenu': (context, game) {
+                  final typedGame = game as CentipedeGame;
+                  return PauseMenuOverlay(
+                    onContinue: typedGame.resumeGame,
+                    onRestart: typedGame.restartFromPause,
+                    accentColor: const Color(0xFF00FF00),
+                  );
+                },
+              },
+            ),
           ),
           
           // HUD - Score, Lives, Wave

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../core/widgets/dark_choice_chip.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/animal_age_calculator.dart';
 
@@ -108,26 +110,11 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
                   runSpacing: 8,
                   children: DogSize.values.map((size) {
                     final isSelected = _dogSize == size;
-                    return ChoiceChip(
-                      label: Text(
-                        AnimalAgeCalculator.getDogSizeDescription(size),
-                      ),
-                      selected: isSelected,
-                      onSelected: (_) => setState(() => _dogSize = size),
-                      selectedColor: CalculatorAccentColors.pet.withValues(alpha: 0.3),
-                      checkmarkColor: Colors.white,
-                      backgroundColor: Colors.white.withValues(alpha: 0.05),
-                      labelStyle: TextStyle(
-                        color: isSelected 
-                            ? Colors.white 
-                            : Colors.white.withValues(alpha: 0.7),
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      ),
-                      side: BorderSide(
-                        color: isSelected
-                            ? CalculatorAccentColors.pet
-                            : Colors.white.withValues(alpha: 0.1),
-                      ),
+                    return DarkChoiceChip(
+                      label: AnimalAgeCalculator.getDogSizeDescription(size),
+                      isSelected: isSelected,
+                      onSelected: () => setState(() => _dogSize = size),
+                      accentColor: CalculatorAccentColors.pet,
                     );
                   }).toList(),
                 ),
@@ -155,24 +142,10 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
               const SizedBox(height: 24),
 
               // Calculate button
-              SizedBox(
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _calculate,
-                  icon: const Icon(Icons.calculate_rounded),
-                  label: const Text(
-                    'Calcular Idade',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: CalculatorAccentColors.pet,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    elevation: 0,
-                  ),
-                ),
+              CalculatorActionButtons(
+                onCalculate: _calculate,
+                onClear: _clear,
+                accentColor: CalculatorAccentColors.pet,
               ),
 
               // Result
@@ -201,6 +174,15 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
     );
 
     setState(() => _result = result);
+  }
+
+  void _clear() {
+    _ageController.clear();
+    setState(() {
+      _species = PetSpecies.dog;
+      _dogSize = DogSize.medium;
+      _result = null;
+    });
   }
 }
 

@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:app_minigames/core/mixins/esc_pause_handler.dart';
 import 'components/frog.dart';
 import 'components/vehicle.dart';
 import 'components/log.dart';
@@ -11,7 +12,7 @@ import 'components/water.dart';
 import 'components/safe_zone.dart';
 import 'components/goal.dart';
 
-class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollisionDetection {
+class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollisionDetection, EscPauseHandler {
   late Frog frog;
   late TextComponent scoreText;
   late TextComponent livesText;
@@ -263,6 +264,7 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
   
   void gameOver() {
     isGameOver = true;
+    super.isGameOver = true; // Update EscPauseHandler
     
     add(RectangleComponent(
       position: Vector2(size.x / 2 - 120, size.y / 2 - 60),
@@ -314,6 +316,7 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
     lives = 3;
     level = 1;
     isGameOver = false;
+    super.isGameOver = false; // Update EscPauseHandler
     goalsReached = [false, false, false, false, false];
     
     add(RectangleComponent(
@@ -324,5 +327,10 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
     _setupLevel();
     _spawnFrog();
     _setupUI();
+  }
+
+  @override
+  void restartFromPause() {
+    restartGame();
   }
 }

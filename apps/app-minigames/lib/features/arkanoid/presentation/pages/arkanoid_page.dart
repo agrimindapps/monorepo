@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
 import '../../game/arkanoid_game.dart';
 
 class ArkanoidPage extends StatelessWidget {
@@ -22,6 +23,11 @@ class ArkanoidPage extends StatelessWidget {
         child: GameWidget<ArkanoidGame>(
           game: ArkanoidGame(),
           overlayBuilderMap: {
+            'PauseMenu': (context, game) => PauseMenuOverlay(
+              onContinue: game.resumeGame,
+              onRestart: game.restartFromPause,
+              accentColor: const Color(0xFF00BCD4),
+            ),
             'GameOver': (context, game) => _buildOverlay(
               'Game Over',
               'Score: ${game.score}',

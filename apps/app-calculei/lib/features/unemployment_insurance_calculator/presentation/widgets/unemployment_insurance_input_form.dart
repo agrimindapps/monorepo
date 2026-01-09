@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
+import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_unemployment_insurance_usecase.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 
@@ -67,22 +68,20 @@ class _UnemploymentInsuranceInputFormState
 
   @override
   Widget build(BuildContext context) {
+    const accentColor = CalculatorAccentColors.labor;
+
     return Form(
       key: widget.formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ResponsiveInputRow(
-            left: TextFormField(
+            left: _DarkCurrencyField(
               controller: _averageSalaryController,
-              decoration: const InputDecoration(
-                labelText: 'Salário Médio (últimos 3 meses)',
-                prefixText: 'R\$ ',
-                border: OutlineInputBorder(),
-                helperText: 'Média dos últimos 3 salários',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [_currencyFormatter],
+              label: 'Salário Médio (últimos 3 meses)',
+              helperText: 'Média dos últimos 3 salários',
+              accentColor: accentColor,
+              formatter: _currencyFormatter,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o salário médio';
@@ -93,17 +92,12 @@ class _UnemploymentInsuranceInputFormState
                 }
                 return null;
               },
-              onSaved: (_) => _submitForm(),
             ),
-            right: TextFormField(
+            right: _DarkNumberField(
               controller: _workMonthsController,
-              decoration: const InputDecoration(
-                labelText: 'Meses Trabalhados',
-                border: OutlineInputBorder(),
-                helperText: 'Tempo no último emprego',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              label: 'Meses Trabalhados',
+              helperText: 'Tempo no último emprego',
+              accentColor: accentColor,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe os meses trabalhados';
@@ -114,21 +108,16 @@ class _UnemploymentInsuranceInputFormState
                 }
                 return null;
               },
-              onSaved: (_) => _submitForm(),
             ),
           ),
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: TextFormField(
+            left: _DarkNumberField(
               controller: _timesReceivedController,
-              decoration: const InputDecoration(
-                labelText: 'Vezes que já recebeu',
-                border: OutlineInputBorder(),
-                helperText: '0 = primeira vez, 1 = segunda vez, etc.',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              label: 'Vezes que já recebeu',
+              helperText: '0 = primeira vez, 1 = segunda vez, etc.',
+              accentColor: accentColor,
               validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final times = int.tryParse(value) ?? 0;
@@ -141,18 +130,13 @@ class _UnemploymentInsuranceInputFormState
                 }
                 return null;
               },
-              onSaved: (_) => _submitForm(),
             ),
-            right: TextFormField(
+            right: _DarkDateField(
               controller: _dismissalDateController,
-              decoration: const InputDecoration(
-                labelText: 'Data de Demissão',
-                border: OutlineInputBorder(),
-                helperText: 'DD/MM/AAAA',
-                suffixIcon: Icon(Icons.calendar_today),
-              ),
-              keyboardType: TextInputType.datetime,
-              inputFormatters: [_dateFormatter],
+              label: 'Data de Demissão',
+              helperText: 'DD/MM/AAAA',
+              accentColor: accentColor,
+              formatter: _dateFormatter,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe a data de demissão';
@@ -231,6 +215,11 @@ class _UnemploymentInsuranceInputFormState
     }
   }
 
+  /// Public method to trigger calculation from parent widget
+  void calculate() {
+    _submitForm();
+  }
+
   void _submitForm() {
     if (!widget.formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -250,5 +239,280 @@ class _UnemploymentInsuranceInputFormState
     );
 
     widget.onCalculate(params);
+  }
+}
+
+/// Dark themed currency input field
+class _DarkCurrencyField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? helperText;
+  final Color accentColor;
+  final MaskTextInputFormatter formatter;
+  final String? Function(String?)? validator;
+
+  const _DarkCurrencyField({
+    required this.controller,
+    required this.label,
+    required this.accentColor,
+    required this.formatter,
+    this.helperText,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            helperText!,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 11,
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [formatter],
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            prefixText: 'R\$ ',
+            prefixStyle: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: accentColor,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dark themed number input field
+class _DarkNumberField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? helperText;
+  final Color accentColor;
+  final String? Function(String?)? validator;
+
+  const _DarkNumberField({
+    required this.controller,
+    required this.label,
+    required this.accentColor,
+    this.helperText,
+    this.validator,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            helperText!,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 11,
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          validator: validator,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: accentColor,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Dark themed date input field
+class _DarkDateField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? helperText;
+  final Color accentColor;
+  final MaskTextInputFormatter formatter;
+  final String? Function(String?)? validator;
+  final void Function(String)? onChanged;
+  final VoidCallback? onTap;
+
+  const _DarkDateField({
+    required this.controller,
+    required this.label,
+    required this.accentColor,
+    required this.formatter,
+    this.helperText,
+    this.validator,
+    this.onChanged,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.7),
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            helperText!,
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 11,
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.datetime,
+          inputFormatters: [formatter],
+          validator: validator,
+          onChanged: onChanged,
+          onTap: onTap,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            suffixIcon: Icon(
+              Icons.calendar_today,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.08),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: accentColor,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

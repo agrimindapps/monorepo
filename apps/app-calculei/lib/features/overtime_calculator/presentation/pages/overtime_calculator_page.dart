@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../providers/overtime_calculator_provider.dart';
@@ -50,52 +51,11 @@ class _OvertimeCalculatorPageState
             const SizedBox(height: 24),
 
             // Action Buttons
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TextButton.icon(
-                  onPressed: _handleClear,
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Limpar'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white.withValues(alpha: 0.7),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                SizedBox(
-                  height: 48,
-                  child: ElevatedButton.icon(
-                    onPressed: state.isLoading ? null : _handleSubmit,
-                    icon: state.isLoading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : const Icon(Icons.calculate_rounded),
-                    label: Text(
-                      state.isLoading ? 'Calculando...' : 'Calcular',
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: CalculatorAccentColors.labor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      elevation: 0,
-                      disabledBackgroundColor: CalculatorAccentColors.labor
-                          .withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-              ],
+            CalculatorActionButtons(
+              onCalculate: _handleSubmit,
+              onClear: _handleClear,
+              accentColor: CalculatorAccentColors.labor,
+              isLoading: state.isLoading,
             ),
 
             // Error Message

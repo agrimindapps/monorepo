@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/providers/user_preferences_providers.dart';
+import '../../../../widgets/theme_toggle_button.dart';
 
 // Modern dark theme colors matching calculator pages
 const _backgroundColor = Color(0xFF0F0F1A);
@@ -460,74 +461,84 @@ class _HomePageState extends ConsumerState<HomePage> {
           bottom: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
         ),
       ),
-      child: Row(
-        children: [
-          // Menu button (mobile only)
-          if (isMobile) ...[
-            IconButton(
-              icon: const Icon(Icons.menu, color: Colors.white),
-              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-            ),
-            const SizedBox(width: 8),
-          ],
-
-          // Search bar
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 500),
-              decoration: BoxDecoration(
-                color: _backgroundColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (value) {
-                  setState(() => _searchQuery = value.toLowerCase());
-                },
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'O que vamos calcular hoje?',
-                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-                  prefixIcon: Icon(
-                    Icons.search,
-                    color: Colors.white.withValues(alpha: 0.4),
-                  ),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1120),
+          child: Row(
+            children: [
+              // Menu button (mobile only)
+              if (isMobile) ...[
+                IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.white),
+                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
                 ),
-              ),
-            ),
-          ),
-
-          const SizedBox(width: 16),
-
-          // View toggle
-          Container(
-            decoration: BoxDecoration(
-              color: _backgroundColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildViewToggleButton(
-                  Icons.grid_view,
-                  ref.watch(viewModeProvider).value == 'grid',
-                  () => ref.read(viewModeProvider.notifier).setMode('grid'),
-                ),
-                _buildViewToggleButton(
-                  Icons.view_list,
-                  ref.watch(viewModeProvider).value != 'grid',
-                  () => ref.read(viewModeProvider.notifier).setMode('list'),
-                ),
+                const SizedBox(width: 8),
               ],
-            ),
+
+              // Search bar
+              Expanded(
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  decoration: BoxDecoration(
+                    color: _backgroundColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                  ),
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.toLowerCase());
+                    },
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'O que vamos calcular hoje?',
+                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: Colors.white.withValues(alpha: 0.4),
+                      ),
+                      border: InputBorder.none,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 16),
+
+              // View toggle
+              Container(
+                decoration: BoxDecoration(
+                  color: _backgroundColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildViewToggleButton(
+                      Icons.grid_view,
+                      ref.watch(viewModeProvider).value == 'grid',
+                      () => ref.read(viewModeProvider.notifier).setMode('grid'),
+                    ),
+                    _buildViewToggleButton(
+                      Icons.view_list,
+                      ref.watch(viewModeProvider).value != 'grid',
+                      () => ref.read(viewModeProvider.notifier).setMode('list'),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // Theme toggle
+              const ThemeToggleButton(color: Colors.white),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -610,73 +621,78 @@ class _HomePageState extends ConsumerState<HomePage> {
           size: Size.infinite,
         ),
 
-        // Content
-        CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Section header
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: sectionColor.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(sectionIcon, color: sectionColor, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      sectionTitle,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${filteredCalculators.length}',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+        // Content with max width constraint
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1120),
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Section header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: sectionColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Icon(sectionIcon, color: sectionColor, size: 20),
                         ),
-                      ),
+                        const SizedBox(width: 12),
+                        Text(
+                          sectionTitle,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${filteredCalculators.length}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.7),
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
+
+                // Empty state
+                if (filteredCalculators.isEmpty)
+                  SliverToBoxAdapter(
+                    child: _buildEmptyState(),
+                  ),
+
+                // Grid/List content
+                if (filteredCalculators.isNotEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+                    sliver: isGridView
+                        ? _buildGridView(filteredCalculators, favorites)
+                        : _buildListView(filteredCalculators, favorites),
+                  ),
+
+                // Bottom padding
+                const SliverToBoxAdapter(child: SizedBox(height: 40)),
+              ],
             ),
-
-            // Empty state
-            if (filteredCalculators.isEmpty)
-              SliverToBoxAdapter(
-                child: _buildEmptyState(),
-              ),
-
-            // Grid/List content
-            if (filteredCalculators.isNotEmpty)
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
-                sliver: isGridView
-                    ? _buildGridView(filteredCalculators, favorites)
-                    : _buildListView(filteredCalculators, favorites),
-              ),
-
-            // Bottom padding
-            const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          ],
+          ),
         ),
       ],
     );

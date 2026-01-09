@@ -25,7 +25,7 @@ class CashVsInstallmentCalculatorPage extends ConsumerStatefulWidget {
 class _CashVsInstallmentCalculatorPageState
     extends ConsumerState<CashVsInstallmentCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  Key _formKeyId = UniqueKey();
+  final _inputFormKey = GlobalKey<CashVsInstallmentInputFormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class _CashVsInstallmentCalculatorPageState
           children: [
             // Input Form
             CashVsInstallmentInputForm(
-              key: _formKeyId,
+              key: _inputFormKey,
               formKey: _formKey,
               onCalculate: _handleCalculate,
             ),
@@ -95,9 +95,7 @@ class _CashVsInstallmentCalculatorPageState
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
-      // The form's onSaved callbacks will trigger _submitForm()
-      // which calls the onCalculate callback from the form widget
-      _formKey.currentState!.save();
+      _inputFormKey.currentState?.submit();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -114,9 +112,7 @@ class _CashVsInstallmentCalculatorPageState
   }
 
   void _handleClear() {
-    setState(() {
-      _formKeyId = UniqueKey();
-    });
+    _formKey.currentState?.reset();
     ref.read(cashVsInstallmentCalculatorProvider.notifier).clearCalculation();
   }
 

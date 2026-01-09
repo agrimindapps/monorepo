@@ -58,7 +58,7 @@ class LandingContentDataSource {
         buttonText: 'Criar conta grátis',
       ),
       comingSoon: true,
-      launchDate: DateTime(2026, 1, 1), // Lançamento: 01 de Janeiro de 2026
+      launchDate: DateTime(2026, 6, 1), // Lançamento: 1º Semestre de 2026
     );
   }
 

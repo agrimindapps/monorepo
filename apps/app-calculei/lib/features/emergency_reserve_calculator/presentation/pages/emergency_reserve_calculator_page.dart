@@ -25,7 +25,7 @@ class EmergencyReserveCalculatorPage extends ConsumerStatefulWidget {
 class _EmergencyReserveCalculatorPageState
     extends ConsumerState<EmergencyReserveCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  Key _formKeyId = UniqueKey();
+  final _inputFormKey = GlobalKey<EmergencyReserveInputFormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class _EmergencyReserveCalculatorPageState
           children: [
             // Input Form
             EmergencyReserveInputForm(
-              key: _formKeyId,
+              key: _inputFormKey,
               formKey: _formKey,
               onCalculate: _handleCalculate,
             ),
@@ -95,7 +95,7 @@ class _EmergencyReserveCalculatorPageState
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+      _inputFormKey.currentState?.submit();
     }
   }
 
@@ -104,9 +104,7 @@ class _EmergencyReserveCalculatorPageState
   }
 
   void _handleClear() {
-    setState(() {
-      _formKeyId = UniqueKey();
-    });
+    _formKey.currentState?.reset();
     ref.read(emergencyReserveCalculatorProvider.notifier).clearCalculation();
   }
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import '../../../../core/widgets/accent_input_fields.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 
@@ -62,7 +62,7 @@ class _VacationInputFormState extends State<VacationInputForm> {
 
               // Salary and Vacation Days Row
               ResponsiveInputRow(
-                left: _DarkCurrencyField(
+                left: AccentCurrencyField(
                   controller: _salaryController,
                   label: 'Salário Bruto Mensal',
                   helperText: 'Ex: 3.000,00',
@@ -85,7 +85,7 @@ class _VacationInputFormState extends State<VacationInputForm> {
                     return null;
                   },
                 ),
-                right: _DarkNumberField(
+                right: AccentNumberField(
                   controller: _vacationDaysController,
                   label: 'Dias de Férias',
                   helperText: 'De 1 a 30 dias',
@@ -170,183 +170,5 @@ class _VacationInputFormState extends State<VacationInputForm> {
     final normalized = cleaned.replaceAll(',', '.');
 
     return double.tryParse(normalized) ?? 0.0;
-  }
-}
-
-/// Dark themed currency input field
-class _DarkCurrencyField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final MaskTextInputFormatter formatter;
-  final String? Function(String?)? validator;
-
-  const _DarkCurrencyField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    required this.formatter,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [formatter],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            prefixText: 'R\$ ',
-            prefixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dark themed number input field
-class _DarkNumberField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final String? Function(String?)? validator;
-
-  const _DarkNumberField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

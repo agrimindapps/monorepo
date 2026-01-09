@@ -27,8 +27,8 @@ class SplashConstants {
   static const String appTagline = 'Cuidados completos para seu melhor amigo';
   static const String appDescription = 'O aplicativo mais completo para tutores que se preocupam com a saúde e bem-estar de seus pets. Acompanhe vacinas, medicamentos, peso, consultas e muito mais.';
   static const String launchStatus = 'EM BREVE';
-  static final DateTime launchDate = DateTime(2025, 10, 1);
-  static const String launchDateFormatted = '1/10/2025';
+  static final DateTime launchDate = DateTime(2026, 6, 1);
+  static const String launchDateFormatted = '1º Semestre 2026';
   static const String heroImageUrl = 'https://fkjakafxqciukoesqvkp.supabase.co/storage/v1/object/public/agrihurb/website/vetipeti.png';
   static const String homeRoute = '/';
   static const String promoRoute = '/promo';

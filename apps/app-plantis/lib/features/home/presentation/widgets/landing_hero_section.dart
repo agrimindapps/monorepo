@@ -25,6 +25,17 @@ class LandingHeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0F2F21), // Deep Forest Green
+            Color(0xFF064E3B), // Dark Emerald
+          ],
+        ),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 60),
       child: Column(
         children: [

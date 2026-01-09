@@ -1,14 +1,14 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
+import '../../../../core/widgets/accent_input_fields.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
-import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
+import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
 
 /// Input form for emergency reserve calculation
 class EmergencyReserveInputForm extends StatefulWidget {
@@ -23,10 +23,10 @@ class EmergencyReserveInputForm extends StatefulWidget {
 
   @override
   State<EmergencyReserveInputForm> createState() =>
-      _EmergencyReserveInputFormState();
+      EmergencyReserveInputFormState();
 }
 
-class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
+class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
   // Controllers
   final _monthlyExpensesController = TextEditingController();
   final _extraExpensesController = TextEditingController(text: '0');
@@ -49,6 +49,11 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
     super.dispose();
   }
 
+  /// Public method to submit the form from external button
+  void submit() {
+    _submitForm();
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.financial;
@@ -59,7 +64,7 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ResponsiveInputRow(
-            left: _DarkCurrencyField(
+            left: AccentCurrencyField(
               controller: _monthlyExpensesController,
               label: 'Despesas Mensais',
               helperText: 'Total de gastos fixos e variáveis',
@@ -76,7 +81,7 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
                 return null;
               },
             ),
-            right: _DarkCurrencyField(
+            right: AccentCurrencyField(
               controller: _extraExpensesController,
               label: 'Despesas Extras (opcional)',
               helperText: 'Custos eventuais ou sazonais',
@@ -96,7 +101,7 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: _DarkNumberField(
+            left: AccentNumberField(
               controller: _desiredMonthsController,
               label: 'Meses de Cobertura',
               helperText: 'Recomendado: 6 a 12 meses',
@@ -115,7 +120,7 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
                 return null;
               },
             ),
-            right: _DarkCurrencyField(
+            right: AccentCurrencyField(
               controller: _monthlySavingsController,
               label: 'Poupança Mensal (opcional)',
               helperText: 'Quanto pode poupar por mês',
@@ -142,11 +147,6 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
     return double.tryParse(cleanValue) ?? 0;
   }
 
-  /// Public method to trigger calculation from parent widget
-  void calculate() {
-    _submitForm();
-  }
-
   void _submitForm() {
     if (!widget.formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -166,183 +166,5 @@ class _EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
     );
 
     widget.onCalculate(params);
-  }
-}
-
-/// Dark themed currency input field
-class _DarkCurrencyField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final MaskTextInputFormatter formatter;
-  final String? Function(String?)? validator;
-
-  const _DarkCurrencyField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    required this.formatter,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [formatter],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            prefixText: 'R\$ ',
-            prefixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dark themed number input field
-class _DarkNumberField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final String? Function(String?)? validator;
-
-  const _DarkNumberField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

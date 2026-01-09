@@ -116,6 +116,82 @@
 
 
 <body>
+  <!-- Modern Loading Screen with Theme Detection -->
+  <div id="loading">
+    <div class="loading-bg"></div>
+    <div class="loading-gradient"></div>
+    <div class="loading-content">
+      <div class="loading-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.3"/>
+          <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="3" fill="currentColor"/>
+        </svg>
+      </div>
+      <h1 class="loading-title">ReceituAgro</h1>
+      <div class="loading-bar-container"><div class="loading-bar"></div></div>
+      <p class="loading-text">Carregando...</p>
+    </div>
+  </div>
+
+  <style>
+    :root {
+      --primary-color: #16A34A;
+      --primary-light: #22C55E;
+      --bg-light: #FAFAFA; --bg-light-secondary: #F5F5F5;
+      --text-light: #212121; --text-light-secondary: #757575;
+      --bg-dark: #121212; --bg-dark-secondary: #1E1E1E;
+      --text-dark: #FFFFFF; --text-dark-secondary: #B0B0B0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    #loading {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9999; background: var(--bg-dark); transition: opacity 0.3s ease;
+    }
+    @media (prefers-color-scheme: light) {
+      #loading { background: var(--bg-light); }
+      .loading-bg { background: linear-gradient(135deg, var(--bg-light) 0%, var(--bg-light-secondary) 100%); }
+      .loading-title { color: var(--text-light); }
+      .loading-text { color: var(--text-light-secondary); }
+      .loading-icon { color: var(--primary-color); background: rgba(0, 0, 0, 0.05); }
+      .loading-bar-container { background: rgba(0, 0, 0, 0.1); }
+    }
+    @media (prefers-color-scheme: dark) {
+      #loading { background: var(--bg-dark); }
+      .loading-bg { background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark-secondary) 100%); }
+      .loading-title { color: var(--text-dark); }
+      .loading-text { color: var(--text-dark-secondary); }
+      .loading-icon { color: var(--primary-color); background: rgba(255, 255, 255, 0.1); }
+      .loading-bar-container { background: rgba(255, 255, 255, 0.1); }
+    }
+    .loading-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; }
+    .loading-bg::before, .loading-bg::after {
+      content: ''; position: absolute; border-radius: 50%; opacity: 0.1; animation: float 8s ease-in-out infinite;
+    }
+    .loading-bg::before { width: 300px; height: 300px; background: var(--primary-color); top: -100px; right: -100px; }
+    .loading-bg::after { width: 400px; height: 400px; background: var(--primary-light); bottom: -150px; left: -150px; animation-delay: -4s; }
+    .loading-gradient { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.1) 100%); }
+    .loading-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; }
+    .loading-icon { width: 80px; height: 80px; border-radius: 24px; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; animation: pulse 2s ease-in-out infinite; }
+    .loading-icon svg { width: 48px; height: 48px; }
+    .loading-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 32px; }
+    .loading-bar-container { width: 200px; height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 16px; }
+    .loading-bar { width: 40%; height: 100%; background: linear-gradient(90deg, var(--primary-color), var(--primary-light)); border-radius: 2px; animation: loading 1.5s ease-in-out infinite; }
+    .loading-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 14px; font-weight: 500; }
+    @keyframes float { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(30px, -30px) scale(1.1); } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.9; } }
+    @keyframes loading { 0% { transform: translateX(-100%); } 50% { transform: translateX(150%); } 100% { transform: translateX(400%); } }
+    #loading.fade-out { opacity: 0; pointer-events: none; }
+  </style>
+
+  <script>
+    window.addEventListener('flutter-first-frame', function () {
+      const loading = document.getElementById('loading');
+      if (loading) { loading.classList.add('fade-out'); setTimeout(() => { loading.style.display = 'none'; }, 300); }
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 <script type="module">

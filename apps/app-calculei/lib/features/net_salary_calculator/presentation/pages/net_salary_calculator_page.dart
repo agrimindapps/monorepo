@@ -20,7 +20,7 @@ class NetSalaryCalculatorPage extends ConsumerStatefulWidget {
 class _NetSalaryCalculatorPageState
     extends ConsumerState<NetSalaryCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  Key _formKeyId = UniqueKey();
+  final _inputFormKey = GlobalKey<NetSalaryInputFormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _NetSalaryCalculatorPageState
           children: [
             // Input Form
             NetSalaryInputForm(
-              key: _formKeyId,
+              key: _inputFormKey,
               formKey: _formKey,
               onCalculate: _handleCalculate,
             ),
@@ -140,9 +140,8 @@ class _NetSalaryCalculatorPageState
   }
 
   void _handleSubmit() {
-    if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
-    }
+    // Call the form's submit method which validates and calculates
+    _inputFormKey.currentState?.submit();
   }
 
   void _handleCalculate(CalculateNetSalaryParams params) {
@@ -150,9 +149,7 @@ class _NetSalaryCalculatorPageState
   }
 
   void _handleClear() {
-    setState(() {
-      _formKeyId = UniqueKey();
-    });
+    // Clear the calculator state
     ref.read(netSalaryCalculatorProvider.notifier).clearCalculation();
   }
 }

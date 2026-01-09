@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../widgets/theme_toggle_button.dart';
 import '../providers/home_providers.dart';
 
 /// Header with search bar and profile
@@ -149,6 +150,13 @@ class _HomeHeaderState extends ConsumerState<HomeHeader> {
           if (!isMobile) const Spacer(),
 
           const SizedBox(width: 16),
+
+          // Theme toggle button
+          const ThemeToggleButton(
+            color: Colors.white,
+          ),
+
+          const SizedBox(width: 8),
 
           // Profile avatar
           Container(

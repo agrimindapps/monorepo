@@ -36,12 +36,13 @@ class PromoFooter extends StatelessWidget {
   Widget _buildFooterContent(BuildContext context, bool isMobile) {
     if (isMobile) {
       return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildBrandSection(),
+          _buildBrandSection(isMobile: true),
           const SizedBox(height: 32),
-          _buildLinksSection(),
+          _buildLinksSection(isMobile: true),
           const SizedBox(height: 32),
-          _buildSocialSection(),
+          _buildSocialSection(isMobile: true),
         ],
       );
     }
@@ -60,11 +61,12 @@ class PromoFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildBrandSection() {
+  Widget _buildBrandSection({bool isMobile = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisSize: isMobile ? MainAxisSize.min : MainAxisSize.max,
           children: [
             Container(
               width: 40,
@@ -99,6 +101,7 @@ class PromoFooter extends StatelessWidget {
             color: Colors.white.withValues(alpha: 0.7),
             height: 1.5,
           ),
+          textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
         
         const SizedBox(height: 16),
@@ -113,9 +116,9 @@ class PromoFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildLinksSection() {
+  Widget _buildLinksSection({bool isMobile = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         const Text(
           'Links Úteis',
@@ -147,9 +150,9 @@ class PromoFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialSection() {
+  Widget _buildSocialSection({bool isMobile = false}) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: isMobile ? CrossAxisAlignment.center : CrossAxisAlignment.start,
       children: [
         const Text(
           'Siga-nos',
@@ -164,6 +167,7 @@ class PromoFooter extends StatelessWidget {
         Wrap(
           spacing: 16,
           runSpacing: 16,
+          alignment: isMobile ? WrapAlignment.center : WrapAlignment.start,
           children: [
             _buildSocialIcon(Icons.facebook, 'Facebook'),
             _buildSocialIcon(Icons.alternate_email, 'Instagram'),
@@ -200,7 +204,7 @@ class PromoFooter extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '© 2025 ${SplashConstants.appName}. Todos os direitos reservados.',
+          '© 2026 ${SplashConstants.appName}. Todos os direitos reservados.',
           style: TextStyle(
             fontSize: 12,
             color: Colors.white.withValues(alpha: 0.6),

@@ -148,13 +148,15 @@ class PromoHeroSection extends StatelessWidget {
           ),
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
-        Container(
-          margin: const EdgeInsets.symmetric(vertical: 20),
-          width: 80,
-          height: 4,
-          decoration: BoxDecoration(
-            color: SplashColors.accentColor,
-            borderRadius: BorderRadius.circular(2),
+        Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 20),
+            width: 80,
+            height: 4,
+            decoration: BoxDecoration(
+              color: SplashColors.accentColor,
+              borderRadius: BorderRadius.circular(2),
+            ),
           ),
         ),
         Text(
@@ -168,18 +170,21 @@ class PromoHeroSection extends StatelessWidget {
           textAlign: isMobile ? TextAlign.center : TextAlign.start,
         ),
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: SplashColors.accentColor,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Text(
-            SplashConstants.launchStatus,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+        Align(
+          alignment: isMobile ? Alignment.center : Alignment.centerLeft,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: SplashColors.accentColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Text(
+              SplashConstants.launchStatus,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
         ),

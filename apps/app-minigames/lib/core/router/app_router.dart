@@ -29,6 +29,8 @@ import 'package:app_minigames/features/tetris/presentation/pages/tetris_page.dar
 import 'package:app_minigames/features/galaga/presentation/pages/galaga_page.dart';
 import 'package:app_minigames/features/centipede/presentation/pages/centipede_page.dart';
 
+import 'page_transitions.dart';
+
 // Global navigator key
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -45,112 +47,193 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
     GoRoute(
       path: '/',
-      builder: (context, state) => const HomePage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const HomePage(),
+        state: state,
+      ),
     ),
-    // Game routes
+    // Game routes with fade transitions
     GoRoute(
       path: '/tower',
-      builder: (context, state) => const TowerPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const TowerPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/tictactoe',
-      builder: (context, state) => const TicTacToePage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const TicTacToePage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/campo-minado',
-      builder: (context, state) => const CampoMinadoPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const CampoMinadoPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/sudoku',
-      builder: (context, state) => const SudokuPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const SudokuPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/snake',
-      builder: (context, state) => const SnakePage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const SnakePage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/memory',
-      builder: (context, state) => const MemoryGamePage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const MemoryGamePage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/2048',
-      builder: (context, state) => const Game2048Page(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const Game2048Page(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/flappbird',
-      builder: (context, state) => const FlappbirdPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const FlappbirdPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/pingpong',
-      builder: (context, state) => const PingpongPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const PingpongPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/quiz',
-      builder: (context, state) => const QuizPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const QuizPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/quiz-image',
-      builder: (context, state) => const QuizImagePage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const QuizImagePage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/caca-palavra',
-      builder: (context, state) => const CacaPalavraPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const CacaPalavraPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/soletrando',
-      builder: (context, state) => const SoletrandoPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const SoletrandoPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/dino-run',
-      builder: (context, state) => const DinoRunPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const DinoRunPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/arkanoid',
-      builder: (context, state) => const ArkanoidPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const ArkanoidPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/simon-says',
-      builder: (context, state) => const SimonSaysPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const SimonSaysPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/connect-four',
-      builder: (context, state) => const ConnectFourPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const ConnectFourPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/space-invaders',
-      builder: (context, state) => const SpaceInvadersPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const SpaceInvadersPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/asteroids',
-      builder: (context, state) => const AsteroidsPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AsteroidsPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/damas',
-      builder: (context, state) => const DamasPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const DamasPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/reversi',
-      builder: (context, state) => const ReversiPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const ReversiPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/batalha-naval',
-      builder: (context, state) => const BatalhaNavalPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const BatalhaNavalPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/frogger',
-      builder: (context, state) => const FroggerPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const FroggerPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/tetris',
-      builder: (context, state) => const TetrisPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const TetrisPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/galaga',
-      builder: (context, state) => const GalagaPage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const GalagaPage(),
+        state: state,
+      ),
     ),
     GoRoute(
       path: '/centipede',
-      builder: (context, state) => const CentipedePage(),
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const CentipedePage(),
+        state: state,
+      ),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

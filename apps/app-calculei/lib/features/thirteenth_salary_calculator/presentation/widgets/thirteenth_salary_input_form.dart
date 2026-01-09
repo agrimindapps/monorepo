@@ -1,15 +1,14 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
-import 'package:intl/intl.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
+import '../../../../core/widgets/accent_input_fields.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
-import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
+import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
 
 /// Input form for 13th salary calculation
 class ThirteenthSalaryInputForm extends StatefulWidget {
@@ -24,10 +23,10 @@ class ThirteenthSalaryInputForm extends StatefulWidget {
 
   @override
   State<ThirteenthSalaryInputForm> createState() =>
-      _ThirteenthSalaryInputFormState();
+      ThirteenthSalaryInputFormState();
 }
 
-class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
+class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   // Controllers
   final _salaryController = TextEditingController();
   final _monthsController = TextEditingController(text: '12');
@@ -42,7 +41,11 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   DateTime? _calculationDate;
 
   // Formatters
-  final _currencyFormatter = _CurrencyInputFormatter();
+  final _currencyFormatter = MaskTextInputFormatter(
+    mask: '###.###.###,##',
+    filter: {'#': RegExp(r'[0-9]')},
+    type: MaskAutoCompletionType.lazy,
+  );
 
   final _dateFormatter = MaskTextInputFormatter(
     mask: '##/##/####',
@@ -77,6 +80,11 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     super.dispose();
   }
 
+  /// Public method to submit the form from external button
+  void submit() {
+    _submitForm();
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.labor;
@@ -87,7 +95,7 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ResponsiveInputRow(
-            left: _DarkCurrencyField(
+            left: AccentCurrencyField(
               controller: _salaryController,
               label: 'Salário Bruto Mensal',
               helperText: 'Ex: 3.000,00',
@@ -104,7 +112,7 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
                 return null;
               },
             ),
-            right: _DarkNumberField(
+            right: AccentNumberField(
               controller: _dependentsController,
               label: 'Número de Dependentes',
               helperText: 'Para cálculo do IRRF',
@@ -184,14 +192,13 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: _DarkNumberField(
+            left: AccentNumberField(
               controller: _monthsController,
               label: 'Meses Trabalhados',
               helperText: 'Calculado automaticamente',
               accentColor: accentColor,
-              enabled: false,
             ),
-            right: _DarkNumberField(
+            right: AccentNumberField(
               controller: _absencesController,
               label: 'Faltas Não Justificadas',
               helperText: 'Cada 15 faltas desconta 1 mês',
@@ -269,19 +276,31 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   }
 
   DateTime? _parseDate(String value) {
-    if (value.length != 10) return null;
+    if (value.length != 10) {
+      return null;
+    }
 
     final parts = value.split('/');
-    if (parts.length != 3) return null;
+    if (parts.length != 3) {
+      return null;
+    }
 
     final day = int.tryParse(parts[0]);
     final month = int.tryParse(parts[1]);
     final year = int.tryParse(parts[2]);
 
-    if (day == null || month == null || year == null) return null;
-    if (day < 1 || day > 31) return null;
-    if (month < 1 || month > 12) return null;
-    if (year < 1900 || year > 2100) return null;
+    if (day == null || month == null || year == null) {
+      return null;
+    }
+    if (day < 1 || day > 31) {
+      return null;
+    }
+    if (month < 1 || month > 12) {
+      return null;
+    }
+    if (year < 1900 || year > 2100) {
+      return null;
+    }
 
     try {
       return DateTime(year, month, day);
@@ -322,11 +341,6 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     }
   }
 
-  /// Public method to trigger calculation from parent widget
-  void calculate() {
-    _submitForm();
-  }
-
   void _submitForm() {
     if (!widget.formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -349,221 +363,6 @@ class _ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     );
 
     widget.onCalculate(params);
-  }
-}
-
-class _CurrencyInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    if (newValue.text.isEmpty) {
-      return newValue.copyWith(text: '');
-    }
-
-    final newText = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-
-    if (newText.isEmpty) {
-      return newValue.copyWith(text: '');
-    }
-
-    final value = double.parse(newText) / 100;
-
-    final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: '');
-    final newString = formatter.format(value).trim();
-
-    return newValue.copyWith(
-      text: newString,
-      selection: TextSelection.collapsed(offset: newString.length),
-    );
-  }
-}
-
-/// Dark themed currency input field
-class _DarkCurrencyField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final TextInputFormatter formatter;
-  final String? Function(String?)? validator;
-
-  const _DarkCurrencyField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    required this.formatter,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [formatter],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            prefixText: 'R\$ ',
-            prefixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dark themed number input field
-class _DarkNumberField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final String? Function(String?)? validator;
-  final bool enabled;
-
-  const _DarkNumberField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    this.helperText,
-    this.validator,
-    this.enabled = true,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          validator: validator,
-          enabled: enabled,
-          style: TextStyle(
-            color: enabled ? Colors.white : Colors.white.withValues(alpha: 0.5),
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }
 

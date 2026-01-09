@@ -20,7 +20,7 @@ class ThirteenthSalaryCalculatorPage extends ConsumerStatefulWidget {
 class _ThirteenthSalaryCalculatorPageState
     extends ConsumerState<ThirteenthSalaryCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  Key _formKeyId = UniqueKey();
+  final _inputFormKey = GlobalKey<ThirteenthSalaryInputFormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _ThirteenthSalaryCalculatorPageState
           children: [
             // Input Form
             ThirteenthSalaryInputForm(
-              key: _formKeyId,
+              key: _inputFormKey,
               formKey: _formKey,
               onCalculate: _handleCalculate,
             ),
@@ -98,7 +98,7 @@ class _ThirteenthSalaryCalculatorPageState
 
   void _handleSubmit() {
     if (_formKey.currentState!.validate()) {
-      _formKey.currentState!.save();
+      _inputFormKey.currentState?.submit();
     }
   }
 
@@ -107,9 +107,7 @@ class _ThirteenthSalaryCalculatorPageState
   }
 
   void _handleClear() {
-    setState(() {
-      _formKeyId = UniqueKey();
-    });
+    _formKey.currentState?.reset();
     ref.read(thirteenthSalaryCalculatorProvider.notifier).clearCalculation();
   }
 }

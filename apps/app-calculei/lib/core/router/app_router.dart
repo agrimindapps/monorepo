@@ -2,6 +2,7 @@ import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/layout/responsive_shell.dart';
+import 'page_transitions.dart';
 import '../../features/cash_vs_installment_calculator/presentation/pages/cash_vs_installment_calculator_page.dart';
 // Construction Calculators
 import '../../features/construction_calculator/presentation/pages/brick_calculator_page.dart';
@@ -81,7 +82,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           routes: [
             GoRoute(
               path: '/home',
-              builder: (context, state) => const HomePage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const HomePage(),
+                state: state,
+              ),
             ),
           ],
         ),
@@ -91,222 +95,344 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           routes: [
             GoRoute(
               path: '/calculators',
-              builder: (context, state) => const HomePage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const HomePage(),
+                state: state,
+              ),
             ),
             // Financial
             GoRoute(
               path: '/calculators/financial/selection',
-              builder: (context, state) => const FinancialSelectionPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FinancialSelectionPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/thirteenth-salary',
-              builder: (context, state) =>
-                  const ThirteenthSalaryCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const ThirteenthSalaryCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/vacation',
-              builder: (context, state) => const VacationCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const VacationCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/net-salary',
-              builder: (context, state) => const NetSalaryCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const NetSalaryCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/overtime',
-              builder: (context, state) => const OvertimeCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const OvertimeCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/emergency-reserve',
-              builder: (context, state) =>
-                  const EmergencyReserveCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const EmergencyReserveCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/cash-vs-installment',
-              builder: (context, state) =>
-                  const CashVsInstallmentCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const CashVsInstallmentCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/financial/unemployment-insurance',
-              builder: (context, state) =>
-                  const UnemploymentInsuranceCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const UnemploymentInsuranceCalculatorPage(),
+                state: state,
+              ),
             ),
             // Construction Calculators
             GoRoute(
               path: '/calculators/construction/selection',
-              builder: (context, state) =>
-                  const ConstructionCalculatorSelectionPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const ConstructionCalculatorSelectionPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/construction/concrete',
-              builder: (context, state) => const ConcreteCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const ConcreteCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/construction/paint',
-              builder: (context, state) => const PaintCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PaintCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/construction/flooring',
-              builder: (context, state) => const FlooringCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FlooringCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/construction/brick',
-              builder: (context, state) => const BrickCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const BrickCalculatorPage(),
+                state: state,
+              ),
             ),
             // Health Calculators
             GoRoute(
               path: '/calculators/health/selection',
-              builder: (context, state) => const HealthSelectionPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const HealthSelectionPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/bmi',
-              builder: (context, state) => const BmiCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const BmiCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/bmr',
-              builder: (context, state) => const BmrCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const BmrCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/water',
-              builder: (context, state) => const WaterIntakeCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const WaterIntakeCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/ideal-weight',
-              builder: (context, state) => const IdealWeightCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const IdealWeightCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/body-fat',
-              builder: (context, state) => const BodyFatCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const BodyFatCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/macros',
-              builder: (context, state) => const MacronutrientsCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const MacronutrientsCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/protein',
-              builder: (context, state) =>
-                  const ProteinasDiariasCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const ProteinasDiariasCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/exercise-calories',
-              builder: (context, state) =>
-                  const CaloriasExercicioCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const CaloriasExercicioCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/waist-hip',
-              builder: (context, state) =>
-                  const CinturaQuadrilCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const CinturaQuadrilCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/blood-alcohol',
-              builder: (context, state) =>
-                  const AlcoolSangueCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const AlcoolSangueCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/blood-volume',
-              builder: (context, state) =>
-                  const VolumeSanguineoCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const VolumeSanguineoCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/health/caloric-deficit',
-              builder: (context, state) =>
-                  const DeficitSuperavitCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const DeficitSuperavitCalculatorPage(),
+                state: state,
+              ),
             ),
             // Pet Calculators
             GoRoute(
               path: '/calculators/pet/selection',
-              builder: (context, state) => const PetSelectionPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PetSelectionPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/age',
-              builder: (context, state) => const AnimalAgeCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const AnimalAgeCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/pregnancy',
-              builder: (context, state) => const PregnancyCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PregnancyCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/body-condition',
-              builder: (context, state) =>
-                  const BodyConditionCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const BodyConditionCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/caloric-needs',
-              builder: (context, state) =>
-                  const CaloricNeedsCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const CaloricNeedsCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/medication',
-              builder: (context, state) =>
-                  const MedicationDosageCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const MedicationDosageCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/fluid-therapy',
-              builder: (context, state) =>
-                  const FluidTherapyCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FluidTherapyCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/ideal-weight',
-              builder: (context, state) =>
-                  const PetIdealWeightCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PetIdealWeightCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/pet/unit-conversion',
-              builder: (context, state) =>
-                  const UnitConversionCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const UnitConversionCalculatorPage(),
+                state: state,
+              ),
             ),
             // Agriculture Calculators
             GoRoute(
               path: '/calculators/agriculture/selection',
-              builder: (context, state) => const AgricultureSelectionPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const AgricultureSelectionPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/npk',
-              builder: (context, state) => const NpkCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const NpkCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/seed-rate',
-              builder: (context, state) => const SeedRateCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const SeedRateCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/irrigation',
-              builder: (context, state) => const IrrigationCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const IrrigationCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/fertilizer-dosing',
-              builder: (context, state) =>
-                  const FertilizerDosingCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FertilizerDosingCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/soil-ph',
-              builder: (context, state) => const SoilPhCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const SoilPhCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/planting-density',
-              builder: (context, state) =>
-                  const PlantingDensityCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PlantingDensityCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/yield-prediction',
-              builder: (context, state) =>
-                  const YieldPredictionCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const YieldPredictionCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/feed',
-              builder: (context, state) => const FeedCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FeedCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/weight-gain',
-              builder: (context, state) => const WeightGainCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const WeightGainCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/breeding-cycle',
-              builder: (context, state) =>
-                  const BreedingCycleCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const BreedingCycleCalculatorPage(),
+                state: state,
+              ),
             ),
             GoRoute(
               path: '/calculators/agriculture/evapotranspiration',
-              builder: (context, state) =>
-                  const EvapotranspirationCalculatorPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const EvapotranspirationCalculatorPage(),
+                state: state,
+              ),
             ),
           ],
         ),
@@ -316,7 +442,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           routes: [
             GoRoute(
               path: '/settings',
-              builder: (context, state) => const SettingsPage(),
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const SettingsPage(),
+                state: state,
+              ),
             ),
           ],
         ),

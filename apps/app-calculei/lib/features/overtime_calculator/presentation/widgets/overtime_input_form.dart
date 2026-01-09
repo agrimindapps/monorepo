@@ -1,11 +1,11 @@
 // Flutter imports:
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 // Package imports:
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 // Project imports:
+import '../../../../core/widgets/accent_input_fields.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
@@ -22,10 +22,10 @@ class OvertimeInputForm extends StatefulWidget {
   });
 
   @override
-  State<OvertimeInputForm> createState() => _OvertimeInputFormState();
+  State<OvertimeInputForm> createState() => OvertimeInputFormState();
 }
 
-class _OvertimeInputFormState extends State<OvertimeInputForm> {
+class OvertimeInputFormState extends State<OvertimeInputForm> {
   // Controllers
   final _grossSalaryController = TextEditingController();
   final _weeklyHoursController = TextEditingController(text: '44');
@@ -58,6 +58,11 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
     super.dispose();
   }
 
+  /// Public method to submit the form from external button
+  void submit() {
+    _submitForm();
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.labor;
@@ -68,7 +73,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ResponsiveInputRow(
-            left: _DarkCurrencyField(
+            left: AccentCurrencyField(
               controller: _grossSalaryController,
               label: 'Salário Bruto Mensal',
               helperText: 'Ex: 3.000,00',
@@ -85,7 +90,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
                 return null;
               },
             ),
-            right: _DarkNumberField(
+            right: AccentNumberField(
               controller: _weeklyHoursController,
               label: 'Horas Semanais Contratadas',
               helperText: 'Geralmente 44 horas',
@@ -105,7 +110,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: _DarkNumberField(
+            left: AccentNumberField(
               controller: _hours50Controller,
               label: 'Horas Extras 50%',
               helperText: 'Horas trabalhadas em dias normais',
@@ -120,7 +125,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
                 return null;
               },
             ),
-            right: _DarkNumberField(
+            right: AccentNumberField(
               controller: _hours100Controller,
               label: 'Horas Extras 100%',
               helperText: 'Domingos e feriados',
@@ -139,13 +144,13 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: _DarkNumberField(
+            left: AccentNumberField(
               controller: _nightHoursController,
               label: 'Horas Noturnas (opcional)',
               helperText: 'Geralmente das 22h às 5h',
               accentColor: accentColor,
             ),
-            right: _DarkNumberField(
+            right: AccentNumberField(
               controller: _nightPercentageController,
               label: 'Adicional Noturno (%)',
               helperText: 'Mínimo legal: 20%',
@@ -164,7 +169,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: _DarkNumberField(
+            left: AccentNumberField(
               controller: _sundayHolidayHoursController,
               label: 'Horas Domingo/Feriado (opcional)',
               helperText: 'Horas trabalhadas em domingos ou feriados',
@@ -179,7 +184,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
                 return null;
               },
             ),
-            right: _DarkNumberField(
+            right: AccentNumberField(
               controller: _workDaysController,
               label: 'Dias Úteis no Mês',
               helperText: 'Geralmente 22 dias',
@@ -199,7 +204,7 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
           const SizedBox(height: 16),
 
           // Dependents
-          _DarkNumberField(
+          AccentNumberField(
             controller: _dependentsController,
             label: 'Número de Dependentes',
             helperText: 'Para cálculo do IRRF',
@@ -246,183 +251,5 @@ class _OvertimeInputFormState extends State<OvertimeInputForm> {
     );
 
     widget.onCalculate(params);
-  }
-}
-
-/// Dark themed currency input field
-class _DarkCurrencyField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final MaskTextInputFormatter formatter;
-  final String? Function(String?)? validator;
-
-  const _DarkCurrencyField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    required this.formatter,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [formatter],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            prefixText: 'R\$ ',
-            prefixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dark themed number input field
-class _DarkNumberField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final String? Function(String?)? validator;
-
-  const _DarkNumberField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    this.helperText,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

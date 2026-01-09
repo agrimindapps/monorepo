@@ -17,12 +17,10 @@ class CashVsInstallmentResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Card(
-      elevation: 4,
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      elevation: 2,
+      
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -31,13 +29,16 @@ class CashVsInstallmentResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado da Comparação',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
                   ),
                 ),
               ],
@@ -49,16 +50,16 @@ class CashVsInstallmentResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: calculation.bestOption == 'À Vista'
-                    ? (isDark
-                          ? Colors.green[900]!.withValues(alpha: 0.3)
-                          : Colors.green[50])
-                    : (isDark ? Colors.grey[800] : Colors.grey[100]),
+                color: _getContainerColor(
+                  context,
+                  calculation.bestOption == 'À Vista',
+                ),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: calculation.bestOption == 'À Vista'
-                      ? (isDark ? Colors.green[400]! : Colors.green)
-                      : (isDark ? Colors.grey[600]! : Colors.grey),
+                  color: _getBorderColor(
+                    context,
+                    calculation.bestOption == 'À Vista',
+                  ),
                   width: 2,
                 ),
               ),
@@ -72,13 +73,10 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.money_off,
-                            color: calculation.bestOption == 'À Vista'
-                                ? (isDark
-                                      ? Colors.green[400]
-                                      : Colors.green[700])
-                                : (isDark
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600]),
+                            color: _getIconColor(
+                              context,
+                              calculation.bestOption == 'À Vista',
+                            ),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -87,13 +85,10 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: calculation.bestOption == 'À Vista'
-                                  ? (isDark
-                                        ? Colors.green[300]
-                                        : Colors.green[900])
-                                  : (isDark
-                                        ? Colors.grey[300]
-                                        : Colors.grey[700]),
+                              color: _getTextColor(
+                                context,
+                                calculation.bestOption == 'À Vista',
+                              ),
                             ),
                           ),
                         ],
@@ -105,13 +100,13 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: Theme.of(context).colorScheme.primary,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
+                          child: Text(
                             'MELHOR OPÇÃO',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -125,9 +120,10 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
-                      color: calculation.bestOption == 'À Vista'
-                          ? (isDark ? Colors.green[300] : Colors.green[900])
-                          : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                      color: _getTextColor(
+                        context,
+                        calculation.bestOption == 'À Vista',
+                      ),
                     ),
                   ),
                 ],
@@ -140,16 +136,16 @@ class CashVsInstallmentResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: calculation.bestOption == 'Parcelado'
-                    ? (isDark
-                          ? Colors.green[900]!.withValues(alpha: 0.3)
-                          : Colors.green[50])
-                    : (isDark ? Colors.grey[800] : Colors.grey[100]),
+                color: _getContainerColor(
+                  context,
+                  calculation.bestOption == 'Parcelado',
+                ),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: calculation.bestOption == 'Parcelado'
-                      ? (isDark ? Colors.green[400]! : Colors.green)
-                      : (isDark ? Colors.grey[600]! : Colors.grey),
+                  color: _getBorderColor(
+                    context,
+                    calculation.bestOption == 'Parcelado',
+                  ),
                   width: 2,
                 ),
               ),
@@ -163,13 +159,10 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.credit_card,
-                            color: calculation.bestOption == 'Parcelado'
-                                ? (isDark
-                                      ? Colors.green[400]
-                                      : Colors.green[700])
-                                : (isDark
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600]),
+                            color: _getIconColor(
+                              context,
+                              calculation.bestOption == 'Parcelado',
+                            ),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
@@ -178,13 +171,10 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: calculation.bestOption == 'Parcelado'
-                                  ? (isDark
-                                        ? Colors.green[300]
-                                        : Colors.green[900])
-                                  : (isDark
-                                        ? Colors.grey[300]
-                                        : Colors.grey[700]),
+                              color: _getTextColor(
+                                context,
+                                calculation.bestOption == 'Parcelado',
+                              ),
                             ),
                           ),
                         ],
@@ -196,13 +186,13 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: Theme.of(context).colorScheme.primary,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Text(
+                          child: Text(
                             'MELHOR OPÇÃO',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
@@ -216,18 +206,20 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: calculation.bestOption == 'Parcelado'
-                          ? (isDark ? Colors.green[300] : Colors.green[900])
-                          : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                      color: _getTextColor(
+                        context,
+                        calculation.bestOption == 'Parcelado',
+                      ),
                     ),
                   ),
                   Text(
                     'Total: ${formatter.format(calculation.totalInstallmentPrice)}',
                     style: TextStyle(
                       fontSize: 14,
-                      color: calculation.bestOption == 'Parcelado'
-                          ? (isDark ? Colors.green[400] : Colors.green[700])
-                          : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                      color: _getTextColor(
+                        context,
+                        calculation.bestOption == 'Parcelado',
+                      ).withValues(alpha: 0.8),
                     ),
                   ),
                 ],
@@ -378,5 +370,29 @@ class CashVsInstallmentResultCard extends StatelessWidget {
       fontSize: 12,
       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
     );
+  }
+
+  Color _getContainerColor(BuildContext context, bool isBest) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return isBest
+        ? colorScheme.primaryContainer
+        : colorScheme.surfaceContainerHighest;
+  }
+
+  Color _getBorderColor(BuildContext context, bool isBest) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return isBest
+        ? colorScheme.primary.withValues(alpha: 0.5)
+        : colorScheme.outline.withValues(alpha: 0.3);
+  }
+
+  Color _getIconColor(BuildContext context, bool isBest) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return isBest ? colorScheme.primary : colorScheme.onSurfaceVariant;
+  }
+
+  Color _getTextColor(BuildContext context, bool isBest) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return isBest ? colorScheme.onPrimaryContainer : colorScheme.onSurface;
   }
 }

@@ -16,8 +16,7 @@ class CalculationResultCard extends StatelessWidget {
     final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
     return Card(
-      elevation: 4,
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -26,13 +25,16 @@ class CalculationResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
                   ),
                 ),
               ],
@@ -93,24 +95,31 @@ class CalculationResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green[700],
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Valor Líquido a Receber',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     formatter.format(calculation.netTotal),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -125,11 +134,8 @@ class CalculationResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,6 +204,8 @@ class CalculationResultCard extends StatelessWidget {
     bool isHighlight = false,
     bool isDeduction = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -209,9 +217,7 @@ class CalculationResultCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: isBold ? 16 : 14,
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: isDeduction
-                    ? Colors.red[700]
-                    : Theme.of(context).colorScheme.onSecondaryContainer,
+                color: isDeduction ? colorScheme.error : colorScheme.onSurface,
               ),
             ),
           ),
@@ -223,10 +229,10 @@ class CalculationResultCard extends StatelessWidget {
                   ? FontWeight.bold
                   : FontWeight.w500,
               color: isDeduction
-                  ? Colors.red[700]
+                  ? colorScheme.error
                   : isHighlight
-                  ? Colors.green[700]
-                  : Theme.of(context).colorScheme.onSecondaryContainer,
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
             ),
           ),
         ],

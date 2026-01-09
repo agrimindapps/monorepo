@@ -19,8 +19,7 @@ class EmergencyReserveResultCard extends StatelessWidget {
     final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
     return Card(
-      elevation: 4,
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -29,13 +28,16 @@ class EmergencyReserveResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
                   ),
                 ),
               ],
@@ -79,24 +81,31 @@ class EmergencyReserveResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.teal[700],
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Meta da Reserva',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     formatter.format(calculation.totalReserveAmount),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -111,7 +120,7 @@ class EmergencyReserveResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _getCategoryColor(calculation.category),
+                color: _getCategoryColor(context, calculation.category),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -119,8 +128,8 @@ class EmergencyReserveResultCard extends StatelessWidget {
                 children: [
                   Text(
                     'Categoria: ${calculation.category}',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: _getCategoryTextColor(context, calculation.category),
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -128,7 +137,10 @@ class EmergencyReserveResultCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     calculation.categoryDescription,
-                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(
+                      color: _getCategoryTextColor(context, calculation.category),
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -140,22 +152,25 @@ class EmergencyReserveResultCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue[200]!),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.schedule, color: Colors.blue[700], size: 20),
+                        Icon(
+                          Icons.schedule,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'Tempo para Construir a Reserva',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[900],
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -163,13 +178,16 @@ class EmergencyReserveResultCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       'Poupando ${formatter.format(calculation.monthlySavings)} por mês:',
-                      style: TextStyle(color: Colors.blue[700], fontSize: 13),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                        fontSize: 13,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       '${calculation.constructionYears} ${calculation.constructionYears == 1 ? "ano" : "anos"} e ${calculation.constructionMonths} ${calculation.constructionMonths == 1 ? "mês" : "meses"}',
                       style: TextStyle(
-                        color: Colors.blue[900],
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -185,11 +203,8 @@ class EmergencyReserveResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,18 +252,35 @@ class EmergencyReserveResultCard extends StatelessWidget {
     );
   }
 
-  Color _getCategoryColor(String category) {
+  Color _getCategoryColor(BuildContext context, String category) {
+    final colorScheme = Theme.of(context).colorScheme;
     switch (category) {
       case 'Mínima':
-        return Colors.red.shade600;
+        return colorScheme.errorContainer;
       case 'Básica':
-        return Colors.orange.shade600;
+        return colorScheme.tertiaryContainer;
       case 'Confortável':
-        return Colors.green.shade600;
+        return colorScheme.primaryContainer;
       case 'Robusta':
-        return Colors.blue.shade700;
+        return colorScheme.secondaryContainer;
       default:
-        return Colors.grey.shade600;
+        return colorScheme.surfaceContainerHighest;
+    }
+  }
+
+  Color _getCategoryTextColor(BuildContext context, String category) {
+    final colorScheme = Theme.of(context).colorScheme;
+    switch (category) {
+      case 'Mínima':
+        return colorScheme.onErrorContainer;
+      case 'Básica':
+        return colorScheme.onTertiaryContainer;
+      case 'Confortável':
+        return colorScheme.onPrimaryContainer;
+      case 'Robusta':
+        return colorScheme.onSecondaryContainer;
+      default:
+        return colorScheme.onSurface;
     }
   }
 
@@ -258,6 +290,8 @@ class EmergencyReserveResultCard extends StatelessWidget {
     String value, {
     bool isBold = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -269,7 +303,7 @@ class EmergencyReserveResultCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: isBold ? 16 : 14,
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                color: colorScheme.onSurface,
               ),
             ),
           ),
@@ -278,7 +312,7 @@ class EmergencyReserveResultCard extends StatelessWidget {
             style: TextStyle(
               fontSize: isBold ? 18 : 15,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
+              color: colorScheme.onSurface,
             ),
           ),
         ],

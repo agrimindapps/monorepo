@@ -19,8 +19,7 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
     final formatter = NumberFormat.currency(locale: 'pt_BR', symbol: 'R\$');
 
     return Card(
-      elevation: 4,
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -29,13 +28,16 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Resultado do Cálculo',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
                   ),
                 ),
               ],
@@ -87,24 +89,31 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green[700],
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     '13º Líquido a Receber',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     formatter.format(calculation.netThirteenthSalary),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -119,22 +128,25 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue[200]!),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.payments, color: Colors.blue[700], size: 20),
+                        Icon(
+                          Icons.payments,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'Pagamento em 2 Parcelas',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue[900],
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -164,11 +176,8 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,9 +211,9 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
                   if (calculation.monthsWorked != calculation.consideredMonths)
                     Text(
                       '• Desconto por faltas: ${calculation.monthsWorked - calculation.consideredMonths} ${calculation.monthsWorked - calculation.consideredMonths == 1 ? "mês" : "meses"}',
-                      style: _detailTextStyle(
-                        context,
-                      ).copyWith(color: Colors.red[700]),
+                      style: _detailTextStyle(context).copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
                     ),
                 ],
               ),
@@ -234,6 +243,8 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
     bool isHighlight = false,
     bool isDeduction = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -245,9 +256,7 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: isBold ? 16 : 14,
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: isDeduction
-                    ? Colors.red[700]
-                    : Theme.of(context).colorScheme.onSecondaryContainer,
+                color: isDeduction ? colorScheme.error : colorScheme.onSurface,
               ),
             ),
           ),
@@ -259,10 +268,10 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
                   ? FontWeight.bold
                   : FontWeight.w500,
               color: isDeduction
-                  ? Colors.red[700]
+                  ? colorScheme.error
                   : isHighlight
-                  ? Colors.green[700]
-                  : Theme.of(context).colorScheme.onSecondaryContainer,
+                      ? colorScheme.primary
+                      : colorScheme.onSurface,
             ),
           ),
         ],
@@ -276,6 +285,8 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
     String value,
     String deadline,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -288,13 +299,16 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blue[900],
+                  color: colorScheme.onSurface,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 deadline,
-                style: TextStyle(fontSize: 11, color: Colors.blue[700]),
+                style: TextStyle(
+                  fontSize: 11,
+                  color: colorScheme.onSurface.withValues(alpha: 0.7),
+                ),
               ),
             ],
           ),
@@ -304,7 +318,7 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Colors.blue[900],
+            color: colorScheme.onSurface,
           ),
         ),
       ],

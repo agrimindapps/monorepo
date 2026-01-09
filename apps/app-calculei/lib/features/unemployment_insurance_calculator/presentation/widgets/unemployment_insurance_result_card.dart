@@ -24,8 +24,8 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
     }
 
     return Card(
-      elevation: 4,
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      elevation: 2,
+      
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -34,13 +34,16 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green[700], size: 28),
+                Icon(
+                  Icons.check_circle,
+                  color: Theme.of(context).colorScheme.primary,
+                  size: 28,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   'Você tem direito!',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSecondaryContainer,
                   ),
                 ),
               ],
@@ -52,20 +55,30 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green[700],
+                color: Theme.of(context).colorScheme.primaryContainer,
                 borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.3),
+                  width: 2,
+                ),
               ),
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     'Valor de cada parcela',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     formatter.format(calculation.installmentValue),
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                     ),
@@ -96,22 +109,25 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.schedule, color: Colors.blue[700], size: 20),
+                      Icon(
+                        Icons.schedule,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         'Prazos Importantes',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue[900],
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -144,9 +160,8 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.orange[50],
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange[200]!),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,7 +170,7 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          color: Colors.orange[700],
+                          color: Theme.of(context).colorScheme.onTertiaryContainer,
                           size: 20,
                         ),
                         const SizedBox(width: 8),
@@ -163,7 +178,7 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
                           'Cronograma de Pagamentos (estimado)',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.orange[900],
+                            color: Theme.of(context).colorScheme.onTertiaryContainer,
                           ),
                         ),
                       ],
@@ -179,7 +194,7 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
                             Text(
                               '${index + 1}ª parcela',
                               style: TextStyle(
-                                color: Colors.orange[900],
+                                color: Theme.of(context).colorScheme.onTertiaryContainer,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -187,7 +202,12 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
                               dateFormatter.format(
                                 calculation.paymentSchedule[index],
                               ),
-                              style: TextStyle(color: Colors.orange[700]),
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onTertiaryContainer
+                                    .withValues(alpha: 0.8),
+                              ),
                             ),
                           ],
                         ),
@@ -204,11 +224,8 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Theme.of(context).dividerColor),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,19 +260,25 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.amber[50],
+                color: Theme.of(context).colorScheme.tertiaryContainer,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.amber[300]!),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.amber[900], size: 20),
+                  Icon(
+                    Icons.warning_amber,
+                    color: Theme.of(context).colorScheme.onTertiaryContainer,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Este é um cálculo estimado. Os valores e datas exatos serão informados pelo Ministério do Trabalho após a solicitação.',
-                      style: TextStyle(fontSize: 12, color: Colors.amber[900]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onTertiaryContainer,
+                      ),
                     ),
                   ),
                 ],
@@ -278,9 +301,10 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
   }
 
   Widget _buildIneligibleCard(BuildContext context, NumberFormat formatter) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Card(
-      elevation: 4,
-      color: Colors.red.shade50,
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -289,13 +313,13 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             // Header
             Row(
               children: [
-                Icon(Icons.cancel, color: Colors.red[700], size: 28),
+                Icon(Icons.cancel, color: colorScheme.error, size: 28),
                 const SizedBox(width: 8),
                 Text(
                   'Não Elegível',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: Colors.red[900],
+                    color: colorScheme.error,
                   ),
                 ),
               ],
@@ -306,7 +330,7 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colorScheme.errorContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -316,20 +340,20 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
                     'Motivo:',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red[900],
+                      color: colorScheme.onErrorContainer,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     calculation.ineligibilityReason,
-                    style: TextStyle(color: Colors.red[700]),
+                    style: TextStyle(color: colorScheme.onErrorContainer),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'Carência necessária: ${calculation.requiredCarencyMonths} meses',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.red[900],
+                      color: colorScheme.onErrorContainer,
                     ),
                   ),
                 ],
@@ -341,19 +365,25 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                  Icon(
+                    Icons.info_outline,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Continue trabalhando até completar o tempo mínimo exigido para ter direito ao benefício.',
-                      style: TextStyle(fontSize: 12, color: Colors.blue[900]),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: colorScheme.onSurface,
+                      ),
                     ),
                   ),
                 ],
@@ -371,6 +401,8 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
     String value, {
     bool isBold = false,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
@@ -382,7 +414,7 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: isBold ? 16 : 14,
                 fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                color: colorScheme.onSurface,
               ),
             ),
           ),
@@ -391,7 +423,7 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
             style: TextStyle(
               fontSize: isBold ? 18 : 15,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSecondaryContainer,
+              color: colorScheme.onSurface,
             ),
           ),
         ],
@@ -400,16 +432,24 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
   }
 
   Widget _buildDateRow(BuildContext context, String label, String date) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: 13, color: Colors.blue[700])),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 13,
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
         Text(
           date,
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Colors.blue[900],
+            color: colorScheme.onSurface,
           ),
         ),
       ],

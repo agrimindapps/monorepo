@@ -38,8 +38,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
       subtitle: 'Nutrição Animal',
       icon: Icons.pets,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule a quantidade de ração necessária baseado no peso e fase dos animais.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

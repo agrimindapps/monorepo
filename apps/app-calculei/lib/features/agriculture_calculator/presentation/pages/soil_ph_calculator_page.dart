@@ -41,8 +41,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
       subtitle: 'Calagem do Solo',
       icon: Icons.science,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule a quantidade de calcário necessária para correção do pH do solo.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

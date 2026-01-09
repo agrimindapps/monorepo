@@ -59,8 +59,6 @@ class _UnitConversionCalculatorPageState
       subtitle: 'Conversão de Unidades',
       icon: Icons.swap_horiz,
       accentColor: accentColor,
-      categoryName: 'Pet',
-      instructions: 'Converta unidades de medida comuns em medicina veterinária.',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

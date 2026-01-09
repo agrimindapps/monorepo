@@ -41,8 +41,7 @@ class _PlantingDensityCalculatorPageState
       subtitle: 'Espaçamento e População',
       icon: Icons.grid_4x4,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule o espaçamento ideal e população de plantas por área.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

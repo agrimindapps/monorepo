@@ -55,9 +55,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
       subtitle: 'Revestimentos e Acabamentos',
       icon: Icons.grid_on,
       accentColor: CalculatorAccentColors.construction,
-      categoryName: 'Construção',
-      instructions: 'Informe as dimensões do ambiente e o tamanho das peças. '
-          'Defina a perda e quantidade de peças por caixa para receber o cálculo completo de peças, caixas e rejunte necessários.',
+      currentCategory: 'construcao',
       maxContentWidth: 800,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

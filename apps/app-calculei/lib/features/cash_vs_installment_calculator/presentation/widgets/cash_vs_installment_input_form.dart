@@ -2,10 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
+import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_cash_vs_installment_usecase.dart';
@@ -35,11 +34,6 @@ class CashVsInstallmentInputFormState
   final _monthlyInterestRateController = TextEditingController(text: '0,8');
 
   // Formatters
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
 
   @override
   void dispose() {
@@ -69,9 +63,7 @@ class CashVsInstallmentInputFormState
               controller: _cashPriceController,
               label: 'Valor à Vista',
               helperText: 'Preço para pagamento à vista',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o valor à vista';
                 }
@@ -86,9 +78,7 @@ class CashVsInstallmentInputFormState
               controller: _installmentPriceController,
               label: 'Valor da Parcela',
               helperText: 'Valor de cada parcela',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o valor da parcela';
                 }

@@ -41,9 +41,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
       subtitle: 'Performance Animal',
       icon: Icons.trending_up,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      categoryRoute: '/agriculture',
-      instructions: 'Calcule o ganho de peso médio diário e projeções de crescimento animal.',
+      currentCategory: 'saude',
       maxContentWidth: 700,
       actions: [
         if (_result != null)

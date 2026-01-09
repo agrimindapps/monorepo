@@ -35,11 +35,7 @@ class _CaloriasExercicioCalculatorPageState
       subtitle: 'Gasto Calórico em Atividades Físicas',
       icon: Icons.directions_run,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions:
-          'Selecione o tipo de exercício e a duração para estimar '
-          'quantas calorias você queima. Baseado em valores MET (Equivalente '
-          'Metabólico de Tarefa) para intensidades médias.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

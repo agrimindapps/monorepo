@@ -36,10 +36,7 @@ class _EmergencyReserveCalculatorPageState
       subtitle: 'Planeje sua segurança financeira',
       icon: Icons.savings_outlined,
       accentColor: CalculatorAccentColors.financial,
-      categoryName: 'Financeiro',
-      instructions: 'Informe suas despesas mensais e perfil para calcular o valor '
-          'ideal de reserva de emergência. Recomenda-se de 3 a 12 meses de despesas, '
-          'dependendo da estabilidade de sua renda.',
+      currentCategory: 'financeiro',
       maxContentWidth: 800,
       actions: [
         IconButton(

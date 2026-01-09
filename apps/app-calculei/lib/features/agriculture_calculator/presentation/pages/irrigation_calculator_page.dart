@@ -42,8 +42,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
       subtitle: 'Cálculo de Irrigação',
       icon: Icons.water,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule o volume de água necessário para irrigação baseado na cultura, estágio e condições climáticas.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

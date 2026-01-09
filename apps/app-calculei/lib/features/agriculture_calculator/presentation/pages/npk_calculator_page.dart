@@ -46,8 +46,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
       subtitle: 'Cálculo de Fertilizantes',
       icon: Icons.science,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule a quantidade de fertilizantes NPK necessária baseado na análise de solo e cultura.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

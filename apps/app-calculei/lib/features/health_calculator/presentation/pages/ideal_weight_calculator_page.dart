@@ -37,10 +37,7 @@ class _IdealWeightCalculatorPageState extends State<IdealWeightCalculatorPage> {
       subtitle: 'Calculadora de Peso Ideal',
       icon: Icons.accessibility_new,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Selecione seu gênero e digite sua altura. Opcionalmente, '
-          'informe seu peso atual para comparação. A calculadora utiliza 4 fórmulas '
-          'científicas (Devine, Robinson, Miller, Hamwi) para maior precisão.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

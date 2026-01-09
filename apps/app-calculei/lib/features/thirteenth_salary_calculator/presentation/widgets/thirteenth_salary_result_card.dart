@@ -40,6 +40,17 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatThirteenthSalary(
+                    grossSalary: calculation.grossSalary,
+                    monthsWorked: calculation.monthsWorked,
+                    totalGross: calculation.grossThirteenthSalary,
+                    totalNet: calculation.netThirteenthSalary,
+                    isAdvance: calculation.isAdvancePayment,
+                  ),
+                  subject: 'Cálculo de 13º Salário',
+                ),
               ],
             ),
 
@@ -219,16 +230,6 @@ class ThirteenthSalaryResultCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatThirteenthSalary(
-                grossSalary: calculation.grossSalary,
-                monthsWorked: calculation.monthsWorked,
-                totalGross: calculation.grossThirteenthSalary,
-                totalNet: calculation.netThirteenthSalary,
-                isAdvance: calculation.isAdvancePayment,
-              ),
-              subject: 'Cálculo de 13º Salário',
-            ),
           ],
         ),
       ),

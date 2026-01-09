@@ -30,10 +30,7 @@ class _BreedingCycleCalculatorPageState
       subtitle: 'Gestão de Reprodução Animal',
       icon: Icons.pregnant_woman,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      categoryRoute: '/calculators/agriculture/selection',
-      instructions: 'Calcule datas importantes do ciclo reprodutivo de animais '
-          'para melhor manejo.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

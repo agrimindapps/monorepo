@@ -40,6 +40,20 @@ class NetSalaryResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatNetSalary(
+                    grossSalary: calculation.grossSalary,
+                    inss: calculation.inssDiscount,
+                    ir: calculation.irrfDiscount,
+                    netSalary: calculation.netSalary,
+                    discounts:
+                        calculation.totalDiscounts -
+                        calculation.inssDiscount -
+                        calculation.irrfDiscount,
+                  ),
+                  subject: 'Cálculo de Salário Líquido',
+                ),
               ],
             ),
 
@@ -203,19 +217,6 @@ class NetSalaryResultCard extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatNetSalary(
-                grossSalary: calculation.grossSalary,
-                inss: calculation.inssDiscount,
-                ir: calculation.irrfDiscount,
-                netSalary: calculation.netSalary,
-                discounts:
-                    calculation.totalDiscounts -
-                    calculation.inssDiscount -
-                    calculation.irrfDiscount,
-              ),
-              subject: 'Cálculo de Salário Líquido',
-            ),
           ],
         ),
       ),

@@ -36,10 +36,7 @@ class _CashVsInstallmentCalculatorPageState
       subtitle: 'Compare as opções de pagamento',
       icon: Icons.compare_arrows_outlined,
       accentColor: CalculatorAccentColors.financial,
-      categoryName: 'Financeiro',
-      instructions: 'Informe o preço à vista, valor parcelado e taxa de juros '
-          'para descobrir qual é a melhor opção financeira. A calculadora '
-          'considera o valor do dinheiro no tempo.',
+      currentCategory: 'financeiro',
       maxContentWidth: 800,
       actions: [
         IconButton(

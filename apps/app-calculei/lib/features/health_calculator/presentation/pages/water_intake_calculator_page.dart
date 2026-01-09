@@ -35,9 +35,7 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
       subtitle: 'Calcule sua hidratação diária',
       icon: Icons.water_drop,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Digite seu peso e selecione seu nível de atividade física e clima. '
-          'O cálculo base usa 35ml por kg de peso, ajustado conforme suas condições.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

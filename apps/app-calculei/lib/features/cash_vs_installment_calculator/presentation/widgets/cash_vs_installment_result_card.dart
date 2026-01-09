@@ -41,6 +41,16 @@ class CashVsInstallmentResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatCashVsInstallment(
+                    cashPrice: calculation.cashPrice,
+                    installmentPrice: calculation.installmentPrice,
+                    installments: calculation.numberOfInstallments,
+                    bestOption: calculation.bestOption,
+                  ),
+                  subject: 'À Vista ou Parcelado',
+                ),
               ],
             ),
 
@@ -322,15 +332,6 @@ class CashVsInstallmentResultCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatCashVsInstallment(
-                cashPrice: calculation.cashPrice,
-                installmentPrice: calculation.installmentPrice,
-                installments: calculation.numberOfInstallments,
-                bestOption: calculation.bestOption,
-              ),
-              subject: 'À Vista ou Parcelado',
-            ),
           ],
         ),
       ),

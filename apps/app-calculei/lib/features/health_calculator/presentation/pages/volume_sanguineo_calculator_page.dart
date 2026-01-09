@@ -39,10 +39,7 @@ class _VolumeSanguineoCalculatorPageState
       subtitle: 'Estimativa de volume total',
       icon: Icons.water_drop_outlined,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Estima o volume total de sangue no corpo usando a fórmula '
-          'de Nadler (mais precisa) ou método simplificado. Digite seu peso e altura '
-          'para obter uma estimativa do volume sanguíneo.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

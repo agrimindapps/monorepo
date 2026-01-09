@@ -41,10 +41,7 @@ class _DeficitSuperavitCalculatorPageState
       subtitle: 'Planejamento de Calorias',
       icon: Icons.trending_down,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Informe seu peso atual, peso meta, prazo desejado e TDEE '
-          'para calcular quantas calorias você deve consumir diariamente. '
-          'Baseado em 1kg de gordura ≈ 7700 kcal.',
+      currentCategory: 'saude',
       maxContentWidth: 700,
       actions: [
         if (_result != null)

@@ -2,10 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
+import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_unemployment_insurance_usecase.dart';
@@ -38,16 +37,6 @@ class UnemploymentInsuranceInputFormState
   DateTime? _dismissalDate;
 
   // Formatters
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
-
-  final _dateFormatter = MaskTextInputFormatter(
-    mask: '##/##/####',
-    filter: {'#': RegExp(r'[0-9]')},
-  );
 
   @override
   void initState() {
@@ -85,9 +74,7 @@ class UnemploymentInsuranceInputFormState
               controller: _averageSalaryController,
               label: 'Salário Médio (últimos 3 meses)',
               helperText: 'Média dos últimos 3 salários',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o salário médio';
                 }
@@ -141,7 +128,6 @@ class UnemploymentInsuranceInputFormState
               label: 'Data de Demissão',
               helperText: 'DD/MM/AAAA',
               accentColor: accentColor,
-              formatter: _dateFormatter,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe a data de demissão';
@@ -260,7 +246,6 @@ class _DarkDateField extends StatelessWidget {
   final String label;
   final String? helperText;
   final Color accentColor;
-  final MaskTextInputFormatter formatter;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final VoidCallback? onTap;
@@ -269,7 +254,6 @@ class _DarkDateField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.accentColor,
-    required this.formatter,
     this.helperText,
     this.validator,
     this.onChanged,
@@ -303,7 +287,6 @@ class _DarkDateField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.datetime,
-          inputFormatters: [formatter],
           validator: validator,
           onChanged: onChanged,
           onTap: onTap,

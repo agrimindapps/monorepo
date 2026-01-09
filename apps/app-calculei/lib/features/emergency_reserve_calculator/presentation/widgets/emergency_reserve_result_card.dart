@@ -40,6 +40,16 @@ class EmergencyReserveResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatEmergencyReserve(
+                    monthlyExpenses: calculation.totalMonthlyExpenses,
+                    monthsToCover: calculation.desiredMonths,
+                    totalReserve: calculation.totalReserveAmount,
+                    monthlySavings: calculation.monthlySavings,
+                  ),
+                  subject: 'Reserva de Emergência',
+                ),
               ],
             ),
 
@@ -237,15 +247,6 @@ class EmergencyReserveResultCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatEmergencyReserve(
-                monthlyExpenses: calculation.totalMonthlyExpenses,
-                monthsToCover: calculation.desiredMonths,
-                totalReserve: calculation.totalReserveAmount,
-                monthlySavings: calculation.monthlySavings,
-              ),
-              subject: 'Reserva de Emergência',
-            ),
           ],
         ),
       ),

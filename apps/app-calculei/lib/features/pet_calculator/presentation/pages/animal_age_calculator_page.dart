@@ -36,9 +36,7 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
       subtitle: 'Idade em Anos Humanos',
       icon: Icons.cake_outlined,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Descubra a idade equivalente do seu pet em anos humanos. '
-          'A conversão varia conforme a espécie e o porte do animal.',
+      currentCategory: 'pet',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

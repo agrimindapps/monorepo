@@ -40,8 +40,7 @@ class _PetIdealWeightCalculatorPageState
       subtitle: 'Meta de Peso Saudável',
       icon: Icons.monitor_weight,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Calcule o peso ideal e meta de redução saudável para seu pet.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

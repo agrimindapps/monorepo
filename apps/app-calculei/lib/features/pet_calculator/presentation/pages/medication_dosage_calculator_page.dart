@@ -40,8 +40,7 @@ class _MedicationDosageCalculatorPageState
       subtitle: 'Cálculo de Dosagem',
       icon: Icons.medication,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Calcule a dosagem correta de medicamentos veterinários baseado no peso do pet.',
+      currentCategory: 'pet',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

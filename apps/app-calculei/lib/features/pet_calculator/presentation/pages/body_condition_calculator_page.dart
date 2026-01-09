@@ -31,9 +31,7 @@ class _BodyConditionCalculatorPageState
       subtitle: 'Escore ECC (1-9)',
       icon: Icons.fitness_center_outlined,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Avalie a condição corporal do seu pet através de parâmetros físicos. '
-          'O ECC (1-9) indica se está abaixo, ideal, sobrepeso ou obeso.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

@@ -82,10 +82,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           routes: [
             GoRoute(
               path: '/home',
-              pageBuilder: (context, state) => fadeTransitionPage(
-                child: const HomePage(),
-                state: state,
-              ),
+              pageBuilder: (context, state) {
+                final category = state.uri.queryParameters['category'];
+                return fadeTransitionPage(
+                  child: HomePage(initialCategory: category),
+                  state: state,
+                );
+              },
             ),
           ],
         ),

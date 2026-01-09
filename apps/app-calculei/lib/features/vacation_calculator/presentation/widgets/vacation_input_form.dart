@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import '../../../../core/widgets/accent_input_fields.dart';
+import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 
@@ -25,12 +25,6 @@ class _VacationInputFormState extends State<VacationInputForm> {
   final _vacationDaysController = TextEditingController(text: '30');
 
   bool _sellVacationDays = false;
-
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
 
   @override
   void dispose() {
@@ -66,9 +60,7 @@ class _VacationInputFormState extends State<VacationInputForm> {
                   controller: _salaryController,
                   label: 'Salário Bruto Mensal',
                   helperText: 'Ex: 3.000,00',
-                  accentColor: accentColor,
-                  formatter: _currencyFormatter,
-                  validator: (value) {
+                  accentColor: accentColor,                  validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Informe o salário';
                     }

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+
+import '../utils/brazilian_currency_formatter.dart';
 
 /// Theme-aware currency input field with accent color
 /// 
 /// Adapts automatically to light/dark theme while maintaining
-/// the calculator's accent color for focused state
+/// the calculator's accent color for focused state.
+/// 
+/// Uses intuitive number-only input - just type digits!
 class AccentCurrencyField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String? helperText;
   final Color accentColor;
-  final MaskTextInputFormatter formatter;
   final String? Function(String?)? validator;
 
   const AccentCurrencyField({
@@ -19,7 +21,6 @@ class AccentCurrencyField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.accentColor,
-    required this.formatter,
     this.helperText,
     this.validator,
   });
@@ -55,7 +56,7 @@ class AccentCurrencyField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.number,
-          inputFormatters: [formatter],
+          inputFormatters: [BrazilianCurrencyFormatter()],
           validator: validator,
           style: TextStyle(
             color: colors.textColor,

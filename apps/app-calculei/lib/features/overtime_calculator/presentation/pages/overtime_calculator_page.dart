@@ -31,10 +31,7 @@ class _OvertimeCalculatorPageState
       subtitle: 'Horas Trabalhadas + Adicionais',
       icon: Icons.access_time_outlined,
       accentColor: CalculatorAccentColors.labor,
-      categoryName: 'Trabalhista',
-      instructions: 'Calcule o valor das horas extras trabalhadas. '
-          'Informe seu salário base, horas trabalhadas e os adicionais aplicáveis. '
-          'O cálculo inclui DSR, reflexos e descontos.',
+      currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

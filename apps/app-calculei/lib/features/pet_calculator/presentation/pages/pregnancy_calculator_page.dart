@@ -31,8 +31,7 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
       subtitle: 'Acompanhamento de Gestação',
       icon: Icons.child_friendly,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Acompanhe o período gestacional do seu pet e saiba as datas importantes.',
+      currentCategory: 'pet',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

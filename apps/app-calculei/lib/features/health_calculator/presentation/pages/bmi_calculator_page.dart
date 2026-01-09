@@ -35,9 +35,7 @@ class _BmiCalculatorPageState extends State<BmiCalculatorPage> {
       subtitle: 'Índice de Massa Corporal',
       icon: Icons.monitor_weight_outlined,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Digite seu peso em kg e altura em cm para calcular seu IMC. '
-          'O resultado mostrará sua classificação e faixa de peso ideal.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

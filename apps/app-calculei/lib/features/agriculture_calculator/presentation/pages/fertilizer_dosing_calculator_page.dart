@@ -39,8 +39,7 @@ class _FertilizerDosingCalculatorPageState
       subtitle: 'Aplicação de Nutrientes',
       icon: Icons.agriculture,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule a dosagem correta de fertilizantes para sua cultura e área.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

@@ -37,6 +37,17 @@ class CalculationResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatVacationCalculation(
+                    grossSalary: calculation.grossSalary,
+                    vacationDays: calculation.vacationDays,
+                    totalGross: calculation.grossTotal,
+                    totalNet: calculation.netTotal,
+                    sellVacationDays: calculation.sellVacationDays,
+                  ),
+                  subject: 'Cálculo de Férias',
+                ),
               ],
             ),
 
@@ -178,17 +189,6 @@ class CalculationResultCard extends StatelessWidget {
                     ),
                 ],
               ),
-            ),
-            const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatVacationCalculation(
-                grossSalary: calculation.grossSalary,
-                vacationDays: calculation.vacationDays,
-                totalGross: calculation.grossTotal,
-                totalNet: calculation.netTotal,
-                sellVacationDays: calculation.sellVacationDays,
-              ),
-              subject: 'Cálculo de Férias',
             ),
           ],
         ),

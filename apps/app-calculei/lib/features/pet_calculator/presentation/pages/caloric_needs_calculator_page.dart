@@ -40,9 +40,7 @@ class _CaloricNeedsCalculatorPageState
       subtitle: 'Necessidade Calórica',
       icon: Icons.local_fire_department,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Calcule a quantidade ideal de calorias que seu pet precisa diariamente '
-          'baseado em peso, idade, atividade e se é castrado.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

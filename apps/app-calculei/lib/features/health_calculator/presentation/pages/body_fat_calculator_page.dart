@@ -41,11 +41,7 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
       subtitle: 'Método US Navy',
       icon: Icons.pie_chart,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: '1. Selecione seu gênero\n'
-          '2. Informe peso e altura\n'
-          '3. Meça as circunferências (cintura no nível do umbigo, pescoço abaixo do pomo de adão, quadril na parte mais larga)\n'
-          '4. Calcule para ver seu percentual de gordura corporal',
+      currentCategory: 'saude',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

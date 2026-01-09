@@ -2,10 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
+import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
@@ -39,18 +38,6 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   bool _isAdvancePayment = false;
   DateTime? _admissionDate;
   DateTime? _calculationDate;
-
-  // Formatters
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
-
-  final _dateFormatter = MaskTextInputFormatter(
-    mask: '##/##/####',
-    filter: {'#': RegExp(r'[0-9]')},
-  );
 
   @override
   void initState() {
@@ -99,9 +86,7 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
               controller: _salaryController,
               label: 'Salário Bruto Mensal',
               helperText: 'Ex: 3.000,00',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o salário';
                 }
@@ -136,7 +121,6 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
               label: 'Data de Admissão',
               helperText: 'DD/MM/AAAA',
               accentColor: accentColor,
-              formatter: _dateFormatter,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe a data de admissão';
@@ -166,7 +150,6 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
               label: 'Data do Cálculo',
               helperText: 'DD/MM/AAAA',
               accentColor: accentColor,
-              formatter: _dateFormatter,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe a data do cálculo';
@@ -372,7 +355,6 @@ class _DarkDateField extends StatelessWidget {
   final String label;
   final String? helperText;
   final Color accentColor;
-  final MaskTextInputFormatter formatter;
   final String? Function(String?)? validator;
   final void Function(String)? onChanged;
   final VoidCallback? onTap;
@@ -381,7 +363,6 @@ class _DarkDateField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.accentColor,
-    required this.formatter,
     this.helperText,
     this.validator,
     this.onChanged,
@@ -415,7 +396,6 @@ class _DarkDateField extends StatelessWidget {
         TextFormField(
           controller: controller,
           keyboardType: TextInputType.datetime,
-          inputFormatters: [formatter],
           validator: validator,
           onChanged: onChanged,
           onTap: onTap,

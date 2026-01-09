@@ -60,9 +60,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
       subtitle: 'Cálculo de Sementes',
       icon: Icons.grass,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule a quantidade de sementes necessárias considerando '
-          'germinação, pureza e perdas de campo.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

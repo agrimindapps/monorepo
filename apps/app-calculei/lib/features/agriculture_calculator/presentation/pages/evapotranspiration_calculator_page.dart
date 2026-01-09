@@ -41,8 +41,7 @@ class _EvapotranspirationCalculatorPageState
       subtitle: 'Perda de Água',
       icon: Icons.water_drop,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions: 'Calcule a evapotranspiração da cultura para manejo adequado da irrigação.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

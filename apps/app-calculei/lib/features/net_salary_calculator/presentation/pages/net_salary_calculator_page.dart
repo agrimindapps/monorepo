@@ -31,10 +31,7 @@ class _NetSalaryCalculatorPageState
       subtitle: 'Descontos e Valor Líquido',
       icon: Icons.account_balance_wallet_outlined,
       accentColor: CalculatorAccentColors.labor,
-      categoryName: 'Trabalhista',
-      instructions: 'Calcule seu salário líquido após descontos obrigatórios e voluntários. '
-          'Informe salário bruto, dependentes e descontos aplicáveis. '
-          'Inclui cálculo de INSS e IRRF conforme tabelas 2024.',
+      currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

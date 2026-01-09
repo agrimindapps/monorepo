@@ -2,10 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
+import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_net_salary_usecase.dart';
@@ -34,11 +33,6 @@ class NetSalaryInputFormState extends State<NetSalaryInputForm> {
   final _otherDiscountsController = TextEditingController(text: '0');
 
   // Formatters
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
 
   @override
   void dispose() {
@@ -70,9 +64,7 @@ class NetSalaryInputFormState extends State<NetSalaryInputForm> {
               controller: _grossSalaryController,
               label: 'Salário Bruto Mensal',
               helperText: 'Informe o salário bruto',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Obrigatório';
                 }
@@ -107,9 +99,7 @@ class NetSalaryInputFormState extends State<NetSalaryInputForm> {
               controller: _transportationVoucherController,
               label: 'Vale Transporte (opcional)',
               helperText: 'Máximo 6% do salário bruto',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final voucherValue = _parseNumericValue(value);
                   if (voucherValue < 0) {
@@ -123,9 +113,7 @@ class NetSalaryInputFormState extends State<NetSalaryInputForm> {
               controller: _healthInsuranceController,
               label: 'Plano de Saúde (opcional)',
               helperText: 'Valor descontado do salário',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final healthValue = _parseNumericValue(value);
                   if (healthValue < 0) {
@@ -143,9 +131,7 @@ class NetSalaryInputFormState extends State<NetSalaryInputForm> {
             controller: _otherDiscountsController,
             label: 'Outros Descontos (opcional)',
             helperText: 'Empréstimos, adiantamentos, etc.',
-            accentColor: accentColor,
-            formatter: _currencyFormatter,
-            validator: (value) {
+            accentColor: accentColor,            validator: (value) {
               if (value != null && value.isNotEmpty) {
                 final otherValue = _parseNumericValue(value);
                 if (otherValue < 0) {

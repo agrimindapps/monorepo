@@ -2,10 +2,9 @@
 import 'package:flutter/material.dart';
 
 // Package imports:
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
+import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
@@ -34,11 +33,6 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
   final _monthlySavingsController = TextEditingController(text: '0');
 
   // Formatters
-  final _currencyFormatter = MaskTextInputFormatter(
-    mask: '###.###.###,##',
-    filter: {'#': RegExp(r'[0-9]')},
-    type: MaskAutoCompletionType.lazy,
-  );
 
   @override
   void dispose() {
@@ -68,9 +62,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _monthlyExpensesController,
               label: 'Despesas Mensais',
               helperText: 'Total de gastos fixos e variáveis',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe as despesas mensais';
                 }
@@ -85,9 +77,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _extraExpensesController,
               label: 'Despesas Extras (opcional)',
               helperText: 'Custos eventuais ou sazonais',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final numericValue = _parseNumericValue(value);
                   if (numericValue < 0) {
@@ -124,9 +114,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _monthlySavingsController,
               label: 'Poupança Mensal (opcional)',
               helperText: 'Quanto pode poupar por mês',
-              accentColor: accentColor,
-              formatter: _currencyFormatter,
-              validator: (value) {
+              accentColor: accentColor,              validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final numericValue = _parseNumericValue(value);
                   if (numericValue < 0) {

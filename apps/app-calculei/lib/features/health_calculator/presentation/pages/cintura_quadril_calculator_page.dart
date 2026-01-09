@@ -38,10 +38,7 @@ class _CinturaQuadrilCalculatorPageState
       subtitle: 'RCQ',
       icon: Icons.straighten,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Meça a cintura na altura do umbigo (relaxado) e o quadril '
-          'na parte mais larga dos glúteos. A RCQ indica riscos de doenças '
-          'cardiovasculares e metabólicas.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

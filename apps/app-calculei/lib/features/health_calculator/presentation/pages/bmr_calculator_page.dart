@@ -38,11 +38,7 @@ class _BmrCalculatorPageState extends State<BmrCalculatorPage> {
       subtitle: 'Taxa Metabólica Basal',
       icon: Icons.local_fire_department,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: '1. Selecione seu gênero\n'
-          '2. Digite peso, altura e idade\n'
-          '3. Escolha seu nível de atividade física\n'
-          '4. Veja sua TMB e gasto energético total',
+      currentCategory: 'saude',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

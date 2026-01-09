@@ -12,7 +12,9 @@ const _sidebarColor = Color(0xFF16162A);
 const _primaryAccent = Color(0xFF4CAF50);
 
 class HomePage extends ConsumerStatefulWidget {
-  const HomePage({super.key});
+  final String? initialCategory;
+
+  const HomePage({super.key, this.initialCategory});
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
@@ -25,6 +27,36 @@ class _HomePageState extends ConsumerState<HomePage> {
   String _searchQuery = '';
   String _selectedCategory = 'Todos';
   String _selectedFilter = '';
+
+  @override
+  void initState() {
+    super.initState();
+    // Set initial category from widget parameter if provided
+    if (widget.initialCategory != null) {
+      _selectedCategory = _mapCategoryParam(widget.initialCategory!);
+    }
+  }
+
+  // Map category parameter to display name
+  String _mapCategoryParam(String param) {
+    switch (param.toLowerCase()) {
+      case 'financeiro':
+        return 'Financeiro';
+      case 'construcao':
+      case 'construção':
+        return 'Construção';
+      case 'saude':
+      case 'saúde':
+        return 'Saúde';
+      case 'pet':
+        return 'Pet';
+      case 'agricultura':
+        return 'Agricultura';
+      case 'todos':
+      default:
+        return 'Todos';
+    }
+  }
 
   @override
   void dispose() {
@@ -282,6 +314,24 @@ class _HomePageState extends ConsumerState<HomePage> {
                   Colors.teal,
                   _agricultureCalculators.length,
                 ),
+                
+                // Theme toggle at the bottom
+                const SizedBox(height: 24),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Divider(color: Colors.white10, height: 1),
+                ),
+                const SizedBox(height: 16),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ThemeToggleButton(color: Colors.white),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -531,11 +581,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ],
                 ),
               ),
-
-              const SizedBox(width: 8),
-
-              // Theme toggle
-              const ThemeToggleButton(color: Colors.white),
             ],
           ),
         ),

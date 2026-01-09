@@ -59,10 +59,7 @@ class _ConcreteCalculatorPageState
       subtitle: 'Volume e Materiais',
       icon: Icons.layers,
       accentColor: CalculatorAccentColors.construction,
-      categoryName: 'Construção',
-      instructions: 'Informe as dimensões (comprimento, largura e altura/espessura). '
-          'Escolha o tipo de concreto e resistência. '
-          'Receba o volume e quantidades de materiais.',
+      currentCategory: 'construcao',
       maxContentWidth: 800,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

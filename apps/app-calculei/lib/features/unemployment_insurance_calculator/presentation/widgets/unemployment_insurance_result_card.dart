@@ -46,6 +46,16 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatUnemploymentInsurance(
+                    averageSalary: calculation.averageSalary,
+                    monthsWorked: calculation.workMonths,
+                    installmentsCount: calculation.numberOfInstallments,
+                    installmentValue: calculation.installmentValue,
+                  ),
+                  subject: 'Cálculo de Seguro Desemprego',
+                ),
               ],
             ),
 
@@ -285,15 +295,6 @@ class UnemploymentInsuranceResultCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatUnemploymentInsurance(
-                averageSalary: calculation.averageSalary,
-                monthsWorked: calculation.workMonths,
-                installmentsCount: calculation.numberOfInstallments,
-                installmentValue: calculation.installmentValue,
-              ),
-              subject: 'Cálculo de Seguro Desemprego',
-            ),
           ],
         ),
       ),

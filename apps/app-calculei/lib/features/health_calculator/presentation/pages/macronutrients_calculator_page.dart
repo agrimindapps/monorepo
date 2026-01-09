@@ -35,8 +35,7 @@ class _MacronutrientsCalculatorPageState
       subtitle: 'Distribuição de Carboidratos, Proteínas e Gorduras',
       icon: Icons.restaurant,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Informe suas calorias diárias e objetivo para calcular a distribuição ideal de macronutrientes (carboidratos, proteínas e gorduras).',
+      currentCategory: 'saude',
       maxContentWidth: 700,
       actions: [
         if (_result != null)

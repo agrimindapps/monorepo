@@ -2,6 +2,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'category_menu.dart';
+
 /// Layout wrapper for calculator pages matching the MiniGames portal style
 /// Includes sidebar (on desktop), consistent dark theme, and proper spacing
 class CalculatorPageLayout extends StatefulWidget {
@@ -11,11 +13,9 @@ class CalculatorPageLayout extends StatefulWidget {
   final Color? accentColor;
   final List<Widget>? actions;
   final Widget? bottomWidget;
-  final String? instructions;
   final IconData? icon;
   final double maxContentWidth;
-  final String categoryName;
-  final String categoryRoute;
+  final String? currentCategory;
   
   const CalculatorPageLayout({
     super.key,
@@ -25,11 +25,9 @@ class CalculatorPageLayout extends StatefulWidget {
     this.accentColor,
     this.actions,
     this.bottomWidget,
-    this.instructions,
     this.icon,
     this.maxContentWidth = 800,
-    this.categoryName = 'Calculadoras',
-    this.categoryRoute = '/home',
+    this.currentCategory,
   });
 
   @override
@@ -214,113 +212,37 @@ class _CalculatorPageLayoutState extends State<CalculatorPageLayout> {
           ),
         ),
 
-        // Instructions if provided
-        if (widget.instructions != null) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.lightbulb_outline,
-                        color: Colors.amber.withValues(alpha: 0.8),
-                        size: 18,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Como usar',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.8),
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    widget.instructions!,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 13,
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-
-        const Spacer(),
-
-        // Category section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.03),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.folder_outlined,
-                  color: Colors.white.withValues(alpha: 0.5),
-                  size: 18,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    widget.categoryName,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ],
+        // Category menu with back button and theme toggle
+        Expanded(
+          child: SingleChildScrollView(
+            child: CategoryMenu(
+              currentCategory: widget.currentCategory,
+              closeDrawerOnTap: isDrawer,
+              showBackToHome: true,
+              themeToggleButton: _buildThemeToggle(),
             ),
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
 
-        // Back to home button
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: () {
-                if (isDrawer) Navigator.of(context).pop();
-                context.go('/home');
-              },
-              icon: const Icon(Icons.home_rounded, size: 20),
-              label: const Text('Voltar ao Início'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white.withValues(alpha: 0.1),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-            ),
+  Widget _buildThemeToggle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Import ThemeToggleButton if needed, or create simple icon button
+        IconButton(
+          icon: Icon(
+            Icons.brightness_6,
+            color: Colors.white.withValues(alpha: 0.7),
           ),
+          onPressed: () {
+            // Toggle theme - will be implemented with Riverpod provider
+          },
+          tooltip: 'Alternar Tema',
         ),
       ],
     );
@@ -501,8 +423,9 @@ class _CalculatorBackgroundPainter extends CustomPainter {
           ),
           textDirection: TextDirection.ltr,
         );
-        textPainter.layout();
-        textPainter.paint(canvas, Offset(x, y));
+        textPainter
+          ..layout()
+          ..paint(canvas, Offset(x, y));
         symbolIndex++;
       }
     }

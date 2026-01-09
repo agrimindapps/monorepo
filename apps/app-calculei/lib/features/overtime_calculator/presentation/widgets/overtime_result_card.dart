@@ -40,6 +40,15 @@ class OvertimeResultCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const Spacer(),
+                ShareButton(
+                  text: ShareFormatter.formatOvertime(
+                    grossSalary: calculation.grossSalary,
+                    weeklyHours: calculation.weeklyHours,
+                    totalOvertimeValue: calculation.totalOvertime,
+                  ),
+                  subject: 'Cálculo de Horas Extras',
+                ),
               ],
             ),
 
@@ -233,14 +242,6 @@ class OvertimeResultCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            ShareButton(
-              text: ShareFormatter.formatOvertime(
-                grossSalary: calculation.grossSalary,
-                weeklyHours: calculation.weeklyHours,
-                totalOvertimeValue: calculation.totalOvertime,
-              ),
-              subject: 'Cálculo de Horas Extras',
-            ),
           ],
         ),
       ),

@@ -41,9 +41,7 @@ class _YieldPredictionCalculatorPageState
       subtitle: 'Estimativa de Produção',
       icon: Icons.trending_up,
       accentColor: CalculatorAccentColors.agriculture,
-      categoryName: 'Agricultura',
-      instructions:
-          'Estime a produtividade esperada baseado em parâmetros da cultura e manejo.',
+      currentCategory: 'agricultura',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

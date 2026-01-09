@@ -38,8 +38,7 @@ class _FluidTherapyCalculatorPageState
       subtitle: 'Cálculo de Fluidos',
       icon: Icons.water_drop,
       accentColor: CalculatorAccentColors.pet,
-      categoryName: 'Pet',
-      instructions: 'Calcule volumes de manutenção e reposição para fluidoterapia veterinária.',
+      currentCategory: 'pet',
       maxContentWidth: 600,
       actions: [
         if (_result != null)

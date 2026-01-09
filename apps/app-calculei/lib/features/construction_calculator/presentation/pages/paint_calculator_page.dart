@@ -50,11 +50,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
       subtitle: 'Litros e Latas',
       icon: Icons.format_paint,
       accentColor: CalculatorAccentColors.construction,
-      categoryName: 'Construção',
-      instructions: 'Informe a área total das paredes (m²). '
-          'Desconte portas e janelas (opcional). '
-          'Escolha o tipo de tinta e demãos. '
-          'Receba a quantidade em litros e latas.',
+      currentCategory: 'construcao',
       maxContentWidth: 800,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

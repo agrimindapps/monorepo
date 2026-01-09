@@ -35,10 +35,7 @@ class _ProteinasDiariasCalculatorPageState
       subtitle: 'Necessidade diária de proteína',
       icon: Icons.fitness_center,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Calcule a quantidade ideal de proteína baseada no seu peso '
-          'e nível de atividade física. Proteínas são essenciais para '
-          'construção muscular, recuperação e saúde geral.',
+      currentCategory: 'saude',
       maxContentWidth: 600,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

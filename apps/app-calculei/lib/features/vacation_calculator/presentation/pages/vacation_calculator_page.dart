@@ -39,9 +39,7 @@ class _VacationCalculatorPageState
       subtitle: 'Férias + 1/3 Constitucional',
       icon: Icons.beach_access_outlined,
       accentColor: CalculatorAccentColors.labor,
-      categoryName: 'Trabalhista',
-      instructions: 'Digite seu salário bruto e dias de férias para calcular o valor a receber. '
-          'Você pode optar por vender até 1/3 das férias (abono pecuniário).',
+      currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

@@ -42,9 +42,7 @@ class _AlcoolSangueCalculatorPageState
       subtitle: 'Blood Alcohol Concentration (BAC)',
       icon: Icons.local_bar,
       accentColor: CalculatorAccentColors.health,
-      categoryName: 'Saúde',
-      instructions: 'Estima o BAC usando a fórmula de Widmark. '
-          'ATENÇÃO: Esta é apenas uma estimativa. Não dirija após consumir qualquer quantidade de álcool.',
+      currentCategory: 'saude',
       maxContentWidth: 700,
       actions: [
         if (_result != null)

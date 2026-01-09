@@ -43,10 +43,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
       subtitle: 'Alvenaria e Blocos',
       icon: Icons.crop_square,
       accentColor: CalculatorAccentColors.construction,
-      categoryName: 'Construção',
-      instructions: 'Informe as dimensões da parede em metros. '
-          'Desconte portas e janelas (opcional). '
-          'Escolha o tipo de tijolo/bloco para receber a quantidade necessária de tijolos e argamassa.',
+      currentCategory: 'construcao',
       maxContentWidth: 800,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

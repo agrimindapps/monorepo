@@ -31,10 +31,7 @@ class _ThirteenthSalaryCalculatorPageState
       subtitle: 'Gratificação Natalina',
       icon: Icons.card_giftcard_outlined,
       accentColor: CalculatorAccentColors.labor,
-      categoryName: 'Trabalhista',
-      instructions: 'Calcule o valor do seu 13º salário (gratificação natalina). '
-          'Informe seu salário bruto, meses trabalhados e dependentes. '
-          'O cálculo considera as duas parcelas e os descontos aplicáveis.',
+      currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

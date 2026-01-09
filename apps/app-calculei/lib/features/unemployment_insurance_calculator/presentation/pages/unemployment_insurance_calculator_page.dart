@@ -31,10 +31,7 @@ class _UnemploymentInsuranceCalculatorPageState
       subtitle: 'Benefício Assistencial',
       icon: Icons.health_and_safety_outlined,
       accentColor: CalculatorAccentColors.labor,
-      categoryName: 'Trabalhista',
-      instructions: 'Calcule o valor e parcelas do seguro-desemprego. '
-          'Informe os últimos 3 salários, tempo trabalhado e se já recebeu antes. '
-          'O benefício é pago ao trabalhador demitido sem justa causa.',
+      currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
         padding: const EdgeInsets.all(24.0),

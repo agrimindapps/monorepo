@@ -6,7 +6,7 @@ class MemorySettingsPage extends ConsumerWidget {
   const MemorySettingsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return GamePageLayout(
       title: 'Configurações - Memory',
       accentColor: const Color(0xFF9C27B0),

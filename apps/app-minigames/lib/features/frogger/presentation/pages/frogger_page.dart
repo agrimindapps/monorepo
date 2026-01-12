@@ -2,11 +2,11 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/widgets/game_page_layout.dart';
-import '../../../../../core/widgets/pause_menu_overlay.dart';
-import '../../../domain/entities/frogger_score.dart';
+import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
+import '../../domain/entities/frogger_score.dart';
 import '../../game/frogger_game.dart';
-import '../../providers/frogger_data_providers.dart';
+import '../providers/frogger_data_providers.dart';
 import 'frogger_high_scores_page.dart';
 import 'frogger_settings_page.dart';
 

@@ -1,5 +1,4 @@
 import '../entities/asteroids_score.dart';
-import '../entities/asteroids_stats.dart';
 import '../repositories/i_asteroids_score_repository.dart';
 import '../repositories/i_asteroids_stats_repository.dart';
 
@@ -21,8 +20,9 @@ class SaveScoreUseCase {
           : currentStats.highestScore,
       totalAsteroidsDestroyed:
           currentStats.totalAsteroidsDestroyed + score.asteroidsDestroyed,
-      highestWave:
-          score.wave > currentStats.highestWave ? score.wave : currentStats.highestWave,
+      highestWave: score.wave > currentStats.highestWave
+          ? score.wave
+          : currentStats.highestWave,
     );
 
     await statsRepository.updateStats(updatedStats);

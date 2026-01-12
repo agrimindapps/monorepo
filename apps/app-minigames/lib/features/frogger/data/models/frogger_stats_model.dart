@@ -6,7 +6,7 @@ class FroggerStatsModel extends FroggerStats {
     super.totalScore,
     super.highestScore,
     super.totalCrossingsCompleted,
-    super.highestWave,
+    super.highestLevel,
   });
 
   factory FroggerStatsModel.fromEntity(FroggerStats entity) {
@@ -15,7 +15,7 @@ class FroggerStatsModel extends FroggerStats {
       totalScore: entity.totalScore,
       highestScore: entity.highestScore,
       totalCrossingsCompleted: entity.totalCrossingsCompleted,
-      highestWave: entity.highestWave,
+      highestLevel: entity.highestLevel,
     );
   }
 
@@ -25,7 +25,7 @@ class FroggerStatsModel extends FroggerStats {
       totalScore: json['totalScore'] as int? ?? 0,
       highestScore: json['highestScore'] as int? ?? 0,
       totalCrossingsCompleted: json['totalCrossingsCompleted'] as int? ?? 0,
-      highestWave: json['highestWave'] as int? ?? 0,
+      highestLevel: json['highestLevel'] as int? ?? 0,
     );
   }
 
@@ -35,7 +35,7 @@ class FroggerStatsModel extends FroggerStats {
       'totalScore': totalScore,
       'highestScore': highestScore,
       'totalCrossingsCompleted': totalCrossingsCompleted,
-      'highestWave': highestWave,
+      'highestLevel': highestLevel,
     };
   }
 }

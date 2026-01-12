@@ -3,25 +3,23 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
 import '../centipede_game.dart';
-import 'centipede.dart';
-import 'mushroom.dart';
 
 /// Bullet fired by the player
 class CentipedeBullet extends PositionComponent with CollisionCallbacks {
   final double cellSize;
   final CentipedeGame gameRef;
-  
+
   static const double speed = 500.0;
-  
+
   CentipedeBullet({
     required Vector2 position,
     required this.cellSize,
     required this.gameRef,
   }) : super(
-    position: position,
-    size: Vector2(cellSize * 0.2, cellSize * 0.5),
-    anchor: Anchor.center,
-  );
+         position: position,
+         size: Vector2(cellSize * 0.2, cellSize * 0.5),
+         anchor: Anchor.center,
+       );
 
   @override
   Future<void> onLoad() async {
@@ -31,16 +29,16 @@ class CentipedeBullet extends PositionComponent with CollisionCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
-    
+
     // Move upward
     position.y -= speed * dt;
-    
+
     // Remove if off screen
     if (position.y < -size.y) {
       removeFromParent();
       return;
     }
-    
+
     // Check collisions manually for better control
     _checkCollisions();
   }
@@ -57,7 +55,7 @@ class CentipedeBullet extends PositionComponent with CollisionCallbacks {
         return;
       }
     }
-    
+
     // Check centipede collision
     for (final centipede in gameRef.centipedes) {
       for (int i = 0; i < centipede.segments.length; i++) {
@@ -69,7 +67,7 @@ class CentipedeBullet extends PositionComponent with CollisionCallbacks {
         }
       }
     }
-    
+
     // Check spider collision
     if (gameRef.spider != null && _isColliding(gameRef.spider!)) {
       gameRef.addScore(600); // Spider bonus
@@ -86,9 +84,9 @@ class CentipedeBullet extends PositionComponent with CollisionCallbacks {
   @override
   void render(Canvas canvas) {
     super.render(canvas);
-    
+
     final paint = Paint()..color = const Color(0xFFFFFF00); // Yellow bullet
-    
+
     // Bullet body
     canvas.drawRRect(
       RRect.fromRectAndRadius(
@@ -97,7 +95,7 @@ class CentipedeBullet extends PositionComponent with CollisionCallbacks {
       ),
       paint,
     );
-    
+
     // Glow effect
     paint.color = const Color(0xFFFFFF88);
     canvas.drawRRect(

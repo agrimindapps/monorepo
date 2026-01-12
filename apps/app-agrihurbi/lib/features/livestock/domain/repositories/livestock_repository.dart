@@ -128,4 +128,14 @@ abstract class LivestockRepository {
   
   /// Importa dados de backup com validação
   Future<Either<Failure, Unit>> importLivestockData(String backupData, {String format = 'json'});
+  
+  /// Publica catálogo no Firebase Storage (admin only)
+  /// Gera JSONs e faz upload para serem baixados por usuários
+  Future<Either<Failure, Unit>> publishCatalogToStorage({
+    required List<BovineEntity> bovines,
+    required List<EquineEntity> equines,
+  });
+  
+  /// Sincroniza catálogo do Storage para cache local (usuários)
+  Future<Either<Failure, Unit>> syncCatalogFromStorage();
 }

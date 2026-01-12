@@ -1,10 +1,13 @@
 import 'package:core/core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/network/network_info.dart';
+import '../../../../core/providers/user_role_providers.dart';
 // import '../../../../database/agrihurbi_database.dart';
 import '../../../../database/database_provider.dart';
 import '../../data/datasources/livestock_local_datasource.dart';
 import '../../data/datasources/livestock_remote_datasource.dart';
+import '../../data/datasources/livestock_storage_datasource.dart';
 import '../../data/repositories/livestock_repository_impl.dart';
 import '../../domain/repositories/livestock_repository.dart';
 import '../../domain/usecases/create_bovine.dart';
@@ -12,6 +15,7 @@ import '../../domain/usecases/delete_bovine.dart';
 import '../../domain/usecases/get_bovine_by_id.dart';
 import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/get_equines.dart';
+import '../../domain/usecases/publish_livestock_catalog.dart';
 import '../../domain/usecases/search_animals.dart';
 import '../../domain/usecases/update_bovine.dart';
 
@@ -33,17 +37,33 @@ final livestockRemoteDataSourceProvider =
   return LivestockRemoteDataSourceImpl();
 });
 
+final livestockStorageDataSourceProvider =
+    Provider<LivestockStorageDataSource>((ref) {
+  return LivestockStorageDataSource(FirebaseStorage.instance);
+});
+
 // Repository
 final livestockRepositoryProvider = Provider<LivestockRepository>((ref) {
   final localDataSource = ref.watch(livestockLocalDataSourceProvider);
   final remoteDataSource = ref.watch(livestockRemoteDataSourceProvider);
+  final storageDataSource = ref.watch(livestockStorageDataSourceProvider);
+  final roleService = ref.watch(userRoleServiceProvider);
   final connectivity = Connectivity();
+  final prefs = ref.watch(sharedPreferencesProvider);
 
   return LivestockRepositoryImpl(
     localDataSource,
     remoteDataSource,
+    storageDataSource,
+    roleService,
     connectivity,
+    prefs,
   );
+});
+
+// SharedPreferences Provider
+final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
+  throw UnimplementedError('SharedPreferences must be overridden in main');
 });
 
 // Usecases
@@ -85,4 +105,9 @@ final searchAnimalsUseCaseProvider = Provider<SearchAnimalsUseCase>((ref) {
 
 final getBovineByIdUseCaseProvider = Provider<GetBovineByIdUseCase>((ref) {
   return GetBovineByIdUseCase(ref.watch(livestockRepositoryProvider));
+});
+
+final publishLivestockCatalogUseCaseProvider = 
+    Provider<PublishLivestockCatalogUseCase>((ref) {
+  return PublishLivestockCatalogUseCase(ref.watch(livestockRepositoryProvider));
 });

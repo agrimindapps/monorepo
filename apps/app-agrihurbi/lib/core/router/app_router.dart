@@ -3,6 +3,7 @@ import 'package:app_agrihurbi/features/auth/presentation/pages/register_page.dar
 import 'package:app_agrihurbi/features/calculators/presentation/pages/calculator_detail_page.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/pages/calculators_list_page.dart';
 import 'package:app_agrihurbi/features/home/presentation/pages/home_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/admin_livestock_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_detail_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_form_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list_page.dart';
@@ -19,6 +20,7 @@ import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/providers/user_role_providers.dart';
 import '../providers/providers.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -35,6 +37,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             state.matchedLocation.startsWith('/login') ||
             state.matchedLocation.startsWith('/register');
         final isOnPromo = state.matchedLocation == '/promo';
+        
+        // Admin route guard
+        final isOnAdminPage = state.matchedLocation.startsWith('/admin');
+        if (isOnAdminPage) {
+          if (!isAuthenticated) {
+            return '/login';
+          }
+          // Check admin role (async, so we handle it in the route builder)
+          // If not admin, will be redirected in the route's redirect callback
+        }
+        
         if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
           return kIsWeb ? '/promo' : '/login';
         }
@@ -439,6 +452,31 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'profile',
             name: 'profile',
             builder: (context, state) => const ProfilePage(),
+          ),
+        ],
+      ),
+      // Admin routes (outside /home, requires admin role)
+      GoRoute(
+        path: '/admin',
+        name: 'admin',
+        redirect: (context, state) async {
+          try {
+            final container = ProviderScope.containerOf(context);
+            final isAdminAsync = container.read(isAdminUserProvider);
+            final isAdmin = await isAdminAsync.value;
+            if (isAdmin != true) {
+              return '/home';
+            }
+            return null;
+          } catch (e) {
+            return '/home';
+          }
+        },
+        routes: [
+          GoRoute(
+            path: 'livestock',
+            name: 'admin-livestock',
+            builder: (context, state) => const AdminLivestockPage(),
           ),
         ],
       ),

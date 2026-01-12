@@ -1,5 +1,3 @@
-import '../entities/reversi_entities.dart';
-
 class ReversiStats {
   final int totalGames;
   final int blackWins;

@@ -4,22 +4,28 @@ import 'package:equatable/equatable.dart';
 class TetrisScore extends Equatable {
   /// ID único do score
   final String id;
-  
+
   /// Pontuação obtida
   final int score;
-  
+
   /// Número de linhas completadas
   final int lines;
-  
+
   /// Nível alcançado
   final int level;
-  
+
   /// Duração da partida
   final Duration duration;
-  
+
   /// Data/hora de conclusão
   final DateTime completedAt;
-  
+
+  /// Total de Tetris (4 linhas de uma vez) nesta partida
+  final int tetrisCount;
+
+  /// Maior combo nesta partida
+  final int maxTetrisCombo;
+
   /// Nome do jogador (opcional)
   final String? playerName;
 
@@ -30,6 +36,8 @@ class TetrisScore extends Equatable {
     required this.level,
     required this.duration,
     required this.completedAt,
+    this.tetrisCount = 0,
+    this.maxTetrisCombo = 0,
     this.playerName,
   });
 
@@ -39,6 +47,8 @@ class TetrisScore extends Equatable {
     required int lines,
     required int level,
     required Duration duration,
+    int tetrisCount = 0,
+    int maxTetrisCombo = 0,
     String? playerName,
   }) {
     return TetrisScore(
@@ -48,6 +58,8 @@ class TetrisScore extends Equatable {
       level: level,
       duration: duration,
       completedAt: DateTime.now(),
+      tetrisCount: tetrisCount,
+      maxTetrisCombo: maxTetrisCombo,
       playerName: playerName,
     );
   }
@@ -60,6 +72,8 @@ class TetrisScore extends Equatable {
     int? level,
     Duration? duration,
     DateTime? completedAt,
+    int? tetrisCount,
+    int? maxTetrisCombo,
     String? playerName,
   }) {
     return TetrisScore(
@@ -69,6 +83,8 @@ class TetrisScore extends Equatable {
       level: level ?? this.level,
       duration: duration ?? this.duration,
       completedAt: completedAt ?? this.completedAt,
+      tetrisCount: tetrisCount ?? this.tetrisCount,
+      maxTetrisCombo: maxTetrisCombo ?? this.maxTetrisCombo,
       playerName: playerName ?? this.playerName,
     );
   }
@@ -87,14 +103,16 @@ class TetrisScore extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        score,
-        lines,
-        level,
-        duration,
-        completedAt,
-        playerName,
-      ];
+    id,
+    score,
+    lines,
+    level,
+    duration,
+    completedAt,
+    tetrisCount,
+    maxTetrisCombo,
+    playerName,
+  ];
 
   @override
   String toString() {

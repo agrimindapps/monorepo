@@ -28,9 +28,15 @@ class ConnectFourHighScoresPage extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       _StatItem(label: 'Jogos', value: '${stats.totalGames}'),
-                      _StatItem(label: 'Melhor Score', value: '${stats.highestScore}'),
-                      _StatItem(label: 'Tijolos', value: '${stats.totalCrossingsCompleted}'),
-                      _StatItem(label: 'Duração Máximo', value: '${stats.highestDuration}'),
+                      _StatItem(
+                        label: 'Vitórias P1',
+                        value: '${stats.player1Wins}',
+                      ),
+                      _StatItem(
+                        label: 'Vitórias P2',
+                        value: '${stats.player2Wins}',
+                      ),
+                      _StatItem(label: 'Empates', value: '${stats.draws}'),
                     ],
                   ),
                 ),
@@ -46,7 +52,10 @@ class ConnectFourHighScoresPage extends ConsumerWidget {
                     return Center(
                       child: Text(
                         'Nenhum score ainda',
-                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 18),
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 18,
+                        ),
                       ),
                     );
                   }
@@ -59,21 +68,37 @@ class ConnectFourHighScoresPage extends ConsumerWidget {
                         color: Colors.black.withValues(alpha: 0.3),
                         child: ListTile(
                           leading: CircleAvatar(
-                            backgroundColor: const Color(0xFF4CAF50).withValues(alpha: 0.3),
-                            child: Text('#${index + 1}', style: const TextStyle(color: Colors.white)),
+                            backgroundColor: const Color(
+                              0xFF4CAF50,
+                            ).withValues(alpha: 0.3),
+                            child: Text(
+                              '#${index + 1}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
                           ),
                           title: Text(
-                            'Score: ${score.score}',
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            'Vencedor: ${score.winner}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           subtitle: Text(
-                            'Duração ${score.duration} • ${score.movesCount} tijolos • ${score.duration}',
-                            style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
+                            'Duração ${score.formattedDuration} • ${score.movesCount} movimentos • ${score.formattedDate}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontSize: 12,
+                            ),
                           ),
                           trailing: IconButton(
-                            icon: Icon(Icons.delete_outline, color: Colors.white.withValues(alpha: 0.5)),
+                            icon: Icon(
+                              Icons.delete_outline,
+                              color: Colors.white.withValues(alpha: 0.5),
+                            ),
                             onPressed: () async {
-                              final deleter = ref.read(connect_fourScoreDeleterProvider.notifier);
+                              final deleter = ref.read(
+                                connectFourScoreDeleterProvider.notifier,
+                              );
                               await deleter.deleteScore(score);
                             },
                           ),
@@ -82,8 +107,15 @@ class ConnectFourHighScoresPage extends ConsumerWidget {
                     },
                   );
                 },
-                loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
-                error: (error, _) => Center(child: Text('Erro: $error', style: const TextStyle(color: Colors.red))),
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+                ),
+                error: (error, _) => Center(
+                  child: Text(
+                    'Erro: $error',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
               ),
             ),
           ],
@@ -103,8 +135,21 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(value, style: const TextStyle(color: Color(0xFF4CAF50), fontSize: 20, fontWeight: FontWeight.bold)),
-        Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Color(0xFF4CAF50),
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.6),
+            fontSize: 12,
+          ),
+        ),
       ],
     );
   }

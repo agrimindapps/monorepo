@@ -2,6 +2,7 @@ class SimonScore {
   final String id;
   final int score;
   final int longestSequence;
+  final int perfectRounds;
   final Duration duration;
   final DateTime completedAt;
   final String? playerName;
@@ -10,6 +11,7 @@ class SimonScore {
     required this.id,
     required this.score,
     required this.longestSequence,
+    this.perfectRounds = 0,
     required this.duration,
     required this.completedAt,
     this.playerName,

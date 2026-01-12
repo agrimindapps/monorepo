@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../domain/entities/game_entity.dart';
 import 'game_card.dart';
@@ -42,11 +41,7 @@ class GamesSection extends StatelessWidget {
                     color: const Color(0xFFFFD700).withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    icon,
-                    color: const Color(0xFFFFD700),
-                    size: 20,
-                  ),
+                  child: Icon(icon, color: const Color(0xFFFFD700), size: 20),
                 ),
                 const SizedBox(width: 12),
               ],
@@ -98,15 +93,15 @@ class GamesSection extends StatelessWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final width = constraints.maxWidth;
-            
+
             // Calculate column count based on width
             final columnCount = width < 600
                 ? 2
                 : width < 1000
-                    ? 3
-                    : width < 1400
-                        ? 4
-                        : crossAxisCount;
+                ? 3
+                : width < 1400
+                ? 4
+                : crossAxisCount;
 
             return GridView.builder(
               shrinkWrap: true,

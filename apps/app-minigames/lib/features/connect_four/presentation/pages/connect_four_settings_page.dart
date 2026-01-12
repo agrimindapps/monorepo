@@ -27,15 +27,27 @@ class ConnectFourSettingsPage extends ConsumerWidget {
                 child: Column(
                   children: [
                     SwitchListTile(
-                      title: const Text('Sons', style: TextStyle(color: Colors.white)),
+                      title: const Text(
+                        'Sons',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       value: settings.soundEnabled,
-                      onChanged: (value) => _updateSettings(ref, settings.copyWith(soundEnabled: value)),
+                      onChanged: (value) => _updateSettings(
+                        ref,
+                        settings.copyWith(soundEnabled: value),
+                      ),
                       activeColor: const Color(0xFF4CAF50),
                     ),
                     SwitchListTile(
-                      title: const Text('Música', style: TextStyle(color: Colors.white)),
+                      title: const Text(
+                        'Música',
+                        style: TextStyle(color: Colors.white),
+                      ),
                       value: settings.musicEnabled,
-                      onChanged: (value) => _updateSettings(ref, settings.copyWith(musicEnabled: value)),
+                      onChanged: (value) => _updateSettings(
+                        ref,
+                        settings.copyWith(musicEnabled: value),
+                      ),
                       activeColor: const Color(0xFF4CAF50),
                     ),
                   ],
@@ -50,11 +62,18 @@ class ConnectFourSettingsPage extends ConsumerWidget {
                   child: Column(
                     children: ConnectFourDifficulty.values.map((difficulty) {
                       return RadioListTile<ConnectFourDifficulty>(
-                        title: Text(difficulty.label, style: const TextStyle(color: Colors.white)),
+                        title: Text(
+                          difficulty.label,
+                          style: const TextStyle(color: Colors.white),
+                        ),
                         value: difficulty,
                         groupValue: settings.difficulty,
                         onChanged: (value) {
-                          if (value != null) _updateSettings(ref, settings.copyWith(difficulty: value));
+                          if (value != null)
+                            _updateSettings(
+                              ref,
+                              settings.copyWith(difficulty: value),
+                            );
                         },
                         activeColor: const Color(0xFF4CAF50),
                       );
@@ -65,14 +84,21 @@ class ConnectFourSettingsPage extends ConsumerWidget {
             ],
           ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
-        error: (error, _) => Center(child: Text('Erro: $error', style: const TextStyle(color: Colors.red))),
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+        ),
+        error: (error, _) => Center(
+          child: Text(
+            'Erro: $error',
+            style: const TextStyle(color: Colors.red),
+          ),
+        ),
       ),
     );
   }
 
   void _updateSettings(WidgetRef ref, ConnectFourSettings settings) {
-    final updater = ref.read(connect_fourSettingsUpdaterProvider.notifier);
+    final updater = ref.read(connectFourSettingsUpdaterProvider.notifier);
     updater.updateSettings(settings);
   }
 }
@@ -88,7 +114,11 @@ class _SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8, left: 4),
       child: Text(
         title,
-        style: const TextStyle(color: Color(0xFF4CAF50), fontSize: 18, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+          color: Color(0xFF4CAF50),
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

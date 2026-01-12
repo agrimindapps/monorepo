@@ -9,6 +9,8 @@ class TetrisScoreModel extends TetrisScore {
     required super.level,
     required super.duration,
     required super.completedAt,
+    super.tetrisCount,
+    super.maxTetrisCombo,
     super.playerName,
   });
 
@@ -21,6 +23,8 @@ class TetrisScoreModel extends TetrisScore {
       level: entity.level,
       duration: entity.duration,
       completedAt: entity.completedAt,
+      tetrisCount: entity.tetrisCount,
+      maxTetrisCombo: entity.maxTetrisCombo,
       playerName: entity.playerName,
     );
   }
@@ -34,6 +38,8 @@ class TetrisScoreModel extends TetrisScore {
       level: json['level'] as int,
       duration: Duration(milliseconds: json['durationMs'] as int),
       completedAt: DateTime.parse(json['completedAt'] as String),
+      tetrisCount: json['tetrisCount'] as int? ?? 0,
+      maxTetrisCombo: json['maxTetrisCombo'] as int? ?? 0,
       playerName: json['playerName'] as String?,
     );
   }
@@ -47,6 +53,8 @@ class TetrisScoreModel extends TetrisScore {
       'level': level,
       'durationMs': duration.inMilliseconds,
       'completedAt': completedAt.toIso8601String(),
+      'tetrisCount': tetrisCount,
+      'maxTetrisCombo': maxTetrisCombo,
       'playerName': playerName,
     };
   }
@@ -60,6 +68,8 @@ class TetrisScoreModel extends TetrisScore {
       level: level,
       duration: duration,
       completedAt: completedAt,
+      tetrisCount: tetrisCount,
+      maxTetrisCombo: maxTetrisCombo,
       playerName: playerName,
     );
   }

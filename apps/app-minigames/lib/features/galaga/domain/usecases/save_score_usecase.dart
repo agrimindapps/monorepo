@@ -1,5 +1,4 @@
 import '../entities/galaga_score.dart';
-import '../entities/galaga_stats.dart';
 import '../repositories/i_galaga_score_repository.dart';
 import '../repositories/i_galaga_stats_repository.dart';
 
@@ -21,8 +20,9 @@ class SaveScoreUseCase {
           : currentStats.highestScore,
       totalEnemiesDestroyed:
           currentStats.totalEnemiesDestroyed + score.enemiesDestroyed,
-      highestWave:
-          score.wave > currentStats.highestWave ? score.wave : currentStats.highestWave,
+      highestWave: score.wave > currentStats.highestWave
+          ? score.wave
+          : currentStats.highestWave,
     );
 
     await statsRepository.updateStats(updatedStats);

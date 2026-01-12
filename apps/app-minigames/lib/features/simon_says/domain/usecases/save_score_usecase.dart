@@ -1,5 +1,4 @@
 import '../entities/simon_score.dart';
-import '../entities/simon_stats.dart';
 import '../repositories/i_simon_score_repository.dart';
 import '../repositories/i_simon_stats_repository.dart';
 
@@ -21,6 +20,7 @@ class SaveScoreUseCase {
       longestSequence: score.longestSequence > currentStats.longestSequence
           ? score.longestSequence
           : currentStats.longestSequence,
+      perfectRounds: currentStats.perfectRounds + score.perfectRounds,
       totalPlayTime: currentStats.totalPlayTime + score.duration,
       lastPlayed: score.completedAt,
     );

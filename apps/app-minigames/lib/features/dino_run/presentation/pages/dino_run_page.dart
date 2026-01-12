@@ -2,11 +2,11 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../../core/widgets/game_page_layout.dart';
-import '../../../../../core/widgets/pause_menu_overlay.dart';
-import '../../../domain/entities/dino_run_score.dart';
+import '../../../../core/widgets/game_page_layout.dart';
+import '../../../../core/widgets/pause_menu_overlay.dart';
+import '../../domain/entities/dino_run_score.dart';
 import '../../game/dino_run_game.dart';
-import '../../providers/dino_run_data_providers.dart';
+import '../providers/dino_run_data_providers.dart';
 import 'dino_run_high_scores_page.dart';
 import 'dino_run_settings_page.dart';
 

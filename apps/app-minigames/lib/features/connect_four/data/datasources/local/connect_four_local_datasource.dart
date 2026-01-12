@@ -20,17 +20,20 @@ class ConnectFourLocalDatasource {
 
     final List<dynamic> jsonList = json.decode(jsonString);
     final scores = jsonList
-        .map((json) => ConnectFourScoreModel.fromJson(json as Map<String, dynamic>))
+        .map(
+          (json) =>
+              ConnectFourScoreModel.fromJson(json as Map<String, dynamic>),
+        )
         .toList();
 
-    scores.sort((a, b) => b.score.compareTo(a.score));
+    scores.sort((a, b) => b.timestamp.compareTo(a.timestamp));
     return scores;
   }
 
   Future<void> saveScore(ConnectFourScoreModel score) async {
     final scores = await getScores();
     scores.add(score);
-    scores.sort((a, b) => b.score.compareTo(a.score));
+    scores.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
     final jsonList = scores.map((s) => s.toJson()).toList();
     await _prefs.setString(_scoresKey, json.encode(jsonList));
@@ -38,10 +41,7 @@ class ConnectFourLocalDatasource {
 
   Future<void> deleteScore(ConnectFourScoreModel score) async {
     final scores = await getScores();
-    scores.removeWhere((s) => 
-      s.score == score.score && 
-      s.timestamp == score.timestamp
-    );
+    scores.removeWhere((s) => s.timestamp == score.timestamp);
 
     final jsonList = scores.map((s) => s.toJson()).toList();
     await _prefs.setString(_scoresKey, json.encode(jsonList));

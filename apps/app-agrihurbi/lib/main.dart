@@ -1,11 +1,13 @@
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
+import 'package:shared_preferences/shared_preferences.dart' as sp;
 
 import 'app.dart';
 
 import 'core/providers/app_providers.dart';
+import 'features/livestock/presentation/providers/livestock_di_providers.dart'
+    as livestock;
 import 'firebase_options.dart';
 
 late ICrashlyticsRepository _crashlyticsRepository;
@@ -29,7 +31,14 @@ Future<void> main() async {
     );
   }
 
-  final container = ProviderContainer();
+  // Initialize SharedPreferences for livestock sync
+  final sharedPrefs = await sp.SharedPreferences.getInstance();
+
+  final container = ProviderContainer(
+    overrides: [
+      livestock.sharedPreferencesProvider.overrideWithValue(sharedPrefs),
+    ],
+  );
 
   // Initialize DI with Firebase status (AFTER Firebase)
   try {

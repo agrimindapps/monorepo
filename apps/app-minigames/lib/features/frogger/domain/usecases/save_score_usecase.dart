@@ -1,5 +1,4 @@
 import '../entities/frogger_score.dart';
-import '../entities/frogger_stats.dart';
 import '../repositories/i_frogger_score_repository.dart';
 import '../repositories/i_frogger_stats_repository.dart';
 
@@ -21,8 +20,9 @@ class SaveScoreUseCase {
           : currentStats.highestScore,
       totalCrossingsCompleted:
           currentStats.totalCrossingsCompleted + score.crossingsCompleted,
-      highestWave:
-          score.level > currentStats.highestWave ? score.level : currentStats.highestWave,
+      highestLevel: score.level > currentStats.highestLevel
+          ? score.level
+          : currentStats.highestLevel,
     );
 
     await statsRepository.updateStats(updatedStats);

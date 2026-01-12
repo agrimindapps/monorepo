@@ -96,12 +96,12 @@ class TetrisScoreActions extends _$TetrisScoreActions {
   FutureOr<void> build() {}
 
   /// Salva um novo score
-  Future<void> saveScore(TetrisScore score, {int tetrisCount = 0}) async {
+  Future<void> saveScore(TetrisScore score) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(saveScoreUseCaseProvider);
-      await useCase(score, tetrisCount: tetrisCount);
-      
+      await useCase(score);
+
       // Invalida os providers para recarregar dados
       ref.invalidate(tetrisHighScoresProvider);
       ref.invalidate(tetrisStatsProvider);
@@ -114,7 +114,7 @@ class TetrisScoreActions extends _$TetrisScoreActions {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(tetrisScoreRepositoryProvider);
       await repository.deleteScore(id);
-      
+
       ref.invalidate(tetrisHighScoresProvider);
     });
   }
@@ -125,7 +125,7 @@ class TetrisScoreActions extends _$TetrisScoreActions {
     state = await AsyncValue.guard(() async {
       final repository = ref.read(tetrisScoreRepositoryProvider);
       await repository.deleteAllScores();
-      
+
       ref.invalidate(tetrisHighScoresProvider);
     });
   }
@@ -143,7 +143,7 @@ class TetrisSettingsActions extends _$TetrisSettingsActions {
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(manageSettingsUseCaseProvider);
       await useCase.saveSettings(settings);
-      
+
       ref.invalidate(tetrisSettingsProvider);
     });
   }
@@ -154,7 +154,7 @@ class TetrisSettingsActions extends _$TetrisSettingsActions {
     state = await AsyncValue.guard(() async {
       final useCase = ref.read(manageSettingsUseCaseProvider);
       await useCase.resetSettings();
-      
+
       ref.invalidate(tetrisSettingsProvider);
     });
   }

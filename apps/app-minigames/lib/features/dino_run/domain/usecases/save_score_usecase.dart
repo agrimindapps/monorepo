@@ -1,5 +1,4 @@
 import '../entities/dino_run_score.dart';
-import '../entities/dino_run_stats.dart';
 import '../repositories/i_dino_run_score_repository.dart';
 import '../repositories/i_dino_run_stats_repository.dart';
 
@@ -21,8 +20,9 @@ class SaveScoreUseCase {
           : currentStats.highestScore,
       totalObstaclesJumped:
           currentStats.totalObstaclesJumped + score.obstaclesJumped,
-      highestDistance:
-          score.distance > currentStats.highestDistance ? score.distance : currentStats.highestDistance,
+      highestDistance: score.distance > currentStats.highestDistance
+          ? score.distance
+          : currentStats.highestDistance,
     );
 
     await statsRepository.updateStats(updatedStats);

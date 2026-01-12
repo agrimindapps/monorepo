@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
-import '../../../domain/entities/connect_four_score.dart';
+import '../../domain/entities/connect_four_score.dart';
 import '../providers/connect_four_controller.dart';
 import '../providers/connect_four_data_providers.dart';
 import 'connect_four_high_scores_page.dart';
@@ -18,12 +18,14 @@ class ConnectFourPage extends ConsumerStatefulWidget {
 class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
   Future<void> _saveScoreAndReset() async {
     final state = ref.read(connectFourControllerProvider);
-    
+
     if ((state.winner != null || state.isDraw) && state.gameStartTime != null) {
-      final winner = state.isDraw 
-          ? 'Draw' 
-          : state.winner == 1 ? 'Player 1' : 'Player 2';
-      
+      final winner = state.isDraw
+          ? 'Draw'
+          : state.winner == 1
+          ? 'Player 1'
+          : 'Player 2';
+
       final score = ConnectFourScore(
         winner: winner,
         movesCount: state.movesCount,
@@ -31,9 +33,9 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
         timestamp: DateTime.now(),
       );
 
-      await ref.read(saveScoreUseCaseProvider).call(score);
-      ref.invalidate(connectFourHighScoresProvider);
-      ref.invalidate(connectFourStatsProvider);
+      await ref.read(connectFourScoreSaverProvider.notifier).saveScore(score);
+      ref.invalidate(connect_fourHighScoresProvider);
+      ref.invalidate(connect_fourStatsProvider);
     }
 
     ref.read(connectFourControllerProvider.notifier).reset();
@@ -47,7 +49,8 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
     return GamePageLayout(
       title: 'Lig 4',
       accentColor: const Color(0xFF1976D2),
-      instructions: 'Conecte 4 peças da mesma cor!\n\n'
+      instructions:
+          'Conecte 4 peças da mesma cor!\n\n'
           '🔴 Jogador 1 (Vermelho)\n'
           '🟡 Jogador 2 (Amarelo)\n'
           '🎯 Horizontal, vertical ou diagonal',
@@ -79,7 +82,9 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
         ),
         IconButton(
           icon: const Icon(Icons.refresh, color: Colors.white),
-          onPressed: state.winner != null || state.isDraw ? _saveScoreAndReset : notifier.reset,
+          onPressed: state.winner != null || state.isDraw
+              ? _saveScoreAndReset
+              : notifier.reset,
           tooltip: 'Reiniciar',
         ),
       ],
@@ -91,7 +96,7 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
             // Status Header
             _buildStatus(state),
             const SizedBox(height: 16),
-            
+
             // Game Board
             AspectRatio(
               aspectRatio: 7 / 6,
@@ -111,7 +116,7 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
                           children: List.generate(6, (rowIndex) {
                             final cellValue = state.board[rowIndex][colIndex];
                             final isWinning = state.winningLine.any(
-                              (pos) => pos[0] == rowIndex && pos[1] == colIndex
+                              (pos) => pos[0] == rowIndex && pos[1] == colIndex,
                             );
 
                             return Expanded(
@@ -120,15 +125,20 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: _getCellColor(cellValue),
-                                  border: isWinning 
-                                    ? Border.all(color: Colors.white, width: 3)
-                                    : null,
+                                  border: isWinning
+                                      ? Border.all(
+                                          color: Colors.white,
+                                          width: 3,
+                                        )
+                                      : null,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.3),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.3,
+                                      ),
                                       offset: const Offset(2, 2),
                                       blurRadius: 2,
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),
@@ -162,7 +172,7 @@ class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
         ],
       );
     }
-    
+
     if (state.isDraw) {
       return const Text(
         '🤝 Empate!',

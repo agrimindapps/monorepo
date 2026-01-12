@@ -87,6 +87,11 @@ export 'src/domain/entities/user_entity.dart';
 // Feedback System
 export 'src/domain/entities/feedback_entity.dart';
 export 'src/domain/repositories/i_feedback_repository.dart';
+// Error Log System
+export 'src/domain/entities/error_log_entity.dart';
+export 'src/domain/repositories/i_error_log_repository.dart';
+export 'src/infrastructure/services/firebase_error_log_service.dart';
+export 'src/riverpod/domain/error_log/error_log_providers.dart';
 // Domain Repositories
 export 'src/domain/repositories/i_ads_repository.dart';
 export 'src/domain/repositories/i_analytics_repository.dart';

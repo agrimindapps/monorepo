@@ -1,22 +1,24 @@
 import 'package:core/core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Dashboard administrativo para gerenciar feedbacks
+/// Dashboard administrativo para gerenciar logs de erros web
 /// 
-/// Mostra lista de feedbacks em tempo real com filtros
-/// Permite atualizar status e adicionar notas
-class AdminDashboardPage extends ConsumerStatefulWidget {
-  const AdminDashboardPage({super.key});
+/// Mostra lista de erros em tempo real com filtros
+/// Permite atualizar status, severidade e adicionar notas
+class AdminErrorsPage extends ConsumerStatefulWidget {
+  const AdminErrorsPage({super.key});
 
   @override
-  ConsumerState<AdminDashboardPage> createState() => _AdminDashboardPageState();
+  ConsumerState<AdminErrorsPage> createState() => _AdminErrorsPageState();
 }
 
-class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
-  FeedbackStatus? _statusFilter;
-  FeedbackType? _typeFilter;
+class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
+  ErrorStatus? _statusFilter;
+  ErrorType? _typeFilter;
+  ErrorSeverity? _severityFilter;
 
   @override
   void initState() {
@@ -40,42 +42,43 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = Colors.teal;
+    const primaryColor = Colors.red;
     
     // Get current filters
-    final filters = FeedbackFilters(
+    final filters = ErrorLogFilters(
       status: _statusFilter,
       type: _typeFilter,
+      severity: _severityFilter,
       limit: 100,
     );
     
-    // Watch feedback stream
-    final feedbacksAsync = ref.watch(feedbackStreamProvider(filters));
-    final countsAsync = ref.watch(feedbackCountsProvider);
+    // Watch error stream
+    final errorsAsync = ref.watch(errorLogStreamProvider(filters));
+    final countsAsync = ref.watch(errorLogCountsProvider);
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF1A1A2E) : Colors.grey.shade100,
       appBar: AppBar(
         backgroundColor: primaryColor,
         foregroundColor: Colors.white,
-        title: const Text('Painel de Feedbacks'),
+        title: const Text('Painel de Erros Web'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/home'),
+          onPressed: () => context.go('/admin/dashboard'),
         ),
         actions: [
-          // Error logs button
+          // Cleanup button
           IconButton(
-            icon: const Icon(Icons.bug_report),
-            onPressed: () => context.go('/admin/errors'),
-            tooltip: 'Logs de Erros Web',
+            icon: const Icon(Icons.cleaning_services),
+            onPressed: () => _showCleanupDialog(),
+            tooltip: 'Limpar erros antigos',
           ),
           // Refresh button
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              ref.invalidate(feedbackStreamProvider(filters));
-              ref.invalidate(feedbackCountsProvider);
+              ref.invalidate(errorLogStreamProvider(filters));
+              ref.invalidate(errorLogCountsProvider);
             },
           ),
           // Logout button
@@ -93,23 +96,23 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
           // Filters
           _buildFiltersSection(primaryColor, isDark),
           
-          // Feedback list
+          // Error list
           Expanded(
-            child: feedbacksAsync.when(
+            child: errorsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, _) => Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
                     const SizedBox(height: 16),
-                    Text('Erro: $error', style: TextStyle(color: Colors.red)),
+                    Text('Erro: $error', style: const TextStyle(color: Colors.red)),
                   ],
                 ),
               ),
-              data: (feedbacks) => feedbacks.isEmpty
+              data: (errors) => errors.isEmpty
                   ? _buildEmptyState(isDark)
-                  : _buildFeedbackList(feedbacks, primaryColor, isDark),
+                  : _buildErrorList(errors, primaryColor, isDark),
             ),
           ),
         ],
@@ -118,7 +121,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   }
 
   Widget _buildStatsSection(
-    AsyncValue<Map<FeedbackStatus, int>> countsAsync,
+    AsyncValue<Map<ErrorStatus, int>> countsAsync,
     Color primaryColor,
     bool isDark,
   ) {
@@ -136,29 +139,29 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
                 _buildStatCard('Total', total, Colors.blue, isDark),
                 const SizedBox(width: 12),
                 _buildStatCard(
-                  'Pendentes',
-                  counts[FeedbackStatus.pending] ?? 0,
+                  'Novos',
+                  counts[ErrorStatus.newError] ?? 0,
+                  Colors.red,
+                  isDark,
+                ),
+                const SizedBox(width: 12),
+                _buildStatCard(
+                  'Investigando',
+                  counts[ErrorStatus.investigating] ?? 0,
                   Colors.orange,
                   isDark,
                 ),
                 const SizedBox(width: 12),
                 _buildStatCard(
-                  'Revisados',
-                  counts[FeedbackStatus.reviewed] ?? 0,
-                  Colors.purple,
-                  isDark,
-                ),
-                const SizedBox(width: 12),
-                _buildStatCard(
-                  'Resolvidos',
-                  counts[FeedbackStatus.resolved] ?? 0,
+                  'Corrigidos',
+                  counts[ErrorStatus.fixed] ?? 0,
                   Colors.green,
                   isDark,
                 ),
                 const SizedBox(width: 12),
                 _buildStatCard(
-                  'Arquivados',
-                  counts[FeedbackStatus.archived] ?? 0,
+                  'Ignorados',
+                  counts[ErrorStatus.ignored] ?? 0,
                   Colors.grey,
                   isDark,
                 ),
@@ -221,7 +224,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
         children: [
           // Status filter
           Expanded(
-            child: DropdownButtonFormField<FeedbackStatus?>(
+            child: DropdownButtonFormField<ErrorStatus?>(
               value: _statusFilter,
               decoration: InputDecoration(
                 labelText: 'Status',
@@ -237,7 +240,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               items: [
                 const DropdownMenuItem(value: null, child: Text('Todos')),
-                ...FeedbackStatus.values.map((status) => DropdownMenuItem(
+                ...ErrorStatus.values.map((status) => DropdownMenuItem(
                   value: status,
                   child: Text(status.displayName),
                 )),
@@ -250,7 +253,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
           const SizedBox(width: 12),
           // Type filter
           Expanded(
-            child: DropdownButtonFormField<FeedbackType?>(
+            child: DropdownButtonFormField<ErrorType?>(
               value: _typeFilter,
               decoration: InputDecoration(
                 labelText: 'Tipo',
@@ -266,7 +269,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
               style: TextStyle(color: isDark ? Colors.white : Colors.black87),
               items: [
                 const DropdownMenuItem(value: null, child: Text('Todos')),
-                ...FeedbackType.values.map((type) => DropdownMenuItem(
+                ...ErrorType.values.map((type) => DropdownMenuItem(
                   value: type,
                   child: Row(
                     children: [
@@ -282,6 +285,41 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
               },
             ),
           ),
+          const SizedBox(width: 12),
+          // Severity filter
+          Expanded(
+            child: DropdownButtonFormField<ErrorSeverity?>(
+              value: _severityFilter,
+              decoration: InputDecoration(
+                labelText: 'Severidade',
+                labelStyle: TextStyle(
+                  color: isDark ? Colors.white60 : Colors.black54,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              dropdownColor: isDark ? const Color(0xFF252545) : Colors.white,
+              style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+              items: [
+                const DropdownMenuItem(value: null, child: Text('Todas')),
+                ...ErrorSeverity.values.map((severity) => DropdownMenuItem(
+                  value: severity,
+                  child: Row(
+                    children: [
+                      Text(severity.emoji),
+                      const SizedBox(width: 8),
+                      Text(severity.displayName),
+                    ],
+                  ),
+                )),
+              ],
+              onChanged: (value) {
+                setState(() => _severityFilter = value);
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -293,16 +331,24 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.inbox_outlined,
+            Icons.check_circle_outline,
             size: 64,
-            color: isDark ? Colors.white30 : Colors.grey,
+            color: Colors.green.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
-            'Nenhum feedback encontrado',
+            'Nenhum erro encontrado',
             style: TextStyle(
               color: isDark ? Colors.white60 : Colors.black54,
               fontSize: 16,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '🎉 Tudo funcionando perfeitamente!',
+            style: TextStyle(
+              color: isDark ? Colors.white38 : Colors.black38,
+              fontSize: 14,
             ),
           ),
         ],
@@ -310,23 +356,23 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
     );
   }
 
-  Widget _buildFeedbackList(
-    List<FeedbackEntity> feedbacks,
+  Widget _buildErrorList(
+    List<ErrorLogEntity> errors,
     Color primaryColor,
     bool isDark,
   ) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: feedbacks.length,
+      itemCount: errors.length,
       itemBuilder: (context, index) {
-        final feedback = feedbacks[index];
-        return _FeedbackCard(
-          feedback: feedback,
+        final error = errors[index];
+        return _ErrorCard(
+          error: error,
           isDark: isDark,
           onStatusChanged: (newStatus, notes) async {
-            final actions = ref.read(feedbackActionsProvider.notifier);
+            final actions = ref.read(errorLogActionsProvider.notifier);
             final success = await actions.updateStatus(
-              feedback.id,
+              error.id,
               newStatus,
               adminNotes: notes,
             );
@@ -339,12 +385,24 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
               );
             }
           },
+          onSeverityChanged: (newSeverity) async {
+            final actions = ref.read(errorLogActionsProvider.notifier);
+            final success = await actions.updateSeverity(error.id, newSeverity);
+            if (success && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Severidade atualizada para ${newSeverity.displayName}'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          },
           onDelete: () async {
             final confirmed = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
                 title: const Text('Confirmar exclusão'),
-                content: const Text('Deseja realmente excluir este feedback?'),
+                content: const Text('Deseja realmente excluir este erro?'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
@@ -360,12 +418,12 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
             );
 
             if (confirmed == true && mounted) {
-              final actions = ref.read(feedbackActionsProvider.notifier);
-              final success = await actions.delete(feedback.id);
+              final actions = ref.read(errorLogActionsProvider.notifier);
+              final success = await actions.delete(error.id);
               if (success && mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Feedback excluído'),
+                    content: Text('Erro excluído'),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -376,32 +434,93 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
       },
     );
   }
+
+  void _showCleanupDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Limpar erros antigos'),
+        content: const Text(
+          'Esta ação irá remover todos os erros com status "Corrigido", "Ignorado" ou "Não será corrigido" '
+          'que foram criados há mais de 30 dias.\n\n'
+          'Esta ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(context).pop();
+              final actions = ref.read(errorLogActionsProvider.notifier);
+              final count = await actions.cleanup(30);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('$count erros removidos'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Limpar'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-/// Card individual de feedback
-class _FeedbackCard extends StatelessWidget {
-  const _FeedbackCard({
-    required this.feedback,
+/// Card individual de erro
+class _ErrorCard extends StatefulWidget {
+  const _ErrorCard({
+    required this.error,
     required this.isDark,
     required this.onStatusChanged,
+    required this.onSeverityChanged,
     required this.onDelete,
   });
 
-  final FeedbackEntity feedback;
+  final ErrorLogEntity error;
   final bool isDark;
-  final void Function(FeedbackStatus status, String? notes) onStatusChanged;
+  final void Function(ErrorStatus status, String? notes) onStatusChanged;
+  final void Function(ErrorSeverity severity) onSeverityChanged;
   final VoidCallback onDelete;
 
+  @override
+  State<_ErrorCard> createState() => _ErrorCardState();
+}
+
+class _ErrorCardState extends State<_ErrorCard> {
+  bool _isExpanded = false;
+
   Color get _statusColor {
-    switch (feedback.status) {
-      case FeedbackStatus.pending:
+    switch (widget.error.status) {
+      case ErrorStatus.newError:
+        return Colors.red;
+      case ErrorStatus.investigating:
         return Colors.orange;
-      case FeedbackStatus.reviewed:
-        return Colors.purple;
-      case FeedbackStatus.resolved:
+      case ErrorStatus.fixed:
         return Colors.green;
-      case FeedbackStatus.archived:
+      case ErrorStatus.ignored:
         return Colors.grey;
+      case ErrorStatus.wontFix:
+        return Colors.blueGrey;
+    }
+  }
+
+  Color get _severityColor {
+    switch (widget.error.severity) {
+      case ErrorSeverity.low:
+        return Colors.green;
+      case ErrorSeverity.medium:
+        return Colors.yellow.shade700;
+      case ErrorSeverity.high:
+        return Colors.orange;
+      case ErrorSeverity.critical:
+        return Colors.red;
     }
   }
 
@@ -409,11 +528,11 @@ class _FeedbackCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      color: isDark ? const Color(0xFF252545) : Colors.white,
+      color: widget.isDark ? const Color(0xFF252545) : Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: _statusColor.withValues(alpha: 0.3),
+          color: _severityColor.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -435,13 +554,36 @@ class _FeedbackCard extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(feedback.type.emoji),
+                      Text(widget.error.errorType.emoji),
                       const SizedBox(width: 4),
                       Text(
-                        feedback.type.displayName,
+                        widget.error.errorType.displayName,
                         style: const TextStyle(fontSize: 12, color: Colors.blue),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Severity badge
+                GestureDetector(
+                  onTap: () => _showSeverityDialog(),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _severityColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(widget.error.severity.emoji),
+                        const SizedBox(width: 4),
+                        Text(
+                          widget.error.severity.displayName,
+                          style: TextStyle(fontSize: 12, color: _severityColor),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -453,24 +595,42 @@ class _FeedbackCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    feedback.status.displayName,
+                    widget.error.status.displayName,
                     style: TextStyle(fontSize: 12, color: _statusColor),
                   ),
                 ),
                 const Spacer(),
-                // Rating
-                if (feedback.rating != null) ...[
-                  Icon(Icons.star, color: Colors.amber, size: 16),
-                  const SizedBox(width: 2),
-                  Text(
-                    feedback.rating!.toStringAsFixed(0),
-                    style: TextStyle(
-                      color: isDark ? Colors.white70 : Colors.black54,
-                      fontSize: 12,
+                // Occurrences
+                if (widget.error.occurrences > 1) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.repeat, color: Colors.purple, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${widget.error.occurrences}x',
+                          style: const TextStyle(fontSize: 12, color: Colors.purple),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 8),
                 ],
+                // Expand/collapse button
+                IconButton(
+                  icon: Icon(
+                    _isExpanded ? Icons.expand_less : Icons.expand_more,
+                    color: widget.isDark ? Colors.white54 : Colors.black45,
+                  ),
+                  onPressed: () => setState(() => _isExpanded = !_isExpanded),
+                  tooltip: _isExpanded ? 'Recolher' : 'Expandir',
+                ),
                 // Delete button
                 IconButton(
                   icon: Icon(
@@ -478,22 +638,82 @@ class _FeedbackCard extends StatelessWidget {
                     color: Colors.red.withValues(alpha: 0.7),
                     size: 20,
                   ),
-                  onPressed: onDelete,
+                  onPressed: widget.onDelete,
                   tooltip: 'Excluir',
                 ),
               ],
             ),
             const SizedBox(height: 12),
 
-            // Message
+            // Error message
             Text(
-              feedback.message,
+              widget.error.message,
               style: TextStyle(
-                color: isDark ? Colors.white : Colors.black87,
+                color: widget.isDark ? Colors.white : Colors.black87,
                 fontSize: 14,
                 height: 1.4,
+                fontFamily: 'monospace',
               ),
+              maxLines: _isExpanded ? null : 2,
+              overflow: _isExpanded ? null : TextOverflow.ellipsis,
             ),
+            
+            // Stack trace (expanded)
+            if (_isExpanded && widget.error.stackTrace != null) ...[
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: widget.isDark ? const Color(0xFF1A1A2E) : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: widget.isDark ? Colors.white10 : Colors.grey.shade300,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Stack Trace',
+                          style: TextStyle(
+                            color: widget.isDark ? Colors.white60 : Colors.black54,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.copy, size: 16),
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: widget.error.stackTrace!));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Stack trace copiado')),
+                            );
+                          },
+                          tooltip: 'Copiar',
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      widget.error.stackTrace!,
+                      style: TextStyle(
+                        color: widget.isDark ? Colors.white70 : Colors.black54,
+                        fontSize: 11,
+                        fontFamily: 'monospace',
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            
             const SizedBox(height: 12),
 
             // Metadata row
@@ -504,31 +724,43 @@ class _FeedbackCard extends StatelessWidget {
                 // Date
                 _buildMetaItem(
                   Icons.calendar_today,
-                  DateFormat('dd/MM/yyyy HH:mm').format(feedback.createdAt),
+                  DateFormat('dd/MM/yyyy HH:mm').format(widget.error.createdAt),
                 ),
-                // Platform
-                if (feedback.platform != null)
+                // URL
+                if (widget.error.url != null)
                   _buildMetaItem(
-                    _platformIcon(feedback.platform!),
-                    feedback.platform!,
+                    Icons.link,
+                    widget.error.url!,
                   ),
                 // Calculator
-                if (feedback.calculatorName != null)
+                if (widget.error.calculatorName != null)
                   _buildMetaItem(
                     Icons.calculate,
-                    feedback.calculatorName!,
+                    widget.error.calculatorName!,
                   ),
-                // Email
-                if (feedback.userEmail != null)
+                // Browser
+                if (widget.error.browserInfo != null)
                   _buildMetaItem(
-                    Icons.email,
-                    feedback.userEmail!,
+                    Icons.web,
+                    widget.error.browserInfo!,
+                  ),
+                // Screen size
+                if (widget.error.screenSize != null)
+                  _buildMetaItem(
+                    Icons.aspect_ratio,
+                    widget.error.screenSize!,
+                  ),
+                // Session
+                if (widget.error.sessionId != null)
+                  _buildMetaItem(
+                    Icons.fingerprint,
+                    widget.error.sessionId!.substring(0, 8),
                   ),
               ],
             ),
             
             // Admin notes
-            if (feedback.adminNotes != null && feedback.adminNotes!.isNotEmpty) ...[
+            if (widget.error.adminNotes != null && widget.error.adminNotes!.isNotEmpty) ...[
               const SizedBox(height: 12),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -544,9 +776,9 @@ class _FeedbackCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        feedback.adminNotes!,
+                        widget.error.adminNotes!,
                         style: TextStyle(
-                          color: isDark ? Colors.white70 : Colors.black54,
+                          color: widget.isDark ? Colors.white70 : Colors.black54,
                           fontSize: 12,
                         ),
                       ),
@@ -564,17 +796,17 @@ class _FeedbackCard extends StatelessWidget {
                 Expanded(
                   child: _buildStatusButton(
                     context,
-                    FeedbackStatus.reviewed,
-                    'Revisar',
-                    Icons.visibility,
+                    ErrorStatus.investigating,
+                    'Investigar',
+                    Icons.search,
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: _buildStatusButton(
                     context,
-                    FeedbackStatus.resolved,
-                    'Resolver',
+                    ErrorStatus.fixed,
+                    'Corrigido',
                     Icons.check_circle,
                   ),
                 ),
@@ -582,9 +814,9 @@ class _FeedbackCard extends StatelessWidget {
                 Expanded(
                   child: _buildStatusButton(
                     context,
-                    FeedbackStatus.archived,
-                    'Arquivar',
-                    Icons.archive,
+                    ErrorStatus.ignored,
+                    'Ignorar',
+                    Icons.block,
                   ),
                 ),
               ],
@@ -602,44 +834,27 @@ class _FeedbackCard extends StatelessWidget {
         Icon(
           icon,
           size: 14,
-          color: isDark ? Colors.white38 : Colors.black38,
+          color: widget.isDark ? Colors.white38 : Colors.black38,
         ),
         const SizedBox(width: 4),
         Text(
           text,
           style: TextStyle(
             fontSize: 12,
-            color: isDark ? Colors.white38 : Colors.black38,
+            color: widget.isDark ? Colors.white38 : Colors.black38,
           ),
         ),
       ],
     );
   }
 
-  IconData _platformIcon(String platform) {
-    switch (platform.toLowerCase()) {
-      case 'android':
-        return Icons.android;
-      case 'ios':
-        return Icons.phone_iphone;
-      case 'web':
-        return Icons.web;
-      case 'macos':
-        return Icons.laptop_mac;
-      case 'windows':
-        return Icons.desktop_windows;
-      default:
-        return Icons.device_unknown;
-    }
-  }
-
   Widget _buildStatusButton(
     BuildContext context,
-    FeedbackStatus status,
+    ErrorStatus status,
     String label,
     IconData icon,
   ) {
-    final isCurrentStatus = feedback.status == status;
+    final isCurrentStatus = widget.error.status == status;
     final color = _getStatusButtonColor(status);
 
     return OutlinedButton.icon(
@@ -657,21 +872,23 @@ class _FeedbackCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusButtonColor(FeedbackStatus status) {
+  Color _getStatusButtonColor(ErrorStatus status) {
     switch (status) {
-      case FeedbackStatus.pending:
+      case ErrorStatus.newError:
+        return Colors.red;
+      case ErrorStatus.investigating:
         return Colors.orange;
-      case FeedbackStatus.reviewed:
-        return Colors.purple;
-      case FeedbackStatus.resolved:
+      case ErrorStatus.fixed:
         return Colors.green;
-      case FeedbackStatus.archived:
+      case ErrorStatus.ignored:
         return Colors.grey;
+      case ErrorStatus.wontFix:
+        return Colors.blueGrey;
     }
   }
 
-  void _showNotesDialog(BuildContext context, FeedbackStatus newStatus) {
-    final notesController = TextEditingController(text: feedback.adminNotes);
+  void _showNotesDialog(BuildContext context, ErrorStatus newStatus) {
+    final notesController = TextEditingController(text: widget.error.adminNotes);
     
     showDialog(
       context: context,
@@ -700,7 +917,7 @@ class _FeedbackCard extends StatelessWidget {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              onStatusChanged(
+              widget.onStatusChanged(
                 newStatus,
                 notesController.text.trim().isEmpty ? null : notesController.text.trim(),
               );
@@ -708,6 +925,27 @@ class _FeedbackCard extends StatelessWidget {
             child: const Text('Confirmar'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showSeverityDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Alterar Severidade'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: ErrorSeverity.values.map((severity) => ListTile(
+            leading: Text(severity.emoji, style: const TextStyle(fontSize: 24)),
+            title: Text(severity.displayName),
+            selected: widget.error.severity == severity,
+            onTap: () {
+              Navigator.of(context).pop();
+              widget.onSeverityChanged(severity);
+            },
+          )).toList(),
+        ),
       ),
     );
   }

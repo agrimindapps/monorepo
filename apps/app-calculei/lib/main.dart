@@ -9,6 +9,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app_page.dart';
 import 'core/config/firebase_options.dart';
+import 'core/services/web_error_capture_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ void main() async {
   // Initialize Firebase with error handling
   var firebaseInitialized = false;
   FirebaseCrashlyticsService? crashlyticsService;
+  WebErrorCaptureService? webErrorService;
 
   try {
     await Firebase.initializeApp(
@@ -44,10 +46,28 @@ void main() async {
 
   // No DI configuration needed - using Riverpod providers
 
-  // Run app with error handling for mobile platforms
-  if (!kIsWeb &&
+  // Run app with error handling
+  if (kIsWeb && firebaseInitialized) {
+    // Web: Use WebErrorCaptureService for Firestore-based error logging
+    webErrorService = await initializeWebErrorCapture();
+    
+    runZonedGuarded<Future<void>>(
+      () async {
+        runApp(const ProviderScope(child: App()));
+      },
+      (error, stackTrace) {
+        webErrorService?.captureError(
+          error: error,
+          stackTrace: stackTrace,
+          errorType: ErrorType.exception,
+          severity: ErrorSeverity.critical,
+        );
+      },
+    );
+  } else if (!kIsWeb &&
       firebaseInitialized &&
       (Platform.isAndroid || Platform.isIOS)) {
+    // Mobile: Use Crashlytics
     runZonedGuarded<Future<void>>(
       () async {
         runApp(const ProviderScope(child: App()));

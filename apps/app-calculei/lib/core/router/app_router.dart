@@ -76,6 +76,7 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 // Admin
 import '../../features/admin/presentation/pages/admin_login_page.dart';
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/pages/admin_errors_page.dart';
 // Financial Calculators
 import '../../features/thirteenth_salary_calculator/presentation/pages/thirteenth_salary_calculator_page.dart';
 import '../../features/unemployment_insurance_calculator/presentation/pages/unemployment_insurance_calculator_page.dart';
@@ -651,6 +652,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       path: '/admin/dashboard',
       pageBuilder: (context, state) => fadeTransitionPage(
         child: const AdminDashboardPage(),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: '/admin/errors',
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AdminErrorsPage(),
         state: state,
       ),
     ),

@@ -49,6 +49,7 @@ dependencies:
   intl: any
   share_plus: any
   url_launcher: any
+  crypto: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

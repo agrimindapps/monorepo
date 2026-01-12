@@ -26,7 +26,7 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
     return GamePageLayout(
       title: 'Caça-Palavras',
       accentColor: const Color(0xFF4CAF50),
-      instructions: 'Toque em letras adjacentes para formar palavras.\n\n'
+      instructions: 'Arraste o dedo sobre as letras para formar palavras.\n\n'
           '📝 Palavras podem estar em qualquer direção\n'
           '🔍 Horizontal, vertical ou diagonal\n'
           '✨ Toque na lista para destacar no grid\n'
@@ -169,8 +169,14 @@ class _CacaPalavraPageState extends ConsumerState<CacaPalavraPage> {
           flex: 3,
           child: WordGridWidget(
             gameState: gameState,
-            onCellTap: (row, col) {
-              ref.read(cacaPalavraGameProvider.notifier).handleCellTap(row, col);
+            onDragStart: (row, col) {
+              ref.read(cacaPalavraGameProvider.notifier).handleDragStart(row, col);
+            },
+            onDragUpdate: (row, col) {
+              ref.read(cacaPalavraGameProvider.notifier).handleDragUpdate(row, col);
+            },
+            onDragEnd: () {
+              ref.read(cacaPalavraGameProvider.notifier).handleDragEnd();
             },
           ),
         ),

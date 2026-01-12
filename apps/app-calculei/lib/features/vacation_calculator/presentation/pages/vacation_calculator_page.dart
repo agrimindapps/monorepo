@@ -33,6 +33,8 @@ class _VacationCalculatorPageState
   @override
   Widget build(BuildContext context) {
     final calculation = ref.watch(vacationCalculatorProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return CalculatorPageLayout(
       title: 'Calculadora de Férias',
@@ -49,7 +51,7 @@ class _VacationCalculatorPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Input fields
-              _DarkInputField(
+              _AdaptiveInputField(
                 label: 'Salário Bruto',
                 controller: _grossSalaryController,
                 prefix: 'R\$',
@@ -71,7 +73,7 @@ class _VacationCalculatorPageState
 
               const SizedBox(height: 16),
 
-              _DarkInputField(
+              _AdaptiveInputField(
                 label: 'Dias de Férias',
                 controller: _vacationDaysController,
                 suffix: 'dias',
@@ -92,62 +94,67 @@ class _VacationCalculatorPageState
               const SizedBox(height: 20),
 
               // Sell vacation days checkbox
-              Material(
-                color: Colors.white.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-                child: InkWell(
-                  onTap: () {
-                    setState(() => _sellVacationDays = !_sellVacationDays);
-                  },
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _sellVacationDays
-                            ? CalculatorAccentColors.labor
-                            : Colors.white.withValues(alpha: 0.1),
-                        width: _sellVacationDays ? 2 : 1,
-                      ),
+              Builder(
+                builder: (context) {
+                  final baseColor = isDark ? Colors.white : Colors.black;
+                  return Material(
+                    color: baseColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() => _sellVacationDays = !_sellVacationDays);
+                      },
                       borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          value: _sellVacationDays,
-                          onChanged: (value) {
-                            setState(() => _sellVacationDays = value ?? false);
-                          },
-                          activeColor: CalculatorAccentColors.labor,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Vender 1/3 das férias',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Abono pecuniário',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.6),
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ],
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: _sellVacationDays
+                                ? CalculatorAccentColors.labor
+                                : baseColor.withValues(alpha: 0.1),
+                            width: _sellVacationDays ? 2 : 1,
                           ),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: _sellVacationDays,
+                              onChanged: (value) {
+                                setState(() => _sellVacationDays = value ?? false);
+                              },
+                              activeColor: CalculatorAccentColors.labor,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Vender 1/3 das férias',
+                                    style: TextStyle(
+                                      color: baseColor.withValues(alpha: 0.9),
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Abono pecuniário',
+                                    style: TextStyle(
+                                      color: baseColor.withValues(alpha: 0.6),
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 24),
@@ -214,8 +221,8 @@ class _VacationCalculatorPageState
   }
 }
 
-/// Dark themed input field for the calculator
-class _DarkInputField extends StatelessWidget {
+/// Theme-adaptive input field for the calculator
+class _AdaptiveInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? prefix;
@@ -224,7 +231,7 @@ class _DarkInputField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
 
-  const _DarkInputField({
+  const _AdaptiveInputField({
     required this.label,
     required this.controller,
     this.prefix,
@@ -236,13 +243,23 @@ class _DarkInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // Adaptive colors
+    final textColor = isDark ? Colors.white : Colors.grey[900]!;
+    final labelColor = isDark ? Colors.white.withValues(alpha: 0.7) : Colors.grey[700]!;
+    final prefixColor = isDark ? Colors.white.withValues(alpha: 0.5) : Colors.grey[600]!;
+    final fillColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey[100]!;
+    final borderColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey[300]!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: labelColor,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -253,33 +270,31 @@ class _DarkInputField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: textColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             prefixText: prefix,
             prefixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: prefixColor,
               fontSize: 16,
             ),
             suffixText: suffix,
             suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: prefixColor,
               fontSize: 16,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
+            fillColor: fillColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
+              borderSide: BorderSide(color: borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -290,7 +305,11 @@ class _DarkInputField extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: theme.colorScheme.error),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: theme.colorScheme.error, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,

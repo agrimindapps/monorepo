@@ -48,6 +48,7 @@ dependencies:
   equatable: any
   intl: any
   share_plus: any
+  url_launcher: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/presentation/widgets/calculator_app_bar.dart';
 import 'package:go_router/go_router.dart';
 
-/// Página de seleção de calculadoras agrícolas
+/// Página de seleção de calculadoras agrícolas (apenas culturas)
 class AgricultureSelectionPage extends StatelessWidget {
   const AgricultureSelectionPage({super.key});
 
@@ -31,14 +31,14 @@ class AgricultureSelectionPage extends StatelessWidget {
                           Row(
                             children: [
                               Icon(
-                                Icons.agriculture,
+                                Icons.grass,
                                 color: Theme.of(context)
                                     .colorScheme
                                     .onPrimaryContainer,
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                'Ferramentas para o Campo',
+                                'Calculadoras Agrícolas',
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -53,8 +53,8 @@ class AgricultureSelectionPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Calculadoras para auxiliar no planejamento da safra, '
-                            'adubação, irrigação e manejo de animais.',
+                            'Ferramentas para auxiliar no planejamento da safra, '
+                            'adubação, irrigação e manejo de culturas.',
                             style: TextStyle(
                               color: Theme.of(context)
                                   .colorScheme
@@ -109,6 +109,13 @@ class AgricultureSelectionPage extends StatelessWidget {
                             route: '/calculators/agriculture/fertilizer-dosing',
                           ),
                           _CalculatorCard(
+                            title: 'Calda Pulverização',
+                            subtitle: 'Preparo de tanques',
+                            icon: Icons.water_drop,
+                            color: Color(0xFF4CAF50),
+                            route: '/calculators/agriculture/spray-mix',
+                          ),
+                          _CalculatorCard(
                             title: 'Correção pH',
                             subtitle: 'Calcário necessário',
                             icon: Icons.landscape,
@@ -130,32 +137,18 @@ class AgricultureSelectionPage extends StatelessWidget {
                             route: '/calculators/agriculture/yield-prediction',
                           ),
                           _CalculatorCard(
-                            title: 'Ração',
-                            subtitle: 'Consumo de animais',
-                            icon: Icons.pets,
-                            color: Colors.red,
-                            route: '/calculators/agriculture/feed',
-                          ),
-                          _CalculatorCard(
-                            title: 'Ganho Peso',
-                            subtitle: 'Tempo para meta',
-                            icon: Icons.monitor_weight,
-                            color: Colors.teal,
-                            route: '/calculators/agriculture/weight-gain',
-                          ),
-                          _CalculatorCard(
-                            title: 'Reprodução',
-                            subtitle: 'Ciclo e gestação',
-                            icon: Icons.child_friendly,
-                            color: Colors.pink,
-                            route: '/calculators/agriculture/breeding-cycle',
-                          ),
-                          _CalculatorCard(
                             title: 'Evapotranspiração',
                             subtitle: 'ETo e clima',
                             icon: Icons.wb_sunny,
                             color: Colors.cyan,
                             route: '/calculators/agriculture/evapotranspiration',
+                          ),
+                          _CalculatorCard(
+                            title: 'Combustível',
+                            subtitle: 'Consumo de máquinas',
+                            icon: Icons.local_gas_station,
+                            color: Colors.deepOrange,
+                            route: '/calculators/agriculture/fuel-consumption',
                           ),
                         ],
                       );

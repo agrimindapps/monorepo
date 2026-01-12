@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/providers/core_providers.dart';
 import '../../constants/settings_design_tokens.dart';
-import '../dialogs/feedback_dialog.dart';
 import '../shared/section_header.dart';
 import '../shared/settings_card.dart';
 import '../shared/settings_list_tile.dart';
@@ -108,9 +107,6 @@ class SupportSection extends ConsumerWidget {
 
   Future<void> _showFeedback(BuildContext context, WidgetRef ref) async {
     if (!context.mounted) return;
-    await showDialog<void>(
-      context: context,
-      builder: (context) => const FeedbackDialog(),
-    );
+    await FeedbackDialog.show(context);
   }
 }

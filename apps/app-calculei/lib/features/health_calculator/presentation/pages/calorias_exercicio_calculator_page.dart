@@ -192,8 +192,8 @@ class _DarkInputField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.health,
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
                 width: 2,
               ),
             ),

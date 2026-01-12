@@ -51,7 +51,7 @@ class _BmrCalculatorPageState extends State<BmrCalculatorPage> {
               Text(
                 'Selecione o gênero',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -165,7 +165,7 @@ class _BmrCalculatorPageState extends State<BmrCalculatorPage> {
               Text(
                 'Nível de atividade física',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -253,13 +253,16 @@ class _DarkInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -270,19 +273,19 @@ class _DarkInputField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             suffixText: suffix,
             suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 16,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
+            fillColor: colorScheme.onSurface.withValues(alpha: 0.08),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -290,19 +293,19 @@ class _DarkInputField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: colorScheme.onSurface.withValues(alpha: 0.1),
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.health,
+              borderSide: BorderSide(
+                color: colorScheme.primary,
                 width: 2,
               ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: colorScheme.error),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -331,11 +334,12 @@ class _GenderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.health;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : colorScheme.onSurface.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -346,7 +350,7 @@ class _GenderButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : colorScheme.onSurface.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -358,7 +362,7 @@ class _GenderButton extends StatelessWidget {
                 size: 32,
                 color: isSelected
                     ? accentColor
-                    : Colors.white.withValues(alpha: 0.6),
+                    : colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               const SizedBox(height: 6),
               Text(
@@ -368,7 +372,7 @@ class _GenderButton extends StatelessWidget {
                   fontSize: 14,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : colorScheme.onSurface.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -397,13 +401,14 @@ class _ActivityRadioTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSelected = value == groupValue;
     const accentColor = CalculatorAccentColors.health;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
         color: isSelected
             ? accentColor.withValues(alpha: 0.1)
-            : Colors.white.withValues(alpha: 0.03),
+            : colorScheme.onSurface.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           onTap: () => onChanged(value),
@@ -414,7 +419,7 @@ class _ActivityRadioTile extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                     ? accentColor
-                    : Colors.white.withValues(alpha: 0.1),
+                    : colorScheme.onSurface.withValues(alpha: 0.1),
                 width: isSelected ? 2 : 1,
               ),
               borderRadius: BorderRadius.circular(10),
@@ -429,7 +434,7 @@ class _ActivityRadioTile extends StatelessWidget {
                     border: Border.all(
                       color: isSelected
                           ? accentColor
-                          : Colors.white.withValues(alpha: 0.4),
+                          : colorScheme.onSurface.withValues(alpha: 0.4),
                       width: 2,
                     ),
                   ),
@@ -453,8 +458,8 @@ class _ActivityRadioTile extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: isSelected
-                          ? Colors.white
-                          : Colors.white.withValues(alpha: 0.7),
+                          ? colorScheme.onSurface
+                          : colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight:
                           isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
@@ -477,11 +482,12 @@ class _BmrResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.health;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: accentColor.withValues(alpha: 0.3),
@@ -502,7 +508,7 @@ class _BmrResultCard extends StatelessWidget {
               Text(
                 'Resultados',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: colorScheme.onSurface.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -545,7 +551,7 @@ class _BmrResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: colorScheme.onSurface.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -554,7 +560,7 @@ class _BmrResultCard extends StatelessWidget {
                 Text(
                   'Metas calóricas',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: colorScheme.onSurface.withValues(alpha: 0.9),
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -610,7 +616,7 @@ class _BmrResultCard extends StatelessWidget {
                     'Déficit de 500 kcal/dia resulta em perda de ~0.5kg/semana. '
                     'Nunca consuma menos que sua TMB.',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: colorScheme.onSurface.withValues(alpha: 0.8),
                       fontSize: 13,
                       height: 1.4,
                     ),
@@ -687,7 +693,7 @@ class _ResultBox extends StatelessWidget {
           Text(
             description,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 11,
             ),
             textAlign: TextAlign.center,
@@ -721,7 +727,7 @@ class _CalorieTarget extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
               fontSize: 14,
             ),
           ),

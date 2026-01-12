@@ -30,6 +30,7 @@ class _CashVsInstallmentCalculatorPageState
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(cashVsInstallmentCalculatorProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return CalculatorPageLayout(
       title: 'À Vista ou Parcelado?',
@@ -40,7 +41,10 @@ class _CashVsInstallmentCalculatorPageState
       maxContentWidth: 800,
       actions: [
         IconButton(
-          icon: const Icon(Icons.info_outline, color: Colors.white70),
+          icon: Icon(
+            Icons.info_outline,
+            color: (isDark ? Colors.white : Colors.black).withValues(alpha: 0.7),
+          ),
           onPressed: () => _showInfo(context),
           tooltip: 'Informações',
         ),
@@ -70,7 +74,7 @@ class _CashVsInstallmentCalculatorPageState
             // Error Message
             if (state.errorMessage != null) ...[
               const SizedBox(height: 20),
-              _DarkErrorCard(message: state.errorMessage!),
+              _ErrorCard(message: state.errorMessage!),
             ],
 
             // Result Card
@@ -147,28 +151,31 @@ class _CashVsInstallmentCalculatorPageState
   }
 }
 
-/// Dark themed error card
-class _DarkErrorCard extends StatelessWidget {
+/// Theme-adaptive error card
+class _ErrorCard extends StatelessWidget {
   final String message;
 
-  const _DarkErrorCard({required this.message});
+  const _ErrorCard({required this.message});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final errorColor = isDark ? Colors.red.shade300 : Colors.red.shade700;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.1),
+        color: Colors.red.withValues(alpha: isDark ? 0.1 : 0.05),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.red.withValues(alpha: 0.3),
+          color: Colors.red.withValues(alpha: isDark ? 0.3 : 0.2),
         ),
       ),
       child: Row(
         children: [
           Icon(
             Icons.error_outline,
-            color: Colors.red.shade300,
+            color: errorColor,
             size: 22,
           ),
           const SizedBox(width: 12),
@@ -176,7 +183,7 @@ class _DarkErrorCard extends StatelessWidget {
             child: Text(
               message,
               style: TextStyle(
-                color: Colors.red.shade300,
+                color: errorColor,
                 fontSize: 14,
               ),
             ),

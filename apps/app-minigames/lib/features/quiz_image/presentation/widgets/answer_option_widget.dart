@@ -25,36 +25,48 @@ class AnswerOptionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isUnanswered = answerState == AnswerState.unanswered;
     final bool canTap = isUnanswered && onTap != null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: InkWell(
         onTap: canTap ? onTap : null,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
           decoration: BoxDecoration(
-            color: _getBackgroundColor(),
-            borderRadius: BorderRadius.circular(10),
+            color: _getBackgroundColor(isDark),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: _getBorderColor(isDark),
+              width: 2,
+            ),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              if (isDark && (isCorrectAnswer || isSelected))
+                BoxShadow(
+                  color: _getBorderColor(isDark).withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
             ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
               // Option letter (A, B, C, etc)
               Container(
-                width: 32,
-                height: 32,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _getLetterBackgroundColor(isDark),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: _getBorderColor(),
+                    color: _getLetterBorderColor(isDark),
                     width: 2,
                   ),
                 ),
@@ -63,20 +75,22 @@ class AnswerOptionWidget extends StatelessWidget {
                     String.fromCharCode(65 + index), // A, B, C, etc.
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: _getBorderColor(),
+                      fontSize: 16,
+                      color: _getLetterTextColor(isDark),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 14),
 
               // Option text
               Expanded(
                 child: Text(
                   text,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
               ),
@@ -86,6 +100,7 @@ class AnswerOptionWidget extends StatelessWidget {
                 Icon(
                   _getIcon(),
                   color: _getIconColor(),
+                  size: 24,
                 ),
             ],
           ),
@@ -94,28 +109,38 @@ class AnswerOptionWidget extends StatelessWidget {
     );
   }
 
-  Color _getBackgroundColor() {
+  Color _getBackgroundColor(bool isDark) {
     if (answerState == AnswerState.unanswered) {
-      return Colors.white;
+      return isDark 
+          ? const Color(0xFF2A2D3E)
+          : Colors.white;
     }
 
     // Show correct answer in green
     if (isCorrectAnswer) {
-      return Colors.green.shade100;
+      return isDark
+          ? Colors.green.withValues(alpha: 0.2)
+          : Colors.green.shade100;
     }
 
     // Show selected incorrect answer in red
     if (isSelected && answerState == AnswerState.incorrect) {
-      return Colors.red.shade100;
+      return isDark
+          ? Colors.red.withValues(alpha: 0.2)
+          : Colors.red.shade100;
     }
 
-    // Other options remain white
-    return Colors.white;
+    // Other options remain default
+    return isDark 
+        ? const Color(0xFF2A2D3E)
+        : Colors.white;
   }
 
-  Color _getBorderColor() {
+  Color _getBorderColor(bool isDark) {
     if (answerState == AnswerState.unanswered) {
-      return Colors.blue.shade300;
+      return isDark
+          ? const Color(0xFF3F51B5).withValues(alpha: 0.4)
+          : Colors.blue.shade300;
     }
 
     // Correct answer
@@ -129,7 +154,44 @@ class AnswerOptionWidget extends StatelessWidget {
     }
 
     // Other options
-    return Colors.grey.shade300;
+    return isDark
+        ? const Color(0xFF3E4152)
+        : Colors.grey.shade300;
+  }
+
+  Color _getLetterBackgroundColor(bool isDark) {
+    if (answerState == AnswerState.unanswered) {
+      return isDark
+          ? const Color(0xFF1A1D2E)
+          : Colors.white;
+    }
+    
+    if (isCorrectAnswer) {
+      return Colors.green.withValues(alpha: isDark ? 0.3 : 0.2);
+    }
+    
+    if (isSelected && answerState == AnswerState.incorrect) {
+      return Colors.red.withValues(alpha: isDark ? 0.3 : 0.2);
+    }
+    
+    return isDark
+        ? const Color(0xFF1A1D2E)
+        : Colors.white;
+  }
+
+  Color _getLetterBorderColor(bool isDark) {
+    return _getBorderColor(isDark);
+  }
+
+  Color _getLetterTextColor(bool isDark) {
+    if (answerState != AnswerState.unanswered) {
+      if (isCorrectAnswer) return Colors.green;
+      if (isSelected && answerState == AnswerState.incorrect) return Colors.red;
+    }
+    
+    return isDark
+        ? const Color(0xFF3F51B5)
+        : Colors.blue.shade600;
   }
 
   bool _shouldShowIcon() {

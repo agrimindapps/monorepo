@@ -69,10 +69,10 @@ class CalculatorAppBar extends StatelessWidget implements PreferredSizeWidget {
       route: '/calculators/pet/selection',
     ),
     CalculatorCategory(
-      name: 'Agricultura',
+      name: 'Agropecuária',
       icon: Icons.agriculture,
       color: Colors.teal,
-      route: '/calculators/agriculture/selection',
+      route: '/calculators/agribusiness/selection',
     ),
   ];
 

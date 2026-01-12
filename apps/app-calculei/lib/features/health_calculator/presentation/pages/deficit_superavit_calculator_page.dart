@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
@@ -72,7 +73,7 @@ class _DeficitSuperavitCalculatorPageState
               Row(
                 children: [
                   Expanded(
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Peso atual',
                       controller: _currentWeightController,
                       suffix: 'kg',
@@ -98,7 +99,7 @@ class _DeficitSuperavitCalculatorPageState
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Peso meta',
                       controller: _targetWeightController,
                       suffix: 'kg',
@@ -131,7 +132,7 @@ class _DeficitSuperavitCalculatorPageState
               Row(
                 children: [
                   Expanded(
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Prazo',
                       controller: _weeksController,
                       suffix: 'semanas',
@@ -153,7 +154,7 @@ class _DeficitSuperavitCalculatorPageState
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'TDEE',
                       controller: _tdeeController,
                       suffix: 'kcal/dia',
@@ -182,10 +183,10 @@ class _DeficitSuperavitCalculatorPageState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
+                    color: Theme.of(context).colorScheme.outlineVariant,
                   ),
                 ),
                 child: Row(
@@ -193,14 +194,14 @@ class _DeficitSuperavitCalculatorPageState
                     Icon(
                       Icons.info_outline,
                       size: 18,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Não sabe seu TDEE? Use a calculadora de TMB primeiro!',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 13,
                         ),
                       ),
@@ -256,88 +257,6 @@ class _DeficitSuperavitCalculatorPageState
   }
 }
 
-/// Dark themed input field for the calculator
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.health,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _CaloricBalanceResultCard extends StatelessWidget {
   final CaloricBalanceResult result;
 
@@ -362,11 +281,12 @@ class _CaloricBalanceResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final goalColor = _getGoalColor(result.goal);
+    final theme = Theme.of(context);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: goalColor.withValues(alpha: 0.3),
@@ -438,7 +358,7 @@ class _CaloricBalanceResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: theme.colorScheme.surfaceContainer,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -497,7 +417,7 @@ class _CaloricBalanceResultCard extends StatelessWidget {
                   child: Text(
                     result.warning,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -531,7 +451,7 @@ class _CaloricBalanceResultCard extends StatelessWidget {
                   child: Text(
                     result.recommendation,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: theme.colorScheme.onSurface,
                       height: 1.4,
                     ),
                   ),
@@ -547,7 +467,7 @@ class _CaloricBalanceResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: theme.colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
@@ -556,7 +476,7 @@ class _CaloricBalanceResultCard extends StatelessWidget {
                   Text(
                     'Dicas importantes:',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: theme.colorScheme.onSurface,
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -566,21 +486,21 @@ class _CaloricBalanceResultCard extends StatelessWidget {
                     Text(
                       '• Alta proteína preserva massa muscular',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
                     Text(
                       '• Treine força 3-4x por semana',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
                     Text(
                       '• Reavalie a cada 2-4 semanas',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
@@ -588,21 +508,21 @@ class _CaloricBalanceResultCard extends StatelessWidget {
                     Text(
                       '• Combine com treino de força intenso',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
                     Text(
                       '• Proteína: 1.6-2.2g por kg de peso',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
                     Text(
                       '• Ganho lento = mais músculo, menos gordura',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurfaceVariant,
                         fontSize: 13,
                       ),
                     ),
@@ -631,18 +551,19 @@ class _InfoColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Icon(
           icon,
           size: 20,
-          color: Colors.white.withValues(alpha: 0.7),
+          color: theme.colorScheme.onSurfaceVariant,
         ),
         const SizedBox(height: 4),
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: theme.colorScheme.onSurfaceVariant,
             fontSize: 13,
           ),
         ),
@@ -651,7 +572,7 @@ class _InfoColumn extends StatelessWidget {
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
-            color: valueColor ?? Colors.white.withValues(alpha: 0.9),
+            color: valueColor ?? theme.colorScheme.onSurface,
           ),
         ),
       ],

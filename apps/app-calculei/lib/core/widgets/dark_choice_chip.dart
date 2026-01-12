@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// Dark themed choice chip for agriculture calculators
-/// Replaces ChoiceChip which doesn't style properly in dark mode
+/// Theme-adaptive choice chip for calculators
+/// Works properly in both dark and light modes
 class DarkChoiceChip extends StatelessWidget {
   final String label;
   final bool isSelected;
@@ -18,10 +18,14 @@ class DarkChoiceChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.2)
-          : Colors.white.withValues(alpha: 0.08),
+          : isDark 
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.black.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(20),
       child: InkWell(
         onTap: onSelected,
@@ -32,7 +36,9 @@ class DarkChoiceChip extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.15),
+                  : isDark 
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.15),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(20),
@@ -55,7 +61,9 @@ class DarkChoiceChip extends StatelessWidget {
                   fontSize: 14,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.8),
+                      : isDark 
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                 ),
               ),
             ],

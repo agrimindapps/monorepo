@@ -40,7 +40,10 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
       actions: [
         if (_result != null)
           IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            icon: Icon(
+              Icons.share_outlined,
+              color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
+            ),
             onPressed: () {
               // Share result
             },
@@ -80,9 +83,7 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
               // Activity Level
               Text(
                 'Nível de atividade física',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -105,9 +106,7 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
               // Climate
               Text(
                 'Clima',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -190,14 +189,15 @@ class _DarkInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
+          style: theme.textTheme.labelMedium?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -207,19 +207,16 @@ class _DarkInputField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
+          style: theme.textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
+            suffixStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
+            fillColor: colorScheme.onSurface.withValues(alpha: 0.08),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -227,7 +224,7 @@ class _DarkInputField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: colorScheme.onSurface.withValues(alpha: 0.1),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -239,7 +236,7 @@ class _DarkInputField extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: colorScheme.error),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -267,11 +264,12 @@ class _ActivityChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.health;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : colorScheme.onSurface.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -282,7 +280,7 @@ class _ActivityChip extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : colorScheme.onSurface.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -294,7 +292,7 @@ class _ActivityChip extends StatelessWidget {
               fontSize: 14,
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.7),
+                  : colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ),
@@ -311,11 +309,12 @@ class _WaterResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const resultColor = CalculatorAccentColors.health;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: resultColor.withValues(alpha: 0.3),
@@ -395,7 +394,7 @@ class _WaterResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: colorScheme.onSurface.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -406,7 +405,7 @@ class _WaterResultCard extends StatelessWidget {
                     Text(
                       'Base',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 12,
                       ),
                     ),
@@ -414,7 +413,7 @@ class _WaterResultCard extends StatelessWidget {
                       '${result.baseLiters}L',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: colorScheme.onSurface.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -428,7 +427,7 @@ class _WaterResultCard extends StatelessWidget {
                     Text(
                       'Ajustado',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: colorScheme.onSurface.withValues(alpha: 0.6),
                         fontSize: 12,
                       ),
                     ),
@@ -472,7 +471,7 @@ class _WaterResultCard extends StatelessWidget {
                       'Dicas de hidratação',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: colorScheme.onSurface.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -495,7 +494,7 @@ class _WaterResultCard extends StatelessWidget {
                             tip,
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.8),
+                              color: colorScheme.onSurface.withValues(alpha: 0.8),
                               height: 1.4,
                             ),
                           ),

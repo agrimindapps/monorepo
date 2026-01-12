@@ -1,33 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/widgets/app_shell.dart';
 import '../../domain/entities/game_entity.dart';
 import '../../domain/enums/game_category.dart';
 import '../providers/home_providers.dart';
 import '../widgets/game_card_featured.dart';
 import '../widgets/games_section.dart';
-import '../widgets/home_header.dart';
-import '../widgets/home_sidebar.dart';
+import '../widgets/home_search_bar.dart';
 
 /// HomePage - Modern game portal design
 /// Displays games in a portal-style layout with sidebar and sections
-class HomePage extends ConsumerStatefulWidget {
+/// Now uses AppShell for unified layout structure
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  ConsumerState<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends ConsumerState<HomePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _sidebarCollapsed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 800;
-    final isTablet = screenWidth >= 800 && screenWidth < 1200;
-
+  Widget build(BuildContext context, WidgetRef ref) {
     final filteredGames = ref.watch(filteredGamesProvider);
     final featuredGames = ref.watch(featuredGamesProvider);
     final newGames = ref.watch(newGamesProvider);
@@ -37,67 +26,64 @@ class _HomePageState extends ConsumerState<HomePage> {
     final hasActiveFilter =
         selectedCategory != GameCategory.all || searchQuery.isNotEmpty;
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFF0F0F1A),
-      drawer: isMobile
-          ? Drawer(
-              backgroundColor: const Color(0xFF1A1A2E),
-              child: HomeSidebar(
-                isCollapsed: false,
-                onToggleCollapse: () => Navigator.of(context).pop(),
-              ),
-            )
-          : null,
-      body: Row(
-        children: [
-          // Sidebar (desktop/tablet)
-          if (!isMobile)
-            HomeSidebar(
-              isCollapsed: isTablet ? _sidebarCollapsed : false,
-              onToggleCollapse: isTablet
-                  ? () => setState(() => _sidebarCollapsed = !_sidebarCollapsed)
-                  : null,
-            ),
-
-          // Main content
-          Expanded(
-            child: Column(
-              children: [
-                // Header
-                HomeHeader(
-                  onMenuTap: isMobile
-                      ? () => _scaffoldKey.currentState?.openDrawer()
-                      : null,
-                ),
-
-                // Content
-                Expanded(
-                  child: _buildContent(
-                    context,
-                    hasActiveFilter: hasActiveFilter,
-                    filteredGames: filteredGames,
-                    featuredGames: featuredGames,
-                    newGames: newGames,
-                    selectedCategory: selectedCategory,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+    return AppShell(
+      searchWidget: const HomeSearchBar(),
+      headerTrailing: _buildProfileAvatar(),
+      collapsibleSidebar: true,
+      child: _HomeContent(
+        hasActiveFilter: hasActiveFilter,
+        filteredGames: filteredGames.cast<GameEntity>(),
+        featuredGames: featuredGames.cast<GameEntity>(),
+        newGames: newGames.cast<GameEntity>(),
+        selectedCategory: selectedCategory,
       ),
     );
   }
 
-  Widget _buildContent(
-    BuildContext context, {
-    required bool hasActiveFilter,
-    required List filteredGames,
-    required List featuredGames,
-    required List newGames,
-    required GameCategory selectedCategory,
-  }) {
+  Widget _buildProfileAvatar() {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white24,
+          width: 2,
+        ),
+        gradient: LinearGradient(
+          colors: [
+            Colors.purple.shade400,
+            Colors.blue.shade400,
+          ],
+        ),
+      ),
+      child: const Icon(
+        Icons.person,
+        color: Colors.white,
+        size: 24,
+      ),
+    );
+  }
+}
+
+/// Home content widget - contains the games grid and sections
+class _HomeContent extends ConsumerWidget {
+  final bool hasActiveFilter;
+  final List<GameEntity> filteredGames;
+  final List<GameEntity> featuredGames;
+  final List<GameEntity> newGames;
+  final GameCategory selectedCategory;
+
+  const _HomeContent({
+    required this.hasActiveFilter,
+    required this.filteredGames,
+    required this.featuredGames,
+    required this.newGames,
+    required this.selectedCategory,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final scrollController = ScrollController();
 
     return Container(
@@ -134,16 +120,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                       duration: const Duration(milliseconds: 300),
                       child: KeyedSubtree(
                         key: ValueKey('${selectedCategory.name}_${filteredGames.length}'),
-                        child: _buildFilteredResults(
-                          filteredGames.cast(),
-                          selectedCategory,
+                        child: _FilteredResults(
+                          games: filteredGames,
+                          category: selectedCategory,
                         ),
                       ),
                     ),
                   ] else ...[
                     // Featured games carousel
                     if (featuredGames.isNotEmpty) ...[
-                      _buildFeaturedSection(featuredGames.cast()),
+                      _FeaturedSection(games: featuredGames),
                       const SizedBox(height: 32),
                     ],
 
@@ -152,7 +138,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       GamesSection(
                         title: 'Novos Jogos',
                         icon: Icons.fiber_new,
-                        games: newGames.cast(),
+                        games: newGames,
                         isCompact: true,
                       ),
                       const SizedBox(height: 32),
@@ -162,7 +148,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     GamesSection(
                       title: 'Todos os Jogos',
                       icon: Icons.games,
-                      games: filteredGames.cast(),
+                      games: filteredGames,
                     ),
                   ],
                 ],
@@ -173,8 +159,16 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+}
 
-  Widget _buildFeaturedSection(List games) {
+/// Featured games section
+class _FeaturedSection extends StatelessWidget {
+  final List<GameEntity> games;
+
+  const _FeaturedSection({required this.games});
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -243,8 +237,20 @@ class _HomePageState extends ConsumerState<HomePage> {
       ],
     );
   }
+}
 
-  Widget _buildFilteredResults(List games, GameCategory category) {
+/// Filtered results section
+class _FilteredResults extends ConsumerWidget {
+  final List<GameEntity> games;
+  final GameCategory category;
+
+  const _FilteredResults({
+    required this.games,
+    required this.category,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final title = category == GameCategory.all
         ? 'Resultados da Busca'
         : category.displayName;
@@ -319,7 +325,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         else
           GamesSection(
             title: '',
-            games: games.cast<GameEntity>(),
+            games: games,
           ),
       ],
     );

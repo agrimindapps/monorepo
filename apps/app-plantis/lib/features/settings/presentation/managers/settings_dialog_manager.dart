@@ -1,7 +1,6 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
 
-import '../dialogs/feedback_dialog.dart';
 import '../providers/notifiers/plantis_theme_notifier.dart';
 
 /// Manager para construir e gerenciar diálogos de configurações
@@ -14,10 +13,7 @@ class SettingsDialogManager {
 
   /// Constrói e exibe diálogo de feedback
   void showFeedbackDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => const FeedbackDialog(),
-    );
+    FeedbackDialog.show(context);
   }
 
   /// Constrói e exibe diálogo de informações do app

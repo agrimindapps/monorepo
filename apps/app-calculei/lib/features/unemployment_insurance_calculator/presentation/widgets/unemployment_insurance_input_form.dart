@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
-import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_unemployment_insurance_usecase.dart';
@@ -123,7 +122,7 @@ class UnemploymentInsuranceInputFormState
                 return null;
               },
             ),
-            right: _DarkDateField(
+            right: AccentDateField(
               controller: _dismissalDateController,
               label: 'Data de Demissão',
               helperText: 'DD/MM/AAAA',
@@ -141,15 +140,15 @@ class UnemploymentInsuranceInputFormState
                 }
                 return null;
               },
-              onChanged: (value) {
-                final date = _parseDate(value);
-                if (date != null) {
-                  setState(() {
-                    _dismissalDate = date;
-                  });
-                }
+              initialDate: _dismissalDate,
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              onDateSelected: (DateTime date) {
+                setState(() {
+                  _dismissalDate = date;
+                  _dismissalDateController.text = _formatDate(date);
+                });
               },
-              onTap: () => _selectDate(context),
             ),
           ),
         ],
@@ -202,22 +201,6 @@ class UnemploymentInsuranceInputFormState
         '${date.year}';
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _dismissalDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-
-    if (picked != null) {
-      setState(() {
-        _dismissalDate = picked;
-        _dismissalDateController.text = _formatDate(picked);
-      });
-    }
-  }
-
   void _submitForm() {
     if (!widget.formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -240,96 +223,3 @@ class UnemploymentInsuranceInputFormState
   }
 }
 
-/// Dark themed date input field
-class _DarkDateField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
-  final VoidCallback? onTap;
-
-  const _DarkDateField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    this.helperText,
-    this.validator,
-    this.onChanged,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.datetime,
-          validator: validator,
-          onChanged: onChanged,
-          onTap: onTap,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixIcon: Icon(
-              Icons.calendar_today,
-              color: Colors.white.withValues(alpha: 0.5),
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

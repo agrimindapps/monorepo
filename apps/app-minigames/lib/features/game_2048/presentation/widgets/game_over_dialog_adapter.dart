@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../widgets/shared/game_over_dialog.dart' as shared;
 import '../providers/game_2048_notifier.dart';
 
@@ -33,7 +34,7 @@ class Game2048GameOverDialogAdapter extends ConsumerWidget {
       stats: stats,
       newAchievements: const [],
       onPlayAgain: () => ref.read(game2048Provider.notifier).restart(),
-      onExit: () => context.go('/'),
+      onExit: () => rootNavigatorKey.currentContext?.go('/'),
       victoryColor: Colors.amber,
       defeatColor: Colors.orange,
     );

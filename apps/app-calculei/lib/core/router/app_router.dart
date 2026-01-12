@@ -8,8 +8,18 @@ import '../../features/cash_vs_installment_calculator/presentation/pages/cash_vs
 import '../../features/construction_calculator/presentation/pages/brick_calculator_page.dart';
 import '../../features/construction_calculator/presentation/pages/concrete_calculator_page.dart';
 import '../../features/construction_calculator/presentation/pages/construction_selection_page.dart';
+import '../../features/construction_calculator/presentation/pages/drywall_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/earthwork_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/electrical_calculator_page.dart';
 import '../../features/construction_calculator/presentation/pages/flooring_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/glass_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/mortar_calculator_page.dart';
 import '../../features/construction_calculator/presentation/pages/paint_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/plumbing_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/rebar_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/roof_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/slab_calculator_page.dart';
+import '../../features/construction_calculator/presentation/pages/water_tank_calculator_page.dart';
 // Health Calculators
 import '../../features/health_calculator/presentation/pages/alcool_sangue_calculator_page.dart';
 import '../../features/health_calculator/presentation/pages/bmi_calculator_page.dart';
@@ -39,19 +49,33 @@ import '../../features/pet_calculator/presentation/pages/pet_selection_page.dart
 import '../../features/pet_calculator/presentation/pages/pregnancy_calculator_page.dart';
 import '../../features/pet_calculator/presentation/pages/unit_conversion_calculator_page.dart';
 // Agriculture Calculators
+import '../../features/agriculture_calculator/presentation/pages/agribusiness_selection_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/agriculture_selection_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/livestock_selection_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/breeding_cycle_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/evapotranspiration_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/feed_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/fertilizer_dosing_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/field_capacity_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/fuel_consumption_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/harvester_setup_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/irrigation_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/nozzle_flow_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/npk_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/operational_cost_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/planter_setup_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/planting_density_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/seed_rate_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/soil_ph_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/spray_mix_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/tire_pressure_calculator_page.dart';
+import '../../features/agriculture_calculator/presentation/pages/tractor_ballast_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/weight_gain_calculator_page.dart';
 import '../../features/agriculture_calculator/presentation/pages/yield_prediction_calculator_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
+// Admin
+import '../../features/admin/presentation/pages/admin_login_page.dart';
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 // Financial Calculators
 import '../../features/thirteenth_salary_calculator/presentation/pages/thirteenth_salary_calculator_page.dart';
 import '../../features/unemployment_insurance_calculator/presentation/pages/unemployment_insurance_calculator_page.dart';
@@ -84,8 +108,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: '/home',
               pageBuilder: (context, state) {
                 final category = state.uri.queryParameters['category'];
+                final filter = state.uri.queryParameters['filter'];
+                // Generate unique key based on params to force rebuild
+                final key = ValueKey('home_${category ?? 'all'}_${filter ?? 'none'}');
                 return fadeTransitionPage(
-                  child: HomePage(initialCategory: category),
+                  child: HomePage(
+                    key: key,
+                    initialCategory: category,
+                    initialFilter: filter,
+                  ),
                   state: state,
                 );
               },
@@ -176,6 +207,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               ),
             ),
             GoRoute(
+              path: '/calculators/construction/rebar',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const RebarCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/water-tank',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const WaterTankCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
               path: '/calculators/construction/paint',
               pageBuilder: (context, state) => fadeTransitionPage(
                 child: const PaintCalculatorPage(),
@@ -193,6 +238,62 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: '/calculators/construction/brick',
               pageBuilder: (context, state) => fadeTransitionPage(
                 child: const BrickCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/electrical',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const ElectricalCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/drywall',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const DrywallCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/roof',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const RoofCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/mortar',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const MortarCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/glass',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const GlassCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/slab',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const SlabCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/earthwork',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const EarthworkCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/construction/plumbing',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PlumbingCalculatorPage(),
                 state: state,
               ),
             ),
@@ -352,7 +453,28 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 state: state,
               ),
             ),
-            // Agriculture Calculators
+            // Agriculture/Livestock Calculators
+            GoRoute(
+              path: '/calculators/agribusiness/selection',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const AgribusinessSelectionPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const AgricultureSelectionPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/livestock',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const LivestockSelectionPage(),
+                state: state,
+              ),
+            ),
             GoRoute(
               path: '/calculators/agriculture/selection',
               pageBuilder: (context, state) => fadeTransitionPage(
@@ -385,6 +507,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               path: '/calculators/agriculture/fertilizer-dosing',
               pageBuilder: (context, state) => fadeTransitionPage(
                 child: const FertilizerDosingCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/spray-mix',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const SprayMixCalculatorPage(),
                 state: state,
               ),
             ),
@@ -437,6 +566,62 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 state: state,
               ),
             ),
+            GoRoute(
+              path: '/calculators/agriculture/fuel-consumption',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FuelConsumptionCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/nozzle-flow',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const NozzleFlowCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/field-capacity',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const FieldCapacityCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/planter-setup',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const PlanterSetupCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/tractor-ballast',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const TractorBallastCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/tire-pressure',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const TirePressureCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/operational-cost',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const OperationalCostCalculatorPage(),
+                state: state,
+              ),
+            ),
+            GoRoute(
+              path: '/calculators/agriculture/harvester-setup',
+              pageBuilder: (context, state) => fadeTransitionPage(
+                child: const HarvesterSetupCalculatorPage(),
+                state: state,
+              ),
+            ),
           ],
         ),
 
@@ -453,6 +638,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ],
         ),
       ],
+    ),
+    // Admin routes (outside shell - no sidebar)
+    GoRoute(
+      path: '/admin',
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AdminLoginPage(),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: '/admin/dashboard',
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AdminDashboardPage(),
+        state: state,
+      ),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

@@ -1,21 +1,23 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/user_preferences_providers.dart';
 import '../../domain/entities/game_entity.dart';
 
 /// Modern game card with gradient and visual effects
-class GameCard extends StatefulWidget {
+class GameCard extends ConsumerStatefulWidget {
   final GameEntity game;
   final bool isCompact;
 
   const GameCard({super.key, required this.game, this.isCompact = false});
 
   @override
-  State<GameCard> createState() => _GameCardState();
+  ConsumerState<GameCard> createState() => _GameCardState();
 }
 
-class _GameCardState extends State<GameCard> {
+class _GameCardState extends ConsumerState<GameCard> {
   bool _isHovered = false;
 
   @override
@@ -110,6 +112,12 @@ class _GameCardState extends State<GameCard> {
                               ),
                             ],
                             const Spacer(),
+                            // Favorite button
+                            _FavoriteButton(
+                              gameId: game.id,
+                              isCompact: widget.isCompact,
+                            ),
+                            const SizedBox(width: 6),
                             // Category emoji
                             Container(
                               padding: const EdgeInsets.all(6),
@@ -286,4 +294,47 @@ class _PatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Favorite button widget
+class _FavoriteButton extends ConsumerWidget {
+  final String gameId;
+  final bool isCompact;
+
+  const _FavoriteButton({
+    required this.gameId,
+    this.isCompact = false,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteGamesAsync = ref.watch(favoriteGamesProvider);
+    final isFavorite = favoriteGamesAsync.value?.contains(gameId) ?? false;
+
+    return GestureDetector(
+      onTap: () {
+        ref.read(favoriteGamesProvider.notifier).toggle(gameId);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isFavorite
+                  ? Colors.pink.withValues(alpha: 0.3)
+                  : Colors.black26,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              size: isCompact ? 14 : 16,
+              color: isFavorite ? Colors.pink : Colors.white70,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

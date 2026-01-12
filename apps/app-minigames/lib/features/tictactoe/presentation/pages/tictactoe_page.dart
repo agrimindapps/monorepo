@@ -154,10 +154,28 @@ class TicTacToePage extends ConsumerWidget {
                 aspectRatio: 1,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF2A2A3E).withValues(alpha: 0.6),
+                        const Color(0xFF1F1F2E).withValues(alpha: 0.8),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF6A11CB).withValues(alpha: 0.3),
+                      width: 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6A11CB).withValues(alpha: 0.15),
+                        blurRadius: 20,
+                        spreadRadius: 2,
+                      ),
+                    ],
                   ),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   child: GameBoardWidget(
                     gameState: state,
                     onCellTapped: (row, col) {

@@ -190,6 +190,8 @@ class _DarkInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -232,8 +234,8 @@ class _DarkInputField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.health,
+              borderSide: BorderSide(
+                color: theme.colorScheme.primary,
                 width: 2,
               ),
             ),

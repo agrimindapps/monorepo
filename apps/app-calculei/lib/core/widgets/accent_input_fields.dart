@@ -329,3 +329,144 @@ class _InputColors {
     }
   }
 }
+
+/// Theme-aware date input field with accent color
+/// 
+/// Displays a date picker and formats the selected date.
+/// Adapts to light/dark theme while maintaining accent color.
+class AccentDateField extends StatelessWidget {
+  final TextEditingController controller;
+  final String label;
+  final String? helperText;
+  final Color accentColor;
+  final String? Function(String?)? validator;
+  final void Function(DateTime) onDateSelected;
+  final DateTime? initialDate;
+  final DateTime? firstDate;
+  final DateTime? lastDate;
+
+  const AccentDateField({
+    super.key,
+    required this.controller,
+    required this.label,
+    required this.accentColor,
+    required this.onDateSelected,
+    this.helperText,
+    this.validator,
+    this.initialDate,
+    this.firstDate,
+    this.lastDate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colors = _InputColors.fromBrightness(isDark);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: colors.labelColor,
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        if (helperText != null) ...[
+          const SizedBox(height: 2),
+          Text(
+            helperText!,
+            style: TextStyle(
+              color: colors.helperColor,
+              fontSize: 11,
+            ),
+          ),
+        ],
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          readOnly: true,
+          style: TextStyle(
+            color: colors.textColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: colors.fillColor,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: colors.borderColor,
+                width: 1.5,
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: colors.borderColor,
+                width: 1.5,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: accentColor,
+                width: 2,
+              ),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 1.5,
+              ),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Colors.red,
+                width: 2,
+              ),
+            ),
+            suffixIcon: Icon(
+              Icons.calendar_today,
+              color: colors.labelColor,
+              size: 20,
+            ),
+          ),
+          validator: validator,
+          onTap: () async {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: initialDate ?? DateTime.now(),
+              firstDate: firstDate ?? DateTime(1900),
+              lastDate: lastDate ?? DateTime(2100),
+              builder: (context, child) {
+                return Theme(
+                  data: theme.copyWith(
+                    colorScheme: theme.colorScheme.copyWith(
+                      primary: accentColor,
+                    ),
+                  ),
+                  child: child!,
+                );
+              },
+            );
+
+            if (date != null) {
+              onDateSelected(date);
+            }
+          },
+        ),
+      ],
+    );
+  }
+}

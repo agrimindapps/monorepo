@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/planting_density_calculator.dart';
 
@@ -67,7 +68,7 @@ class _PlantingDensityCalculatorPageState
                 children: [
                   SizedBox(
                     width: 180,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Espaçamento entre linhas',
                       controller: _rowSpacingController,
                       suffix: 'm',
@@ -83,7 +84,7 @@ class _PlantingDensityCalculatorPageState
                   ),
                   SizedBox(
                     width: 180,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Espaçamento entre plantas',
                       controller: _plantSpacingController,
                       suffix: 'm',
@@ -109,7 +110,7 @@ class _PlantingDensityCalculatorPageState
                 children: [
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Área total',
                       controller: _areaController,
                       suffix: 'ha',
@@ -125,7 +126,7 @@ class _PlantingDensityCalculatorPageState
                   ),
                   SizedBox(
                     width: 180,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Custo por muda (opcional)',
                       controller: _costPerPlantController,
                       suffix: 'R\$',
@@ -193,13 +194,19 @@ class _PlantingDensityResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -212,7 +219,9 @@ class _PlantingDensityResultCard extends StatelessWidget {
               Text(
                 'Resultado da Densidade',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark 
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -274,7 +283,9 @@ class _PlantingDensityResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.black.withValues(alpha: 0.03),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -283,7 +294,9 @@ class _PlantingDensityResultCard extends StatelessWidget {
                   Text(
                     'Custo com mudas:',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.7)
+                          : Colors.black.withValues(alpha: 0.7),
                     ),
                   ),
                   Text(
@@ -306,7 +319,9 @@ class _PlantingDensityResultCard extends StatelessWidget {
             Text(
               'Recomendações',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.9)
+                    : Colors.black.withValues(alpha: 0.9),
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
               ),
@@ -328,7 +343,9 @@ class _PlantingDensityResultCard extends StatelessWidget {
                       child: Text(
                         rec,
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.7),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.7)
+                              : Colors.black.withValues(alpha: 0.7),
                           fontSize: 14,
                         ),
                       ),
@@ -372,19 +389,23 @@ class _ResultBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
+        color: color.withValues(alpha: isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.3 : 0.2)),
       ),
       child: Column(
         children: [
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -399,94 +420,6 @@ class _ResultBox extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

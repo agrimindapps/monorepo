@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/weight_gain_calculator.dart';
 
@@ -62,13 +63,18 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 // Animal type selection
-                Text(
-                  'Tipo de Animal',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Builder(
+                  builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    return Text(
+                      'Tipo de Animal',
+                      style: TextStyle(
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -93,7 +99,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                   children: [
                     SizedBox(
                       width: 160,
-                      child: _DarkInputField(
+                      child: AdaptiveInputField(
                         label: 'Peso inicial',
                         controller: _initialWeightController,
                         suffix: 'kg',
@@ -109,7 +115,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                     ),
                     SizedBox(
                       width: 160,
-                      child: _DarkInputField(
+                      child: AdaptiveInputField(
                         label: 'Peso alvo',
                         controller: _targetWeightController,
                         suffix: 'kg',
@@ -125,7 +131,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                     ),
                     SizedBox(
                       width: 200,
-                      child: _DarkInputField(
+                      child: AdaptiveInputField(
                         label: 'Ganho diário esperado',
                         controller: _dailyGainController,
                         suffix: 'kg/dia',
@@ -205,6 +211,7 @@ class _WeightGainResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateFormatter = DateFormat('dd/MM/yyyy');
     const accentColor = CalculatorAccentColors.agriculture;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -218,10 +225,10 @@ class _WeightGainResultCard extends StatelessWidget {
               size: 24,
             ),
             const SizedBox(width: 8),
-            const Text(
+            Text(
               'Previsão de Ganho de Peso',
               style: TextStyle(
-                color: Colors.white,
+                color: isDark ? Colors.white : Colors.black,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -281,10 +288,10 @@ class _WeightGainResultCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
+            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
             ),
           ),
           child: Column(
@@ -335,7 +342,7 @@ class _WeightGainResultCard extends StatelessWidget {
                   Text(
                     'Recomendações',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -359,7 +366,7 @@ class _WeightGainResultCard extends StatelessWidget {
                         child: Text(
                           rec,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -414,6 +421,7 @@ class _ResultBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -427,7 +435,7 @@ class _ResultBox extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -446,7 +454,7 @@ class _ResultBox extends StatelessWidget {
             Text(
               subtitle!,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
                 fontSize: 11,
               ),
             ),
@@ -470,13 +478,14 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.6),
+            color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -484,7 +493,9 @@ class _DetailRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            color: highlight ? Colors.white : Colors.white.withValues(alpha: 0.8),
+            color: highlight 
+                ? (isDark ? Colors.white : Colors.black)
+                : (isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8)),
             fontSize: highlight ? 16 : 14,
             fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
           ),
@@ -494,90 +505,4 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
 
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

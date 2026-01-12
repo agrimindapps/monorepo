@@ -13,6 +13,7 @@ class ThemeToggleButton extends ConsumerWidget {
     this.iconSize = 24.0,
     this.color,
     this.tooltip,
+    this.showSnackBar = true,
   });
 
   /// Tamanho do ícone
@@ -23,6 +24,40 @@ class ThemeToggleButton extends ConsumerWidget {
   
   /// Tooltip customizado
   final String? tooltip;
+  
+  /// Se deve mostrar SnackBar ao trocar tema
+  final bool showSnackBar;
+
+  void _showThemeSnackBar(BuildContext context, bool isDark) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isDark ? 'Tema Escuro ativado' : 'Tema Claro ativado',
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isDark ? const Color(0xFF1A1A2E) : const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -53,6 +88,10 @@ class ThemeToggleButton extends ConsumerWidget {
       tooltip: tooltip ?? (isDark ? 'Tema Claro' : 'Tema Escuro'),
       onPressed: () {
         ref.read(themeModeProvider.notifier).toggleTheme();
+        if (showSnackBar) {
+          // Show snackbar with the NEW theme (opposite of current)
+          _showThemeSnackBar(context, !isDark);
+        }
       },
     );
   }
@@ -65,10 +104,45 @@ class ThemeToggleChip extends ConsumerWidget {
   const ThemeToggleChip({
     super.key,
     this.showLabel = true,
+    this.showSnackBar = true,
   });
 
   /// Se deve mostrar o label "Claro"/"Escuro"
   final bool showLabel;
+  
+  /// Se deve mostrar SnackBar ao trocar tema
+  final bool showSnackBar;
+
+  void _showThemeSnackBar(BuildContext context, bool isDark) {
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              isDark ? 'Tema Escuro ativado' : 'Tema Claro ativado',
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: isDark ? const Color(0xFF1A1A2E) : const Color(0xFF4CAF50),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        duration: const Duration(seconds: 2),
+        margin: const EdgeInsets.all(16),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -83,6 +157,9 @@ class ThemeToggleChip extends ConsumerWidget {
       child: InkWell(
         onTap: () {
           ref.read(themeModeProvider.notifier).toggleTheme();
+          if (showSnackBar) {
+            _showThemeSnackBar(context, !isDark);
+          }
         },
         borderRadius: BorderRadius.circular(20),
         child: Container(

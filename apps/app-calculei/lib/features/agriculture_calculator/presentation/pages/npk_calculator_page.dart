@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/npk_calculator.dart';
 
@@ -66,13 +67,18 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Crop selection
-              Text(
-                'Cultura',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Cultura',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -99,7 +105,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                 children: [
                   SizedBox(
                     width: 180,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Produtividade esperada',
                       controller: _yieldController,
                       suffix: 't/ha',
@@ -115,7 +121,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                   ),
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
                       suffix: 'ha',
@@ -135,13 +141,18 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
               const SizedBox(height: 24),
 
               // Soil texture
-              Text(
-                'Textura do solo',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Textura do solo',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -162,13 +173,18 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
               const SizedBox(height: 24),
 
               // Soil analysis
-              Text(
-                'Análise de solo',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Análise de solo',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -177,7 +193,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                 children: [
                   SizedBox(
                     width: 130,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'N disponível',
                       controller: _soilNController,
                       suffix: 'mg/dm³',
@@ -186,7 +202,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                   ),
                   SizedBox(
                     width: 130,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'P (Mehlich)',
                       controller: _soilPController,
                       suffix: 'mg/dm³',
@@ -195,7 +211,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                   ),
                   SizedBox(
                     width: 130,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'K trocável',
                       controller: _soilKController,
                       suffix: 'mg/dm³',
@@ -204,7 +220,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                   ),
                   SizedBox(
                     width: 130,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Mat. Orgânica',
                       controller: _omController,
                       suffix: '%',
@@ -276,13 +292,14 @@ class _NpkResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -295,7 +312,7 @@ class _NpkResultCard extends StatelessWidget {
               Text(
                 'Resultado',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -352,7 +369,7 @@ class _NpkResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -361,13 +378,13 @@ class _NpkResultCard extends StatelessWidget {
                 Text(
                   'Custo estimado:',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   ),
                 ),
                 Text(
                   'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -382,7 +399,7 @@ class _NpkResultCard extends StatelessWidget {
           Text(
             'Fertilizantes recomendados',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -397,23 +414,23 @@ class _NpkResultCard extends StatelessWidget {
           // Tips
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             child: ExpansionTile(
               title: Text(
                 'Dicas de aplicação',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              iconColor: Colors.white.withValues(alpha: 0.7),
-              collapsedIconColor: Colors.white.withValues(alpha: 0.7),
-              textColor: Colors.white.withValues(alpha: 0.9),
+              iconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              collapsedIconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              textColor: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               children: result.applicationTips
                   .map(
                     (tip) => Padding(
@@ -431,7 +448,7 @@ class _NpkResultCard extends StatelessWidget {
                             child: Text(
                               tip,
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
+                                color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -464,6 +481,7 @@ class _ResultBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -476,7 +494,7 @@ class _ResultBox extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -494,7 +512,7 @@ class _ResultBox extends StatelessWidget {
           Text(
             unit,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -511,14 +529,15 @@ class _FertilizerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -535,8 +554,8 @@ class _FertilizerItem extends StatelessWidget {
               children: [
                 Text(
                   recommendation.name,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -544,7 +563,7 @@ class _FertilizerItem extends StatelessWidget {
                   recommendation.timing,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.white.withValues(alpha: 0.6),
+                    color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
                   ),
                 ),
               ],
@@ -552,101 +571,13 @@ class _FertilizerItem extends StatelessWidget {
           ),
           Text(
             '${recommendation.quantityKgHa} kg/ha',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

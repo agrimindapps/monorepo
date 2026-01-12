@@ -37,6 +37,10 @@ class _AlcoolSangueCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+    final subtleTextColor = textColor.withValues(alpha: 0.7);
+
     return CalculatorPageLayout(
       title: 'Álcool no Sangue',
       subtitle: 'Blood Alcohol Concentration (BAC)',
@@ -47,7 +51,7 @@ class _AlcoolSangueCalculatorPageState
       actions: [
         if (_result != null)
           IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            icon: Icon(Icons.share_outlined, color: subtleTextColor),
             onPressed: () {
               // Share is handled in result card
             },
@@ -79,7 +83,7 @@ class _AlcoolSangueCalculatorPageState
                       child: Text(
                         'NUNCA dirija após consumir álcool. Lei Seca: 0 tolerância no Brasil.',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: textColor.withValues(alpha: 0.9),
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
                         ),
@@ -95,7 +99,7 @@ class _AlcoolSangueCalculatorPageState
               Text(
                 'Selecione o gênero',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: subtleTextColor,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -152,7 +156,7 @@ class _AlcoolSangueCalculatorPageState
               Text(
                 'Tipo de bebida',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: subtleTextColor,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -302,13 +306,17 @@ class _DarkInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+    final surfaceColor = theme.colorScheme.surface;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: textColor.withValues(alpha: 0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -319,19 +327,19 @@ class _DarkInputField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: textColor,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             suffixText: suffix,
             suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: textColor.withValues(alpha: 0.5),
               fontSize: 16,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
+            fillColor: surfaceColor.withValues(alpha: 0.5),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -339,7 +347,7 @@ class _DarkInputField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: textColor.withValues(alpha: 0.1),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -380,11 +388,14 @@ class _GenderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.health;
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+    final surfaceColor = theme.colorScheme.surface;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : surfaceColor.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -395,7 +406,7 @@ class _GenderButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : textColor.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -407,7 +418,7 @@ class _GenderButton extends StatelessWidget {
                 size: 32,
                 color: isSelected
                     ? accentColor
-                    : Colors.white.withValues(alpha: 0.6),
+                    : textColor.withValues(alpha: 0.6),
               ),
               const SizedBox(height: 6),
               Text(
@@ -417,7 +428,7 @@ class _GenderButton extends StatelessWidget {
                   fontSize: 14,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : textColor.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -444,11 +455,14 @@ class _DrinkTypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.health;
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+    final surfaceColor = theme.colorScheme.surface;
 
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.2)
-          : Colors.white.withValues(alpha: 0.05),
+          : surfaceColor.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -459,7 +473,7 @@ class _DrinkTypeChip extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : textColor.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -483,7 +497,7 @@ class _DrinkTypeChip extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.8),
+                      : textColor.withValues(alpha: 0.8),
                 ),
               ),
             ],
@@ -511,12 +525,15 @@ class _BacResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textColor = theme.colorScheme.onSurface;
+    final surfaceColor = theme.colorScheme.surface;
     final levelColor = _getLevelColor(result.level);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: surfaceColor.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: levelColor.withValues(alpha: 0.3),
@@ -535,7 +552,7 @@ class _BacResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: textColor.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -651,7 +668,7 @@ class _BacResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: surfaceColor.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -662,7 +679,7 @@ class _BacResultCard extends StatelessWidget {
                     Icon(
                       Icons.psychology_outlined,
                       size: 18,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: textColor.withValues(alpha: 0.7),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -670,7 +687,7 @@ class _BacResultCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: textColor.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -679,7 +696,7 @@ class _BacResultCard extends StatelessWidget {
                 Text(
                   result.effects,
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: textColor.withValues(alpha: 0.7),
                     height: 1.4,
                   ),
                 ),
@@ -712,7 +729,7 @@ class _BacResultCard extends StatelessWidget {
                   child: Text(
                     result.warning,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: textColor.withValues(alpha: 0.8),
                       fontWeight: FontWeight.w500,
                       height: 1.4,
                     ),

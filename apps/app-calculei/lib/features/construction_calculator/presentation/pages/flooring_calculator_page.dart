@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../providers/flooring_calculator_provider.dart';
 import '../widgets/flooring_result_card.dart';
 
@@ -67,13 +68,18 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'Dimensões do Ambiente',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text(
+                        'Dimensões do Ambiente',
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -83,7 +89,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                     children: [
                       SizedBox(
                         width: 200,
-                        child: _DarkInputField(
+                        child: AdaptiveInputField(
                           label: 'Comprimento',
                           controller: _roomLengthController,
                           suffix: 'm',
@@ -101,7 +107,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                       ),
                       SizedBox(
                         width: 200,
-                        child: _DarkInputField(
+                        child: AdaptiveInputField(
                           label: 'Largura',
                           controller: _roomWidthController,
                           suffix: 'm',
@@ -122,13 +128,18 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
 
                   const SizedBox(height: 24),
 
-                  Text(
-                    'Dimensões da Peça',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text(
+                        'Dimensões da Peça',
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -138,7 +149,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                     children: [
                       SizedBox(
                         width: 180,
-                        child: _DarkInputField(
+                        child: AdaptiveInputField(
                           label: 'Comprimento',
                           controller: _tileLengthController,
                           suffix: 'cm',
@@ -152,7 +163,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                       ),
                       SizedBox(
                         width: 180,
-                        child: _DarkInputField(
+                        child: AdaptiveInputField(
                           label: 'Largura',
                           controller: _tileWidthController,
                           suffix: 'cm',
@@ -166,7 +177,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                       ),
                       SizedBox(
                         width: 180,
-                        child: _DarkInputField(
+                        child: AdaptiveInputField(
                           label: 'Peças/caixa',
                           controller: _tilesPerBoxController,
                           keyboardType: TextInputType.number,
@@ -182,13 +193,18 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
 
                   const SizedBox(height: 24),
 
-                  Text(
-                    'Configurações',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text(
+                        'Configurações',
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -203,29 +219,39 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                   const SizedBox(height: 16),
 
                   // Waste slider
-                  Text(
-                    'Perda: ${_wastePercentage.toInt()}%',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return Text(
+                        'Perda: ${_wastePercentage.toInt()}%',
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      );
+                    },
                   ),
-                  SliderTheme(
-                    data: SliderThemeData(
-                      activeTrackColor: CalculatorAccentColors.construction,
-                      thumbColor: CalculatorAccentColors.construction,
-                      overlayColor: CalculatorAccentColors.construction.withValues(alpha: 0.2),
-                      inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
-                    ),
-                    child: Slider(
-                      value: _wastePercentage,
-                      min: 5,
-                      max: 20,
-                      divisions: 15,
-                      label: '${_wastePercentage.toInt()}%',
-                      onChanged: (value) => setState(() => _wastePercentage = value),
-                    ),
+                  Builder(
+                    builder: (context) {
+                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      return SliderTheme(
+                        data: SliderThemeData(
+                          activeTrackColor: CalculatorAccentColors.construction,
+                          thumbColor: CalculatorAccentColors.construction,
+                          overlayColor: CalculatorAccentColors.construction.withValues(alpha: 0.2),
+                          inactiveTrackColor: isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.2),
+                        ),
+                        child: Slider(
+                          value: _wastePercentage,
+                          min: 5,
+                          max: 20,
+                          divisions: 15,
+                          label: '${_wastePercentage.toInt()}%',
+                          onChanged: (value) => setState(() => _wastePercentage = value),
+                        ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 24),
@@ -306,100 +332,6 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
   }
 }
 
-/// Dark themed input field
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final String? helperText;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.helperText,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.construction,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 /// Dark themed dropdown field
 class _DarkDropdownField extends StatelessWidget {
   final String label;
@@ -416,13 +348,14 @@ class _DarkDropdownField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -430,15 +363,15 @@ class _DarkDropdownField extends StatelessWidget {
         const SizedBox(height: 8),
         DropdownButtonFormField<String>(
           value: value,
-          dropdownColor: const Color(0xFF1A1A2E),
-          style: const TextStyle(
-            color: Colors.white,
+          dropdownColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
+            fillColor: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -446,7 +379,7 @@ class _DarkDropdownField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             focusedBorder: OutlineInputBorder(

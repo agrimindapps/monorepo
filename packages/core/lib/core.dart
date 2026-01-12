@@ -84,6 +84,9 @@ export 'src/domain/entities/security_entity.dart';
 export 'src/domain/entities/shared_preferences_record.dart';
 export 'src/domain/entities/subscription_entity.dart';
 export 'src/domain/entities/user_entity.dart';
+// Feedback System
+export 'src/domain/entities/feedback_entity.dart';
+export 'src/domain/repositories/i_feedback_repository.dart';
 // Domain Repositories
 export 'src/domain/repositories/i_ads_repository.dart';
 export 'src/domain/repositories/i_analytics_repository.dart';
@@ -155,6 +158,7 @@ export 'src/infrastructure/services/firebase_analytics_service.dart';
 export 'src/infrastructure/services/firebase_auth_service.dart';
 export 'src/infrastructure/services/firebase_crashlytics_service.dart';
 export 'src/infrastructure/services/firebase_device_service.dart';
+export 'src/infrastructure/services/firebase_feedback_service.dart';
 export 'src/infrastructure/services/firebase_storage_service.dart';
 export 'src/infrastructure/services/firestore_deletion_service.dart';
 export 'src/infrastructure/services/http_client_service.dart' hide CacheItem;
@@ -189,6 +193,7 @@ export 'src/presentation/widgets/account_deletion/account_deletion_progress_dial
 // Presentation Widgets
 export 'src/presentation/widgets/ads/ad_banner_widget.dart';
 export 'src/presentation/widgets/ads/unified_ad_banner_widget.dart';
+export 'src/presentation/widgets/feedback/feedback_dialog.dart';
 export 'src/presentation/widgets/image/core_image_widget.dart';
 export 'src/presentation/widgets/profile/profile_image_picker_widget.dart';
 export 'src/riverpod/common_notifiers.dart';
@@ -207,6 +212,7 @@ export 'src/riverpod/domain/ads/web_ads_providers.dart';
 export 'src/riverpod/domain/analytics/analytics_providers.dart';
 export 'src/riverpod/domain/auth/auth_domain_providers.dart';
 export 'src/riverpod/domain/device/device_management_providers.dart';
+export 'src/riverpod/domain/feedback/feedback_providers.dart';
 export 'src/riverpod/domain/premium/subscription_providers.dart';
 export 'src/riverpod/domain/premium/subscription_sync_providers.dart';
 export 'src/riverpod/domain/profile/profile_providers.dart';

@@ -26,6 +26,8 @@ class _BodyConditionCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return CalculatorPageLayout(
       title: 'Calculadora de Condição Corporal',
       subtitle: 'Escore ECC (1-9)',
@@ -52,7 +54,7 @@ class _BodyConditionCalculatorPageState
               Text(
                 'Selecione a espécie',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -148,72 +150,78 @@ class _BodyConditionCalculatorPageState
     required List<String> descriptions,
     required ValueChanged<int> onChanged,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.8),
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(5, (index) {
-            final score = index + 1;
-            final isSelected = value == score;
-            return InkWell(
-              onTap: () => onChanged(score),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? CalculatorAccentColors.pet
-                      : Colors.white.withValues(alpha: 0.05),
+    return Builder(
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(5, (index) {
+                final score = index + 1;
+                final isSelected = value == score;
+                return InkWell(
+                  onTap: () => onChanged(score),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected
-                        ? CalculatorAccentColors.pet
-                        : Colors.white.withValues(alpha: 0.1),
-                    width: 2,
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? CalculatorAccentColors.pet
+                          : isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: isSelected
+                            ? CalculatorAccentColors.pet
+                            : isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+                        width: 2,
+                      ),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '$score',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: isSelected 
+                            ? Colors.white 
+                            : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                      ),
+                    ),
                   ),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  '$score',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: isSelected 
-                        ? Colors.white 
-                        : Colors.white.withValues(alpha: 0.7),
-                  ),
+                );
+              }),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                descriptions[value - 1],
+                style: TextStyle(
+                  fontSize: 13,
+                  color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                 ),
               ),
-            );
-          }),
-        ),
-        const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.05),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            descriptions[value - 1],
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.white.withValues(alpha: 0.8),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 
@@ -257,11 +265,12 @@ class _SpeciesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -272,7 +281,7 @@ class _SpeciesButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -287,7 +296,7 @@ class _SpeciesButton extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -320,11 +329,12 @@ class _BodyConditionResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = _getClassificationColor(result.classification);
     final petEmoji = species == PetSpecies.dog ? '🐕' : '🐈';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: color.withValues(alpha: 0.3),
@@ -342,7 +352,7 @@ class _BodyConditionResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -433,14 +443,14 @@ https://calculei.com.br''',
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(
               result.description,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               ),
             ),
           ),
@@ -453,7 +463,7 @@ https://calculei.com.br''',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 8),
@@ -474,7 +484,7 @@ https://calculei.com.br''',
                       rec,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                       ),
                     ),
                   ),

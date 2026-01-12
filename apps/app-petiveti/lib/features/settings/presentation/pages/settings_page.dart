@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/header_theme_button.dart';
 import '../../../../shared/widgets/petiveti_page_header.dart';
-import '../dialogs/feedback_dialog.dart';
 import '../widgets/sections/legal_section.dart';
 import '../widgets/sections/notification_section.dart';
 import '../widgets/sections/preferences_section.dart';
@@ -89,10 +88,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showFeedbackDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => const FeedbackDialog(),
-    );
+    FeedbackDialog.show(context);
   }
 
   Future<void> _showRateAppDialog() async {

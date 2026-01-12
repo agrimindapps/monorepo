@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
-import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_thirteenth_salary_usecase.dart';
@@ -116,7 +115,7 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
           const SizedBox(height: 16),
 
           ResponsiveInputRow(
-            left: _DarkDateField(
+            left: AccentDateField(
               controller: _admissionDateController,
               label: 'Data de Admissão',
               helperText: 'DD/MM/AAAA',
@@ -134,18 +133,18 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
                 }
                 return null;
               },
-              onChanged: (value) {
-                final date = _parseDate(value);
-                if (date != null) {
-                  setState(() {
-                    _admissionDate = date;
-                    _updateMonthsWorked();
-                  });
-                }
+              initialDate: _admissionDate,
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              onDateSelected: (DateTime date) {
+                setState(() {
+                  _admissionDate = date;
+                  _admissionDateController.text = _formatDate(date);
+                  _updateMonthsWorked();
+                });
               },
-              onTap: () => _selectDate(context, true),
             ),
-            right: _DarkDateField(
+            right: AccentDateField(
               controller: _calculationDateController,
               label: 'Data do Cálculo',
               helperText: 'DD/MM/AAAA',
@@ -160,16 +159,16 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
                 }
                 return null;
               },
-              onChanged: (value) {
-                final date = _parseDate(value);
-                if (date != null) {
-                  setState(() {
-                    _calculationDate = date;
-                    _updateMonthsWorked();
-                  });
-                }
+              initialDate: _calculationDate,
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+              onDateSelected: (DateTime date) {
+                setState(() {
+                  _calculationDate = date;
+                  _calculationDateController.text = _formatDate(date);
+                  _updateMonthsWorked();
+                });
               },
-              onTap: () => _selectDate(context, false),
             ),
           ),
           const SizedBox(height: 16),
@@ -298,32 +297,6 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
         '${date.year}';
   }
 
-  Future<void> _selectDate(BuildContext context, bool isAdmission) async {
-    final initialDate = isAdmission
-        ? _admissionDate ?? DateTime.now()
-        : _calculationDate ?? DateTime.now();
-
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      setState(() {
-        if (isAdmission) {
-          _admissionDate = picked;
-          _admissionDateController.text = _formatDate(picked);
-        } else {
-          _calculationDate = picked;
-          _calculationDateController.text = _formatDate(picked);
-        }
-        _updateMonthsWorked();
-      });
-    }
-  }
-
   void _submitForm() {
     if (!widget.formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -349,96 +322,3 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
   }
 }
 
-/// Dark themed date input field
-class _DarkDateField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String? helperText;
-  final Color accentColor;
-  final String? Function(String?)? validator;
-  final void Function(String)? onChanged;
-  final VoidCallback? onTap;
-
-  const _DarkDateField({
-    required this.controller,
-    required this.label,
-    required this.accentColor,
-    this.helperText,
-    this.validator,
-    this.onChanged,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        if (helperText != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            helperText!,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: TextInputType.datetime,
-          validator: validator,
-          onChanged: onChanged,
-          onTap: onTap,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixIcon: Icon(
-              Icons.calendar_today,
-              color: Colors.white.withValues(alpha: 0.5),
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: accentColor,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

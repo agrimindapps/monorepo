@@ -4,18 +4,15 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/enums.dart';
 import '../../domain/entities/game_state.dart';
 import '../../domain/entities/high_score.dart';
+import '../../domain/entities/position.dart';
 import 'caca_palavra_providers.dart';
 
 part 'caca_palavra_game_notifier.g.dart';
 
 /// Riverpod notifier for Caça Palavra game state management
-/// Handles grid generation, cell selection, word matching, and scoring
+/// Handles grid generation, drag-based word selection, word matching, and scoring
 @riverpod
 class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
-  // Debounce timer for cell taps (100ms as per requirements)
-  Timer? _debounceTimer;
-  static const Duration _debounceDuration = Duration(milliseconds: 100);
-
   // Game start time for completion tracking
   DateTime? _gameStartTime;
 
@@ -30,7 +27,6 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
     // Cleanup on dispose
     ref.onDispose(() {
       _isMounted = false;
-      _debounceTimer?.cancel();
     });
 
     // Load high score
@@ -67,26 +63,45 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
     );
   }
 
-  /// Handles cell tap with debounce (100ms)
-  Future<void> handleCellTap(int row, int col) async {
-    // Cancel previous timer
-    _debounceTimer?.cancel();
-
-    // Schedule execution after debounce delay
-    _debounceTimer = Timer(_debounceDuration, () async {
-      await _executeCellTap(row, col);
-    });
-  }
-
-  /// Executes cell tap after debounce
-  Future<void> _executeCellTap(int row, int col) async {
+  /// Handles drag start - begins a new word selection
+  void handleDragStart(int row, int col) {
     if (!_isMounted) return;
 
     final currentState = state.value;
     if (currentState == null || !currentState.isPlaying) return;
 
-    // Haptic feedback for selection
+    // Haptic feedback for drag start
     HapticFeedback.selectionClick();
+
+    // Clear previous selection and start new one
+    final selectCellUseCase = ref.read(selectCellUseCaseProvider);
+    final selectResult = selectCellUseCase(
+      currentState: currentState.copyWith(selectedPositions: []),
+      row: row,
+      col: col,
+    );
+
+    selectResult.fold(
+      (failure) {
+        // Ignore selection errors during drag
+      },
+      (newState) {
+        if (!_isMounted) return;
+        state = AsyncValue.data(newState);
+      },
+    );
+  }
+
+  /// Handles drag update - adds cells to selection as user drags
+  void handleDragUpdate(int row, int col) {
+    if (!_isMounted) return;
+
+    final currentState = state.value;
+    if (currentState == null || !currentState.isPlaying) return;
+
+    // Only add if not already in selection (prevents duplicate adds during drag)
+    final position = Position(row, col);
+    if (currentState.selectedPositions.contains(position)) return;
 
     // Select cell
     final selectCellUseCase = ref.read(selectCellUseCaseProvider);
@@ -96,48 +111,60 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
       col: col,
     );
 
-    await selectResult.fold(
-      (failure) async {
-        if (!_isMounted) return;
-        state = AsyncValue.data(currentState);
+    selectResult.fold(
+      (failure) {
+        // Ignore selection errors during drag
       },
-      (newState) async {
+      (newState) {
         if (!_isMounted) return;
-
-        // Check if selection forms a word (only if 2+ positions)
-        if (newState.selectedPositions.length >= 2) {
-          final previousFoundCount = newState.foundWordsCount;
-
-          final checkWordMatchUseCase = ref.read(checkWordMatchUseCaseProvider);
-          final checkResult = checkWordMatchUseCase(currentState: newState);
-
-          await checkResult.fold(
-            (failure) async {
-              if (!_isMounted) return;
-              state = AsyncValue.data(newState);
-            },
-            (finalState) async {
-              if (!_isMounted) return;
-
-              // Provide haptic feedback if word was found
-              if (finalState.foundWordsCount > previousFoundCount) {
-                HapticFeedback.mediumImpact();
-              }
-
-              state = AsyncValue.data(finalState);
-
-              // Check if game completed
-              if (finalState.isCompleted) {
-                await _handleGameCompletion(finalState);
-              }
-            },
-          );
-        } else {
-          if (!_isMounted) return;
-          state = AsyncValue.data(newState);
-        }
+        state = AsyncValue.data(newState);
       },
     );
+  }
+
+  /// Handles drag end - validates the selection and checks for word match
+  Future<void> handleDragEnd() async {
+    if (!_isMounted) return;
+
+    final currentState = state.value;
+    if (currentState == null || !currentState.isPlaying) return;
+
+    // Only check for match if we have at least 2 positions
+    if (currentState.selectedPositions.length >= 2) {
+      final previousFoundCount = currentState.foundWordsCount;
+
+      final checkWordMatchUseCase = ref.read(checkWordMatchUseCaseProvider);
+      final checkResult = checkWordMatchUseCase(currentState: currentState);
+
+      await checkResult.fold(
+        (failure) async {
+          if (!_isMounted) return;
+          // Clear selection on error
+          state = AsyncValue.data(currentState.copyWith(selectedPositions: []));
+        },
+        (finalState) async {
+          if (!_isMounted) return;
+
+          // Provide haptic feedback if word was found
+          if (finalState.foundWordsCount > previousFoundCount) {
+            HapticFeedback.mediumImpact();
+          } else {
+            // Light feedback for invalid word
+            HapticFeedback.lightImpact();
+          }
+
+          state = AsyncValue.data(finalState);
+
+          // Check if game completed
+          if (finalState.isCompleted) {
+            await _handleGameCompletion(finalState);
+          }
+        },
+      );
+    } else {
+      // Clear selection if less than 2 positions
+      state = AsyncValue.data(currentState.copyWith(selectedPositions: []));
+    }
   }
 
   /// Handles word tap from word list (toggles highlight)
@@ -184,7 +211,6 @@ class CacaPalavraGameNotifier extends _$CacaPalavraGameNotifier {
 
   /// Restarts game with optional new difficulty
   Future<void> restartGame({GameDifficulty? newDifficulty}) async {
-    _debounceTimer?.cancel();
     _gameStartTime = DateTime.now();
 
     state = const AsyncValue.loading();

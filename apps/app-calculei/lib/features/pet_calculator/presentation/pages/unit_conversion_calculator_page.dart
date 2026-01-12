@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../domain/calculators/unit_conversion_calculator.dart';
 
 /// Página da calculadora de Conversão de Unidades
@@ -53,6 +54,7 @@ class _UnitConversionCalculatorPageState
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return CalculatorPageLayout(
       title: 'Conversor Veterinário',
@@ -92,7 +94,9 @@ https://calculei.com.br''');
               Text(
                 'Tipo de Conversão',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.7)
+                      : Colors.black.withValues(alpha: 0.7),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -107,7 +111,9 @@ https://calculei.com.br''');
                   return Material(
                     color: isSelected
                         ? accentColor.withValues(alpha: 0.15)
-                        : Colors.white.withValues(alpha: 0.05),
+                        : isDark
+                            ? Colors.white.withValues(alpha: 0.05)
+                            : Colors.black.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
                     child: InkWell(
                       onTap: () {
@@ -126,7 +132,9 @@ https://calculei.com.br''');
                           border: Border.all(
                             color: isSelected
                                 ? accentColor
-                                : Colors.white.withValues(alpha: 0.2),
+                                : isDark
+                                    ? Colors.white.withValues(alpha: 0.2)
+                                    : Colors.black.withValues(alpha: 0.2),
                             width: isSelected ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -139,7 +147,9 @@ https://calculei.com.br''');
                               size: 18,
                               color: isSelected
                                   ? accentColor
-                                  : Colors.white.withValues(alpha: 0.7),
+                                  : isDark
+                                      ? Colors.white.withValues(alpha: 0.7)
+                                      : Colors.black.withValues(alpha: 0.7),
                             ),
                             const SizedBox(width: 6),
                             Text(
@@ -149,7 +159,9 @@ https://calculei.com.br''');
                                     isSelected ? FontWeight.bold : FontWeight.normal,
                                 color: isSelected
                                     ? accentColor
-                                    : Colors.white.withValues(alpha: 0.7),
+                                    : isDark
+                                        ? Colors.white.withValues(alpha: 0.7)
+                                        : Colors.black.withValues(alpha: 0.7),
                               ),
                             ),
                           ],
@@ -163,7 +175,7 @@ https://calculei.com.br''');
               const SizedBox(height: 24),
 
               // Value Input
-              _DarkInputField(
+              AdaptiveInputField(
                 label: 'Valor',
                 controller: _valueController,
                 keyboardType: const TextInputType.numberWithOptions(
@@ -197,7 +209,9 @@ https://calculei.com.br''');
                         Text(
                           'De:',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : Colors.black.withValues(alpha: 0.7),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -222,7 +236,9 @@ https://calculei.com.br''');
                         Text(
                           'Para:',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : Colors.black.withValues(alpha: 0.7),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -258,13 +274,18 @@ https://calculei.com.br''');
 
   Widget _buildFromUnitDropdown() {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.08),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -272,9 +293,9 @@ https://calculei.com.br''');
         value: _getFromUnitValue(),
         isExpanded: true,
         underline: const SizedBox(),
-        dropdownColor: const Color(0xFF1A1A2E),
-        style: const TextStyle(
-          color: Colors.white,
+        dropdownColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black,
           fontSize: 16,
         ),
         icon: Icon(
@@ -298,13 +319,18 @@ https://calculei.com.br''');
 
   Widget _buildToUnitDropdown() {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.08),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
         borderRadius: BorderRadius.circular(12),
       ),
@@ -312,9 +338,9 @@ https://calculei.com.br''');
         value: _getToUnitValue(),
         isExpanded: true,
         underline: const SizedBox(),
-        dropdownColor: const Color(0xFF1A1A2E),
-        style: const TextStyle(
-          color: Colors.white,
+        dropdownColor: isDark ? const Color(0xFF1A1A2E) : Colors.white,
+        style: TextStyle(
+          color: isDark ? Colors.white : Colors.black,
           fontSize: 16,
         ),
         icon: Icon(
@@ -523,14 +549,19 @@ class _UnitConversionResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -545,7 +576,9 @@ class _UnitConversionResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
             ],
@@ -569,10 +602,10 @@ class _UnitConversionResultCard extends StatelessWidget {
                   children: [
                     Text(
                       result.fromValue.toStringAsFixed(2),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: isDark ? Colors.white : Colors.black,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -580,7 +613,9 @@ class _UnitConversionResultCard extends StatelessWidget {
                       result.fromUnit,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : Colors.black.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
@@ -623,7 +658,9 @@ class _UnitConversionResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -632,11 +669,18 @@ class _UnitConversionResultCard extends StatelessWidget {
                 _DetailRow(
                   label: 'Tipo',
                   value: result.conversionType,
+                  isDark: isDark,
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(
+                  height: 16,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.black.withValues(alpha: 0.1),
+                ),
                 _DetailRow(
                   label: 'Conversão',
                   value: result.formula,
+                  isDark: isDark,
                 ),
               ],
             ),
@@ -650,8 +694,13 @@ class _UnitConversionResultCard extends StatelessWidget {
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
+  final bool isDark;
 
-  const _DetailRow({required this.label, required this.value});
+  const _DetailRow({
+    required this.label,
+    required this.value,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -664,109 +713,24 @@ class _DetailRow extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
             ),
           ),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.pet,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-            errorStyle: const TextStyle(color: Colors.red),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-          validator: validator,
-        ),
-      ],
     );
   }
 }

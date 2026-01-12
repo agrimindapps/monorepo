@@ -69,7 +69,8 @@ class MinesweeperGame extends FlameGame with PanDetector, ScrollDetector {
     if (rows != _rows || cols != _cols) {
       _rows = rows;
       _cols = cols;
-      if (size.x > 0 && size.y > 0) {
+      // Only create grid if the game has a valid size
+      if (hasLayout && size.x > 0 && size.y > 0) {
         _createGrid(rows, cols);
         // Center camera on the new grid
         camera.viewfinder.position = size / 2;
@@ -153,6 +154,8 @@ class MinesweeperGame extends FlameGame with PanDetector, ScrollDetector {
   }
 
   void _calculateLayout(int rows, int cols) {
+    if (!hasLayout) return; // Guard against calling before layout is ready
+    
     final availableWidth = size.x * 0.95;
     final availableHeight = size.y * 0.9;
     

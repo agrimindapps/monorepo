@@ -39,6 +39,7 @@ dependencies:
   riverpod_annotation: ^3.0.3
   shared_preferences: ^2.4.0
   uuid: ^4.5.1
+  url_launcher: ^6.3.0
   
   # Riverpod (code generation)
 dev_dependencies:

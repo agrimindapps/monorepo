@@ -2,19 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/data/calculator_registry.dart';
 import '../../../../core/providers/user_preferences_providers.dart';
-import '../../../../widgets/theme_toggle_button.dart';
-
-// Modern dark theme colors matching calculator pages
-const _backgroundColor = Color(0xFF0F0F1A);
-const _surfaceColor = Color(0xFF1A1A2E);
-const _sidebarColor = Color(0xFF16162A);
-const _primaryAccent = Color(0xFF4CAF50);
+import '../../../../core/theme/adaptive_colors.dart';
+import '../../../../core/widgets/app_shell.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   final String? initialCategory;
+  final String? initialFilter;
 
-  const HomePage({super.key, this.initialCategory});
+  const HomePage({super.key, this.initialCategory, this.initialFilter});
 
   @override
   ConsumerState<HomePage> createState() => _HomePageState();
@@ -23,7 +20,6 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _searchQuery = '';
   String _selectedCategory = 'Todos';
   String _selectedFilter = '';
@@ -34,6 +30,39 @@ class _HomePageState extends ConsumerState<HomePage> {
     // Set initial category from widget parameter if provided
     if (widget.initialCategory != null) {
       _selectedCategory = _mapCategoryParam(widget.initialCategory!);
+    }
+    // Set initial filter from widget parameter if provided
+    if (widget.initialFilter != null) {
+      _selectedFilter = _mapFilterParam(widget.initialFilter!);
+      _selectedCategory = 'Todos'; // Reset category when filter is set
+    }
+  }
+
+  @override
+  void didUpdateWidget(HomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // React to route parameter changes
+    if (oldWidget.initialCategory != widget.initialCategory) {
+      setState(() {
+        if (widget.initialCategory != null) {
+          _selectedCategory = _mapCategoryParam(widget.initialCategory!);
+          _selectedFilter = ''; // Clear filter when category changes
+        } else {
+          _selectedCategory = 'Todos';
+        }
+      });
+    }
+    
+    if (oldWidget.initialFilter != widget.initialFilter) {
+      setState(() {
+        if (widget.initialFilter != null) {
+          _selectedFilter = _mapFilterParam(widget.initialFilter!);
+          _selectedCategory = 'Todos'; // Reset category when filter is set
+        } else {
+          _selectedFilter = '';
+        }
+      });
     }
   }
 
@@ -52,9 +81,26 @@ class _HomePageState extends ConsumerState<HomePage> {
         return 'Pet';
       case 'agricultura':
         return 'Agricultura';
+      case 'pecuaria':
+      case 'pecuária':
+        return 'Pecuária';
       case 'todos':
       default:
         return 'Todos';
+    }
+  }
+
+  // Map filter parameter to display name
+  String _mapFilterParam(String param) {
+    switch (param.toLowerCase()) {
+      case 'favoritos':
+        return 'Favoritos';
+      case 'recentes':
+        return 'Recentes';
+      case 'popular':
+        return 'Popular';
+      default:
+        return '';
     }
   }
 
@@ -65,12 +111,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     super.dispose();
   }
 
-  List<_CalculatorItem> _getFilteredCalculators(
-    List<_CalculatorItem> allCalculators,
+  List<CalculatorItem> _getFilteredCalculators(
+    List<CalculatorItem> allCalculators,
     List<String> favorites,
     List<String> recents,
   ) {
-    var items = <_CalculatorItem>[];
+    var items = <CalculatorItem>[];
 
     // Apply filter first
     if (_selectedFilter == 'Favoritos') {
@@ -88,19 +134,22 @@ class _HomePageState extends ConsumerState<HomePage> {
       // Filter by category
       switch (_selectedCategory) {
         case 'Financeiro':
-          items = _financialCalculators;
+          items = CalculatorRegistry.financial;
           break;
         case 'Construção':
-          items = _constructionCalculators;
+          items = CalculatorRegistry.construction;
           break;
         case 'Saúde':
-          items = _healthCalculators;
+          items = CalculatorRegistry.health;
           break;
         case 'Pet':
-          items = _petCalculators;
+          items = CalculatorRegistry.pet;
           break;
         case 'Agricultura':
-          items = _agricultureCalculators;
+          items = CalculatorRegistry.agriculture;
+          break;
+        case 'Pecuária':
+          items = CalculatorRegistry.livestock;
           break;
         default:
           items = allCalculators;
@@ -121,469 +170,83 @@ class _HomePageState extends ConsumerState<HomePage> {
     return items;
   }
 
+  /// Mapeia o filtro selecionado para o parâmetro de rota
+  String? _getFilterParam() {
+    switch (_selectedFilter) {
+      case 'Favoritos':
+        return 'favoritos';
+      case 'Recentes':
+        return 'recentes';
+      case 'Popular':
+        return 'popular';
+      default:
+        return null;
+    }
+  }
+
+  /// Mapeia a categoria selecionada para o parâmetro de rota
+  String? _getCategoryParam() {
+    if (_selectedCategory == 'Todos') return null;
+    return _selectedCategory.toLowerCase()
+        .replaceAll('ú', 'u')
+        .replaceAll('ã', 'a')
+        .replaceAll('ç', 'c');
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 800;
-
     final favoritesAsync = ref.watch(favoriteCalculatorsProvider);
     final recentsAsync = ref.watch(recentCalculatorsProvider);
 
     final favorites = favoritesAsync.value ?? [];
     final recents = recentsAsync.value ?? [];
 
-    final allCalculators = [
-      ..._financialCalculators,
-      ..._constructionCalculators,
-      ..._healthCalculators,
-      ..._petCalculators,
-      ..._agricultureCalculators,
-    ];
+    // Use CalculatorRegistry as single source of truth
+    const allCalculators = CalculatorRegistry.all;
 
     final filteredCalculators =
         _getFilteredCalculators(allCalculators, favorites, recents);
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: _backgroundColor,
-      drawer: isMobile ? _buildDrawer(favorites.length, recents.length) : null,
-      body: Row(
+    return AppShell(
+      // Home page - no title shows search bar
+      searchController: _searchController,
+      onSearchChanged: (value) {
+        setState(() => _searchQuery = value.toLowerCase());
+      },
+      searchHint: 'O que vamos calcular hoje?',
+      headerTrailing: _buildViewToggle(),
+      currentCategory: _getCategoryParam(),
+      currentFilter: _getFilterParam(),
+      showBackgroundPattern: true,
+      child: _buildMainContent(
+        filteredCalculators,
+        allCalculators,
+        favorites,
+      ),
+    );
+  }
+
+  Widget _buildViewToggle() {
+    final colors = context.colors;
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.background,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Sidebar (desktop only)
-          if (!isMobile) _buildSidebar(favorites.length, recents.length),
-
-          // Main content
-          Expanded(
-            child: Column(
-              children: [
-                // Top header with search
-                _buildTopHeader(isMobile),
-
-                // Content
-                Expanded(
-                  child: _buildMainContent(
-                    filteredCalculators,
-                    allCalculators,
-                    favorites,
-                  ),
-                ),
-              ],
-            ),
+          _buildViewToggleButton(
+            Icons.grid_view,
+            ref.watch(viewModeProvider).value == 'grid',
+            () => ref.read(viewModeProvider.notifier).setMode('grid'),
+          ),
+          _buildViewToggleButton(
+            Icons.view_list,
+            ref.watch(viewModeProvider).value != 'grid',
+            () => ref.read(viewModeProvider.notifier).setMode('list'),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDrawer(int favoritesCount, int recentsCount) {
-    return Drawer(
-      backgroundColor: _sidebarColor,
-      child: _buildSidebarContent(favoritesCount, recentsCount),
-    );
-  }
-
-  Widget _buildSidebar(int favoritesCount, int recentsCount) {
-    return Container(
-      width: 260,
-      decoration: BoxDecoration(
-        color: _sidebarColor,
-        border: Border(
-          right: BorderSide(
-            color: Colors.white.withValues(alpha: 0.08),
-          ),
-        ),
-      ),
-      child: _buildSidebarContent(favoritesCount, recentsCount),
-    );
-  }
-
-  Widget _buildSidebarContent(int favoritesCount, int recentsCount) {
-    final popularCount =
-        [..._financialCalculators, ..._constructionCalculators, ..._healthCalculators, ..._petCalculators, ..._agricultureCalculators]
-            .where((c) => c.isPopular)
-            .length;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Logo header
-        Container(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [_primaryAccent, _primaryAccent.withValues(alpha: 0.7)],
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(
-                  Icons.calculate_rounded,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Text(
-                'Calculei',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        const Divider(color: Colors.white10, height: 1),
-
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Quick filters section
-                _buildSidebarSection('FILTROS RÁPIDOS'),
-                _buildFilterItem(
-                  'Favoritos',
-                  Icons.favorite,
-                  Colors.red,
-                  favoritesCount,
-                  isFilter: true,
-                ),
-                _buildFilterItem(
-                  'Recentes',
-                  Icons.history,
-                  Colors.purple,
-                  recentsCount,
-                  isFilter: true,
-                ),
-                _buildFilterItem(
-                  'Popular',
-                  Icons.star,
-                  Colors.amber,
-                  popularCount,
-                  isFilter: true,
-                ),
-
-                const SizedBox(height: 24),
-
-                // Categories section
-                _buildSidebarSection('CATEGORIAS'),
-                _buildCategoryItem(
-                  'Todos',
-                  Icons.apps,
-                  null,
-                  _financialCalculators.length +
-                      _constructionCalculators.length +
-                      _healthCalculators.length +
-                      _petCalculators.length +
-                      _agricultureCalculators.length,
-                ),
-                _buildCategoryItem(
-                  'Financeiro',
-                  Icons.account_balance_wallet,
-                  Colors.blue,
-                  _financialCalculators.length,
-                ),
-                _buildCategoryItem(
-                  'Construção',
-                  Icons.construction,
-                  Colors.orange,
-                  _constructionCalculators.length,
-                ),
-                _buildCategoryItem(
-                  'Saúde',
-                  Icons.favorite_border,
-                  Colors.pink,
-                  _healthCalculators.length,
-                ),
-                _buildCategoryItem(
-                  'Pet',
-                  Icons.pets,
-                  Colors.brown,
-                  _petCalculators.length,
-                ),
-                _buildCategoryItem(
-                  'Agricultura',
-                  Icons.agriculture,
-                  Colors.teal,
-                  _agricultureCalculators.length,
-                ),
-                
-                // Theme toggle at the bottom
-                const SizedBox(height: 24),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Divider(color: Colors.white10, height: 1),
-                ),
-                const SizedBox(height: 16),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ThemeToggleButton(color: Colors.white),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSidebarSection(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-      child: Text(
-        title,
-        style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.4),
-          fontSize: 11,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterItem(
-    String label,
-    IconData icon,
-    Color color,
-    int count, {
-    bool isFilter = false,
-  }) {
-    final isSelected = _selectedFilter == label;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          if (isSelected) {
-            _selectedFilter = '';
-          } else {
-            _selectedFilter = label;
-            _selectedCategory = 'Todos';
-          }
-        });
-        if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
-          Navigator.of(context).pop();
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: isSelected
-              ? Border.all(color: color.withValues(alpha: 0.3))
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: color, size: 20),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected ? color : Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? color.withValues(alpha: 0.2)
-                    : Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
-                style: TextStyle(
-                  color: isSelected ? color : Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCategoryItem(
-    String label,
-    IconData icon,
-    Color? color,
-    int count,
-  ) {
-    final isSelected = _selectedCategory == label && _selectedFilter.isEmpty;
-    final itemColor = color ?? _primaryAccent;
-
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedCategory = label;
-          _selectedFilter = '';
-        });
-        if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
-          Navigator.of(context).pop();
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? itemColor.withValues(alpha: 0.15) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: isSelected
-              ? Border.all(color: itemColor.withValues(alpha: 0.3))
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? itemColor : Colors.white.withValues(alpha: 0.5),
-              size: 20,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? itemColor.withValues(alpha: 0.2)
-                    : Colors.white.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '$count',
-                style: TextStyle(
-                  color: isSelected
-                      ? itemColor
-                      : Colors.white.withValues(alpha: 0.6),
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopHeader(bool isMobile) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 16 : 32,
-        vertical: 16,
-      ),
-      decoration: BoxDecoration(
-        color: _surfaceColor.withValues(alpha: 0.5),
-        border: Border(
-          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
-        ),
-      ),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 1120),
-          child: Row(
-            children: [
-              // Menu button (mobile only)
-              if (isMobile) ...[
-                IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.white),
-                  onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                ),
-                const SizedBox(width: 8),
-              ],
-
-              // Search bar
-              Expanded(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 500),
-                  decoration: BoxDecoration(
-                    color: _backgroundColor,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: (value) {
-                      setState(() => _searchQuery = value.toLowerCase());
-                    },
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'O que vamos calcular hoje?',
-                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
-                      prefixIcon: Icon(
-                        Icons.search,
-                        color: Colors.white.withValues(alpha: 0.4),
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 16),
-
-              // View toggle
-              Container(
-                decoration: BoxDecoration(
-                  color: _backgroundColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildViewToggleButton(
-                      Icons.grid_view,
-                      ref.watch(viewModeProvider).value == 'grid',
-                      () => ref.read(viewModeProvider.notifier).setMode('grid'),
-                    ),
-                    _buildViewToggleButton(
-                      Icons.view_list,
-                      ref.watch(viewModeProvider).value != 'grid',
-                      () => ref.read(viewModeProvider.notifier).setMode('list'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -595,21 +258,20 @@ class _HomePageState extends ConsumerState<HomePage> {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isSelected ? _primaryAccent.withValues(alpha: 0.2) : Colors.transparent,
+          color: isSelected ? context.colors.primary.withValues(alpha: 0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           icon,
           size: 20,
-          color: isSelected ? _primaryAccent : Colors.white.withValues(alpha: 0.5),
+          color: isSelected ? context.colors.primary : context.colors.textMuted,
         ),
       ),
     );
   }
-
   Widget _buildMainContent(
-    List<_CalculatorItem> filteredCalculators,
-    List<_CalculatorItem> allCalculators,
+    List<CalculatorItem> filteredCalculators,
+    List<CalculatorItem> allCalculators,
     List<String> favorites,
   ) {
     final viewMode = ref.watch(viewModeProvider).value;
@@ -618,7 +280,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     // Get section title
     var sectionTitle = 'TODAS AS CALCULADORAS';
     var sectionIcon = Icons.apps;
-    var sectionColor = _primaryAccent;
+    var sectionColor = context.colors.primary;
 
     if (_selectedFilter == 'Favoritos') {
       sectionTitle = 'FAVORITOS';
@@ -652,8 +314,12 @@ class _HomePageState extends ConsumerState<HomePage> {
           sectionColor = Colors.brown;
           break;
         case 'Agricultura':
+          sectionIcon = Icons.grass;
+          sectionColor = const Color(0xFF8BC34A);
+          break;
+        case 'Pecuária':
           sectionIcon = Icons.agriculture;
-          sectionColor = Colors.teal;
+          sectionColor = const Color(0xFFFF5722);
           break;
       }
     }
@@ -662,7 +328,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       children: [
         // Background pattern
         CustomPaint(
-          painter: _HomeBackgroundPainter(),
+          painter: _HomeBackgroundPainter(symbolColor: context.colors.textPrimary.withValues(alpha: 0.015)),
           size: Size.infinite,
         ),
 
@@ -690,8 +356,8 @@ class _HomePageState extends ConsumerState<HomePage> {
                         const SizedBox(width: 12),
                         Text(
                           sectionTitle,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: context.colors.textPrimary,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 0.5,
@@ -701,13 +367,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
+                            color: context.colors.textPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '${filteredCalculators.length}',
                             style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.7),
+                              color: context.colors.textSecondary,
                               fontSize: 13,
                               fontWeight: FontWeight.bold,
                             ),
@@ -765,21 +431,21 @@ class _HomePageState extends ConsumerState<HomePage> {
           children: [
             Container(
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: _surfaceColor,
+              decoration: BoxDecoration(
+                color: context.colors.surface,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 icon,
                 size: 48,
-                color: Colors.white.withValues(alpha: 0.3),
+                color: context.colors.textDisabled,
               ),
             ),
             const SizedBox(height: 24),
             Text(
               message,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: context.colors.textPrimary.withValues(alpha: 0.8),
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -788,7 +454,7 @@ class _HomePageState extends ConsumerState<HomePage> {
             Text(
               subtitle,
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
+                color: context.colors.textMuted,
                 fontSize: 14,
               ),
             ),
@@ -798,7 +464,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildGridView(List<_CalculatorItem> items, List<String> favorites) {
+  Widget _buildGridView(List<CalculatorItem> items, List<String> favorites) {
     return SliverLayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.crossAxisExtent;
@@ -832,7 +498,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
 
-  Widget _buildListView(List<_CalculatorItem> items, List<String> favorites) {
+  Widget _buildListView(List<CalculatorItem> items, List<String> favorites) {
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (context, index) {
@@ -849,394 +515,14 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
-
-  // Calculator Data
-  final List<_CalculatorItem> _financialCalculators = [
-    _CalculatorItem(
-      title: '13º Salário',
-      description: 'Calcule seu 13º salário líquido e bruto',
-      icon: Icons.card_giftcard,
-      color: Colors.green,
-      route: '/calculators/financial/thirteenth-salary',
-      tags: ['CLT', 'Trabalhista'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Férias',
-      description: 'Descubra quanto você vai receber de férias',
-      icon: Icons.beach_access,
-      color: Colors.blue,
-      route: '/calculators/financial/vacation',
-      tags: ['CLT', 'Trabalhista'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Salário Líquido',
-      description: 'Descubra seu salário após descontos',
-      icon: Icons.monetization_on,
-      color: Colors.orange,
-      route: '/calculators/financial/net-salary',
-      tags: ['CLT', 'INSS', 'IR'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Horas Extras',
-      description: 'Calcule o valor das suas horas extras',
-      icon: Icons.access_time,
-      color: Colors.purple,
-      route: '/calculators/financial/overtime',
-      tags: ['CLT', 'Trabalhista'],
-    ),
-    _CalculatorItem(
-      title: 'Reserva de Emergência',
-      description: 'Planeje sua reserva financeira ideal',
-      icon: Icons.savings,
-      color: Colors.teal,
-      route: '/calculators/financial/emergency-reserve',
-      tags: ['Investimento', 'Planejamento'],
-    ),
-    _CalculatorItem(
-      title: 'À vista ou Parcelado',
-      description: 'Compare e decida a melhor forma de pagamento',
-      icon: Icons.payment,
-      color: Colors.indigo,
-      route: '/calculators/financial/cash-vs-installment',
-      tags: ['Compras', 'Juros'],
-    ),
-    _CalculatorItem(
-      title: 'Seguro Desemprego',
-      description: 'Calcule o valor do seu seguro desemprego',
-      icon: Icons.work_off,
-      color: Colors.red,
-      route: '/calculators/financial/unemployment-insurance',
-      tags: ['CLT', 'Trabalhista'],
-    ),
-  ];
-
-  final List<_CalculatorItem> _constructionCalculators = [
-    _CalculatorItem(
-      title: 'Concreto',
-      description: 'Calcule volume e materiais para concreto',
-      icon: Icons.layers,
-      color: Colors.grey,
-      route: '/calculators/construction/concrete',
-      tags: ['Cimento', 'Areia', 'Brita'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Tinta',
-      description: 'Quantidade de tinta para pintura',
-      icon: Icons.format_paint,
-      color: Colors.orange,
-      route: '/calculators/construction/paint',
-      tags: ['Parede', 'Litros'],
-    ),
-    _CalculatorItem(
-      title: 'Piso e Revestimento',
-      description: 'Peças, caixas e rejunte necessários',
-      icon: Icons.grid_on,
-      color: Colors.brown,
-      route: '/calculators/construction/flooring',
-      tags: ['Cerâmica', 'Porcelanato'],
-    ),
-    _CalculatorItem(
-      title: 'Tijolos e Blocos',
-      description: 'Tijolos e argamassa para alvenaria',
-      icon: Icons.crop_square,
-      color: Colors.red,
-      route: '/calculators/construction/brick',
-      tags: ['Alvenaria', 'Parede'],
-    ),
-  ];
-
-  final List<_CalculatorItem> _healthCalculators = [
-    _CalculatorItem(
-      title: 'IMC',
-      description: 'Índice de Massa Corporal',
-      icon: Icons.monitor_weight_outlined,
-      color: Colors.green,
-      route: '/calculators/health/bmi',
-      tags: ['Peso', 'Altura', 'Saúde'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Taxa Metabólica',
-      description: 'Calorias diárias necessárias',
-      icon: Icons.local_fire_department,
-      color: Colors.orange,
-      route: '/calculators/health/bmr',
-      tags: ['Calorias', 'Metabolismo'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Necessidade Hídrica',
-      description: 'Quantidade ideal de água por dia',
-      icon: Icons.water_drop,
-      color: Colors.blue,
-      route: '/calculators/health/water',
-      tags: ['Água', 'Hidratação'],
-    ),
-    _CalculatorItem(
-      title: 'Peso Ideal',
-      description: '4 fórmulas científicas',
-      icon: Icons.accessibility_new,
-      color: Colors.teal,
-      route: '/calculators/health/ideal-weight',
-      tags: ['Peso', 'Altura'],
-    ),
-    _CalculatorItem(
-      title: 'Gordura Corporal',
-      description: 'Percentual de gordura (US Navy)',
-      icon: Icons.pie_chart,
-      color: Colors.purple,
-      route: '/calculators/health/body-fat',
-      tags: ['Composição', 'Medidas'],
-    ),
-    _CalculatorItem(
-      title: 'Macronutrientes',
-      description: 'Carboidratos, proteínas e gorduras',
-      icon: Icons.pie_chart_outline,
-      color: Colors.amber,
-      route: '/calculators/health/macros',
-      tags: ['Dieta', 'Nutrição'],
-    ),
-    _CalculatorItem(
-      title: 'Proteínas Diárias',
-      description: 'Necessidade proteica por peso',
-      icon: Icons.restaurant,
-      color: Colors.red,
-      route: '/calculators/health/protein',
-      tags: ['Proteína', 'Dieta', 'Músculo'],
-    ),
-    _CalculatorItem(
-      title: 'Calorias Exercício',
-      description: 'Gasto calórico por atividade',
-      icon: Icons.directions_run,
-      color: Colors.deepOrange,
-      route: '/calculators/health/exercise-calories',
-      tags: ['Exercício', 'Calorias', 'Treino'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Cintura-Quadril',
-      description: 'Risco cardiovascular (RCQ)',
-      icon: Icons.straighten,
-      color: Colors.pink,
-      route: '/calculators/health/waist-hip',
-      tags: ['Medidas', 'Risco', 'Saúde'],
-    ),
-    _CalculatorItem(
-      title: 'Álcool no Sangue',
-      description: 'Concentração alcoólica (BAC)',
-      icon: Icons.local_bar,
-      color: Colors.brown,
-      route: '/calculators/health/blood-alcohol',
-      tags: ['Álcool', 'BAC', 'Segurança'],
-    ),
-    _CalculatorItem(
-      title: 'Volume Sanguíneo',
-      description: 'Estimativa por peso e altura',
-      icon: Icons.bloodtype,
-      color: Colors.red,
-      route: '/calculators/health/blood-volume',
-      tags: ['Sangue', 'Volume', 'Corpo'],
-    ),
-    _CalculatorItem(
-      title: 'Déficit Calórico',
-      description: 'Meta para perda ou ganho de peso',
-      icon: Icons.trending_down,
-      color: Colors.indigo,
-      route: '/calculators/health/caloric-deficit',
-      tags: ['Dieta', 'Emagrecimento', 'Meta'],
-    ),
-  ];
-
-  final List<_CalculatorItem> _petCalculators = [
-    _CalculatorItem(
-      title: 'Idade do Pet',
-      description: 'Idade em anos humanos',
-      icon: Icons.pets,
-      color: Colors.blue,
-      route: '/calculators/pet/age',
-      tags: ['Cachorro', 'Gato', 'Idade'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Gestação Pet',
-      description: 'Acompanhe a gravidez',
-      icon: Icons.child_friendly,
-      color: Colors.pink,
-      route: '/calculators/pet/pregnancy',
-      tags: ['Gravidez', 'Parto', 'Filhotes'],
-    ),
-    _CalculatorItem(
-      title: 'Condição Corporal',
-      description: 'BCS - Escore de condição física',
-      icon: Icons.fitness_center,
-      color: Colors.orange,
-      route: '/calculators/pet/body-condition',
-      tags: ['BCS', 'Peso', 'Nutrição'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Calorias Pet',
-      description: 'Necessidade calórica diária',
-      icon: Icons.restaurant,
-      color: Colors.green,
-      route: '/calculators/pet/caloric-needs',
-      tags: ['Ração', 'Alimentação', 'Calorias'],
-    ),
-    _CalculatorItem(
-      title: 'Dosagem Medicamento',
-      description: 'Dose por peso do animal',
-      icon: Icons.medication,
-      color: Colors.red,
-      route: '/calculators/pet/medication',
-      tags: ['Remédio', 'Veterinário', 'Dose'],
-    ),
-    _CalculatorItem(
-      title: 'Fluidoterapia',
-      description: 'Volume de fluidos IV',
-      icon: Icons.water_drop,
-      color: Colors.cyan,
-      route: '/calculators/pet/fluid-therapy',
-      tags: ['Soro', 'Desidratação', 'IV'],
-    ),
-    _CalculatorItem(
-      title: 'Peso Ideal Pet',
-      description: 'Meta de peso saudável',
-      icon: Icons.monitor_weight,
-      color: Colors.purple,
-      route: '/calculators/pet/ideal-weight',
-      tags: ['Peso', 'Obesidade', 'Dieta'],
-    ),
-    _CalculatorItem(
-      title: 'Conversão Unidades',
-      description: 'kg↔lb, °C↔°F e mais',
-      icon: Icons.swap_horiz,
-      color: Colors.grey,
-      route: '/calculators/pet/unit-conversion',
-      tags: ['Converter', 'Medidas', 'Unidades'],
-    ),
-  ];
-
-  final List<_CalculatorItem> _agricultureCalculators = [
-    _CalculatorItem(
-      title: 'Adubação NPK',
-      description: 'Calcule a necessidade de nutrientes',
-      icon: Icons.grass,
-      color: Colors.green,
-      route: '/calculators/agriculture/npk',
-      tags: ['Fertilizante', 'Nutrientes', 'Solo'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Taxa de Semeadura',
-      description: 'Quantidade de sementes por hectare',
-      icon: Icons.agriculture,
-      color: Colors.amber,
-      route: '/calculators/agriculture/seed-rate',
-      tags: ['Sementes', 'Plantio', 'Lavoura'],
-    ),
-    _CalculatorItem(
-      title: 'Irrigação',
-      description: 'Volume de água e tempo de irrigação',
-      icon: Icons.water,
-      color: Colors.blue,
-      route: '/calculators/agriculture/irrigation',
-      tags: ['Água', 'Pivô', 'Gotejo'],
-    ),
-    _CalculatorItem(
-      title: 'Dosagem Fertilizante',
-      description: 'Quantidade de adubo por área',
-      icon: Icons.science,
-      color: Colors.purple,
-      route: '/calculators/agriculture/fertilizer-dosing',
-      tags: ['Adubo', 'Dosagem', 'Aplicação'],
-    ),
-    _CalculatorItem(
-      title: 'Correção pH Solo',
-      description: 'Calcário necessário para correção',
-      icon: Icons.landscape,
-      color: Colors.brown,
-      route: '/calculators/agriculture/soil-ph',
-      tags: ['Calcário', 'pH', 'Acidez'],
-    ),
-    _CalculatorItem(
-      title: 'Densidade Plantio',
-      description: 'Plantas por hectare',
-      icon: Icons.grid_on,
-      color: Colors.lightGreen,
-      route: '/calculators/agriculture/planting-density',
-      tags: ['Espaçamento', 'Plantas', 'Estande'],
-    ),
-    _CalculatorItem(
-      title: 'Previsão Produtividade',
-      description: 'Estimativa de colheita',
-      icon: Icons.trending_up,
-      color: Colors.orange,
-      route: '/calculators/agriculture/yield-prediction',
-      tags: ['Colheita', 'Produção', 'Safra'],
-      isPopular: true,
-    ),
-    _CalculatorItem(
-      title: 'Ração Animal',
-      description: 'Consumo diário de ração',
-      icon: Icons.pets,
-      color: Colors.red,
-      route: '/calculators/agriculture/feed',
-      tags: ['Gado', 'Suíno', 'Frango', 'Alimentação'],
-    ),
-    _CalculatorItem(
-      title: 'Ganho de Peso',
-      description: 'Tempo para atingir peso meta',
-      icon: Icons.monitor_weight,
-      color: Colors.teal,
-      route: '/calculators/agriculture/weight-gain',
-      tags: ['Engorda', 'Gado', 'Pecuária'],
-    ),
-    _CalculatorItem(
-      title: 'Ciclo Reprodutivo',
-      description: 'Gestação e parto de animais',
-      icon: Icons.child_friendly,
-      color: Colors.pink,
-      route: '/calculators/agriculture/breeding-cycle',
-      tags: ['Gestação', 'Parto', 'Reprodução'],
-    ),
-    _CalculatorItem(
-      title: 'Evapotranspiração',
-      description: 'ETo e necessidade hídrica',
-      icon: Icons.wb_sunny,
-      color: Colors.cyan,
-      route: '/calculators/agriculture/evapotranspiration',
-      tags: ['ETo', 'Clima', 'Água'],
-    ),
-  ];
-}
-
-// Data model
-class _CalculatorItem {
-  final String title;
-  final String description;
-  final IconData icon;
-  final Color color;
-  final String route;
-  final List<String> tags;
-  final bool isPopular;
-
-  _CalculatorItem({
-    required this.title,
-    required this.description,
-    required this.icon,
-    required this.color,
-    required this.route,
-    this.tags = const [],
-    this.isPopular = false,
-  });
 }
 
 // Background painter
 class _HomeBackgroundPainter extends CustomPainter {
+  final Color symbolColor;
+
+  _HomeBackgroundPainter({required this.symbolColor});
+
   @override
   void paint(Canvas canvas, Size size) {
     const spacing = 80.0;
@@ -1249,7 +535,7 @@ class _HomeBackgroundPainter extends CustomPainter {
           text: TextSpan(
             text: symbols[symbolIndex % symbols.length],
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.015),
+              color: symbolColor,
               fontSize: 28,
               fontWeight: FontWeight.w300,
             ),
@@ -1264,12 +550,13 @@ class _HomeBackgroundPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _HomeBackgroundPainter oldDelegate) => 
+      oldDelegate.symbolColor != symbolColor;
 }
 
 // Modern Calculator Card
 class _ModernCalculatorCard extends ConsumerStatefulWidget {
-  final _CalculatorItem item;
+  final CalculatorItem item;
   final bool isFavorite;
 
   const _ModernCalculatorCard({
@@ -1287,6 +574,7 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
@@ -1310,7 +598,7 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
             border: Border.all(
               color: _isHovering
                   ? widget.item.color.withValues(alpha: 0.5)
-                  : Colors.white.withValues(alpha: 0.08),
+                  : colors.border.withValues(alpha: 0.08),
               width: _isHovering ? 2 : 1,
             ),
           ),
@@ -1366,7 +654,7 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
                               size: 18,
                               color: widget.isFavorite
                                   ? Colors.red
-                                  : Colors.white.withValues(alpha: 0.7),
+                                  : colors.textSecondary,
                             ),
                           ),
                         ),
@@ -1380,12 +668,12 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
+                          color: colors.textPrimary.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           widget.item.icon,
-                          color: Colors.white,
+                          color: colors.textPrimary,
                           size: 32,
                         ),
                       ),
@@ -1396,8 +684,8 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
                     // Title
                     Text(
                       widget.item.title,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colors.textPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                       ),
@@ -1409,7 +697,7 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
                     Text(
                       widget.item.description,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: colors.textSecondary,
                         fontSize: 11,
                       ),
                       maxLines: 2,
@@ -1428,7 +716,7 @@ class _ModernCalculatorCardState extends ConsumerState<_ModernCalculatorCard> {
 
 // Modern List Tile
 class _ModernCalculatorListTile extends ConsumerWidget {
-  final _CalculatorItem item;
+  final CalculatorItem item;
   final bool isFavorite;
 
   const _ModernCalculatorListTile({
@@ -1447,9 +735,9 @@ class _ModernCalculatorListTile extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _surfaceColor,
+          color: context.colors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+          border: Border.all(color: context.colors.border),
         ),
         child: Row(
           children: [
@@ -1471,8 +759,8 @@ class _ModernCalculatorListTile extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           item.title,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: context.colors.textPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -1503,7 +791,7 @@ class _ModernCalculatorListTile extends ConsumerWidget {
                   Text(
                     item.description,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
+                      color: context.colors.textMuted,
                       fontSize: 13,
                     ),
                     maxLines: 1,
@@ -1519,7 +807,7 @@ class _ModernCalculatorListTile extends ConsumerWidget {
               },
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : Colors.white.withValues(alpha: 0.4),
+                color: isFavorite ? Colors.red : context.colors.textHint,
               ),
             ),
           ],

@@ -4,7 +4,7 @@ import 'calculei_colors.dart';
 
 /// Tema do Calculei otimizado
 class CalculeiTheme {
-  /// Tema claro simplificado
+  /// Tema claro simplificado - tons de cinza suave
   static ThemeData get lightTheme => ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
@@ -14,22 +14,23 @@ class CalculeiTheme {
       onPrimary: Colors.white,
       secondary: CalculeiColors.secondary,
       onSecondary: Colors.white,
-      surface: Colors.white,
-      onSurface: Colors.black,
-      surfaceContainerHighest: Colors.white,
-      surfaceContainer: Colors.white,
-      surfaceContainerHigh: Color(0xFFF8F9FA),
-      surfaceContainerLow: Color(0xFFFCFCFC),
-      surfaceContainerLowest: Colors.white,
+      surface: Color(0xFFF5F5F7),           // Cinza muito claro (não branco puro)
+      onSurface: Color(0xFF1A1C1E),         // Texto escuro
+      surfaceContainerHighest: Color(0xFFFFFFFF),
+      surfaceContainer: Color(0xFFF0F0F2),   // Cinza claro para containers
+      surfaceContainerHigh: Color(0xFFE8E8EC),
+      surfaceContainerLow: Color(0xFFF8F8FA),
+      surfaceContainerLowest: Color(0xFFFFFFFF),
       inverseSurface: Color(0xFF1C1C1E),
       onInverseSurface: Colors.white,
       error: Color(0xFFF44336),
       onError: Colors.white,
-      outline: Color(0xFFE0E0E0),
-      outlineVariant: Color(0xFFF5F5F5),
+      outline: Color(0xFFD0D0D4),            // Bordas mais visíveis
+      outlineVariant: Color(0xFFE5E5E8),
       shadow: Color(0x1F000000),
       scrim: Color(0x80000000),
       inversePrimary: CalculeiColors.primaryLight,
+      onSurfaceVariant: Color(0xFF49454F),  // Texto secundário
     ),
   ).copyWith(
     appBarTheme: const AppBarTheme(
@@ -117,6 +118,31 @@ class CalculeiTheme {
         ),
       ),
     ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: const Color(0xFF49454F),  // Cor mais escura para botões de texto
+        textStyle: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: const Color(0xFF49454F),
+        side: const BorderSide(color: Color(0xFFD0D0D4), width: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        textStyle: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+        ),
+      ),
+    ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -157,14 +183,14 @@ class CalculeiTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFFF8F9FA),
+      fillColor: Colors.white,  // Fundo branco para inputs no tema claro
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        borderSide: const BorderSide(color: Color(0xFFD0D0D4), width: 1.5),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+        borderSide: const BorderSide(color: Color(0xFFD0D0D4), width: 1.5),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -185,7 +211,7 @@ class CalculeiTheme {
         fontWeight: FontWeight.w400,
       ),
       labelStyle: const TextStyle(
-        color: Color(0xFF616161),
+        color: Color(0xFF49454F),  // Cor mais escura para labels
         fontSize: 16,
         fontWeight: FontWeight.w500,
       ),
@@ -197,7 +223,7 @@ class CalculeiTheme {
     ),
   );
   
-  /// Tema escuro simplificado
+  /// Tema escuro com azul estiloso da sidebar
   static ThemeData get darkTheme => ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
@@ -207,22 +233,23 @@ class CalculeiTheme {
       onPrimary: Colors.white,
       secondary: CalculeiColors.secondary,
       onSecondary: Colors.white,
-      surface: Color(0xFF1C1C1E),
+      surface: Color(0xFF12122A),            // Azul escuro estiloso (similar à sidebar)
       onSurface: Colors.white,
-      surfaceContainerHighest: Color(0xFF2D2D2D),
-      surfaceContainer: Color(0xFF242424),
-      surfaceContainerHigh: Color(0xFF2A2A2A),
-      surfaceContainerLow: Color(0xFF1F1F1F),
-      surfaceContainerLowest: Color(0xFF0F0F0F),
+      surfaceContainerHighest: Color(0xFF22223A),
+      surfaceContainer: Color(0xFF1A1A32),   // Azul escuro para containers
+      surfaceContainerHigh: Color(0xFF1E1E36),
+      surfaceContainerLow: Color(0xFF16162A), // Cor da sidebar
+      surfaceContainerLowest: Color(0xFF0F0F1A),
       inverseSurface: Colors.white,
       onInverseSurface: Colors.black,
       error: Color(0xFFF44336),
       onError: Colors.white,
-      outline: Color(0xFF4A4A4A),
-      outlineVariant: Color(0xFF2A2A2A),
+      outline: Color(0xFF3A3A5A),             // Bordas azuladas
+      outlineVariant: Color(0xFF2A2A4A),
       shadow: Color(0x4F000000),
       scrim: Color(0x80000000),
       inversePrimary: CalculeiColors.primaryLight,
+      onSurfaceVariant: Color(0xFFCAC4D0),   // Texto secundário claro
     ),
   ).copyWith(
     appBarTheme: const AppBarTheme(
@@ -245,7 +272,7 @@ class CalculeiTheme {
       shape: CircleBorder(),
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: const Color(0xFF16162A),  // Azul escuro
       selectedItemColor: CalculeiColors.primaryLight,
       unselectedItemColor: Colors.grey.shade600,
       showUnselectedLabels: true,
@@ -253,7 +280,7 @@ class CalculeiTheme {
       elevation: 8,
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: const Color(0xFF1E1E1E),
+      backgroundColor: const Color(0xFF16162A),  // Azul escuro
       indicatorColor: CalculeiColors.primaryLight.withValues(alpha: 0.15),
       iconTheme: WidgetStateProperty.resolveWith((states) {
         if (states.contains(WidgetState.selected)) {
@@ -291,7 +318,7 @@ class CalculeiTheme {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      color: const Color(0xFF2D2D2D),
+      color: const Color(0xFF1E1E36),  // Azul escuro para cards
       shadowColor: Colors.black.withValues(alpha: 0.3),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -350,14 +377,14 @@ class CalculeiTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: const Color(0xFF2D2D2D),
+      fillColor: const Color(0xFF1E1E36),  // Azul escuro
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
+        borderSide: const BorderSide(color: Color(0xFF3A3A5A)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF4A4A4A)),
+        borderSide: const BorderSide(color: Color(0xFF3A3A5A)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),

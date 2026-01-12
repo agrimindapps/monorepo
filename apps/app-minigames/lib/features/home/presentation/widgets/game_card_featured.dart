@@ -1,20 +1,22 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/providers/user_preferences_providers.dart';
 import '../../domain/entities/game_entity.dart';
 
 /// Featured game card - larger, more prominent display
-class GameCardFeatured extends StatefulWidget {
+class GameCardFeatured extends ConsumerStatefulWidget {
   final GameEntity game;
 
   const GameCardFeatured({super.key, required this.game});
 
   @override
-  State<GameCardFeatured> createState() => _GameCardFeaturedState();
+  ConsumerState<GameCardFeatured> createState() => _GameCardFeaturedState();
 }
 
-class _GameCardFeaturedState extends State<GameCardFeatured> {
+class _GameCardFeaturedState extends ConsumerState<GameCardFeatured> {
   bool _isHovered = false;
 
   @override
@@ -147,25 +149,33 @@ class _GameCardFeaturedState extends State<GameCardFeatured> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Badges
-        if (game.isNew || game.playerCount > 1)
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              if (game.isNew)
-                const _FeaturedBadge(
-                  text: 'NOVO',
-                  color: Colors.green,
-                ),
-              if (game.playerCount > 1)
-                _FeaturedBadge(
-                  icon: Icons.people,
-                  text: '${game.playerCount}',
-                  color: Colors.blue.shade700,
-                ),
-            ],
-          ),
+        // Badges and favorite button
+        Row(
+          children: [
+            // Badges
+            Expanded(
+              child: Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: [
+                  if (game.isNew)
+                    const _FeaturedBadge(
+                      text: 'NOVO',
+                      color: Colors.green,
+                    ),
+                  if (game.playerCount > 1)
+                    _FeaturedBadge(
+                      icon: Icons.people,
+                      text: '${game.playerCount}',
+                      color: Colors.blue.shade700,
+                    ),
+                ],
+              ),
+            ),
+            // Favorite button
+            _FeaturedFavoriteButton(gameId: game.id),
+          ],
+        ),
 
         const Spacer(),
 
@@ -433,6 +443,45 @@ class _FeaturedBadge extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Featured favorite button widget
+class _FeaturedFavoriteButton extends ConsumerWidget {
+  final String gameId;
+
+  const _FeaturedFavoriteButton({required this.gameId});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final favoriteGamesAsync = ref.watch(favoriteGamesProvider);
+    final isFavorite = favoriteGamesAsync.value?.contains(gameId) ?? false;
+
+    return GestureDetector(
+      onTap: () {
+        ref.read(favoriteGamesProvider.notifier).toggle(gameId);
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isFavorite
+                  ? Colors.pink.withValues(alpha: 0.3)
+                  : Colors.black26,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              size: 20,
+              color: isFavorite ? Colors.pink : Colors.white70,
+            ),
           ),
         ),
       ),

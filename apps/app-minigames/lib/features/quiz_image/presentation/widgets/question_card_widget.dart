@@ -12,37 +12,59 @@ class QuestionCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        gradient: isDark
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  const Color(0xFF2A2D3E),
+                  const Color(0xFF1F2230),
+                ],
+              )
+            : null,
+        color: isDark ? null : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: isDark
+            ? Border.all(
+                color: const Color(0xFF3F51B5).withValues(alpha: 0.3),
+                width: 2,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 8,
+            color: isDark
+                ? const Color(0xFF3F51B5).withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: 0.1),
+            blurRadius: isDark ? 16 : 8,
             offset: const Offset(0, 4),
+            spreadRadius: isDark ? 2 : 0,
           ),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
             // Question image or emoji
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: _buildImageContent(),
+              borderRadius: BorderRadius.circular(12),
+              child: _buildImageContent(isDark),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
             // Question text
             Text(
               question.question,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
           ],
@@ -51,7 +73,7 @@ class QuestionCardWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildImageContent() {
+  Widget _buildImageContent(bool isDark) {
     // Check if it's an emoji URL (format: "emoji:🇧🇷")
     if (question.imageUrl.startsWith('emoji:')) {
       final emoji = question.imageUrl.substring(6); // Remove "emoji:" prefix
@@ -59,8 +81,13 @@ class QuestionCardWidget extends StatelessWidget {
         height: 150,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(8),
+          color: isDark ? const Color(0xFF1A1D2E) : const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+          border: isDark
+              ? Border.all(
+                  color: const Color(0xFF3F51B5).withValues(alpha: 0.2),
+                )
+              : null,
         ),
         child: Center(
           child: Text(

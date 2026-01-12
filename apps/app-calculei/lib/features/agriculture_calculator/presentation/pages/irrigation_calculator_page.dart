@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/irrigation_calculator.dart';
 
@@ -60,13 +61,18 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Crop selection
-              Text(
-                'Cultura',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Cultura',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -87,13 +93,18 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
               const SizedBox(height: 24),
 
               // Crop stage
-              Text(
-                'Estágio da cultura',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Estágio da cultura',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -114,13 +125,18 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
               const SizedBox(height: 24),
 
               // Irrigation system
-              Text(
-                'Sistema de irrigação',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Sistema de irrigação',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -147,7 +163,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                 children: [
                   SizedBox(
                     width: 160,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'ETo (referência)',
                       controller: _etoController,
                       suffix: 'mm/dia',
@@ -163,7 +179,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                   ),
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
                       suffix: 'ha',
@@ -174,7 +190,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                   ),
                   SizedBox(
                     width: 160,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Vazão sistema',
                       controller: _flowController,
                       suffix: 'L/h',
@@ -251,13 +267,14 @@ class _IrrigationResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -270,7 +287,7 @@ class _IrrigationResultCard extends StatelessWidget {
               Text(
                 'Necessidade de Irrigação',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -368,7 +385,7 @@ class _IrrigationResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -392,7 +409,7 @@ class _IrrigationResultCard extends StatelessWidget {
           Text(
             'Recomendações',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -416,7 +433,7 @@ class _IrrigationResultCard extends StatelessWidget {
                     child: Text(
                       rec.replaceAll('⚠️ ', ''),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -444,6 +461,7 @@ class _DetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -459,14 +477,14 @@ class _DetailCard extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 11,
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
         ],
@@ -483,6 +501,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -491,106 +510,18 @@ class _InfoRow extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
             ),
           ),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

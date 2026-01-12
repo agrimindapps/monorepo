@@ -265,6 +265,202 @@ $_footer''';
 $_footer''';
   }
 
+  /// Format plumbing calculation for sharing
+  static String formatPlumbingCalculation({
+    required String systemType,
+    required String pipeDiameter,
+    required double totalLength,
+    required int pipeCount,
+    required int glueAmount,
+    required int numberOfElbows,
+    required int numberOfTees,
+    required int numberOfCouplings,
+  }) {
+    final connectionsText = StringBuffer();
+    if (numberOfElbows > 0 || numberOfTees > 0 || numberOfCouplings > 0) {
+      connectionsText.writeln();
+      connectionsText.writeln('🔧 Conexões:');
+      if (numberOfElbows > 0) {
+        connectionsText.writeln('• Joelhos 90°: $numberOfElbows un');
+      }
+      if (numberOfTees > 0) {
+        connectionsText.writeln('• Ts (Junções): $numberOfTees un');
+      }
+      if (numberOfCouplings > 0) {
+        connectionsText.writeln('• Luvas: $numberOfCouplings un');
+      }
+    }
+
+    return '''
+📋 Cálculo de Tubulação - Calculei App
+
+🚰 Sistema: $systemType
+📏 Diâmetro: $pipeDiameter
+📐 Comprimento Total: ${totalLength.toStringAsFixed(1)} m
+
+📦 Materiais Necessários:
+• Tubos PVC: $pipeCount unidades (6m)
+• Cola PVC: $glueAmount ml$connectionsText
+$_footer''';
+  }
+
+  /// Format roof calculation for sharing
+  static String formatRoofCalculation({
+    required double roofArea,
+    required int numberOfTiles,
+    required int ridgeTilesCount,
+    required double woodFrameMeters,
+    required String roofType,
+    required double roofSlope,
+  }) {
+    return '''
+📋 Cálculo de Telhado - Calculei App
+
+📏 Área do Telhado: ${roofArea.toStringAsFixed(2)} m²
+🏠 Tipo de Telha: $roofType
+📐 Inclinação: ${roofSlope.toStringAsFixed(0)}%
+
+📦 Materiais Necessários:
+• Telhas: $numberOfTiles unidades
+• Cumeeiras: $ridgeTilesCount unidades
+• Madeiramento Total: ${woodFrameMeters.toStringAsFixed(2)} m
+$_footer''';
+  }
+
+  /// Format drywall calculation for sharing
+  static String formatDrywallCalculation({
+    required double wallArea,
+    required int numberOfPanels,
+    required double profilesMeters,
+    required int screwsCount,
+    required double jointTapeMeters,
+    required double jointCompoundKg,
+    required String wallType,
+  }) {
+    return '''
+📋 Cálculo de Drywall - Calculei App
+
+📏 Área da Parede: ${wallArea.toStringAsFixed(2)} m²
+🏗️ Tipo: Parede $wallType
+
+📦 Materiais Necessários:
+• Placas (1.20×2.40m): $numberOfPanels unidades
+• Perfis Metálicos: ${profilesMeters.toStringAsFixed(1)} metros
+• Parafusos: $screwsCount unidades
+• Fita de Junção: ${jointTapeMeters.toStringAsFixed(1)} metros
+• Massa Corrida: ${jointCompoundKg.toStringAsFixed(1)} kg
+$_footer''';
+  }
+
+  /// Format electrical calculation for sharing
+  static String formatElectricalCalculation({
+    required double totalPower,
+    required double voltage,
+    required String circuitType,
+    required double totalCurrent,
+    required double wireGauge,
+    required int breakerSize,
+    required double cableLength,
+    required int numberOfCircuits,
+    double? voltageDrop,
+  }) {
+    final voltageDropText = voltageDrop != null 
+        ? '\n⚡ Queda de Tensão: ${voltageDrop.toStringAsFixed(2)}%' 
+        : '';
+    
+    return '''
+📋 Cálculo Elétrico - Calculei App
+
+⚡ Potência Total: ${totalPower.toStringAsFixed(0)} W
+🔌 Tensão: ${voltage.toInt()}V - $circuitType
+⚡ Corrente Total: ${totalCurrent.toStringAsFixed(2)} A$voltageDropText
+
+🔧 Especificações Recomendadas:
+• Bitola do Cabo: ${wireGauge.toStringAsFixed(1)} mm²
+• Disjuntor: $breakerSize A
+• Comprimento: ${cableLength.toStringAsFixed(1)} m
+• Circuitos: $numberOfCircuits
+$_footer''';
+  }
+
+  /// Format slab calculation for sharing
+  static String formatSlabCalculation({
+    required String slabType,
+    required double concreteVolume,
+    required int cementBags,
+    required double sandCubicMeters,
+    required double gravelCubicMeters,
+    required int steelWeight,
+    required int numberOfBlocks,
+    required int waterLiters,
+  }) {
+    final blocksText = numberOfBlocks > 0
+        ? '\n• Blocos: $numberOfBlocks unidades'
+        : '';
+
+    return '''
+📋 Cálculo de Laje - Calculei App
+
+🏗️ Tipo: Laje $slabType
+📏 Volume de Concreto: ${concreteVolume.toStringAsFixed(2)} m³
+
+📦 Materiais Necessários:
+• Cimento: $cementBags sacos (50kg)
+• Areia: ${sandCubicMeters.toStringAsFixed(2)} m³
+• Brita: ${gravelCubicMeters.toStringAsFixed(2)} m³
+• Água: $waterLiters litros
+• Aço/Ferro: $steelWeight kg$blocksText
+$_footer''';
+  }
+
+  /// Format glass calculation for sharing
+  static String formatGlassCalculation({
+    required double totalArea,
+    required double estimatedWeight,
+    required String glassType,
+    required int glassThickness,
+    required int numberOfPanels,
+  }) {
+    return '''
+📋 Cálculo de Vidros - Calculei App
+
+📏 Área Total: ${totalArea.toStringAsFixed(2)} m²
+🪟 Painéis: $numberOfPanels unidades
+🏗️ Tipo: Vidro $glassType - ${glassThickness}mm
+
+⚖️ Especificações:
+• Peso total: ${estimatedWeight.toStringAsFixed(1)} kg
+• Peso por painel: ${(estimatedWeight / numberOfPanels).toStringAsFixed(1)} kg
+
+💡 Considere instalação profissional para segurança.
+$_footer''';
+  }
+
+  /// Format mortar calculation for sharing
+  static String formatMortarCalculation({
+    required double area,
+    required double thickness,
+    required double volume,
+    required int cementBags,
+    required double sandCubicMeters,
+    required int waterLiters,
+    required String mortarType,
+  }) {
+    return '''
+📋 Cálculo de Argamassa - Calculei App
+
+📏 Área: ${area.toStringAsFixed(1)} m²
+📐 Espessura: ${thickness.toStringAsFixed(1)} cm
+📦 Volume Total: ${volume.toStringAsFixed(2)} m³
+🏗️ Tipo: Argamassa para $mortarType
+
+📦 Materiais Necessários:
+• Cimento: $cementBags sacos (50kg)
+• Areia: ${sandCubicMeters.toStringAsFixed(2)} m³
+• Água: $waterLiters litros
+$_footer''';
+  }
+
   /// Format paint calculation for sharing
   static String formatPaintCalculation({
     required double paintLiters,
@@ -336,6 +532,33 @@ $_footer''';
 • Cimento: $cementBags sacos (50kg)
 
 ℹ️ Tijolos sem perda: $bricksNeeded
+$_footer''';
+  }
+
+  /// Format rebar calculation for sharing
+  static String formatRebarCalculation({
+    required String structureType,
+    required double concreteVolume,
+    required String rebarDiameter,
+    required double totalWeight,
+    required double totalLength,
+    required int numberOfBars,
+    required double steelRate,
+  }) {
+    return '''
+📋 Cálculo de Ferragem - Calculei App
+
+🏗️ Tipo de Estrutura: $structureType
+📏 Volume de Concreto: ${concreteVolume.toStringAsFixed(2)} m³
+⚙️ Taxa de Aço: ${steelRate.toStringAsFixed(0)} kg/m³
+
+🔩 Ferragem Necessária:
+• Peso Total: ${totalWeight.toStringAsFixed(1)} kg
+• Comprimento Total: ${totalLength.toStringAsFixed(1)} m
+• Diâmetro: $rebarDiameter
+• Barras de 12m: $numberOfBars unidades
+
+💡 Considere 5-10% de perda no corte e amarração
 $_footer''';
   }
 
@@ -1038,6 +1261,34 @@ $_footer''';
 • Necessidade semanal: ${weeklyWater.toStringAsFixed(1)} mm
 
 💡 Use para planejamento de irrigação.
+$_footer''';
+  }
+
+  /// Format water tank calculation for sharing
+  static String formatWaterTankCalculation({
+    required int numberOfPeople,
+    required double dailyConsumption,
+    required int reserveDays,
+    required double totalCapacity,
+    required int recommendedTankSize,
+    required String tankType,
+  }) {
+    final totalDaily = (numberOfPeople * dailyConsumption).toInt();
+    
+    return '''
+📋 Cálculo de Caixa d'Água - Calculei App
+
+👥 Número de Pessoas: $numberOfPeople
+💧 Consumo Diário: ${dailyConsumption.toInt()} L/pessoa/dia
+📅 Dias de Reserva: $reserveDays ${reserveDays == 1 ? 'dia' : 'dias'}
+
+📊 Resultado:
+• Consumo total diário: $totalDaily litros
+• Capacidade mínima: ${totalCapacity.toInt()} litros
+• Caixa recomendada: $recommendedTankSize litros
+• Material: $tankType
+
+💡 Considere margem de segurança de 20% para variações.
 $_footer''';
   }
 }

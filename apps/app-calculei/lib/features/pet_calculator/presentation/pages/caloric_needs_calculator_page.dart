@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/caloric_needs_calculator.dart';
 
@@ -58,13 +59,18 @@ class _CaloricNeedsCalculatorPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Species selection
-              Text(
-                'Selecione a espécie',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Selecione a espécie',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Row(
@@ -92,7 +98,7 @@ class _CaloricNeedsCalculatorPageState
               const SizedBox(height: 24),
 
               // Weight
-              _DarkInputField(
+              AdaptiveInputField(
                 label: 'Peso do pet',
                 controller: _weightController,
                 suffix: 'kg',
@@ -117,13 +123,18 @@ class _CaloricNeedsCalculatorPageState
               const SizedBox(height: 24),
 
               // Life Stage
-              Text(
-                'Estágio de Vida',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Estágio de Vida',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -142,13 +153,18 @@ class _CaloricNeedsCalculatorPageState
               const SizedBox(height: 24),
 
               // Activity Level
-              Text(
-                'Nível de Atividade',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Nível de Atividade',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -167,34 +183,39 @@ class _CaloricNeedsCalculatorPageState
               const SizedBox(height: 24),
 
               // Neutered
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: CheckboxListTile(
-                  title: Text(
-                    'Pet castrado/esterilizado',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+                      ),
                     ),
-                  ),
-                  subtitle: Text(
-                    'Pets castrados têm menor gasto energético',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
-                      fontSize: 13,
+                    child: CheckboxListTile(
+                      title: Text(
+                        'Pet castrado/esterilizado',
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Pets castrados têm menor gasto energético',
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+                          fontSize: 13,
+                        ),
+                      ),
+                      value: _isNeutered,
+                      onChanged: (value) =>
+                          setState(() => _isNeutered = value ?? false),
+                      activeColor: CalculatorAccentColors.pet,
+                      checkColor: Colors.white,
                     ),
-                  ),
-                  value: _isNeutered,
-                  onChanged: (value) =>
-                      setState(() => _isNeutered = value ?? false),
-                  activeColor: CalculatorAccentColors.pet,
-                  checkColor: Colors.white,
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 32),
@@ -265,87 +286,6 @@ class _CaloricNeedsCalculatorPageState
   }
 }
 
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.pet,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SpeciesButton extends StatelessWidget {
   final String label;
   final String emoji;
@@ -362,11 +302,12 @@ class _SpeciesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -377,7 +318,7 @@ class _SpeciesButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -392,7 +333,7 @@ class _SpeciesButton extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -417,15 +358,16 @@ class _CaloricNeedsResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final petEmoji = species == PetSpecies.dog ? '🐕' : '🐈';
 
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -440,7 +382,7 @@ class _CaloricNeedsResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -494,7 +436,7 @@ https://calculei.com.br''',
                         ' kcal/dia',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
@@ -511,7 +453,7 @@ https://calculei.com.br''',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
@@ -526,7 +468,7 @@ https://calculei.com.br''',
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -535,12 +477,12 @@ https://calculei.com.br''',
                   label: 'RER (Repouso)',
                   value: '${result.rer.toStringAsFixed(0)} kcal',
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Estágio',
                   value: result.lifeStageText,
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Atividade',
                   value: result.activityLevelText,
@@ -557,33 +499,38 @@ https://calculei.com.br''',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 8),
           ...result.recommendations.map(
-            (rec) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    size: 18,
-                    color: accentColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      rec,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+            (rec) => Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        size: 18,
+                        color: accentColor,
                       ),
-                    ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          rec,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
           ),
         ],
@@ -600,6 +547,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -607,7 +555,7 @@ class _DetailRow extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
           ),
         ),
         Text(
@@ -615,7 +563,7 @@ class _DetailRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.white.withValues(alpha: 0.9),
+            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
           ),
         ),
       ],

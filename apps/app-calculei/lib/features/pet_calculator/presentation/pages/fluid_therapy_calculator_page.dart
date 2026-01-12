@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/fluid_therapy_calculator.dart';
 export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
@@ -42,10 +43,18 @@ class _FluidTherapyCalculatorPageState
       maxContentWidth: 600,
       actions: [
         if (_result != null)
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {},
-            tooltip: 'Compartilhar',
+          Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return IconButton(
+                icon: Icon(
+                  Icons.share_outlined,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+                onPressed: () {},
+                tooltip: 'Compartilhar',
+              );
+            },
           ),
       ],
       child: Padding(
@@ -56,48 +65,53 @@ class _FluidTherapyCalculatorPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Warning Card
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.warning, color: Colors.orange),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'APENAS ORIENTATIVO',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.orange,
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            'Fluidoterapia deve ser prescrita por veterinário. Este cálculo não substitui avaliação profissional.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
-                          ),
-                        ],
-                      ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.warning, color: Colors.orange),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'APENAS ORIENTATIVO',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Fluidoterapia deve ser prescrita por veterinário. Este cálculo não substitui avaliação profissional.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 24),
 
               // Weight
-              _DarkInputField(
+              AdaptiveInputField(
                 label: 'Peso do pet',
                 controller: _weightController,
                 suffix: 'kg',
@@ -124,7 +138,7 @@ class _FluidTherapyCalculatorPageState
               const SizedBox(height: 24),
 
               // Dehydration
-              _DarkInputField(
+              AdaptiveInputField(
                 label: 'Desidratação estimada',
                 controller: _dehydrationController,
                 suffix: '%',
@@ -151,28 +165,33 @@ class _FluidTherapyCalculatorPageState
               const SizedBox(height: 24),
 
               // Dehydration guide
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Guia de Desidratação:',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        fontSize: 14,
-                      ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                     ),
-                    const SizedBox(height: 8),
-                    ..._buildDehydrationGuide(),
-                  ],
-                ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Guia de Desidratação:',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        ..._buildDehydrationGuide(),
+                      ],
+                    ),
+                  );
+                },
               ),
 
               const SizedBox(height: 32),
@@ -207,23 +226,28 @@ class _FluidTherapyCalculatorPageState
     ];
 
     return guides
-        .map((guide) => Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  Icon(Icons.fiber_manual_record, size: 8, color: CalculatorAccentColors.pet),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      guide,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.white.withValues(alpha: 0.7),
+        .map((guide) => Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Icon(Icons.fiber_manual_record, size: 8, color: CalculatorAccentColors.pet),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          guide,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             ))
         .toList();
   }
@@ -259,15 +283,16 @@ class _FluidTherapyResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const accentColor = CalculatorAccentColors.pet;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -282,7 +307,7 @@ class _FluidTherapyResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -341,7 +366,7 @@ https://calculei.com.br''',
                         ' ml',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
@@ -350,7 +375,7 @@ https://calculei.com.br''',
                 Text(
                   'volume total 24h',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -363,7 +388,7 @@ https://calculei.com.br''',
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -372,17 +397,17 @@ https://calculei.com.br''',
                   label: 'Manutenção',
                   value: '${result.maintenanceVolumeMl.toStringAsFixed(0)} ml',
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Déficit (${result.dehydrationPercent}%)',
                   value: '${result.deficitVolumeMl.toStringAsFixed(0)} ml',
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Taxa horária',
                   value: '${result.hourlyRateMl.toStringAsFixed(1)} ml/h',
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Gotas/minuto',
                   value: '${result.dropsPerMinute.toStringAsFixed(0)} gts/min',
@@ -399,7 +424,7 @@ https://calculei.com.br''',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 8),
@@ -424,7 +449,7 @@ https://calculei.com.br''',
                       rec,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
@@ -446,6 +471,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -453,7 +479,7 @@ class _DetailRow extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
           ),
         ),
         Text(
@@ -461,89 +487,7 @@ class _DetailRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.pet,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
           ),
         ),
       ],

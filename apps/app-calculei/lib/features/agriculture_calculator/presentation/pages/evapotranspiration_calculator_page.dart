@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/evapotranspiration_calculator.dart';
 
@@ -59,13 +60,18 @@ class _EvapotranspirationCalculatorPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Title section
-              Text(
-                'Dados Meteorológicos',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Dados Meteorológicos',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 16),
 
@@ -76,7 +82,7 @@ class _EvapotranspirationCalculatorPageState
                 children: [
                   SizedBox(
                     width: 160,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Temperatura média',
                       controller: _temperatureController,
                       suffix: '°C',
@@ -92,7 +98,7 @@ class _EvapotranspirationCalculatorPageState
                   ),
                   SizedBox(
                     width: 160,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Umidade relativa',
                       controller: _humidityController,
                       suffix: '%',
@@ -108,7 +114,7 @@ class _EvapotranspirationCalculatorPageState
                   ),
                   SizedBox(
                     width: 160,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Velocidade do vento',
                       controller: _windSpeedController,
                       suffix: 'km/h',
@@ -124,7 +130,7 @@ class _EvapotranspirationCalculatorPageState
                   ),
                   SizedBox(
                     width: 160,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Radiação solar',
                       controller: _solarRadiationController,
                       suffix: 'MJ/m²',
@@ -194,13 +200,14 @@ class _EvapotranspirationResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -213,7 +220,7 @@ class _EvapotranspirationResultCard extends StatelessWidget {
               Text(
                 'Evapotranspiração de Referência',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -241,7 +248,7 @@ class _EvapotranspirationResultCard extends StatelessWidget {
                   value: '${result.etoMmDay.toStringAsFixed(2)} mm/dia',
                   highlight: true,
                 ),
-                const Divider(height: 24, color: Colors.white24),
+                Divider(height: 24, color: isDark ? Colors.white24 : Colors.black26),
                 _ResultRow(
                   label: 'ETo semanal',
                   value: '${result.etoWeekly.toStringAsFixed(1)} mm',
@@ -266,7 +273,7 @@ class _EvapotranspirationResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -277,26 +284,26 @@ class _EvapotranspirationResultCard extends StatelessWidget {
                     Text(
                       'Água diária/ha:',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                       ),
                     ),
                     Text(
                       '${result.dailyWaterM3Ha.toStringAsFixed(1)} m³',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : Colors.black,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-                const Divider(height: 12, color: Colors.white24),
+                Divider(height: 12, color: isDark ? Colors.white24 : Colors.black26),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Água semanal/ha:',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                       ),
                     ),
                     Text(
@@ -347,23 +354,23 @@ class _EvapotranspirationResultCard extends StatelessWidget {
           // Recommendations
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             child: ExpansionTile(
               title: Text(
                 'Recomendações de Irrigação',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              iconColor: Colors.white.withValues(alpha: 0.7),
-              collapsedIconColor: Colors.white.withValues(alpha: 0.7),
-              textColor: Colors.white.withValues(alpha: 0.9),
+              iconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              collapsedIconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              textColor: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               children: result.recommendations
                   .map((rec) => Padding(
                         padding: const EdgeInsets.only(left: 16, bottom: 8, right: 16),
@@ -380,7 +387,7 @@ class _EvapotranspirationResultCard extends StatelessWidget {
                               child: Text(
                                 rec,
                                 style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.7),
+                                  color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                                   fontSize: 14,
                                 ),
                               ),
@@ -432,6 +439,7 @@ class _ResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -440,7 +448,7 @@ class _ResultRow extends StatelessWidget {
           style: TextStyle(
             fontSize: highlight ? 16 : 14,
             fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
           ),
         ),
         Text(
@@ -450,7 +458,7 @@ class _ResultRow extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: highlight 
                 ? CalculatorAccentColors.agriculture 
-                : Colors.white.withValues(alpha: 0.9),
+                : isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -458,90 +466,4 @@ class _ResultRow extends StatelessWidget {
   }
 }
 
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
 
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/providers/dependency_providers.dart';
 import '../../../../core/widgets/semantic_widgets.dart';
-import '../dialogs/feedback_dialog.dart';
 import '../providers/settings_notifier.dart';
 import '../providers/theme_notifier.dart';
 import '../widgets/profile/profile_user_section.dart';
@@ -314,10 +313,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _showFeedbackDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => const FeedbackDialog(),
-    );
+    FeedbackDialog.show(context);
   }
 
   Future<void> _openWebVersion() async {

@@ -31,6 +31,8 @@ class CalculatorActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Row(
       children: [
         // Clear button (optional)
@@ -43,8 +45,8 @@ class CalculatorActionButtons extends StatelessWidget {
                 icon: Icon(
                   Icons.clear_rounded,
                   color: isLoading 
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : Colors.white.withValues(alpha: 0.7),
+                      ? (isDark ? Colors.white : Colors.black).withValues(alpha: 0.3)
+                      : (isDark ? Colors.white : Colors.black).withValues(alpha: 0.7),
                 ),
                 label: Text(
                   'Limpar',
@@ -52,13 +54,13 @@ class CalculatorActionButtons extends StatelessWidget {
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: isLoading 
-                        ? Colors.white.withValues(alpha: 0.3)
-                        : Colors.white.withValues(alpha: 0.7),
+                        ? (isDark ? Colors.white : Colors.black).withValues(alpha: 0.3)
+                        : (isDark ? Colors.white : Colors.black).withValues(alpha: 0.7),
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: BorderSide(
-                    color: Colors.white.withValues(alpha: isLoading ? 0.1 : 0.2),
+                    color: (isDark ? Colors.white : Colors.black).withValues(alpha: isLoading ? 0.1 : 0.2),
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),

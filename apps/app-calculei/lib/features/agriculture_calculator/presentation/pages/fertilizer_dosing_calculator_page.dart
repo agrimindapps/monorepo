@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/fertilizer_dosing_calculator.dart';
 
@@ -49,13 +50,18 @@ class _FertilizerDosingCalculatorPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Fertilizer type selection
-              Text(
-                'Tipo de Fertilizante',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Tipo de Fertilizante',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -87,7 +93,7 @@ class _FertilizerDosingCalculatorPageState
                 children: [
                   SizedBox(
                     width: 180,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
                       suffix: 'ha',
@@ -103,7 +109,7 @@ class _FertilizerDosingCalculatorPageState
                   ),
                   SizedBox(
                     width: 220,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Taxa desejada de nutriente',
                       controller: _desiredRateController,
                       suffix: 'kg/ha',
@@ -178,16 +184,17 @@ class _FertilizerDosingResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final fertilizerName =
         FertilizerDosingCalculator.getFertilizerName(fertilizerType);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -195,12 +202,12 @@ class _FertilizerDosingResultCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.inventory_2, color: Colors.white70),
+              const Icon(Icons.inventory_2, color: CalculatorAccentColors.agriculture),
               const SizedBox(width: 8),
               Text(
                 'Resultado - $fertilizerName',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -217,7 +224,7 @@ class _FertilizerDosingResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -228,7 +235,7 @@ class _FertilizerDosingResultCard extends StatelessWidget {
                   highlight: true,
                 ),
                 Divider(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
                   height: 24,
                 ),
                 _ResultRow(
@@ -267,16 +274,16 @@ class _FertilizerDosingResultCard extends StatelessWidget {
                 Text(
                   'Custo estimado:',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                     fontSize: 15,
                   ),
                 ),
                 Text(
                   'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ],
@@ -289,7 +296,7 @@ class _FertilizerDosingResultCard extends StatelessWidget {
           Text(
             'Dicas de aplicação',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -311,7 +318,7 @@ class _FertilizerDosingResultCard extends StatelessWidget {
                     child: Text(
                       tip,
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -359,6 +366,7 @@ class _ResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -367,7 +375,7 @@ class _ResultRow extends StatelessWidget {
           style: TextStyle(
             fontSize: highlight ? 16 : 14,
             fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
-            color: Colors.white.withValues(alpha: highlight ? 0.9 : 0.7),
+            color: isDark ? Colors.white.withValues(alpha: highlight ? 0.9 : 0.7) : Colors.black.withValues(alpha: highlight ? 0.9 : 0.7),
           ),
         ),
         Text(
@@ -377,7 +385,7 @@ class _ResultRow extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: highlight 
                 ? CalculatorAccentColors.agriculture 
-                : Colors.white.withValues(alpha: 0.9),
+                : (isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9)),
           ),
         ),
       ],
@@ -385,91 +393,4 @@ class _ResultRow extends StatelessWidget {
   }
 }
 
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
 
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              // ignore: prefer_const_constructors
-              borderSide: BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

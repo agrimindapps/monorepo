@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/yield_prediction_calculator.dart';
 
@@ -61,13 +62,18 @@ class _YieldPredictionCalculatorPageState
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Crop selection
-              Text(
-                'Cultura',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Cultura',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -93,7 +99,7 @@ class _YieldPredictionCalculatorPageState
                 children: [
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
                       suffix: 'ha',
@@ -109,7 +115,7 @@ class _YieldPredictionCalculatorPageState
                   ),
                   SizedBox(
                     width: 200,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Produtividade esperada',
                       controller: _yieldController,
                       suffix: 'kg/ha',
@@ -125,7 +131,7 @@ class _YieldPredictionCalculatorPageState
                   ),
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Perdas estimadas',
                       controller: _lossController,
                       suffix: '%',
@@ -207,14 +213,17 @@ class _YieldResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final productivityColor = _getProductivityColor(result.netYieldKgHa);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -229,7 +238,7 @@ class _YieldResultCard extends StatelessWidget {
               Text(
                 'Resultado',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -289,7 +298,7 @@ class _YieldResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -298,14 +307,14 @@ class _YieldResultCard extends StatelessWidget {
                 Text(
                   'Valor estimado:',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
                 Text(
                   'R\$ ${result.estimatedValue.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -320,7 +329,7 @@ class _YieldResultCard extends StatelessWidget {
           Text(
             'Recomendações',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -342,7 +351,7 @@ class _YieldResultCard extends StatelessWidget {
                     child: Text(
                       rec.replaceAll('⚠️ ', ''),
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.7),
+                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -389,6 +398,7 @@ class _ResultBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -401,7 +411,7 @@ class _ResultBox extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -420,84 +430,4 @@ class _ResultBox extends StatelessWidget {
   }
 }
 
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
 
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 2),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

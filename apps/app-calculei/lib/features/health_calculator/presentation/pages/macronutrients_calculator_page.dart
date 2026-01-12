@@ -82,7 +82,7 @@ class _MacronutrientsCalculatorPageState
               Text(
                 'Selecione seu objetivo',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -170,13 +170,16 @@ class _DarkInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -187,23 +190,25 @@ class _DarkInputField extends StatelessWidget {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.3),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             suffixText: suffix,
             suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 16,
             ),
             filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
+            fillColor: isDark 
+                ? Colors.white.withValues(alpha: 0.08)
+                : theme.colorScheme.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -211,7 +216,7 @@ class _DarkInputField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: theme.colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -223,7 +228,7 @@ class _DarkInputField extends StatelessWidget {
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: theme.colorScheme.error),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -263,11 +268,15 @@ class _GoalOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.health;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : isDark 
+              ? Colors.white.withValues(alpha: 0.05)
+              : theme.colorScheme.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -278,7 +287,7 @@ class _GoalOption extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : theme.colorScheme.outline.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -290,7 +299,7 @@ class _GoalOption extends StatelessWidget {
                 size: 24,
                 color: isSelected
                     ? accentColor
-                    : Colors.white.withValues(alpha: 0.7),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.7),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -305,7 +314,7 @@ class _GoalOption extends StatelessWidget {
                         fontSize: 14,
                         color: isSelected
                             ? accentColor
-                            : Colors.white.withValues(alpha: 0.9),
+                            : theme.colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -313,7 +322,7 @@ class _GoalOption extends StatelessWidget {
                       'C: ${distribution.carbsPercent}% | P: ${distribution.proteinPercent}% | G: ${distribution.fatPercent}%',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -341,10 +350,15 @@ class _MacroResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.05)
+            : theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: CalculatorAccentColors.health.withValues(alpha: 0.3),
@@ -367,7 +381,7 @@ class _MacroResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.95),
+                  color: theme.colorScheme.onSurface,
                 ),
               ),
             ],
@@ -469,7 +483,7 @@ class _MacroResultCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: theme.colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -492,7 +506,7 @@ class _MacroResultCard extends StatelessWidget {
                             tip,
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.8),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                               height: 1.4,
                             ),
                           ),
@@ -528,6 +542,8 @@ class _MacroBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -539,14 +555,14 @@ class _MacroBar extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: theme.colorScheme.onSurface,
               ),
             ),
             Text(
               '${grams.toStringAsFixed(0)}g (${calories.toStringAsFixed(0)} kcal)',
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.white.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -596,10 +612,15 @@ class _MacroPieChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.03)
+            : theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -613,6 +634,9 @@ class _MacroPieChart extends StatelessWidget {
                 carbsPercent: result.carbsPercent,
                 proteinPercent: result.proteinPercent,
                 fatPercent: result.fatPercent,
+                centerColor: isDark 
+                    ? const Color(0xFF1A1A2E)
+                    : theme.colorScheme.surface,
               ),
             ),
           ),
@@ -642,6 +666,8 @@ class _LegendItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Row(
       children: [
         Container(
@@ -658,7 +684,7 @@ class _LegendItem extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w500,
-            color: Colors.white.withValues(alpha: 0.8),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -666,16 +692,18 @@ class _LegendItem extends StatelessWidget {
   }
 }
 
-/// Custom painter for pie chart with white center for dark background
+/// Custom painter for pie chart with theme-adaptive center
 class _PieChartPainter extends CustomPainter {
   final int carbsPercent;
   final int proteinPercent;
   final int fatPercent;
+  final Color centerColor;
 
   _PieChartPainter({
     required this.carbsPercent,
     required this.proteinPercent,
     required this.fatPercent,
+    required this.centerColor,
   });
 
   @override
@@ -722,8 +750,8 @@ class _PieChartPainter extends CustomPainter {
       paint,
     );
 
-    // Inner circle (donut effect) - dark color for dark background
-    paint.color = const Color(0xFF1A1A2E);
+    // Inner circle (donut effect) - theme-adaptive
+    paint.color = centerColor;
     canvas.drawCircle(center, radius * 0.5, paint);
   }
 

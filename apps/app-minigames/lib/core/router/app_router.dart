@@ -28,6 +28,9 @@ import 'package:app_minigames/features/frogger/presentation/pages/frogger_page.d
 import 'package:app_minigames/features/tetris/presentation/pages/tetris_page.dart';
 import 'package:app_minigames/features/galaga/presentation/pages/galaga_page.dart';
 import 'package:app_minigames/features/centipede/presentation/pages/centipede_page.dart';
+// Admin
+import 'package:app_minigames/features/admin/presentation/pages/admin_login_page.dart';
+import 'package:app_minigames/features/admin/presentation/pages/admin_dashboard_page.dart';
 
 import 'page_transitions.dart';
 
@@ -235,10 +238,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         state: state,
       ),
     ),
+    // Admin routes
+    GoRoute(
+      path: '/admin',
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AdminLoginPage(),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: '/admin/dashboard',
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AdminDashboardPage(),
+        state: state,
+      ),
+    ),
   ],
   errorBuilder: (context, state) => Scaffold(
+    backgroundColor: const Color(0xFF0F0F1A),
     body: Center(
-      child: Text('Página não encontrada: ${state.uri.path}'),
+      child: Text(
+        'Página não encontrada: ${state.uri.path}',
+        style: const TextStyle(color: Colors.white70),
+      ),
     ),
   ),
 );

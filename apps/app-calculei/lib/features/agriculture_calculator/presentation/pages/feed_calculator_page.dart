@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/feed_calculator.dart';
 
@@ -58,13 +59,18 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Animal type selection
-              Text(
-                'Tipo de Animal',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Tipo de Animal',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -90,7 +96,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
                 children: [
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Peso médio',
                       controller: _weightController,
                       suffix: 'kg',
@@ -106,7 +112,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
                   ),
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Nº de animais',
                       controller: _numAnimalsController,
                       keyboardType: TextInputType.number,
@@ -119,7 +125,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
                   ),
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Período',
                       controller: _daysController,
                       suffix: 'dias',
@@ -188,13 +194,14 @@ class _FeedResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -208,10 +215,10 @@ class _FeedResultCard extends StatelessWidget {
                 size: 24,
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 'Necessidade de Ração',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: isDark ? Colors.white : Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -259,7 +266,7 @@ class _FeedResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
@@ -268,51 +275,48 @@ class _FeedResultCard extends StatelessWidget {
                 Text(
                   'Custo estimado:',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   ),
                 ),
                 Text(
                   'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.white,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Theme(
-            data: Theme.of(context).copyWith(
-              expansionTileTheme: const ExpansionTileThemeData(
-                collapsedBackgroundColor: Colors.white,
-                backgroundColor: Colors.white,
+          ExpansionTile(
+            title: Text(
+              'Dicas de manejo',
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            child: ExpansionTile(
-              title: const Text(
-                'Dicas de manejo',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              leading: const Icon(Icons.tips_and_updates),
-              children: result.recommendations
-                  .map((rec) => ListTile(
-                        leading: const Icon(Icons.check, size: 20),
-                        title: Text(
-                          rec,
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.7),
-                            fontSize: 14,
-                          ),
+            leading: Icon(
+              Icons.tips_and_updates,
+              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+            ),
+            iconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+            collapsedIconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+            children: result.recommendations
+                .map((rec) => ListTile(
+                      leading: const Icon(Icons.check, size: 20, color: Colors.green),
+                      title: Text(
+                        rec,
+                        style: TextStyle(
+                          color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                          fontSize: 14,
                         ),
-                        dense: true,
-                      ))
-                  .toList(),
-            ),
+                      ),
+                      dense: true,
+                    ))
+                .toList(),
           ),
         ],
       ),
@@ -352,6 +356,7 @@ class _ResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -360,7 +365,9 @@ class _ResultRow extends StatelessWidget {
           style: TextStyle(
             fontSize: highlight ? 16 : 14,
             fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
-            color: Colors.white.withValues(alpha: highlight ? 1 : 0.7),
+            color: isDark 
+                ? Colors.white.withValues(alpha: highlight ? 1 : 0.7)
+                : Colors.black.withValues(alpha: highlight ? 1 : 0.7),
           ),
         ),
         Text(
@@ -370,7 +377,7 @@ class _ResultRow extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: highlight 
                 ? CalculatorAccentColors.agriculture 
-                : Colors.white,
+                : (isDark ? Colors.white : Colors.black),
           ),
         ),
       ],
@@ -378,89 +385,4 @@ class _ResultRow extends StatelessWidget {
   }
 }
 
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
 
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

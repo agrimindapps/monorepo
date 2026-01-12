@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/medication_dosage_calculator.dart';
 export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
@@ -44,19 +45,27 @@ class _MedicationDosageCalculatorPageState
       maxContentWidth: 600,
       actions: [
         if (_result != null)
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {},
-            tooltip: 'Compartilhar',
+          Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return IconButton(
+                icon: Icon(Icons.share_outlined, color: isDark ? Colors.white70 : Colors.black54),
+                onPressed: () {},
+                tooltip: 'Compartilhar',
+              );
+            },
           ),
       ],
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+      child: Builder(
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
               // Warning Card
               Container(
                 padding: const EdgeInsets.all(16.0),
@@ -86,7 +95,7 @@ class _MedicationDosageCalculatorPageState
                             'Este cálculo é apenas informativo. NUNCA medique seu pet sem prescrição veterinária.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.9),
+                              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                             ),
                           ),
                         ],
@@ -126,7 +135,7 @@ class _MedicationDosageCalculatorPageState
               const SizedBox(height: 24),
 
               // Weight
-              _DarkInputField(
+              AdaptiveInputField(
                 label: 'Peso do pet',
                 controller: _weightController,
                 suffix: 'kg',
@@ -157,7 +166,7 @@ class _MedicationDosageCalculatorPageState
               Text(
                 'Medicamento',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -169,7 +178,7 @@ class _MedicationDosageCalculatorPageState
                     MedicationDosageCalculator
                         .getMedicationDescription(type),
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                       fontSize: 14,
                     ),
                   ),
@@ -189,7 +198,7 @@ class _MedicationDosageCalculatorPageState
               Text(
                 'Frequência',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -227,9 +236,11 @@ class _MedicationDosageCalculatorPageState
                   weight: double.parse(_weightController.text),
                 ),
               ],
-            ],
-          ),
-        ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -282,11 +293,12 @@ class _SpeciesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -297,7 +309,7 @@ class _SpeciesButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.2),
+                  : isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -312,7 +324,7 @@ class _SpeciesButton extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -337,14 +349,15 @@ class _MedicationDosageResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -359,7 +372,7 @@ class _MedicationDosageResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -425,7 +438,7 @@ https://calculei.com.br''',
                         ' mg',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
@@ -434,7 +447,7 @@ https://calculei.com.br''',
                 Text(
                   'por administração',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -447,7 +460,7 @@ https://calculei.com.br''',
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.08),
+              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -456,12 +469,12 @@ https://calculei.com.br''',
                   label: 'Frequência',
                   value: result.frequencyText,
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Administrações/dia',
                   value: '${result.administrationsPerDay}x',
                 ),
-                Divider(height: 16, color: Colors.white.withValues(alpha: 0.1)),
+                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
                 _DetailRow(
                   label: 'Dose diária total',
                   value: '${result.dailyDose.toStringAsFixed(1)} mg',
@@ -490,7 +503,7 @@ https://calculei.com.br''',
                     result.observations,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                     ),
                   ),
                 ),
@@ -529,7 +542,7 @@ https://calculei.com.br''',
                       warning,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
@@ -551,6 +564,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -558,7 +572,7 @@ class _DetailRow extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
           ),
         ),
         Text(
@@ -566,89 +580,7 @@ class _DetailRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.pet,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
           ),
         ),
       ],

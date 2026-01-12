@@ -145,6 +145,27 @@ class ConstructionCalculatorSelectionPage extends StatelessWidget {
       route: '/calculators/construction/concrete',
     ),
     const _CalculatorInfo(
+      title: 'Ferragem',
+      description: 'Armadura de aço',
+      icon: Icons.architecture,
+      color: Colors.blueGrey,
+      route: '/calculators/construction/rebar',
+    ),
+    const _CalculatorInfo(
+      title: 'Caixa d\'Água',
+      description: 'Dimensionamento',
+      icon: Icons.water_drop,
+      color: Colors.blue,
+      route: '/calculators/construction/water-tank',
+    ),
+    const _CalculatorInfo(
+      title: 'Elétrica',
+      description: 'Instalação e dimensionamento',
+      icon: Icons.bolt,
+      color: Colors.amber,
+      route: '/calculators/construction/electrical',
+    ),
+    const _CalculatorInfo(
       title: 'Tinta',
       description: 'Litros necessários',
       icon: Icons.format_paint,
@@ -164,6 +185,20 @@ class ConstructionCalculatorSelectionPage extends StatelessWidget {
       icon: Icons.crop_square,
       color: Colors.red,
       route: '/calculators/construction/brick',
+    ),
+    const _CalculatorInfo(
+      title: 'Drywall',
+      description: 'Gesso acartonado',
+      icon: Icons.view_column,
+      color: Colors.teal,
+      route: '/calculators/construction/drywall',
+    ),
+    const _CalculatorInfo(
+      title: 'Telhado',
+      description: 'Telhas e madeiramento',
+      icon: Icons.roofing,
+      color: Colors.deepOrange,
+      route: '/calculators/construction/roof',
     ),
   ];
 }

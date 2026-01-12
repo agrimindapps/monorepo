@@ -25,6 +25,7 @@ class _BreedingCycleCalculatorPageState
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return CalculatorPageLayout(
       title: 'Ciclo Reprodutivo',
       subtitle: 'Gestão de Reprodução Animal',
@@ -52,7 +53,7 @@ class _BreedingCycleCalculatorPageState
               Text(
                 'Espécie',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -79,7 +80,7 @@ class _BreedingCycleCalculatorPageState
               Text(
                 'Data da Cobertura/Inseminação',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -141,15 +142,16 @@ class _BreedingCycleResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final dateFormatter = DateFormat('dd/MM/yyyy');
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -163,7 +165,7 @@ class _BreedingCycleResultCard extends StatelessWidget {
               Text(
                 'Previsão de Parto',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -196,7 +198,7 @@ class _BreedingCycleResultCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Divider(
-                  color: Colors.white.withValues(alpha: 0.1),
+                  color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
                   height: 16,
                 ),
                 const SizedBox(height: 16),
@@ -221,7 +223,7 @@ class _BreedingCycleResultCard extends StatelessWidget {
           Text(
             'Marcos do Ciclo',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
@@ -288,13 +290,14 @@ class _MilestonesSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
@@ -303,7 +306,7 @@ class _MilestonesSection extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
               fontSize: 13,
               fontWeight: FontWeight.bold,
             ),
@@ -328,7 +331,7 @@ class _MilestonesSection extends StatelessWidget {
                         Text(
                           milestone.event,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -336,7 +339,7 @@ class _MilestonesSection extends StatelessWidget {
                         Text(
                           '${dateFormatter.format(milestone.date)} - ${milestone.description}',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
                             fontSize: 12,
                           ),
                         ),
@@ -404,12 +407,17 @@ class _CareTipsSection extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      tip,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        fontSize: 13,
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final isDark = Theme.of(context).brightness == Brightness.dark;
+                        return Text(
+                          tip,
+                          style: TextStyle(
+                            color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+                            fontSize: 13,
+                          ),
+                        );
+                      }
                     ),
                   ),
                 ],
@@ -437,13 +445,16 @@ class _ResultRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: highlight ? 0.9 : 0.7),
+            color: isDark 
+              ? Colors.white.withValues(alpha: highlight ? 0.9 : 0.7)
+              : Colors.black.withValues(alpha: highlight ? 0.9 : 0.7),
             fontSize: highlight ? 16 : 14,
             fontWeight: highlight ? FontWeight.bold : FontWeight.normal,
           ),
@@ -451,100 +462,9 @@ class _ResultRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            color: highlight ? color : Colors.white.withValues(alpha: 0.9),
+            color: highlight ? color : (isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9)),
             fontSize: highlight ? 18 : 14,
             fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// Dark theme input field widget
-// Provided as a reusable pattern for future form fields, matching seed_rate_calculator_page.dart
-// ignore: unused_element
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  // ignore: unused_element
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
           ),
         ),
       ],
@@ -564,6 +484,7 @@ class _DarkDateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final dateFormatter = DateFormat('dd/MM/yyyy');
 
     return GestureDetector(
@@ -581,10 +502,10 @@ class _DarkDateSelector extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.white.withValues(alpha: 0.1),
+            color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
           ),
         ),
         child: Row(
@@ -598,8 +519,8 @@ class _DarkDateSelector extends StatelessWidget {
             Expanded(
               child: Text(
                 dateFormatter.format(selectedDate),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                 ),
@@ -607,7 +528,7 @@ class _DarkDateSelector extends StatelessWidget {
             ),
             Icon(
               Icons.edit,
-              color: Colors.white.withValues(alpha: 0.5),
+              color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
               size: 18,
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flame/game.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
 import '../../../../core/widgets/pause_menu_overlay.dart';
@@ -212,7 +213,7 @@ class _TowerPageState extends ConsumerState<TowerPage> {
                 });
                 _game.resetGame();
               },
-              onExit: () => Navigator.of(context).pop(),
+              onExit: () => context.go('/'),
             ),
         ],
       ),

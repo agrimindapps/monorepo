@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/animal_age_calculator.dart';
 
@@ -40,124 +41,137 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
       maxContentWidth: 600,
       actions: [
         if (_result != null)
-          IconButton(
-            icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {
-              // Share functionality handled by ShareButton in result card
+          Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return IconButton(
+                icon: Icon(
+                  Icons.share_outlined,
+                  color: isDark ? Colors.white70 : Colors.black54,
+                ),
+                onPressed: () {
+                  // Share functionality handled by ShareButton in result card
+                },
+                tooltip: 'Compartilhar',
+              );
             },
-            tooltip: 'Compartilhar',
           ),
       ],
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Species selection
-              Text(
-                'Selecione a espécie',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
+      child: Builder(
+        builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: _SpeciesButton(
-                      label: 'Cachorro',
-                      emoji: '🐕',
-                      isSelected: _species == PetSpecies.dog,
-                      onTap: () => setState(() {
-                        _species = PetSpecies.dog;
-                      }),
+                  // Species selection
+                  Text(
+                    'Selecione a espécie',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _SpeciesButton(
-                      label: 'Gato',
-                      emoji: '🐈',
-                      isSelected: _species == PetSpecies.cat,
-                      onTap: () => setState(() {
-                        _species = PetSpecies.cat;
-                      }),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _SpeciesButton(
+                          label: 'Cachorro',
+                          emoji: '🐕',
+                          isSelected: _species == PetSpecies.dog,
+                          onTap: () => setState(() {
+                            _species = PetSpecies.dog;
+                          }),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _SpeciesButton(
+                          label: 'Gato',
+                          emoji: '🐈',
+                          isSelected: _species == PetSpecies.cat,
+                          onTap: () => setState(() {
+                            _species = PetSpecies.cat;
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Dog size (only for dogs)
+                  if (_species == PetSpecies.dog) ...[
+                    const SizedBox(height: 24),
+                    Text(
+                      'Porte do cachorro',
+                      style: TextStyle(
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: DogSize.values.map((size) {
+                        final isSelected = _dogSize == size;
+                        return DarkChoiceChip(
+                          label: AnimalAgeCalculator.getDogSizeDescription(size),
+                          isSelected: isSelected,
+                          onSelected: () => setState(() => _dogSize = size),
+                          accentColor: CalculatorAccentColors.pet,
+                        );
+                      }).toList(),
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+
+                  // Age input
+                  AdaptiveInputField(
+                    label: 'Idade do pet',
+                    controller: _ageController,
+                    suffix: 'anos',
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                    ],
+                    validator: (value) {
+                      if (value == null || value.isEmpty) return 'Obrigatório';
+                      final num = double.tryParse(value);
+                      if (num == null || num <= 0 || num > 30) return 'Entre 0 e 30 anos';
+                      return null;
+                    },
                   ),
+
+                  const SizedBox(height: 24),
+
+                  // Calculate button
+                  CalculatorActionButtons(
+                    onCalculate: _calculate,
+                    onClear: _clear,
+                    accentColor: CalculatorAccentColors.pet,
+                  ),
+
+                  // Result
+                  if (_result != null) ...[
+                    const SizedBox(height: 32),
+                    _AnimalAgeResultCard(
+                      result: _result!,
+                      species: _species,
+                      petAge: double.parse(_ageController.text),
+                    ),
+                  ],
                 ],
               ),
-
-              // Dog size (only for dogs)
-              if (_species == PetSpecies.dog) ...[
-                const SizedBox(height: 24),
-                Text(
-                  'Porte do cachorro',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: DogSize.values.map((size) {
-                    final isSelected = _dogSize == size;
-                    return DarkChoiceChip(
-                      label: AnimalAgeCalculator.getDogSizeDescription(size),
-                      isSelected: isSelected,
-                      onSelected: () => setState(() => _dogSize = size),
-                      accentColor: CalculatorAccentColors.pet,
-                    );
-                  }).toList(),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Age input
-              _DarkInputField(
-                label: 'Idade do pet',
-                controller: _ageController,
-                suffix: 'anos',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
-                ],
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Obrigatório';
-                  final num = double.tryParse(value);
-                  if (num == null || num <= 0 || num > 30) return 'Entre 0 e 30 anos';
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 24),
-
-              // Calculate button
-              CalculatorActionButtons(
-                onCalculate: _calculate,
-                onClear: _clear,
-                accentColor: CalculatorAccentColors.pet,
-              ),
-
-              // Result
-              if (_result != null) ...[
-                const SizedBox(height: 32),
-                _AnimalAgeResultCard(
-                  result: _result!,
-                  species: _species,
-                  petAge: double.parse(_ageController.text),
-                ),
-              ],
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -184,87 +198,6 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
   }
 }
 
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.pet,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SpeciesButton extends StatelessWidget {
   final String label;
   final String emoji;
@@ -281,11 +214,12 @@ class _SpeciesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -296,7 +230,7 @@ class _SpeciesButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -311,7 +245,7 @@ class _SpeciesButton extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -348,11 +282,12 @@ class _AnimalAgeResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final stageColor = _getLifeStageColor(result.lifeStage);
     final petEmoji = species == PetSpecies.dog ? '🐕' : '🐈';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: stageColor.withValues(alpha: 0.3),
@@ -370,7 +305,7 @@ class _AnimalAgeResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -457,14 +392,14 @@ class _AnimalAgeResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               children: [
                 Icon(
                   Icons.compare_arrows,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
@@ -472,7 +407,7 @@ class _AnimalAgeResultCard extends StatelessWidget {
                     result.ageComparison,
                     style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                     ),
                   ),
                 ),
@@ -488,7 +423,7 @@ class _AnimalAgeResultCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 8),
@@ -509,7 +444,7 @@ class _AnimalAgeResultCard extends StatelessWidget {
                       rec,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                       ),
                     ),
                   ),

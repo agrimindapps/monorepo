@@ -253,44 +253,51 @@ class CashVsInstallmentResultCard extends StatelessWidget {
             const Divider(height: 24, thickness: 2),
 
             // Recommendation
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.indigo[700],
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final textColor = isDark ? Colors.white : Colors.white;
+                
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.indigo[700],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(
-                        Icons.lightbulb,
-                        color: Colors.white,
-                        size: 20,
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.lightbulb,
+                            color: textColor,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            calculation.bestOption == 'À Vista'
+                                ? 'Economize pagando à vista'
+                                : 'Vantajoso parcelar',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(height: 8),
                       Text(
                         calculation.bestOption == 'À Vista'
-                            ? 'Economize pagando à vista'
-                            : 'Vantajoso parcelar',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                            ? 'Você economiza ${formatter.format(calculation.savingsOrAdditionalCost)} pagando à vista!'
+                            : 'Parcelando, o custo adicional é de apenas ${formatter.format(calculation.savingsOrAdditionalCost)}',
+                        style: TextStyle(color: textColor, fontSize: 14),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    calculation.bestOption == 'À Vista'
-                        ? 'Você economiza ${formatter.format(calculation.savingsOrAdditionalCost)} pagando à vista!'
-                        : 'Parcelando, o custo adicional é de apenas ${formatter.format(calculation.savingsOrAdditionalCost)}',
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
 
             const SizedBox(height: 16),

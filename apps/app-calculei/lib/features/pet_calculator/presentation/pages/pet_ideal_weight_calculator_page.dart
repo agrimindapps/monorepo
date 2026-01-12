@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/pet_ideal_weight_calculator.dart';
 export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
@@ -86,13 +87,18 @@ class _PetIdealWeightCalculatorPageState
 
               // Breed Size (only for dogs)
               if (_species == PetSpecies.dog) ...[
-                Text(
-                  'Porte do Cachorro',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
+                Builder(
+                  builder: (context) {
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    return Text(
+                      'Porte do Cachorro',
+                      style: TextStyle(
+                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 8),
                 Wrap(
@@ -114,7 +120,7 @@ class _PetIdealWeightCalculatorPageState
               ],
 
               // Current Weight
-              _DarkInputField(
+              AdaptiveInputField(
                 label: 'Peso atual',
                 controller: _weightController,
                 suffix: 'kg',
@@ -142,69 +148,84 @@ class _PetIdealWeightCalculatorPageState
               const SizedBox(height: 24),
 
               // BCS Score
-              Text(
-                'Escore de Condição Corporal (BCS)',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Escore de Condição Corporal (BCS)',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(9, (index) {
-                  final score = index + 1;
-                  final isSelected = _bcsScore == score;
-                  return InkWell(
-                    onTap: () =>
-                        setState(() => _bcsScore = score),
-                    borderRadius: BorderRadius.circular(8),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? CalculatorAccentColors.pet
-                            : Colors.white.withValues(alpha: 0.08),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(9, (index) {
+                      final score = index + 1;
+                      final isSelected = _bcsScore == score;
+                      return InkWell(
+                        onTap: () =>
+                            setState(() => _bcsScore = score),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: isSelected
-                              ? CalculatorAccentColors.pet
-                              : Colors.white.withValues(alpha: 0.2),
-                          width: 2,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? CalculatorAccentColors.pet
+                                : Colors.white.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isSelected
+                                  ? CalculatorAccentColors.pet
+                                  : Colors.white.withValues(alpha: 0.2),
+                              width: 2,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            '$score',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: isSelected
+                                  ? Colors.white
+                                  : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                            ),
+                          ),
                         ),
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        '$score',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: isSelected
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.7),
-                        ),
+                      );
+                    }),
+                  );
+                },
+              ),
+              const SizedBox(height: 8),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      _getBcsDescription(_bcsScore),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                       ),
                     ),
                   );
-                }),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  _getBcsDescription(_bcsScore),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.white.withValues(alpha: 0.9),
-                  ),
-                ),
+                },
               ),
 
               const SizedBox(height: 32),
@@ -278,6 +299,7 @@ class _SpeciesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.pet;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: isSelected
@@ -308,7 +330,7 @@ class _SpeciesButton extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -341,6 +363,7 @@ class _PetIdealWeightResultCard extends StatelessWidget {
     const accentColor = CalculatorAccentColors.pet;
     final statusColor = _getStatusColor();
     final petEmoji = species == PetSpecies.dog ? '🐕' : '🐈';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
@@ -363,7 +386,7 @@ class _PetIdealWeightResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
               const Spacer(),
@@ -428,7 +451,7 @@ https://calculei.com.br''',
                         ' kg',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.white.withValues(alpha: 0.8),
+                          color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                         ),
                       ),
                     ),
@@ -438,7 +461,7 @@ https://calculei.com.br''',
                 Text(
                   'Faixa: ${result.minIdealWeight.toStringAsFixed(1)}-${result.maxIdealWeight.toStringAsFixed(1)} kg',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -485,7 +508,7 @@ https://calculei.com.br''',
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
             ),
           ),
           const SizedBox(height: 8),
@@ -512,7 +535,7 @@ https://calculei.com.br''',
                       rec,
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.white.withValues(alpha: 0.8),
+                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
@@ -534,6 +557,7 @@ class _DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -541,7 +565,7 @@ class _DetailRow extends StatelessWidget {
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.white.withValues(alpha: 0.7),
+            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
           ),
         ),
         Text(
@@ -549,7 +573,7 @@ class _DetailRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            color: Colors.white.withValues(alpha: 0.9),
+            color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
           ),
         ),
       ],
@@ -557,84 +581,4 @@ class _DetailRow extends StatelessWidget {
   }
 }
 
-/// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
 
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.pet,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}

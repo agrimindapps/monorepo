@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../widgets/shared/game_over_dialog.dart' as shared;
 import '../../domain/entities/enums.dart';
 import '../providers/campo_minado_game_notifier.dart';
@@ -56,7 +57,7 @@ class CampoMinadoGameOverDialogAdapter extends ConsumerWidget {
       stats: stats,
       newAchievements: achievements,
       onPlayAgain: () => ref.read(campoMinadoGameProvider.notifier).startNewGame(),
-      onExit: () => context.go('/'),
+      onExit: () => rootNavigatorKey.currentContext?.go('/'),
       victoryColor: Colors.amber,
       defeatColor: Colors.red,
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../widgets/shared/game_over_dialog.dart' as shared;
 import '../providers/snake_extended_providers.dart';
 import '../providers/snake_game_notifier.dart';
@@ -46,7 +47,7 @@ class SnakeGameOverDialogAdapter extends ConsumerWidget {
       stats: stats,
       newAchievements: achievements,
       onPlayAgain: () => ref.read(snakeGameProvider.notifier).restartGame(),
-      onExit: () => context.go('/'),
+      onExit: () => rootNavigatorKey.currentContext?.go('/'),
       victoryColor: Colors.greenAccent,
       defeatColor: Colors.redAccent,
     );

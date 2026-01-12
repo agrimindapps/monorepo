@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../core/widgets/dark_choice_chip.dart';
+import '../../../../shared/widgets/adaptive_input_field.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/soil_ph_calculator.dart';
 
@@ -61,13 +62,18 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // pH values
-              Text(
-                'Valores de pH',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Valores de pH',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -76,7 +82,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                 children: [
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'pH atual',
                       controller: _currentPhController,
                       keyboardType: TextInputType.number,
@@ -91,7 +97,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                   ),
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'pH alvo',
                       controller: _targetPhController,
                       keyboardType: TextInputType.number,
@@ -110,13 +116,18 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
               const SizedBox(height: 24),
 
               // Soil texture
-              Text(
-                'Textura do solo',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Textura do solo',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -137,13 +148,18 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
               const SizedBox(height: 24),
 
               // Area and PRNT
-              Text(
-                'Propriedades',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+              Builder(
+                builder: (context) {
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Text(
+                    'Propriedades',
+                    style: TextStyle(
+                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 12),
               Wrap(
@@ -152,7 +168,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                 children: [
                   SizedBox(
                     width: 150,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
                       suffix: 'ha',
@@ -168,7 +184,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                   ),
                   SizedBox(
                     width: 180,
-                    child: _DarkInputField(
+                    child: AdaptiveInputField(
                       label: 'PRNT do calcário',
                       controller: _prntController,
                       suffix: '%',
@@ -247,6 +263,7 @@ class _SoilPhResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -259,10 +276,10 @@ class _SoilPhResultCard extends StatelessWidget {
               size: 24,
             ),
             const SizedBox(width: 12),
-            const Text(
+            Text(
               'Recomendação de Calagem',
               style: TextStyle(
-                color: Colors.white,
+                color: isDark ? Colors.white : Colors.black,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -325,9 +342,9 @@ class _SoilPhResultCard extends StatelessWidget {
                   unit: 'toneladas',
                   highlight: true,
                 ),
-                const Divider(
+                Divider(
                   height: 24,
-                  color: Colors.white24,
+                  color: isDark ? Colors.white24 : Colors.black26,
                 ),
                 _ResultBox(
                   label: 'Por hectare',
@@ -350,10 +367,10 @@ class _SoilPhResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             child: Row(
@@ -362,7 +379,7 @@ class _SoilPhResultCard extends StatelessWidget {
                 Text(
                   'Custo estimado:',
                   style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                     fontSize: 14,
                   ),
                 ),
@@ -383,23 +400,23 @@ class _SoilPhResultCard extends StatelessWidget {
           // Recommendations
           Container(
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.05),
+              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             child: ExpansionTile(
               title: Text(
                 'Recomendações de aplicação',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              iconColor: Colors.white.withValues(alpha: 0.7),
-              collapsedIconColor: Colors.white.withValues(alpha: 0.7),
-              textColor: Colors.white.withValues(alpha: 0.9),
+              iconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              collapsedIconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              textColor: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
               initiallyExpanded: true,
               children: result.recommendations
                   .map(
@@ -418,7 +435,7 @@ class _SoilPhResultCard extends StatelessWidget {
                             child: Text(
                               rec,
                               style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.7),
+                                color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -485,6 +502,7 @@ class _ResultBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -495,7 +513,7 @@ class _ResultBox extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.6),
+                  color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
@@ -504,7 +522,7 @@ class _ResultBox extends StatelessWidget {
               Text(
                 unit,
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.5),
+                  color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
                   fontSize: 11,
                 ),
               ),
@@ -521,102 +539,10 @@ class _ResultBox extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: highlight
                     ? CalculatorAccentColors.agriculture
-                    : Colors.white,
+                    : (isDark ? Colors.white : Colors.black),
               ),
             ),
           ],
-        ),
-      ],
-    );
-  }
-}
-
-// Dark theme input field widget
-class _DarkInputField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final String? suffix;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final String? Function(String?)? validator;
-
-  const _DarkInputField({
-    required this.label,
-    required this.controller,
-    this.suffix,
-    this.keyboardType,
-    this.inputFormatters,
-    this.validator,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.7),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          inputFormatters: inputFormatters,
-          validator: validator,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-          decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 16,
-            ),
-            filled: true,
-            fillColor: Colors.white.withValues(alpha: 0.08),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.white.withValues(alpha: 0.1),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: CalculatorAccentColors.agriculture,
-                width: 2,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Colors.red,
-                width: 2,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 14,
-            ),
-          ),
         ),
       ],
     );

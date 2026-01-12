@@ -18,6 +18,11 @@ class SpaceInvadersGame extends FlameGame
   int lives = 3;
   bool isGameOver = false;
   bool isGameWon = false;
+  
+  // Tracking for persistence
+  DateTime? gameStartTime;
+  int wave = 1;
+  int invadersKilled = 0;
 
   @override
   Color backgroundColor() => const Color(0xFF000020);
@@ -32,6 +37,9 @@ class SpaceInvadersGame extends FlameGame
     children.whereType<PlayerShip>().forEach((e) => e.removeFromParent());
     children.whereType<InvaderManager>().forEach((e) => e.removeFromParent());
     children.whereType<Bullet>().forEach((e) => e.removeFromParent());
+
+    // Initialize game start time
+    gameStartTime ??= DateTime.now();
 
     // Create player
     player = PlayerShip();
@@ -130,6 +138,7 @@ class SpaceInvadersGame extends FlameGame
 
   void addScore(int points) {
     score += points;
+    invadersKilled++;
   }
 
   void playerHit() {
@@ -163,6 +172,9 @@ class SpaceInvadersGame extends FlameGame
     isGameOver = false;
     super.isGameOver = false;
     isGameWon = false;
+    gameStartTime = DateTime.now();
+    wave = 1;
+    invadersKilled = 0;
     overlays.remove('GameOver');
     overlays.remove('GameWon');
     _setupGame();

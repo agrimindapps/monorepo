@@ -5,6 +5,8 @@ import '../../../../core/widgets/game_page_layout.dart';
 import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/tetromino.dart';
 import '../providers/tetris_controller.dart';
+import 'tetris_high_scores_page.dart';
+import 'tetris_settings_page.dart';
 
 class TetrisPage extends ConsumerStatefulWidget {
   const TetrisPage({super.key});
@@ -84,11 +86,34 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
         maxGameWidth: 450,
         actions: [
         IconButton(
+          icon: const Icon(Icons.emoji_events, color: Colors.amber),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const TetrisHighScoresPage(),
+              ),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const TetrisSettingsPage(),
+              ),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
+        IconButton(
           icon: Icon(
             state.isPaused ? Icons.play_arrow : Icons.pause,
             color: Colors.white,
           ),
           onPressed: () => ref.read(tetrisControllerProvider.notifier).togglePause(),
+          tooltip: state.isPaused ? 'Retomar' : 'Pausar',
         ),
       ],
       child: KeyboardListener(

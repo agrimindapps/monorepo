@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
 import '../providers/simon_says_controller.dart';
 import '../widgets/simon_button.dart';
+import 'simon_high_scores_page.dart';
+import 'simon_settings_page.dart';
 
 class SimonSaysPage extends ConsumerWidget {
   const SimonSaysPage({super.key});
@@ -21,6 +23,32 @@ class SimonSaysPage extends ConsumerWidget {
           '🎯 Repita a sequência\n'
           '📈 Cada rodada adiciona uma cor',
       maxGameWidth: 400,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SimonHighScoresPage(),
+              ),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SimonSettingsPage(),
+              ),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
+      ],
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

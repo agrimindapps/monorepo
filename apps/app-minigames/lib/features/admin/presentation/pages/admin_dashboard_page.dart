@@ -79,6 +79,12 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
           onPressed: () => context.go('/'),
         ),
         actions: [
+          // Error logs button
+          IconButton(
+            icon: const Icon(Icons.bug_report, color: Colors.red),
+            onPressed: () => context.go('/admin/errors'),
+            tooltip: 'Logs de Erros Web',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {

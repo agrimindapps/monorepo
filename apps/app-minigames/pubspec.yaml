@@ -42,6 +42,9 @@ dependencies:
   url_launcher: ^6.3.0
   
   # Riverpod (code generation)
+
+  # Crypto for error hashing
+  crypto: ^3.0.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

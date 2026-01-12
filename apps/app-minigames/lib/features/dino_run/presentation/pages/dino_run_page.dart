@@ -2,9 +2,13 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/widgets/game_page_layout.dart';
-import '../../../../core/widgets/pause_menu_overlay.dart';
-import '../game/dino_run_game.dart';
+import '../../../../../core/widgets/game_page_layout.dart';
+import '../../../../../core/widgets/pause_menu_overlay.dart';
+import '../../../domain/entities/dino_run_score.dart';
+import '../../game/dino_run_game.dart';
+import '../../providers/dino_run_data_providers.dart';
+import 'dino_run_high_scores_page.dart';
+import 'dino_run_settings_page.dart';
 
 class DinoRunPage extends ConsumerStatefulWidget {
   const DinoRunPage({super.key});
@@ -39,7 +43,21 @@ class _DinoRunPageState extends ConsumerState<DinoRunPage> {
     );
   }
 
-  void _restartGame() {
+  Future<void> _restartGame() async {
+    // Save score before restarting
+    if (_score > 0 && _game?.gameStartTime != null) {
+      final score = DinoRunScore(
+        score: _score,
+        distance: _score, // Using score as distance
+        obstaclesJumped: _game!.obstaclesJumped,
+        timestamp: DateTime.now(),
+      );
+
+      await ref.read(saveScoreUseCaseProvider).call(score);
+      ref.invalidate(dinoRunHighScoresProvider);
+      ref.invalidate(dinoRunStatsProvider);
+    }
+
     _game?.reset();
     setState(() {
       _score = 0;
@@ -62,6 +80,30 @@ class _DinoRunPageState extends ConsumerState<DinoRunPage> {
           '⚡ Velocidade aumenta com o tempo!',
       maxGameWidth: 800,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events),
+          tooltip: 'High Scores',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const DinoRunHighScoresPage(),
+              ),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: 'Configurações',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const DinoRunSettingsPage(),
+              ),
+            );
+          },
+        ),
         if (_highScore > 0)
           Padding(
             padding: const EdgeInsets.only(right: 8),

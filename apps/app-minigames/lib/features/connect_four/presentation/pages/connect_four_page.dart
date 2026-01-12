@@ -2,13 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
+import '../../../domain/entities/connect_four_score.dart';
 import '../providers/connect_four_controller.dart';
+import '../providers/connect_four_data_providers.dart';
+import 'connect_four_high_scores_page.dart';
+import 'connect_four_settings_page.dart';
 
-class ConnectFourPage extends ConsumerWidget {
+class ConnectFourPage extends ConsumerStatefulWidget {
   const ConnectFourPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ConnectFourPage> createState() => _ConnectFourPageState();
+}
+
+class _ConnectFourPageState extends ConsumerState<ConnectFourPage> {
+  Future<void> _saveScoreAndReset() async {
+    final state = ref.read(connectFourControllerProvider);
+    
+    if ((state.winner != null || state.isDraw) && state.gameStartTime != null) {
+      final winner = state.isDraw 
+          ? 'Draw' 
+          : state.winner == 1 ? 'Player 1' : 'Player 2';
+      
+      final score = ConnectFourScore(
+        winner: winner,
+        movesCount: state.movesCount,
+        gameDuration: state.gameDuration,
+        timestamp: DateTime.now(),
+      );
+
+      await ref.read(saveScoreUseCaseProvider).call(score);
+      ref.invalidate(connectFourHighScoresProvider);
+      ref.invalidate(connectFourStatsProvider);
+    }
+
+    ref.read(connectFourControllerProvider.notifier).reset();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(connectFourControllerProvider);
     final notifier = ref.read(connectFourControllerProvider.notifier);
 
@@ -22,8 +54,32 @@ class ConnectFourPage extends ConsumerWidget {
       maxGameWidth: 450,
       actions: [
         IconButton(
+          icon: const Icon(Icons.emoji_events),
+          tooltip: 'High Scores',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ConnectFourHighScoresPage(),
+              ),
+            );
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          tooltip: 'Configurações',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ConnectFourSettingsPage(),
+              ),
+            );
+          },
+        ),
+        IconButton(
           icon: const Icon(Icons.refresh, color: Colors.white),
-          onPressed: notifier.reset,
+          onPressed: state.winner != null || state.isDraw ? _saveScoreAndReset : notifier.reset,
           tooltip: 'Reiniciar',
         ),
       ],

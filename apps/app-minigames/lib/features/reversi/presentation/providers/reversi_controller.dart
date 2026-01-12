@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/reversi_entities.dart';
+import '../../domain/entities/reversi_score.dart';
+import 'reversi_data_providers.dart';
 
 part 'reversi_controller.g.dart';
 
@@ -13,6 +15,8 @@ class ReversiState {
   final bool isGameOver;
   final int blackCount;
   final int whiteCount;
+  final DateTime? gameStartTime;
+  final int moveCount;
 
   const ReversiState({
     required this.board,
@@ -21,6 +25,8 @@ class ReversiState {
     this.isGameOver = false,
     this.blackCount = 2,
     this.whiteCount = 2,
+    this.gameStartTime,
+    this.moveCount = 0,
   });
 
   factory ReversiState.initial() {
@@ -32,7 +38,15 @@ class ReversiState {
     board[4][3] = ReversiPlayer.black;
     board[4][4] = ReversiPlayer.white;
 
-    return ReversiState(board: board);
+    return ReversiState(
+      board: board,
+      gameStartTime: DateTime.now(),
+    );
+  }
+
+  Duration? get gameDuration {
+    if (gameStartTime == null) return null;
+    return DateTime.now().difference(gameStartTime!);
   }
 
   ReversiPlayer? get winner {
@@ -49,6 +63,8 @@ class ReversiState {
     bool? isGameOver,
     int? blackCount,
     int? whiteCount,
+    DateTime? gameStartTime,
+    int? moveCount,
   }) {
     return ReversiState(
       board: board ?? this.board,
@@ -57,6 +73,8 @@ class ReversiState {
       isGameOver: isGameOver ?? this.isGameOver,
       blackCount: blackCount ?? this.blackCount,
       whiteCount: whiteCount ?? this.whiteCount,
+      gameStartTime: gameStartTime ?? this.gameStartTime,
+      moveCount: moveCount ?? this.moveCount,
     );
   }
 }
@@ -77,7 +95,7 @@ class ReversiController extends _$ReversiController {
     );
   }
 
-  void makeMove(int row, int col) {
+  Future<void> makeMove(int row, int col) async {
     if (state.isGameOver) return;
     if (!_isValidMove(row, col)) return;
 
@@ -124,7 +142,13 @@ class ReversiController extends _$ReversiController {
       isGameOver: isGameOver,
       blackCount: blackCount,
       whiteCount: whiteCount,
+      gameStartTime: state.gameStartTime,
+      moveCount: state.moveCount + 1,
     );
+
+    if (isGameOver) {
+      await _saveScore();
+    }
   }
 
   bool _isValidMove(int row, int col) {
@@ -207,5 +231,22 @@ class ReversiController extends _$ReversiController {
     state = initialState.copyWith(
       validMoves: _calculateValidMoves(initialState.board, initialState.currentPlayer),
     );
+  }
+
+  Future<void> _saveScore() async {
+    if (state.gameDuration == null || state.winner == null) return;
+
+    final score = ReversiScore(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      winner: state.winner!,
+      blackCount: state.blackCount,
+      whiteCount: state.whiteCount,
+      moves: state.moveCount,
+      duration: state.gameDuration!,
+      completedAt: DateTime.now(),
+    );
+
+    final saver = ref.read(reversiScoreSaverProvider.notifier);
+    await saver.saveScore(score);
   }
 }

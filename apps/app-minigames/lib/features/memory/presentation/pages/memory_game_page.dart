@@ -9,6 +9,8 @@ import '../providers/memory_game_notifier.dart';
 import '../widgets/game_stats_widget.dart';
 import '../widgets/memory_grid_widget.dart';
 import '../widgets/victory_dialog.dart';
+import 'memory_high_scores_page.dart';
+import 'memory_settings_page.dart';
 
 import '../../data/repositories/deck_repository.dart';
 
@@ -55,6 +57,26 @@ class _MemoryGamePageState extends ConsumerState<MemoryGamePage> {
             '🏆 Complete com menos tentativas!',
         maxGameWidth: 800,
         actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MemoryHighScoresPage()),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MemorySettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
         if (gameState.status == GameStatus.playing ||
             gameState.status == GameStatus.paused)
           IconButton(

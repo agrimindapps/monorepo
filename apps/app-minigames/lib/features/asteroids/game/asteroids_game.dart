@@ -20,6 +20,11 @@ class AsteroidsGame extends FlameGame
   int lives = 3;
   bool isGameOver = false;
 
+  // Tracking for Clean Architecture persistence
+  DateTime? gameStartTime;
+  int wave = 1;
+  int asteroidsDestroyed = 0;
+
   // Keyboard state
   final Set<LogicalKeyboardKey> _keysPressed = {};
 
@@ -32,6 +37,9 @@ class AsteroidsGame extends FlameGame
   }
 
   Future<void> _setupGame() async {
+    // Initialize tracking on first game start
+    gameStartTime ??= DateTime.now();
+    
     // Clear existing
     children.whereType<Ship>().forEach((e) => e.removeFromParent());
     children.whereType<Asteroid>().forEach((e) => e.removeFromParent());
@@ -123,6 +131,7 @@ class AsteroidsGame extends FlameGame
 
     // Check if all asteroids destroyed
     if (!children.whereType<Asteroid>().any((a) => a.isMounted)) {
+      wave++;
       _spawnAsteroids(5 + score ~/ 500); // More asteroids as score increases
     }
   }
@@ -150,6 +159,7 @@ class AsteroidsGame extends FlameGame
 
   void addScore(int points) {
     score += points;
+    asteroidsDestroyed++;
   }
 
   void shipDestroyed() {
@@ -170,6 +180,12 @@ class AsteroidsGame extends FlameGame
     isGameOver = false;
     super.isGameOver = false; // Update EscPauseHandler
     overlays.remove('GameOver');
+    
+    // Reset tracking
+    gameStartTime = DateTime.now();
+    wave = 1;
+    asteroidsDestroyed = 0;
+    
     _setupGame();
   }
 

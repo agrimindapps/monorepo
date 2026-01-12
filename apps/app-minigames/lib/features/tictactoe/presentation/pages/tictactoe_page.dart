@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'tictactoe_high_scores_page.dart';
+import 'tictactoe_settings_page.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
 import '../../../../core/widgets/esc_keyboard_wrapper.dart';
@@ -28,6 +30,26 @@ class TicTacToePage extends ConsumerWidget {
       scrollable: true, // Flutter widget game needs scrolling
       actions: [
         IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TicTacToeHighScoresPage()),
+            );
+          },
+          tooltip: 'Estatísticas',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TicTacToeSettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
+        IconButton(
           icon: const Icon(Icons.bar_chart, color: Colors.white),
           onPressed: () => _showStatsDialog(context, ref),
           tooltip: 'Ver Estatísticas',
@@ -43,6 +65,26 @@ class TicTacToePage extends ConsumerWidget {
                 title: const Text('Pausado'),
                 content: const Text('Pressione ESC para continuar ou Reiniciar'),
                 actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TicTacToeHighScoresPage()),
+            );
+          },
+          tooltip: 'Estatísticas',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const TicTacToeSettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: const Text('Continuar'),

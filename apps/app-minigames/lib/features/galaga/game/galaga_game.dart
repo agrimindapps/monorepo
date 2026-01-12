@@ -22,6 +22,10 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
   bool isGameOver = false;
   double shootCooldown = 0;
   
+  // Tracking for Clean Architecture persistence
+  DateTime? gameStartTime;
+  int enemiesDestroyed = 0;
+  
   @override
   Future<void> onLoad() async {
     await super.onLoad();
@@ -40,6 +44,9 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
   }
   
   void _setupGame() {
+    // Initialize tracking on first game start
+    gameStartTime ??= DateTime.now();
+    
     // Player
     player = GalagaPlayerShip(
       position: Vector2(size.x / 2, size.y - 80),
@@ -170,6 +177,7 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
   
   void addScore(int points) {
     score += points;
+    enemiesDestroyed++;
     scoreText.text = 'Score: $score';
   }
   
@@ -218,64 +226,11 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
   void gameOver() {
     isGameOver = true;
     super.isGameOver = true;
-    
-    add(RectangleComponent(
-      position: Vector2(size.x / 2 - 120, size.y / 2 - 80),
-      size: Vector2(240, 160),
-      paint: Paint()..color = Colors.black87,
-    ));
-    
-    add(TextComponent(
-      text: 'GAME OVER',
-      position: Vector2(size.x / 2, size.y / 2 - 40),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ));
-    
-    add(TextComponent(
-      text: 'Score: $score',
-      position: Vector2(size.x / 2, size.y / 2),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-      ),
-    ));
-    
-    add(TextComponent(
-      text: 'Wave: $wave',
-      position: Vector2(size.x / 2, size.y / 2 + 25),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.yellow,
-          fontSize: 16,
-        ),
-      ),
-    ));
-    
-    add(TextComponent(
-      text: 'Tap to restart',
-      position: Vector2(size.x / 2, size.y / 2 + 55),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 14,
-        ),
-      ),
-    ));
+    overlays.add('GameOver');
   }
   
   void restartGame() {
+    overlays.remove('GameOver');
     removeAll(children);
     score = 0;
     lives = 3;
@@ -283,6 +238,10 @@ class GalagaGame extends FlameGame with KeyboardEvents, TapCallbacks, DragCallba
     isGameOver = false;
     super.isGameOver = false;
     shootCooldown = 0;
+    
+    // Reset tracking
+    gameStartTime = DateTime.now();
+    enemiesDestroyed = 0;
 
     add(RectangleComponent(
       size: size,

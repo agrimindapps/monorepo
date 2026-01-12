@@ -38,6 +38,10 @@ class DinoRunGame extends FlameGame
   bool isGameOver = false;
   bool isPlaying = false;
 
+  // Tracking for Clean Architecture persistence
+  DateTime? gameStartTime;
+  int obstaclesJumped = 0;
+
   // Game speed increases over time
   double gameSpeed = 1.0;
   static const double maxGameSpeed = 2.5;
@@ -180,6 +184,9 @@ class DinoRunGame extends FlameGame
   void startGame() {
     if (isPlaying) return;
 
+    // Initialize tracking on first game start
+    gameStartTime ??= DateTime.now();
+
     isPlaying = true;
     isGameOver = false;
     dino.startRunning();
@@ -197,6 +204,9 @@ class DinoRunGame extends FlameGame
 
     dino.die();
     obstacleManager.stop();
+
+    // Calculate obstacles jumped (estimate: 1 obstacle per 100 points)
+    obstaclesJumped = (score / 100).toInt();
 
     // Update high score
     if (score.toInt() > highScore) {
@@ -218,6 +228,10 @@ class DinoRunGame extends FlameGame
     isNight = false;
     _skyColor = daySkyColor;
     _targetSkyColor = daySkyColor;
+
+    // Reset tracking
+    gameStartTime = DateTime.now();
+    obstaclesJumped = (score / 100).toInt(); // Estimate based on score
 
     onScoreChanged?.call(0);
 

@@ -1,12 +1,48 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/widgets/game_page_layout.dart';
 import '../../../../core/widgets/pause_menu_overlay.dart';
+import '../../domain/entities/space_invaders_score.dart';
 import '../../game/space_invaders_game.dart';
+import '../providers/space_invaders_data_providers.dart';
+import 'space_invaders_high_scores_page.dart';
+import 'space_invaders_settings_page.dart';
 
-class SpaceInvadersPage extends StatelessWidget {
+class SpaceInvadersPage extends ConsumerStatefulWidget {
   const SpaceInvadersPage({super.key});
+
+  @override
+  ConsumerState<SpaceInvadersPage> createState() => _SpaceInvadersPageState();
+}
+
+class _SpaceInvadersPageState extends ConsumerState<SpaceInvadersPage> {
+  late SpaceInvadersGame _game;
+
+  @override
+  void initState() {
+    super.initState();
+    _game = SpaceInvadersGame();
+  }
+
+  Future<void> _saveScoreAndReset() async {
+    if (_game.gameStartTime != null && _game.score > 0) {
+      final duration = DateTime.now().difference(_game.gameStartTime!);
+      final score = SpaceInvadersScore(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        score: _game.score,
+        wave: _game.wave,
+        invadersKilled: _game.invadersKilled,
+        duration: duration,
+        completedAt: DateTime.now(),
+      );
+
+      final saver = ref.read(spaceInvadersScoreSaverProvider.notifier);
+      await saver.saveScore(score);
+    }
+    _game.reset();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,10 +54,32 @@ class SpaceInvadersPage extends StatelessWidget {
           '🛡️ Defenda a Terra\n'
           '❤️ Você tem 3 vidas',
       maxGameWidth: 500,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SpaceInvadersHighScoresPage()),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SpaceInvadersSettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
+      ],
       child: AspectRatio(
         aspectRatio: 0.7,
         child: GameWidget<SpaceInvadersGame>(
-          game: SpaceInvadersGame(),
+          game: _game,
           overlayBuilderMap: {
             'PauseMenu': (context, game) => PauseMenuOverlay(
               onContinue: game.resumeGame,
@@ -32,13 +90,13 @@ class SpaceInvadersPage extends StatelessWidget {
               'Game Over',
               'Score: ${game.score}',
               Colors.red,
-              game.reset,
+              _saveScoreAndReset,
             ),
             'GameWon': (context, game) => _buildOverlay(
               'Vitória!',
               'Score: ${game.score}',
               Colors.green,
-              game.reset,
+              _saveScoreAndReset,
             ),
           },
         ),

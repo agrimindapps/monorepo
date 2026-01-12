@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../enums/error_severity.dart';
 import 'app_error.dart';
 import 'failure.dart';
 
@@ -100,7 +101,9 @@ mixin ErrorHandlingMixin on ChangeNotifier {
   }
 
   /// Executa uma operação e trata erros automaticamente
-  Future<T?> handleOperation<T>(Future<Either<Failure, T>> Function() operation) async {
+  Future<T?> handleOperation<T>(
+    Future<Either<Failure, T>> Function() operation,
+  ) async {
     clearError();
 
     final result = await operation();
@@ -147,13 +150,12 @@ mixin ErrorDisplayMixin {
         duration: Duration(
           seconds: error.severity == ErrorSeverity.critical ? 10 : 4,
         ),
-        action:
-            error.severity == ErrorSeverity.critical
-                ? SnackBarAction(
-                  label: 'Detalhes',
-                  onPressed: () => _showErrorDetails(context, error),
-                )
-                : null,
+        action: error.severity == ErrorSeverity.critical
+            ? SnackBarAction(
+                label: 'Detalhes',
+                onPressed: () => _showErrorDetails(context, error),
+              )
+            : null,
       ),
     );
   }
@@ -162,30 +164,29 @@ mixin ErrorDisplayMixin {
   void _showErrorDetails(BuildContext context, AppError error) {
     showDialog<void>(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Detalhes do Erro'),
-            content: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Mensagem: ${error.message}'),
-                  if (error.code != null) Text('Código: ${error.code}'),
-                  if (error.details != null) Text('Detalhes: ${error.details}'),
-                  Text('Categoria: ${error.category.name}'),
-                  Text('Severidade: ${error.severity.name}'),
-                  Text('Timestamp: ${error.timestamp}'),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('Fechar'),
-              ),
+      builder: (context) => AlertDialog(
+        title: const Text('Detalhes do Erro'),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Mensagem: ${error.message}'),
+              if (error.code != null) Text('Código: ${error.code}'),
+              if (error.details != null) Text('Detalhes: ${error.details}'),
+              Text('Categoria: ${error.category.name}'),
+              Text('Severidade: ${error.severity.name}'),
+              Text('Timestamp: ${error.timestamp}'),
             ],
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -307,8 +308,6 @@ extension ResultCompatExtensions<T> on Either<Failure, T> {
 
 extension EitherCompatExtensions<L extends Failure, R> on Either<L, R> {
   /// Retorna Either sem conversão (migração)
-  Either<Failure, R> asResult() => fold(
-    (failure) => Left(failure),
-    (right) => Right(right),
-  );
+  Either<Failure, R> asResult() =>
+      fold((failure) => Left(failure), (right) => Right(right));
 }

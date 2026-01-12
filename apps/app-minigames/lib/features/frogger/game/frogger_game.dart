@@ -23,12 +23,19 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
   bool isGameOver = false;
   List<bool> goalsReached = [false, false, false, false, false];
   
+  // Tracking for Clean Architecture persistence
+  DateTime? gameStartTime;
+  int crossingsCompleted = 0;
+  
   final double gridSize = 40;
   final Random _random = Random();
   
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    
+    // Initialize tracking on first game start
+    gameStartTime ??= DateTime.now();
     
     // Background
     add(RectangleComponent(
@@ -219,6 +226,7 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
   void frogHitGoal(int index) {
     if (!goalsReached[index]) {
       goalsReached[index] = true;
+      crossingsCompleted++;
       score += 100;
       scoreText.text = 'Score: $score';
       
@@ -265,52 +273,11 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
   void gameOver() {
     isGameOver = true;
     super.isGameOver = true; // Update EscPauseHandler
-    
-    add(RectangleComponent(
-      position: Vector2(size.x / 2 - 120, size.y / 2 - 60),
-      size: Vector2(240, 120),
-      paint: Paint()..color = Colors.black87,
-    ));
-    
-    add(TextComponent(
-      text: 'GAME OVER',
-      position: Vector2(size.x / 2, size.y / 2 - 30),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.red,
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ));
-    
-    add(TextComponent(
-      text: 'Score: $score',
-      position: Vector2(size.x / 2, size.y / 2 + 5),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-        ),
-      ),
-    ));
-    
-    add(TextComponent(
-      text: 'Tap to restart',
-      position: Vector2(size.x / 2, size.y / 2 + 35),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.white70,
-          fontSize: 14,
-        ),
-      ),
-    ));
+    overlays.add('GameOver');
   }
   
   void restartGame() {
+    overlays.remove('GameOver');
     removeAll(children);
     score = 0;
     lives = 3;
@@ -318,6 +285,10 @@ class FroggerGame extends FlameGame with KeyboardEvents, TapCallbacks, HasCollis
     isGameOver = false;
     super.isGameOver = false; // Update EscPauseHandler
     goalsReached = [false, false, false, false, false];
+    
+    // Reset tracking
+    gameStartTime = DateTime.now();
+    crossingsCompleted = 0;
     
     add(RectangleComponent(
       size: size,

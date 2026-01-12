@@ -5,6 +5,8 @@ import '../../../../core/widgets/game_page_layout.dart';
 import '../../domain/entities/reversi_entities.dart';
 import '../providers/reversi_controller.dart';
 import '../widgets/reversi_widgets.dart';
+import 'reversi_high_scores_page.dart';
+import 'reversi_settings_page.dart';
 
 class ReversiPage extends ConsumerWidget {
   const ReversiPage({super.key});
@@ -23,6 +25,26 @@ class ReversiPage extends ConsumerWidget {
           '🏆 Quem tiver mais peças vence',
       maxGameWidth: 450,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ReversiHighScoresPage()),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ReversiSettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
         IconButton(
           icon: const Icon(Icons.refresh, color: Colors.white),
           onPressed: notifier.reset,

@@ -15,7 +15,7 @@ import 'package:app_minigames/features/quiz/presentation/pages/quiz_page.dart';
 import 'package:app_minigames/features/quiz_image/presentation/pages/quiz_image_page.dart';
 import 'package:app_minigames/features/caca_palavra/presentation/pages/caca_palavra_page.dart';
 import 'package:app_minigames/features/soletrando/presentation/pages/soletrando_page.dart';
-import 'package:app_minigames/features/dino_run/presentation/dino_run_page.dart';
+import 'package:app_minigames/features/dino_run/presentation/pages/dino_run_page.dart';
 import 'package:app_minigames/features/arkanoid/presentation/pages/arkanoid_page.dart';
 import 'package:app_minigames/features/simon_says/presentation/pages/simon_says_page.dart';
 import 'package:app_minigames/features/connect_four/presentation/pages/connect_four_page.dart';
@@ -31,6 +31,7 @@ import 'package:app_minigames/features/centipede/presentation/pages/centipede_pa
 // Admin
 import 'package:app_minigames/features/admin/presentation/pages/admin_login_page.dart';
 import 'package:app_minigames/features/admin/presentation/pages/admin_dashboard_page.dart';
+import 'package:app_minigames/features/admin/presentation/pages/admin_errors_page.dart';
 
 import 'page_transitions.dart';
 
@@ -250,6 +251,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       path: '/admin/dashboard',
       pageBuilder: (context, state) => fadeTransitionPage(
         child: const AdminDashboardPage(),
+        state: state,
+      ),
+    ),
+    GoRoute(
+      path: '/admin/errors',
+      pageBuilder: (context, state) => fadeTransitionPage(
+        child: const AdminErrorsPage(),
         state: state,
       ),
     ),

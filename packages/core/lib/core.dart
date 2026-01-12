@@ -232,6 +232,7 @@ export 'src/services/supabase/supabase_config_service.dart';
 export 'src/shared/config/environment_config.dart';
 export 'src/shared/contracts/i_asset_loader.dart';
 export 'src/shared/contracts/i_version_manager.dart';
+export 'src/shared/enums/error_severity.dart';
 export 'src/shared/enums/log_level.dart';
 export 'src/shared/extensions/log_level_extensions.dart';
 export 'src/shared/extensions/supabase_query_extensions.dart';

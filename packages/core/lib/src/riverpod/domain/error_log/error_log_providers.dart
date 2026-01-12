@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/enums/error_severity.dart';
 import '../../../domain/entities/error_log_entity.dart';
 import '../../../domain/repositories/i_error_log_repository.dart';
 import '../../../infrastructure/services/firebase_error_log_service.dart';
@@ -10,54 +11,62 @@ final errorLogServiceProvider = Provider<IErrorLogRepository>((ref) {
 });
 
 /// Provider para registrar erro (qualquer usuário/automático)
-final logErrorProvider = FutureProvider.family<String?, ErrorLogEntity>(
-  (ref, error) async {
-    final service = ref.read(errorLogServiceProvider);
-    final result = await service.logError(error);
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (id) => id,
-    );
-  },
-);
+final logErrorProvider = FutureProvider.family<String?, ErrorLogEntity>((
+  ref,
+  error,
+) async {
+  final service = ref.read(errorLogServiceProvider);
+  final result = await service.logError(error);
+  return result.fold((failure) => throw Exception(failure.message), (id) => id);
+});
 
 /// Provider para listar erros (apenas admin)
-final errorLogListProvider = FutureProvider.family<List<ErrorLogEntity>, ErrorLogFilters>(
-  (ref, filters) async {
-    final service = ref.read(errorLogServiceProvider);
-    final result = await service.getErrors(
-      status: filters.status,
-      type: filters.type,
-      severity: filters.severity,
-      calculatorId: filters.calculatorId,
-      limit: filters.limit,
-      lastDocumentId: filters.lastDocumentId,
-    );
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (errors) => errors,
-    );
-  },
-);
+final errorLogListProvider =
+    FutureProvider.family<List<ErrorLogEntity>, ErrorLogFilters>((
+      ref,
+      filters,
+    ) async {
+      final service = ref.read(errorLogServiceProvider);
+      final result = await service.getErrors(
+        status: filters.status,
+        type: filters.type,
+        severity: filters.severity,
+        calculatorId: filters.calculatorId,
+        limit: filters.limit,
+        lastDocumentId: filters.lastDocumentId,
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (errors) => errors,
+      );
+    });
 
 /// Provider para stream de erros em tempo real (admin)
-final errorLogStreamProvider = StreamProvider.family<List<ErrorLogEntity>, ErrorLogFilters>(
-  (ref, filters) {
-    final service = ref.read(errorLogServiceProvider);
-    return service.watchErrors(
-      status: filters.status,
-      type: filters.type,
-      severity: filters.severity,
-      limit: filters.limit,
-    ).map((result) => result.fold(
-      (failure) => throw Exception(failure.message),
-      (errors) => errors,
-    ));
-  },
-);
+final errorLogStreamProvider =
+    StreamProvider.family<List<ErrorLogEntity>, ErrorLogFilters>((
+      ref,
+      filters,
+    ) {
+      final service = ref.read(errorLogServiceProvider);
+      return service
+          .watchErrors(
+            status: filters.status,
+            type: filters.type,
+            severity: filters.severity,
+            limit: filters.limit,
+          )
+          .map(
+            (result) => result.fold(
+              (failure) => throw Exception(failure.message),
+              (errors) => errors,
+            ),
+          );
+    });
 
 /// Provider para contagem de erros por status
-final errorLogCountsProvider = FutureProvider<Map<ErrorStatus, int>>((ref) async {
+final errorLogCountsProvider = FutureProvider<Map<ErrorStatus, int>>((
+  ref,
+) async {
   final service = ref.read(errorLogServiceProvider);
   final result = await service.getErrorCounts();
   return result.fold(
@@ -67,7 +76,9 @@ final errorLogCountsProvider = FutureProvider<Map<ErrorStatus, int>>((ref) async
 });
 
 /// Provider para contagem de erros por tipo
-final errorLogCountsByTypeProvider = FutureProvider<Map<ErrorType, int>>((ref) async {
+final errorLogCountsByTypeProvider = FutureProvider<Map<ErrorType, int>>((
+  ref,
+) async {
   final service = ref.read(errorLogServiceProvider);
   final result = await service.getErrorCountsByType();
   return result.fold(
@@ -77,7 +88,9 @@ final errorLogCountsByTypeProvider = FutureProvider<Map<ErrorType, int>>((ref) a
 });
 
 /// Provider para erros agrupados por calculadora
-final errorsByCalculatorProvider = FutureProvider<Map<String, int>>((ref) async {
+final errorsByCalculatorProvider = FutureProvider<Map<String, int>>((
+  ref,
+) async {
   final service = ref.read(errorLogServiceProvider);
   final result = await service.getErrorsByCalculator();
   return result.fold(
@@ -87,16 +100,17 @@ final errorsByCalculatorProvider = FutureProvider<Map<String, int>>((ref) async 
 });
 
 /// Provider para obter um erro específico
-final errorLogByIdProvider = FutureProvider.family<ErrorLogEntity, String>(
-  (ref, id) async {
-    final service = ref.read(errorLogServiceProvider);
-    final result = await service.getErrorById(id);
-    return result.fold(
-      (failure) => throw Exception(failure.message),
-      (error) => error,
-    );
-  },
-);
+final errorLogByIdProvider = FutureProvider.family<ErrorLogEntity, String>((
+  ref,
+  id,
+) async {
+  final service = ref.read(errorLogServiceProvider);
+  final result = await service.getErrorById(id);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (error) => error,
+  );
+});
 
 /// Classe para filtros de error log
 class ErrorLogFilters {
@@ -147,7 +161,8 @@ class ErrorLogFilters {
   }
 
   @override
-  int get hashCode => Object.hash(status, type, severity, calculatorId, limit, lastDocumentId);
+  int get hashCode =>
+      Object.hash(status, type, severity, calculatorId, limit, lastDocumentId);
 }
 
 /// Notifier para gerenciar ações de error log (admin)
@@ -249,5 +264,5 @@ class ErrorLogActionsNotifier extends Notifier<AsyncValue<void>> {
 /// Provider para ações de error log (admin)
 final errorLogActionsProvider =
     NotifierProvider<ErrorLogActionsNotifier, AsyncValue<void>>(
-  ErrorLogActionsNotifier.new,
-);
+      ErrorLogActionsNotifier.new,
+    );

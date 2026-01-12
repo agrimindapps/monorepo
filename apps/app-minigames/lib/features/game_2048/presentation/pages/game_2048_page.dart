@@ -1,4 +1,6 @@
 import 'package:flame/game.dart';
+import 'game_2048_high_scores_page.dart';
+import 'game_2048_settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,6 +78,26 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
           '🎯 Alcance 2048 para vencer!',
       maxGameWidth: 500,
       actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Game2048HighScoresPage()),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Game2048SettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
         PopupMenuButton<BoardSize>(
           icon: const Icon(Icons.grid_4x4, color: Colors.white),
           tooltip: 'Tamanho do tabuleiro',
@@ -207,6 +229,26 @@ class _Game2048PageState extends ConsumerState<Game2048Page> {
           'Tem certeza que deseja reiniciar? Você perderá o progresso atual.',
         ),
         actions: [
+        IconButton(
+          icon: const Icon(Icons.emoji_events_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Game2048HighScoresPage()),
+            );
+          },
+          tooltip: 'High Scores',
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings_outlined),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Game2048SettingsPage()),
+            );
+          },
+          tooltip: 'Configurações',
+        ),
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),

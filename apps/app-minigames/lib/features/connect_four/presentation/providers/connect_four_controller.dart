@@ -10,6 +10,8 @@ class ConnectFourState {
   final int? winner;
   final bool isDraw;
   final List<List<int>> winningLine; // coordinates of winning chips
+  final DateTime? gameStartTime;
+  final int movesCount;
 
   const ConnectFourState({
     this.board = const [],
@@ -17,6 +19,8 @@ class ConnectFourState {
     this.winner,
     this.isDraw = false,
     this.winningLine = const [],
+    this.gameStartTime,
+    this.movesCount = 0,
   });
 
   // Initial 6 rows x 7 cols
@@ -24,6 +28,8 @@ class ConnectFourState {
     return ConnectFourState(
       board: List.generate(6, (_) => List.filled(7, 0)),
       currentPlayer: 1,
+      gameStartTime: DateTime.now(),
+      movesCount: 0,
     );
   }
 
@@ -33,6 +39,8 @@ class ConnectFourState {
     int? winner,
     bool? isDraw,
     List<List<int>>? winningLine,
+    DateTime? gameStartTime,
+    int? movesCount,
   }) {
     return ConnectFourState(
       board: board ?? this.board,
@@ -40,8 +48,14 @@ class ConnectFourState {
       winner: winner ?? this.winner,
       isDraw: isDraw ?? this.isDraw,
       winningLine: winningLine ?? this.winningLine,
+      gameStartTime: gameStartTime ?? this.gameStartTime,
+      movesCount: movesCount ?? this.movesCount,
     );
   }
+
+  Duration get gameDuration => gameStartTime != null
+      ? DateTime.now().difference(gameStartTime!)
+      : Duration.zero;
 }
 
 @riverpod
@@ -71,7 +85,7 @@ class ConnectFourController extends _$ConnectFourController {
     );
     newBoard[row][column] = state.currentPlayer;
 
-    state = state.copyWith(board: newBoard);
+    state = state.copyWith(board: newBoard, movesCount: state.movesCount + 1);
     
     _checkWin(row, column);
     

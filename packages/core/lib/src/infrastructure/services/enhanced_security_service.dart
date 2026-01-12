@@ -8,6 +8,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 
+import '../../shared/enums/error_severity.dart';
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
 

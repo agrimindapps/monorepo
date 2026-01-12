@@ -18,6 +18,11 @@ class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollis
   bool isGameOver = false;
   bool isGameWon = false;
   bool isPlaying = false;
+  
+  // Tracking for persistence
+  DateTime? gameStartTime;
+  int level = 1;
+  int bricksDestroyed = 0;
 
   @override
   Color backgroundColor() => const Color(0xFF1A1A2E);
@@ -32,6 +37,9 @@ class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollis
     children.whereType<Paddle>().forEach((e) => e.removeFromParent());
     children.whereType<Ball>().forEach((e) => e.removeFromParent());
     children.whereType<Brick>().forEach((e) => e.removeFromParent());
+    
+    // Initialize game start time
+    gameStartTime ??= DateTime.now();
     
     // Create Paddle
     paddle = Paddle();
@@ -128,6 +136,7 @@ class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollis
   
   void onBrickDestroyed() {
     score += 10;
+    bricksDestroyed++;
     if (children.whereType<Brick>().isEmpty) {
       isGameWon = true;
       isPlaying = false;
@@ -139,7 +148,10 @@ class ArkanoidGame extends FlameGame with DragCallbacks, TapCallbacks, HasCollis
   void reset() {
     isGameOver = false;
     isGameWon = false;
-    super.isGameOver = false; // Update EscPauseHandler
+    super.isGameOver = false;
+    gameStartTime = DateTime.now();
+    level = 1;
+    bricksDestroyed = 0;
     overlays.remove('GameOver');
     overlays.remove('GameWon');
     setupGame();

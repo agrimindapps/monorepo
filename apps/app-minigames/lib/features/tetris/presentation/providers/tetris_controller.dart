@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../domain/entities/tetromino.dart';
+import '../../domain/entities/tetris_score.dart';
+import 'tetris_data_providers.dart';
 
 part 'tetris_controller.g.dart';
 
@@ -15,6 +17,8 @@ class TetrisState {
   final int level;
   final bool isGameOver;
   final bool isPaused;
+  final DateTime? gameStartTime;
+  final int tetrisCount; // Contador de Tetris (4 linhas de uma vez)
   
   static const int boardWidth = 10;
   static const int boardHeight = 20;
@@ -28,6 +32,8 @@ class TetrisState {
     this.level = 1,
     this.isGameOver = false,
     this.isPaused = false,
+    this.gameStartTime,
+    this.tetrisCount = 0,
   });
   
   factory TetrisState.initial() {
@@ -36,6 +42,7 @@ class TetrisState {
         boardHeight,
         (_) => List.generate(boardWidth, (_) => null),
       ),
+      gameStartTime: DateTime.now(),
     );
   }
   
@@ -48,6 +55,8 @@ class TetrisState {
     int? level,
     bool? isGameOver,
     bool? isPaused,
+    DateTime? gameStartTime,
+    int? tetrisCount,
     bool clearCurrentPiece = false,
   }) {
     return TetrisState(
@@ -59,7 +68,15 @@ class TetrisState {
       level: level ?? this.level,
       isGameOver: isGameOver ?? this.isGameOver,
       isPaused: isPaused ?? this.isPaused,
+      gameStartTime: gameStartTime ?? this.gameStartTime,
+      tetrisCount: tetrisCount ?? this.tetrisCount,
     );
+  }
+  
+  /// Duração do jogo
+  Duration get gameDuration {
+    if (gameStartTime == null) return Duration.zero;
+    return DateTime.now().difference(gameStartTime!);
   }
 }
 
@@ -105,6 +122,7 @@ class TetrisController extends _$TetrisController {
     if (!_canPlace(newPiece, newPiece.x, newPiece.y)) {
       state = state.copyWith(isGameOver: true);
       _gameTimer?.cancel();
+      _saveScore(); // Salva o score quando o jogo termina
       return;
     }
     
@@ -172,12 +190,14 @@ class TetrisController extends _$TetrisController {
       final points = [0, 100, 300, 500, 800][linesCleared];
       final newLines = state.lines + linesCleared;
       final newLevel = (newLines ~/ 10) + 1;
+      final isTetris = linesCleared == 4;
       
       state = state.copyWith(
         board: newBoard,
         score: state.score + points * state.level,
         lines: newLines,
         level: newLevel,
+        tetrisCount: isTetris ? state.tetrisCount + 1 : state.tetrisCount,
       );
       
       if (newLevel != state.level) {
@@ -267,6 +287,26 @@ class TetrisController extends _$TetrisController {
   
   void restart() {
     startGame();
+  }
+  
+  /// Salva o score quando o jogo termina
+  Future<void> _saveScore() async {
+    if (state.score == 0) return; // Não salva scores zero
+    
+    final score = TetrisScore.create(
+      score: state.score,
+      lines: state.lines,
+      level: state.level,
+      duration: state.gameDuration,
+    );
+    
+    try {
+      final scoreActions = ref.read(tetrisScoreActionsProvider.notifier);
+      await scoreActions.saveScore(score, tetrisCount: state.tetrisCount);
+    } catch (e) {
+      // Ignora erros de salvamento para não afetar o jogo
+      debugPrint('Failed to save score: $e');
+    }
   }
 }
 

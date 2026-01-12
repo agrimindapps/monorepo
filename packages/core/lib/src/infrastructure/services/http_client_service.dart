@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../shared/enums/error_severity.dart';
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';
 

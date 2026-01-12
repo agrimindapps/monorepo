@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../shared/enums/error_severity.dart';
 
 /// Tipos de erro que podem ser capturados
 enum ErrorType {
@@ -116,42 +117,8 @@ enum ErrorStatus {
   }
 }
 
-/// Severidade do erro
-enum ErrorSeverity {
-  low,
-  medium,
-  high,
-  critical;
-
-  String get displayName {
-    switch (this) {
-      case ErrorSeverity.low:
-        return 'Baixa';
-      case ErrorSeverity.medium:
-        return 'Média';
-      case ErrorSeverity.high:
-        return 'Alta';
-      case ErrorSeverity.critical:
-        return 'Crítica';
-    }
-  }
-
-  String get emoji {
-    switch (this) {
-      case ErrorSeverity.low:
-        return '🟢';
-      case ErrorSeverity.medium:
-        return '🟡';
-      case ErrorSeverity.high:
-        return '🟠';
-      case ErrorSeverity.critical:
-        return '🔴';
-    }
-  }
-}
-
 /// Entidade de Log de Erro
-/// 
+///
 /// Representa um erro capturado em produção web,
 /// armazenado no Firestore para análise e gestão.
 class ErrorLogEntity extends Equatable {
@@ -373,26 +340,26 @@ class ErrorLogEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-        id,
-        errorType,
-        message,
-        stackTrace,
-        url,
-        calculatorId,
-        calculatorName,
-        userAgent,
-        appVersion,
-        platform,
-        browserInfo,
-        screenSize,
-        severity,
-        status,
-        createdAt,
-        resolvedAt,
-        adminNotes,
-        occurrences,
-        lastOccurrence,
-        errorHash,
-        sessionId,
-      ];
+    id,
+    errorType,
+    message,
+    stackTrace,
+    url,
+    calculatorId,
+    calculatorName,
+    userAgent,
+    appVersion,
+    platform,
+    browserInfo,
+    screenSize,
+    severity,
+    status,
+    createdAt,
+    resolvedAt,
+    adminNotes,
+    occurrences,
+    lastOccurrence,
+    errorHash,
+    sessionId,
+  ];
 }

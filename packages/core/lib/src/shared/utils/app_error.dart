@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../enums/error_severity.dart';
 import 'failure.dart';
 
 /// Classe base para todos os erros da aplicação
@@ -138,21 +139,6 @@ abstract class AppError extends Equatable {
   @override
   String toString() =>
       'AppError(message: $message, code: $code, category: ${category.name})';
-}
-
-/// Severidade do erro
-enum ErrorSeverity {
-  /// Avisos, informações não críticas
-  low,
-
-  /// Erros que não impedem o funcionamento
-  medium,
-
-  /// Erros críticos que afetam funcionalidades
-  high,
-
-  /// Erros que podem causar crash ou perda de dados
-  critical,
 }
 
 /// Categoria do erro para melhor organização

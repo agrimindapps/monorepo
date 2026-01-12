@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
+import '../../shared/enums/error_severity.dart';
 import '../../shared/enums/log_level.dart';
 import '../../shared/utils/app_error.dart';
 import '../../shared/utils/failure.dart';

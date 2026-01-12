@@ -1,21 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 
+import '../../shared/enums/error_severity.dart';
 import '../../domain/entities/error_log_entity.dart';
 import '../../domain/repositories/i_error_log_repository.dart';
 import '../../shared/utils/failure.dart';
 
 /// Implementação do repositório de logs de erro usando Firebase Firestore
-/// 
+///
 /// Collection: `error_logs`
-/// 
+///
 /// Regras de segurança:
 /// - CREATE: Qualquer usuário (erros automáticos, mesmo não autenticado)
 /// - READ/UPDATE/DELETE: Apenas admin autenticado
 class FirebaseErrorLogService implements IErrorLogRepository {
-  FirebaseErrorLogService({
-    FirebaseFirestore? firestore,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirebaseErrorLogService({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -55,14 +55,18 @@ class FirebaseErrorLogService implements IErrorLogRepository {
 
       return const Right(null);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure('Erro ao incrementar ocorrências: ${e.message}'));
+      return Left(
+        ServerFailure('Erro ao incrementar ocorrências: ${e.message}'),
+      );
     } catch (e) {
       return Left(ServerFailure('Erro inesperado: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, ErrorLogEntity?>> getErrorByHash(String errorHash) async {
+  Future<Either<Failure, ErrorLogEntity?>> getErrorByHash(
+    String errorHash,
+  ) async {
     try {
       final snapshot = await _collection
           .where('errorHash', isEqualTo: errorHash)
@@ -92,8 +96,10 @@ class FirebaseErrorLogService implements IErrorLogRepository {
     String? lastDocumentId,
   }) async {
     try {
-      Query<Map<String, dynamic>> query = _collection
-          .orderBy('createdAt', descending: true);
+      Query<Map<String, dynamic>> query = _collection.orderBy(
+        'createdAt',
+        descending: true,
+      );
 
       if (status != null) {
         query = query.where('status', isEqualTo: status.firestoreName);
@@ -157,9 +163,7 @@ class FirebaseErrorLogService implements IErrorLogRepository {
     String? adminNotes,
   }) async {
     try {
-      final updates = <String, dynamic>{
-        'status': status.firestoreName,
-      };
+      final updates = <String, dynamic>{'status': status.firestoreName};
 
       if (status == ErrorStatus.fixed || status == ErrorStatus.wontFix) {
         updates['resolvedAt'] = FieldValue.serverTimestamp();
@@ -184,9 +188,7 @@ class FirebaseErrorLogService implements IErrorLogRepository {
     ErrorSeverity severity,
   ) async {
     try {
-      await _collection.doc(id).update({
-        'severity': severity.name,
-      });
+      await _collection.doc(id).update({'severity': severity.name});
       return const Right(null);
     } on FirebaseException catch (e) {
       return Left(ServerFailure('Erro ao atualizar severidade: ${e.message}'));
@@ -230,8 +232,10 @@ class FirebaseErrorLogService implements IErrorLogRepository {
     ErrorSeverity? severity,
     int limit = 50,
   }) {
-    Query<Map<String, dynamic>> query = _collection
-        .orderBy('createdAt', descending: true);
+    Query<Map<String, dynamic>> query = _collection.orderBy(
+      'createdAt',
+      descending: true,
+    );
 
     if (status != null) {
       query = query.where('status', isEqualTo: status.firestoreName);
@@ -313,8 +317,9 @@ class FirebaseErrorLogService implements IErrorLogRepository {
       for (final doc in snapshot.docs) {
         final data = doc.data();
         final calcId = data['calculatorId'] as String?;
-        final calcName = data['calculatorName'] as String? ?? calcId ?? 'Desconhecido';
-        
+        final calcName =
+            data['calculatorName'] as String? ?? calcId ?? 'Desconhecido';
+
         if (calcName.isNotEmpty) {
           counts[calcName] = (counts[calcName] ?? 0) + 1;
         }
@@ -322,7 +327,9 @@ class FirebaseErrorLogService implements IErrorLogRepository {
 
       return Right(counts);
     } on FirebaseException catch (e) {
-      return Left(ServerFailure('Erro ao agrupar por calculadora: ${e.message}'));
+      return Left(
+        ServerFailure('Erro ao agrupar por calculadora: ${e.message}'),
+      );
     } catch (e) {
       return Left(ServerFailure('Erro inesperado: $e'));
     }
@@ -332,14 +339,17 @@ class FirebaseErrorLogService implements IErrorLogRepository {
   Future<Either<Failure, int>> cleanupOldErrors(int days) async {
     try {
       final cutoffDate = DateTime.now().subtract(Duration(days: days));
-      
+
       // Busca erros resolvidos ou ignorados mais antigos que o período
       final snapshot = await _collection
-          .where('status', whereIn: [
-            ErrorStatus.fixed.firestoreName,
-            ErrorStatus.ignored.firestoreName,
-            ErrorStatus.wontFix.firestoreName,
-          ])
+          .where(
+            'status',
+            whereIn: [
+              ErrorStatus.fixed.firestoreName,
+              ErrorStatus.ignored.firestoreName,
+              ErrorStatus.wontFix.firestoreName,
+            ],
+          )
           .where('createdAt', isLessThan: Timestamp.fromDate(cutoffDate))
           .get();
 

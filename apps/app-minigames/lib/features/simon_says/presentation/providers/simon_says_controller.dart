@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../../domain/entities/simon_score.dart';
+import 'simon_data_providers.dart';
 
 part 'simon_says_controller.g.dart';
 
@@ -13,7 +15,9 @@ class SimonState {
   final List<int> sequence;
   final List<int> userSequence;
   final int score;
-  final int? activeIndex; // The button currently lit up
+  final int? activeIndex;
+  final DateTime? gameStartTime;
+  final int perfectRounds;
 
   const SimonState({
     this.gameState = SimonGameState.idle,
@@ -21,7 +25,14 @@ class SimonState {
     this.userSequence = const [],
     this.score = 0,
     this.activeIndex,
+    this.gameStartTime,
+    this.perfectRounds = 0,
   });
+
+  Duration? get gameDuration {
+    if (gameStartTime == null) return null;
+    return DateTime.now().difference(gameStartTime!);
+  }
 
   SimonState copyWith({
     SimonGameState? gameState,
@@ -30,6 +41,8 @@ class SimonState {
     int? score,
     int? activeIndex,
     bool clearActiveIndex = false,
+    DateTime? gameStartTime,
+    int? perfectRounds,
   }) {
     return SimonState(
       gameState: gameState ?? this.gameState,
@@ -37,6 +50,8 @@ class SimonState {
       userSequence: userSequence ?? this.userSequence,
       score: score ?? this.score,
       activeIndex: clearActiveIndex ? null : (activeIndex ?? this.activeIndex),
+      gameStartTime: gameStartTime ?? this.gameStartTime,
+      perfectRounds: perfectRounds ?? this.perfectRounds,
     );
   }
 }
@@ -51,7 +66,10 @@ class SimonSaysController extends _$SimonSaysController {
   }
 
   Future<void> startGame() async {
-    state = const SimonState(gameState: SimonGameState.showingSequence);
+    state = SimonState(
+      gameState: SimonGameState.showingSequence,
+      gameStartTime: DateTime.now(),
+    );
     await _addToSequenceAndShow();
   }
 
@@ -98,6 +116,7 @@ class SimonSaysController extends _$SimonSaysController {
     if (index != expectedIndex) {
       // Wrong input
       state = state.copyWith(gameState: SimonGameState.gameOver);
+      await _saveScore();
       return;
     }
 
@@ -118,5 +137,20 @@ class SimonSaysController extends _$SimonSaysController {
 
   void reset() {
     state = const SimonState();
+  }
+
+  Future<void> _saveScore() async {
+    if (state.gameDuration == null) return;
+
+    final score = SimonScore(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      score: state.score,
+      longestSequence: state.sequence.length,
+      duration: state.gameDuration!,
+      completedAt: DateTime.now(),
+    );
+
+    final saver = ref.read(simonScoreSaverProvider.notifier);
+    await saver.saveScore(score);
   }
 }

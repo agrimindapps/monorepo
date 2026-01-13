@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------------------------------------------------------
+    // Helper Functions
+    // ---------------------------------------------------------
+    
+    // Checks if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Checks if the authenticated user is the owner of the data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Checks if the user has admin role
+    // This assumes a 'role' field in the user document
+    // OR checks against a hardcoded list of admin emails
+    function isAdmin() {
+      return (isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+             (isAuthenticated() && request.auth.token.email in ['agrimind.br@gmail.com']);
+    }
+
+    // ---------------------------------------------------------
+    // Collection Rules
+    // ---------------------------------------------------------
+
+    // Users collection
+    // Stores user profile information
+    match /users/{userId} {
+      // Users can only read and write their own data
+      allow read, write: if isOwner(userId);
+    }
+
+    // Comments collection (Feedback system)
+    // Stores user comments/feedback/suggestions for games
+    match /comments/{commentId} {
+      // Allow anonymous creation (feedback form)
+      allow create: if true;
+      
+      // Only admins can read, update or delete comments
+      // Regular users cannot see other people's comments
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Error Logs collection
+    // Used by WebErrorCaptureService / FirebaseErrorLogService
+    match /error_logs/{logId} {
+      // Allow creation of error logs by anyone (including anonymous/unauthenticated users)
+      allow create: if true;
+      
+      // Only admins can read/manage error logs
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

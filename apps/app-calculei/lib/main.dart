@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app_page.dart';
-import 'core/config/firebase_options.dart';
+import 'firebase_options.dart';
 import 'core/services/web_error_capture_service.dart';
 
 void main() async {

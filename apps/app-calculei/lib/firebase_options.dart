@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB5YiNGjFwu5r71u6a2jXOQTGsw1jsrHYk',
-    appId: '1:552417998440:android:23bb5afc0a7770e5d36ddd',
+    appId: '1:552417998440:android:2db089be13152efed36ddd',
     messagingSenderId: '552417998440',
     projectId: 'calculei-52e71',
     storageBucket: 'calculei-52e71.firebasestorage.app',
@@ -66,10 +66,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBQsXkFoLVLisS6Ja_8C5ZukLPRi6sEh-g',
-    appId: '1:552417998440:ios:ad1546b08f0b8cbcd36ddd',
+    appId: '1:552417998440:ios:a959aed553c71d9cd36ddd',
     messagingSenderId: '552417998440',
     projectId: 'calculei-52e71',
     storageBucket: 'calculei-52e71.firebasestorage.app',
-    iosBundleId: 'com.example.appCalculei',
+    iosBundleId: 'br.com.agrimind.calculei',
   );
+
 }

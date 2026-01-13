@@ -1,0 +1,62 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Checks if the user has admin role
+    // Requires a document in 'users' collection with role: 'admin'
+    // OR checks against a hardcoded list of admin emails for backward compatibility/simplicity
+    function isAdmin() {
+      return (isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+             (isAuthenticated() && request.auth.token.email in ['agrimind.br@gmail.com']);
+    }
+
+    // ---------------------------------------------------------
+    // Collection Rules
+    // ---------------------------------------------------------
+
+    // Users collection
+    // Stores user profile information and roles
+    match /users/{userId} {
+      // Admins can read/write any user profile
+      // Owners can read/write their own profile
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    // Comments/Feedback collection
+    // Stores user comments/feedback/suggestions for calculators/games
+    // Unified name: supports both 'feedback' and 'comments' collections if needed, 
+    // but applying rules to both for consistency
+    match /comments/{commentId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    
+    match /feedback/{feedbackId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Error Logs collection
+    // Used by WebErrorCaptureService / FirebaseErrorLogService
+    match /error_logs/{logId} {
+      // Allow creation of error logs by anyone (including anonymous/unauthenticated users)
+      allow create: if true;
+      
+      // Only admins can read/manage error logs
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Analytics (legacy/specific for calculei)
+    match /analytics/{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

@@ -202,4 +202,24 @@ class SemanticColors {
   /// Danger/Error color (red)
   static Color danger(BuildContext context) => 
       context.isDark ? const Color(0xFFEF5350) : const Color(0xFFF44336);
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SPEC ITEM COLORS (Adapt to theme for better readability)
+  // ═══════════════════════════════════════════════════════════════════════════
+  
+  /// Blue color for spec items - adapts to theme
+  static Color specBlue(BuildContext context) => 
+      context.isDark ? const Color(0xFF42A5F5) : const Color(0xFF1976D2);
+  
+  /// Purple color for spec items - adapts to theme
+  static Color specPurple(BuildContext context) => 
+      context.isDark ? const Color(0xFFAB47BC) : const Color(0xFF7B1FA2);
+  
+  /// Orange color for spec items - adapts to theme
+  static Color specOrange(BuildContext context) => 
+      context.isDark ? const Color(0xFFFF9800) : const Color(0xFFE65100);
+  
+  /// Teal color for spec items - adapts to theme
+  static Color specTeal(BuildContext context) => 
+      context.isDark ? const Color(0xFF26A69A) : const Color(0xFF00695C);
 }

@@ -58,7 +58,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDR3ugM5sfxcb-Hy6P9z7pnfUOvRD12O_4',
-    appId: '1:1015632283781:android:7cd6fef76e8539361541ec',
+    appId: '1:1015632283781:android:127cbdae9e4269e31541ec',
     messagingSenderId: '1015632283781',
     projectId: 'minigames-33fe5',
     storageBucket: 'minigames-33fe5.firebasestorage.app',
@@ -66,10 +66,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyChsARHBux9w6h8qwzdmtFl94vUq25xrYw',
-    appId: '1:1015632283781:ios:e720007c53a4e6c11541ec',
+    appId: '1:1015632283781:ios:5b8fda7e15a1271d1541ec',
     messagingSenderId: '1015632283781',
     projectId: 'minigames-33fe5',
     storageBucket: 'minigames-33fe5.firebasestorage.app',
-    iosBundleId: 'com.example.appMinigames',
+    iosBundleId: 'br.com.agrimind.minigames',
   );
 }

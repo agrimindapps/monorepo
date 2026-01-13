@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/adaptive_spec_card.dart';
 import '../../../../../shared/widgets/share_button.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/earthwork_calculation.dart';
 
@@ -128,35 +130,37 @@ class EarthworkResultCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                _LogisticsItem(
+                AdaptiveSpecCard(
                   icon: Icons.local_shipping,
                   label: 'Caminhões',
                   value: '${calculation.truckLoads}',
                   unit: 'viagens (8m³)',
-                  color: Colors.orange,
+                  color: SemanticColors.specOrange(context),
+                  width: 170,
                 ),
-                _LogisticsItem(
+                AdaptiveSpecCard(
                   icon: Icons.access_time,
                   label: 'Tempo Estimado',
                   value: calculation.estimatedHours.toStringAsFixed(1),
                   unit: 'horas',
-                  color: Colors.blue,
+                  color: SemanticColors.specBlue(context),
+                  width: 170,
                 ),
-                _LogisticsItem(
+                AdaptiveSpecCard(
                   icon: Icons.terrain,
                   label: 'Tipo de Solo',
                   value: calculation.soilType,
                   unit: '',
-                  color: Colors.brown,
-                  isText: true,
+                  color: SemanticColors.specTeal(context),
+                  width: 170,
                 ),
-                _LogisticsItem(
+                AdaptiveSpecCard(
                   icon: Icons.construction,
                   label: 'Operação',
                   value: calculation.operationType,
                   unit: '',
-                  color: Colors.grey,
-                  isText: true,
+                  color: SemanticColors.specPurple(context),
+                  width: 170,
                 ),
               ],
             ),
@@ -257,84 +261,6 @@ class EarthworkResultCard extends StatelessWidget {
 
 Calculado por App Calculei
 ''';
-  }
-}
-
-/// Logistics item widget for dark theme
-class _LogisticsItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-  final bool isText;
-
-  const _LogisticsItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-    this.isText = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 170,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: isText ? 16 : 22,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          if (unit.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            Text(
-              unit,
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
-                fontSize: 12,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
   }
 }
 

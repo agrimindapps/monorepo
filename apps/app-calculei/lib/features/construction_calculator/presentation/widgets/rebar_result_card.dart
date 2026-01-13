@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/adaptive_spec_card.dart';
 import '../../../../../shared/widgets/share_button.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/rebar_calculation.dart';
 
@@ -128,33 +130,33 @@ class RebarResultCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                _DetailItem(
+                AdaptiveSpecCard(
                   icon: Icons.straighten,
                   label: 'Comprimento Total',
                   value: calculation.totalLength.toStringAsFixed(1),
                   unit: 'metros',
-                  color: Colors.orange,
+                  color: SemanticColors.specOrange(context),
                 ),
-                _DetailItem(
+                AdaptiveSpecCard(
                   icon: Icons.hardware,
                   label: 'Barras de 12m',
                   value: '${calculation.numberOfBars}',
                   unit: 'unidades',
-                  color: Colors.deepOrange,
+                  color: SemanticColors.specOrange(context),
                 ),
-                _DetailItem(
+                AdaptiveSpecCard(
                   icon: Icons.donut_small,
                   label: 'Diâmetro',
                   value: calculation.rebarDiameter,
                   unit: '(${calculation.weightPerMeter.toStringAsFixed(3)} kg/m)',
-                  color: Colors.amber,
+                  color: SemanticColors.specOrange(context),
                 ),
-                _DetailItem(
+                AdaptiveSpecCard(
                   icon: Icons.analytics,
                   label: 'Taxa de Aço',
                   value: calculation.steelRate.toStringAsFixed(0),
                   unit: 'kg/m³',
-                  color: Colors.blueGrey,
+                  color: SemanticColors.specBlue(context),
                 ),
               ],
             ),
@@ -226,75 +228,6 @@ class RebarResultCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Detail item widget for dark theme
-class _DetailItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-
-  const _DetailItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            unit,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 11,
-            ),
-          ),
-        ],
       ),
     );
   }

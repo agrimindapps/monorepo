@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-/// Página de login do administrador para app-minigames
+/// Página de login do administrador
 /// 
 /// Acesso via rota secreta: /admin
 /// Usa Firebase Auth com email/password
@@ -23,11 +23,6 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   bool _obscurePassword = true;
   String? _errorMessage;
 
-  // MiniGames theme colors
-  static const _backgroundColor = Color(0xFF0F0F1A);
-  static const _cardColor = Color(0xFF1A1A2E);
-  static const _accentColor = Color(0xFFFFD700);
-
   @override
   void dispose() {
     _emailController.dispose();
@@ -44,14 +39,28 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      
+      // Debug log
+      debugPrint('🔐 Tentando login com: $email');
+      
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
+      debugPrint('✅ Login bem-sucedido! UID: ${credential.user?.uid}');
+
       if (!mounted) return;
+
+      // Navegar para o dashboard
       context.go('/admin/dashboard');
-    } on Exception catch (e) {
+    } catch (e) {
+      // Log detalhado do erro
+      debugPrint('❌ Erro no login: $e');
+      debugPrint('Tipo do erro: ${e.runtimeType}');
+      
       setState(() {
         _errorMessage = _parseError(e.toString());
       });
@@ -63,6 +72,8 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   }
 
   String _parseError(String error) {
+    debugPrint('🔍 Parseando erro: $error');
+    
     if (error.contains('user-not-found')) {
       return 'Usuário não encontrado';
     } else if (error.contains('wrong-password')) {
@@ -73,14 +84,23 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
       return 'Muitas tentativas. Tente novamente mais tarde.';
     } else if (error.contains('invalid-credential')) {
       return 'Credenciais inválidas';
+    } else if (error.contains('network-request-failed')) {
+      return 'Erro de conexão. Verifique sua internet.';
+    } else if (error.contains('user-disabled')) {
+      return 'Usuário desativado';
     }
-    return 'Erro ao fazer login';
+    
+    // Retornar o erro completo para debug em desenvolvimento
+    return 'Erro ao fazer login: ${error.split('\n').first}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Colors.teal;
+
     return Scaffold(
-      backgroundColor: _backgroundColor,
+      backgroundColor: isDark ? const Color(0xFF1A1A2E) : Colors.grey.shade100,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -88,15 +108,12 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
             constraints: const BoxConstraints(maxWidth: 400),
             padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
-              color: _cardColor,
+              color: isDark ? const Color(0xFF252545) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                color: _accentColor.withValues(alpha: 0.2),
-              ),
               boxShadow: [
                 BoxShadow(
-                  color: _accentColor.withValues(alpha: 0.1),
-                  blurRadius: 30,
+                  color: Colors.black.withValues(alpha: 0.1),
+                  blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
               ],
@@ -110,36 +127,31 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          _accentColor.withValues(alpha: 0.2),
-                          _accentColor.withValues(alpha: 0.1),
-                        ],
-                      ),
+                      color: primaryColor.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.admin_panel_settings,
                       size: 48,
-                      color: _accentColor,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(height: 24),
 
                   // Title
-                  const Text(
+                  Text(
                     'Área Administrativa',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: isDark ? Colors.white : Colors.black87,
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'MiniGames - Painel de Feedback',
+                    'Faça login para acessar o painel',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: isDark ? Colors.white60 : Colors.black54,
                       fontSize: 14,
                     ),
                   ),
@@ -174,20 +186,20 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
                       labelText: 'Email',
-                      labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                      prefixIcon: const Icon(Icons.email_outlined, color: _accentColor),
+                      labelStyle: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
+                      prefixIcon: Icon(Icons.email_outlined, color: primaryColor),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: _accentColor, width: 2),
+                        borderSide: BorderSide(color: primaryColor, width: 2),
                       ),
                     ),
                     validator: (value) {
@@ -206,29 +218,29 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                     decoration: InputDecoration(
                       labelText: 'Senha',
-                      labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
-                      prefixIcon: const Icon(Icons.lock_outline, color: _accentColor),
+                      labelStyle: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
+                      prefixIcon: Icon(Icons.lock_outline, color: primaryColor),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                          color: Colors.white.withValues(alpha: 0.6),
+                          color: isDark ? Colors.white60 : Colors.black54,
                         ),
                         onPressed: () {
                           setState(() => _obscurePassword = !_obscurePassword);
                         },
                       ),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.05),
+                      fillColor: isDark ? Colors.white10 : Colors.grey.shade100,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: _accentColor, width: 2),
+                        borderSide: BorderSide(color: primaryColor, width: 2),
                       ),
                     ),
                     validator: (value) {
@@ -250,12 +262,12 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _accentColor,
-                        foregroundColor: Colors.black,
+                        backgroundColor: primaryColor,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        disabledBackgroundColor: _accentColor.withValues(alpha: 0.5),
+                        disabledBackgroundColor: primaryColor.withValues(alpha: 0.5),
                       ),
                       child: _isLoading
                           ? const SizedBox(
@@ -263,7 +275,7 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                               height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.black,
+                                color: Colors.white,
                               ),
                             )
                           : const Row(
@@ -286,11 +298,11 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
 
                   // Back to home
                   TextButton.icon(
-                    onPressed: () => context.go('/'),
-                    icon: Icon(Icons.arrow_back, color: Colors.white.withValues(alpha: 0.6)),
+                    onPressed: () => context.go('/home'),
+                    icon: Icon(Icons.arrow_back, color: isDark ? Colors.white60 : Colors.black54),
                     label: Text(
-                      'Voltar para os jogos',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                      'Voltar para o app',
+                      style: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
                     ),
                   ),
                 ],

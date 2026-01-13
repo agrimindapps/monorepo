@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/adaptive_spec_card.dart';
 import '../../../../../shared/widgets/share_button.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 import '../../domain/entities/brick_calculation.dart';
 import 'detail_row.dart';
-import 'material_item.dart';
 
 /// Result card widget for brick calculation
 class BrickResultCard extends StatelessWidget {
@@ -97,26 +98,26 @@ class BrickResultCard extends StatelessWidget {
               spacing: 16,
               runSpacing: 16,
               children: [
-                MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.inventory_2,
                   label: 'Argamassa',
                   value: '${calculation.mortarBags}',
                   unit: 'sacos (20kg)',
-                  color: Colors.brown,
+                  color: SemanticColors.specTeal(context),
                 ),
-                MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.grain,
                   label: 'Areia',
                   value: calculation.sandCubicMeters.toStringAsFixed(2),
                   unit: 'm³',
-                  color: Colors.amber,
+                  color: SemanticColors.specOrange(context),
                 ),
-                MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.inventory,
                   label: 'Cimento',
                   value: '${calculation.cementBags}',
                   unit: 'sacos (50kg)',
-                  color: Colors.grey,
+                  color: SemanticColors.specBlue(context),
                 ),
               ],
             ),

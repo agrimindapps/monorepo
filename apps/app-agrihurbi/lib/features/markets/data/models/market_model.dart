@@ -3,9 +3,6 @@ import 'package:core/core.dart';
 
 part 'market_model.g.dart';
 
-
-
-
 /// Market Model for Data Layer
 ///
 /// Extends MarketEntity with JSON serialization
@@ -83,8 +80,9 @@ class MarketModel {
       exchange: entity.exchange,
       lastUpdated: entity.lastUpdated,
       status: entity.status,
-      history:
-          entity.history.map((h) => PriceHistoryModel.fromEntity(h)).toList(),
+      history: entity.history
+          .map((h) => PriceHistoryModel.fromEntity(h))
+          .toList(),
       description: entity.description,
       imageUrl: entity.imageUrl,
     );
@@ -249,12 +247,15 @@ class MarketSummaryModel {
     return MarketSummaryModel(
       marketName: entity.marketName,
       lastUpdated: entity.lastUpdated,
-      topGainers:
-          entity.topGainers.map((m) => MarketModel.fromEntity(m)).toList(),
-      topLosers:
-          entity.topLosers.map((m) => MarketModel.fromEntity(m)).toList(),
-      mostActive:
-          entity.mostActive.map((m) => MarketModel.fromEntity(m)).toList(),
+      topGainers: entity.topGainers
+          .map((m) => MarketModel.fromEntity(m))
+          .toList(),
+      topLosers: entity.topLosers
+          .map((m) => MarketModel.fromEntity(m))
+          .toList(),
+      mostActive: entity.mostActive
+          .map((m) => MarketModel.fromEntity(m))
+          .toList(),
       marketIndex: entity.marketIndex,
       marketIndexChange: entity.marketIndexChange,
       totalMarkets: entity.totalMarkets,

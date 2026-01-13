@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/adaptive_spec_card.dart';
 import '../../../../../shared/widgets/share_button.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/electrical_calculation.dart';
 
@@ -130,36 +132,40 @@ class ElectricalResultCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                _SpecificationItem(
+                AdaptiveSpecCard(
                   icon: Icons.cable,
                   label: 'Bitola do Cabo',
-                  value: '${calculation.wireGauge.toStringAsFixed(1)}',
+                  value: calculation.wireGauge.toStringAsFixed(1),
                   unit: 'mm²',
-                  color: Colors.orange,
+                  color: SemanticColors.specOrange(context),
+                  width: 160,
                 ),
-                _SpecificationItem(
+                AdaptiveSpecCard(
                   icon: Icons.power,
                   label: 'Disjuntor',
                   value: '${calculation.recommendedBreakerSize}',
                   unit: 'A',
-                  color: Colors.red,
+                  color: SemanticColors.danger(context),
+                  width: 160,
                 ),
-                _SpecificationItem(
+                AdaptiveSpecCard(
                   icon: Icons.straighten,
                   label: 'Comprimento',
                   value:
                       calculation.estimatedCableLength.toStringAsFixed(1),
                   unit: 'm',
-                  color: Colors.blue,
+                  color: SemanticColors.specBlue(context),
+                  width: 160,
                 ),
-                _SpecificationItem(
+                AdaptiveSpecCard(
                   icon: Icons.account_tree,
                   label: 'Circuitos',
                   value: '${calculation.numberOfCircuits}',
                   unit: calculation.numberOfCircuits == 1
                       ? 'circuito'
                       : 'circuitos',
-                  color: Colors.purple,
+                  color: SemanticColors.specPurple(context),
+                  width: 160,
                 ),
               ],
             ),
@@ -281,75 +287,6 @@ class ElectricalResultCard extends StatelessWidget {
               label: 'Queda de Tensão',
               value: '${calculation.voltageDrop!.toStringAsFixed(2)}%',
             ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Specification item widget for dark theme
-class _SpecificationItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-
-  const _SpecificationItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 160,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            unit,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 12,
-            ),
-          ),
         ],
       ),
     );

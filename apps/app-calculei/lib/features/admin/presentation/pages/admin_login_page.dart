@@ -39,16 +39,28 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
     });
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      
+      // Debug log
+      debugPrint('🔐 Tentando login com: $email');
+      
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
+
+      debugPrint('✅ Login bem-sucedido! UID: ${credential.user?.uid}');
 
       if (!mounted) return;
 
       // Navegar para o dashboard
       context.go('/admin/dashboard');
-    } on Exception catch (e) {
+    } catch (e) {
+      // Log detalhado do erro
+      debugPrint('❌ Erro no login: $e');
+      debugPrint('Tipo do erro: ${e.runtimeType}');
+      
       setState(() {
         _errorMessage = _parseError(e.toString());
       });
@@ -60,6 +72,8 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   }
 
   String _parseError(String error) {
+    debugPrint('🔍 Parseando erro: $error');
+    
     if (error.contains('user-not-found')) {
       return 'Usuário não encontrado';
     } else if (error.contains('wrong-password')) {
@@ -70,8 +84,14 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
       return 'Muitas tentativas. Tente novamente mais tarde.';
     } else if (error.contains('invalid-credential')) {
       return 'Credenciais inválidas';
+    } else if (error.contains('network-request-failed')) {
+      return 'Erro de conexão. Verifique sua internet.';
+    } else if (error.contains('user-disabled')) {
+      return 'Usuário desativado';
     }
-    return 'Erro ao fazer login';
+    
+    // Retornar o erro completo para debug em desenvolvimento
+    return 'Erro ao fazer login: ${error.split('\n').first}';
   }
 
   @override

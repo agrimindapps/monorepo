@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/adaptive_spec_card.dart';
 import '../../../../../shared/widgets/share_button.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/glass_calculation.dart';
 
@@ -126,33 +128,33 @@ class GlassResultCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                _SpecItem(
+                AdaptiveSpecCard(
                   icon: Icons.straighten,
                   label: 'Dimensões',
                   value: '${calculation.width.toStringAsFixed(2)} × ${calculation.height.toStringAsFixed(2)}',
                   unit: 'm',
-                  color: Colors.blue,
+                  color: SemanticColors.specBlue(context),
                 ),
-                _SpecItem(
+                AdaptiveSpecCard(
                   icon: Icons.inventory_2,
                   label: 'Painéis',
                   value: '${calculation.numberOfPanels}',
                   unit: 'unidades',
-                  color: Colors.purple,
+                  color: SemanticColors.specPurple(context),
                 ),
-                _SpecItem(
+                AdaptiveSpecCard(
                   icon: Icons.line_weight,
                   label: 'Peso Total',
                   value: calculation.estimatedWeight.toStringAsFixed(1),
                   unit: 'kg',
-                  color: Colors.orange,
+                  color: SemanticColors.specOrange(context),
                 ),
-                _SpecItem(
+                AdaptiveSpecCard(
                   icon: Icons.layers,
                   label: 'Espessura',
                   value: '${calculation.glassThickness}',
                   unit: 'mm',
-                  color: Colors.teal,
+                  color: SemanticColors.specTeal(context),
                 ),
               ],
             ),
@@ -225,76 +227,6 @@ class GlassResultCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Specification item widget for dark theme
-class _SpecItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-
-  const _SpecItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            unit,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 12,
-            ),
-          ),
-        ],
       ),
     );
   }

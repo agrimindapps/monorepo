@@ -119,43 +119,29 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   }
 
   PlanType _mapTierToPlanType(core.SubscriptionTier tier) {
-    switch (tier) {
-      case core.SubscriptionTier.free:
-        return PlanType.free;
-      case core.SubscriptionTier.basic:
-        return PlanType.free;
-      case core.SubscriptionTier.premium:
-        return PlanType.monthly;
-      case core.SubscriptionTier.pro:
-        return PlanType.yearly;
-      case core.SubscriptionTier.ultimate:
-        return PlanType.lifetime;
-      case core.SubscriptionTier.lifetime:
-        return PlanType.lifetime;
-      case core.SubscriptionTier.trial:
-        return PlanType.monthly;
-    }
+    return switch (tier) {
+      core.SubscriptionTier.free => PlanType.free,
+      core.SubscriptionTier.basic => PlanType.free,
+      core.SubscriptionTier.premium => PlanType.monthly,
+      core.SubscriptionTier.pro => PlanType.yearly,
+      core.SubscriptionTier.ultimate => PlanType.lifetime,
+      core.SubscriptionTier.lifetime => PlanType.lifetime,
+      core.SubscriptionTier.trial => PlanType.monthly,
+    };
   }
 
   PlanStatus _mapSubscriptionStatusToPlanStatus(
     core.SubscriptionStatus status,
   ) {
-    switch (status) {
-      case core.SubscriptionStatus.active:
-        return PlanStatus.active;
-      case core.SubscriptionStatus.expired:
-        return PlanStatus.expired;
-      case core.SubscriptionStatus.cancelled:
-        return PlanStatus.cancelled;
-      case core.SubscriptionStatus.paused:
-        return PlanStatus.paused;
-      case core.SubscriptionStatus.pending:
-        return PlanStatus.pending;
-      case core.SubscriptionStatus.gracePeriod:
-        return PlanStatus.active; // Grace period is still active
-      case core.SubscriptionStatus.unknown:
-        return PlanStatus.pending;
-    }
+    return switch (status) {
+      core.SubscriptionStatus.active => PlanStatus.active,
+      core.SubscriptionStatus.expired => PlanStatus.expired,
+      core.SubscriptionStatus.cancelled => PlanStatus.cancelled,
+      core.SubscriptionStatus.paused => PlanStatus.paused,
+      core.SubscriptionStatus.pending => PlanStatus.pending,
+      core.SubscriptionStatus.gracePeriod => PlanStatus.active,
+      core.SubscriptionStatus.unknown => PlanStatus.pending,
+    };
   }
 
   int? _parseTrialDays(String period) {

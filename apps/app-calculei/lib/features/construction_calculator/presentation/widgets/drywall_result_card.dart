@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/widgets/adaptive_spec_card.dart';
 import '../../../../../shared/widgets/share_button.dart';
+import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/drywall_calculation.dart';
 
@@ -128,47 +130,47 @@ class DrywallResultCard extends StatelessWidget {
               spacing: 12,
               runSpacing: 12,
               children: [
-                _MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.grid_on,
                   label: 'Placas',
                   value: '${calculation.numberOfPanels}',
                   unit: 'placas (1.20×2.40m)',
-                  color: Colors.blueGrey,
+                  color: SemanticColors.specBlue(context),
                 ),
-                _MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.straighten,
                   label: 'Montantes',
                   value: calculation.montantesMeters.toStringAsFixed(1),
                   unit: 'metros',
-                  color: Colors.orange,
+                  color: SemanticColors.specOrange(context),
                 ),
-                _MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.horizontal_rule,
                   label: 'Guias',
                   value: calculation.guiasMeters.toStringAsFixed(1),
                   unit: 'metros',
-                  color: Colors.deepOrange,
+                  color: SemanticColors.specOrange(context),
                 ),
-                _MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.build,
                   label: 'Parafusos',
                   value: '${calculation.screwsCount}',
                   unit: 'unidades',
-                  color: Colors.grey,
+                  color: SemanticColors.specPurple(context),
                 ),
-                _MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.line_style,
                   label: 'Fita de Junção',
                   value: calculation.jointTapeMeters.toStringAsFixed(1),
                   unit: 'metros',
-                  color: Colors.white,
+                  color: SemanticColors.specBlue(context),
                 ),
-                _MaterialItem(
+                AdaptiveSpecCard(
                   icon: Icons.format_paint,
                   label: 'Massa Corrida',
                   value: calculation.jointCompoundKg.toStringAsFixed(1),
                   unit: 'kg',
-                  color: Colors.teal,
+                  color: SemanticColors.specTeal(context),
                 ),
               ],
             ),
@@ -207,75 +209,6 @@ class DrywallResultCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Material item widget for dark theme
-class _MaterialItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final String unit;
-  final Color color;
-
-  const _MaterialItem({
-    required this.icon,
-    required this.label,
-    required this.value,
-    required this.unit,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 150,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: color.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 18),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            value,
-            style: TextStyle(
-              color: color,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            unit,
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 12,
-            ),
-          ),
-        ],
       ),
     );
   }

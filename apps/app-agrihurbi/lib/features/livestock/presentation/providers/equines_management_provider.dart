@@ -2,7 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../domain/entities/equine_entity.dart';
+import '../../domain/usecases/create_equine.dart';
+import '../../domain/usecases/delete_equine.dart';
 import '../../domain/usecases/get_equines.dart';
+import '../../domain/usecases/update_equine.dart';
 import 'livestock_di_providers.dart';
 
 part 'equines_management_provider.g.dart';
@@ -75,6 +78,9 @@ class EquinesManagementState {
 @riverpod
 class EquinesManagementNotifier extends _$EquinesManagementNotifier {
   GetEquinesUseCase get _getEquines => ref.read(getEquinesUseCaseProvider);
+  CreateEquineUseCase get _createEquine => ref.read(createEquineUseCaseProvider);
+  UpdateEquineUseCase get _updateEquine => ref.read(updateEquineUseCaseProvider);
+  DeleteEquineUseCase get _deleteEquine => ref.read(deleteEquineUseCaseProvider);
 
   @override
   EquinesManagementState build() {
@@ -167,20 +173,89 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
   }
 
   Future<bool> createEquine(EquineEntity equine) async {
-    debugPrint(
-        'EquinesManagementNotifier: createEquine não implementado ainda');
-    return false;
+    state = state.copyWith(isCreating: true, clearError: true);
+    
+    final result = await _createEquine(CreateEquineParams(equine: equine));
+    
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isCreating: false,
+        );
+        return false;
+      },
+      (createdEquine) {
+        final updatedEquines = List<EquineEntity>.from(state.equines);
+        updatedEquines.add(createdEquine);
+        
+        state = state.copyWith(
+          equines: updatedEquines,
+          isCreating: false,
+          selectedEquine: createdEquine,
+        );
+        return true;
+      },
+    );
   }
 
   Future<bool> updateEquine(EquineEntity equine) async {
-    debugPrint(
-        'EquinesManagementNotifier: updateEquine não implementado ainda');
-    return false;
+    state = state.copyWith(isUpdating: true, clearError: true);
+    
+    final result = await _updateEquine(UpdateEquineParams(equine: equine));
+    
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isUpdating: false,
+        );
+        return false;
+      },
+      (updatedEquine) {
+        final updatedEquines = List<EquineEntity>.from(state.equines);
+        final index = updatedEquines.indexWhere((e) => e.id == updatedEquine.id);
+        
+        if (index != -1) {
+          updatedEquines[index] = updatedEquine;
+        } else {
+          updatedEquines.add(updatedEquine);
+        }
+        
+        state = state.copyWith(
+          equines: updatedEquines,
+          isUpdating: false,
+          selectedEquine: updatedEquine,
+        );
+        return true;
+      },
+    );
   }
 
   Future<bool> deleteEquine(String equineId) async {
-    debugPrint(
-        'EquinesManagementNotifier: deleteEquine não implementado ainda');
-    return false;
+    state = state.copyWith(isDeleting: true, clearError: true);
+    
+    final result = await _deleteEquine(DeleteEquineParams(equineId: equineId, confirmed: true));
+    
+    return result.fold(
+      (failure) {
+        state = state.copyWith(
+          errorMessage: failure.message,
+          isDeleting: false,
+        );
+        return false;
+      },
+      (_) {
+        final updatedEquines = List<EquineEntity>.from(state.equines);
+        updatedEquines.removeWhere((e) => e.id == equineId);
+        
+        state = state.copyWith(
+          equines: updatedEquines,
+          isDeleting: false,
+          clearSelectedEquine: state.selectedEquine?.id == equineId,
+        );
+        return true;
+      },
+    );
   }
 }

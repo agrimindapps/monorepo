@@ -12,6 +12,8 @@ class TaskListEntity extends Equatable {
   final bool isShared;
   final bool isArchived;
   final int position;
+  final String? backgroundImage;
+  final String? groupId; // Grupo ao qual a lista pertence
 
   const TaskListEntity({
     required this.id,
@@ -25,11 +27,15 @@ class TaskListEntity extends Equatable {
     this.isShared = false,
     this.isArchived = false,
     this.position = 0,
+    this.backgroundImage,
+    this.groupId,
   });
 
   bool get isOwner => ownerId.isNotEmpty;
   
   bool isMember(String userId) => memberIds.contains(userId);
+  
+  bool get isGrouped => groupId != null && groupId!.isNotEmpty;
 
   TaskListEntity copyWith({
     String? id,
@@ -43,6 +49,8 @@ class TaskListEntity extends Equatable {
     bool? isShared,
     bool? isArchived,
     int? position,
+    String? backgroundImage,
+    String? groupId,
   }) {
     return TaskListEntity(
       id: id ?? this.id,
@@ -56,6 +64,8 @@ class TaskListEntity extends Equatable {
       isShared: isShared ?? this.isShared,
       isArchived: isArchived ?? this.isArchived,
       position: position ?? this.position,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
+      groupId: groupId ?? this.groupId,
     );
   }
 
@@ -72,5 +82,7 @@ class TaskListEntity extends Equatable {
         isShared,
         isArchived,
         position,
+        backgroundImage,
+        groupId,
       ];
 }

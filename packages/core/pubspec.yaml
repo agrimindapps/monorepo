@@ -135,6 +135,7 @@ dependencies:
   sqlite3_web: ^0.4.1  # Web support with WASM
   
   web: any
+  fl_chart: ^1.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

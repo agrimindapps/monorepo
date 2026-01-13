@@ -4,10 +4,12 @@ import 'package:drift/drift.dart';
 // DAOs
 import 'daos/my_day_task_dao.dart';
 import 'daos/task_dao.dart';
+import 'daos/task_attachment_dao.dart';
 import 'daos/user_dao.dart';
 // Tables
 import 'tables/my_day_tasks_table.dart';
 import 'tables/tasks_table.dart';
+import 'tables/task_attachments_table.dart';
 import 'tables/users_table.dart';
 
 part 'taskolist_database.g.dart';
@@ -25,21 +27,25 @@ part 'taskolist_database.g.dart';
 /// - MigrationStrategy com onCreate e beforeOpen
 /// - Extends BaseDriftDatabase do core (funcionalidades compartilhadas)
 ///
-/// **TABELAS (3 total):**
+/// **TABELAS (4 total):**
 /// 1. Tasks - Tarefas e gerenciamento
 /// 2. Users - Usuários e preferências
 /// 3. MyDayTasks - Tarefas do planejador diário "Meu Dia"
+/// 4. TaskAttachments - Anexos de arquivos em tarefas
 ///
-/// **SCHEMA VERSION:** 2 (adicionado MyDayTasks)
+/// **SCHEMA VERSION:** 3 (adicionado TaskAttachments)
 /// ============================================================================
 
-@DriftDatabase(tables: [Tasks, Users, MyDayTasks], daos: [TaskDao, UserDao, MyDayTaskDao])
+@DriftDatabase(
+  tables: [Tasks, Users, MyDayTasks, TaskAttachments],
+  daos: [TaskDao, UserDao, MyDayTaskDao, TaskAttachmentDao],
+)
 class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
   TaskolistDatabase(super.e);
 
   /// Versão do schema do banco de dados
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   /// Factory constructor para ambiente de produção
   factory TaskolistDatabase.production() {
@@ -92,6 +98,17 @@ class TaskolistDatabase extends _$TaskolistDatabase with BaseDriftDatabase {
       // Migration from v1 to v2: Add MyDayTasks table
       if (from == 1 && to == 2) {
         await m.createTable(myDayTasks);
+      }
+      
+      // Migration from v2 to v3: Add TaskAttachments table
+      if (from == 2 && to == 3) {
+        await m.createTable(taskAttachments);
+      }
+      
+      // Migration from v1 to v3 (skip v2)
+      if (from == 1 && to == 3) {
+        await m.createTable(myDayTasks);
+        await m.createTable(taskAttachments);
       }
     },
   );

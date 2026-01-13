@@ -507,9 +507,9 @@ class _AppShellState extends ConsumerState<AppShell> {
     
     // Add background pattern if specified
     if (widget.showBackgroundPattern) {
-      // Opacidade mais visível: 8% para tema claro, 6% para tema escuro
+      // Opacidade reduzida para evitar interferência visual com o conteúdo
       final isDark = Theme.of(context).brightness == Brightness.dark;
-      final patternOpacity = isDark ? 0.06 : 0.08;
+      final patternOpacity = isDark ? 0.025 : 0.035;
       
       return Container(
         color: colors.background,

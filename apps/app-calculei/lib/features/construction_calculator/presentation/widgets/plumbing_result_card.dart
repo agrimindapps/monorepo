@@ -6,7 +6,7 @@ import '../../../../core/theme/adaptive_colors.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/plumbing_calculation.dart';
 
-/// Result card widget for plumbing calculation - Dark theme
+/// Result card widget for plumbing calculation - Adaptive theme
 class PlumbingResultCard extends StatelessWidget {
   final PlumbingCalculation calculation;
 
@@ -18,13 +18,22 @@ class PlumbingResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.construction;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
+    // Theme colors
+    final cardBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50;
+    final cardBorderColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200;
+    
+    // Text colors
+    final titleColor = isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87;
+    final subtitleColor = isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black54;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: cardBorderColor,
         ),
       ),
       child: Padding(
@@ -51,7 +60,7 @@ class PlumbingResultCard extends StatelessWidget {
                   child: Text(
                     'Resultado',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: titleColor,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -105,7 +114,7 @@ class PlumbingResultCard extends StatelessWidget {
                       Text(
                         '${calculation.systemType} - ${calculation.pipeDiameter}',
                         style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: titleColor,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -116,7 +125,7 @@ class PlumbingResultCard extends StatelessWidget {
                   Text(
                     '${calculation.totalLength.toStringAsFixed(1)} metros totais',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: subtitleColor,
                       fontSize: 14,
                     ),
                   ),
@@ -129,7 +138,7 @@ class PlumbingResultCard extends StatelessWidget {
             Text(
               'Materiais Necessários',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: titleColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -166,7 +175,7 @@ class PlumbingResultCard extends StatelessWidget {
               Text(
                 'Conexões',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.9),
+                  color: titleColor,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
@@ -211,10 +220,10 @@ class PlumbingResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
+                color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300,
                 ),
               ),
               child: Row(
@@ -222,14 +231,14 @@ class PlumbingResultCard extends StatelessWidget {
                   Icon(
                     Icons.info_outline,
                     size: 20,
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: subtitleColor,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Cálculo inclui 10% de margem para desperdício',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: subtitleColor,
                         fontSize: 13,
                       ),
                     ),

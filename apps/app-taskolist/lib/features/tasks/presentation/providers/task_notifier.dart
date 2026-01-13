@@ -1,5 +1,6 @@
 import 'package:core/core.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 import '../../domain/create_task.dart';
 import '../../domain/delete_task.dart';
@@ -16,6 +17,8 @@ part 'task_notifier.g.dart';
 
 @riverpod
 class TaskNotifier extends _$TaskNotifier {
+  final _audioPlayer = AudioPlayer();
+
   @override
   Future<List<TaskEntity>> build() async {
     final getTasks = ref.read(getTasksProvider);
@@ -77,6 +80,18 @@ class TaskNotifier extends _$TaskNotifier {
   }
 
   Future<void> updateTask(TaskEntity task) async {
+    // Check for completion to play sound
+    final currentTasks = state.value ?? [];
+    final oldTask = currentTasks.where((t) => t.id == task.id).firstOrNull;
+    
+    if (oldTask != null && !oldTask.isCompleted && task.isCompleted) {
+      try {
+        await _audioPlayer.play(AssetSource('sounds/completion.mp3'), volume: 0.5);
+      } catch (_) {
+        // Ignore if sound file is missing or error playing
+      }
+    }
+
     state = const AsyncValue<List<TaskEntity>>.loading();
 
     state = await AsyncValue.guard(() async {

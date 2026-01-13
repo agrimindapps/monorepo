@@ -6,6 +6,7 @@ class EmptyStateWidget extends StatelessWidget {
   final String message;
   final String? actionLabel;
   final VoidCallback? onAction;
+  final Color? textColor;
 
   const EmptyStateWidget({
     super.key,
@@ -14,6 +15,7 @@ class EmptyStateWidget extends StatelessWidget {
     required this.message,
     this.actionLabel,
     this.onAction,
+    this.textColor,
   });
 
   @override
@@ -27,7 +29,7 @@ class EmptyStateWidget extends StatelessWidget {
             Icon(
               icon,
               size: 80,
-              color: Theme.of(
+              color: textColor?.withValues(alpha: 0.8) ?? Theme.of(
                 context,
               ).colorScheme.primary.withValues(alpha: 0.5),
             ),
@@ -36,14 +38,17 @@ class EmptyStateWidget extends StatelessWidget {
               title,
               style: Theme.of(
                 context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              ).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               message,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                color: textColor?.withValues(alpha: 0.8) ?? Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),

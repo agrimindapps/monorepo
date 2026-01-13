@@ -10,6 +10,7 @@ import '../../domain/remove_task_from_my_day.dart';
 import '../../domain/task_entity.dart';
 import '../../domain/watch_my_day_tasks.dart';
 import '../../providers/my_day_providers.dart';
+import 'theme_provider.dart';
 
 part 'my_day_notifier.g.dart';
 
@@ -17,6 +18,9 @@ part 'my_day_notifier.g.dart';
 class MyDayNotifier extends _$MyDayNotifier {
   @override
   Future<List<MyDayTaskEntity>> build(String userId) async {
+    // Check for daily reset
+    await _checkDailyReset(userId);
+
     final getMyDayTasks = ref.read(getMyDayTasksProvider);
     final result = await getMyDayTasks(GetMyDayTasksParams(userId: userId));
 
@@ -24,6 +28,28 @@ class MyDayNotifier extends _$MyDayNotifier {
       (failure) => throw Exception(failure.message),
       (tasks) => tasks,
     );
+  }
+
+  Future<void> _checkDailyReset(String userId) async {
+    try {
+      final prefs = ref.read(preferencesDataSourceProvider);
+      final lastReset = await prefs.getLastMyDayResetDate();
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      if (lastReset == null || lastReset.isBefore(today)) {
+        // Reset needed
+        final clearMyDay = ref.read(clearMyDayProvider);
+        await clearMyDay(ClearMyDayParams(userId: userId));
+        await prefs.setLastMyDayResetDate(today);
+        
+        // Log analytics
+        final analytics = ref.read(analyticsServiceProvider);
+        analytics.logMyDayCleared(taskCount: 0); // Count unknown here, but reset happened
+      }
+    } catch (e) {
+      // Fail silently to ensure app functionality
+    }
   }
 
   Future<void> addTask(String taskId, {String source = 'manual'}) async {

@@ -11,13 +11,16 @@ import '../../data/datasources/livestock_storage_datasource.dart';
 import '../../data/repositories/livestock_repository_impl.dart';
 import '../../domain/repositories/livestock_repository.dart';
 import '../../domain/usecases/create_bovine.dart';
+import '../../domain/usecases/create_equine.dart';
 import '../../domain/usecases/delete_bovine.dart';
+import '../../domain/usecases/delete_equine.dart';
 import '../../domain/usecases/get_bovine_by_id.dart';
 import '../../domain/usecases/get_bovines.dart';
 import '../../domain/usecases/get_equines.dart';
 import '../../domain/usecases/publish_livestock_catalog.dart';
 import '../../domain/usecases/search_animals.dart';
 import '../../domain/usecases/update_bovine.dart';
+import '../../domain/usecases/update_equine.dart';
 
 // Network Info
 final networkInfoProvider = Provider<NetworkInfo>((ref) {
@@ -91,12 +94,24 @@ final createBovineUseCaseProvider = Provider<CreateBovineUseCase>((ref) {
   return CreateBovineUseCase(ref.watch(livestockRepositoryProvider));
 });
 
+final createEquineUseCaseProvider = Provider<CreateEquineUseCase>((ref) {
+  return CreateEquineUseCase(ref.watch(livestockRepositoryProvider));
+});
+
 final updateBovineUseCaseProvider = Provider<UpdateBovineUseCase>((ref) {
   return UpdateBovineUseCase(ref.watch(livestockRepositoryProvider));
 });
 
+final updateEquineUseCaseProvider = Provider<UpdateEquineUseCase>((ref) {
+  return UpdateEquineUseCase(ref.watch(livestockRepositoryProvider));
+});
+
 final deleteBovineUseCaseProvider = Provider<DeleteBovineUseCase>((ref) {
   return DeleteBovineUseCase(ref.watch(livestockRepositoryProvider));
+});
+
+final deleteEquineUseCaseProvider = Provider<DeleteEquineUseCase>((ref) {
+  return DeleteEquineUseCase(ref.watch(livestockRepositoryProvider));
 });
 
 final searchAnimalsUseCaseProvider = Provider<SearchAnimalsUseCase>((ref) {

@@ -4,7 +4,7 @@ import '../../../../../shared/widgets/share_button.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/entities/paint_calculation.dart';
 
-/// Result card widget for paint calculation - Dark theme
+/// Result card widget for paint calculation - Adaptive theme
 class PaintResultCard extends StatelessWidget {
   final PaintCalculation calculation;
 
@@ -16,13 +16,23 @@ class PaintResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.construction;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
+    // Background and border colors based on theme
+    final cardBgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50;
+    final cardBorderColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200;
+    
+    // Text colors
+    final titleColor = isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87;
+    final subtitleColor = isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black54;
+    final valueColor = isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: cardBgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: cardBorderColor,
         ),
       ),
       child: Padding(
@@ -49,7 +59,7 @@ class PaintResultCard extends StatelessWidget {
                   child: Text(
                     'Resultado',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: titleColor,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -91,7 +101,7 @@ class PaintResultCard extends StatelessWidget {
                   Text(
                     'Total de Tinta',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: subtitleColor,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -146,7 +156,7 @@ class PaintResultCard extends StatelessWidget {
                         Text(
                           calculation.recommendedOption,
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: valueColor,
                             fontSize: 15,
                           ),
                         ),
@@ -163,7 +173,7 @@ class PaintResultCard extends StatelessWidget {
             Text(
               'Detalhes',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: titleColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -173,26 +183,32 @@ class PaintResultCard extends StatelessWidget {
             _DetailRow(
               label: 'Área das paredes',
               value: '${calculation.wallArea.toStringAsFixed(1)} m²',
+              isDark: isDark,
             ),
             _DetailRow(
               label: 'Área de aberturas',
               value: '${calculation.openingsArea.toStringAsFixed(1)} m²',
+              isDark: isDark,
             ),
             _DetailRow(
               label: 'Área líquida',
               value: '${calculation.netArea.toStringAsFixed(1)} m²',
+              isDark: isDark,
             ),
             _DetailRow(
               label: 'Tipo de tinta',
               value: calculation.paintType,
+              isDark: isDark,
             ),
             _DetailRow(
               label: 'Demãos',
               value: '${calculation.coats}',
+              isDark: isDark,
             ),
             _DetailRow(
               label: 'Rendimento',
               value: '${calculation.paintYield.toStringAsFixed(0)} m²/L',
+              isDark: isDark,
             ),
 
             const SizedBox(height: 20),
@@ -201,10 +217,10 @@ class PaintResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
+                color: isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300,
                 ),
               ),
               child: Row(
@@ -212,14 +228,14 @@ class PaintResultCard extends StatelessWidget {
                   Icon(
                     Icons.info_outline,
                     size: 20,
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: subtitleColor,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Latas disponíveis: 3,6L e 18L. O cálculo otimiza para menor desperdício.',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.6),
+                        color: subtitleColor,
                         fontSize: 12,
                       ),
                     ),
@@ -234,14 +250,16 @@ class PaintResultCard extends StatelessWidget {
   }
 }
 
-/// Detail row widget for dark theme
+/// Detail row widget for adaptive theme
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
+  final bool isDark;
 
   const _DetailRow({
     required this.label,
     required this.value,
+    required this.isDark,
   });
 
   @override
@@ -254,14 +272,14 @@ class _DetailRow extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black54,
               fontSize: 14,
             ),
           ),
           Text(
             value,
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.9),
+              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),

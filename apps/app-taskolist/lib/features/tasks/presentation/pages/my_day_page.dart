@@ -3,13 +3,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../core/services/analytics_service.dart';
 import '../../../../shared/providers/auth_providers.dart';
 import '../../domain/my_day_task_entity.dart';
 import '../../domain/task_entity.dart';
 import '../../providers/task_providers.dart';
 import '../providers/my_day_notifier.dart';
 import '../providers/task_notifier.dart';
+import '../../../../shared/widgets/entry_animation_widget.dart';
+
+import '../widgets/my_day_suggestions_bottom_sheet.dart';
 
 class MyDayPage extends ConsumerStatefulWidget {
   const MyDayPage({super.key});
@@ -19,7 +21,7 @@ class MyDayPage extends ConsumerStatefulWidget {
 }
 
 class _MyDayPageState extends ConsumerState<MyDayPage> {
-  bool _showSuggestions = false;
+  // _showSuggestions state removed as we use BottomSheet now
 
   @override
   Widget build(BuildContext context) {
@@ -38,10 +40,7 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
           children: [
             const Text(
               'Meu Dia',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Text(
               DateFormat('EEEE, d MMMM', 'pt_BR').format(DateTime.now()),
@@ -64,12 +63,8 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
       ),
       body: myDayTasksAsync.when(
         data: (myDayTasks) {
-          if (_showSuggestions) {
-            return _buildSuggestionsView(context, userId);
-          }
-
           if (myDayTasks.isEmpty) {
-            return _buildEmptyState(context);
+            return _buildEmptyState(context, userId);
           }
 
           return _buildTasksList(context, myDayTasks, userId);
@@ -103,37 +98,25 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState(BuildContext context, String userId) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.wb_sunny_outlined,
-            size: 80,
-            color: Colors.blue[300],
-          ),
+          Icon(Icons.wb_sunny_outlined, size: 80, color: Colors.blue[300]),
           const SizedBox(height: 24),
           const Text(
             'Meu Dia',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
             'Nenhuma tarefa para hoje',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () {
-              setState(() => _showSuggestions = true);
-            },
+            onPressed: () => _showSuggestionsSheet(context, userId),
             icon: const Icon(Icons.lightbulb_outline),
             label: const Text('Ver sugestões'),
             style: ElevatedButton.styleFrom(
@@ -156,12 +139,46 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
         // Aguardar um pouco para dar feedback visual
         await Future<void>.delayed(const Duration(milliseconds: 500));
       },
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+      child: ReorderableListView.builder(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
         itemCount: myDayTasks.length + 1,
+        proxyDecorator: (child, index, animation) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (BuildContext context, Widget? child) {
+              return Material(
+                elevation: 4,
+                color: Colors.transparent,
+                shadowColor: Colors.black26,
+                borderRadius: BorderRadius.circular(12),
+                child: child,
+              );
+            },
+            child: child,
+          );
+        },
+        onReorder: (int oldIndex, int newIndex) async {
+          if (newIndex > oldIndex) {
+            newIndex -= 1;
+          }
+          if (oldIndex >= myDayTasks.length || newIndex >= myDayTasks.length) {
+            // Cannot reorder the "Add task" button
+            return;
+          }
+
+          final item = myDayTasks.removeAt(oldIndex);
+          myDayTasks.insert(newIndex, item);
+
+          // Update order in backend
+          // Note: MyDayTaskEntity doesn't strictly have a 'position' field visible here
+          // but we should ideally update the task entity position.
+          // For now, we'll just handle the UI reorder since the backend support
+          // for arbitrary my-day reordering might need specific implementation
+        },
         itemBuilder: (context, index) {
           if (index == myDayTasks.length) {
             return Padding(
+              key: const ValueKey('add_task_button'),
               padding: const EdgeInsets.symmetric(vertical: 16),
               child: TextButton.icon(
                 onPressed: () => _showAddTaskDialog(context, userId),
@@ -191,113 +208,131 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
           return const SizedBox.shrink(); // Task não encontrada
         }
 
-        return Dismissible(
+        return Container(
           key: Key(myDayTask.taskId),
-          direction: DismissDirection.endToStart,
-          background: Container(
-            alignment: Alignment.centerRight,
-            padding: const EdgeInsets.only(right: 20),
-            margin: const EdgeInsets.only(bottom: 12),
-            decoration: BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.delete, color: Colors.white),
-          ),
-          onDismissed: (direction) async {
-            await ref
-                .read(myDayProvider(userId).notifier)
-                .removeTask(myDayTask.taskId);
-            HapticFeedback.mediumImpact();
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Removida do Meu Dia'),
-                  duration: Duration(seconds: 2),
+          margin: const EdgeInsets.only(bottom: 12),
+          child: EntryAnimationWidget(
+            child: Dismissible(
+              key: ValueKey('dismiss_${myDayTask.taskId}'),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: Colors.red,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              );
-            }
-          },
-          child: Card(
-            margin: const EdgeInsets.only(bottom: 12),
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              leading: Checkbox(
-                value: task.status == TaskStatus.completed,
-                shape: const CircleBorder(),
-                onChanged: (value) async {
-                  HapticFeedback.lightImpact();
-                  final newStatus = value == true 
-                      ? TaskStatus.completed 
-                      : TaskStatus.pending;
-                  final updatedTask = task.copyWith(
-                    status: newStatus,
-                    updatedAt: DateTime.now(),
+                child: const Icon(Icons.delete, color: Colors.white),
+              ),
+              onDismissed: (direction) async {
+                await ref
+                    .read(myDayProvider(userId).notifier)
+                    .removeTask(myDayTask.taskId);
+                HapticFeedback.mediumImpact();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Removida do Meu Dia'),
+                      duration: Duration(seconds: 2),
+                    ),
                   );
-                  await ref.read(taskProvider.notifier).updateTask(updatedTask);
-                },
-              ),
-              title: Text(
-                task.title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  decoration: task.status == TaskStatus.completed
-                      ? TextDecoration.lineThrough
-                      : null,
+                }
+              },
+              child: Card(
+                margin: EdgeInsets.zero,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ),
-              subtitle: task.description != null && task.description!.isNotEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        task.description!,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        children: [
-                          Icon(Icons.wb_sunny, size: 14, color: Colors.orange[300]),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Adicionada: ${_formatTime(myDayTask.addedAt)}',
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: Checkbox(
+                    value: task.status == TaskStatus.completed,
+                    shape: const CircleBorder(),
+                    onChanged: (value) async {
+                      HapticFeedback.lightImpact();
+                      final newStatus = value == true
+                          ? TaskStatus.completed
+                          : TaskStatus.pending;
+                      final updatedTask = task.copyWith(
+                        status: newStatus,
+                        updatedAt: DateTime.now(),
+                      );
+                      await ref
+                          .read(taskProvider.notifier)
+                          .updateTask(updatedTask);
+                    },
+                  ),
+                  title: Text(
+                    task.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      decoration: task.status == TaskStatus.completed
+                          ? TextDecoration.lineThrough
+                          : null,
+                    ),
+                  ),
+                  subtitle:
+                      task.description != null && task.description!.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            task.description!,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               color: Colors.grey[600],
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-              trailing: IconButton(
-                icon: const Icon(Icons.close, size: 20),
-                onPressed: () async {
-                  await ref
-                      .read(myDayProvider(userId).notifier)
-                      .removeTask(myDayTask.taskId);
-                  HapticFeedback.mediumImpact();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Removida do Meu Dia'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.wb_sunny,
+                                size: 14,
+                                color: Colors.orange[300],
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Adicionada: ${_formatTime(myDayTask.addedAt)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.close, size: 20),
+                    onPressed: () async {
+                      await ref
+                          .read(myDayProvider(userId).notifier)
+                          .removeTask(myDayTask.taskId);
+                      HapticFeedback.mediumImpact();
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Removida do Meu Dia'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  onTap: () {
+                    // TODO: Abrir detalhes da tarefa
+                  },
+                ),
               ),
-              onTap: () {
-                // TODO: Abrir detalhes da tarefa
-              },
             ),
           ),
         );
@@ -328,109 +363,19 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
     }
   }
 
-  Widget _buildSuggestionsView(BuildContext context, String userId) {
-    final suggestionsAsync = ref.watch(myDaySuggestionsProvider(userId));
-
-    // Log analytics quando visualizar sugestões
-    suggestionsAsync.whenData((suggestions) {
-      if (suggestions.isNotEmpty) {
-        ref.read(analyticsServiceProvider).logMyDaySuggestionsViewed(
-          suggestionCount: suggestions.length,
-        );
-      }
-    });
-
-    return suggestionsAsync.when(
-      data: (suggestions) {
-        if (suggestions.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.check_circle_outline, size: 64, color: Colors.green[300]),
-                const SizedBox(height: 16),
-                const Text(
-                  'Sem sugestões no momento',
-                  style: TextStyle(fontSize: 18),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: () => setState(() => _showSuggestions = false),
-                  child: const Text('Voltar'),
-                ),
-              ],
-            ),
-          );
-        }
-
-        return Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Sugestões para Meu Dia',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => setState(() => _showSuggestions = false),
-                    child: const Text('Fechar'),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: suggestions.length,
-                itemBuilder: (context, index) {
-                  final task = suggestions[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    child: ListTile(
-                      leading: Icon(
-                        Icons.wb_sunny_outlined,
-                        color: Colors.blue[400],
-                      ),
-                      title: Text(task.title),
-                      subtitle: task.description != null
-                          ? Text(
-                              task.description!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            )
-                          : null,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () async {
-                          await ref
-                              .read(myDayProvider(userId).notifier)
-                              .addTask(task.id, source: 'suggestion');
-                          setState(() => _showSuggestions = false);
-                        },
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(child: Text('Erro: $error')),
+  void _showSuggestionsSheet(BuildContext context, String userId) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => MyDaySuggestionsBottomSheet(userId: userId),
     );
   }
 
   void _showAddTaskDialog(BuildContext context, String userId) {
     // TODO: Implementar dialog para adicionar tarefas
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade em desenvolvimento'),
-      ),
+      const SnackBar(content: Text('Funcionalidade em desenvolvimento')),
     );
   }
 
@@ -446,7 +391,7 @@ class _MyDayPageState extends ConsumerState<MyDayPage> {
               title: const Text('Ver sugestões'),
               onTap: () {
                 Navigator.pop(context);
-                setState(() => _showSuggestions = true);
+                _showSuggestionsSheet(context, userId);
               },
             ),
             ListTile(

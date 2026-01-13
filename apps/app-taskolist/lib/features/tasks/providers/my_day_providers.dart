@@ -86,53 +86,5 @@ GetMyDaySuggestions getMyDaySuggestions(Ref ref) {
 // PRESENTATION LAYER - NOTIFIERS
 // ============================================================================
 
-/// Notifier simplificado para adicionar tarefas ao Meu Dia
-@riverpod
-class MyDayNotifier extends _$MyDayNotifier {
-  @override
-  void build() {}
+// MyDayNotifier moved to presentation/providers/my_day_notifier.dart
 
-  Future<void> addTask(String taskId, {String source = 'task_list'}) async {
-    final useCase = ref.read(addTaskToMyDayProvider);
-    final userId = ref.read(currentUserIdProvider); // Assumindo que existe
-    if (userId == null) return;
-    
-    await useCase.call(AddTaskToMyDayParams(
-      taskId: taskId,
-      userId: userId,
-    ));
-
-    // Log analytics
-    final analytics = ref.read(analyticsServiceProvider);
-    await analytics.logMyDayTaskAdded(taskId: taskId, source: source);
-  }
-
-  Future<void> removeTask(String taskId) async {
-    final useCase = ref.read(removeTaskFromMyDayProvider);
-    
-    await useCase.call(RemoveTaskFromMyDayParams(
-      taskId: taskId,
-    ));
-
-    // Log analytics
-    final analytics = ref.read(analyticsServiceProvider);
-    await analytics.logMyDayTaskRemoved(taskId: taskId);
-  }
-
-  Future<void> clearAll() async {
-    final useCase = ref.read(clearMyDayProvider);
-    final userId = ref.read(currentUserIdProvider);
-    if (userId == null) return;
-    
-    // Buscar contagem antes de limpar
-    final getTasks = ref.read(getMyDayTasksProvider);
-    final tasksResult = await getTasks(GetMyDayTasksParams(userId: userId));
-    final taskCount = tasksResult.fold((_) => 0, (tasks) => tasks.length);
-    
-    await useCase.call(ClearMyDayParams(userId: userId));
-
-    // Log analytics
-    final analytics = ref.read(analyticsServiceProvider);
-    await analytics.logMyDayCleared(taskCount: taskCount);
-  }
-}

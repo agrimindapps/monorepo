@@ -23,6 +23,7 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
   ErrorType? _typeFilter;
   ErrorSeverity? _severityFilter;
   String _searchQuery = '';
+  bool _sortAscending = false;
   final _searchController = TextEditingController();
 
   @override
@@ -219,7 +220,7 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
     final textColor = isDark ? Colors.white : Colors.black87;
     final subtextColor = isDark ? Colors.white60 : Colors.black54;
 
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut, 
       constraints: compact ? const BoxConstraints(minWidth: 120) : null,
       padding: EdgeInsets.all(compact ? 16 : 20),
       decoration: BoxDecoration(
@@ -287,7 +288,7 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
   Widget _buildStatsLoading(bool isDark) {
     return Row(
       children: List.generate(5, (i) => Expanded(
-        child: Container(
+        child: AnimatedContainer(duration: const Duration(milliseconds: 300), 
           margin: EdgeInsets.only(right: i < 4 ? 16 : 0),
           height: 100,
           decoration: BoxDecoration(
@@ -310,7 +311,7 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
     final bgColor = isDark ? const Color(0xFF1E1E2D) : Colors.white;
     final borderColor = isDark ? Colors.white10 : Colors.grey.shade200;
 
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut, 
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
@@ -371,7 +372,7 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
           const Spacer(),
           // Search field
           Container(
-            width: 300,
+            width: 250,
             height: 40,
             decoration: BoxDecoration(
               color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
@@ -381,13 +382,38 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
               controller: _searchController,
               style: TextStyle(color: textColor, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Pesquisar erros...',
+                hintText: 'Pesquisar...',
                 hintStyle: TextStyle(color: subtextColor, fontSize: 14),
                 prefixIcon: Icon(Icons.search, color: subtextColor, size: 20),
                 border: InputBorder.none,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               ),
               onChanged: (value) => setState(() => _searchQuery = value),
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Sort button
+          Tooltip(
+            message: _sortAscending ? 'Mais antigos primeiro' : 'Mais recentes primeiro',
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => setState(() => _sortAscending = !_sortAscending),
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                    color: subtextColor,
+                    size: 20,
+                  ),
+                ),
+              ),
             ),
           ),
         ],
@@ -512,12 +538,20 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
   }
 
   List<ErrorLogEntity> _filterErrors(List<ErrorLogEntity> errors) {
-    if (_searchQuery.isEmpty) return errors;
-    final query = _searchQuery.toLowerCase();
-    return errors.where((e) =>
-      e.message.toLowerCase().contains(query) ||
-      (e.stackTrace?.toLowerCase().contains(query) ?? false)
-    ).toList();
+    var filtered = errors;
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      filtered = errors.where((e) =>
+        e.message.toLowerCase().contains(query) ||
+        (e.stackTrace?.toLowerCase().contains(query) ?? false)
+      ).toList();
+    }
+    
+    filtered.sort((a, b) => _sortAscending 
+        ? a.createdAt.compareTo(b.createdAt) 
+        : b.createdAt.compareTo(a.createdAt));
+        
+    return filtered;
   }
 
   Widget _buildErrorsList(List<ErrorLogEntity> errors, bool isDark) {
@@ -772,6 +806,20 @@ class _ErrorCardState extends State<_ErrorCard> {
   bool _isExpanded = false;
   bool _isHovered = false;
 
+  Future<void> _copyToClipboard(String text, String label) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$label copiado!'),
+          behavior: SnackBarBehavior.floating,
+          width: 200,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final error = widget.error;
@@ -862,23 +910,44 @@ class _ErrorCardState extends State<_ErrorCard> {
               const SizedBox(height: 8),
               
               // Error message preview
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.black26 : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  error.message,
-                  style: TextStyle(
-                    color: subtextColor,
-                    fontSize: 13,
-                    fontFamily: 'monospace',
-                    height: 1.5,
+              Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.black26 : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      error.message,
+                      style: TextStyle(
+                        color: subtextColor,
+                        fontSize: 13,
+                        fontFamily: 'monospace',
+                        height: 1.5,
+                      ),
+                      maxLines: _isExpanded ? null : 3,
+                      overflow: _isExpanded ? null : TextOverflow.ellipsis,
+                    ),
                   ),
-                  maxLines: _isExpanded ? null : 3,
-                  overflow: _isExpanded ? null : TextOverflow.ellipsis,
-                ),
+                  Positioned(
+                    right: 4,
+                    top: 4,
+                    child: InkWell(
+                      onTap: () => _copyToClipboard(error.message, 'Mensagem'),
+                      borderRadius: BorderRadius.circular(4),
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.black45 : Colors.white54,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Icon(Icons.copy, size: 14, color: subtextColor),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               
               const SizedBox(height: 12),
@@ -889,7 +958,7 @@ class _ErrorCardState extends State<_ErrorCard> {
                 runSpacing: 8,
                 children: [
                   _buildMetaItem(Icons.access_time, _formatDate(error.createdAt)),
-                  _buildMetaItem(Icons.computer, error.platform ?? 'Unknown'),
+                  _buildMetaItem(Icons.computer, error.platform),
                   if (error.sessionId != null)
                     _buildMetaItem(Icons.fingerprint, error.sessionId!.substring(0, 8)),
                   if (error.occurrences > 1)
@@ -906,22 +975,49 @@ class _ErrorCardState extends State<_ErrorCard> {
                   _buildExpandedSection(
                     title: 'Stack Trace',
                     icon: Icons.code,
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.black38 : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: SelectableText(
-                        error.stackTrace!,
-                        style: TextStyle(
-                          color: subtextColor,
-                          fontSize: 12,
-                          fontFamily: 'monospace',
-                          height: 1.5,
+                    child: Stack(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.black38 : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: SelectableText(
+                            error.stackTrace!,
+                            style: TextStyle(
+                              color: subtextColor,
+                              fontSize: 12,
+                              fontFamily: 'monospace',
+                              height: 1.5,
+                            ),
+                          ),
                         ),
-                      ),
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: InkWell(
+                            onTap: () => _copyToClipboard(error.stackTrace!, 'Stack trace'),
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: isDark ? Colors.black45 : Colors.white54,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.copy, size: 14, color: subtextColor),
+                                  const SizedBox(width: 4),
+                                  Text('Copiar', style: TextStyle(color: subtextColor, fontSize: 10)),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -993,7 +1089,7 @@ class _ErrorCardState extends State<_ErrorCard> {
     IconData? icon,
     bool filled = false,
   }) {
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), 
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: filled ? color : color.withValues(alpha: 0.1),

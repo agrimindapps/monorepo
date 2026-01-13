@@ -154,8 +154,8 @@ class PublishCatalogButton extends ConsumerWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: isError 
-            ? Colors.red.withOpacity(0.1) 
-            : Colors.green.withOpacity(0.1),
+            ? Colors.red.withValues(alpha: 0.1) 
+            : Colors.green.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isError ? Colors.red : Colors.green,

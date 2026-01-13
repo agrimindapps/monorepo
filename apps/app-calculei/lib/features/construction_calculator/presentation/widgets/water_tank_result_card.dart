@@ -18,13 +18,23 @@ class WaterTankResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.construction;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Adaptive colors
+    final bgColor = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade50;
+    final borderColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.shade200;
+    final textColor = isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87;
+    final labelColor = isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black54;
+    final infoBgColor = isDark ? Colors.white.withValues(alpha: 0.03) : Colors.grey.shade100;
+    final infoBorderColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade300;
+
     
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.05),
+        color: bgColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
+          color: borderColor,
         ),
       ),
       child: Padding(
@@ -51,7 +61,7 @@ class WaterTankResultCard extends StatelessWidget {
                   child: Text(
                     'Resultado',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.9),
+                      color: textColor,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -94,7 +104,7 @@ class WaterTankResultCard extends StatelessWidget {
                   Text(
                     'Caixa d\'Água Recomendada',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: labelColor,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -112,7 +122,7 @@ class WaterTankResultCard extends StatelessWidget {
                   Text(
                     calculation.tankType,
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.6),
+                      color: labelColor,
                       fontSize: 13,
                     ),
                   ),
@@ -125,7 +135,7 @@ class WaterTankResultCard extends StatelessWidget {
             Text(
               'Detalhes do Cálculo',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.9),
+                color: textColor,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -174,10 +184,10 @@ class WaterTankResultCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.03),
+                color: infoBgColor,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: infoBorderColor,
                 ),
               ),
               child: Column(
@@ -188,14 +198,14 @@ class WaterTankResultCard extends StatelessWidget {
                       Icon(
                         Icons.info_outline,
                         size: 20,
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: labelColor,
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           'Consumo Total Diário: ${(calculation.numberOfPeople * calculation.dailyConsumption).toInt()} litros',
                           style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.6),
+                            color: labelColor,
                             fontSize: 13,
                           ),
                         ),
@@ -208,7 +218,7 @@ class WaterTankResultCard extends StatelessWidget {
                     child: Text(
                       'Considere margem de segurança de 20% para variações no consumo',
                       style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.5),
+                        color: labelColor,
                         fontSize: 12,
                         fontStyle: FontStyle.italic,
                       ),

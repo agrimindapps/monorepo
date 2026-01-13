@@ -7,9 +7,12 @@ import '../../domain/entities/weather_statistics_entity.dart';
 import '../../domain/failures/weather_failures.dart';
 import '../../domain/repositories/weather_repository.dart';
 import '../../domain/usecases/calculate_weather_statistics.dart';
+import '../../domain/usecases/create_rain_gauge.dart';
 import '../../domain/usecases/create_weather_measurement.dart';
+import '../../domain/usecases/delete_rain_gauge.dart';
 import '../../domain/usecases/get_rain_gauges.dart';
 import '../../domain/usecases/get_weather_measurements.dart';
+import '../../domain/usecases/update_rain_gauge.dart';
 import 'weather_di_providers.dart';
 
 part 'weather_provider.g.dart';
@@ -143,6 +146,9 @@ class WeatherNotifier extends _$WeatherNotifier {
   GetWeatherMeasurements get _getWeatherMeasurements => ref.read(getWeatherMeasurementsProvider);
   CreateWeatherMeasurement get _createWeatherMeasurement => ref.read(createWeatherMeasurementProvider);
   GetRainGauges get _getRainGauges => ref.read(getRainGaugesProvider);
+  CreateRainGauge get _createRainGauge => ref.read(createRainGaugeProvider);
+  UpdateRainGauge get _updateRainGauge => ref.read(updateRainGaugeProvider);
+  DeleteRainGauge get _deleteRainGauge => ref.read(deleteRainGaugeProvider);
   CalculateWeatherStatistics get _calculateWeatherStatistics => ref.read(calculateWeatherStatisticsProvider);
   WeatherRepository get _weatherRepository => ref.read(weatherRepositoryProvider);
 
@@ -533,6 +539,114 @@ class WeatherNotifier extends _$WeatherNotifier {
       );
     } finally {
       state = state.copyWith(isRainGaugesLoading: false);
+    }
+  }
+
+  /// Create new rain gauge
+  Future<bool> createRainGauge(RainGaugeEntity rainGauge) async {
+    state = state.copyWith(isRainGaugesLoading: true, clearError: true);
+
+    try {
+      final result = await _createRainGauge(rainGauge);
+
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            lastError: failure,
+            errorMessage: failure.toString(),
+            isRainGaugesLoading: false,
+          );
+          return false;
+        },
+        (createdGauge) {
+          final updatedGauges = [...state.rainGauges, createdGauge];
+          state = state.copyWith(
+            rainGauges: updatedGauges,
+            isRainGaugesLoading: false,
+          );
+          return true;
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        lastError: RainGaugeSaveFailure(e.toString()),
+        errorMessage: e.toString(),
+        isRainGaugesLoading: false,
+      );
+      return false;
+    }
+  }
+
+  /// Update existing rain gauge
+  Future<bool> updateRainGauge(RainGaugeEntity rainGauge) async {
+    state = state.copyWith(isRainGaugesLoading: true, clearError: true);
+
+    try {
+      final result = await _updateRainGauge(rainGauge);
+
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            lastError: failure,
+            errorMessage: failure.toString(),
+            isRainGaugesLoading: false,
+          );
+          return false;
+        },
+        (updatedGauge) {
+          final updatedGauges = state.rainGauges.map((g) {
+            return g.id == updatedGauge.id ? updatedGauge : g;
+          }).toList();
+          
+          state = state.copyWith(
+            rainGauges: updatedGauges,
+            isRainGaugesLoading: false,
+          );
+          return true;
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        lastError: RainGaugeSaveFailure(e.toString()),
+        errorMessage: e.toString(),
+        isRainGaugesLoading: false,
+      );
+      return false;
+    }
+  }
+
+  /// Delete rain gauge
+  Future<bool> deleteRainGauge(String id) async {
+    state = state.copyWith(isRainGaugesLoading: true, clearError: true);
+
+    try {
+      final result = await _deleteRainGauge(id);
+
+      return result.fold(
+        (failure) {
+          state = state.copyWith(
+            lastError: failure,
+            errorMessage: failure.toString(),
+            isRainGaugesLoading: false,
+          );
+          return false;
+        },
+        (_) {
+          final updatedGauges = state.rainGauges.where((g) => g.id != id).toList();
+          state = state.copyWith(
+            rainGauges: updatedGauges,
+            isRainGaugesLoading: false,
+          );
+          return true;
+        },
+      );
+    } catch (e) {
+      state = state.copyWith(
+        lastError: RainGaugeDeleteFailure(e.toString()),
+        errorMessage: e.toString(),
+        isRainGaugesLoading: false,
+      );
+      return false;
     }
   }
 

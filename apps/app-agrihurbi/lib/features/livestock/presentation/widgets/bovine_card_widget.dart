@@ -26,31 +26,50 @@ class BovineCardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      elevation: 2.0,
+      margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16.0),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12.0),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+        child: Column(
+          children: [
+            // Status Strip
+            Container(
+              height: 4,
+              width: double.infinity,
+              color: bovine.isActive 
+                  ? Theme.of(context).colorScheme.primary 
+                  : Theme.of(context).colorScheme.error.withValues(alpha: 0.5),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildBovineImage(context),
-                  const SizedBox(width: 12.0),
-                  Expanded(child: _buildBovineInfo(context)),
-                  if (showActions) _buildActionsMenu(context),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildBovineImage(context),
+                      const SizedBox(width: 16.0),
+                      Expanded(child: _buildBovineInfo(context)),
+                      if (showActions) _buildActionsMenu(context),
+                    ],
+                  ),
+                  const SizedBox(height: 12.0),
+                  const Divider(height: 24),
+                  _buildBovineMetadata(context),
+                  const SizedBox(height: 8.0),
+                  _buildStatusInfo(context),
                 ],
               ),
-              const SizedBox(height: 8.0),
-              _buildBovineMetadata(context),
-              const SizedBox(height: 8.0),
-              _buildStatusInfo(context),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -292,33 +311,49 @@ class BovineCardWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Icon(
-              bovine.isActive ? Icons.check_circle : Icons.cancel,
-              size: 16.0,
-              color: bovine.isActive
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(width: 4.0),
-            Text(
-              bovine.isActive ? 'Ativo' : 'Inativo',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: bovine.isActive
+                ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5)
+                : Theme.of(context).colorScheme.errorContainer.withValues(alpha: 0.5),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                bovine.isActive ? Icons.check_circle : Icons.cancel,
+                size: 14.0,
                 color: bovine.isActive
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.w500,
               ),
-            ),
-          ],
+              const SizedBox(width: 4.0),
+              Text(
+                bovine.isActive ? 'Ativo' : 'Inativo',
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: bovine.isActive
+                      ? Theme.of(context).colorScheme.onPrimaryContainer
+                      : Theme.of(context).colorScheme.onErrorContainer,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
         if (bovine.updatedAt != null)
-          Text(
-            _formatDate(bovine.updatedAt!),
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+          Row(
+            children: [
+              Icon(Icons.access_time, size: 14, color: Theme.of(context).colorScheme.outline),
+              const SizedBox(width: 4),
+              Text(
+                'Atualizado ${_formatDate(bovine.updatedAt!)}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+            ],
           ),
       ],
     );

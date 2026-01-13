@@ -33,6 +33,11 @@ class SubtaskListWidget extends ConsumerWidget {
               onPressed: () => _showCreateSubtaskDialog(context, parentTaskId),
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Adicionar'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                minimumSize: const Size(0, 32),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
           ],
         ),
@@ -92,11 +97,8 @@ class SubtaskListWidget extends ConsumerWidget {
                       background: Container(
                         alignment: Alignment.centerRight,
                         padding: const EdgeInsets.only(right: 20),
-                        margin: const EdgeInsets.only(bottom: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.error,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                        margin: const EdgeInsets.only(bottom: 0),
+                        color: AppColors.error,
                         child: const Icon(Icons.delete, color: Colors.white),
                       ),
                       confirmDismiss: (direction) async {
@@ -105,26 +107,38 @@ class SubtaskListWidget extends ConsumerWidget {
                       onDismissed: (direction) {
                         _deleteSubtask(context, ref, subtask, confirmed: true);
                       },
-                      child: Card(
-                        margin: const EdgeInsets.only(bottom: 4),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                              width: 0.5,
+                            ),
+                          ),
+                        ),
                         child: ListTile(
                           dense: true,
-                          leading: Checkbox(
-                            value: subtask.status == TaskStatus.completed,
-                            onChanged: (value) {
-                              HapticFeedback.lightImpact();
-                              final newStatus =
-                                  value == true
-                                      ? TaskStatus.completed
-                                      : TaskStatus.pending;
-                              final updatedSubtask = subtask.copyWith(
-                                status: newStatus,
-                                updatedAt: DateTime.now(),
-                              );
-                              ref
-                                  .read(taskProvider.notifier)
-                                  .updateSubtask(updatedSubtask);
-                            },
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                          leading: Transform.scale(
+                            scale: 0.9,
+                            child: Checkbox(
+                              value: subtask.status == TaskStatus.completed,
+                              shape: const CircleBorder(),
+                              onChanged: (value) {
+                                HapticFeedback.lightImpact();
+                                final newStatus =
+                                    value == true
+                                        ? TaskStatus.completed
+                                        : TaskStatus.pending;
+                                final updatedSubtask = subtask.copyWith(
+                                  status: newStatus,
+                                  updatedAt: DateTime.now(),
+                                );
+                                ref
+                                    .read(taskProvider.notifier)
+                                    .updateSubtask(updatedSubtask);
+                              },
+                            ),
                           ),
                           title: Text(
                             subtask.title,
@@ -134,60 +148,34 @@ class SubtaskListWidget extends ConsumerWidget {
                                       ? TextDecoration.lineThrough
                                       : null,
                               fontSize: 14,
+                              color: subtask.status == TaskStatus.completed
+                                  ? Theme.of(context).disabledColor
+                                  : null,
                             ),
                           ),
                           subtitle:
-                              subtask.description != null
+                              subtask.description != null && subtask.description!.isNotEmpty
                                   ? Text(
                                     subtask.description!,
                                     style: const TextStyle(fontSize: 12),
                                   )
                                   : null,
-                          trailing: PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == 'edit') {
-                                _showEditSubtaskDialog(context, subtask);
-                              } else if (value == 'delete') {
-                                _deleteSubtask(context, ref, subtask);
-                              }
-                            },
-                            itemBuilder:
-                                (context) => [
-                                  const PopupMenuItem(
-                                    value: 'edit',
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.edit, size: 16),
-                                        SizedBox(width: 8),
-                                        Text('Editar'),
-                                      ],
-                                    ),
-                                  ),
-                                  const PopupMenuItem(
-                                    value: 'delete',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.delete,
-                                          size: 16,
-                                          color: AppColors.error,
-                                        ),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'Excluir',
-                                          style: TextStyle(color: AppColors.error),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                          trailing: IconButton(
+                            icon: const Icon(Icons.close, size: 16),
+                            onPressed: () => _deleteSubtask(context, ref, subtask),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                           ),
+                          onTap: () => _showEditSubtaskDialog(context, subtask),
                         ),
                       ),
                     );
                   }),
                 // Quick Add Field
-                QuickAddSubtaskField(parentTaskId: parentTaskId),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: QuickAddSubtaskField(parentTaskId: parentTaskId),
+                ),
               ],
             );
           },

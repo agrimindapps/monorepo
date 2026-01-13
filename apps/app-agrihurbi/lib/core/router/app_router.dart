@@ -9,13 +9,18 @@ import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_form_
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_detail_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_form_page.dart';
+import 'package:app_agrihurbi/features/livestock/presentation/pages/equines_list_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_search_page.dart';
 import 'package:app_agrihurbi/features/markets/presentation/pages/market_detail_page.dart';
 import 'package:app_agrihurbi/features/markets/presentation/pages/markets_list_page.dart';
 import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
 import 'package:app_agrihurbi/features/promo/presentation/pages/promo_page.dart';
 import 'package:app_agrihurbi/features/settings/presentation/pages/settings_page.dart';
+import 'package:app_agrihurbi/features/weather/presentation/pages/rain_gauge_detail_page.dart';
+import 'package:app_agrihurbi/features/weather/presentation/pages/rain_gauge_form_page.dart';
+import 'package:app_agrihurbi/features/weather/presentation/pages/rain_gauges_page.dart';
 import 'package:app_agrihurbi/features/weather/presentation/pages/weather_dashboard_page.dart';
+import 'package:app_agrihurbi/features/weather/presentation/pages/weather_measurement_form_page.dart';
 import 'package:core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -355,11 +360,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 path: 'measurements',
                 name: 'weather-measurements',
                 builder: (context, state) => const WeatherMeasurementsPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'weather-measurements-add',
+                    builder: (context, state) =>
+                        const WeatherMeasurementFormPage(),
+                  ),
+                ],
               ),
               GoRoute(
                 path: 'rain-gauges',
                 name: 'weather-rain-gauges',
                 builder: (context, state) => const RainGaugesPage(),
+                routes: [
+                  GoRoute(
+                    path: 'add',
+                    name: 'weather-rain-gauges-add',
+                    builder: (context, state) => const RainGaugeFormPage(),
+                  ),
+                  GoRoute(
+                    path: 'edit/:id',
+                    name: 'weather-rain-gauges-edit',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return RainGaugeFormPage(rainGaugeId: id);
+                    },
+                  ),
+                  GoRoute(
+                    path: 'detail/:id',
+                    name: 'weather-rain-gauges-detail',
+                    builder: (context, state) {
+                      final id = state.pathParameters['id']!;
+                      return RainGaugeDetailPage(rainGaugeId: id);
+                    },
+                  ),
+                ],
               ),
               GoRoute(
                 path: 'statistics',
@@ -635,33 +671,8 @@ class AppNavigation {
   }
 }
 
-class EquinesListPage extends StatelessWidget {
-  const EquinesListPage({super.key});
+// Placeholder removed - EquinesListPage is now imported
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Equinos'),
-      backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-    ),
-    body: const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.pets, size: 64),
-          SizedBox(height: 16),
-          Text('Lista de Equinos'),
-          SizedBox(height: 8),
-          Text('Em desenvolvimento...'),
-        ],
-      ),
-    ),
-    floatingActionButton: FloatingActionButton(
-      onPressed: () => context.push('/home/livestock/equines/add'),
-      child: const Icon(Icons.add),
-    ),
-  );
-}
 
 class WeatherMeasurementsPage extends StatelessWidget {
   const WeatherMeasurementsPage({super.key});
@@ -674,14 +685,8 @@ class WeatherMeasurementsPage extends StatelessWidget {
   );
 }
 
-class RainGaugesPage extends StatelessWidget {
-  const RainGaugesPage({super.key});
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Pluviômetros')),
-    body: const Center(child: Text('Rain Gauges Page - Em desenvolvimento')),
-  );
-}
+// Placeholder removed - RainGaugesPage is now imported
+
 
 class WeatherStatisticsPage extends StatelessWidget {
   const WeatherStatisticsPage({super.key});

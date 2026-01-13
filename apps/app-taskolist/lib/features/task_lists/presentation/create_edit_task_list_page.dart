@@ -25,8 +25,18 @@ class _CreateEditTaskListPageState
   late final TextEditingController _titleController;
   late final TextEditingController _descriptionController;
   late String _selectedColor;
+  String? _selectedBackground;
 
   bool get isEditing => widget.taskList != null;
+
+  final List<String> _backgroundOptions = [
+    'none',
+    'mountain',
+    'beach',
+    'city',
+    'forest',
+    'abstract',
+  ];
 
   @override
   void initState() {
@@ -36,6 +46,7 @@ class _CreateEditTaskListPageState
         TextEditingController(text: widget.taskList?.description);
     _selectedColor =
         widget.taskList?.color ?? TaskListColors.defaultColor;
+    _selectedBackground = widget.taskList?.backgroundImage;
   }
 
   @override
@@ -70,6 +81,7 @@ class _CreateEditTaskListPageState
       isShared: widget.taskList?.isShared ?? false,
       isArchived: widget.taskList?.isArchived ?? false,
       position: widget.taskList?.position ?? 0,
+      backgroundImage: _selectedBackground == 'none' ? null : _selectedBackground,
     );
 
     if (isEditing) {
@@ -197,6 +209,63 @@ class _CreateEditTaskListPageState
                   _selectedColor = color;
                 });
               },
+            ),
+            const SizedBox(height: 24),
+
+            // Seletor de Fundo
+            Text(
+              'Imagem de Fundo',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 80,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _backgroundOptions.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final bg = _backgroundOptions[index];
+                  final isSelected = 
+                      (bg == 'none' && _selectedBackground == null) || 
+                      bg == _selectedBackground;
+                  
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedBackground = bg == 'none' ? null : bg;
+                      });
+                    },
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: bg == 'none' ? Colors.grey[200] : Colors.grey[300],
+                        borderRadius: BorderRadius.circular(8),
+                        border: isSelected
+                            ? Border.all(
+                                color: Theme.of(context).primaryColor,
+                                width: 3,
+                              )
+                            : null,
+                        image: bg != 'none' 
+                            ? null // TODO: Add actual assets
+                            : null,
+                      ),
+                      child: Center(
+                        child: bg == 'none'
+                            ? const Icon(Icons.block, color: Colors.grey)
+                            : Text(
+                                bg[0].toUpperCase() + bg.substring(1),
+                                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                              ),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 24),
 

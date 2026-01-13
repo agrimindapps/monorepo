@@ -22,6 +22,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   FeedbackStatus? _statusFilter;
   FeedbackType? _typeFilter;
   String _searchQuery = '';
+  bool _sortAscending = false;
   final _searchController = TextEditingController();
 
   // Calculei theme colors
@@ -248,7 +249,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   Widget _buildStatsLoading(bool isDark) {
     return Row(
       children: List.generate(5, (index) => Expanded(
-        child: Container(
+        child: AnimatedContainer(duration: const Duration(milliseconds: 300), 
           height: 100,
           margin: EdgeInsets.only(left: index > 0 ? 16 : 0),
           decoration: BoxDecoration(
@@ -274,7 +275,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
     required bool isDark,
     bool compact = false,
   }) {
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut, 
       padding: EdgeInsets.all(compact ? 16 : 20),
       decoration: BoxDecoration(
         color: isDark ? _cardColor : Colors.white,
@@ -337,7 +338,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
     AsyncValue<List<FeedbackEntity>> feedbacksAsync,
     bool isDark,
   ) {
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut, 
       decoration: BoxDecoration(
         color: isDark ? _cardColor : Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -396,13 +397,18 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
             ),
             data: (feedbacks) {
               // Apply search filter
-              final filtered = _searchQuery.isEmpty
+              var filtered = _searchQuery.isEmpty
                   ? feedbacks
                   : feedbacks.where((f) =>
                       f.message.toLowerCase().contains(_searchQuery.toLowerCase()) ||
                       (f.userEmail?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false) ||
                       (f.calculatorName?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false)
                     ).toList();
+
+              // Apply sorting
+              filtered.sort((a, b) => _sortAscending 
+                  ? a.createdAt.compareTo(b.createdAt) 
+                  : b.createdAt.compareTo(a.createdAt));
 
               if (filtered.isEmpty) {
                 return _buildEmptyState(isDark);
@@ -449,7 +455,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   }
 
   Widget _buildSectionHeader(bool isDark) {
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), 
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         border: Border(
@@ -502,7 +508,7 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
   }
 
   Widget _buildFiltersBar(bool isDark) {
-    return Container(
+    return AnimatedContainer(duration: const Duration(milliseconds: 300), 
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: isDark ? Colors.black.withValues(alpha: 0.2) : Colors.grey.shade50,
@@ -546,6 +552,44 @@ class _AdminDashboardPageState extends ConsumerState<AdminDashboardPage> {
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             ),
             onChanged: (value) => setState(() => _searchQuery = value),
+          ),
+          const SizedBox(height: 12),
+          // Sort option
+          Row(
+            children: [
+              Text(
+                'Ordenar por data:',
+                style: TextStyle(
+                  color: isDark ? Colors.white60 : Colors.black54,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: () => setState(() => _sortAscending = !_sortAscending),
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    children: [
+                      Text(
+                        _sortAscending ? 'Mais antigos' : 'Mais recentes',
+                        style: TextStyle(
+                          color: _primaryColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Icon(
+                        _sortAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                        size: 16,
+                        color: _primaryColor,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           // Filter chips
@@ -788,6 +832,20 @@ class _FeedbackCardState extends State<_FeedbackCard> {
   bool _isExpanded = false;
   bool _isHovered = false;
 
+  Future<void> _copyToClipboard(String text, String label) async {
+    await Clipboard.setData(ClipboardData(text: text));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$label copiado!'),
+          behavior: SnackBarBehavior.floating,
+          width: 200,
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
+  }
+
   static const _cardColor = Color(0xFF252545);
   static const _googleBlue = Color(0xFF4285F4);
   static const _googleRed = Color(0xFFEA4335);
@@ -962,6 +1020,7 @@ class _FeedbackCardState extends State<_FeedbackCard> {
                           _buildMetaItem(
                             Icons.email_outlined,
                             widget.feedback.userEmail!,
+                            isCopyable: true,
                           ),
                       ],
                     ),
@@ -1061,8 +1120,8 @@ class _FeedbackCardState extends State<_FeedbackCard> {
     );
   }
 
-  Widget _buildMetaItem(IconData icon, String text) {
-    return Row(
+  Widget _buildMetaItem(IconData icon, String text, {bool isCopyable = false}) {
+    final content = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 14, color: widget.isDark ? Colors.white38 : Colors.black38),
@@ -1072,9 +1131,26 @@ class _FeedbackCardState extends State<_FeedbackCard> {
           style: TextStyle(
             fontSize: 12,
             color: widget.isDark ? Colors.white38 : Colors.black38,
+            decoration: isCopyable ? TextDecoration.underline : null,
+            decorationStyle: TextDecorationStyle.dotted,
           ),
         ),
+        if (isCopyable) ...[
+          const SizedBox(width: 4),
+          Icon(Icons.copy, size: 10, color: widget.isDark ? Colors.white38 : Colors.black38),
+        ],
       ],
+    );
+
+    if (!isCopyable) return content;
+
+    return InkWell(
+      onTap: () => _copyToClipboard(text, text),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: content,
+      ),
     );
   }
 

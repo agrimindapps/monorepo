@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
 import '../providers/weather_provider.dart';
+import '../widgets/rain_gauge_card_widget.dart';
 import '../widgets/rain_gauges_summary.dart';
+import '../widgets/weather_chart_widget.dart';
 import '../widgets/weather_current_card.dart';
 import '../widgets/weather_measurements_list.dart';
 import '../widgets/weather_statistics_card.dart';
@@ -154,6 +158,14 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
             ),
             
             const SizedBox(height: 16),
+            if (state.measurements.isNotEmpty) ...[
+              WeatherChartWidget(
+                measurements: state.measurements.take(14).toList(),
+                title: 'Tendência de Temperatura',
+                isRainfall: false,
+              ),
+              const SizedBox(height: 16),
+            ],
             if (state.hasStatistics) ...[
               WeatherStatisticsCard(
                 statistics: state.statistics.first,
@@ -256,7 +268,42 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
               rainGauges: state.rainGauges,
               isLoading: state.isRainGaugesLoading,
             ),
-            
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                context.pushNamed('weather-rain-gauges');
+              },
+              icon: const Icon(Icons.list),
+              label: const Text('Gerenciar Pluviômetros'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Pluviômetros Ativos',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            if (state.activeRainGauges.isEmpty)
+              const Card(
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('Nenhum pluviômetro ativo no momento.'),
+                ),
+              )
+            else
+              ...state.activeRainGauges.take(3).map(
+                    (gauge) => RainGaugeCardWidget(
+                      rainGauge: gauge,
+                      onTap: () {
+                        context.pushNamed(
+                          'weather-rain-gauges-detail',
+                          pathParameters: {'id': gauge.id},
+                        );
+                      },
+                    ),
+                  ),
             const SizedBox(height: 16),
             Card(
               child: Padding(
@@ -269,9 +316,21 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 12),
-                    _buildStatusRow('Operacionais', state.operationalRainGauges.length, Colors.green),
-                    _buildStatusRow('Necessitam Manutenção', state.rainGaugesNeedingMaintenance.length, Colors.orange),
-                    _buildStatusRow('Total', state.rainGauges.length, Colors.blue),
+                    _buildStatusRow(
+                      'Operacionais',
+                      state.operationalRainGauges.length,
+                      Colors.green,
+                    ),
+                    _buildStatusRow(
+                      'Necessitam Manutenção',
+                      state.rainGaugesNeedingMaintenance.length,
+                      Colors.orange,
+                    ),
+                    _buildStatusRow(
+                      'Total',
+                      state.rainGauges.length,
+                      Colors.blue,
+                    ),
                   ],
                 ),
               ),
@@ -407,28 +466,7 @@ class _WeatherDashboardPageState extends ConsumerState<WeatherDashboardPage>
 
   /// Show add measurement dialog
   Future<void> _showAddMeasurementDialog() async {
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Adicionar Medição Manual'),
-        content: const Text(
-          'Esta funcionalidade permite adicionar medições meteorológicas manualmente.\n\n'
-          'Em desenvolvimento...',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Fechar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: const Text('Abrir Formulário'),
-          ),
-        ],
-      ),
-    );
+    context.pushNamed('weather-measurements-add');
   }
 
   /// Show date range picker

@@ -5,4 +5,6 @@ abstract class PreferencesLocalDataSource {
   Future<void> setThemeMode(AppThemeMode themeMode);
   Future<bool> getFirstLaunch();
   Future<void> setFirstLaunch(bool isFirstLaunch);
+  Future<DateTime?> getLastMyDayResetDate();
+  Future<void> setLastMyDayResetDate(DateTime date);
 }

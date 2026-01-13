@@ -124,6 +124,21 @@ class RainGaugeSaveFailure extends WeatherFailure {
   String toString() => 'RainGaugeSaveFailure(message: $message)';
 }
 
+/// Failed to delete rain gauge
+class RainGaugeDeleteFailure extends WeatherFailure {
+  final String message;
+
+  const RainGaugeDeleteFailure([
+    this.message = 'Failed to delete rain gauge',
+  ]);
+
+  @override
+  List<Object> get props => [message];
+
+  @override
+  String toString() => 'RainGaugeDeleteFailure(message: $message)';
+}
+
 /// Rain gauge not found
 class RainGaugeNotFoundFailure extends WeatherFailure {
   final String gaugeId;

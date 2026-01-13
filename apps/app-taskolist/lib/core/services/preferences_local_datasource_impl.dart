@@ -8,6 +8,7 @@ import 'preferences_local_datasource.dart';
 class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
   static const String _themeKey = 'theme_mode';
   static const String _firstLaunchKey = 'first_launch';
+  static const String _lastMyDayResetKey = 'last_my_day_reset';
 
   SharedPreferences? _prefs;
 
@@ -63,6 +64,33 @@ class PreferencesLocalDataSourceImpl implements PreferencesLocalDataSource {
     } catch (e) {
       if (kDebugMode) {
         debugPrint('Erro ao salvar primeiro launch: $e');
+      }
+    }
+  }
+
+  @override
+  Future<DateTime?> getLastMyDayResetDate() async {
+    try {
+      final prefs = await _preferences;
+      final dateStr = prefs.getString(_lastMyDayResetKey);
+      if (dateStr == null) return null;
+      return DateTime.parse(dateStr);
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Erro ao obter data de reset do Meu Dia: $e');
+      }
+      return null;
+    }
+  }
+
+  @override
+  Future<void> setLastMyDayResetDate(DateTime date) async {
+    try {
+      final prefs = await _preferences;
+      await prefs.setString(_lastMyDayResetKey, date.toIso8601String());
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Erro ao salvar data de reset do Meu Dia: $e');
       }
     }
   }

@@ -14,6 +14,7 @@ class TaskListModel extends TaskListEntity {
     super.isShared,
     super.isArchived,
     super.position,
+    super.backgroundImage,
   });
 
   /// Converte de Firestore Document para Model
@@ -34,6 +35,7 @@ class TaskListModel extends TaskListEntity {
       isShared: data['isShared'] as bool? ?? false,
       isArchived: data['isArchived'] as bool? ?? false,
       position: data['position'] as int? ?? 0,
+      backgroundImage: data['backgroundImage'] as String?,
     );
   }
 
@@ -56,6 +58,7 @@ class TaskListModel extends TaskListEntity {
       isShared: map['isShared'] as bool? ?? false,
       isArchived: map['isArchived'] as bool? ?? false,
       position: map['position'] as int? ?? 0,
+      backgroundImage: map['backgroundImage'] as String?,
     );
   }
 
@@ -73,6 +76,7 @@ class TaskListModel extends TaskListEntity {
       isShared: entity.isShared,
       isArchived: entity.isArchived,
       position: entity.position,
+      backgroundImage: entity.backgroundImage,
     );
   }
 
@@ -89,6 +93,7 @@ class TaskListModel extends TaskListEntity {
       'isShared': isShared,
       'isArchived': isArchived,
       'position': position,
+      'backgroundImage': backgroundImage,
     };
   }
 
@@ -106,6 +111,7 @@ class TaskListModel extends TaskListEntity {
     bool? isShared,
     bool? isArchived,
     int? position,
+    String? backgroundImage,
   }) {
     return TaskListModel(
       id: id ?? this.id,
@@ -119,6 +125,7 @@ class TaskListModel extends TaskListEntity {
       isShared: isShared ?? this.isShared,
       isArchived: isArchived ?? this.isArchived,
       position: position ?? this.position,
+      backgroundImage: backgroundImage ?? this.backgroundImage,
     );
   }
 }

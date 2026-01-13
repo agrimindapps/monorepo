@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/equine_entity.dart';
+import '../providers/equines_management_provider.dart';
 import '../providers/equines_provider.dart';
 
 /// Página de formulário para criação/edição de equinos
 ///
 /// Unifica as funcionalidades de cadastro e edição em uma única página
-/// Implementa validação completa e integração com EquinesProvider
+/// Implementa validação completa e integração com EquinesManagementNotifier
 class EquineFormPage extends ConsumerStatefulWidget {
   const EquineFormPage({super.key, this.equineId});
 
@@ -60,11 +61,18 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
 
   Future<void> _loadEquineData() async {
     if (widget.isEditing) {
-      final notifier = ref.read(equinesProvider.notifier);
-      var equine = notifier.getEquineById(widget.equineId!);
+      // Tenta encontrar primeiro no management provider
+      final mgmtNotifier = ref.read(equinesManagementProvider.notifier);
+      var equine = mgmtNotifier.findEquineById(widget.equineId!);
+      
+      // Se não achar, tenta no provider de leitura principal
       if (equine == null) {
-        final success = await notifier.loadEquineById(widget.equineId!);
-        if (success) {
+        final readNotifier = ref.read(equinesProvider.notifier);
+        equine = readNotifier.getEquineById(widget.equineId!);
+        
+        // Se ainda não achar, força carregamento (poderia usar loadEquineById se existisse no mgmt)
+        if (equine == null) {
+          await readNotifier.loadEquineById(widget.equineId!);
           equine = ref.read(equinesProvider).selectedEquine;
         }
       }
@@ -75,6 +83,11 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
         _showErrorAndGoBack('Equino não encontrado');
         return;
       }
+    } else {
+      // Defaults para criação
+      _selectedTemperament = EquineTemperament.calm;
+      _selectedCoat = CoatColor.bay;
+      _selectedPrimaryUse = EquinePrimaryUse.riding;
     }
 
     if (mounted) {
@@ -101,6 +114,9 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
 
   @override
   Widget build(BuildContext context) {
+    final mgmtState = ref.watch(equinesManagementProvider);
+    final isOperating = mgmtState.isCreating || mgmtState.isUpdating || mgmtState.isDeleting;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.isEditing ? 'Editar Equino' : 'Novo Equino'),
@@ -109,40 +125,49 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
           if (widget.isEditing)
             IconButton(
               icon: const Icon(Icons.delete),
-              onPressed: _confirmDelete,
+              onPressed: isOperating ? null : _confirmDelete,
               tooltip: 'Excluir equino',
             ),
         ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: _scrollController,
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildBasicInfoSection(),
-                          const SizedBox(height: 24),
-                          _buildCharacteristicsSection(),
-                          const SizedBox(height: 24),
-                          _buildPhysicalInfoSection(),
-                          const SizedBox(height: 24),
-                          _buildAdditionalInfoSection(),
-                          const SizedBox(height: 24),
-                          if (widget.isEditing) _buildStatusSection(),
-                        ],
+          : Stack(
+              children: [
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _buildBasicInfoSection(),
+                              const SizedBox(height: 24),
+                              _buildCharacteristicsSection(),
+                              const SizedBox(height: 24),
+                              _buildPhysicalInfoSection(),
+                              const SizedBox(height: 24),
+                              _buildAdditionalInfoSection(),
+                              const SizedBox(height: 24),
+                              if (widget.isEditing) _buildStatusSection(),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                      _buildActionButtons(isOperating),
+                    ],
                   ),
-                  _buildActionButtons(),
-                ],
-              ),
+                ),
+                if (isOperating)
+                  Container(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+              ],
             ),
     );
   }
@@ -434,7 +459,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _buildActionButtons(bool isLoading) {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -452,7 +477,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
           children: [
             Expanded(
               child: OutlinedButton(
-                onPressed: () => context.pop(),
+                onPressed: isLoading ? null : () => context.pop(),
                 child: const Text('Cancelar'),
               ),
             ),
@@ -460,7 +485,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
             Expanded(
               flex: 2,
               child: ElevatedButton(
-                onPressed: _saveEquine,
+                onPressed: isLoading ? null : _saveEquine,
                 child: Text(widget.isEditing ? 'Salvar' : 'Criar'),
               ),
             ),
@@ -475,12 +500,44 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
       _scrollToFirstError();
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Funcionalidade de equinos em desenvolvimento'),
-      ),
+
+    final notifier = ref.read(equinesManagementProvider.notifier);
+    
+    final equine = EquineEntity(
+      id: widget.equineId ?? '',
+      commonName: _commonNameController.text.trim(),
+      registrationId: _registrationIdController.text.trim().toUpperCase(),
+      originCountry: _originCountryController.text.trim(),
+      temperament: _selectedTemperament!,
+      coat: _selectedCoat!,
+      primaryUse: _selectedPrimaryUse!,
+      height: _heightController.text.trim(),
+      weight: _weightController.text.trim(),
+      geneticInfluences: _geneticInfluencesController.text.trim(),
+      history: _historyController.text.trim(),
+      isActive: _isActive,
+      imageUrls: const [], // TODO: Implementar upload de imagens
+      createdAt: DateTime.now(), // Será ignorado/atualizado pelo backend/usecase
+      updatedAt: DateTime.now(),
     );
-    context.pop();
+
+    final success = widget.isEditing
+        ? await notifier.updateEquine(equine)
+        : await notifier.createEquine(equine);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Equino ${widget.isEditing ? "atualizado" : "criado"} com sucesso!'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+        ),
+      );
+      context.pop();
+    } else {
+      _showErrorMessage(notifier.errorMessage ?? 'Operação falhou');
+    }
   }
 
   void _scrollToFirstError() {
@@ -521,18 +578,45 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   }
 
   void _deleteEquine() async {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Funcionalidade de exclusão de equinos em desenvolvimento',
+    final notifier = ref.read(equinesManagementProvider.notifier);
+    final success = await notifier.deleteEquine(widget.equineId!);
+
+    if (!mounted) return;
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Equino excluído com sucesso!'),
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
+      );
+      context.pop();
+    } else {
+      _showErrorMessage(notifier.errorMessage ?? 'Erro ao excluir');
+    }
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Theme.of(context).colorScheme.onError,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Erro: $message')),
+          ],
+        ),
+        backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );
-    context.pop();
   }
 
   void _showErrorAndGoBack(String message) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),

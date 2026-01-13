@@ -9,9 +9,12 @@ import '../../data/datasources/weather_remote_datasource_impl.dart';
 import '../../data/repositories/weather_repository_impl.dart';
 import '../../domain/repositories/weather_repository.dart';
 import '../../domain/usecases/calculate_weather_statistics.dart';
+import '../../domain/usecases/create_rain_gauge.dart';
 import '../../domain/usecases/create_weather_measurement.dart';
+import '../../domain/usecases/delete_rain_gauge.dart';
 import '../../domain/usecases/get_rain_gauges.dart';
 import '../../domain/usecases/get_weather_measurements.dart';
+import '../../domain/usecases/update_rain_gauge.dart';
 
 // Dio Provider
 final dioProvider = Provider<Dio>((ref) {
@@ -54,4 +57,19 @@ final getRainGaugesProvider = Provider<GetRainGauges>((ref) {
 final calculateWeatherStatisticsProvider = Provider<CalculateWeatherStatistics>((ref) {
   final repository = ref.watch(weatherRepositoryProvider);
   return CalculateWeatherStatistics(repository);
+});
+
+final createRainGaugeProvider = Provider<CreateRainGauge>((ref) {
+  final repository = ref.watch(weatherRepositoryProvider);
+  return CreateRainGauge(repository);
+});
+
+final updateRainGaugeProvider = Provider<UpdateRainGauge>((ref) {
+  final repository = ref.watch(weatherRepositoryProvider);
+  return UpdateRainGauge(repository);
+});
+
+final deleteRainGaugeProvider = Provider<DeleteRainGauge>((ref) {
+  final repository = ref.watch(weatherRepositoryProvider);
+  return DeleteRainGauge(repository);
 });

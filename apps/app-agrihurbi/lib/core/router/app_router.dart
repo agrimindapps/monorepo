@@ -42,7 +42,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             state.matchedLocation.startsWith('/login') ||
             state.matchedLocation.startsWith('/register');
         final isOnPromo = state.matchedLocation == '/promo';
-        
+
         // Admin route guard
         final isOnAdminPage = state.matchedLocation.startsWith('/admin');
         if (isOnAdminPage) {
@@ -52,7 +52,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           // Check admin role (async, so we handle it in the route builder)
           // If not admin, will be redirected in the route's redirect callback
         }
-        
+
         if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
           return kIsWeb ? '/promo' : '/login';
         }
@@ -673,7 +673,6 @@ class AppNavigation {
 
 // Placeholder removed - EquinesListPage is now imported
 
-
 class WeatherMeasurementsPage extends StatelessWidget {
   const WeatherMeasurementsPage({super.key});
   @override
@@ -686,7 +685,6 @@ class WeatherMeasurementsPage extends StatelessWidget {
 }
 
 // Placeholder removed - RainGaugesPage is now imported
-
 
 class WeatherStatisticsPage extends StatelessWidget {
   const WeatherStatisticsPage({super.key});

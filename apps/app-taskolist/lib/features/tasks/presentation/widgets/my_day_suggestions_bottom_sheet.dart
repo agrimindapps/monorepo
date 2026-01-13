@@ -8,10 +8,7 @@ import '../providers/my_day_notifier.dart';
 class MyDaySuggestionsBottomSheet extends ConsumerWidget {
   final String userId;
 
-  const MyDaySuggestionsBottomSheet({
-    super.key,
-    required this.userId,
-  });
+  const MyDaySuggestionsBottomSheet({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,10 +40,13 @@ class MyDaySuggestionsBottomSheet extends ConsumerWidget {
                   ),
                 ),
               ),
-              
+
               // Header
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     const Icon(Icons.lightbulb_outline, color: Colors.amber),
@@ -60,7 +60,7 @@ class MyDaySuggestionsBottomSheet extends ConsumerWidget {
                   ],
                 ),
               ),
-              
+
               const Divider(),
 
               // Content
@@ -75,7 +75,9 @@ class MyDaySuggestionsBottomSheet extends ConsumerWidget {
                             Icon(
                               Icons.check_circle_outline,
                               size: 64,
-                              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 16),
                             Text(
@@ -104,7 +106,7 @@ class MyDaySuggestionsBottomSheet extends ConsumerWidget {
                             ref
                                 .read(myDayProvider(userId).notifier)
                                 .addTask(task.id, source: 'suggestion');
-                                
+
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Tarefa adicionada ao Meu Dia'),
@@ -116,12 +118,10 @@ class MyDaySuggestionsBottomSheet extends ConsumerWidget {
                       },
                     );
                   },
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                  error: (error, stack) => Center(
-                    child: Text('Erro ao carregar sugestões: $error'),
-                  ),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) =>
+                      Center(child: Text('Erro ao carregar sugestões: $error')),
                 ),
               ),
             ],
@@ -136,10 +136,7 @@ class _SuggestionItem extends StatelessWidget {
   final TaskEntity task;
   final VoidCallback onAdd;
 
-  const _SuggestionItem({
-    required this.task,
-    required this.onAdd,
-  });
+  const _SuggestionItem({required this.task, required this.onAdd});
 
   @override
   Widget build(BuildContext context) {

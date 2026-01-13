@@ -16,24 +16,24 @@ class RainGaugeFormPage extends ConsumerStatefulWidget {
 
 class _RainGaugeFormPageState extends ConsumerState<RainGaugeFormPage> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   late TextEditingController _locationNameController;
   late TextEditingController _deviceIdController;
   late TextEditingController _deviceModelController;
-  
+
   // State variables
   bool _isActive = true;
   String _status = 'active';
   bool _isLoading = false;
-  
+
   @override
   void initState() {
     super.initState();
     _locationNameController = TextEditingController();
     _deviceIdController = TextEditingController();
     _deviceModelController = TextEditingController();
-    
+
     // Load existing data if editing
     if (widget.rainGaugeId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -79,10 +79,13 @@ class _RainGaugeFormPageState extends ConsumerState<RainGaugeFormPage> {
     try {
       final notifier = ref.read(weatherProvider.notifier);
       final existingGauge = isEditing
-          ? ref.read(weatherProvider).rainGauges.firstWhere(
-                (g) => g.id == widget.rainGaugeId,
-                orElse: () => RainGaugeEntity.empty(),
-              )
+          ? ref
+                .read(weatherProvider)
+                .rainGauges
+                .firstWhere(
+                  (g) => g.id == widget.rainGaugeId,
+                  orElse: () => RainGaugeEntity.empty(),
+                )
           : RainGaugeEntity.empty();
 
       final rainGauge = existingGauge.copyWith(
@@ -210,7 +213,7 @@ class _RainGaugeFormPageState extends ConsumerState<RainGaugeFormPage> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -231,9 +234,18 @@ class _RainGaugeFormPageState extends ConsumerState<RainGaugeFormPage> {
                       ),
                       items: const [
                         DropdownMenuItem(value: 'active', child: Text('Ativo')),
-                        DropdownMenuItem(value: 'maintenance', child: Text('Em Manutenção')),
-                        DropdownMenuItem(value: 'inactive', child: Text('Inativo')),
-                        DropdownMenuItem(value: 'offline', child: Text('Offline')),
+                        DropdownMenuItem(
+                          value: 'maintenance',
+                          child: Text('Em Manutenção'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'inactive',
+                          child: Text('Inativo'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'offline',
+                          child: Text('Offline'),
+                        ),
                       ],
                       onChanged: (value) {
                         if (value != null) {
@@ -255,18 +267,21 @@ class _RainGaugeFormPageState extends ConsumerState<RainGaugeFormPage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
             SizedBox(
               height: 50,
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _save,
-                icon: _isLoading 
+                icon: _isLoading
                     ? const SizedBox(
-                        width: 20, 
-                        height: 20, 
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      ) 
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
                     : const Icon(Icons.save),
                 label: Text(_isLoading ? 'Salvando...' : 'Salvar'),
               ),
@@ -308,9 +323,9 @@ class _RainGaugeFormPageState extends ConsumerState<RainGaugeFormPage> {
       if (mounted) {
         setState(() => _isLoading = false);
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Pluviômetro excluído')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Pluviômetro excluído')));
           context.pop();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(

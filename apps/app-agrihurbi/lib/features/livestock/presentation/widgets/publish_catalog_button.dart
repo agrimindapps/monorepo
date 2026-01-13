@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import '../notifiers/catalog_publisher_notifier.dart';
 
 /// Widget de botão para publicar catálogo no Firebase Storage
-/// 
+///
 /// Exibe:
 /// - Botão de publicação
 /// - Loading state
@@ -18,7 +18,7 @@ class PublishCatalogButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(catalogPublisherProvider);
     final notifier = ref.read(catalogPublisherProvider.notifier);
-    
+
     return Card(
       elevation: 2,
       margin: const EdgeInsets.all(16),
@@ -44,23 +44,23 @@ class PublishCatalogButton extends ConsumerWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Descrição
             Text(
               'Atualiza o catálogo de bovinos e equinos para todos os usuários.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Botão de publicação
             ElevatedButton.icon(
-              onPressed: state.isPublishing 
-                  ? null 
+              onPressed: state.isPublishing
+                  ? null
                   : () => _showConfirmDialog(context, notifier),
               icon: state.isPublishing
                   ? const SizedBox(
@@ -73,9 +73,7 @@ class PublishCatalogButton extends ConsumerWidget {
                     )
                   : const Icon(Icons.cloud_upload),
               label: Text(
-                state.isPublishing 
-                    ? 'Publicando...' 
-                    : 'Publicar Agora',
+                state.isPublishing ? 'Publicando...' : 'Publicar Agora',
               ),
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
@@ -83,18 +81,19 @@ class PublishCatalogButton extends ConsumerWidget {
                 foregroundColor: Colors.white,
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Última publicação
             if (state.lastPublished != null)
               _buildInfoRow(
                 context,
                 icon: Icons.check_circle,
                 iconColor: Colors.green,
-                text: 'Última publicação: ${_formatDateTime(state.lastPublished!)}',
+                text:
+                    'Última publicação: ${_formatDateTime(state.lastPublished!)}',
               ),
-            
+
             // Mensagem de sucesso
             if (state.successMessage != null)
               Padding(
@@ -106,7 +105,7 @@ class PublishCatalogButton extends ConsumerWidget {
                   onDismiss: () => notifier.clearMessages(),
                 ),
               ),
-            
+
             // Mensagem de erro
             if (state.errorMessage != null)
               Padding(
@@ -123,7 +122,7 @@ class PublishCatalogButton extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildInfoRow(
     BuildContext context, {
     required IconData icon,
@@ -135,15 +134,12 @@ class PublishCatalogButton extends ConsumerWidget {
         Icon(icon, size: 16, color: iconColor),
         const SizedBox(width: 8),
         Expanded(
-          child: Text(
-            text,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
+          child: Text(text, style: Theme.of(context).textTheme.bodySmall),
         ),
       ],
     );
   }
-  
+
   Widget _buildMessageCard(
     BuildContext context, {
     required String message,
@@ -153,8 +149,8 @@ class PublishCatalogButton extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isError 
-            ? Colors.red.withValues(alpha: 0.1) 
+        color: isError
+            ? Colors.red.withValues(alpha: 0.1)
             : Colors.green.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
@@ -189,7 +185,7 @@ class PublishCatalogButton extends ConsumerWidget {
       ),
     );
   }
-  
+
   Future<void> _showConfirmDialog(
     BuildContext context,
     CatalogPublisherNotifier notifier,
@@ -226,12 +222,12 @@ class PublishCatalogButton extends ConsumerWidget {
         ],
       ),
     );
-    
+
     if (confirm == true) {
       await notifier.publishCatalog();
     }
   }
-  
+
   String _formatDateTime(DateTime dateTime) {
     final formatter = DateFormat('dd/MM/yyyy \'às\' HH:mm');
     return formatter.format(dateTime);

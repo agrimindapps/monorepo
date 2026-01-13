@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import '../widgets/admin_layout.dart';
 
 /// Dashboard administrativo para gerenciar logs de erros web
-/// 
+///
 /// Design profissional inspirado no Firebase Crashlytics com:
 /// - Cards de estatísticas elegantes
 /// - Tabela de problemas com tendências
@@ -46,14 +46,14 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     final filters = ErrorLogFilters(
       status: _statusFilter,
       type: _typeFilter,
       severity: _severityFilter,
       limit: 100,
     );
-    
+
     final errorsAsync = ref.watch(errorLogStreamProvider(filters));
     final countsAsync = ref.watch(errorLogCountsProvider);
 
@@ -84,9 +84,9 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
           children: [
             // Stats Overview
             _buildStatsOverview(countsAsync, isDark),
-            
+
             const SizedBox(height: 24),
-            
+
             // Problems Section
             _buildProblemsSection(errorsAsync, isDark),
           ],
@@ -142,63 +142,109 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
         return LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 800;
-            
+
             if (isWide) {
               return Row(
                 children: [
-                  Expanded(child: _buildStatCard(
-                    label: 'Total de Erros',
-                    value: total,
-                    icon: Icons.bug_report_outlined,
-                    color: const Color(0xFF4285F4),
-                    isDark: isDark,
-                  )),
+                  Expanded(
+                    child: _buildStatCard(
+                      label: 'Total de Erros',
+                      value: total,
+                      icon: Icons.bug_report_outlined,
+                      color: const Color(0xFF4285F4),
+                      isDark: isDark,
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard(
-                    label: 'Novos',
-                    value: newCount,
-                    icon: Icons.fiber_new_outlined,
-                    color: const Color(0xFFEA4335),
-                    isDark: isDark,
-                    highlight: newCount > 0,
-                  )),
+                  Expanded(
+                    child: _buildStatCard(
+                      label: 'Novos',
+                      value: newCount,
+                      icon: Icons.fiber_new_outlined,
+                      color: const Color(0xFFEA4335),
+                      isDark: isDark,
+                      highlight: newCount > 0,
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard(
-                    label: 'Investigando',
-                    value: investigating,
-                    icon: Icons.search_outlined,
-                    color: const Color(0xFFFBBC04),
-                    isDark: isDark,
-                  )),
+                  Expanded(
+                    child: _buildStatCard(
+                      label: 'Investigando',
+                      value: investigating,
+                      icon: Icons.search_outlined,
+                      color: const Color(0xFFFBBC04),
+                      isDark: isDark,
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard(
-                    label: 'Corrigidos',
-                    value: fixed,
-                    icon: Icons.check_circle_outline,
-                    color: const Color(0xFF34A853),
-                    isDark: isDark,
-                  )),
+                  Expanded(
+                    child: _buildStatCard(
+                      label: 'Corrigidos',
+                      value: fixed,
+                      icon: Icons.check_circle_outline,
+                      color: const Color(0xFF34A853),
+                      isDark: isDark,
+                    ),
+                  ),
                   const SizedBox(width: 16),
-                  Expanded(child: _buildStatCard(
-                    label: 'Ignorados',
-                    value: ignored,
-                    icon: Icons.do_not_disturb_alt_outlined,
-                    color: const Color(0xFF9AA0A6),
-                    isDark: isDark,
-                  )),
+                  Expanded(
+                    child: _buildStatCard(
+                      label: 'Ignorados',
+                      value: ignored,
+                      icon: Icons.do_not_disturb_alt_outlined,
+                      color: const Color(0xFF9AA0A6),
+                      isDark: isDark,
+                    ),
+                  ),
                 ],
               );
             }
-            
+
             return Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                _buildStatCard(label: 'Total', value: total, icon: Icons.bug_report_outlined, color: const Color(0xFF4285F4), isDark: isDark, compact: true),
-                _buildStatCard(label: 'Novos', value: newCount, icon: Icons.fiber_new_outlined, color: const Color(0xFFEA4335), isDark: isDark, compact: true, highlight: newCount > 0),
-                _buildStatCard(label: 'Investigando', value: investigating, icon: Icons.search_outlined, color: const Color(0xFFFBBC04), isDark: isDark, compact: true),
-                _buildStatCard(label: 'Corrigidos', value: fixed, icon: Icons.check_circle_outline, color: const Color(0xFF34A853), isDark: isDark, compact: true),
-                _buildStatCard(label: 'Ignorados', value: ignored, icon: Icons.do_not_disturb_alt_outlined, color: const Color(0xFF9AA0A6), isDark: isDark, compact: true),
+                _buildStatCard(
+                  label: 'Total',
+                  value: total,
+                  icon: Icons.bug_report_outlined,
+                  color: const Color(0xFF4285F4),
+                  isDark: isDark,
+                  compact: true,
+                ),
+                _buildStatCard(
+                  label: 'Novos',
+                  value: newCount,
+                  icon: Icons.fiber_new_outlined,
+                  color: const Color(0xFFEA4335),
+                  isDark: isDark,
+                  compact: true,
+                  highlight: newCount > 0,
+                ),
+                _buildStatCard(
+                  label: 'Investigando',
+                  value: investigating,
+                  icon: Icons.search_outlined,
+                  color: const Color(0xFFFBBC04),
+                  isDark: isDark,
+                  compact: true,
+                ),
+                _buildStatCard(
+                  label: 'Corrigidos',
+                  value: fixed,
+                  icon: Icons.check_circle_outline,
+                  color: const Color(0xFF34A853),
+                  isDark: isDark,
+                  compact: true,
+                ),
+                _buildStatCard(
+                  label: 'Ignorados',
+                  value: ignored,
+                  icon: Icons.do_not_disturb_alt_outlined,
+                  color: const Color(0xFF9AA0A6),
+                  isDark: isDark,
+                  compact: true,
+                ),
               ],
             );
           },
@@ -220,21 +266,23 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
     final textColor = isDark ? Colors.white : Colors.black87;
     final subtextColor = isDark ? Colors.white60 : Colors.black54;
 
-    return AnimatedContainer(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut, 
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       constraints: compact ? const BoxConstraints(minWidth: 120) : null,
       padding: EdgeInsets.all(compact ? 16 : 20),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: highlight 
+          color: highlight
               ? color.withValues(alpha: 0.5)
               : (isDark ? Colors.white10 : Colors.grey.shade200),
           width: highlight ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: highlight 
+            color: highlight
                 ? color.withValues(alpha: 0.15)
                 : Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: highlight ? 20 : 10,
@@ -287,16 +335,22 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
 
   Widget _buildStatsLoading(bool isDark) {
     return Row(
-      children: List.generate(5, (i) => Expanded(
-        child: AnimatedContainer(duration: const Duration(milliseconds: 300), 
-          margin: EdgeInsets.only(right: i < 4 ? 16 : 0),
-          height: 100,
-          decoration: BoxDecoration(
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(12),
+      children: List.generate(
+        5,
+        (i) => Expanded(
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            margin: EdgeInsets.only(right: i < 4 ? 16 : 0),
+            height: 100,
+            decoration: BoxDecoration(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 
@@ -311,7 +365,9 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
     final bgColor = isDark ? const Color(0xFF1E1E2D) : Colors.white;
     final borderColor = isDark ? Colors.white10 : Colors.grey.shade200;
 
-    return AnimatedContainer(duration: const Duration(milliseconds: 300), curve: Curves.easeInOut, 
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
@@ -322,14 +378,14 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
         children: [
           // Header com título e busca
           _buildProblemsHeader(isDark),
-          
+
           Divider(height: 1, color: borderColor),
-          
+
           // Filtros
           _buildFiltersBar(isDark),
-          
+
           Divider(height: 1, color: borderColor),
-          
+
           // Lista de erros
           errorsAsync.when(
             loading: () => _buildListLoading(isDark),
@@ -375,7 +431,9 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
             width: 250,
             height: 40,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.grey.shade100,
               borderRadius: BorderRadius.circular(8),
             ),
             child: TextField(
@@ -386,7 +444,10 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
                 hintStyle: TextStyle(color: subtextColor, fontSize: 14),
                 prefixIcon: Icon(Icons.search, color: subtextColor, size: 20),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
               ),
               onChanged: (value) => setState(() => _searchQuery = value),
             ),
@@ -394,7 +455,9 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
           const SizedBox(width: 12),
           // Sort button
           Tooltip(
-            message: _sortAscending ? 'Mais antigos primeiro' : 'Mais recentes primeiro',
+            message: _sortAscending
+                ? 'Mais antigos primeiro'
+                : 'Mais recentes primeiro',
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -404,7 +467,9 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -422,7 +487,8 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
   }
 
   Widget _buildFiltersBar(bool isDark) {
-    final hasFilters = _statusFilter != null || _typeFilter != null || _severityFilter != null;
+    final hasFilters =
+        _statusFilter != null || _typeFilter != null || _severityFilter != null;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -433,32 +499,52 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
           if (hasFilters) ...[
             _buildClearFiltersButton(isDark),
             const SizedBox(width: 12),
-            Container(width: 1, height: 24, color: isDark ? Colors.white10 : Colors.grey.shade300),
+            Container(
+              width: 1,
+              height: 24,
+              color: isDark ? Colors.white10 : Colors.grey.shade300,
+            ),
             const SizedBox(width: 12),
           ],
-          
+
           // Status filters
-          _buildFilterChip('Todos', _statusFilter == null, () => setState(() => _statusFilter = null), isDark),
-          ...ErrorStatus.values.map((s) => _buildFilterChip(
-            s.displayName, 
-            _statusFilter == s, 
-            () => setState(() => _statusFilter = _statusFilter == s ? null : s),
+          _buildFilterChip(
+            'Todos',
+            _statusFilter == null,
+            () => setState(() => _statusFilter = null),
             isDark,
-            color: _getStatusColor(s),
-          )),
-          
+          ),
+          ...ErrorStatus.values.map(
+            (s) => _buildFilterChip(
+              s.displayName,
+              _statusFilter == s,
+              () =>
+                  setState(() => _statusFilter = _statusFilter == s ? null : s),
+              isDark,
+              color: _getStatusColor(s),
+            ),
+          ),
+
           const SizedBox(width: 8),
-          Container(width: 1, height: 24, color: isDark ? Colors.white10 : Colors.grey.shade300),
+          Container(
+            width: 1,
+            height: 24,
+            color: isDark ? Colors.white10 : Colors.grey.shade300,
+          ),
           const SizedBox(width: 8),
-          
+
           // Severity filters
-          ...ErrorSeverity.values.map((s) => _buildFilterChip(
-            s.displayName,
-            _severityFilter == s,
-            () => setState(() => _severityFilter = _severityFilter == s ? null : s),
-            isDark,
-            color: _getSeverityColor(s),
-          )),
+          ...ErrorSeverity.values.map(
+            (s) => _buildFilterChip(
+              s.displayName,
+              _severityFilter == s,
+              () => setState(
+                () => _severityFilter = _severityFilter == s ? null : s,
+              ),
+              isDark,
+              color: _getSeverityColor(s),
+            ),
+          ),
         ],
       ),
     );
@@ -500,9 +586,15 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
     );
   }
 
-  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap, bool isDark, {Color? color}) {
+  Widget _buildFilterChip(
+    String label,
+    bool isSelected,
+    VoidCallback onTap,
+    bool isDark, {
+    Color? color,
+  }) {
     final chipColor = color ?? (isDark ? Colors.white : Colors.black87);
-    
+
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Material(
@@ -513,12 +605,14 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
             decoration: BoxDecoration(
-              color: isSelected 
+              color: isSelected
                   ? chipColor.withValues(alpha: 0.15)
-                  : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.grey.shade100),
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.05)
+                        : Colors.grey.shade100),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isSelected 
+                color: isSelected
                     ? chipColor.withValues(alpha: 0.5)
                     : Colors.transparent,
               ),
@@ -526,7 +620,9 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
             child: Text(
               label,
               style: TextStyle(
-                color: isSelected ? chipColor : (isDark ? Colors.white70 : Colors.black54),
+                color: isSelected
+                    ? chipColor
+                    : (isDark ? Colors.white70 : Colors.black54),
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
@@ -541,16 +637,21 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
     var filtered = errors;
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
-      filtered = errors.where((e) =>
-        e.message.toLowerCase().contains(query) ||
-        (e.stackTrace?.toLowerCase().contains(query) ?? false)
-      ).toList();
+      filtered = errors
+          .where(
+            (e) =>
+                e.message.toLowerCase().contains(query) ||
+                (e.stackTrace?.toLowerCase().contains(query) ?? false),
+          )
+          .toList();
     }
-    
-    filtered.sort((a, b) => _sortAscending 
-        ? a.createdAt.compareTo(b.createdAt) 
-        : b.createdAt.compareTo(a.createdAt));
-        
+
+    filtered.sort(
+      (a, b) => _sortAscending
+          ? a.createdAt.compareTo(b.createdAt)
+          : b.createdAt.compareTo(a.createdAt),
+    );
+
     return filtered;
   }
 
@@ -566,8 +667,10 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
       itemBuilder: (context, index) => _ErrorCard(
         error: errors[index],
         isDark: isDark,
-        onStatusChanged: (status, notes) => _updateErrorStatus(errors[index], status, notes),
-        onSeverityChanged: (severity) => _updateErrorSeverity(errors[index], severity),
+        onStatusChanged: (status, notes) =>
+            _updateErrorStatus(errors[index], status, notes),
+        onSeverityChanged: (severity) =>
+            _updateErrorSeverity(errors[index], severity),
         onDelete: () => _deleteError(errors[index]),
       ),
     );
@@ -607,7 +710,11 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.error_outline, size: 48, color: Colors.red.withValues(alpha: 0.5)),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.red.withValues(alpha: 0.5),
+            ),
             const SizedBox(height: 16),
             Text(
               'Erro ao carregar logs',
@@ -677,29 +784,42 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
   // ACTIONS
   // ════════════════════════════════════════════════════════════════════════════
 
-  Future<void> _updateErrorStatus(ErrorLogEntity error, ErrorStatus status, String? notes) async {
+  Future<void> _updateErrorStatus(
+    ErrorLogEntity error,
+    ErrorStatus status,
+    String? notes,
+  ) async {
     try {
-      await ref.read(errorLogServiceProvider).updateErrorStatus(
-        error.id,
-        status,
-        adminNotes: notes,
-      );
+      await ref
+          .read(errorLogServiceProvider)
+          .updateErrorStatus(error.id, status, adminNotes: notes);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Erro ao atualizar: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
 
-  Future<void> _updateErrorSeverity(ErrorLogEntity error, ErrorSeverity severity) async {
+  Future<void> _updateErrorSeverity(
+    ErrorLogEntity error,
+    ErrorSeverity severity,
+  ) async {
     try {
-      await ref.read(errorLogServiceProvider).updateErrorSeverity(error.id, severity);
+      await ref
+          .read(errorLogServiceProvider)
+          .updateErrorSeverity(error.id, severity);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao atualizar: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Erro ao atualizar: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -712,7 +832,10 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
         title: const Text('Confirmar exclusão'),
         content: const Text('Deseja realmente excluir este erro?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -728,7 +851,10 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erro ao excluir: $e'), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text('Erro ao excluir: $e'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }
@@ -741,16 +867,24 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
       builder: (ctx) => _CleanupDialog(
         onCleanup: (days) async {
           try {
-            final count = await ref.read(errorLogServiceProvider).cleanupOldErrors(days);
+            final count = await ref
+                .read(errorLogServiceProvider)
+                .cleanupOldErrors(days);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('$count erros removidos'), backgroundColor: Colors.green),
+                SnackBar(
+                  content: Text('$count erros removidos'),
+                  backgroundColor: Colors.green,
+                ),
               );
             }
           } catch (e) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erro: $e'), backgroundColor: Colors.red),
+                SnackBar(
+                  content: Text('Erro: $e'),
+                  backgroundColor: Colors.red,
+                ),
               );
             }
           }
@@ -761,20 +895,29 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
 
   Color _getStatusColor(ErrorStatus status) {
     switch (status) {
-      case ErrorStatus.newError: return const Color(0xFFEA4335);
-      case ErrorStatus.investigating: return const Color(0xFFFBBC04);
-      case ErrorStatus.fixed: return const Color(0xFF34A853);
-      case ErrorStatus.ignored: return const Color(0xFF9AA0A6);
-      case ErrorStatus.wontFix: return const Color(0xFF5F6368);
+      case ErrorStatus.newError:
+        return const Color(0xFFEA4335);
+      case ErrorStatus.investigating:
+        return const Color(0xFFFBBC04);
+      case ErrorStatus.fixed:
+        return const Color(0xFF34A853);
+      case ErrorStatus.ignored:
+        return const Color(0xFF9AA0A6);
+      case ErrorStatus.wontFix:
+        return const Color(0xFF5F6368);
     }
   }
 
   Color _getSeverityColor(ErrorSeverity severity) {
     switch (severity) {
-      case ErrorSeverity.low: return const Color(0xFF4285F4);
-      case ErrorSeverity.medium: return const Color(0xFFFBBC04);
-      case ErrorSeverity.high: return const Color(0xFFEA4335);
-      case ErrorSeverity.critical: return const Color(0xFF9C27B0);
+      case ErrorSeverity.low:
+        return const Color(0xFF4285F4);
+      case ErrorSeverity.medium:
+        return const Color(0xFFFBBC04);
+      case ErrorSeverity.high:
+        return const Color(0xFFEA4335);
+      case ErrorSeverity.critical:
+        return const Color(0xFF9C27B0);
     }
   }
 }
@@ -832,8 +975,10 @@ class _ErrorCardState extends State<_ErrorCard> {
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        color: _isHovered 
-            ? (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade50)
+        color: _isHovered
+            ? (isDark
+                  ? Colors.white.withValues(alpha: 0.02)
+                  : Colors.grey.shade50)
             : Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(20),
@@ -891,9 +1036,9 @@ class _ErrorCardState extends State<_ErrorCard> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Error message title
               Text(
                 _getErrorTitle(error.message),
@@ -906,9 +1051,9 @@ class _ErrorCardState extends State<_ErrorCard> {
                 maxLines: _isExpanded ? null : 2,
                 overflow: _isExpanded ? null : TextOverflow.ellipsis,
               ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Error message preview
               Stack(
                 children: [
@@ -949,29 +1094,39 @@ class _ErrorCardState extends State<_ErrorCard> {
                   ),
                 ],
               ),
-              
+
               const SizedBox(height: 12),
-              
+
               // Metadata row
               Wrap(
                 spacing: 16,
                 runSpacing: 8,
                 children: [
-                  _buildMetaItem(Icons.access_time, _formatDate(error.createdAt)),
+                  _buildMetaItem(
+                    Icons.access_time,
+                    _formatDate(error.createdAt),
+                  ),
                   _buildMetaItem(Icons.computer, error.platform),
                   if (error.sessionId != null)
-                    _buildMetaItem(Icons.fingerprint, error.sessionId!.substring(0, 8)),
+                    _buildMetaItem(
+                      Icons.fingerprint,
+                      error.sessionId!.substring(0, 8),
+                    ),
                   if (error.occurrences > 1)
-                    _buildMetaItem(Icons.repeat, '${error.occurrences} ocorrências'),
+                    _buildMetaItem(
+                      Icons.repeat,
+                      '${error.occurrences} ocorrências',
+                    ),
                 ],
               ),
-              
+
               // Expanded content
               if (_isExpanded) ...[
                 const SizedBox(height: 16),
-                
+
                 // Stack trace
-                if (error.stackTrace != null && error.stackTrace!.isNotEmpty) ...[
+                if (error.stackTrace != null &&
+                    error.stackTrace!.isNotEmpty) ...[
                   _buildExpandedSection(
                     title: 'Stack Trace',
                     icon: Icons.code,
@@ -981,7 +1136,9 @@ class _ErrorCardState extends State<_ErrorCard> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.black38 : Colors.grey.shade100,
+                            color: isDark
+                                ? Colors.black38
+                                : Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: SelectableText(
@@ -998,7 +1155,10 @@ class _ErrorCardState extends State<_ErrorCard> {
                           right: 8,
                           top: 8,
                           child: InkWell(
-                            onTap: () => _copyToClipboard(error.stackTrace!, 'Stack trace'),
+                            onTap: () => _copyToClipboard(
+                              error.stackTrace!,
+                              'Stack trace',
+                            ),
                             borderRadius: BorderRadius.circular(4),
                             child: Container(
                               padding: const EdgeInsets.all(6),
@@ -1009,9 +1169,19 @@ class _ErrorCardState extends State<_ErrorCard> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.copy, size: 14, color: subtextColor),
+                                  Icon(
+                                    Icons.copy,
+                                    size: 14,
+                                    color: subtextColor,
+                                  ),
                                   const SizedBox(width: 4),
-                                  Text('Copiar', style: TextStyle(color: subtextColor, fontSize: 10)),
+                                  Text(
+                                    'Copiar',
+                                    style: TextStyle(
+                                      color: subtextColor,
+                                      fontSize: 10,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -1021,9 +1191,10 @@ class _ErrorCardState extends State<_ErrorCard> {
                     ),
                   ),
                 ],
-                
+
                 // Admin notes
-                if (error.adminNotes != null && error.adminNotes!.isNotEmpty) ...[
+                if (error.adminNotes != null &&
+                    error.adminNotes!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   _buildExpandedSection(
                     title: 'Notas do Admin',
@@ -1034,7 +1205,9 @@ class _ErrorCardState extends State<_ErrorCard> {
                       decoration: BoxDecoration(
                         color: Colors.amber.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+                        border: Border.all(
+                          color: Colors.amber.withValues(alpha: 0.3),
+                        ),
                       ),
                       child: Text(
                         error.adminNotes!,
@@ -1047,32 +1220,43 @@ class _ErrorCardState extends State<_ErrorCard> {
                     ),
                   ),
                 ],
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Quick actions
                 Row(
                   children: [
-                    Expanded(child: _buildQuickActionButton(
-                      label: 'Investigar',
-                      icon: Icons.search,
-                      color: const Color(0xFFFBBC04),
-                      onPressed: () => widget.onStatusChanged(ErrorStatus.investigating, null),
-                    )),
+                    Expanded(
+                      child: _buildQuickActionButton(
+                        label: 'Investigar',
+                        icon: Icons.search,
+                        color: const Color(0xFFFBBC04),
+                        onPressed: () => widget.onStatusChanged(
+                          ErrorStatus.investigating,
+                          null,
+                        ),
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildQuickActionButton(
-                      label: 'Marcar Corrigido',
-                      icon: Icons.check_circle,
-                      color: const Color(0xFF34A853),
-                      onPressed: () => widget.onStatusChanged(ErrorStatus.fixed, null),
-                    )),
+                    Expanded(
+                      child: _buildQuickActionButton(
+                        label: 'Marcar Corrigido',
+                        icon: Icons.check_circle,
+                        color: const Color(0xFF34A853),
+                        onPressed: () =>
+                            widget.onStatusChanged(ErrorStatus.fixed, null),
+                      ),
+                    ),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildQuickActionButton(
-                      label: 'Ignorar',
-                      icon: Icons.do_not_disturb,
-                      color: const Color(0xFF9AA0A6),
-                      onPressed: () => widget.onStatusChanged(ErrorStatus.ignored, null),
-                    )),
+                    Expanded(
+                      child: _buildQuickActionButton(
+                        label: 'Ignorar',
+                        icon: Icons.do_not_disturb,
+                        color: const Color(0xFF9AA0A6),
+                        onPressed: () =>
+                            widget.onStatusChanged(ErrorStatus.ignored, null),
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -1089,7 +1273,8 @@ class _ErrorCardState extends State<_ErrorCard> {
     IconData? icon,
     bool filled = false,
   }) {
-    return AnimatedContainer(duration: const Duration(milliseconds: 300), 
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: filled ? color : color.withValues(alpha: 0.1),
@@ -1149,10 +1334,7 @@ class _ErrorCardState extends State<_ErrorCard> {
       children: [
         Icon(icon, size: 14, color: color),
         const SizedBox(width: 4),
-        Text(
-          text,
-          style: TextStyle(color: color, fontSize: 12),
-        ),
+        Text(text, style: TextStyle(color: color, fontSize: 12)),
       ],
     );
   }
@@ -1207,7 +1389,9 @@ class _ErrorCardState extends State<_ErrorCard> {
 
   String _getErrorTitle(String message) {
     final lines = message.split('\n');
-    return lines.first.length > 100 ? '${lines.first.substring(0, 100)}...' : lines.first;
+    return lines.first.length > 100
+        ? '${lines.first.substring(0, 100)}...'
+        : lines.first;
   }
 
   String _formatDate(DateTime date) {
@@ -1216,48 +1400,75 @@ class _ErrorCardState extends State<_ErrorCard> {
 
   Color _getTypeColor(ErrorType type) {
     switch (type) {
-      case ErrorType.exception: return const Color(0xFFEA4335);
-      case ErrorType.assertion: return const Color(0xFFFBBC04);
-      case ErrorType.network: return const Color(0xFF4285F4);
-      case ErrorType.timeout: return const Color(0xFF9C27B0);
-      case ErrorType.parsing: return const Color(0xFF00BCD4);
-      case ErrorType.render: return const Color(0xFFFF5722);
-      case ErrorType.state: return const Color(0xFF795548);
-      case ErrorType.navigation: return const Color(0xFF607D8B);
-      case ErrorType.other: return const Color(0xFF9AA0A6);
+      case ErrorType.exception:
+        return const Color(0xFFEA4335);
+      case ErrorType.assertion:
+        return const Color(0xFFFBBC04);
+      case ErrorType.network:
+        return const Color(0xFF4285F4);
+      case ErrorType.timeout:
+        return const Color(0xFF9C27B0);
+      case ErrorType.parsing:
+        return const Color(0xFF00BCD4);
+      case ErrorType.render:
+        return const Color(0xFFFF5722);
+      case ErrorType.state:
+        return const Color(0xFF795548);
+      case ErrorType.navigation:
+        return const Color(0xFF607D8B);
+      case ErrorType.other:
+        return const Color(0xFF9AA0A6);
     }
   }
 
   IconData _getTypeIcon(ErrorType type) {
     switch (type) {
-      case ErrorType.exception: return Icons.error_outline;
-      case ErrorType.assertion: return Icons.warning_amber;
-      case ErrorType.network: return Icons.wifi_off;
-      case ErrorType.timeout: return Icons.timer_off;
-      case ErrorType.parsing: return Icons.code;
-      case ErrorType.render: return Icons.brush;
-      case ErrorType.state: return Icons.memory;
-      case ErrorType.navigation: return Icons.navigation;
-      case ErrorType.other: return Icons.help_outline;
+      case ErrorType.exception:
+        return Icons.error_outline;
+      case ErrorType.assertion:
+        return Icons.warning_amber;
+      case ErrorType.network:
+        return Icons.wifi_off;
+      case ErrorType.timeout:
+        return Icons.timer_off;
+      case ErrorType.parsing:
+        return Icons.code;
+      case ErrorType.render:
+        return Icons.brush;
+      case ErrorType.state:
+        return Icons.memory;
+      case ErrorType.navigation:
+        return Icons.navigation;
+      case ErrorType.other:
+        return Icons.help_outline;
     }
   }
 
   Color _getStatusColor(ErrorStatus status) {
     switch (status) {
-      case ErrorStatus.newError: return const Color(0xFFEA4335);
-      case ErrorStatus.investigating: return const Color(0xFFFBBC04);
-      case ErrorStatus.fixed: return const Color(0xFF34A853);
-      case ErrorStatus.ignored: return const Color(0xFF9AA0A6);
-      case ErrorStatus.wontFix: return const Color(0xFF5F6368);
+      case ErrorStatus.newError:
+        return const Color(0xFFEA4335);
+      case ErrorStatus.investigating:
+        return const Color(0xFFFBBC04);
+      case ErrorStatus.fixed:
+        return const Color(0xFF34A853);
+      case ErrorStatus.ignored:
+        return const Color(0xFF9AA0A6);
+      case ErrorStatus.wontFix:
+        return const Color(0xFF5F6368);
     }
   }
 
   Color _getSeverityColor(ErrorSeverity severity) {
     switch (severity) {
-      case ErrorSeverity.low: return const Color(0xFF4285F4);
-      case ErrorSeverity.medium: return const Color(0xFFFBBC04);
-      case ErrorSeverity.high: return const Color(0xFFEA4335);
-      case ErrorSeverity.critical: return const Color(0xFF9C27B0);
+      case ErrorSeverity.low:
+        return const Color(0xFF4285F4);
+      case ErrorSeverity.medium:
+        return const Color(0xFFFBBC04);
+      case ErrorSeverity.high:
+        return const Color(0xFFEA4335);
+      case ErrorSeverity.critical:
+        return const Color(0xFF9C27B0);
     }
   }
 
@@ -1366,7 +1577,9 @@ class _StatusDialogState extends State<_StatusDialog> {
             Navigator.pop(context);
             widget.onStatusChanged(
               _selectedStatus,
-              _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+              _notesController.text.trim().isEmpty
+                  ? null
+                  : _notesController.text.trim(),
             );
           },
           child: const Text('Salvar'),
@@ -1377,11 +1590,16 @@ class _StatusDialogState extends State<_StatusDialog> {
 
   Color _getStatusColor(ErrorStatus status) {
     switch (status) {
-      case ErrorStatus.newError: return const Color(0xFFEA4335);
-      case ErrorStatus.investigating: return const Color(0xFFFBBC04);
-      case ErrorStatus.fixed: return const Color(0xFF34A853);
-      case ErrorStatus.ignored: return const Color(0xFF9AA0A6);
-      case ErrorStatus.wontFix: return const Color(0xFF5F6368);
+      case ErrorStatus.newError:
+        return const Color(0xFFEA4335);
+      case ErrorStatus.investigating:
+        return const Color(0xFFFBBC04);
+      case ErrorStatus.fixed:
+        return const Color(0xFF34A853);
+      case ErrorStatus.ignored:
+        return const Color(0xFF9AA0A6);
+      case ErrorStatus.wontFix:
+        return const Color(0xFF5F6368);
     }
   }
 }
@@ -1409,10 +1627,7 @@ class _SeverityDialog extends StatelessWidget {
             leading: Container(
               width: 12,
               height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
             ),
             title: Text(severity.displayName),
             selected: isSelected,
@@ -1428,10 +1643,14 @@ class _SeverityDialog extends StatelessWidget {
 
   Color _getSeverityColor(ErrorSeverity severity) {
     switch (severity) {
-      case ErrorSeverity.low: return const Color(0xFF4285F4);
-      case ErrorSeverity.medium: return const Color(0xFFFBBC04);
-      case ErrorSeverity.high: return const Color(0xFFEA4335);
-      case ErrorSeverity.critical: return const Color(0xFF9C27B0);
+      case ErrorSeverity.low:
+        return const Color(0xFF4285F4);
+      case ErrorSeverity.medium:
+        return const Color(0xFFFBBC04);
+      case ErrorSeverity.high:
+        return const Color(0xFFEA4335);
+      case ErrorSeverity.critical:
+        return const Color(0xFF9C27B0);
     }
   }
 }
@@ -1466,7 +1685,8 @@ class _CleanupDialogState extends State<_CleanupDialog> {
               ButtonSegment(value: 90, label: Text('90 dias')),
             ],
             selected: {_selectedDays},
-            onSelectionChanged: (value) => setState(() => _selectedDays = value.first),
+            onSelectionChanged: (value) =>
+                setState(() => _selectedDays = value.first),
           ),
         ],
       ),
@@ -1485,7 +1705,11 @@ class _CleanupDialogState extends State<_CleanupDialog> {
                 },
           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
           child: _isLoading
-              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Limpar'),
         ),
       ],

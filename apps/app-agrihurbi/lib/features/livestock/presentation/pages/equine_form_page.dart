@@ -64,12 +64,12 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
       // Tenta encontrar primeiro no management provider
       final mgmtNotifier = ref.read(equinesManagementProvider.notifier);
       var equine = mgmtNotifier.findEquineById(widget.equineId!);
-      
+
       // Se não achar, tenta no provider de leitura principal
       if (equine == null) {
         final readNotifier = ref.read(equinesProvider.notifier);
         equine = readNotifier.getEquineById(widget.equineId!);
-        
+
         // Se ainda não achar, força carregamento (poderia usar loadEquineById se existisse no mgmt)
         if (equine == null) {
           await readNotifier.loadEquineById(widget.equineId!);
@@ -115,7 +115,8 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
   @override
   Widget build(BuildContext context) {
     final mgmtState = ref.watch(equinesManagementProvider);
-    final isOperating = mgmtState.isCreating || mgmtState.isUpdating || mgmtState.isDeleting;
+    final isOperating =
+        mgmtState.isCreating || mgmtState.isUpdating || mgmtState.isDeleting;
 
     return Scaffold(
       appBar: AppBar(
@@ -502,7 +503,7 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
     }
 
     final notifier = ref.read(equinesManagementProvider.notifier);
-    
+
     final equine = EquineEntity(
       id: widget.equineId ?? '',
       commonName: _commonNameController.text.trim(),
@@ -517,7 +518,8 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
       history: _historyController.text.trim(),
       isActive: _isActive,
       imageUrls: const [], // TODO: Implementar upload de imagens
-      createdAt: DateTime.now(), // Será ignorado/atualizado pelo backend/usecase
+      createdAt:
+          DateTime.now(), // Será ignorado/atualizado pelo backend/usecase
       updatedAt: DateTime.now(),
     );
 
@@ -530,7 +532,9 @@ class _EquineFormPageState extends ConsumerState<EquineFormPage> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Equino ${widget.isEditing ? "atualizado" : "criado"} com sucesso!'),
+          content: Text(
+            'Equino ${widget.isEditing ? "atualizado" : "criado"} com sucesso!',
+          ),
           backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );

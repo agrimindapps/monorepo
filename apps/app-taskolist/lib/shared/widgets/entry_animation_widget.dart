@@ -28,24 +28,23 @@ class _EntryAnimationWidgetState extends State<EntryAnimationWidget>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    );
+    _controller = AnimationController(vsync: this, duration: widget.duration);
 
-    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _opacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _offset = Tween<Offset>(
-      begin: Offset(0, widget.verticalOffset / 100), // Approximate pixel to fractional conversion logic if needed, but SlideTransition uses fractional relative to child size. 
-      // Actually SlideTransition offset is percentage of child size. 
+      begin: Offset(
+        0,
+        widget.verticalOffset / 100,
+      ), // Approximate pixel to fractional conversion logic if needed, but SlideTransition uses fractional relative to child size.
+      // Actually SlideTransition offset is percentage of child size.
       // To slide up from a bit down, we can use Offset(0, 0.5) for half height.
       // Let's use a small offset like 0.1 (10% of height)
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutQuart));
 
     _startAnimation();
   }
@@ -70,10 +69,7 @@ class _EntryAnimationWidgetState extends State<EntryAnimationWidget>
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: _opacity,
-      child: SlideTransition(
-        position: _offset,
-        child: widget.child,
-      ),
+      child: SlideTransition(position: _offset, child: widget.child),
     );
   }
 }

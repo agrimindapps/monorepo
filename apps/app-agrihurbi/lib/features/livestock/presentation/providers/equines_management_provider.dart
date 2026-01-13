@@ -43,7 +43,9 @@ class EquinesManagementState {
   }) {
     return EquinesManagementState(
       equines: equines ?? this.equines,
-      selectedEquine: clearSelectedEquine ? null : (selectedEquine ?? this.selectedEquine),
+      selectedEquine: clearSelectedEquine
+          ? null
+          : (selectedEquine ?? this.selectedEquine),
       isLoadingEquines: isLoadingEquines ?? this.isLoadingEquines,
       isCreating: isCreating ?? this.isCreating,
       isUpdating: isUpdating ?? this.isUpdating,
@@ -78,9 +80,12 @@ class EquinesManagementState {
 @riverpod
 class EquinesManagementNotifier extends _$EquinesManagementNotifier {
   GetEquinesUseCase get _getEquines => ref.read(getEquinesUseCaseProvider);
-  CreateEquineUseCase get _createEquine => ref.read(createEquineUseCaseProvider);
-  UpdateEquineUseCase get _updateEquine => ref.read(updateEquineUseCaseProvider);
-  DeleteEquineUseCase get _deleteEquine => ref.read(deleteEquineUseCaseProvider);
+  CreateEquineUseCase get _createEquine =>
+      ref.read(createEquineUseCaseProvider);
+  UpdateEquineUseCase get _updateEquine =>
+      ref.read(updateEquineUseCaseProvider);
+  DeleteEquineUseCase get _deleteEquine =>
+      ref.read(deleteEquineUseCaseProvider);
 
   @override
   EquinesManagementState build() {
@@ -115,15 +120,14 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
           isLoadingEquines: false,
         );
         debugPrint(
-            'EquinesManagementNotifier: Erro ao carregar equinos - ${failure.message}');
+          'EquinesManagementNotifier: Erro ao carregar equinos - ${failure.message}',
+        );
       },
       (loadedEquines) {
-        state = state.copyWith(
-          equines: loadedEquines,
-          isLoadingEquines: false,
-        );
+        state = state.copyWith(equines: loadedEquines, isLoadingEquines: false);
         debugPrint(
-            'EquinesManagementNotifier: Equinos carregados - ${loadedEquines.length}');
+          'EquinesManagementNotifier: Equinos carregados - ${loadedEquines.length}',
+        );
       },
     );
   }
@@ -135,7 +139,8 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
       clearSelectedEquine: equine == null,
     );
     debugPrint(
-        'EquinesManagementNotifier: Equino selecionado - ${equine?.id ?? "nenhum"}');
+      'EquinesManagementNotifier: Equino selecionado - ${equine?.id ?? "nenhum"}',
+    );
   }
 
   /// Encontra equino por ID
@@ -174,9 +179,9 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
 
   Future<bool> createEquine(EquineEntity equine) async {
     state = state.copyWith(isCreating: true, clearError: true);
-    
+
     final result = await _createEquine(CreateEquineParams(equine: equine));
-    
+
     return result.fold(
       (failure) {
         state = state.copyWith(
@@ -188,7 +193,7 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
       (createdEquine) {
         final updatedEquines = List<EquineEntity>.from(state.equines);
         updatedEquines.add(createdEquine);
-        
+
         state = state.copyWith(
           equines: updatedEquines,
           isCreating: false,
@@ -201,9 +206,9 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
 
   Future<bool> updateEquine(EquineEntity equine) async {
     state = state.copyWith(isUpdating: true, clearError: true);
-    
+
     final result = await _updateEquine(UpdateEquineParams(equine: equine));
-    
+
     return result.fold(
       (failure) {
         state = state.copyWith(
@@ -214,14 +219,16 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
       },
       (updatedEquine) {
         final updatedEquines = List<EquineEntity>.from(state.equines);
-        final index = updatedEquines.indexWhere((e) => e.id == updatedEquine.id);
-        
+        final index = updatedEquines.indexWhere(
+          (e) => e.id == updatedEquine.id,
+        );
+
         if (index != -1) {
           updatedEquines[index] = updatedEquine;
         } else {
           updatedEquines.add(updatedEquine);
         }
-        
+
         state = state.copyWith(
           equines: updatedEquines,
           isUpdating: false,
@@ -234,9 +241,11 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
 
   Future<bool> deleteEquine(String equineId) async {
     state = state.copyWith(isDeleting: true, clearError: true);
-    
-    final result = await _deleteEquine(DeleteEquineParams(equineId: equineId, confirmed: true));
-    
+
+    final result = await _deleteEquine(
+      DeleteEquineParams(equineId: equineId, confirmed: true),
+    );
+
     return result.fold(
       (failure) {
         state = state.copyWith(
@@ -248,7 +257,7 @@ class EquinesManagementNotifier extends _$EquinesManagementNotifier {
       (_) {
         final updatedEquines = List<EquineEntity>.from(state.equines);
         updatedEquines.removeWhere((e) => e.id == equineId);
-        
+
         state = state.copyWith(
           equines: updatedEquines,
           isDeleting: false,

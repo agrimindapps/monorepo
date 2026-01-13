@@ -81,11 +81,11 @@ class _WeatherMeasurementFormPageState
 
     try {
       final notifier = ref.read(weatherProvider.notifier);
-      
 
       // We'll use a generated ID for location for now, or the name as ID if unique
       // Ideally this comes from a Location selection
-      final locationId = 'loc_${_locationNameController.text.toLowerCase().replaceAll(' ', '_')}';
+      final locationId =
+          'loc_${_locationNameController.text.toLowerCase().replaceAll(' ', '_')}';
 
       final success = await notifier.createManualMeasurement(
         locationId: locationId,
@@ -115,7 +115,8 @@ class _WeatherMeasurementFormPageState
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                ref.read(weatherProvider).errorMessage ?? 'Erro ao salvar medição',
+                ref.read(weatherProvider).errorMessage ??
+                    'Erro ao salvar medição',
               ),
               backgroundColor: Colors.red,
             ),
@@ -141,9 +142,7 @@ class _WeatherMeasurementFormPageState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nova Medição'),
-      ),
+      appBar: AppBar(title: const Text('Nova Medição')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -181,10 +180,10 @@ class _WeatherMeasurementFormPageState
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
             _buildSectionHeader('Condições'),
-            
+
             Row(
               children: [
                 Expanded(
@@ -194,7 +193,10 @@ class _WeatherMeasurementFormPageState
                       labelText: 'Temp. (°C)',
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: true,
+                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty) return 'Obrigatório';
                       if (double.tryParse(value) == null) return 'Inválido';
@@ -210,7 +212,9 @@ class _WeatherMeasurementFormPageState
                       labelText: 'Umidade (%)',
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
                         final val = double.tryParse(value);
@@ -223,7 +227,7 @@ class _WeatherMeasurementFormPageState
               ],
             ),
             const SizedBox(height: 16),
-             Row(
+            Row(
               children: [
                 Expanded(
                   child: TextFormField(
@@ -232,7 +236,9 @@ class _WeatherMeasurementFormPageState
                       labelText: 'Chuva (mm)',
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -243,7 +249,9 @@ class _WeatherMeasurementFormPageState
                       labelText: 'Pressão (hPa)',
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
               ],
@@ -261,10 +269,19 @@ class _WeatherMeasurementFormPageState
                 DropdownMenuItem(value: 'unknown', child: Text('Desconhecido')),
                 DropdownMenuItem(value: 'sunny', child: Text('Ensolarado')),
                 DropdownMenuItem(value: 'cloudy', child: Text('Nublado')),
-                DropdownMenuItem(value: 'partly_cloudy', child: Text('Parcialmente Nublado')),
+                DropdownMenuItem(
+                  value: 'partly_cloudy',
+                  child: Text('Parcialmente Nublado'),
+                ),
                 DropdownMenuItem(value: 'rain', child: Text('Chuvoso')),
-                DropdownMenuItem(value: 'heavy_rain', child: Text('Chuva Forte')),
-                DropdownMenuItem(value: 'thunderstorm', child: Text('Tempestade')),
+                DropdownMenuItem(
+                  value: 'heavy_rain',
+                  child: Text('Chuva Forte'),
+                ),
+                DropdownMenuItem(
+                  value: 'thunderstorm',
+                  child: Text('Tempestade'),
+                ),
                 DropdownMenuItem(value: 'fog', child: Text('Neblina')),
               ],
               onChanged: (val) {
@@ -274,7 +291,7 @@ class _WeatherMeasurementFormPageState
 
             const SizedBox(height: 24),
             _buildSectionHeader('Vento (Opcional)'),
-             Row(
+            Row(
               children: [
                 Expanded(
                   child: TextFormField(
@@ -283,7 +300,9 @@ class _WeatherMeasurementFormPageState
                       labelText: 'Velocidade (km/h)',
                       border: OutlineInputBorder(),
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -295,7 +314,9 @@ class _WeatherMeasurementFormPageState
                       border: OutlineInputBorder(),
                       helperText: '0° = Norte, 90° = Leste',
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ),
               ],
@@ -345,9 +366,9 @@ class _WeatherMeasurementFormPageState
           Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
           const Divider(),
         ],

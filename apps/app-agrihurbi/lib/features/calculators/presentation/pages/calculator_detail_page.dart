@@ -7,8 +7,11 @@ import '../../domain/entities/calculation_template.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_template_service.dart';
+import '../providers/calculator_coordinator_provider.dart';
+import '../providers/calculator_execution_provider.dart';
+
 import '../providers/calculator_features_provider.dart';
-import '../providers/calculator_provider.dart';
+import '../providers/calculator_management_provider.dart';
 import '../widgets/calculation_result_display.dart';
 import '../widgets/parameter_input_widget.dart';
 
@@ -49,8 +52,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
   Future<void> _loadCalculatorData() async {
     if (!mounted) return; // ✅ Safety check
-    final provider = ref.read(calculatorProvider);
-    await provider.loadCalculatorById(widget.calculatorId);
+    await ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectAndPrepareCalculator(widget.calculatorId);
   }
 
   @override
@@ -59,8 +63,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       appBar: AppBar(
         title: Consumer(
           builder: (context, ref, child) {
-            final provider = ref.watch(calculatorProvider);
-            final calculator = provider.selectedCalculator;
+            final calculator = ref
+                .watch(calculatorCoordinatorProvider.notifier)
+                .selectedCalculator;
             return Text(calculator?.name ?? 'Calculadora');
           },
         ),
@@ -98,8 +103,8 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       ),
       body: Consumer(
         builder: (context, ref, child) {
-          final provider = ref.watch(calculatorProvider);
-          if (provider.isLoading) {
+          final managementState = ref.watch(calculatorManagementProvider);
+          if (managementState.isLoading) {
             return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +117,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             );
           }
 
-          if (provider.errorMessage != null) {
+          if (managementState.errorMessage != null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -129,7 +134,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    provider.errorMessage!,
+                    managementState.errorMessage!,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
@@ -143,32 +148,39 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
             );
           }
 
-          final calculator = provider.selectedCalculator;
+          final calculator = ref
+              .read(calculatorCoordinatorProvider.notifier)
+              .selectedCalculator;
           if (calculator == null) {
             return const Center(child: Text('Calculadora não encontrada'));
           }
 
-          return _buildCalculatorInterface(context, provider, calculator);
+          return _buildCalculatorInterface(context, calculator);
         },
       ),
       floatingActionButton: Consumer(
         builder: (context, ref, child) {
-          final provider = ref.watch(calculatorProvider);
-          if (provider.selectedCalculator == null) {
+          final calculator = ref
+              .read(calculatorCoordinatorProvider.notifier)
+              .selectedCalculator;
+          final executionState = ref.watch(calculatorExecutionProvider);
+          if (calculator == null) {
             return const SizedBox.shrink();
           }
           return FloatingActionButton.extended(
-            onPressed: provider.isCalculating
+            onPressed: executionState.isCalculating
                 ? null
-                : () => _executeCalculation(provider),
-            icon: provider.isCalculating
+                : () => _executeCalculation(),
+            icon: executionState.isCalculating
                 ? const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.calculate),
-            label: Text(provider.isCalculating ? 'Calculando...' : 'Calcular'),
+            label: Text(
+              executionState.isCalculating ? 'Calculando...' : 'Calcular',
+            ),
           );
         },
       ),
@@ -177,9 +189,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
   Widget _buildCalculatorInterface(
     BuildContext context,
-    CalculatorProvider provider,
     CalculatorEntity calculator,
   ) {
+    final executionState = ref.watch(calculatorExecutionProvider);
     return SingleChildScrollView(
       controller: _scrollController,
       padding: const EdgeInsets.all(16),
@@ -191,15 +203,15 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           const SizedBox(height: 24),
           Form(
             key: _formKey,
-            child: _buildParametersForm(context, provider, calculator),
+            child: _buildParametersForm(context, calculator),
           ),
 
           const SizedBox(height: 24),
-          _buildActionButtons(context, provider),
+          _buildActionButtons(context),
 
           const SizedBox(height: 24),
-          if (_showResults && provider.currentResult != null)
-            _buildResultsSection(context, provider),
+          if (_showResults && executionState.currentResult != null)
+            _buildResultsSection(context),
 
           const SizedBox(height: 100), // Espaço para o FAB
         ],
@@ -310,9 +322,10 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
 
   Widget _buildParametersForm(
     BuildContext context,
-    CalculatorProvider provider,
     CalculatorEntity calculator,
   ) {
+    final executionNotifier = ref.read(calculatorExecutionProvider.notifier);
+    final executionState = ref.watch(calculatorExecutionProvider);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -331,9 +344,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: ParameterInputWidget(
                   parameter: parameter,
-                  value: provider.currentInputs[parameter.id],
+                  value: executionState.currentInputs[parameter.id],
                   onChanged: (value) =>
-                      provider.updateInput(parameter.id, value),
+                      executionNotifier.updateInput(parameter.id, value),
                 ),
               ),
             ),
@@ -343,22 +356,20 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     );
   }
 
-  Widget _buildActionButtons(
-    BuildContext context,
-    CalculatorProvider provider,
-  ) {
+  Widget _buildActionButtons(BuildContext context) {
+    final executionNotifier = ref.read(calculatorExecutionProvider.notifier);
     return Row(
       children: [
         Expanded(
           child: OutlinedButton(
-            onPressed: () => _clearForm(provider),
+            onPressed: () => executionNotifier.clearInputs(),
             child: const Text('Limpar'),
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
           child: OutlinedButton(
-            onPressed: () => _loadTemplate(provider),
+            onPressed: _loadTemplate,
             child: const Text('Modelo'),
           ),
         ),
@@ -366,11 +377,8 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     );
   }
 
-  Widget _buildResultsSection(
-    BuildContext context,
-    CalculatorProvider provider,
-  ) {
-    final result = provider.currentResult!;
+  Widget _buildResultsSection(BuildContext context) {
+    final result = ref.read(calculatorExecutionProvider).currentResult!;
 
     return Card(
       child: Padding(
@@ -388,12 +396,12 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
                 ),
                 const Spacer(),
                 IconButton(
-                  onPressed: () => _shareResults(provider, result),
+                  onPressed: () => _shareResults(result),
                   icon: const Icon(Icons.share),
                   tooltip: 'Compartilhar resultados',
                 ),
                 IconButton(
-                  onPressed: () => _saveToHistory(provider, result),
+                  onPressed: () => _saveToHistory(result),
                   icon: const Icon(Icons.bookmark_add),
                   tooltip: 'Salvar no histórico',
                 ),
@@ -407,7 +415,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     );
   }
 
-  Future<void> _executeCalculation(CalculatorProvider provider) async {
+  Future<void> _executeCalculation() async {
     if (!_formKey.currentState!.validate()) {
       if (!mounted) return; // ✅ Safety check
       ScaffoldMessenger.of(context).showSnackBar(
@@ -419,7 +427,8 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       return;
     }
 
-    final success = await provider.executeCurrentCalculation();
+    final coordinator = ref.read(calculatorCoordinatorProvider.notifier);
+    final success = await coordinator.executeCalculationAndSave();
 
     if (!mounted) return; // ✅ Safety check after async operation
 
@@ -447,9 +456,11 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       }
     } else {
       if (mounted) {
+        final errorMessage =
+            ref.read(calculatorExecutionProvider).errorMessage;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(provider.errorMessage ?? 'Erro ao executar cálculo'),
+            content: Text(errorMessage ?? 'Erro ao executar cálculo'),
             backgroundColor: Colors.red,
           ),
         );
@@ -457,16 +468,11 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     }
   }
 
-  void _clearForm(CalculatorProvider provider) {
-    provider.clearInputs();
-    setState(() {
-      _showResults = false;
-    });
-    _formKey.currentState?.reset();
-  }
-
-  Future<void> _loadTemplate(CalculatorProvider provider) async {
-    if (!mounted || provider.selectedCalculator == null) return;
+  Future<void> _loadTemplate() async {
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
+    if (!mounted || calculator == null) return;
 
     try {
       CalculatorFeaturesNotifier? featuresProvider;
@@ -484,7 +490,6 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
         }
       }
 
-      final calculator = provider.selectedCalculator!;
       List<CalculationTemplate> templates;
       if (featuresProvider != null) {
         templates = await featuresProvider.getTemplatesForCalculator(
@@ -514,7 +519,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
       );
 
       if (selectedTemplate != null && mounted) {
-        provider.updateInputs(selectedTemplate.inputValues);
+        ref
+            .read(calculatorExecutionProvider.notifier)
+            .updateInputs(selectedTemplate.inputValues);
         if (featuresProvider != null) {
           await featuresProvider.markTemplateAsUsed(selectedTemplate.id);
         } else {
@@ -547,8 +554,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   Future<void> _toggleFavorite() async {
     if (!mounted) return;
 
-    final provider = ref.read(calculatorProvider);
-    final calculator = provider.selectedCalculator;
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
     if (calculator == null) return;
 
     try {
@@ -602,14 +610,13 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     }
   }
 
-  Future<void> _shareResults(
-    CalculatorProvider provider,
-    CalculationResult result,
-  ) async {
-    if (!mounted || provider.selectedCalculator == null) return;
+  Future<void> _shareResults(CalculationResult result) async {
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
+    if (!mounted || calculator == null) return;
 
     try {
-      final calculator = provider.selectedCalculator!;
       final shareText = _generateResultShareText(
         calculator.name,
         result.inputs,
@@ -665,14 +672,13 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
     }
   }
 
-  Future<void> _saveToHistory(
-    CalculatorProvider provider,
-    CalculationResult result,
-  ) async {
-    if (!mounted || provider.selectedCalculator == null) return;
+  Future<void> _saveToHistory(CalculationResult result) async {
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
+    if (!mounted || calculator == null) return;
 
     try {
-      final calculator = provider.selectedCalculator!;
       debugPrint('Salvando cálculo da ${calculator.name} no histórico');
 
       if (mounted) {
@@ -715,8 +721,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   Future<void> _shareCalculator() async {
     if (!mounted) return;
 
-    final provider = ref.read(calculatorProvider);
-    final calculator = provider.selectedCalculator;
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
     if (calculator == null) return;
 
     try {
@@ -774,9 +781,12 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   Future<void> _saveTemplate() async {
     if (!mounted) return;
 
-    final provider = ref.read(calculatorProvider);
-    final calculator = provider.selectedCalculator;
-    if (calculator == null || provider.currentInputs.isEmpty) {
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
+    final currentInputs =
+        ref.read(calculatorExecutionProvider).currentInputs;
+    if (calculator == null || currentInputs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha os parâmetros antes de salvar um template'),
@@ -798,7 +808,9 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           name: templateName,
           calculatorId: calculator.id,
           calculatorName: calculator.name,
-          inputValues: Map<String, dynamic>.from(provider.currentInputs),
+          inputValues: Map<String, dynamic>.from(
+            ref.read(calculatorExecutionProvider).currentInputs,
+          ),
           description: null,
           tags: const [],
           createdAt: DateTime.now(),
@@ -916,8 +928,7 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   Future<void> _showExportOptions() async {
     if (!mounted) return;
 
-    final provider = ref.read(calculatorProvider);
-    final result = provider.currentResult;
+    final result = ref.read(calculatorExecutionProvider).currentResult;
     if (result == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -941,14 +952,14 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _exportResult('CSV', provider, result);
+              _exportResult('CSV', result);
             },
             child: const Text('Exportar CSV'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _exportResult('JSON', provider, result);
+              _exportResult('JSON', result);
             },
             child: const Text('Exportar JSON'),
           ),
@@ -960,13 +971,14 @@ class _CalculatorDetailPageState extends ConsumerState<CalculatorDetailPage> {
   /// Exporta resultado no formato especificado
   Future<void> _exportResult(
     String format,
-    CalculatorProvider provider,
     CalculationResult result,
   ) async {
-    if (!mounted || provider.selectedCalculator == null) return;
+    final calculator = ref
+        .read(calculatorCoordinatorProvider.notifier)
+        .selectedCalculator;
+    if (!mounted || calculator == null) return;
 
     try {
-      final calculator = provider.selectedCalculator!;
       String exportData;
 
       if (format.toUpperCase() == 'CSV') {

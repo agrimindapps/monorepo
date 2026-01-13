@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../domain/entities/calculator_entity.dart';
-import '../providers/calculator_provider.dart';
+import '../providers/calculator_coordinator_provider.dart';
 import 'calculator_card_widget.dart';
 
 /// Widget otimizado para lista de calculadoras
@@ -78,12 +78,14 @@ class CalculatorListWidget extends StatelessWidget {
         return RepaintBoundary(
           child: Consumer(
             builder: (context, ref, child) {
-              final provider = ref.watch(calculatorProvider);
+              final coordinator =
+                  ref.read(calculatorCoordinatorProvider.notifier);
               return CalculatorCardWidget(
                 calculator: calculator,
-                isFavorite: provider.isCalculatorFavorite(calculator.id),
+                isFavorite: coordinator.isCalculatorFavorite(calculator.id),
                 onTap: () => _navigateToCalculator(context, calculator.id),
-                onFavoriteToggle: () => provider.toggleFavorite(calculator.id),
+                onFavoriteToggle: () =>
+                    coordinator.toggleCurrentCalculatorFavorite(),
                 key: ValueKey(calculator.id), // Chave estável para otimização
                 showCategory: showCategory,
               );

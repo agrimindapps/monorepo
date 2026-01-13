@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
 /// Wrapper widget para emoji picker com configuração customizada
 class TaskolistEmojiPicker extends StatelessWidget {
-  final Function(String emoji) onEmojiSelected;
+  final void Function(String emoji) onEmojiSelected;
   final String? selectedEmoji;
 
   const TaskolistEmojiPicker({
@@ -59,7 +59,7 @@ class TaskolistEmojiPicker extends StatelessWidget {
 
 /// Bottom sheet com emoji picker
 class EmojiPickerBottomSheet extends StatelessWidget {
-  final Function(String emoji) onEmojiSelected;
+  final void Function(String emoji) onEmojiSelected;
   final String? currentEmoji;
 
   const EmojiPickerBottomSheet({
@@ -137,10 +137,10 @@ class EmojiPickerBottomSheet extends StatelessWidget {
   /// Show emoji picker bottom sheet
   static Future<void> show(
     BuildContext context, {
-    required Function(String emoji) onEmojiSelected,
+    required void Function(String emoji) onEmojiSelected,
     String? currentEmoji,
   }) async {
-    await showModalBottomSheet(
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -158,7 +158,7 @@ class EmojiTextField extends StatefulWidget {
   final String? label;
   final String? hint;
   final String? currentEmoji;
-  final Function(String emoji)? onEmojiChanged;
+  final void Function(String emoji)? onEmojiChanged;
   final InputDecoration? decoration;
   final int? maxLines;
 

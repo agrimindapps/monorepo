@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/utils/performance_benchmark.dart';
 import '../../domain/entities/calculator_entity.dart';
-import '../providers/calculator_provider.dart';
+import '../providers/calculator_coordinator_provider.dart';
 import 'calculator_card_widget.dart';
 import 'calculator_empty_state_widget.dart';
 
@@ -133,17 +133,16 @@ class CalculatorSearchResultsWidget extends StatelessWidget {
           key: ValueKey(calculator.id),
           child: Consumer(
             builder: (context, ref, child) {
-              final provider = ref.watch(calculatorProvider);
+              final coordinator =
+                  ref.read(calculatorCoordinatorProvider.notifier);
               return Padding(
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: CalculatorCardWidget(
                   calculator: calculator,
-                  isFavorite: provider.isCalculatorFavorite(calculator.id),
+                  isFavorite: coordinator.isCalculatorFavorite(calculator.id),
                   onTap: () => _navigateToCalculator(context, calculator.id),
-                  onFavoriteToggle:
-                      () => ref
-                          .read(calculatorProvider)
-                          .toggleFavorite(calculator.id),
+                  onFavoriteToggle: () =>
+                      coordinator.toggleCurrentCalculatorFavorite(),
                   showCategory: showCategory,
                 ),
               );

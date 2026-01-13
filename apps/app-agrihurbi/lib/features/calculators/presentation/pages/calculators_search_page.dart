@@ -8,7 +8,7 @@ import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
 import '../../domain/services/calculator_search_service.dart' as search_service;
 import '../../domain/services/calculator_ui_service.dart';
-import '../providers/calculator_provider.dart';
+import '../providers/calculator_management_provider.dart';
 import '../widgets/calculator_search_bar_widget.dart';
 import '../widgets/calculator_search_filters_widget.dart';
 import '../widgets/calculator_search_results_widget.dart';
@@ -58,9 +58,9 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
   void _loadInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return; // ✅ Safety check
-      final provider = ref.read(calculatorProvider);
+      final calculators = ref.read(calculatorManagementProvider).calculators;
       _updateSearchResults();
-      _extractAvailableTags(provider.calculators);
+      _extractAvailableTags(calculators);
     });
   }
 
@@ -80,7 +80,7 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
       ),
       body: Builder(
         builder: (context) {
-          ref.watch(calculatorProvider); // Watch for reactivity
+          ref.watch(calculatorManagementProvider); // Watch for reactivity
           return Column(
             children: [
               CalculatorSearchBarWidget(
@@ -158,7 +158,7 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
     });
 
     await PerformanceBenchmark.measureAsync('search_otimizada', () async {
-      final provider = ref.read(calculatorProvider);
+      final calculators = ref.read(calculatorManagementProvider).calculators;
       List<String> favoriteIds = [];
       if (_showOnlyFavorites) {
         final favoritesService = CalculatorFavoritesService(
@@ -178,7 +178,7 @@ class _CalculatorsSearchPageState extends ConsumerState<CalculatorsSearchPage> {
         showOnlyFavorites: _showOnlyFavorites,
       );
       final results = search_service.CalculatorSearchService.optimizedSearch(
-        provider.calculators,
+        calculators,
         criteria,
       );
 

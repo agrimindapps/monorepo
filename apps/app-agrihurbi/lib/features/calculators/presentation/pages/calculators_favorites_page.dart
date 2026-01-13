@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../domain/entities/calculator_category.dart';
 import '../../domain/entities/calculator_entity.dart';
 import '../../domain/services/calculator_favorites_service.dart';
-import '../providers/calculator_provider.dart';
+import '../providers/calculator_management_provider.dart';
 import '../widgets/calculator_card_widget.dart';
 
 /// Página de calculadoras favoritas
@@ -57,9 +57,9 @@ class _CalculatorsFavoritesPageState
     });
 
     try {
-      final provider = ref.read(calculatorProvider);
+      final calculators = ref.read(calculatorManagementProvider).calculators;
       final favoriteCalculators = await _favoritesService!.filterFavorites(
-        provider.calculators,
+        calculators,
       );
       final stats = await _favoritesService!.getStats();
 
@@ -138,10 +138,10 @@ class _CalculatorsFavoritesPageState
       ),
       body: Builder(
         builder: (context) {
-          final provider = ref.watch(calculatorProvider);
+          ref.watch(calculatorManagementProvider); // Watch for reactivity
           return TabBarView(
             controller: _tabController,
-            children: [_buildFavoritesTab(provider), _buildStatsTab()],
+            children: [_buildFavoritesTab(), _buildStatsTab()],
           );
         },
       ),
@@ -149,7 +149,7 @@ class _CalculatorsFavoritesPageState
     );
   }
 
-  Widget _buildFavoritesTab(CalculatorProvider provider) {
+  Widget _buildFavoritesTab() {
     if (_isLoading) {
       return const Center(
         child: Column(

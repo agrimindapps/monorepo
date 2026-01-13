@@ -49,7 +49,7 @@ class TaskAttachmentEntity extends Equatable {
     return '${(fileSize / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 
-  AttachmentType static getTypeFromMime(String mimeType) {
+  static AttachmentType getTypeFromMime(String mimeType) {
     if (mimeType.startsWith('image/')) return AttachmentType.image;
     if (mimeType == 'application/pdf') return AttachmentType.pdf;
     if (mimeType.startsWith('application/') || mimeType.startsWith('text/')) {

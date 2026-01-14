@@ -30,22 +30,20 @@ class RecurrenceSelector extends StatelessWidget {
   void _showRecurrenceDialog(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (context) => _RecurrenceDialog(
-        currentRule: currentRule,
-        onSelected: onChanged,
-      ),
+      builder: (context) =>
+          _RecurrenceDialog(currentRule: currentRule, onSelected: onChanged),
     );
   }
 
   String _getRuleDescription(String? rule) {
     if (rule == null) return 'Não repetir';
-    
+
     final parts = rule.split(':');
     if (parts.length != 2) return 'Não repetir';
-    
+
     final type = parts[0];
     final interval = int.tryParse(parts[1]) ?? 1;
-    
+
     switch (type) {
       case 'daily':
         return interval == 1 ? 'Diariamente' : 'A cada $interval dias';
@@ -65,10 +63,7 @@ class _RecurrenceDialog extends StatefulWidget {
   final String? currentRule;
   final void Function(String?) onSelected;
 
-  const _RecurrenceDialog({
-    this.currentRule,
-    required this.onSelected,
-  });
+  const _RecurrenceDialog({this.currentRule, required this.onSelected});
 
   @override
   State<_RecurrenceDialog> createState() => _RecurrenceDialogState();
@@ -95,91 +90,77 @@ class _RecurrenceDialogState extends State<_RecurrenceDialog> {
     return AlertDialog(
       title: const Text('Repetir tarefa'),
       content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Opção: Não repetir
-            RadioListTile<String?>(
-              title: const Text('Não repetir'),
-              value: null,
-              groupValue: selectedType,
-              onChanged: (value) {
-                setState(() => selectedType = value);
-              },
-            ),
-            
-            // Opção: Diariamente
-            RadioListTile<String>(
-              title: const Text('Diariamente'),
-              value: 'daily',
-              groupValue: selectedType,
-              onChanged: (value) {
-                setState(() => selectedType = value);
-              },
-            ),
-            
-            // Opção: Semanalmente
-            RadioListTile<String>(
-              title: const Text('Semanalmente'),
-              value: 'weekly',
-              groupValue: selectedType,
-              onChanged: (value) {
-                setState(() => selectedType = value);
-              },
-            ),
-            
-            // Opção: Mensalmente
-            RadioListTile<String>(
-              title: const Text('Mensalmente'),
-              value: 'monthly',
-              groupValue: selectedType,
-              onChanged: (value) {
-                setState(() => selectedType = value);
-              },
-            ),
-            
-            // Opção: Anualmente
-            RadioListTile<String>(
-              title: const Text('Anualmente'),
-              value: 'yearly',
-              groupValue: selectedType,
-              onChanged: (value) {
-                setState(() => selectedType = value);
-              },
-            ),
-            
-            // Intervalo personalizado
-            if (selectedType != null) ...[
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  const Text('A cada'),
-                  const SizedBox(width: 16),
-                  SizedBox(
-                    width: 60,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      textAlign: TextAlign.center,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                      ),
-                      controller: TextEditingController(
-                        text: interval.toString(),
-                      ),
-                      onChanged: (value) {
-                        final parsed = int.tryParse(value);
-                        if (parsed != null && parsed > 0) {
-                          setState(() => interval = parsed);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(_getIntervalLabel(selectedType!)),
-                ],
+        child: RadioGroup<String?>(
+          groupValue: selectedType,
+          onChanged: (value) {
+            setState(() => selectedType = value);
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Opção: Não repetir
+              RadioListTile<String?>(
+                title: const Text('Não repetir'),
+                value: null,
               ),
+
+              // Opção: Diariamente
+              RadioListTile<String?>(
+                title: const Text('Diariamente'),
+                value: 'daily',
+              ),
+
+              // Opção: Semanalmente
+              RadioListTile<String?>(
+                title: const Text('Semanalmente'),
+                value: 'weekly',
+              ),
+
+              // Opção: Mensalmente
+              RadioListTile<String?>(
+                title: const Text('Mensalmente'),
+                value: 'monthly',
+              ),
+
+              // Opção: Anualmente
+              RadioListTile<String?>(
+                title: const Text('Anualmente'),
+                value: 'yearly',
+              ),
+
+              // Intervalo personalizado
+              if (selectedType != null) ...[
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    const Text('A cada'),
+                    const SizedBox(width: 16),
+                    SizedBox(
+                      width: 60,
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        textAlign: TextAlign.center,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        controller: TextEditingController(
+                          text: interval.toString(),
+                        ),
+                        onChanged: (value) {
+                          final parsed = int.tryParse(value);
+                          if (parsed != null && parsed > 0) {
+                            setState(() => interval = parsed);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(_getIntervalLabel(selectedType!)),
+                  ],
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
       actions: [
@@ -189,8 +170,8 @@ class _RecurrenceDialogState extends State<_RecurrenceDialog> {
         ),
         FilledButton(
           onPressed: () {
-            final rule = selectedType != null 
-                ? '$selectedType:$interval' 
+            final rule = selectedType != null
+                ? '$selectedType:$interval'
                 : null;
             widget.onSelected(rule);
             Navigator.pop(context);

@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,8 +22,8 @@ class _ElectricalCalculatorPageState
     extends ConsumerState<ElectricalCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _powerController = TextEditingController();
-  final _cableLengthController = TextEditingController(text: '10');
-  final _numberOfCircuitsController = TextEditingController(text: '1');
+  final _cableLengthController = TextEditingController();
+  final _numberOfCircuitsController = TextEditingController();
 
   double _voltage = 127;
   String _circuitType = 'Monofásico';
@@ -52,12 +53,9 @@ class _ElectricalCalculatorPageState
       child: Builder(
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          final textColor = isDark 
+          final textColor = isDark
               ? Colors.white.withValues(alpha: 0.9)
               : Colors.grey.shade800;
-          final subtleTextColor = isDark 
-              ? Colors.white.withValues(alpha: 0.7)
-              : Colors.grey.shade600;
 
           return Padding(
             padding: const EdgeInsets.all(24.0),
@@ -87,6 +85,7 @@ class _ElectricalCalculatorPageState
                           label: 'Potência Total',
                           controller: _powerController,
                           suffix: 'W',
+                          hintText: 'Ex: 5000',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
                           ),
@@ -191,9 +190,11 @@ class _ElectricalCalculatorPageState
                               label: 'Comprimento do Cabo',
                               controller: _cableLengthController,
                               suffix: 'm',
-                              keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
+                              hintText: 'Ex: 15',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(
                                   RegExp(r'^\d*\.?\d*'),
@@ -217,6 +218,7 @@ class _ElectricalCalculatorPageState
                               label: 'Número de Circuitos',
                               controller: _numberOfCircuitsController,
                               suffix: '',
+                              hintText: 'Ex: 2',
                               keyboardType: TextInputType.number,
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
@@ -273,13 +275,15 @@ class _ElectricalCalculatorPageState
     }
 
     try {
-      await ref.read(electricalCalculatorProvider.notifier).calculate(
-        totalPower: double.parse(_powerController.text),
-        voltage: _voltage,
-        circuitType: _circuitType,
-        cableLength: double.parse(_cableLengthController.text),
-        numberOfCircuits: int.parse(_numberOfCircuitsController.text),
-      );
+      await ref
+          .read(electricalCalculatorProvider.notifier)
+          .calculate(
+            totalPower: double.parse(_powerController.text),
+            voltage: _voltage,
+            circuitType: _circuitType,
+            cableLength: double.parse(_cableLengthController.text),
+            numberOfCircuits: int.parse(_numberOfCircuitsController.text),
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -292,10 +296,7 @@ class _ElectricalCalculatorPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e is Failure ? e.message : e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -303,8 +304,8 @@ class _ElectricalCalculatorPageState
 
   void _clear() {
     _powerController.clear();
-    _cableLengthController.text = '10';
-    _numberOfCircuitsController.text = '1';
+    _cableLengthController.clear();
+    _numberOfCircuitsController.clear();
     setState(() {
       _voltage = 127;
       _circuitType = 'Monofásico';
@@ -328,13 +329,13 @@ class _SelectionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final unselectedBg = isDark 
+    final unselectedBg = isDark
         ? Colors.white.withValues(alpha: 0.05)
         : Colors.grey.shade100;
-    final unselectedBorder = isDark 
+    final unselectedBorder = isDark
         ? Colors.white.withValues(alpha: 0.1)
         : Colors.grey.shade300;
-    final unselectedText = isDark 
+    final unselectedText = isDark
         ? Colors.white.withValues(alpha: 0.8)
         : Colors.grey.shade700;
 

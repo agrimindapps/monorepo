@@ -48,7 +48,14 @@ class AdminLayout extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildDesktopHeader(context, isDark),
-                      Expanded(child: child),
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1120),
+                            child: child,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -218,8 +225,14 @@ class AdminLayout extends StatelessWidget {
         child: InkWell(
           onTap: () {
             context.go(item.route);
-            if (Scaffold.of(context).hasDrawer) {
-              Navigator.of(context).pop();
+            // Safe way to close drawer if open
+            try {
+              final scaffold = Scaffold.maybeOf(context);
+              if (scaffold != null && scaffold.hasDrawer && scaffold.isDrawerOpen) {
+                Navigator.of(context).pop(); // Close drawer
+              }
+            } catch (_) {
+              // Ignore if no scaffold found
             }
           },
           borderRadius: BorderRadius.circular(12),

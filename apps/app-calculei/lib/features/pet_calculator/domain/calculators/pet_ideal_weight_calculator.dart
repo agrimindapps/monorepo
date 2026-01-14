@@ -4,12 +4,7 @@ library;
 
 enum PetSpecies { dog, cat }
 
-enum BreedSize {
-  small,
-  medium,
-  large,
-  giant,
-}
+enum BreedSize { small, medium, large, giant }
 
 class PetIdealWeightResult {
   /// Peso ideal estimado (kg)
@@ -149,7 +144,6 @@ class PetIdealWeightCalculator {
     bool shouldGainWeight,
     double weightChangeAbs,
   ) {
-    final pet = species == PetSpecies.dog ? 'cão' : 'gato';
     final recommendations = <String>[];
 
     if (shouldLoseWeight) {
@@ -158,11 +152,13 @@ class PetIdealWeightCalculator {
       recommendations.add('Evite petiscos e comida humana');
       recommendations.add('Aumente exercícios progressivamente');
       recommendations.add('Meta saudável: perder 1-2% do peso por semana');
-      
+
       if (weightChangeAbs > 2.0) {
-        recommendations.add('⚠️ Perda significativa necessária - acompanhamento veterinário');
+        recommendations.add(
+          '⚠️ Perda significativa necessária - acompanhamento veterinário',
+        );
       }
-      
+
       recommendations.add('Monitore o peso semanalmente');
       recommendations.add('Consulte veterinário para plano alimentar');
     } else if (shouldGainWeight) {
@@ -180,8 +176,12 @@ class PetIdealWeightCalculator {
       recommendations.add('Ajuste porções se houver mudança de atividade');
     }
 
-    recommendations.add('Peso ideal varia entre indivíduos - considere estrutura óssea');
-    recommendations.add('Use BCS (Escore de Condição Corporal) além da balança');
+    recommendations.add(
+      'Peso ideal varia entre indivíduos - considere estrutura óssea',
+    );
+    recommendations.add(
+      'Use BCS (Escore de Condição Corporal) além da balança',
+    );
 
     return recommendations;
   }

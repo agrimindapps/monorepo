@@ -35,17 +35,47 @@ class CalculatorPageLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final effectiveAccentColor = accentColor ?? colors.primary;
+
+    // Apply accent color to theme so child widgets (like cards) pick it up
+    final currentTheme = Theme.of(context);
+    // Determine appropriate container colors based on brightness
+    final isDark = currentTheme.brightness == Brightness.dark;
+    final primaryContainer = isDark 
+        ? effectiveAccentColor.withValues(alpha: 0.2)
+        : effectiveAccentColor.withValues(alpha: 0.1);
+    final onPrimaryContainer = isDark
+        ? effectiveAccentColor.withValues(alpha: 0.9)
+        : effectiveAccentColor.withValues(alpha: 0.9);
+
+    final themeWithAccent = currentTheme.copyWith(
+      primaryColor: effectiveAccentColor,
+      colorScheme: currentTheme.colorScheme.copyWith(
+        primary: effectiveAccentColor,
+        primaryContainer: primaryContainer,
+        onPrimaryContainer: onPrimaryContainer,
+        // Also update outline/border colors if they use primary
+        outline: effectiveAccentColor.withValues(alpha: 0.5),
+      ),
+      // Update toggle buttons, switches, etc
+      toggleButtonsTheme: currentTheme.toggleButtonsTheme.copyWith(
+        selectedColor: effectiveAccentColor,
+        selectedBorderColor: effectiveAccentColor,
+      ),
+    );
     
-    return AppShell(
-      pageTitle: title,
-      pageSubtitle: subtitle,
-      accentColor: effectiveAccentColor,
-      pageIcon: icon,
-      actions: actions,
-      showBackButton: true,
-      currentCategory: currentCategory,
-      showBackgroundPattern: true,
-      child: _buildContent(context, effectiveAccentColor),
+    return Theme(
+      data: themeWithAccent,
+      child: AppShell(
+        pageTitle: title,
+        pageSubtitle: subtitle,
+        accentColor: effectiveAccentColor,
+        pageIcon: icon,
+        actions: actions,
+        showBackButton: true,
+        currentCategory: currentCategory,
+        showBackgroundPattern: true,
+        child: _buildContent(context, effectiveAccentColor),
+      ),
     );
   }
   
@@ -108,12 +138,12 @@ class CalculatorPageLayout extends StatelessWidget {
 
 /// Category accent colors for different calculator types
 class CalculatorAccentColors {
-  static const financial = Color(0xFF4CAF50);     // Green
+  static const financial = Color(0xFF2196F3);     // Blue (was Green)
   static const health = Color(0xFFE91E63);        // Pink
   static const construction = Color(0xFFFF9800);  // Orange
   static const agriculture = Color(0xFF8BC34A);   // Light green
   static const pet = Color(0xFF795548);           // Brown
-  static const labor = Color(0xFF2196F3);         // Blue
+  static const labor = Color(0xFF4CAF50);         // Green (swapped with Financial to avoid duplicate)
   
   /// Get accent color by category name
   static Color fromCategory(String category) {

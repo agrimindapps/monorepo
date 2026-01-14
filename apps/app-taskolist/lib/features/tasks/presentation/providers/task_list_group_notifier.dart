@@ -7,7 +7,7 @@ part 'task_list_group_notifier.g.dart';
 
 /// Provider for SharedPreferences
 @riverpod
-Future<SharedPreferences> sharedPreferences(SharedPreferencesRef ref) async {
+Future<SharedPreferences> sharedPreferences(Ref ref) async {
   return await SharedPreferences.getInstance();
 }
 
@@ -21,7 +21,7 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
   Future<List<TaskListGroupEntity>> build(String userId) async {
     final prefs = await ref.watch(sharedPreferencesProvider.future);
     final groupsJson = prefs.getString('${_storageKey}_$userId');
-    
+
     if (groupsJson == null || groupsJson.isEmpty) {
       // Retornar grupos padrão
       final defaultGroups = DefaultListGroups.all(userId);
@@ -30,8 +30,16 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     }
 
     try {
-      final List<dynamic> decoded = jsonDecode(groupsJson);
-      return decoded.map((json) => TaskListGroupEntity.fromMap(json)).toList();
+      final decoded = jsonDecode(groupsJson);
+      if (decoded is List) {
+        return decoded
+            .map(
+              (json) =>
+                  TaskListGroupEntity.fromMap(json as Map<String, dynamic>),
+            )
+            .toList();
+      }
+      return DefaultListGroups.all(userId);
     } catch (e) {
       // Em caso de erro, retornar grupos padrão
       final defaultGroups = DefaultListGroups.all(userId);
@@ -47,10 +55,10 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = await AsyncValue.guard(() async {
       final current = state.value ?? [];
       final updated = [...current, group];
-      
+
       final prefs = await ref.read(sharedPreferencesProvider.future);
       await _saveGroups(updated, prefs, group.userId);
-      
+
       return updated;
     });
   }
@@ -62,10 +70,10 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = await AsyncValue.guard(() async {
       final current = state.value ?? [];
       final updated = current.map((g) => g.id == group.id ? group : g).toList();
-      
+
       final prefs = await ref.read(sharedPreferencesProvider.future);
       await _saveGroups(updated, prefs, group.userId);
-      
+
       return updated;
     });
   }
@@ -77,11 +85,11 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = await AsyncValue.guard(() async {
       final current = state.value ?? [];
       final updated = current.where((g) => g.id != groupId).toList();
-      
+
       final userId = current.firstOrNull?.userId ?? '';
       final prefs = await ref.read(sharedPreferencesProvider.future);
       await _saveGroups(updated, prefs, userId);
-      
+
       return updated;
     });
   }
@@ -98,11 +106,11 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
         }
         return g;
       }).toList();
-      
+
       final userId = current.firstOrNull?.userId ?? '';
       final prefs = await ref.read(sharedPreferencesProvider.future);
       await _saveGroups(updated, prefs, userId);
-      
+
       return updated;
     });
   }
@@ -114,16 +122,16 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = await AsyncValue.guard(() async {
       final current = state.value ?? [];
       final updated = <TaskListGroupEntity>[];
-      
+
       for (int i = 0; i < groupIds.length; i++) {
         final group = current.firstWhere((g) => g.id == groupIds[i]);
         updated.add(group.copyWith(position: i));
       }
-      
+
       final userId = current.firstOrNull?.userId ?? '';
       final prefs = await ref.read(sharedPreferencesProvider.future);
       await _saveGroups(updated, prefs, userId);
-      
+
       return updated;
     });
   }

@@ -6,11 +6,7 @@ class CreateEditGroupDialog extends StatefulWidget {
   final TaskListGroupEntity? group; // null = create, not null = edit
   final String userId;
 
-  const CreateEditGroupDialog({
-    super.key,
-    this.group,
-    required this.userId,
-  });
+  const CreateEditGroupDialog({super.key, this.group, required this.userId});
 
   @override
   State<CreateEditGroupDialog> createState() => _CreateEditGroupDialogState();
@@ -22,10 +18,7 @@ class CreateEditGroupDialog extends StatefulWidget {
   }) async {
     return showDialog<TaskListGroupEntity>(
       context: context,
-      builder: (context) => CreateEditGroupDialog(
-        group: group,
-        userId: userId,
-      ),
+      builder: (context) => CreateEditGroupDialog(group: group, userId: userId),
     );
   }
 }
@@ -86,10 +79,7 @@ class _CreateEditGroupDialogState extends State<CreateEditGroupDialog> {
             const SizedBox(height: 24),
 
             // Icon selection
-            Text(
-              'Ícone',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text('Ícone', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             OutlinedButton.icon(
               onPressed: () {
@@ -97,23 +87,24 @@ class _CreateEditGroupDialogState extends State<CreateEditGroupDialog> {
                   context,
                   currentEmoji: _selectedIcon,
                   onEmojiSelected: (emoji) {
-                    setState(() => _selectedIcon = emoji.isNotEmpty ? emoji : null);
+                    setState(
+                      () => _selectedIcon = emoji.isNotEmpty ? emoji : null,
+                    );
                   },
                 );
               },
               icon: _selectedIcon != null
                   ? Text(_selectedIcon!, style: const TextStyle(fontSize: 24))
                   : const Icon(Icons.add_reaction_outlined),
-              label: Text(_selectedIcon != null ? 'Alterar Emoji' : 'Escolher Emoji'),
+              label: Text(
+                _selectedIcon != null ? 'Alterar Emoji' : 'Escolher Emoji',
+              ),
             ),
 
             const SizedBox(height: 24),
 
             // Color selection
-            Text(
-              'Cor',
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+            Text('Cor', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Wrap(
               spacing: 12,
@@ -136,7 +127,7 @@ class _CreateEditGroupDialogState extends State<CreateEditGroupDialog> {
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: color.withOpacity(0.5),
+                                color: color.withValues(alpha: 0.5),
                                 blurRadius: 8,
                                 spreadRadius: 2,
                               ),

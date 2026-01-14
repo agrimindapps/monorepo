@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
-import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../domain/usecases/calculate_overtime_usecase.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
@@ -57,6 +56,19 @@ class OvertimeInputFormState extends State<OvertimeInputForm> {
     _submitForm();
   }
 
+  /// Public method to clear all input fields
+  void clear() {
+    _grossSalaryController.clear();
+    _weeklyHoursController.text = '44';
+    _hours50Controller.text = '0';
+    _hours100Controller.text = '0';
+    _nightHoursController.text = '0';
+    _nightPercentageController.text = '20';
+    _sundayHolidayHoursController.text = '0';
+    _workDaysController.text = '22';
+    _dependentsController.text = '0';
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.labor;
@@ -71,6 +83,7 @@ class OvertimeInputFormState extends State<OvertimeInputForm> {
               controller: _grossSalaryController,
               label: 'Salário Bruto Mensal',
               helperText: 'Ex: 3.000,00',
+              hintText: 'Ex: 3.000,00',
               accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o salário';

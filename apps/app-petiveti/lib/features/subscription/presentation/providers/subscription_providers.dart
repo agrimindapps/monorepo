@@ -8,7 +8,6 @@ import '../../../../core/providers/core_services_providers.dart'
     as local_providers;
 import '../../../../database/providers/sync_providers.dart';
 import '../../data/repositories/subscription_repository_impl.dart';
-import '../../data/services/subscription_error_handling_service.dart';
 import '../../domain/repositories/i_app_subscription_repository.dart';
 
 part 'subscription_providers.g.dart';
@@ -20,9 +19,10 @@ part 'subscription_providers.g.dart';
 /// Provider para o repositório de assinaturas app-specific
 @riverpod
 IAppSubscriptionRepository appSubscriptionRepository(Ref ref) {
-  final coreRepository = ref.watch(local_providers.subscriptionRepositoryProvider);
+  final coreRepository = ref.watch(
+    local_providers.subscriptionRepositoryProvider,
+  );
   final localStorageRepository = _SimpleLocalStorageRepository();
-  final errorService = SubscriptionErrorHandlingService();
   final subscriptionLocalRepo = ref.watch(subscriptionLocalRepositoryProvider);
 
   return SubscriptionRepositoryImpl(
@@ -105,12 +105,12 @@ class PetivetiPremiumStatus {
 
   bool get canAddDevice => devicesUsed < maxDevices;
   bool get isNearDeviceLimit => devicesUsed >= (maxDevices * 0.8);
-  
+
   int? get daysRemaining {
     if (expirationDate == null) return null;
     return expirationDate!.difference(DateTime.now()).inDays;
   }
-  
+
   bool get willExpireSoon {
     final days = daysRemaining;
     return days != null && days <= 7 && days > 0;
@@ -182,44 +182,44 @@ class PetivetiPremiumState {
 Future<bool> hasPremiumSubscription(Ref ref) async {
   final repository = ref.watch(appSubscriptionRepositoryProvider);
   final result = await repository.hasPetivetiSubscription();
-  return result.fold(
-    (failure) => false,
-    (hasPremium) => hasPremium,
-  );
+  return result.fold((failure) => false, (hasPremium) => hasPremium);
 }
 
 /// Provider para obter informações da assinatura atual
 @riverpod
 Future<SubscriptionInfo?> currentSubscription(Ref ref) async {
-  final coreRepository = ref.watch(local_providers.subscriptionRepositoryProvider);
-  final result = await coreRepository.getCurrentSubscription();
-  
-  return result.fold(
-    (Failure failure) => null,
-    (SubscriptionEntity? subscription) {
-      if (subscription == null) return null;
-      
-      return SubscriptionInfo(
-        productId: subscription.productId,
-        isPremium: subscription.isActive,
-        isTrialPeriod: subscription.isTrialActive,
-        hasUsedTrial: subscription.trialEndDate != null,
-        purchaseDate: subscription.purchaseDate,
-        expirationDate: subscription.expirationDate,
-        originalTransactionId: subscription.id,
-      );
-    },
+  final coreRepository = ref.watch(
+    local_providers.subscriptionRepositoryProvider,
   );
+  final result = await coreRepository.getCurrentSubscription();
+
+  return result.fold((Failure failure) => null, (
+    SubscriptionEntity? subscription,
+  ) {
+    if (subscription == null) return null;
+
+    return SubscriptionInfo(
+      productId: subscription.productId,
+      isPremium: subscription.isActive,
+      isTrialPeriod: subscription.isTrialActive,
+      hasUsedTrial: subscription.trialEndDate != null,
+      purchaseDate: subscription.purchaseDate,
+      expirationDate: subscription.expirationDate,
+      originalTransactionId: subscription.id,
+    );
+  });
 }
 
 /// Provider para listar planos disponíveis
 @riverpod
 Future<List<ProductInfo>> availablePlans(Ref ref) async {
-  final coreRepository = ref.watch(local_providers.subscriptionRepositoryProvider);
+  final coreRepository = ref.watch(
+    local_providers.subscriptionRepositoryProvider,
+  );
   final result = await coreRepository.getAvailableProducts(
     productIds: PetivetiProducts.allSubscriptions,
   );
-  
+
   return result.fold(
     (Failure failure) => <ProductInfo>[],
     (List<ProductInfo> products) => products,
@@ -242,10 +242,7 @@ Future<bool> hasFeatureAccess(Ref ref, String featureKey) async {
 Future<bool> hasActiveTrial(Ref ref) async {
   final repository = ref.watch(appSubscriptionRepositoryProvider);
   final result = await repository.hasActiveTrial();
-  return result.fold(
-    (failure) => false,
-    (hasTrial) => hasTrial,
-  );
+  return result.fold((failure) => false, (hasTrial) => hasTrial);
 }
 
 /// Provider simples de subscription (compatibilidade com SubscriptionState do core)
@@ -330,7 +327,10 @@ class _SimpleLocalStorageRepository implements ILocalStorageRepository {
   }
 
   @override
-  Future<Either<Failure, void>> remove({required String key, String? box}) async {
+  Future<Either<Failure, void>> remove({
+    required String key,
+    String? box,
+  }) async {
     try {
       _cache.remove(key);
       return const Right(null);
@@ -350,7 +350,10 @@ class _SimpleLocalStorageRepository implements ILocalStorageRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> contains({required String key, String? box}) async {
+  Future<Either<Failure, bool>> contains({
+    required String key,
+    String? box,
+  }) async {
     return Right(_cache.containsKey(key));
   }
 
@@ -543,4 +546,3 @@ class _SimpleLocalStorageRepository implements ILocalStorageRepository {
     return Right(unsyncedKeys);
   }
 }
-

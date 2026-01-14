@@ -8,9 +8,9 @@ class GroupedTaskListsSidebar extends StatelessWidget {
   final List<TaskListEntity> lists;
   final String? selectedListId;
   final String? selectedGroupId;
-  final Function(String listId) onListTap;
-  final Function(String groupId) onGroupTap;
-  final Function(String groupId, bool isCollapsed) onGroupToggle;
+  final void Function(String listId) onListTap;
+  final void Function(String groupId) onGroupTap;
+  final void Function(String groupId, bool isCollapsed) onGroupToggle;
   final VoidCallback onCreateList;
   final VoidCallback onCreateGroup;
 
@@ -31,7 +31,7 @@ class GroupedTaskListsSidebar extends StatelessWidget {
   Widget build(BuildContext context) {
     // Organizar listas por grupo
     final Map<String?, List<TaskListEntity>> listsByGroup = {};
-    
+
     for (final list in lists) {
       if (list.isArchived) continue; // Skip archived
       final groupId = list.groupId;
@@ -42,7 +42,8 @@ class GroupedTaskListsSidebar extends StatelessWidget {
     }
 
     // Ordenar grupos por position
-    final sortedGroups = [...groups]..sort((a, b) => a.position.compareTo(b.position));
+    final sortedGroups = [...groups]
+      ..sort((a, b) => a.position.compareTo(b.position));
 
     return ListView(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -55,9 +56,9 @@ class GroupedTaskListsSidebar extends StatelessWidget {
             children: [
               Text(
                 'Minhas Listas',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               IconButton(
                 icon: const Icon(Icons.add, size: 20),
@@ -80,7 +81,8 @@ class GroupedTaskListsSidebar extends StatelessWidget {
             isSelected: selectedGroupId == group.id,
             selectedListId: selectedListId,
             onGroupTap: () => onGroupTap(group.id),
-            onGroupToggle: (isCollapsed) => onGroupToggle(group.id, isCollapsed),
+            onGroupToggle: (isCollapsed) =>
+                onGroupToggle(group.id, isCollapsed),
             onListTap: onListTap,
           );
         }),
@@ -117,8 +119,8 @@ class _GroupSection extends StatelessWidget {
   final bool isSelected;
   final String? selectedListId;
   final VoidCallback onGroupTap;
-  final Function(bool isCollapsed) onGroupToggle;
-  final Function(String listId) onListTap;
+  final void Function(bool isCollapsed) onGroupToggle;
+  final void Function(String listId) onListTap;
 
   const _GroupSection({
     required this.group,
@@ -138,8 +140,10 @@ class _GroupSection extends StatelessWidget {
       children: [
         // Group header
         Material(
-          color: isSelected 
-              ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3) 
+          color: isSelected
+              ? Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.3)
               : Colors.transparent,
           child: InkWell(
             onTap: onGroupTap,
@@ -171,10 +175,7 @@ class _GroupSection extends StatelessWidget {
                   ),
                   Text(
                     '${lists.length}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
@@ -184,11 +185,13 @@ class _GroupSection extends StatelessWidget {
 
         // Lists (quando expandido)
         if (!isCollapsed)
-          ...lists.map((list) => _ListTile(
-                list: list,
-                isSelected: selectedListId == list.id,
-                onTap: () => onListTap(list.id),
-              )),
+          ...lists.map(
+            (list) => _ListTile(
+              list: list,
+              isSelected: selectedListId == list.id,
+              onTap: () => onListTap(list.id),
+            ),
+          ),
       ],
     );
   }
@@ -198,7 +201,7 @@ class _GroupSection extends StatelessWidget {
 class _UngroupedSection extends StatelessWidget {
   final List<TaskListEntity> lists;
   final String? selectedListId;
-  final Function(String listId) onListTap;
+  final void Function(String listId) onListTap;
 
   const _UngroupedSection({
     required this.lists,
@@ -222,11 +225,13 @@ class _UngroupedSection extends StatelessWidget {
             ),
           ),
         ),
-        ...lists.map((list) => _ListTile(
-              list: list,
-              isSelected: selectedListId == list.id,
-              onTap: () => onListTap(list.id),
-            )),
+        ...lists.map(
+          (list) => _ListTile(
+            list: list,
+            isSelected: selectedListId == list.id,
+            onTap: () => onListTap(list.id),
+          ),
+        ),
       ],
     );
   }
@@ -247,8 +252,10 @@ class _ListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: isSelected 
-          ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.5) 
+      color: isSelected
+          ? Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.5)
           : Colors.transparent,
       child: InkWell(
         onTap: onTap,
@@ -271,7 +278,9 @@ class _ListTile extends StatelessWidget {
                 child: Text(
                   list.title,
                   style: TextStyle(
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontWeight: isSelected
+                        ? FontWeight.w600
+                        : FontWeight.normal,
                     fontSize: 14,
                   ),
                   maxLines: 1,

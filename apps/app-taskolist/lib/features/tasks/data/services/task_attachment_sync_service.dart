@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
-import '../../domain/task_attachment_entity.dart';
 import '../task_attachment_local_datasource.dart';
 import 'task_attachment_storage_service.dart';
 
@@ -39,17 +38,20 @@ class PendingAttachmentUpload {
 
   bool get shouldWaitBeforeRetry {
     if (lastAttemptMs == null) return false;
-    
+
     final now = DateTime.now().millisecondsSinceEpoch;
     final timeSinceLastAttempt = now - lastAttemptMs!;
-    
+
     // Exponential backoff: 1min, 5min, 15min
-    final waitTime = retryCount == 1 
-        ? 60 * 1000 // 1 minute
-        : retryCount == 2 
-            ? 5 * 60 * 1000 // 5 minutes
-            : 15 * 60 * 1000; // 15 minutes
-    
+    final waitTime = retryCount == 1
+        ? 60 *
+              1000 // 1 minute
+        : retryCount == 2
+        ? 5 *
+              60 *
+              1000 // 5 minutes
+        : 15 * 60 * 1000; // 15 minutes
+
     return timeSinceLastAttempt < waitTime;
   }
 }
@@ -84,8 +86,10 @@ class TaskAttachmentSyncService {
   final Map<String, PendingAttachmentUpload> _pendingUploads = {};
 
   // Progress stream
-  final _progressController = StreamController<AttachmentSyncProgress>.broadcast();
-  Stream<AttachmentSyncProgress> get progressStream => _progressController.stream;
+  final _progressController =
+      StreamController<AttachmentSyncProgress>.broadcast();
+  Stream<AttachmentSyncProgress> get progressStream =>
+      _progressController.stream;
 
   bool _isSyncing = false;
 
@@ -93,9 +97,9 @@ class TaskAttachmentSyncService {
     required TaskAttachmentStorageService storageService,
     required TaskAttachmentLocalDataSource localDataSource,
     required ConnectivityService connectivityService,
-  })  : _storageService = storageService,
-        _localDataSource = localDataSource,
-        _connectivityService = connectivityService;
+  }) : _storageService = storageService,
+       _localDataSource = localDataSource,
+       _connectivityService = connectivityService;
 
   /// Add attachment to pending upload queue
   void addPendingUpload({
@@ -118,9 +122,9 @@ class TaskAttachmentSyncService {
     );
 
     _pendingUploads[upload.id] = upload;
-    
+
     // Auto-sync if online
-    if (_connectivityService.isOnline) {
+    if (_connectivityService.isOnlineSync) {
       syncPendingUploads();
     }
   }
@@ -134,7 +138,7 @@ class TaskAttachmentSyncService {
   /// Sync all pending uploads
   Future<void> syncPendingUploads() async {
     if (_isSyncing) return;
-    if (!_connectivityService.isOnline) return;
+    if (!_connectivityService.isOnlineSync) return;
     if (_pendingUploads.isEmpty) return;
 
     _isSyncing = true;
@@ -157,11 +161,13 @@ class TaskAttachmentSyncService {
         }
 
         // Emit progress
-        _progressController.add(AttachmentSyncProgress(
-          current: current,
-          total: total,
-          currentItemId: upload.attachmentId,
-        ));
+        _progressController.add(
+          AttachmentSyncProgress(
+            current: current,
+            total: total,
+            currentItemId: upload.attachmentId,
+          ),
+        );
 
         // Attempt upload
         final result = await _uploadPendingAttachment(upload);
@@ -187,11 +193,13 @@ class TaskAttachmentSyncService {
       }
 
       // Emit completion
-      _progressController.add(AttachmentSyncProgress(
-        current: current,
-        total: total,
-        isCompleted: true,
-      ));
+      _progressController.add(
+        AttachmentSyncProgress(
+          current: current,
+          total: total,
+          isCompleted: true,
+        ),
+      );
     } finally {
       _isSyncing = false;
     }
@@ -205,7 +213,7 @@ class TaskAttachmentSyncService {
       // Check if file still exists
       final file = File(upload.localPath);
       if (!await file.exists()) {
-        return Left(Failure('Local file not found'));
+        return Left(CacheFailure('Local file not found'));
       }
 
       // Upload to Firebase Storage
@@ -218,23 +226,20 @@ class TaskAttachmentSyncService {
         mimeType: upload.mimeType,
       );
 
-      return uploadResult.fold(
-        (failure) => Left(failure),
-        (downloadUrl) async {
-          // Update database with download URL
-          final updateResult = await _localDataSource.markAsUploaded(
-            upload.attachmentId,
-            downloadUrl,
-          );
+      return uploadResult.fold((failure) => Left(failure), (downloadUrl) async {
+        // Update database with download URL
+        final updateResult = await _localDataSource.markAsUploaded(
+          upload.attachmentId,
+          downloadUrl,
+        );
 
-          return updateResult.fold(
-            (failure) => Left(failure),
-            (_) => const Right(null),
-          );
-        },
-      );
+        return updateResult.fold(
+          (failure) => Left(failure),
+          (_) => const Right(null),
+        );
+      });
     } catch (e) {
-      return Left(Failure('Upload error: $e'));
+      return Left(UnknownFailure('Upload error: $e'));
     }
   }
 

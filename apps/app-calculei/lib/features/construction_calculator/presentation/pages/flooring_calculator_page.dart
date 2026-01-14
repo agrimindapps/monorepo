@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,9 +22,9 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
   final _formKey = GlobalKey<FormState>();
   final _roomLengthController = TextEditingController();
   final _roomWidthController = TextEditingController();
-  final _tileLengthController = TextEditingController(text: '60');
-  final _tileWidthController = TextEditingController(text: '60');
-  final _tilesPerBoxController = TextEditingController(text: '6');
+  final _tileLengthController = TextEditingController();
+  final _tileWidthController = TextEditingController();
+  final _tilesPerBoxController = TextEditingController();
 
   double _wastePercentage = 10;
   String _flooringType = 'Porcelanato';
@@ -93,6 +94,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                           label: 'Comprimento',
                           controller: _roomLengthController,
                           suffix: 'm',
+                          hintText: 'Ex: 4.0',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -111,6 +113,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                           label: 'Largura',
                           controller: _roomWidthController,
                           suffix: 'm',
+                          hintText: 'Ex: 3.5',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -153,6 +156,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                           label: 'Comprimento',
                           controller: _tileLengthController,
                           suffix: 'cm',
+                          hintText: 'Ex: 60',
                           keyboardType: TextInputType.number,
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           validator: (value) {
@@ -167,6 +171,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                           label: 'Largura',
                           controller: _tileWidthController,
                           suffix: 'cm',
+                          hintText: 'Ex: 60',
                           keyboardType: TextInputType.number,
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           validator: (value) {
@@ -180,6 +185,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
                         child: AdaptiveInputField(
                           label: 'Peças/caixa',
                           controller: _tilesPerBoxController,
+                          hintText: 'Ex: 4',
                           keyboardType: TextInputType.number,
                           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           validator: (value) {
@@ -310,7 +316,7 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -321,9 +327,9 @@ class _FlooringCalculatorPageState extends ConsumerState<FlooringCalculatorPage>
   void _clear() {
     _roomLengthController.clear();
     _roomWidthController.clear();
-    _tileLengthController.text = '60';
-    _tileWidthController.text = '60';
-    _tilesPerBoxController.text = '6';
+    _tileLengthController.clear();
+    _tileWidthController.clear();
+    _tilesPerBoxController.clear();
     setState(() {
       _wastePercentage = 10;
       _flooringType = 'Porcelanato';

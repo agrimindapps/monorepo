@@ -19,10 +19,10 @@ class EvapotranspirationCalculatorPage extends StatefulWidget {
 class _EvapotranspirationCalculatorPageState
     extends State<EvapotranspirationCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _temperatureController = TextEditingController(text: '28');
-  final _humidityController = TextEditingController(text: '60');
-  final _windSpeedController = TextEditingController(text: '10');
-  final _solarRadiationController = TextEditingController(text: '20');
+  final _temperatureController = TextEditingController();
+  final _humidityController = TextEditingController();
+  final _windSpeedController = TextEditingController();
+  final _solarRadiationController = TextEditingController();
 
   EvapotranspirationResult? _result;
 
@@ -85,6 +85,7 @@ class _EvapotranspirationCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Temperatura média',
                       controller: _temperatureController,
+                      hintText: 'Ex: 28',
                       suffix: '°C',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -101,6 +102,7 @@ class _EvapotranspirationCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Umidade relativa',
                       controller: _humidityController,
+                      hintText: 'Ex: 60',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -117,6 +119,7 @@ class _EvapotranspirationCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Velocidade do vento',
                       controller: _windSpeedController,
+                      hintText: 'Ex: 10',
                       suffix: 'km/h',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -133,6 +136,7 @@ class _EvapotranspirationCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Radiação solar',
                       controller: _solarRadiationController,
+                      hintText: 'Ex: 20',
                       suffix: 'MJ/m²',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -183,10 +187,10 @@ class _EvapotranspirationCalculatorPageState
   }
 
   void _clear() {
-    _temperatureController.text = '28';
-    _humidityController.text = '60';
-    _windSpeedController.text = '10';
-    _solarRadiationController.text = '20';
+    _temperatureController.clear();
+    _humidityController.clear();
+    _windSpeedController.clear();
+    _solarRadiationController.clear();
     setState(() {
       _result = null;
     });

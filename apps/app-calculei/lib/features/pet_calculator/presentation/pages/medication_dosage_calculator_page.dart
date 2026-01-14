@@ -137,6 +137,7 @@ class _MedicationDosageCalculatorPageState
               // Weight
               AdaptiveInputField(
                 label: 'Peso do pet',
+                hintText: 'Ex: 10.0',
                 controller: _weightController,
                 suffix: 'kg',
                 keyboardType:
@@ -394,7 +395,7 @@ Consulte sempre um veterinário antes de medicar!
 _________________
 Calculado por Calculei
 by Agrimind
-https://calculei.com.br''',
+https://calculei.agrimind.com.br''',
               ),
             ],
           ),

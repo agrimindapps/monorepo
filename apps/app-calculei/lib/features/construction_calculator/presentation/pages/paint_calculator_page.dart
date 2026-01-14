@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,7 @@ class PaintCalculatorPage extends ConsumerStatefulWidget {
 class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _wallAreaController = TextEditingController();
-  final _openingsAreaController = TextEditingController(text: '0');
+  final _openingsAreaController = TextEditingController();
 
   int _coats = 2;
   String _paintType = 'Acrílica';
@@ -91,7 +92,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
                               label: 'Área das Paredes',
                               controller: _wallAreaController,
                               suffix: 'm²',
-                              hint: 'Soma de todas as paredes',
+                              hintText: 'Ex: 120.5',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -114,7 +115,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
                               label: 'Área de Aberturas',
                               controller: _openingsAreaController,
                               suffix: 'm²',
-                              hint: 'Portas e janelas',
+                              hintText: 'Ex: 15.0',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -239,9 +240,11 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
       }
     } catch (e) {
       if (mounted) {
+        // Extract message from Failure object
+        final message = e is Failure ? e.message : e.toString();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(message),
             backgroundColor: Colors.red,
           ),
         );
@@ -251,7 +254,7 @@ class _PaintCalculatorPageState extends ConsumerState<PaintCalculatorPage> {
 
   void _clear() {
     _wallAreaController.clear();
-    _openingsAreaController.text = '0';
+    _openingsAreaController.clear();
     setState(() {
       _coats = 2;
       _paintType = 'Acrílica';

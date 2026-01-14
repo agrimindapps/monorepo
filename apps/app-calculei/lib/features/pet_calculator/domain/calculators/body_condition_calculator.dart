@@ -4,12 +4,7 @@ library;
 
 enum PetSpecies { dog, cat }
 
-enum BcsClassification {
-  underweight,
-  ideal,
-  overweight,
-  obese,
-}
+enum BcsClassification { underweight, ideal, overweight, obese }
 
 class BodyConditionResult {
   /// Escore de Condição Corporal (1-9)
@@ -65,7 +60,8 @@ class BodyConditionCalculator {
     }
 
     // Cálculo do score ponderado
-    final weightedScore = (ribPalpation * _ribWeight) +
+    final weightedScore =
+        (ribPalpation * _ribWeight) +
         (waistVisibility * _waistWeight) +
         (abdominalProfile * _abdominalWeight);
 
@@ -125,8 +121,6 @@ class BodyConditionCalculator {
     BcsClassification classification,
     PetSpecies species,
   ) {
-    final pet = species == PetSpecies.dog ? 'cão' : 'gato';
-
     return switch (classification) {
       BcsClassification.underweight => [
         'Consulte um veterinário para investigar causas',

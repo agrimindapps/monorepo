@@ -28,7 +28,7 @@ class TaskAttachmentService {
       );
 
       if (image == null) {
-        return Left(Failure('Nenhuma imagem capturada'));
+        return Left(UnknownFailure('Nenhuma imagem capturada'));
       }
 
       return _createAttachmentFromFile(
@@ -37,7 +37,7 @@ class TaskAttachmentService {
         userId: userId,
       );
     } catch (e) {
-      return Left(Failure('Erro ao capturar imagem: $e'));
+      return Left(UnknownFailure('Erro ao capturar imagem: $e'));
     }
   }
 
@@ -55,7 +55,7 @@ class TaskAttachmentService {
       );
 
       if (image == null) {
-        return Left(Failure('Nenhuma imagem selecionada'));
+        return Left(UnknownFailure('Nenhuma imagem selecionada'));
       }
 
       return _createAttachmentFromFile(
@@ -64,7 +64,7 @@ class TaskAttachmentService {
         userId: userId,
       );
     } catch (e) {
-      return Left(Failure('Erro ao selecionar imagem: $e'));
+      return Left(UnknownFailure('Erro ao selecionar imagem: $e'));
     }
   }
 
@@ -83,7 +83,7 @@ class TaskAttachmentService {
       );
 
       if (result == null || result.files.isEmpty) {
-        return Left(Failure('Nenhum arquivo selecionado'));
+        return Left(UnknownFailure('Nenhum arquivo selecionado'));
       }
 
       final List<TaskAttachmentEntity> attachments = [];
@@ -104,12 +104,12 @@ class TaskAttachmentService {
       }
 
       if (attachments.isEmpty) {
-        return Left(Failure('Nenhum arquivo válido selecionado'));
+        return Left(UnknownFailure('Nenhum arquivo válido selecionado'));
       }
 
       return Right(attachments);
     } catch (e) {
-      return Left(Failure('Erro ao selecionar arquivos: $e'));
+      return Left(UnknownFailure('Erro ao selecionar arquivos: $e'));
     }
   }
 
@@ -122,7 +122,7 @@ class TaskAttachmentService {
     try {
       // Validate file exists
       if (!await file.exists()) {
-        return Left(Failure('Arquivo não encontrado'));
+        return Left(UnknownFailure('Arquivo não encontrado'));
       }
 
       // Get file info
@@ -132,9 +132,11 @@ class TaskAttachmentService {
 
       // Check file size (25MB limit)
       if (fileSize > TaskAttachmentEntity.maxFileSizeBytes) {
-        return Left(Failure(
-          'Arquivo muito grande. Máximo: ${(TaskAttachmentEntity.maxFileSizeBytes / (1024 * 1024)).toStringAsFixed(0)}MB',
-        ));
+        return Left(
+          UnknownFailure(
+            'Arquivo muito grande. Máximo: ${(TaskAttachmentEntity.maxFileSizeBytes / (1024 * 1024)).toStringAsFixed(0)}MB',
+          ),
+        );
       }
 
       // Determine MIME type
@@ -167,7 +169,7 @@ class TaskAttachmentService {
 
       return Right(attachment);
     } catch (e) {
-      return Left(Failure('Erro ao processar arquivo: $e'));
+      return Left(UnknownFailure('Erro ao processar arquivo: $e'));
     }
   }
 
@@ -180,7 +182,7 @@ class TaskAttachmentService {
       }
       return const Right(null);
     } catch (e) {
-      return Left(Failure('Erro ao deletar arquivo: $e'));
+      return Left(UnknownFailure('Erro ao deletar arquivo: $e'));
     }
   }
 

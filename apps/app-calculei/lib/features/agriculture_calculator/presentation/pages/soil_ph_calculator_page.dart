@@ -18,10 +18,10 @@ class SoilPhCalculatorPage extends StatefulWidget {
 
 class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _currentPhController = TextEditingController(text: '5.2');
-  final _targetPhController = TextEditingController(text: '6.5');
-  final _areaController = TextEditingController(text: '10');
-  final _prntController = TextEditingController(text: '90');
+  final _currentPhController = TextEditingController();
+  final _targetPhController = TextEditingController();
+  final _areaController = TextEditingController();
+  final _prntController = TextEditingController();
 
   SoilTexture _texture = SoilTexture.loam;
   SoilPhResult? _result;
@@ -85,6 +85,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'pH atual',
                       controller: _currentPhController,
+                      hintText: 'Ex: 5.2',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
@@ -100,6 +101,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'pH alvo',
                       controller: _targetPhController,
+                      hintText: 'Ex: 6.5',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(
@@ -171,6 +173,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
+                      hintText: 'Ex: 10',
                       suffix: 'ha',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -187,6 +190,7 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'PRNT do calcário',
                       controller: _prntController,
+                      hintText: 'Ex: 90',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -241,10 +245,10 @@ class _SoilPhCalculatorPageState extends State<SoilPhCalculatorPage> {
   }
 
   void _clear() {
-    _currentPhController.text = '5.2';
-    _targetPhController.text = '6.5';
-    _areaController.text = '10';
-    _prntController.text = '90';
+    _currentPhController.clear();
+    _targetPhController.clear();
+    _areaController.clear();
+    _prntController.clear();
     setState(() {
       _texture = SoilTexture.loam;
       _result = null;

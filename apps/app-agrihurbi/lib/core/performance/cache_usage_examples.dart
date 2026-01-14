@@ -1,8 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'cache_extensions.dart';
-import 'cache_manager_provider.dart';
-
 /// ========================================
 /// EXEMPLO 1: Uso básico em um Notifier
 /// ========================================

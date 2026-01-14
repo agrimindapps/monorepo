@@ -44,6 +44,7 @@ class SimonSettings {
   final double musicVolume;
   final SimonDifficulty difficulty;
   final bool colorblindMode;
+  final int colorCount;
 
   const SimonSettings({
     this.soundEnabled = true,
@@ -52,6 +53,7 @@ class SimonSettings {
     this.musicVolume = 0.5,
     this.difficulty = SimonDifficulty.normal,
     this.colorblindMode = false,
+    this.colorCount = 4,
   });
 
   SimonSettings copyWith({
@@ -61,6 +63,7 @@ class SimonSettings {
     double? musicVolume,
     SimonDifficulty? difficulty,
     bool? colorblindMode,
+    int? colorCount,
   }) {
     return SimonSettings(
       soundEnabled: soundEnabled ?? this.soundEnabled,
@@ -69,6 +72,7 @@ class SimonSettings {
       musicVolume: musicVolume ?? this.musicVolume,
       difficulty: difficulty ?? this.difficulty,
       colorblindMode: colorblindMode ?? this.colorblindMode,
+      colorCount: colorCount ?? this.colorCount,
     );
   }
 }

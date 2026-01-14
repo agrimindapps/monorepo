@@ -30,7 +30,7 @@ class _NetSalaryCalculatorPageState
       title: 'Calculadora de Salário Líquido',
       subtitle: 'Descontos e Valor Líquido',
       icon: Icons.account_balance_wallet_outlined,
-      accentColor: CalculatorAccentColors.labor,
+      accentColor: CalculatorAccentColors.financial,
       currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
@@ -51,7 +51,7 @@ class _NetSalaryCalculatorPageState
             CalculatorActionButtons(
               onCalculate: _handleSubmit,
               onClear: _handleClear,
-              accentColor: CalculatorAccentColors.labor,
+              accentColor: CalculatorAccentColors.financial,
               isLoading: state.isLoading,
             ),
 
@@ -85,61 +85,10 @@ class _NetSalaryCalculatorPageState
             // Result Card or Empty State
             const SizedBox(height: 32),
             if (state.calculation != null)
-              NetSalaryResultCard(calculation: state.calculation!)
-            else
-              _buildEmptyState(context),
+              NetSalaryResultCard(calculation: state.calculation!),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final baseColor = isDark ? Colors.white : Colors.black;
-        
-        return Container(
-          padding: const EdgeInsets.all(48),
-          decoration: BoxDecoration(
-            color: baseColor.withValues(alpha: 0.03),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: baseColor.withValues(alpha: 0.08),
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.calculate_outlined,
-                size: 64,
-                color: CalculatorAccentColors.labor.withValues(alpha: 0.3),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'O resultado aparecerá aqui',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: baseColor.withValues(alpha: 0.7),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Preencha os dados acima e clique em calcular.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: baseColor.withValues(alpha: 0.5),
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 
@@ -153,7 +102,8 @@ class _NetSalaryCalculatorPageState
   }
 
   void _handleClear() {
-    // Clear the calculator state
+    _formKey.currentState?.reset();
+    _inputFormKey.currentState?.clear();
     ref.read(netSalaryCalculatorProvider.notifier).clearCalculation();
   }
 }

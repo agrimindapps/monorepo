@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -145,6 +146,7 @@ class _TirePressureCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Carga no Eixo',
                           controller: _axleLoadController,
+                          hintText: 'Ex: 2500',
                           suffix: 'kg',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -174,6 +176,7 @@ class _TirePressureCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Tamanho do Pneu',
                           controller: _tireSizeController,
+                          hintText: 'Ex: 18.4-34',
                           suffix: '',
                           keyboardType: TextInputType.text,
                           inputFormatters: const [],
@@ -343,7 +346,7 @@ class _TirePressureCalculatorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );

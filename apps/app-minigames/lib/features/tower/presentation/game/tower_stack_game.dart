@@ -119,6 +119,8 @@ class TowerStackGame extends FlameGame with TapCallbacks, KeyboardEvents, EscPau
   void update(double dt) {
     super.update(dt);
     
+    _updateCamera(dt);
+    
     if (status != TowerGameStatus.playing || currentBlock == null) return;
     
     // Move current block
@@ -133,13 +135,23 @@ class TowerStackGame extends FlameGame with TapCallbacks, KeyboardEvents, EscPau
         movingRight = true;
       }
     }
+  }
+
+  void _updateCamera(double dt) {
+    if (stack.isEmpty) return;
+
+    // We want the top block to be about 200px from the top of the screen
+    // But we don't want the camera to go below the initial position (size.y / 2)
+    // This effectively clamps the camera so it only scrolls UP, never down below start
+    final topBlockY = stack.last.position.y;
+    final idealCameraY = topBlockY + size.y / 2 - 200;
     
-    // Update camera smoothly
-    if (stack.length > 5) {
-      final targetY = stack.last.position.y + size.y / 2 - 200;
-      // Simple lerp for camera
-      camera.viewfinder.position.y += (targetY - camera.viewfinder.position.y) * dt * 2;
-    }
+    // Use min to ensure we don't scroll down past the initial view
+    final targetY = math.min(size.y / 2, idealCameraY);
+    
+    // Smoothly move camera towards target
+    // Increased lerp speed for better responsiveness (was 2)
+    camera.viewfinder.position.y += (targetY - camera.viewfinder.position.y) * dt * 5;
   }
 
   @override
@@ -352,6 +364,7 @@ class TowerStackGame extends FlameGame with TapCallbacks, KeyboardEvents, EscPau
     if (onGameOver != null) onGameOver!();
   }
 
+  @override
   void restartFromPause() {
     resetGame();
   }

@@ -18,7 +18,7 @@ class AttachmentsSection extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final attachmentsAsync = ref.watch(taskAttachmentNotifierProvider(taskId));
+    final attachmentsAsync = ref.watch(taskAttachmentProvider(taskId));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -28,9 +28,9 @@ class AttachmentsSection extends ConsumerWidget {
           children: [
             Text(
               'Anexos',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: () => _showAttachmentPicker(context, ref),
@@ -41,7 +41,7 @@ class AttachmentsSection extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         attachmentsAsync.when(
-          data: (attachments) {
+          data: (List<TaskAttachmentEntity> attachments) {
             if (attachments.isEmpty) {
               return _buildEmptyState(context);
             }
@@ -49,7 +49,7 @@ class AttachmentsSection extends ConsumerWidget {
             return Column(
               children: attachments
                   .map(
-                    (attachment) => AttachmentListTile(
+                    (TaskAttachmentEntity attachment) => AttachmentListTile(
                       attachment: attachment,
                       onDelete: () => _deleteAttachment(ref, attachment.id),
                     ),
@@ -86,10 +86,7 @@ class AttachmentsSection extends ConsumerWidget {
           children: [
             Icon(Icons.attach_file, size: 48, color: Colors.grey[400]),
             const SizedBox(height: 12),
-            Text(
-              'Nenhum anexo',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            Text('Nenhum anexo', style: TextStyle(color: Colors.grey[600])),
             const SizedBox(height: 4),
             Text(
               'Toque em "Adicionar" para anexar arquivos',
@@ -111,20 +108,26 @@ class AttachmentsSection extends ConsumerWidget {
   }
 
   Future<void> _addFromCamera(WidgetRef ref) async {
-    await ref.read(taskAttachmentNotifierProvider(taskId).notifier).addFromCamera(userId);
+    await ref
+        .read(taskAttachmentProvider(taskId).notifier)
+        .addFromCamera(userId);
   }
 
   Future<void> _addFromGallery(WidgetRef ref) async {
-    await ref.read(taskAttachmentNotifierProvider(taskId).notifier).addFromGallery(userId);
+    await ref
+        .read(taskAttachmentProvider(taskId).notifier)
+        .addFromGallery(userId);
   }
 
   Future<void> _addFromFiles(WidgetRef ref) async {
-    await ref.read(taskAttachmentNotifierProvider(taskId).notifier).addFromFiles(userId);
+    await ref
+        .read(taskAttachmentProvider(taskId).notifier)
+        .addFromFiles(userId);
   }
 
   Future<void> _deleteAttachment(WidgetRef ref, String attachmentId) async {
     await ref
-        .read(taskAttachmentNotifierProvider(taskId).notifier)
+        .read(taskAttachmentProvider(taskId).notifier)
         .removeAttachment(attachmentId);
   }
 }

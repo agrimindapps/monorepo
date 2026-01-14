@@ -70,7 +70,9 @@ class _IdealWeightCalculatorPageState extends State<IdealWeightCalculatorPage> {
               Text(
                 'Selecione o gênero',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white.withValues(alpha: 0.8) 
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),

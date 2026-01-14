@@ -113,6 +113,7 @@ class _FluidTherapyCalculatorPageState
               // Weight
               AdaptiveInputField(
                 label: 'Peso do pet',
+                hintText: 'Ex: 12.5',
                 controller: _weightController,
                 suffix: 'kg',
                 keyboardType: const TextInputType.numberWithOptions(
@@ -140,6 +141,7 @@ class _FluidTherapyCalculatorPageState
               // Dehydration
               AdaptiveInputField(
                 label: 'Desidratação estimada',
+                hintText: 'Ex: 5',
                 controller: _dehydrationController,
                 suffix: '%',
                 keyboardType: const TextInputType.numberWithOptions(
@@ -331,7 +333,7 @@ class _FluidTherapyResultCard extends StatelessWidget {
 _________________
 Calculado por Calculei
 by Agrimind
-https://calculei.com.br''',
+https://calculei.agrimind.com.br''',
               ),
             ],
           ),

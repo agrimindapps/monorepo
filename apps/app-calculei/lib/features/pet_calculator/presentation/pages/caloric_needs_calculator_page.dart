@@ -100,6 +100,7 @@ class _CaloricNeedsCalculatorPageState
               // Weight
               AdaptiveInputField(
                 label: 'Peso do pet',
+                hintText: 'Ex: 15.5',
                 controller: _weightController,
                 suffix: 'kg',
                 keyboardType: const TextInputType.numberWithOptions(
@@ -401,7 +402,7 @@ class _CaloricNeedsResultCard extends StatelessWidget {
 _________________
 Calculado por Calculei
 by Agrimind
-https://calculei.com.br''',
+https://calculei.agrimind.com.br''',
               ),
             ],
           ),

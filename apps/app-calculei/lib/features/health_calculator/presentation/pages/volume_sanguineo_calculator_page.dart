@@ -45,9 +45,8 @@ class _VolumeSanguineoCalculatorPageState
       child: Builder(
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          final textColor = isDark ? Colors.white : Colors.black87;
-          final subtleTextColor = isDark 
-              ? Colors.white.withValues(alpha: 0.8) 
+          final subtleTextColor = isDark
+              ? Colors.white.withValues(alpha: 0.8)
               : Colors.black.withValues(alpha: 0.6);
 
           return Padding(
@@ -66,30 +65,30 @@ class _VolumeSanguineoCalculatorPageState
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _GenderButton(
-                      label: 'Masculino',
-                      icon: Icons.male,
-                      isSelected: _gender == Gender.male,
-                      onTap: () => setState(() => _gender = Gender.male),
-                    ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _GenderButton(
+                          label: 'Masculino',
+                          icon: Icons.male,
+                          isSelected: _gender == Gender.male,
+                          onTap: () => setState(() => _gender = Gender.male),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _GenderButton(
+                          label: 'Feminino',
+                          icon: Icons.female,
+                          isSelected: _gender == Gender.female,
+                          onTap: () => setState(() => _gender = Gender.female),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _GenderButton(
-                      label: 'Feminino',
-                      icon: Icons.female,
-                      isSelected: _gender == Gender.female,
-                      onTap: () => setState(() => _gender = Gender.female),
-                    ),
-                  ),
-                ],
-              ),
 
-              const SizedBox(height: 24),
+                  const SizedBox(height: 24),
 
                   // Input fields
                   Row(
@@ -99,9 +98,13 @@ class _VolumeSanguineoCalculatorPageState
                           label: 'Peso',
                           controller: _weightController,
                           suffix: 'kg',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -123,7 +126,9 @@ class _VolumeSanguineoCalculatorPageState
                           suffix: 'cm',
                           enabled: !_useSimplified,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           validator: (value) {
                             if (_useSimplified) {
                               return null;
@@ -214,9 +219,7 @@ class _VolumeSanguineoCalculatorPageState
 
     final result = VolumeSanguineoCalculator.calculate(
       weightKg: double.parse(_weightController.text),
-      heightCm: _useSimplified
-          ? 170.0
-          : double.parse(_heightController.text),
+      heightCm: _useSimplified ? 170.0 : double.parse(_heightController.text),
       gender: _gender,
       useSimplified: _useSimplified,
     );
@@ -254,11 +257,11 @@ class _GenderButton extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
-      color: isSelected 
+      color: isSelected
           ? accentColor.withValues(alpha: 0.15)
           : isDark
-              ? Colors.white.withValues(alpha: 0.05)
-              : Colors.black.withValues(alpha: 0.03),
+          ? Colors.white.withValues(alpha: 0.05)
+          : Colors.black.withValues(alpha: 0.03),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -270,8 +273,8 @@ class _GenderButton extends StatelessWidget {
               color: isSelected
                   ? accentColor
                   : isDark
-                      ? Colors.white.withValues(alpha: 0.1)
-                      : Colors.black.withValues(alpha: 0.1),
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.1),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -284,8 +287,8 @@ class _GenderButton extends StatelessWidget {
                 color: isSelected
                     ? accentColor
                     : isDark
-                        ? Colors.white.withValues(alpha: 0.6)
-                        : Colors.black.withValues(alpha: 0.5),
+                    ? Colors.white.withValues(alpha: 0.6)
+                    : Colors.black.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 6),
               Text(
@@ -296,8 +299,8 @@ class _GenderButton extends StatelessWidget {
                   color: isSelected
                       ? accentColor
                       : isDark
-                          ? Colors.white.withValues(alpha: 0.7)
-                          : Colors.black.withValues(alpha: 0.6),
+                      ? Colors.white.withValues(alpha: 0.7)
+                      : Colors.black.withValues(alpha: 0.6),
                 ),
               ),
             ],
@@ -326,9 +329,7 @@ class _BloodVolumeResultCard extends StatelessWidget {
             ? Colors.white.withValues(alpha: 0.05)
             : Colors.black.withValues(alpha: 0.02),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: bloodColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: bloodColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -342,11 +343,7 @@ class _BloodVolumeResultCard extends StatelessWidget {
             ),
             child: Column(
               children: [
-                const Icon(
-                  Icons.water_drop,
-                  size: 48,
-                  color: bloodColor,
-                ),
+                const Icon(Icons.water_drop, size: 48, color: bloodColor),
                 const SizedBox(height: 8),
                 Text(
                   '${result.volumeLiters}L',
@@ -431,9 +428,7 @@ class _BloodVolumeResultCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.amber.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.amber.withValues(alpha: 0.2),
-              ),
+              border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,

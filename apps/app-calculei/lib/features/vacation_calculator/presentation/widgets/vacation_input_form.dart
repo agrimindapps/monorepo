@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/accent_input_fields.dart';
-import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 

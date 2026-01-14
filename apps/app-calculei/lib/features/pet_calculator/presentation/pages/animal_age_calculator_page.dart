@@ -135,6 +135,7 @@ class _AnimalAgeCalculatorPageState extends State<AnimalAgeCalculatorPage> {
                   // Age input
                   AdaptiveInputField(
                     label: 'Idade do pet',
+                    hintText: 'Ex: 3',
                     controller: _ageController,
                     suffix: 'anos',
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),

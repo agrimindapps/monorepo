@@ -15,6 +15,7 @@ class TaskListModel extends TaskListEntity {
     super.isArchived,
     super.position,
     super.backgroundImage,
+    super.groupId,
   });
 
   /// Converte de Firestore Document para Model
@@ -26,7 +27,8 @@ class TaskListModel extends TaskListEntity {
       description: data['description'] as String?,
       color: data['color'] as String? ?? '#2196F3', // Default blue
       ownerId: data['ownerId'] as String,
-      memberIds: (data['memberIds'] as List<dynamic>?)
+      memberIds:
+          (data['memberIds'] as List<dynamic>?)
               ?.map((e) => e as String)
               .toList() ??
           [],
@@ -36,6 +38,7 @@ class TaskListModel extends TaskListEntity {
       isArchived: data['isArchived'] as bool? ?? false,
       position: data['position'] as int? ?? 0,
       backgroundImage: data['backgroundImage'] as String?,
+      groupId: data['groupId'] as String?,
     );
   }
 
@@ -48,7 +51,10 @@ class TaskListModel extends TaskListEntity {
       color: map['color'] as String? ?? '#2196F3',
       ownerId: map['ownerId'] as String,
       memberIds:
-          (map['memberIds'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+          (map['memberIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       createdAt: map['createdAt'] is Timestamp
           ? (map['createdAt'] as Timestamp).toDate()
           : DateTime.parse(map['createdAt'] as String),
@@ -59,6 +65,7 @@ class TaskListModel extends TaskListEntity {
       isArchived: map['isArchived'] as bool? ?? false,
       position: map['position'] as int? ?? 0,
       backgroundImage: map['backgroundImage'] as String?,
+      groupId: map['groupId'] as String?,
     );
   }
 
@@ -77,6 +84,7 @@ class TaskListModel extends TaskListEntity {
       isArchived: entity.isArchived,
       position: entity.position,
       backgroundImage: entity.backgroundImage,
+      groupId: entity.groupId,
     );
   }
 
@@ -94,6 +102,7 @@ class TaskListModel extends TaskListEntity {
       'isArchived': isArchived,
       'position': position,
       'backgroundImage': backgroundImage,
+      'groupId': groupId,
     };
   }
 
@@ -112,6 +121,7 @@ class TaskListModel extends TaskListEntity {
     bool? isArchived,
     int? position,
     String? backgroundImage,
+    String? groupId,
   }) {
     return TaskListModel(
       id: id ?? this.id,
@@ -126,6 +136,7 @@ class TaskListModel extends TaskListEntity {
       isArchived: isArchived ?? this.isArchived,
       position: position ?? this.position,
       backgroundImage: backgroundImage ?? this.backgroundImage,
+      groupId: groupId ?? this.groupId,
     );
   }
 }

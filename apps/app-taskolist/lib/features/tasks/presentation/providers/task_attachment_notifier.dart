@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide connectivityServiceProvider;
 import '../../../../core/providers/core_providers.dart';
 import '../../data/services/task_attachment_service.dart';
 import '../../data/services/task_attachment_storage_service.dart';
@@ -27,7 +27,9 @@ TaskAttachmentStorageService taskAttachmentStorageService(Ref ref) {
 TaskAttachmentSyncService taskAttachmentSyncService(Ref ref) {
   final storageService = ref.watch(taskAttachmentStorageServiceProvider);
   final localDataSource = ref.watch(taskAttachmentLocalDataSourceProvider);
-  final connectivityService = ref.watch(connectivityServiceProvider);
+  final connectivityService = ref.watch<ConnectivityService>(
+    connectivityServiceProvider,
+  );
 
   return TaskAttachmentSyncService(
     storageService: storageService,
@@ -50,7 +52,7 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
   Future<List<TaskAttachmentEntity>> build(String taskId) async {
     final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
     final result = await datasource.getAttachmentsByTaskId(taskId);
-    
+
     return result.fold(
       (failure) => throw Exception(failure.message),
       (attachments) => attachments,
@@ -68,20 +70,21 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
         userId: userId,
       );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (attachment) async {
-          final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-          await datasource.saveAttachment(attachment);
-          await _uploadOrQueue(attachment, userId);
-          
-          final attachmentsResult = await datasource.getAttachmentsByTaskId(taskId);
-          return attachmentsResult.fold(
-            (failure) => throw Exception(failure.message),
-            (attachments) => attachments,
-          );
-        },
-      );
+      return result.fold((failure) => throw Exception(failure.message), (
+        attachment,
+      ) async {
+        final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
+        await datasource.saveAttachment(attachment);
+        await _uploadOrQueue(attachment, userId);
+
+        final attachmentsResult = await datasource.getAttachmentsByTaskId(
+          taskId,
+        );
+        return attachmentsResult.fold(
+          (failure) => throw Exception(failure.message),
+          (attachments) => attachments,
+        );
+      });
     });
   }
 
@@ -96,20 +99,21 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
         userId: userId,
       );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (attachment) async {
-          final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-          await datasource.saveAttachment(attachment);
-          await _uploadOrQueue(attachment, userId);
-          
-          final attachmentsResult = await datasource.getAttachmentsByTaskId(taskId);
-          return attachmentsResult.fold(
-            (failure) => throw Exception(failure.message),
-            (attachments) => attachments,
-          );
-        },
-      );
+      return result.fold((failure) => throw Exception(failure.message), (
+        attachment,
+      ) async {
+        final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
+        await datasource.saveAttachment(attachment);
+        await _uploadOrQueue(attachment, userId);
+
+        final attachmentsResult = await datasource.getAttachmentsByTaskId(
+          taskId,
+        );
+        return attachmentsResult.fold(
+          (failure) => throw Exception(failure.message),
+          (attachments) => attachments,
+        );
+      });
     });
   }
 
@@ -125,22 +129,23 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
         allowMultiple: allowMultiple,
       );
 
-      return result.fold(
-        (failure) => throw Exception(failure.message),
-        (attachments) async {
-          final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-          for (final attachment in attachments) {
-            await datasource.saveAttachment(attachment);
-            await _uploadOrQueue(attachment, userId);
-          }
-          
-          final attachmentsResult = await datasource.getAttachmentsByTaskId(taskId);
-          return attachmentsResult.fold(
-            (failure) => throw Exception(failure.message),
-            (attachments) => attachments,
-          );
-        },
-      );
+      return result.fold((failure) => throw Exception(failure.message), (
+        attachments,
+      ) async {
+        final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
+        for (final attachment in attachments) {
+          await datasource.saveAttachment(attachment);
+          await _uploadOrQueue(attachment, userId);
+        }
+
+        final attachmentsResult = await datasource.getAttachmentsByTaskId(
+          taskId,
+        );
+        return attachmentsResult.fold(
+          (failure) => throw Exception(failure.message),
+          (attachments) => attachments,
+        );
+      });
     });
   }
 
@@ -174,13 +179,16 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
   }
 
   /// Upload or queue attachment based on connectivity
-  Future<void> _uploadOrQueue(TaskAttachmentEntity attachment, String userId) async {
+  Future<void> _uploadOrQueue(
+    TaskAttachmentEntity attachment,
+    String userId,
+  ) async {
     final connectivityService = ref.read(connectivityServiceProvider);
-    
-    if (connectivityService.isOnline) {
+
+    if (connectivityService.isOnlineSync) {
       final storageService = ref.read(taskAttachmentStorageServiceProvider);
       final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-      
+
       if (attachment.filePath != null) {
         final uploadResult = await storageService.uploadAttachment(
           file: File(attachment.filePath!),
@@ -193,7 +201,8 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
 
         uploadResult.fold(
           (failure) => _addToQueue(attachment, userId),
-          (downloadUrl) async => await datasource.markAsUploaded(attachment.id, downloadUrl),
+          (downloadUrl) async =>
+              await datasource.markAsUploaded(attachment.id, downloadUrl),
         );
       }
     } else {

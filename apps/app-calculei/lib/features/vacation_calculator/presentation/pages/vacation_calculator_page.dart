@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,7 +41,7 @@ class _VacationCalculatorPageState
       title: 'Calculadora de Férias',
       subtitle: 'Férias + 1/3 Constitucional',
       icon: Icons.beach_access_outlined,
-      accentColor: CalculatorAccentColors.labor,
+      accentColor: CalculatorAccentColors.financial,
       currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
@@ -110,7 +111,7 @@ class _VacationCalculatorPageState
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: _sellVacationDays
-                                ? CalculatorAccentColors.labor
+                                ? CalculatorAccentColors.financial
                                 : baseColor.withValues(alpha: 0.1),
                             width: _sellVacationDays ? 2 : 1,
                           ),
@@ -123,7 +124,7 @@ class _VacationCalculatorPageState
                               onChanged: (value) {
                                 setState(() => _sellVacationDays = value ?? false);
                               },
-                              activeColor: CalculatorAccentColors.labor,
+                              activeColor: CalculatorAccentColors.financial,
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -163,7 +164,7 @@ class _VacationCalculatorPageState
               CalculatorActionButtons(
                 onCalculate: _calculate,
                 onClear: _handleClear,
-                accentColor: CalculatorAccentColors.labor,
+                accentColor: CalculatorAccentColors.financial,
                 isLoading: false,
               ),
 
@@ -195,7 +196,7 @@ class _VacationCalculatorPageState
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Férias calculadas com sucesso!'),
-            backgroundColor: CalculatorAccentColors.labor,
+            backgroundColor: CalculatorAccentColors.financial,
           ),
         );
       }
@@ -203,7 +204,7 @@ class _VacationCalculatorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -299,7 +300,7 @@ class _AdaptiveInputField extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(
-                color: CalculatorAccentColors.labor,
+                color: CalculatorAccentColors.financial,
                 width: 2,
               ),
             ),

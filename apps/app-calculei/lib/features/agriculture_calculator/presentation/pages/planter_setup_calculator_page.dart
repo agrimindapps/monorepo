@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,19 +23,13 @@ class _PlanterSetupCalculatorPageState
     extends ConsumerState<PlanterSetupCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _populationController = TextEditingController();
-  final _rowSpacingController = TextEditingController(text: '50');
-  final _germinationController = TextEditingController(text: '90');
+  final _rowSpacingController = TextEditingController();
+  final _germinationController = TextEditingController();
 
   String _cropType = 'Soja';
   int _discHoles = 28;
 
-  final _cropTypes = [
-    'Soja',
-    'Milho',
-    'Feijão',
-    'Algodão',
-    'Girassol',
-  ];
+  final _cropTypes = ['Soja', 'Milho', 'Feijão', 'Algodão', 'Girassol'];
 
   final _discHoleOptions = [20, 24, 28, 32, 36, 40];
 
@@ -50,12 +45,6 @@ class _PlanterSetupCalculatorPageState
   @override
   void initState() {
     super.initState();
-    _setDefaultPopulation();
-  }
-
-  void _setDefaultPopulation() {
-    final defaultPop = _recommendedPopulations[_cropType]!['default']!;
-    _populationController.text = defaultPop.toStringAsFixed(0);
   }
 
   @override
@@ -91,11 +80,14 @@ class _PlanterSetupCalculatorPageState
                   // Crop type selection
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Text(
                         'Cultura',
                         style: TextStyle(
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : Colors.black.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -113,7 +105,7 @@ class _PlanterSetupCalculatorPageState
                         onSelected: () {
                           setState(() {
                             _cropType = crop;
-                            _setDefaultPopulation();
+                            // _setDefaultPopulation();
                           });
                         },
                         accentColor: const Color(0xFF4CAF50),
@@ -131,11 +123,14 @@ class _PlanterSetupCalculatorPageState
                   // Input fields
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Text(
                         'Parâmetros de Plantio',
                         style: TextStyle(
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : Colors.black.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -153,6 +148,7 @@ class _PlanterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'População Alvo',
                           controller: _populationController,
+                          hintText: 'Ex: 300000',
                           suffix: 'plantas/ha',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: false,
@@ -168,8 +164,10 @@ class _PlanterSetupCalculatorPageState
                             if (num == null || num <= 0) {
                               return 'Inválido';
                             }
-                            final min = _recommendedPopulations[_cropType]!['min']!;
-                            final max = _recommendedPopulations[_cropType]!['max']!;
+                            final min =
+                                _recommendedPopulations[_cropType]!['min']!;
+                            final max =
+                                _recommendedPopulations[_cropType]!['max']!;
                             if (num < min || num > max) {
                               return 'Fora da faixa';
                             }
@@ -182,6 +180,7 @@ class _PlanterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Espaçamento',
                           controller: _rowSpacingController,
+                          hintText: 'Ex: 50',
                           suffix: 'cm',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -211,6 +210,7 @@ class _PlanterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Germinação',
                           controller: _germinationController,
+                          hintText: 'Ex: 90',
                           suffix: '%',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -243,11 +243,14 @@ class _PlanterSetupCalculatorPageState
                   // Disc holes selection
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Text(
                         'Disco de Plantio',
                         style: TextStyle(
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : Colors.black.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -324,7 +327,9 @@ class _PlanterSetupCalculatorPageState
                   'Faixa recomendada para $_cropType: '
                   '${(min / 1000).toStringAsFixed(0)}k - ${(max / 1000).toStringAsFixed(0)}k plantas/ha',
                   style: TextStyle(
-                    color: isDark ? Colors.white.withValues(alpha: 0.85) : Colors.black.withValues(alpha: 0.85),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.85)
+                        : Colors.black.withValues(alpha: 0.85),
                     fontSize: 13,
                   ),
                 ),
@@ -343,7 +348,9 @@ class _PlanterSetupCalculatorPageState
       final germination = double.parse(_germinationController.text);
 
       try {
-        ref.read(planterSetupCalculatorProvider.notifier).calculate(
+        ref
+            .read(planterSetupCalculatorProvider.notifier)
+            .calculate(
               cropType: _cropType,
               targetPopulation: population,
               rowSpacing: rowSpacing,
@@ -352,10 +359,7 @@ class _PlanterSetupCalculatorPageState
             );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e is Failure ? e.message : e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -363,15 +367,16 @@ class _PlanterSetupCalculatorPageState
 
   void _clear() {
     _formKey.currentState?.reset();
+    _populationController.clear();
+    _rowSpacingController.clear();
+    _germinationController.clear();
     setState(() {
       _cropType = 'Soja';
       _discHoles = 28;
-      _rowSpacingController.text = '50';
-      _germinationController.text = '90';
-      _setDefaultPopulation();
+      // _rowSpacingController.text = '50';
+      // _germinationController.text = '90';
+      // _setDefaultPopulation();
     });
     ref.read(planterSetupCalculatorProvider.notifier).reset();
   }
 }
-
-

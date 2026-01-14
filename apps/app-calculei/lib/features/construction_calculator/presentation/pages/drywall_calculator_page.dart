@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -82,6 +83,7 @@ class _DrywallCalculatorPageState extends ConsumerState<DrywallCalculatorPage> {
                           label: 'Comprimento',
                           controller: _lengthController,
                           suffix: 'm',
+                          hintText: 'Ex: 4.5',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -104,6 +106,7 @@ class _DrywallCalculatorPageState extends ConsumerState<DrywallCalculatorPage> {
                           label: 'Altura',
                           controller: _heightController,
                           suffix: 'm',
+                          hintText: 'Ex: 2.8',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -206,7 +209,7 @@ class _DrywallCalculatorPageState extends ConsumerState<DrywallCalculatorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );

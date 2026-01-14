@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
 
-import '../../domain/task_attachment_entity.dart';
+import '../domain/task_attachment_entity.dart';
 import '../../../database/daos/task_attachment_dao.dart';
 
 /// Local datasource para task attachments
@@ -18,7 +18,7 @@ class TaskAttachmentLocalDataSource {
       await _dao.insertAttachment(attachment);
       return const Right(null);
     } catch (e) {
-      return Left(Failure('Erro ao salvar anexo: $e'));
+      return Left(CacheFailure('Erro ao salvar anexo: $e'));
     }
   }
 
@@ -31,7 +31,7 @@ class TaskAttachmentLocalDataSource {
       final entities = _dao.toEntities(data);
       return Right(entities);
     } catch (e) {
-      return Left(Failure('Erro ao buscar anexos: $e'));
+      return Left(CacheFailure('Erro ao buscar anexos: $e'));
     }
   }
 
@@ -44,7 +44,7 @@ class TaskAttachmentLocalDataSource {
       if (data == null) return const Right(null);
       return Right(_dao.toEntity(data));
     } catch (e) {
-      return Left(Failure('Erro ao buscar anexo: $e'));
+      return Left(CacheFailure('Erro ao buscar anexo: $e'));
     }
   }
 
@@ -56,7 +56,7 @@ class TaskAttachmentLocalDataSource {
       await _dao.updateAttachment(attachment);
       return const Right(null);
     } catch (e) {
-      return Left(Failure('Erro ao atualizar anexo: $e'));
+      return Left(CacheFailure('Erro ao atualizar anexo: $e'));
     }
   }
 
@@ -69,7 +69,7 @@ class TaskAttachmentLocalDataSource {
       await _dao.markAsUploaded(id, fileUrl);
       return const Right(null);
     } catch (e) {
-      return Left(Failure('Erro ao marcar anexo como enviado: $e'));
+      return Left(CacheFailure('Erro ao marcar anexo como enviado: $e'));
     }
   }
 
@@ -79,24 +79,27 @@ class TaskAttachmentLocalDataSource {
       await _dao.deleteAttachment(id);
       return const Right(null);
     } catch (e) {
-      return Left(Failure('Erro ao deletar anexo: $e'));
+      return Left(CacheFailure('Erro ao deletar anexo: $e'));
     }
   }
 
   /// Buscar anexos pendentes de upload
-  Future<Either<Failure, List<TaskAttachmentEntity>>> getPendingUploads() async {
+  Future<Either<Failure, List<TaskAttachmentEntity>>>
+  getPendingUploads() async {
     try {
       final data = await _dao.getPendingUploads();
       final entities = _dao.toEntities(data);
       return Right(entities);
     } catch (e) {
-      return Left(Failure('Erro ao buscar anexos pendentes: $e'));
+      return Left(CacheFailure('Erro ao buscar anexos pendentes: $e'));
     }
   }
 
   /// Watch anexos (stream)
   Stream<List<TaskAttachmentEntity>> watchAttachmentsByTaskId(String taskId) {
-    return _dao.watchAttachmentsByTaskId(taskId).map((data) => _dao.toEntities(data));
+    return _dao
+        .watchAttachmentsByTaskId(taskId)
+        .map((data) => _dao.toEntities(data));
   }
 
   /// Contar anexos de uma tarefa
@@ -105,7 +108,7 @@ class TaskAttachmentLocalDataSource {
       final count = await _dao.countAttachmentsByTaskId(taskId);
       return Right(count);
     } catch (e) {
-      return Left(Failure('Erro ao contar anexos: $e'));
+      return Left(CacheFailure('Erro ao contar anexos: $e'));
     }
   }
 }

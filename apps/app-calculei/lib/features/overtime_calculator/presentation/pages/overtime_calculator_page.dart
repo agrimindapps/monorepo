@@ -30,7 +30,7 @@ class _OvertimeCalculatorPageState
       title: 'Calculadora de Horas Extras',
       subtitle: 'Horas Trabalhadas + Adicionais',
       icon: Icons.access_time_outlined,
-      accentColor: CalculatorAccentColors.labor,
+      accentColor: CalculatorAccentColors.financial,
       currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
@@ -51,7 +51,7 @@ class _OvertimeCalculatorPageState
             CalculatorActionButtons(
               onCalculate: _handleSubmit,
               onClear: _handleClear,
-              accentColor: CalculatorAccentColors.labor,
+              accentColor: CalculatorAccentColors.financial,
               isLoading: state.isLoading,
             ),
 
@@ -102,6 +102,8 @@ class _OvertimeCalculatorPageState
   }
 
   void _handleClear() {
+    _formKey.currentState?.reset();
+    _inputFormKey.currentState?.clear();
     ref.read(overtimeCalculatorProvider.notifier).clearCalculation();
   }
 }

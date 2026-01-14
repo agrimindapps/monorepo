@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'tasks_table.dart';
 
 /// Task Attachments Table - Anexos de tarefas
 @DataClassName('TaskAttachmentData')
@@ -7,7 +8,8 @@ class TaskAttachments extends Table {
   TextColumn get id => text()();
 
   /// Foreign key para Tasks
-  TextColumn get taskId => text().references(Tasks, #id, onDelete: KeyAction.cascade)();
+  TextColumn get taskId =>
+      text().references(Tasks, #firebaseId, onDelete: KeyAction.cascade)();
 
   /// Nome do arquivo original
   TextColumn get fileName => text()();

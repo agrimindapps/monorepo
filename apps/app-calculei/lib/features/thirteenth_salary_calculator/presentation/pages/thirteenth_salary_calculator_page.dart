@@ -30,7 +30,7 @@ class _ThirteenthSalaryCalculatorPageState
       title: 'Calculadora de 13º Salário',
       subtitle: 'Gratificação Natalina',
       icon: Icons.card_giftcard_outlined,
-      accentColor: CalculatorAccentColors.labor,
+      accentColor: CalculatorAccentColors.financial,
       currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
@@ -51,7 +51,7 @@ class _ThirteenthSalaryCalculatorPageState
             CalculatorActionButtons(
               onCalculate: _handleSubmit,
               onClear: _handleClear,
-              accentColor: CalculatorAccentColors.labor,
+              accentColor: CalculatorAccentColors.financial,
               isLoading: state.isLoading,
             ),
 
@@ -105,6 +105,7 @@ class _ThirteenthSalaryCalculatorPageState
 
   void _handleClear() {
     _formKey.currentState?.reset();
+    _inputFormKey.currentState?.clear();
     ref.read(thirteenthSalaryCalculatorProvider.notifier).clearCalculation();
   }
 }

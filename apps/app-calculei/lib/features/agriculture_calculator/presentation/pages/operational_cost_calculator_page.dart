@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,8 +45,6 @@ class _OperationalCostCalculatorPageState
   @override
   void initState() {
     super.initState();
-    // Set default values
-    _maintenanceFactorController.text = '50'; // Default 50%
   }
 
   @override
@@ -114,6 +113,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Consumo de Combustível',
                           controller: _fuelConsumptionController,
+                          hintText: 'Ex: 15.5',
                           suffix: 'L/ha',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -143,6 +143,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Preço do Combustível',
                           controller: _fuelPriceController,
+                          hintText: 'Ex: 5.90',
                           suffix: 'R\$/L',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -184,6 +185,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Horas de Trabalho',
                           controller: _laborHoursController,
+                          hintText: 'Ex: 8',
                           suffix: 'h/ha',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -213,6 +215,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Custo da Mão de Obra',
                           controller: _laborCostController,
+                          hintText: 'Ex: 25.00',
                           suffix: 'R\$/h',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -254,6 +257,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Valor da Máquina',
                           controller: _machineryValueController,
+                          hintText: 'Ex: 250000',
                           suffix: 'R\$',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -283,6 +287,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Vida Útil',
                           controller: _usefulLifeController,
+                          hintText: 'Ex: 10000',
                           suffix: 'horas',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -312,6 +317,7 @@ class _OperationalCostCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Fator de Manutenção',
                           controller: _maintenanceFactorController,
+                          hintText: 'Ex: 50',
                           suffix: '%',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -349,6 +355,7 @@ class _OperationalCostCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Área Trabalhada',
                       controller: _areaWorkedController,
+                      hintText: 'Ex: 500',
                       suffix: 'ha',
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
@@ -465,7 +472,7 @@ class _OperationalCostCalculatorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -481,7 +488,7 @@ class _OperationalCostCalculatorPageState
     _laborCostController.clear();
     _machineryValueController.clear();
     _usefulLifeController.clear();
-    _maintenanceFactorController.text = '50'; // Reset to default
+    _maintenanceFactorController.clear();
     _areaWorkedController.clear();
     
     setState(() {

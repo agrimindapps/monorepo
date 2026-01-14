@@ -112,14 +112,14 @@ class FinancialSelectionPage extends StatelessWidget {
                             title: 'Reserva Emergência',
                             subtitle: 'Planejamento',
                             icon: Icons.savings,
-                            color: Colors.teal,
+                            color: Colors.blue,
                             route: '/calculators/financial/emergency-reserve',
                           ),
                           _CalculatorCard(
                             title: 'À Vista ou Parcelado',
                             subtitle: 'Compare opções',
                             icon: Icons.payment,
-                            color: Colors.indigo,
+                            color: Colors.blue,
                             route: '/calculators/financial/cash-vs-installment',
                           ),
                           _CalculatorCard(

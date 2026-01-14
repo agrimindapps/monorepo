@@ -19,15 +19,15 @@ class SprayMixCalculatorPage extends StatefulWidget {
 
 class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _areaController = TextEditingController(text: '10');
-  final _applicationRateController = TextEditingController(text: '200');
-  final _tankCapacityController = TextEditingController(text: '2000');
+  final _areaController = TextEditingController();
+  final _applicationRateController = TextEditingController();
+  final _tankCapacityController = TextEditingController();
 
   // Lista de produtos (até 3 produtos por vez)
   final List<_ProductInput> _products = [
     _ProductInput(
-      nameController: TextEditingController(text: 'Herbicida'),
-      doseController: TextEditingController(text: '2000'),
+      nameController: TextEditingController(),
+      doseController: TextEditingController(),
       unit: ProductUnit.mL,
     ),
   ];
@@ -135,6 +135,7 @@ class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
                   child: AdaptiveInputField(
                     label: 'Volume de calda',
                     controller: _applicationRateController,
+                    hintText: 'Ex: 200',
                     suffix: 'L/ha',
                     keyboardType: TextInputType.number,
                     inputFormatters: [
@@ -160,6 +161,7 @@ class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
                   child: AdaptiveInputField(
                     label: 'Capacidade do tanque',
                     controller: _tankCapacityController,
+                    hintText: 'Ex: 2000',
                     suffix: 'L',
                     keyboardType: TextInputType.number,
                     inputFormatters: [
@@ -283,6 +285,7 @@ class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Nome do produto',
                       controller: product.nameController,
+                      hintText: 'Ex: Herbicida',
                       validator: (v) =>
                           v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
@@ -292,6 +295,7 @@ class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Dose por hectare',
                       controller: product.doseController,
+                      hintText: 'Ex: 2000',
                       suffix: SprayMixCalculator.getUnitLabel(product.unit),
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -389,9 +393,9 @@ class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
   }
 
   void _clear() {
-    _areaController.text = '10';
-    _applicationRateController.text = '200';
-    _tankCapacityController.text = '2000';
+    _areaController.clear();
+    _applicationRateController.clear();
+    _tankCapacityController.clear();
 
     // Limpa produtos mantendo apenas 1
     for (var i = _products.length - 1; i > 0; i--) {
@@ -400,8 +404,8 @@ class _SprayMixCalculatorPageState extends State<SprayMixCalculatorPage> {
       _products.removeAt(i);
     }
 
-    _products[0].nameController.text = 'Herbicida';
-    _products[0].doseController.text = '2000';
+    _products[0].nameController.clear();
+    _products[0].doseController.clear();
     _products[0].unit = ProductUnit.mL;
 
     setState(() {

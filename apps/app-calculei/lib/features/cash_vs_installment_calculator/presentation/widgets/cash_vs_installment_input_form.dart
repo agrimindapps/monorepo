@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
-import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_cash_vs_installment_usecase.dart';
@@ -30,8 +29,8 @@ class CashVsInstallmentInputFormState
   // Controllers
   final _cashPriceController = TextEditingController();
   final _installmentPriceController = TextEditingController();
-  final _numberOfInstallmentsController = TextEditingController(text: '12');
-  final _monthlyInterestRateController = TextEditingController(text: '0,8');
+  final _numberOfInstallmentsController = TextEditingController();
+  final _monthlyInterestRateController = TextEditingController();
 
   // Formatters
 
@@ -49,6 +48,14 @@ class CashVsInstallmentInputFormState
     _submitForm();
   }
 
+  /// Public method to clear all input fields
+  void clear() {
+    _cashPriceController.clear();
+    _installmentPriceController.clear();
+    _numberOfInstallmentsController.clear();
+    _monthlyInterestRateController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.financial;
@@ -63,6 +70,7 @@ class CashVsInstallmentInputFormState
               controller: _cashPriceController,
               label: 'Valor à Vista',
               helperText: 'Preço para pagamento à vista',
+              hintText: 'Ex: 1.000,00',
               accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o valor à vista';
@@ -78,6 +86,7 @@ class CashVsInstallmentInputFormState
               controller: _installmentPriceController,
               label: 'Valor da Parcela',
               helperText: 'Valor de cada parcela',
+              hintText: 'Ex: 100,00',
               accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o valor da parcela';
@@ -97,6 +106,7 @@ class CashVsInstallmentInputFormState
               controller: _numberOfInstallmentsController,
               label: 'Número de Parcelas',
               helperText: 'Quantidade de parcelas',
+              hintText: 'Ex: 12',
               accentColor: accentColor,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -115,7 +125,8 @@ class CashVsInstallmentInputFormState
             right: AccentPercentageField(
               controller: _monthlyInterestRateController,
               label: 'Taxa de Juros Mensal',
-              helperText: 'Taxa que você consegue aplicando (ex: 0,8%)',
+              helperText: 'Taxa que você consegue aplicando',
+              hintText: 'Ex: 0,8',
               accentColor: accentColor,
               validator: (value) {
                 if (value == null || value.isEmpty) {

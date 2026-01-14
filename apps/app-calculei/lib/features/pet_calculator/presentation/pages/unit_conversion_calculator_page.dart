@@ -78,7 +78,7 @@ Fórmula: ${_result!.formula}
 _________________
 Calculado por Calculei
 by Agrimind
-https://calculei.com.br''');
+https://calculei.agrimind.com.br''');
             },
             tooltip: 'Compartilhar',
           ),
@@ -177,6 +177,7 @@ https://calculei.com.br''');
               // Value Input
               AdaptiveInputField(
                 label: 'Valor',
+                hintText: 'Ex: 10',
                 controller: _valueController,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,

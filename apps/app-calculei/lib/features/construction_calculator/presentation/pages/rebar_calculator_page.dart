@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,6 +133,7 @@ class _RebarCalculatorPageState extends ConsumerState<RebarCalculatorPage> {
                           label: 'Volume',
                           controller: _volumeController,
                           suffix: 'm³',
+                          hintText: 'Ex: 10.0',
                           keyboardType:
                               const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
@@ -236,7 +238,7 @@ class _RebarCalculatorPageState extends ConsumerState<RebarCalculatorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );

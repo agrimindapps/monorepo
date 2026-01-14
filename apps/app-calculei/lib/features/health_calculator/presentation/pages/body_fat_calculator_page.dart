@@ -54,7 +54,9 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
               Text(
                 'Selecione o gênero',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white.withValues(alpha: 0.8) 
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -154,7 +156,7 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
                       label: 'Cintura',
                       controller: _waistController,
                       suffix: 'cm',
-                      hint: 'No umbigo',
+                      hintText: 'No umbigo',
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -173,7 +175,7 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
                       label: 'Pescoço',
                       controller: _neckController,
                       suffix: 'cm',
-                      hint: 'Abaixo do pomo',
+                      hintText: 'Abaixo do pomo',
                       keyboardType: const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -193,7 +195,7 @@ class _BodyFatCalculatorPageState extends State<BodyFatCalculatorPage> {
                         label: 'Quadril',
                         controller: _hipController,
                         suffix: 'cm',
-                        hint: 'Parte mais larga',
+                        hintText: 'Parte mais larga',
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         inputFormatters: [
                           FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -270,7 +272,7 @@ class _DarkInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
-  final String? hint;
+  final String? hintText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
@@ -279,7 +281,7 @@ class _DarkInputField extends StatelessWidget {
     required this.label,
     required this.controller,
     this.suffix,
-    this.hint,
+    this.hintText,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -310,7 +312,7 @@ class _DarkInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: hintText,
             hintStyle: TextStyle(
               color: Colors.white.withValues(alpha: 0.3),
               fontSize: 14,
@@ -369,12 +371,14 @@ class _GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final accentColor = CalculatorAccentColors.health;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : (isDark ? Colors.white.withValues(alpha: 0.05) : theme.colorScheme.surfaceContainerHighest),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -385,7 +389,7 @@ class _GenderButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : (isDark ? Colors.white.withValues(alpha: 0.1) : theme.colorScheme.outline.withValues(alpha: 0.3)),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -397,7 +401,7 @@ class _GenderButton extends StatelessWidget {
                 size: 32,
                 color: isSelected
                     ? accentColor
-                    : Colors.white.withValues(alpha: 0.6),
+                    : (isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 6),
               Text(
@@ -407,7 +411,7 @@ class _GenderButton extends StatelessWidget {
                   fontSize: 14,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : (isDark ? Colors.white.withValues(alpha: 0.7) : theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                 ),
               ),
             ],

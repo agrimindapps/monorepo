@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,7 @@ class _TractorBallastCalculatorPageState
     extends ConsumerState<TractorBallastCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _tractorWeightController = TextEditingController();
-  final _implementWeightController = TextEditingController(text: '0');
+  final _implementWeightController = TextEditingController();
 
   String _tractorType = '4x2';
   String _operationType = 'Preparo Pesado';
@@ -162,6 +163,7 @@ class _TractorBallastCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Peso do Trator',
                           controller: _tractorWeightController,
+                          hintText: 'Ex: 5000',
                           suffix: 'kg',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: false,
@@ -192,6 +194,7 @@ class _TractorBallastCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Peso do Implemento',
                           controller: _implementWeightController,
+                          hintText: 'Ex: 1000',
                           suffix: 'kg',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: false,
@@ -317,7 +320,7 @@ class _TractorBallastCalculatorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red.shade700,
           ),
         );
@@ -328,7 +331,7 @@ class _TractorBallastCalculatorPageState
   void _handleClear() {
     _formKey.currentState?.reset();
     _tractorWeightController.clear();
-    _implementWeightController.text = '0';
+    _implementWeightController.clear();
     setState(() {
       _tractorType = '4x2';
       _operationType = 'Preparo Pesado';

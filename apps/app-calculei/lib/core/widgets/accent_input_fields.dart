@@ -13,6 +13,7 @@ class AccentCurrencyField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String? helperText;
+  final String? hintText;
   final Color accentColor;
   final String? Function(String?)? validator;
 
@@ -22,6 +23,7 @@ class AccentCurrencyField extends StatelessWidget {
     required this.label,
     required this.accentColor,
     this.helperText,
+    this.hintText,
     this.validator,
   });
 
@@ -64,6 +66,7 @@ class AccentCurrencyField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
             prefixText: 'R\$ ',
             prefixStyle: TextStyle(
               color: colors.prefixColor,
@@ -108,6 +111,7 @@ class AccentNumberField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String? helperText;
+  final String? hintText;
   final Color accentColor;
   final String? Function(String?)? validator;
 
@@ -117,6 +121,7 @@ class AccentNumberField extends StatelessWidget {
     required this.label,
     required this.accentColor,
     this.helperText,
+    this.hintText,
     this.validator,
   });
 
@@ -159,6 +164,7 @@ class AccentNumberField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
             filled: true,
             fillColor: colors.fillColor,
             border: OutlineInputBorder(
@@ -197,6 +203,7 @@ class AccentPercentageField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String? helperText;
+  final String? hintText;
   final Color accentColor;
   final String? Function(String?)? validator;
 
@@ -206,6 +213,7 @@ class AccentPercentageField extends StatelessWidget {
     required this.label,
     required this.accentColor,
     this.helperText,
+    this.hintText,
     this.validator,
   });
 
@@ -250,6 +258,7 @@ class AccentPercentageField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
             suffixText: '%',
             suffixStyle: TextStyle(
               color: colors.prefixColor,
@@ -332,7 +341,7 @@ class _InputColors {
 
 /// Theme-aware date input field with accent color
 /// 
-/// Displays a date picker and formats the selected date.
+/// Allows both manual keyboard input (DD/MM/YYYY) and date picker selection.
 /// Adapts to light/dark theme while maintaining accent color.
 class AccentDateField extends StatelessWidget {
   final TextEditingController controller;
@@ -388,7 +397,11 @@ class AccentDateField extends StatelessWidget {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          readOnly: true,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+            _DateInputFormatter(),
+          ],
           style: TextStyle(
             color: colors.textColor,
             fontSize: 16,
@@ -397,6 +410,11 @@ class AccentDateField extends StatelessWidget {
           decoration: InputDecoration(
             filled: true,
             fillColor: colors.fillColor,
+            hintText: 'DD/MM/AAAA',
+            hintStyle: TextStyle(
+              color: colors.helperColor,
+              fontSize: 16,
+            ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 16,
@@ -436,37 +454,113 @@ class AccentDateField extends StatelessWidget {
                 width: 2,
               ),
             ),
-            suffixIcon: Icon(
-              Icons.calendar_today,
-              color: colors.labelColor,
-              size: 20,
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.calendar_today,
+                color: colors.labelColor,
+                size: 20,
+              ),
+              onPressed: () => _showDatePickerDialog(context, theme),
             ),
           ),
           validator: validator,
-          onTap: () async {
-            final date = await showDatePicker(
-              context: context,
-              initialDate: initialDate ?? DateTime.now(),
-              firstDate: firstDate ?? DateTime(1900),
-              lastDate: lastDate ?? DateTime(2100),
-              builder: (context, child) {
-                return Theme(
-                  data: theme.copyWith(
-                    colorScheme: theme.colorScheme.copyWith(
-                      primary: accentColor,
-                    ),
-                  ),
-                  child: child!,
-                );
-              },
-            );
-
-            if (date != null) {
-              onDateSelected(date);
+          onChanged: (value) {
+            // Try to parse the date when user finishes typing
+            if (value.length == 10) {
+              final date = _tryParseDate(value);
+              if (date != null) {
+                onDateSelected(date);
+              }
             }
           },
         ),
       ],
+    );
+  }
+
+  Future<void> _showDatePickerDialog(BuildContext context, ThemeData theme) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _tryParseDate(controller.text) ?? initialDate ?? DateTime.now(),
+      firstDate: firstDate ?? DateTime(1900),
+      lastDate: lastDate ?? DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: theme.copyWith(
+            colorScheme: theme.colorScheme.copyWith(
+              primary: accentColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (date != null) {
+      // Format the date as DD/MM/YYYY
+      final day = date.day.toString().padLeft(2, '0');
+      final month = date.month.toString().padLeft(2, '0');
+      final year = date.year.toString();
+      controller.text = '$day/$month/$year';
+      onDateSelected(date);
+    }
+  }
+
+  DateTime? _tryParseDate(String text) {
+    if (text.length != 10) return null;
+    
+    try {
+      final parts = text.split('/');
+      if (parts.length != 3) return null;
+      
+      final day = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final year = int.parse(parts[2]);
+      
+      final date = DateTime(year, month, day);
+      
+      // Validate the date is within allowed range
+      if (firstDate != null && date.isBefore(firstDate!)) return null;
+      if (lastDate != null && date.isAfter(lastDate!)) return null;
+      
+      return date;
+    } catch (_) {
+      return null;
+    }
+  }
+}
+
+/// Formatter for date input (DD/MM/YYYY)
+class _DateInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    
+    if (text.isEmpty) {
+      return newValue;
+    }
+    
+    // Remove any non-digits
+    final digitsOnly = text.replaceAll(RegExp(r'[^\d]'), '');
+    
+    // Limit to 8 digits (DDMMYYYY)
+    final limitedDigits = digitsOnly.substring(0, digitsOnly.length > 8 ? 8 : digitsOnly.length);
+    
+    // Format as DD/MM/YYYY
+    String formatted = '';
+    for (int i = 0; i < limitedDigits.length; i++) {
+      if (i == 2 || i == 4) {
+        formatted += '/';
+      }
+      formatted += limitedDigits[i];
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

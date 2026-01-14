@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -110,6 +111,7 @@ class _FieldCapacityCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Largura de Trabalho',
                           controller: _widthController,
+                          hintText: 'Ex: 6.5',
                           suffix: 'm',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -139,6 +141,7 @@ class _FieldCapacityCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Velocidade de Trabalho',
                           controller: _speedController,
+                          hintText: 'Ex: 8.0',
                           suffix: 'km/h',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -302,6 +305,7 @@ class _FieldCapacityCalculatorPageState
                 child: AdaptiveInputField(
                   label: 'Eficiência Customizada',
                   controller: _efficiencyController,
+                  hintText: 'Ex: 75',
                   suffix: '%',
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
@@ -364,7 +368,7 @@ class _FieldCapacityCalculatorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );

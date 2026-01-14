@@ -59,6 +59,18 @@ class UnemploymentInsuranceInputFormState
     _submitForm();
   }
 
+  /// Public method to clear all input fields
+  void clear() {
+    _averageSalaryController.clear();
+    _workMonthsController.clear();
+    _timesReceivedController.text = '0';
+    
+    setState(() {
+      _dismissalDate = DateTime.now();
+      _dismissalDateController.text = _formatDate(_dismissalDate!);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.labor;
@@ -73,6 +85,7 @@ class UnemploymentInsuranceInputFormState
               controller: _averageSalaryController,
               label: 'Salário Médio (últimos 3 meses)',
               helperText: 'Média dos últimos 3 salários',
+              hintText: 'Ex: 2.500,00',
               accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o salário médio';

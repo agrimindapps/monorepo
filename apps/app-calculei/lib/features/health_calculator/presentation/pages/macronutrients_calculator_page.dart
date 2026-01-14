@@ -60,7 +60,7 @@ class _MacronutrientsCalculatorPageState
                 controller: _caloriesController,
                 suffix: 'kcal',
                 keyboardType: TextInputType.number,
-                hint: 'Ex: 2000',
+                hintText: 'Ex: 2000',
                 inputFormatters: [
                   FilteringTextInputFormatter.digitsOnly,
                 ],
@@ -153,7 +153,7 @@ class _DarkInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
-  final String? hint;
+  final String? hintText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
@@ -162,7 +162,7 @@ class _DarkInputField extends StatelessWidget {
     required this.label,
     required this.controller,
     this.suffix,
-    this.hint,
+    this.hintText,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -196,7 +196,7 @@ class _DarkInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: hintText,
             hintStyle: TextStyle(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.3),
             ),

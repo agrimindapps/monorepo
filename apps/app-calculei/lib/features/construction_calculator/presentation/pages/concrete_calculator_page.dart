@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -65,8 +66,9 @@ class _ConcreteCalculatorPageState
       child: Builder(
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          final textColor = isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black87;
-          final labelColor = isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black54;
+          final textColor = isDark
+              ? Colors.white.withValues(alpha: 0.9)
+              : Colors.black87;
 
           return Padding(
             padding: const EdgeInsets.all(24.0),
@@ -100,9 +102,15 @@ class _ConcreteCalculatorPageState
                               label: 'Comprimento',
                               controller: _lengthController,
                               suffix: 'm',
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              hintText: 'Ex: 5.0',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: [
-                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d*'),
+                                ),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -122,9 +130,15 @@ class _ConcreteCalculatorPageState
                               label: 'Largura',
                               controller: _widthController,
                               suffix: 'm',
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              hintText: 'Ex: 3.0',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: [
-                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d*'),
+                                ),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -144,9 +158,15 @@ class _ConcreteCalculatorPageState
                               label: 'Altura/Espessura',
                               controller: _heightController,
                               suffix: 'm',
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              hintText: 'Ex: 0.15',
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
                               inputFormatters: [
-                                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                                FilteringTextInputFormatter.allow(
+                                  RegExp(r'^\d*\.?\d*'),
+                                ),
                               ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
@@ -243,7 +263,7 @@ class _ConcreteCalculatorPageState
               ],
             ),
           );
-        }
+        },
       ),
     );
   }
@@ -260,13 +280,15 @@ class _ConcreteCalculatorPageState
     }
 
     try {
-      await ref.read(concreteCalculatorProvider.notifier).calculate(
-        length: double.parse(_lengthController.text),
-        width: double.parse(_widthController.text),
-        height: double.parse(_heightController.text),
-        concreteType: _concreteType,
-        concreteStrength: _concreteStrength,
-      );
+      await ref
+          .read(concreteCalculatorProvider.notifier)
+          .calculate(
+            length: double.parse(_lengthController.text),
+            width: double.parse(_widthController.text),
+            height: double.parse(_heightController.text),
+            concreteType: _concreteType,
+            concreteStrength: _concreteStrength,
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -279,10 +301,7 @@ class _ConcreteCalculatorPageState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e is Failure ? e.message : e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -315,13 +334,13 @@ class _SelectionChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final chipColor = isDark 
+    final chipColor = isDark
         ? Colors.white.withValues(alpha: 0.05)
         : Colors.black.withValues(alpha: 0.03);
-    final borderColor = isDark 
+    final borderColor = isDark
         ? Colors.white.withValues(alpha: 0.1)
         : Colors.black.withValues(alpha: 0.1);
-    final textColor = isDark 
+    final textColor = isDark
         ? Colors.white.withValues(alpha: 0.8)
         : Colors.black87;
 

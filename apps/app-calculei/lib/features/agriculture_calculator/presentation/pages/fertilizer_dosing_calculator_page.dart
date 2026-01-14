@@ -20,8 +20,8 @@ class FertilizerDosingCalculatorPage extends StatefulWidget {
 class _FertilizerDosingCalculatorPageState
     extends State<FertilizerDosingCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _areaController = TextEditingController(text: '10');
-  final _desiredRateController = TextEditingController(text: '100');
+  final _areaController = TextEditingController();
+  final _desiredRateController = TextEditingController();
 
   FertilizerType _fertilizerType = FertilizerType.urea;
   FertilizerDosingResult? _result;
@@ -96,6 +96,7 @@ class _FertilizerDosingCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
+                      hintText: 'Ex: 10',
                       suffix: 'ha',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -112,6 +113,7 @@ class _FertilizerDosingCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Taxa desejada de nutriente',
                       controller: _desiredRateController,
+                      hintText: 'Ex: 100',
                       suffix: 'kg/ha',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -164,8 +166,8 @@ class _FertilizerDosingCalculatorPageState
   }
 
   void _clear() {
-    _areaController.text = '10';
-    _desiredRateController.text = '100';
+    _areaController.clear();
+    _desiredRateController.clear();
     setState(() {
       _fertilizerType = FertilizerType.urea;
       _result = null;
@@ -258,40 +260,6 @@ class _FertilizerDosingResultCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Cost
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: CalculatorAccentColors.agriculture.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: CalculatorAccentColors.agriculture.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Custo estimado:',
-                  style: TextStyle(
-                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
-                    fontSize: 15,
-                  ),
-                ),
-                Text(
-                  'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
           // Tips
           Text(
             'Dicas de aplicação',
@@ -344,8 +312,6 @@ class _FertilizerDosingResultCard extends StatelessWidget {
 • Produto necessário: ${result.productKg.toStringAsFixed(1)} kg
 • Por hectare: ${result.productKgHa.toStringAsFixed(1)} kg/ha
 • Sacas (50kg): ${result.bagsNeeded}
-
-💰 Custo estimado: R\$ ${result.estimatedCost.toStringAsFixed(2)}
 
 _________________
 Calculado por Calculei

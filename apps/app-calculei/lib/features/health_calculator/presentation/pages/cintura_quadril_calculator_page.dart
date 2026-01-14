@@ -61,7 +61,9 @@ class _CinturaQuadrilCalculatorPageState
               Text(
                 'Selecione o gênero',
                 style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: Theme.of(context).brightness == Brightness.dark 
+                      ? Colors.white.withValues(alpha: 0.8) 
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -329,12 +331,14 @@ class _GenderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     const accentColor = CalculatorAccentColors.health;
 
     return Material(
       color: isSelected 
           ? accentColor.withValues(alpha: 0.15)
-          : Colors.white.withValues(alpha: 0.05),
+          : (isDark ? Colors.white.withValues(alpha: 0.05) : theme.colorScheme.surfaceContainerHighest),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -345,7 +349,7 @@ class _GenderButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : Colors.white.withValues(alpha: 0.1),
+                  : (isDark ? Colors.white.withValues(alpha: 0.1) : theme.colorScheme.outline.withValues(alpha: 0.3)),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(14),
@@ -357,7 +361,7 @@ class _GenderButton extends StatelessWidget {
                 size: 32,
                 color: isSelected
                     ? accentColor
-                    : Colors.white.withValues(alpha: 0.6),
+                    : (isDark ? Colors.white.withValues(alpha: 0.6) : theme.colorScheme.onSurface.withValues(alpha: 0.6)),
               ),
               const SizedBox(height: 6),
               Text(
@@ -367,7 +371,7 @@ class _GenderButton extends StatelessWidget {
                   fontSize: 14,
                   color: isSelected
                       ? accentColor
-                      : Colors.white.withValues(alpha: 0.7),
+                      : (isDark ? Colors.white.withValues(alpha: 0.7) : theme.colorScheme.onSurface.withValues(alpha: 0.7)),
                 ),
               ),
             ],

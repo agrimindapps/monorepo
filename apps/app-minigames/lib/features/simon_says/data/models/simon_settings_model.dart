@@ -8,6 +8,7 @@ class SimonSettingsModel extends SimonSettings {
     super.musicVolume,
     super.difficulty,
     super.colorblindMode,
+    super.colorCount,
   });
 
   factory SimonSettingsModel.fromEntity(SimonSettings entity) {
@@ -18,6 +19,7 @@ class SimonSettingsModel extends SimonSettings {
       musicVolume: entity.musicVolume,
       difficulty: entity.difficulty,
       colorblindMode: entity.colorblindMode,
+      colorCount: entity.colorCount,
     );
   }
 
@@ -32,6 +34,7 @@ class SimonSettingsModel extends SimonSettings {
         orElse: () => SimonDifficulty.normal,
       ),
       colorblindMode: json['colorblindMode'] as bool? ?? false,
+      colorCount: json['colorCount'] as int? ?? 4,
     );
   }
 
@@ -43,6 +46,7 @@ class SimonSettingsModel extends SimonSettings {
       'musicVolume': musicVolume,
       'difficulty': difficulty.name,
       'colorblindMode': colorblindMode,
+      'colorCount': colorCount,
     };
   }
 }

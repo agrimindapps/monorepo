@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,7 +23,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _wallLengthController = TextEditingController();
   final _wallHeightController = TextEditingController();
-  final _openingsAreaController = TextEditingController(text: '0');
+  final _openingsAreaController = TextEditingController();
 
   BrickType _brickType = BrickType.ceramic6Holes;
   double _wastePercentage = 5;
@@ -81,6 +82,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
                               label: 'Comprimento',
                               controller: _wallLengthController,
                               suffix: 'm',
+                              hintText: 'Ex: 4.5',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -103,6 +105,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
                               label: 'Altura',
                               controller: _wallHeightController,
                               suffix: 'm',
+                              hintText: 'Ex: 3.0',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -125,7 +128,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
                               label: 'Aberturas',
                               controller: _openingsAreaController,
                               suffix: 'm²',
-                              hint: 'Portas/janelas',
+                              hintText: 'Portas/janelas',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -254,7 +257,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -265,7 +268,7 @@ class _BrickCalculatorPageState extends ConsumerState<BrickCalculatorPage> {
   void _clear() {
     _wallLengthController.clear();
     _wallHeightController.clear();
-    _openingsAreaController.text = '0';
+    _openingsAreaController.clear();
     setState(() {
       _brickType = BrickType.ceramic6Holes;
       _wastePercentage = 5;

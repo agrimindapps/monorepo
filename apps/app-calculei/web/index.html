@@ -333,6 +333,16 @@
   </style>
 
   <script>
+    // Handle loading errors
+    window.addEventListener('unhandledrejection', function(event) {
+      console.error('Unhandled rejection:', event.reason);
+      const loadingText = document.querySelector('.loading-text');
+      if (loadingText && event.reason && event.reason.toString().includes('Failed to fetch')) {
+        loadingText.innerText = "Erro de conexão. Verifique sua internet.";
+        loadingText.style.color = '#ef4444'; // Red
+      }
+    });
+
     window.addEventListener('flutter-first-frame', function () {
       const loading = document.getElementById('loading');
       if (loading) {

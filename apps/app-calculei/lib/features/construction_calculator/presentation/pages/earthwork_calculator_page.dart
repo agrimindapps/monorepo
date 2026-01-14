@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,6 +92,7 @@ class _EarthworkCalculatorPageState
                           label: 'Comprimento',
                           controller: _lengthController,
                           suffix: 'm',
+                          hintText: 'Ex: 10.0',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -113,6 +115,7 @@ class _EarthworkCalculatorPageState
                           label: 'Largura',
                           controller: _widthController,
                           suffix: 'm',
+                          hintText: 'Ex: 5.0',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -135,6 +138,7 @@ class _EarthworkCalculatorPageState
                           label: 'Profundidade',
                           controller: _depthController,
                           suffix: 'm',
+                          hintText: 'Ex: 1.5',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -269,7 +273,7 @@ class _EarthworkCalculatorPageState
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -294,6 +298,7 @@ class _DarkInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
+  final String? hintText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
@@ -302,6 +307,7 @@ class _DarkInputField extends StatelessWidget {
     required this.label,
     required this.controller,
     this.suffix,
+    this.hintText,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -335,6 +341,10 @@ class _DarkInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: textColor.withValues(alpha: 0.3),
+            ),
             suffixText: suffix,
             suffixStyle: TextStyle(
               color: textColor.withValues(alpha: 0.5),

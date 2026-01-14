@@ -25,11 +25,11 @@ class _NozzleFlowCalculatorPageState
   final _formKey = GlobalKey<FormState>();
   
   // Controllers
-  final _applicationRateController = TextEditingController(text: '200');
-  final _workingSpeedController = TextEditingController(text: '6');
-  final _nozzleSpacingController = TextEditingController(text: '50');
-  final _pressureController = TextEditingController(text: '3');
-  final _numberOfNozzlesController = TextEditingController(text: '24');
+  final _applicationRateController = TextEditingController();
+  final _workingSpeedController = TextEditingController();
+  final _nozzleSpacingController = TextEditingController();
+  final _pressureController = TextEditingController();
+  final _numberOfNozzlesController = TextEditingController();
 
   // State
   NozzleType _selectedNozzleType = NozzleType.fanJet;
@@ -98,7 +98,7 @@ class _NozzleFlowCalculatorPageState
               AdaptiveInputField(
                 controller: _applicationRateController,
                 label: 'Taxa de Aplicação',
-                hint: 'Ex: 200',
+                hintText: 'Ex: 200',
                 suffix: 'L/ha',
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
@@ -125,7 +125,7 @@ class _NozzleFlowCalculatorPageState
               AdaptiveInputField(
                 controller: _workingSpeedController,
                 label: 'Velocidade de Trabalho',
-                hint: 'Ex: 6',
+                hintText: 'Ex: 6',
                 suffix: 'km/h',
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
@@ -152,7 +152,7 @@ class _NozzleFlowCalculatorPageState
               AdaptiveInputField(
                 controller: _nozzleSpacingController,
                 label: 'Espaçamento entre Bicos',
-                hint: 'Ex: 50',
+                hintText: 'Ex: 50',
                 suffix: 'cm',
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
@@ -179,7 +179,7 @@ class _NozzleFlowCalculatorPageState
               AdaptiveInputField(
                 controller: _pressureController,
                 label: 'Pressão de Trabalho',
-                hint: 'Ex: 3',
+                hintText: 'Ex: 3',
                 suffix: 'bar',
                 keyboardType:
                     const TextInputType.numberWithOptions(decimal: true),
@@ -206,7 +206,7 @@ class _NozzleFlowCalculatorPageState
               AdaptiveInputField(
                 controller: _numberOfNozzlesController,
                 label: 'Número de Bicos na Barra',
-                hint: 'Ex: 24',
+                hintText: 'Ex: 24',
                 suffix: 'bicos',
                 keyboardType: TextInputType.number,
                 inputFormatters: [
@@ -293,11 +293,11 @@ class _NozzleFlowCalculatorPageState
 
   void _handleClear() {
     _formKey.currentState?.reset();
-    _applicationRateController.text = '200';
-    _workingSpeedController.text = '6';
-    _nozzleSpacingController.text = '50';
-    _pressureController.text = '3';
-    _numberOfNozzlesController.text = '24';
+    _applicationRateController.clear();
+    _workingSpeedController.clear();
+    _nozzleSpacingController.clear();
+    _pressureController.clear();
+    _numberOfNozzlesController.clear();
     setState(() {
       _selectedNozzleType = NozzleType.fanJet;
     });

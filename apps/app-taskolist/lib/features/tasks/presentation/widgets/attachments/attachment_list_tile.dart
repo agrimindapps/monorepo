@@ -64,7 +64,8 @@ class AttachmentListTile extends StatelessWidget {
   }
 
   Widget _buildLeadingWidget() {
-    if (attachment.type == AttachmentType.image && attachment.filePath != null) {
+    if (attachment.type == AttachmentType.image &&
+        attachment.filePath != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(4),
         child: Image.file(
@@ -107,7 +108,7 @@ class AttachmentListTile extends StatelessWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Icon(icon, color: color, size: 24),
@@ -126,9 +127,9 @@ class AttachmentListTile extends StatelessWidget {
       await OpenFilex.open(attachment.filePath!);
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao abrir arquivo: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Erro ao abrir arquivo: $e')));
       }
     }
   }

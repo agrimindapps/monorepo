@@ -866,28 +866,75 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
       context: context,
       builder: (ctx) => _CleanupDialog(
         onCleanup: (days) async {
-          try {
-            final count = await ref
-                .read(errorLogServiceProvider)
-                .cleanupOldErrors(days);
-            if (mounted) {
+          final result = await ref
+              .read(errorLogServiceProvider)
+              .cleanupOldErrors(days);
+          
+          if (!mounted) return;
+          
+          result.fold(
+            (failure) {
+              final message = failure.message;
+              // Check for index error to show a more helpful message
+              if (message.contains('requires an index')) {
+                // Extract the URL if possible, or just show a friendly message
+                final urlRegex = RegExp(r'https://console\.firebase\.google\.com[^\s]+');
+                final match = urlRegex.firstMatch(message);
+                final url = match?.group(0);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Requer índice no Firestore!'),
+                        if (url != null) ...[
+                          const SizedBox(height: 4),
+                          const Text('Clique no link abaixo para criar:', style: TextStyle(fontSize: 12)),
+                          SelectableText(
+                            url, 
+                            style: const TextStyle(
+                              color: Colors.white, 
+                              decoration: TextDecoration.underline,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    backgroundColor: Colors.orange,
+                    duration: const Duration(seconds: 10),
+                    action: SnackBarAction(
+                      label: 'Copiar Link',
+                      textColor: Colors.white,
+                      onPressed: () {
+                         if (url != null) {
+                           // Use clipboard if available or just leave the text selectable
+                           // For now, simpler is better
+                         }
+                      },
+                    ),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Erro: $message'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            (count) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('$count erros removidos'),
                   backgroundColor: Colors.green,
                 ),
               );
-            }
-          } catch (e) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Erro: $e'),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            }
-          }
+            },
+          );
         },
       ),
     );

@@ -157,12 +157,13 @@ class AdaptiveColors {
   // CATEGORY COLORS (Fixed - don't change with theme)
   // ═══════════════════════════════════════════════════════════════════════════
   
-  static const Color categoryFinancial = Color(0xFF4CAF50);   // Green
+  static const Color categoryFinancial = Color(0xFF2196F3);   // Blue
   static const Color categoryHealth = Color(0xFFE91E63);      // Pink
   static const Color categoryConstruction = Color(0xFFFF9800); // Orange
   static const Color categoryAgriculture = Color(0xFF8BC34A);  // Light green
   static const Color categoryLivestock = Color(0xFFFF5722);    // Deep orange
   static const Color categoryPet = Color(0xFF795548);          // Brown
+  static const Color categoryLabor = Color(0xFF4CAF50);        // Green
   
   // ═══════════════════════════════════════════════════════════════════════════
   // FILTER COLORS (Fixed - don't change with theme)

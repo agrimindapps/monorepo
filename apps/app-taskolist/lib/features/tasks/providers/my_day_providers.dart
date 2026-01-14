@@ -1,8 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/providers/core_providers.dart';
-import '../../../core/services/analytics_service.dart';
-import '../../task_lists/providers/task_list_providers.dart';
 import '../data/my_day_local_datasource.dart';
 import '../data/my_day_local_datasource_impl.dart';
 import '../data/my_day_repository_impl.dart';
@@ -87,4 +85,3 @@ GetMyDaySuggestions getMyDaySuggestions(Ref ref) {
 // ============================================================================
 
 // MyDayNotifier moved to presentation/providers/my_day_notifier.dart
-

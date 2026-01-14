@@ -4,14 +4,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/game_page_layout.dart';
 import '../providers/simon_says_controller.dart';
 import '../widgets/simon_button.dart';
+import '../widgets/simon_game_options_dialog.dart';
 import 'simon_high_scores_page.dart';
-import 'simon_settings_page.dart';
 
-class SimonSaysPage extends ConsumerWidget {
+class SimonSaysPage extends ConsumerStatefulWidget {
   const SimonSaysPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SimonSaysPage> createState() => _SimonSaysPageState();
+}
+
+class _SimonSaysPageState extends ConsumerState<SimonSaysPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showOptionsDialog();
+    });
+  }
+
+  void _showOptionsDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const SimonGameOptionsDialog(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(simonSaysControllerProvider);
     final notifier = ref.read(simonSaysControllerProvider.notifier);
 
@@ -22,7 +43,7 @@ class SimonSaysPage extends ConsumerWidget {
           '👀 Observe as cores acenderem\n'
           '🎯 Repita a sequência\n'
           '📈 Cada rodada adiciona uma cor',
-      maxGameWidth: 400,
+      maxGameWidth: 600, // Increased width
       actions: [
         IconButton(
           icon: const Icon(Icons.emoji_events_outlined),
@@ -38,14 +59,7 @@ class SimonSaysPage extends ConsumerWidget {
         ),
         IconButton(
           icon: const Icon(Icons.settings_outlined),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SimonSettingsPage(),
-              ),
-            );
-          },
+          onPressed: _showOptionsDialog,
           tooltip: 'Configurações',
         ),
       ],
@@ -69,7 +83,7 @@ class SimonSaysPage extends ConsumerWidget {
             Text(
               _getStatusMessage(state.gameState),
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: Colors.white.withOpacity(0.7),
                 fontSize: 16,
               ),
             ),
@@ -77,45 +91,9 @@ class SimonSaysPage extends ConsumerWidget {
 
             // Game Board
             SizedBox(
-              width: 280,
-              height: 280,
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                padding: const EdgeInsets.all(8),
-                physics: const NeverScrollableScrollPhysics(),
-                children: [
-                  SimonButton(
-                    index: 0,
-                    color: Colors.green,
-                    isActive: state.activeIndex == 0,
-                    enabled: state.gameState == SimonGameState.waitingForInput,
-                    onTap: () => notifier.handleInput(0),
-                  ),
-                  SimonButton(
-                    index: 1,
-                    color: Colors.red,
-                    isActive: state.activeIndex == 1,
-                    enabled: state.gameState == SimonGameState.waitingForInput,
-                    onTap: () => notifier.handleInput(1),
-                  ),
-                  SimonButton(
-                    index: 2,
-                    color: Colors.yellow,
-                    isActive: state.activeIndex == 2,
-                    enabled: state.gameState == SimonGameState.waitingForInput,
-                    onTap: () => notifier.handleInput(2),
-                  ),
-                  SimonButton(
-                    index: 3,
-                    color: Colors.blue,
-                    isActive: state.activeIndex == 3,
-                    enabled: state.gameState == SimonGameState.waitingForInput,
-                    onTap: () => notifier.handleInput(3),
-                  ),
-                ],
-              ),
+              width: 360, // Increased size
+              height: 360, // Increased size
+              child: _buildBoard(state, notifier),
             ),
             
             const SizedBox(height: 24),
@@ -138,6 +116,50 @@ class SimonSaysPage extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBoard(SimonState state, SimonSaysController notifier) {
+    // Colors map
+    final colors = [
+      Colors.green,
+      Colors.red,
+      Colors.yellow,
+      Colors.blue,
+      Colors.purple,
+      Colors.orange,
+    ];
+
+    final count = state.colorCount;
+    int crossAxisCount;
+    
+    if (count <= 2) {
+      crossAxisCount = 2;
+    } else if (count <= 4) {
+      crossAxisCount = 2;
+    } else {
+      crossAxisCount = 3;
+    }
+
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 1.0,
+      ),
+      padding: const EdgeInsets.all(8),
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: count,
+      itemBuilder: (context, index) {
+        return SimonButton(
+          index: index,
+          color: colors[index % colors.length],
+          isActive: state.activeIndex == index,
+          enabled: state.gameState == SimonGameState.waitingForInput,
+          onTap: () => notifier.handleInput(index),
+        );
+      },
     );
   }
 

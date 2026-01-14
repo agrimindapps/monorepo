@@ -20,9 +20,9 @@ class WeightGainCalculatorPage extends StatefulWidget {
 
 class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _initialWeightController = TextEditingController(text: '250');
-  final _targetWeightController = TextEditingController(text: '450');
-  final _dailyGainController = TextEditingController(text: '1.2');
+  final _initialWeightController = TextEditingController();
+  final _targetWeightController = TextEditingController();
+  final _dailyGainController = TextEditingController();
 
   AnimalType _animalType = AnimalType.cattle;
   WeightGainResult? _result;
@@ -65,11 +65,14 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                 // Animal type selection
                 Builder(
                   builder: (context) {
-                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    final isDark =
+                        Theme.of(context).brightness == Brightness.dark;
                     return Text(
                       'Tipo de Animal',
                       style: TextStyle(
-                        color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.8)
+                            : Colors.black.withValues(alpha: 0.8),
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -84,8 +87,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                     return DarkChoiceChip(
                       label: WeightGainCalculator.getAnimalName(type),
                       isSelected: _animalType == type,
-                      onSelected: () =>
-                          setState(() => _animalType = type),
+                      onSelected: () => setState(() => _animalType = type),
                       accentColor: CalculatorAccentColors.agriculture,
                     );
                   }).toList(),
@@ -102,6 +104,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                       child: AdaptiveInputField(
                         label: 'Peso inicial',
                         controller: _initialWeightController,
+                        hintText: 'Ex: 250',
                         suffix: 'kg',
                         keyboardType: TextInputType.number,
                         inputFormatters: [
@@ -118,6 +121,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                       child: AdaptiveInputField(
                         label: 'Peso alvo',
                         controller: _targetWeightController,
+                        hintText: 'Ex: 450',
                         suffix: 'kg',
                         keyboardType: TextInputType.number,
                         inputFormatters: [
@@ -134,6 +138,7 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
                       child: AdaptiveInputField(
                         label: 'Ganho diário esperado',
                         controller: _dailyGainController,
+                        hintText: 'Ex: 1.2',
                         suffix: 'kg/dia',
                         keyboardType: TextInputType.number,
                         inputFormatters: [
@@ -188,9 +193,9 @@ class _WeightGainCalculatorPageState extends State<WeightGainCalculatorPage> {
   }
 
   void _clear() {
-    _initialWeightController.text = '250';
-    _targetWeightController.text = '450';
-    _dailyGainController.text = '1.2';
+    _initialWeightController.clear();
+    _targetWeightController.clear();
+    _dailyGainController.clear();
     setState(() {
       _animalType = AnimalType.cattle;
       _result = null;
@@ -202,10 +207,7 @@ class _WeightGainResultCard extends StatelessWidget {
   final WeightGainResult result;
   final AnimalType animalType;
 
-  const _WeightGainResultCard({
-    required this.result,
-    required this.animalType,
-  });
+  const _WeightGainResultCard({required this.result, required this.animalType});
 
   @override
   Widget build(BuildContext context) {
@@ -219,11 +221,7 @@ class _WeightGainResultCard extends StatelessWidget {
         // Header
         Row(
           children: [
-            const Icon(
-              Icons.insights,
-              color: accentColor,
-              size: 24,
-            ),
+            const Icon(Icons.insights, color: accentColor, size: 24),
             const SizedBox(width: 8),
             Text(
               'Previsão de Ganho de Peso',
@@ -245,9 +243,7 @@ class _WeightGainResultCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: accentColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: accentColor.withValues(alpha: 0.3),
-            ),
+            border: Border.all(color: accentColor.withValues(alpha: 0.3)),
           ),
           child: Column(
             children: [
@@ -288,10 +284,14 @@ class _WeightGainResultCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.1),
             ),
           ),
           child: Column(
@@ -306,12 +306,6 @@ class _WeightGainResultCard extends StatelessWidget {
                 label: 'Consumo de ração',
                 value: '${result.totalFeedKg.toStringAsFixed(0)} kg',
               ),
-              const SizedBox(height: 10),
-              _DetailRow(
-                label: 'Custo estimado',
-                value: 'R\$ ${result.feedCost.toStringAsFixed(2)}',
-                highlight: true,
-              ),
             ],
           ),
         ),
@@ -324,9 +318,7 @@ class _WeightGainResultCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.amber.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.amber.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,7 +334,9 @@ class _WeightGainResultCard extends StatelessWidget {
                   Text(
                     'Recomendações',
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.9)
+                          : Colors.black.withValues(alpha: 0.9),
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
                     ),
@@ -366,7 +360,9 @@ class _WeightGainResultCard extends StatelessWidget {
                         child: Text(
                           rec,
                           style: TextStyle(
-                            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : Colors.black.withValues(alpha: 0.7),
                             fontSize: 13,
                             height: 1.4,
                           ),
@@ -395,8 +391,6 @@ class _WeightGainResultCard extends StatelessWidget {
 • Ganho total: ${result.totalGain.toStringAsFixed(1)} kg
 • Data estimada: ${formatter.format(result.estimatedDate)}
 • Conversão alimentar: ${result.feedEfficiency.toStringAsFixed(1)}:1
-
-💰 Custo com ração: R\$ ${result.feedCost.toStringAsFixed(2)}
 
 _________________
 Calculado por Calculei
@@ -435,7 +429,9 @@ class _ResultBox extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.6)
+                  : Colors.black.withValues(alpha: 0.6),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -454,7 +450,9 @@ class _ResultBox extends StatelessWidget {
             Text(
               subtitle!,
               style: TextStyle(
-                color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.5)
+                    : Colors.black.withValues(alpha: 0.5),
                 fontSize: 11,
               ),
             ),
@@ -468,13 +466,8 @@ class _ResultBox extends StatelessWidget {
 class _DetailRow extends StatelessWidget {
   final String label;
   final String value;
-  final bool highlight;
 
-  const _DetailRow({
-    required this.label,
-    required this.value,
-    this.highlight = false,
-  });
+  const _DetailRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -485,7 +478,9 @@ class _DetailRow extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.6)
+                : Colors.black.withValues(alpha: 0.6),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -493,16 +488,14 @@ class _DetailRow extends StatelessWidget {
         Text(
           value,
           style: TextStyle(
-            color: highlight 
-                ? (isDark ? Colors.white : Colors.black)
-                : (isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8)),
-            fontSize: highlight ? 16 : 14,
-            fontWeight: highlight ? FontWeight.bold : FontWeight.w600,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.8)
+                : Colors.black.withValues(alpha: 0.8),
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
     );
   }
 }
-
-

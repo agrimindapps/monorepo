@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -174,6 +175,7 @@ class _PlumbingCalculatorPageState extends ConsumerState<PlumbingCalculatorPage>
                       label: 'Comprimento Total',
                       controller: _lengthController,
                       suffix: 'm',
+                      hintText: 'Ex: 12.0',
                       accentColor: accentColor,
                       isDark: isDark,
                       theme: theme,
@@ -207,6 +209,7 @@ class _PlumbingCalculatorPageState extends ConsumerState<PlumbingCalculatorPage>
                           label: 'Joelhos 90°',
                           controller: _elbowsController,
                           suffix: 'un',
+                          hintText: 'Ex: 4',
                           accentColor: accentColor,
                           isDark: isDark,
                           theme: theme,
@@ -231,6 +234,7 @@ class _PlumbingCalculatorPageState extends ConsumerState<PlumbingCalculatorPage>
                           label: 'Ts (Junções)',
                           controller: _teesController,
                           suffix: 'un',
+                          hintText: 'Ex: 2',
                           accentColor: accentColor,
                           isDark: isDark,
                           theme: theme,
@@ -255,6 +259,7 @@ class _PlumbingCalculatorPageState extends ConsumerState<PlumbingCalculatorPage>
                           label: 'Luvas',
                           controller: _couplingsController,
                           suffix: 'un',
+                          hintText: 'Ex: 5',
                           accentColor: accentColor,
                           isDark: isDark,
                           theme: theme,
@@ -332,7 +337,7 @@ class _PlumbingCalculatorPageState extends ConsumerState<PlumbingCalculatorPage>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -358,6 +363,7 @@ class _DarkInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
+  final String? hintText;
   final Color accentColor;
   final bool isDark;
   final ThemeData theme;
@@ -372,6 +378,7 @@ class _DarkInputField extends StatelessWidget {
     required this.isDark,
     required this.theme,
     this.suffix,
+    this.hintText,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -404,6 +411,12 @@ class _DarkInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: isDark 
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             suffixText: suffix,
             suffixStyle: TextStyle(
               color: isDark 

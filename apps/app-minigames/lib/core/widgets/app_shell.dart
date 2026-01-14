@@ -12,48 +12,48 @@ import '../providers/user_preferences_providers.dart';
 
 /// URLs para políticas
 class _LegalUrls {
-  static const String privacyPolicy = 
+  static const String privacyPolicy =
       'https://agrimindapps.blogspot.com/2022/08/a-agrimind-apps-construiu-o-aplicativo.html';
-  static const String termsOfUse = 
+  static const String termsOfUse =
       'https://agrimindapps.blogspot.com/2022/08/receituagro-termos-e-condicoes.html';
 }
 
 /// AppShell - Layout unificado para todas as páginas do app MiniGames
-/// 
+///
 /// Fornece estrutura consistente com:
 /// - Sidebar (desktop) / Drawer (mobile)
 /// - Header adaptativo (search bar ou título do jogo)
 /// - Área de conteúdo flexível
-/// 
+///
 /// Usado tanto pela HomePage quanto pelas páginas de jogos
 class AppShell extends ConsumerStatefulWidget {
   /// Conteúdo principal da página
   final Widget child;
-  
+
   /// Título da página (null = home, mostra search bar)
   final String? pageTitle;
-  
+
   /// Cor de destaque da página
   final Color? accentColor;
-  
+
   /// Ações extras no header
   final List<Widget>? actions;
-  
+
   /// Mostra botão de voltar no header
   final bool showBackButton;
-  
+
   /// Mostra card com info do jogo atual na sidebar
   final bool showCurrentGameCard;
-  
+
   /// Instruções do jogo (só aparece se showCurrentGameCard = true)
   final String? instructions;
-  
+
   /// Widget de search (para home)
   final Widget? searchWidget;
-  
+
   /// Widget extra no header (ex: profile button)
   final Widget? headerTrailing;
-  
+
   /// Se a sidebar deve poder ser colapsada
   final bool collapsibleSidebar;
 
@@ -100,9 +100,11 @@ class _AppShellState extends ConsumerState<AppShell> {
           // Sidebar (desktop/tablet)
           if (!isMobile)
             _buildSidebar(
-              context, 
+              context,
               accentColor,
-              isCollapsed: widget.collapsibleSidebar && isTablet ? _sidebarCollapsed : false,
+              isCollapsed: widget.collapsibleSidebar && isTablet
+                  ? _sidebarCollapsed
+                  : false,
               canCollapse: widget.collapsibleSidebar && isTablet,
             ),
 
@@ -139,7 +141,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   // ═══════════════════════════════════════════════════════════════════════════
 
   Widget _buildSidebar(
-    BuildContext context, 
+    BuildContext context,
     Color accentColor, {
     bool isCollapsed = false,
     bool canCollapse = false,
@@ -159,7 +161,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             ),
           ),
           child: _buildSidebarContent(
-            context, 
+            context,
             accentColor,
             isCollapsed: isCollapsed,
             canCollapse: canCollapse,
@@ -170,7 +172,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   }
 
   Widget _buildSidebarContent(
-    BuildContext context, 
+    BuildContext context,
     Color accentColor, {
     bool isDrawer = false,
     bool isCollapsed = false,
@@ -238,11 +240,7 @@ class _AppShellState extends ConsumerState<AppShell> {
               ),
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
-              Icons.games,
-              color: Colors.white,
-              size: 24,
-            ),
+            child: const Icon(Icons.games, color: Colors.white, size: 24),
           ),
           if (!isCollapsed) ...[
             const SizedBox(width: 12),
@@ -260,7 +258,11 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  Widget _buildCategoriesSection(BuildContext context, bool isCollapsed, bool isDrawer) {
+  Widget _buildCategoriesSection(
+    BuildContext context,
+    bool isCollapsed,
+    bool isDrawer,
+  ) {
     final selectedCategory = ref.watch(selectedCategoryProvider);
     final categoryCounts = ref.watch(categoryCountsProvider);
     final favoriteGames = ref.watch(favoriteGameEntitiesProvider);
@@ -354,10 +356,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             if (isDrawer) {
               Navigator.of(context).pop();
             }
-            FeedbackDialog.show(
-              context,
-              primaryColor: const Color(0xFFFFD700),
-            );
+            FeedbackDialog.show(context, primaryColor: const Color(0xFFFFD700));
           },
           borderRadius: BorderRadius.circular(10),
           child: Container(
@@ -471,7 +470,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     if (widget.pageTitle != null) {
       return _buildGameHeader(context, isMobile, accentColor);
     }
-    
+
     // Senão, mostra header de home
     return _buildHomeHeader(context, isMobile);
   }
@@ -516,7 +515,11 @@ class _AppShellState extends ConsumerState<AppShell> {
     );
   }
 
-  Widget _buildGameHeader(BuildContext context, bool isMobile, Color accentColor) {
+  Widget _buildGameHeader(
+    BuildContext context,
+    bool isMobile,
+    Color accentColor,
+  ) {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isMobile ? 8 : 16,
@@ -525,9 +528,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       decoration: BoxDecoration(
         color: _sidebarColor.withValues(alpha: 0.9),
         border: Border(
-          bottom: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
       ),
       child: Row(
@@ -544,7 +545,11 @@ class _AppShellState extends ConsumerState<AppShell> {
           // Back button
           if (widget.showBackButton)
             IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white, size: isMobile ? 22 : 24),
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: isMobile ? 22 : 24,
+              ),
               onPressed: () => context.go('/'),
               tooltip: 'Voltar ao Início',
               padding: EdgeInsets.all(isMobile ? 8 : 12),
@@ -561,11 +566,7 @@ class _AppShellState extends ConsumerState<AppShell> {
                 color: accentColor.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
-                Icons.sports_esports,
-                color: accentColor,
-                size: 20,
-              ),
+              child: Icon(Icons.sports_esports, color: accentColor, size: 20),
             ),
 
           SizedBox(width: isMobile ? 4 : 12),
@@ -602,10 +603,7 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final bool isCollapsed;
 
-  const _SectionHeader({
-    required this.title,
-    required this.isCollapsed,
-  });
+  const _SectionHeader({required this.title, required this.isCollapsed});
 
   @override
   Widget build(BuildContext context) {
@@ -706,7 +704,9 @@ class _SidebarItemState extends State<_SidebarItem> {
                     style: TextStyle(
                       color: isActive ? Colors.white : Colors.white70,
                       fontSize: 13,
-                      fontWeight: widget.isSelected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: widget.isSelected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -715,9 +715,13 @@ class _SidebarItemState extends State<_SidebarItem> {
                 if (widget.count != null && widget.count! > 0)
                   Container(
                     constraints: const BoxConstraints(minWidth: 24),
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
-                      color: widget.color?.withValues(alpha: 0.15) ??
+                      color:
+                          widget.color?.withValues(alpha: 0.15) ??
                           Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),

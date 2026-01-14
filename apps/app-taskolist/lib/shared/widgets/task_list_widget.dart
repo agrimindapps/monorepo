@@ -5,7 +5,8 @@ import '../../core/enums/task_filter.dart';
 import '../../features/tasks/domain/task_entity.dart';
 import '../../features/tasks/presentation/providers/task_notifier.dart';
 import '../../features/tasks/presentation/widgets/subtask_progress_indicator.dart';
-import '../../features/tasks/providers/my_day_providers.dart';
+import '../../features/tasks/presentation/providers/my_day_notifier.dart';
+import '../providers/auth_providers.dart';
 
 class TaskListWidget extends ConsumerWidget {
   final void Function(TaskEntity)? onTaskTap;
@@ -27,24 +28,23 @@ class TaskListWidget extends ConsumerWidget {
 
     return tasksState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error:
-          (Object error, StackTrace stackTrace) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Icons.error, color: Colors.red, size: 48),
-                const SizedBox(height: 16),
-                const Text('Erro ao carregar tarefas'),
-                const SizedBox(height: 8),
-                Text(error.toString(), style: const TextStyle(fontSize: 12)),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => ref.refresh(taskProvider),
-                  child: const Text('Tentar novamente'),
-                ),
-              ],
+      error: (Object error, StackTrace stackTrace) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error, color: Colors.red, size: 48),
+            const SizedBox(height: 16),
+            const Text('Erro ao carregar tarefas'),
+            const SizedBox(height: 8),
+            Text(error.toString(), style: const TextStyle(fontSize: 12)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => ref.refresh(taskProvider),
+              child: const Text('Tentar novamente'),
             ),
-          ),
+          ],
+        ),
+      ),
       data: (List<TaskEntity> tasks) {
         final filteredTasks = _filterTasks(tasks);
 
@@ -72,22 +72,21 @@ class TaskListWidget extends ConsumerWidget {
 
         return enableReorder
             ? ReorderableListView.builder(
-              itemCount: filteredTasks.length,
-              onReorder:
-                  (oldIndex, newIndex) =>
-                      _onReorder(ref, filteredTasks, oldIndex, newIndex),
-              itemBuilder: (context, index) {
-                final task = filteredTasks[index];
-                return _buildTaskCard(context, ref, task, index);
-              },
-            )
+                itemCount: filteredTasks.length,
+                onReorder: (oldIndex, newIndex) =>
+                    _onReorder(ref, filteredTasks, oldIndex, newIndex),
+                itemBuilder: (context, index) {
+                  final task = filteredTasks[index];
+                  return _buildTaskCard(context, ref, task, index);
+                },
+              )
             : ListView.builder(
-              itemCount: filteredTasks.length,
-              itemBuilder: (context, index) {
-                final task = filteredTasks[index];
-                return _buildTaskCard(context, ref, task, index);
-              },
-            );
+                itemCount: filteredTasks.length,
+                itemBuilder: (context, index) {
+                  final task = filteredTasks[index];
+                  return _buildTaskCard(context, ref, task, index);
+                },
+              );
       },
     );
   }
@@ -95,8 +94,9 @@ class TaskListWidget extends ConsumerWidget {
   List<TaskEntity> _filterTasks(List<TaskEntity> tasks) {
     List<TaskEntity> filtered = List.from(tasks);
     if (selectedTag != null && selectedTag!.isNotEmpty) {
-      filtered =
-          filtered.where((task) => task.tags.contains(selectedTag)).toList();
+      filtered = filtered
+          .where((task) => task.tags.contains(selectedTag))
+          .toList();
     }
     switch (taskFilter) {
       case TaskFilter.all:
@@ -135,13 +135,16 @@ class TaskListWidget extends ConsumerWidget {
             Checkbox(
               value: task.status == TaskStatus.completed,
               onChanged: (value) {
-                final newStatus =
-                    value == true ? TaskStatus.completed : TaskStatus.pending;
+                final newStatus = value == true
+                    ? TaskStatus.completed
+                    : TaskStatus.pending;
                 final updatedTask = task.copyWith(
                   status: newStatus,
                   updatedAt: DateTime.now(),
                 );
-                ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
+                ref
+                    .read<TaskNotifier>(taskProvider.notifier)
+                    .updateTask(updatedTask);
               },
             ),
           ],
@@ -149,10 +152,9 @@ class TaskListWidget extends ConsumerWidget {
         title: Text(
           task.title,
           style: TextStyle(
-            decoration:
-                task.status == TaskStatus.completed
-                    ? TextDecoration.lineThrough
-                    : null,
+            decoration: task.status == TaskStatus.completed
+                ? TextDecoration.lineThrough
+                : null,
           ),
         ),
         subtitle: Column(
@@ -171,14 +173,19 @@ class TaskListWidget extends ConsumerWidget {
               icon: const Icon(Icons.wb_sunny_outlined),
               tooltip: 'Adicionar ao Meu Dia',
               onPressed: () async {
-                await ref.read(myDayProvider.notifier).addTask(task.id, source: 'task_list');
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Tarefa adicionada ao Meu Dia'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
+                final user = ref.read(authProvider).value;
+                if (user != null) {
+                  await ref
+                      .read(myDayProvider(user.id).notifier)
+                      .addTask(task.id, source: 'task_list');
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Tarefa adicionada ao Meu Dia'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 }
               },
             ),
@@ -193,7 +200,9 @@ class TaskListWidget extends ConsumerWidget {
                   isStarred: !task.isStarred,
                   updatedAt: DateTime.now(),
                 );
-                ref.read<TaskNotifier>(taskProvider.notifier).updateTask(updatedTask);
+                ref
+                    .read<TaskNotifier>(taskProvider.notifier)
+                    .updateTask(updatedTask);
               },
             ),
           ],

@@ -122,6 +122,7 @@ class _PetIdealWeightCalculatorPageState
               // Current Weight
               AdaptiveInputField(
                 label: 'Peso atual',
+                hintText: 'Ex: 25.0',
                 controller: _weightController,
                 suffix: 'kg',
                 keyboardType:
@@ -405,7 +406,7 @@ ${result.shouldLoseWeight ? '📉 Perder: ${result.weightChange.abs().toStringAs
 _________________
 Calculado por Calculei
 by Agrimind
-https://calculei.com.br''',
+https://calculei.agrimind.com.br''',
               ),
             ],
           ),

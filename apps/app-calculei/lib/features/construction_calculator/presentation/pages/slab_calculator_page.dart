@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,8 +13,7 @@ class SlabCalculatorPage extends ConsumerStatefulWidget {
   const SlabCalculatorPage({super.key});
 
   @override
-  ConsumerState<SlabCalculatorPage> createState() =>
-      _SlabCalculatorPageState();
+  ConsumerState<SlabCalculatorPage> createState() => _SlabCalculatorPageState();
 }
 
 class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
@@ -24,12 +24,7 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
 
   String _slabType = 'Maciça';
 
-  final _slabTypes = [
-    'Maciça',
-    'Treliçada',
-    'Pré-moldada',
-    'Nervurada',
-  ];
+  final _slabTypes = ['Maciça', 'Treliçada', 'Pré-moldada', 'Nervurada'];
 
   @override
   void dispose() {
@@ -43,7 +38,6 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
   Widget build(BuildContext context) {
     final calculation = ref.watch(slabCalculatorProvider);
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return CalculatorPageLayout(
       title: 'Calculadora de Laje',
@@ -79,11 +73,16 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
                         width: 200,
                         child: _AdaptiveInputField(
                           label: 'Comprimento',
+                          hintText: 'Ex: 5.0',
                           controller: _lengthController,
                           suffix: 'm',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -101,11 +100,16 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
                         width: 200,
                         child: _AdaptiveInputField(
                           label: 'Largura',
+                          hintText: 'Ex: 4.0',
                           controller: _widthController,
                           suffix: 'm',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -123,11 +127,16 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
                         width: 200,
                         child: _AdaptiveInputField(
                           label: 'Espessura',
+                          hintText: 'Ex: 12',
                           controller: _thicknessController,
                           suffix: 'cm',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -207,12 +216,14 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
     }
 
     try {
-      await ref.read(slabCalculatorProvider.notifier).calculate(
-        length: double.parse(_lengthController.text),
-        width: double.parse(_widthController.text),
-        thickness: double.parse(_thicknessController.text),
-        slabType: _slabType,
-      );
+      await ref
+          .read(slabCalculatorProvider.notifier)
+          .calculate(
+            length: double.parse(_lengthController.text),
+            width: double.parse(_widthController.text),
+            thickness: double.parse(_thicknessController.text),
+            slabType: _slabType,
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -225,10 +236,7 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e is Failure ? e.message : e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -248,6 +256,7 @@ class _SlabCalculatorPageState extends ConsumerState<SlabCalculatorPage> {
 /// Theme-adaptive input field
 class _AdaptiveInputField extends StatelessWidget {
   final String label;
+  final String? hintText;
   final TextEditingController controller;
   final String? suffix;
   final TextInputType? keyboardType;
@@ -256,6 +265,7 @@ class _AdaptiveInputField extends StatelessWidget {
 
   const _AdaptiveInputField({
     required this.label,
+    this.hintText,
     required this.controller,
     this.suffix,
     this.keyboardType,
@@ -271,10 +281,7 @@ class _AdaptiveInputField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: theme.textTheme.labelMedium,
-        ),
+        Text(label, style: theme.textTheme.labelMedium),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
@@ -285,6 +292,7 @@ class _AdaptiveInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
             suffixText: suffix,
             suffixStyle: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurfaceVariant,
@@ -297,16 +305,11 @@ class _AdaptiveInputField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.outline,
-              ),
+              borderSide: BorderSide(color: colorScheme.outline),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: colorScheme.primary,
-                width: 2,
-              ),
+              borderSide: BorderSide(color: colorScheme.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -352,9 +355,7 @@ class _AdaptiveSelectionChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             border: Border.all(
-              color: isSelected
-                  ? colorScheme.primary
-                  : colorScheme.outline,
+              color: isSelected ? colorScheme.primary : colorScheme.outline,
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),

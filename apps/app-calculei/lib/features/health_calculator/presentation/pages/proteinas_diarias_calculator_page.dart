@@ -53,7 +53,9 @@ class _ProteinasDiariasCalculatorPageState
                 label: 'Peso',
                 controller: _weightController,
                 suffix: 'kg',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
@@ -75,7 +77,9 @@ class _ProteinasDiariasCalculatorPageState
               Text(
                 'Nível de atividade física',
                 style: TextStyle(
-                  color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.8)
+                      : Colors.black.withValues(alpha: 0.8),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -177,13 +181,14 @@ class _ActivityLevelOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     const accentColor = CalculatorAccentColors.health;
 
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.15)
-          : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
+          : (isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : Colors.black.withValues(alpha: 0.05)),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -194,7 +199,9 @@ class _ActivityLevelOption extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
+                  : (isDark
+                        ? Colors.white.withValues(alpha: 0.1)
+                        : Colors.black.withValues(alpha: 0.1)),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -209,7 +216,9 @@ class _ActivityLevelOption extends StatelessWidget {
                   border: Border.all(
                     color: isSelected
                         ? accentColor
-                        : (isDark ? Colors.white.withValues(alpha: 0.3) : Colors.black.withValues(alpha: 0.3)),
+                        : (isDark
+                              ? Colors.white.withValues(alpha: 0.3)
+                              : Colors.black.withValues(alpha: 0.3)),
                     width: 2,
                   ),
                 ),
@@ -236,7 +245,13 @@ class _ActivityLevelOption extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
-                        color: isDark ? Colors.white.withValues(alpha: isSelected ? 1.0 : 0.8) : Colors.black.withValues(alpha: isSelected ? 1.0 : 0.8),
+                        color: isDark
+                            ? Colors.white.withValues(
+                                alpha: isSelected ? 1.0 : 0.8,
+                              )
+                            : Colors.black.withValues(
+                                alpha: isSelected ? 1.0 : 0.8,
+                              ),
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -244,7 +259,9 @@ class _ActivityLevelOption extends StatelessWidget {
                       description,
                       style: TextStyle(
                         fontSize: 12,
-                        color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.5)
+                            : Colors.black.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -266,17 +283,16 @@ class _ProteinResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     const accentColor = CalculatorAccentColors.health;
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: accentColor.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -337,9 +353,7 @@ class _ProteinResultCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.amber.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.amber.withValues(alpha: 0.2),
-              ),
+              border: Border.all(color: Colors.amber.withValues(alpha: 0.2)),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +368,9 @@ class _ProteinResultCard extends StatelessWidget {
                   child: Text(
                     result.recommendation,
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                       height: 1.4,
                     ),
                   ),
@@ -369,7 +385,9 @@ class _ProteinResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -380,7 +398,9 @@ class _ProteinResultCard extends StatelessWidget {
                     Icon(
                       Icons.restaurant_menu,
                       size: 18,
-                      color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.7)
+                          : Colors.black.withValues(alpha: 0.7),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -388,16 +408,34 @@ class _ProteinResultCard extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.9)
+                            : Colors.black.withValues(alpha: 0.9),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _ProteinSource(label: 'Peito de frango', amount: '31g/100g', isDark: isDark),
-                _ProteinSource(label: 'Ovo', amount: '6g por unidade', isDark: isDark),
-                _ProteinSource(label: 'Feijão', amount: '9g por xícara', isDark: isDark),
-                _ProteinSource(label: 'Whey protein', amount: '20-30g por dose', isDark: isDark),
+                _ProteinSource(
+                  label: 'Peito de frango',
+                  amount: '31g/100g',
+                  isDark: isDark,
+                ),
+                _ProteinSource(
+                  label: 'Ovo',
+                  amount: '6g por unidade',
+                  isDark: isDark,
+                ),
+                _ProteinSource(
+                  label: 'Feijão',
+                  amount: '9g por xícara',
+                  isDark: isDark,
+                ),
+                _ProteinSource(
+                  label: 'Whey protein',
+                  amount: '20-30g por dose',
+                  isDark: isDark,
+                ),
               ],
             ),
           ),
@@ -412,12 +450,14 @@ class _ProteinSource extends StatelessWidget {
   final String amount;
   final bool isDark;
 
-  const _ProteinSource({required this.label, required this.amount, required this.isDark});
+  const _ProteinSource({
+    required this.label,
+    required this.amount,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -426,7 +466,9 @@ class _ProteinSource extends StatelessWidget {
             width: 4,
             height: 4,
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.4) : Colors.black.withValues(alpha: 0.4),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.4)
+                  : Colors.black.withValues(alpha: 0.4),
               shape: BoxShape.circle,
             ),
           ),
@@ -435,7 +477,9 @@ class _ProteinSource extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.7)
+                    : Colors.black.withValues(alpha: 0.7),
                 fontSize: 13,
               ),
             ),
@@ -443,7 +487,9 @@ class _ProteinSource extends StatelessWidget {
           Text(
             amount,
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black.withValues(alpha: 0.5),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.5)
+                  : Colors.black.withValues(alpha: 0.5),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),

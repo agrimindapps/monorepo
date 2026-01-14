@@ -65,7 +65,7 @@ class AttachmentPickerBottomSheet extends StatelessWidget {
     required VoidCallback onGallery,
     required VoidCallback onFiles,
   }) async {
-    await showModalBottomSheet(
+    await showModalBottomSheet<void>(
       context: context,
       builder: (context) => AttachmentPickerBottomSheet(
         onCamera: onCamera,

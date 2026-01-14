@@ -18,6 +18,7 @@ class SimonState {
   final int? activeIndex;
   final DateTime? gameStartTime;
   final int perfectRounds;
+  final int colorCount;
 
   const SimonState({
     this.gameState = SimonGameState.idle,
@@ -27,6 +28,7 @@ class SimonState {
     this.activeIndex,
     this.gameStartTime,
     this.perfectRounds = 0,
+    this.colorCount = 4,
   });
 
   Duration? get gameDuration {
@@ -43,6 +45,7 @@ class SimonState {
     bool clearActiveIndex = false,
     DateTime? gameStartTime,
     int? perfectRounds,
+    int? colorCount,
   }) {
     return SimonState(
       gameState: gameState ?? this.gameState,
@@ -52,6 +55,7 @@ class SimonState {
       activeIndex: clearActiveIndex ? null : (activeIndex ?? this.activeIndex),
       gameStartTime: gameStartTime ?? this.gameStartTime,
       perfectRounds: perfectRounds ?? this.perfectRounds,
+      colorCount: colorCount ?? this.colorCount,
     );
   }
 }
@@ -66,16 +70,18 @@ class SimonSaysController extends _$SimonSaysController {
   }
 
   Future<void> startGame() async {
+    final settings = await ref.read(simonSettingsProvider.future);
     state = SimonState(
       gameState: SimonGameState.showingSequence,
       gameStartTime: DateTime.now(),
+      colorCount: settings.colorCount,
     );
     await _addToSequenceAndShow();
   }
 
   Future<void> _addToSequenceAndShow() async {
-    // Add new random color (0-3)
-    final newSequence = List<int>.from(state.sequence)..add(_random.nextInt(4));
+    // Add new random color (0 to colorCount-1)
+    final newSequence = List<int>.from(state.sequence)..add(_random.nextInt(state.colorCount));
     
     state = state.copyWith(
       sequence: newSequence,

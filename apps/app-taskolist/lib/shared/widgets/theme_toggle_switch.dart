@@ -56,19 +56,18 @@ class ThemeToggleSwitch extends ConsumerWidget {
             ),
           ),
         SegmentedButton<AppThemeMode>(
-          segments:
-              AppThemeMode.values
-                  .map(
-                    (mode) => ButtonSegment<AppThemeMode>(
-                      value: mode,
-                      icon: Icon(mode.icon, size: 20),
-                      label: Text(
-                        mode.displayName,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ),
-                  )
-                  .toList(),
+          segments: AppThemeMode.values
+              .map(
+                (mode) => ButtonSegment<AppThemeMode>(
+                  value: mode,
+                  icon: Icon(mode.icon, size: 20),
+                  label: Text(
+                    mode.displayName,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              )
+              .toList(),
           selected: {currentTheme},
           onSelectionChanged: (Set<AppThemeMode> selected) {
             if (selected.isNotEmpty) {
@@ -136,6 +135,7 @@ class ThemeToggleSwitch extends ConsumerWidget {
     );
   }
 }
+
 class ThemeToggleIcon extends ConsumerWidget {
   final double size;
 
@@ -164,6 +164,7 @@ class ThemeToggleIcon extends ConsumerWidget {
     }
   }
 }
+
 class ThemeSelectionList extends ConsumerWidget {
   const ThemeSelectionList({super.key});
 
@@ -172,40 +173,42 @@ class ThemeSelectionList extends ConsumerWidget {
     final currentTheme = ref.watch(currentThemeProvider);
     final themeNotifier = ref.read(appThemeProvider.notifier);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(16),
-          child: Text(
-            'Aparência',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-        ),
-        ...AppThemeMode.values.map(
-          (mode) => RadioListTile<AppThemeMode>(
-            title: Row(
-              children: [
-                Icon(
-                  mode.icon,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-                const SizedBox(width: 12),
-                Text(mode.displayName),
-              ],
+    return RadioGroup<AppThemeMode>(
+      groupValue: currentTheme,
+      onChanged: (value) {
+        if (value != null) {
+          themeNotifier.setThemeMode(value);
+        }
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text(
+              'Aparência',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
-            subtitle: Text(mode.description),
-            value: mode,
-            groupValue: currentTheme,
-            onChanged: (value) {
-              if (value != null) {
-                themeNotifier.setThemeMode(value);
-              }
-            },
           ),
-        ),
-      ],
+          ...AppThemeMode.values.map(
+            (mode) => RadioListTile<AppThemeMode>(
+              title: Row(
+                children: [
+                  Icon(
+                    mode.icon,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(mode.displayName),
+                ],
+              ),
+              subtitle: Text(mode.description),
+              value: mode,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

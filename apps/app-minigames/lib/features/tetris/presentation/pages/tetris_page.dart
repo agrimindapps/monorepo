@@ -5,8 +5,8 @@ import '../../../../core/widgets/game_page_layout.dart';
 import '../../../../core/widgets/esc_keyboard_wrapper.dart';
 import '../../domain/entities/tetromino.dart';
 import '../providers/tetris_controller.dart';
+import '../widgets/tetris_game_options_dialog.dart';
 import 'tetris_high_scores_page.dart';
-import 'tetris_settings_page.dart';
 
 class TetrisPage extends ConsumerStatefulWidget {
   const TetrisPage({super.key});
@@ -22,9 +22,17 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(tetrisControllerProvider.notifier).startGame();
+      _showOptionsDialog();
       _focusNode.requestFocus();
     });
+  }
+
+  void _showOptionsDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const TetrisGameOptionsDialog(),
+    ).then((_) => _focusNode.requestFocus());
   }
   
   @override
@@ -83,7 +91,7 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
             '⬆️ Rotacionar\n'
             '⬇️ Descer rápido\n'
             '⏬ Hard drop',
-        maxGameWidth: 450,
+        maxGameWidth: 800,
         actions: [
         IconButton(
           icon: const Icon(Icons.emoji_events, color: Colors.amber),
@@ -98,13 +106,7 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
         ),
         IconButton(
           icon: const Icon(Icons.settings, color: Colors.white),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const TetrisSettingsPage(),
-              ),
-            );
-          },
+          onPressed: _showOptionsDialog,
           tooltip: 'Configurações',
         ),
         IconButton(
@@ -199,11 +201,30 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
   }
   
   Widget _buildGameBoard(TetrisState state) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final cellSize = 18.0;
-        
-        return Container(
+    // Calculate responsive cell size
+    final size = MediaQuery.of(context).size;
+    final screenWidth = size.width;
+    final screenHeight = size.height;
+
+    // Available width calculation
+    final containerWidth = screenWidth > 800 ? 800.0 : screenWidth;
+    final contentWidth = containerWidth - 32; // Horizontal padding
+    final availableForBoard = contentWidth - 86; // - (NextPiece(70) + Gap(16))
+    
+    // Available height calculation (approximate header + controls + padding)
+    final availableHeight = screenHeight - 280; 
+
+    // Determine max possible sizes
+    final widthBasedSize = availableForBoard / TetrisState.boardWidth;
+    final heightBasedSize = availableHeight / TetrisState.boardHeight;
+    
+    // Pick the constraining dimension, clamped to reasonable limits
+    // 35.0 * 20 = 700px height (fits on most desktops)
+    // 35.0 * 10 = 350px width
+    final rawSize = widthBasedSize < heightBasedSize ? widthBasedSize : heightBasedSize;
+    final cellSize = rawSize.clamp(15.0, 35.0);
+
+    return Container(
           decoration: BoxDecoration(
             border: Border.all(color: Colors.white24, width: 2),
             borderRadius: BorderRadius.circular(8),
@@ -315,9 +336,7 @@ class _TetrisPageState extends ConsumerState<TetrisPage> {
             ],
           ),
         );
-      },
-    );
-  }
+      }
   
   Widget _buildNextPiece(Tetromino? piece) {
     if (piece == null) return const SizedBox(width: 70, height: 70);

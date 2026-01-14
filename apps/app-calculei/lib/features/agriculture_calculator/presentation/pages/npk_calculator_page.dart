@@ -18,12 +18,12 @@ class NpkCalculatorPage extends StatefulWidget {
 
 class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _yieldController = TextEditingController(text: '8');
-  final _areaController = TextEditingController(text: '10');
-  final _soilNController = TextEditingController(text: '20');
-  final _soilPController = TextEditingController(text: '10');
-  final _soilKController = TextEditingController(text: '80');
-  final _omController = TextEditingController(text: '3');
+  final _yieldController = TextEditingController();
+  final _areaController = TextEditingController();
+  final _soilNController = TextEditingController();
+  final _soilPController = TextEditingController();
+  final _soilKController = TextEditingController();
+  final _omController = TextEditingController();
 
   CropType _crop = CropType.corn;
   SoilTexture _texture = SoilTexture.loam;
@@ -69,11 +69,14 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
               // Crop selection
               Builder(
                 builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return Text(
                     'Cultura',
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -108,6 +111,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Produtividade esperada',
                       controller: _yieldController,
+                      hintText: 'Ex: 8',
                       suffix: 't/ha',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -124,6 +128,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
+                      hintText: 'Ex: 10',
                       suffix: 'ha',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -143,11 +148,14 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
               // Soil texture
               Builder(
                 builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return Text(
                     'Textura do solo',
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -175,11 +183,14 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
               // Soil analysis
               Builder(
                 builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return Text(
                     'Análise de solo',
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -196,6 +207,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'N disponível',
                       controller: _soilNController,
+                      hintText: 'Ex: 20',
                       suffix: 'mg/dm³',
                       keyboardType: TextInputType.number,
                     ),
@@ -205,6 +217,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'P (Mehlich)',
                       controller: _soilPController,
+                      hintText: 'Ex: 10',
                       suffix: 'mg/dm³',
                       keyboardType: TextInputType.number,
                     ),
@@ -214,6 +227,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'K trocável',
                       controller: _soilKController,
+                      hintText: 'Ex: 80',
                       suffix: 'mg/dm³',
                       keyboardType: TextInputType.number,
                     ),
@@ -223,6 +237,7 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Mat. Orgânica',
                       controller: _omController,
+                      hintText: 'Ex: 3',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                     ),
@@ -270,12 +285,12 @@ class _NpkCalculatorPageState extends State<NpkCalculatorPage> {
   }
 
   void _clear() {
-    _yieldController.text = '8';
-    _areaController.text = '10';
-    _soilNController.text = '20';
-    _soilPController.text = '10';
-    _soilKController.text = '80';
-    _omController.text = '3';
+    _yieldController.clear();
+    _areaController.clear();
+    _soilNController.clear();
+    _soilPController.clear();
+    _soilKController.clear();
+    _omController.clear();
     setState(() {
       _crop = CropType.corn;
       _texture = SoilTexture.loam;
@@ -296,10 +311,14 @@ class _NpkResultCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -307,12 +326,17 @@ class _NpkResultCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.assessment, color: CalculatorAccentColors.agriculture),
+              const Icon(
+                Icons.assessment,
+                color: CalculatorAccentColors.agriculture,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Resultado',
                 style: TextStyle(
-                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -365,41 +389,13 @@ class _NpkResultCard extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // Cost
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Custo estimado:',
-                  style: TextStyle(
-                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
-                  ),
-                ),
-                Text(
-                  'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
           // Fertilizer recommendations
           Text(
             'Fertilizantes recomendados',
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.9)
+                  : Colors.black.withValues(alpha: 0.9),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -414,27 +410,43 @@ class _NpkResultCard extends StatelessWidget {
           // Tips
           Container(
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.05)
+                  : Colors.black.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.1),
               ),
             ),
             child: ExpansionTile(
               title: Text(
                 'Dicas de aplicação',
                 style: TextStyle(
-                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.9),
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              iconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
-              collapsedIconColor: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
-              textColor: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+              iconColor: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
+              collapsedIconColor: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
+              textColor: isDark
+                  ? Colors.white.withValues(alpha: 0.9)
+                  : Colors.black.withValues(alpha: 0.9),
               children: result.applicationTips
                   .map(
                     (tip) => Padding(
-                      padding: const EdgeInsets.only(left: 16, bottom: 8, right: 16),
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        bottom: 8,
+                        right: 16,
+                      ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -448,7 +460,9 @@ class _NpkResultCard extends StatelessWidget {
                             child: Text(
                               tip,
                               style: TextStyle(
-                                color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.7)
+                                    : Colors.black.withValues(alpha: 0.7),
                                 fontSize: 14,
                               ),
                             ),
@@ -494,7 +508,9 @@ class _ResultBox extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -512,7 +528,9 @@ class _ResultBox extends StatelessWidget {
           Text(
             unit,
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.6)
+                  : Colors.black.withValues(alpha: 0.6),
               fontSize: 12,
             ),
           ),
@@ -534,10 +552,14 @@ class _FertilizerItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -563,7 +585,9 @@ class _FertilizerItem extends StatelessWidget {
                   recommendation.timing,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? Colors.white.withValues(alpha: 0.6) : Colors.black.withValues(alpha: 0.6),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.6)
+                        : Colors.black.withValues(alpha: 0.6),
                   ),
                 ),
               ],

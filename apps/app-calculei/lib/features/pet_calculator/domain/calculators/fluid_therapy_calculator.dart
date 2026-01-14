@@ -39,9 +39,6 @@ class FluidTherapyCalculator {
   /// Faixa de manutenção: 50-60 ml/kg/dia (média 55)
   static const double _maintenanceFactorMlPerKg = 55.0;
 
-  /// Fator de conversão ml/h para gotas/min (macrogotas: 20 gotas = 1 ml)
-  static const double _dropsPerMl = 20.0;
-
   /// Calcula a fluidoterapia necessária
   static FluidTherapyResult calculate({
     required double weightKg,

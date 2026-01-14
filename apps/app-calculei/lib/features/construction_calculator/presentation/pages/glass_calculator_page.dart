@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,17 +21,12 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _widthController = TextEditingController();
   final _heightController = TextEditingController();
-  final _quantityController = TextEditingController(text: '1');
+  final _quantityController = TextEditingController();
 
   String _glassType = 'Comum';
   int _glassThickness = 6;
 
-  final _glassTypes = [
-    'Comum',
-    'Temperado',
-    'Laminado',
-    'Fumê',
-  ];
+  final _glassTypes = ['Comum', 'Temperado', 'Laminado', 'Fumê'];
 
   final _thicknessOptions = [4, 6, 8, 10];
 
@@ -49,9 +45,6 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
     final textColor = theme.brightness == Brightness.dark
         ? Colors.white.withValues(alpha: 0.9)
         : Colors.black87;
-    final labelColor = theme.brightness == Brightness.dark
-        ? Colors.white.withValues(alpha: 0.7)
-        : Colors.black54;
 
     return CalculatorPageLayout(
       title: 'Calculadora de Vidros',
@@ -92,9 +85,14 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
                           label: 'Largura',
                           controller: _widthController,
                           suffix: 'm',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          hintText: 'Ex: 1.5',
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -114,9 +112,14 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
                           label: 'Altura',
                           controller: _heightController,
                           suffix: 'm',
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          hintText: 'Ex: 2.0',
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d*\.?\d*'),
+                            ),
                           ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -136,6 +139,7 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
                           label: 'Quantidade',
                           controller: _quantityController,
                           suffix: 'painéis',
+                          hintText: 'Ex: 1',
                           keyboardType: TextInputType.number,
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
@@ -250,13 +254,15 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
     }
 
     try {
-      await ref.read(glassCalculatorProvider.notifier).calculate(
-        width: double.parse(_widthController.text),
-        height: double.parse(_heightController.text),
-        glassType: _glassType,
-        glassThickness: _glassThickness,
-        numberOfPanels: int.parse(_quantityController.text),
-      );
+      await ref
+          .read(glassCalculatorProvider.notifier)
+          .calculate(
+            width: double.parse(_widthController.text),
+            height: double.parse(_heightController.text),
+            glassType: _glassType,
+            glassThickness: _glassThickness,
+            numberOfPanels: int.parse(_quantityController.text),
+          );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -269,10 +275,7 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e is Failure ? e.message : e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -281,7 +284,7 @@ class _GlassCalculatorPageState extends ConsumerState<GlassCalculatorPage> {
   void _clear() {
     _widthController.clear();
     _heightController.clear();
-    _quantityController.text = '1';
+    _quantityController.clear();
     setState(() {
       _glassType = 'Comum';
       _glassThickness = 6;
@@ -294,6 +297,7 @@ class _DarkInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
+  final String? hintText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
@@ -302,6 +306,7 @@ class _DarkInputField extends StatelessWidget {
     required this.label,
     required this.controller,
     this.suffix,
+    this.hintText,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -312,10 +317,18 @@ class _DarkInputField extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
-    final labelColor = isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black54;
-    final suffixColor = isDark ? Colors.white.withValues(alpha: 0.5) : Colors.black45;
-    final fillColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.05);
-    final borderColor = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.15);
+    final labelColor = isDark
+        ? Colors.white.withValues(alpha: 0.7)
+        : Colors.black54;
+    final suffixColor = isDark
+        ? Colors.white.withValues(alpha: 0.5)
+        : Colors.black45;
+    final fillColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.05);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.15);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -340,11 +353,14 @@ class _DarkInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
-            suffixText: suffix,
-            suffixStyle: TextStyle(
-              color: suffixColor,
-              fontSize: 16,
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.3)
+                  : Colors.black.withValues(alpha: 0.3),
             ),
+            suffixText: suffix,
+            suffixStyle: TextStyle(color: suffixColor, fontSize: 16),
             filled: true,
             fillColor: fillColor,
             border: OutlineInputBorder(
@@ -353,9 +369,7 @@ class _DarkInputField extends StatelessWidget {
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: borderColor,
-              ),
+              borderSide: BorderSide(color: borderColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -394,9 +408,15 @@ class _SelectionChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final unselectedBg = isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03);
-    final unselectedBorder = isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.15);
-    final unselectedText = isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black87;
+    final unselectedBg = isDark
+        ? Colors.white.withValues(alpha: 0.05)
+        : Colors.black.withValues(alpha: 0.03);
+    final unselectedBorder = isDark
+        ? Colors.white.withValues(alpha: 0.1)
+        : Colors.black.withValues(alpha: 0.15);
+    final unselectedText = isDark
+        ? Colors.white.withValues(alpha: 0.8)
+        : Colors.black87;
 
     return Material(
       color: isSelected

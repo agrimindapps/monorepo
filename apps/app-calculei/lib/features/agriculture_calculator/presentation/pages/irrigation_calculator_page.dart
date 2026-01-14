@@ -19,9 +19,9 @@ class IrrigationCalculatorPage extends StatefulWidget {
 
 class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _etoController = TextEditingController(text: '5');
-  final _areaController = TextEditingController(text: '10');
-  final _flowController = TextEditingController(text: '10000');
+  final _etoController = TextEditingController();
+  final _areaController = TextEditingController();
+  final _flowController = TextEditingController();
 
   IrrigationCropType _crop = IrrigationCropType.corn;
   CropStage _stage = CropStage.mid;
@@ -166,6 +166,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'ETo (referência)',
                       controller: _etoController,
+                      hintText: 'Ex: 5',
                       suffix: 'mm/dia',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -182,6 +183,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
+                      hintText: 'Ex: 10',
                       suffix: 'ha',
                       keyboardType: TextInputType.number,
                       validator: (v) =>
@@ -193,6 +195,7 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Vazão sistema',
                       controller: _flowController,
+                      hintText: 'Ex: 10000',
                       suffix: 'L/h',
                       keyboardType: TextInputType.number,
                     ),
@@ -242,9 +245,9 @@ class _IrrigationCalculatorPageState extends State<IrrigationCalculatorPage> {
   }
 
   void _clear() {
-    _etoController.text = '5';
-    _areaController.text = '10';
-    _flowController.text = '10000';
+    _etoController.clear();
+    _areaController.clear();
+    _flowController.clear();
     setState(() {
       _crop = IrrigationCropType.corn;
       _stage = CropStage.mid;

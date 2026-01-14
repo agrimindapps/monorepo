@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dartz/dartz.dart';
 import 'package:core/core.dart';
@@ -9,7 +10,7 @@ class TaskAttachmentStorageService {
   final FirebaseStorage _storage;
 
   TaskAttachmentStorageService({FirebaseStorage? storage})
-      : _storage = storage ?? FirebaseStorage.instance;
+    : _storage = storage ?? FirebaseStorage.instance;
 
   /// Storage path pattern: attachments/{userId}/{taskId}/{attachmentId}_{fileName}
   String _buildStoragePath({
@@ -42,7 +43,7 @@ class TaskAttachmentStorageService {
       );
 
       final ref = _storage.ref().child(path);
-      
+
       // Set metadata
       final metadata = SettableMetadata(
         contentType: mimeType,
@@ -61,7 +62,8 @@ class TaskAttachmentStorageService {
       // Listen to progress
       uploadTask.snapshotEvents.listen((taskSnapshot) {
         if (onProgress != null && taskSnapshot.totalBytes > 0) {
-          final progress = taskSnapshot.bytesTransferred / taskSnapshot.totalBytes;
+          final progress =
+              taskSnapshot.bytesTransferred / taskSnapshot.totalBytes;
           onProgress(progress);
         }
       });
@@ -74,12 +76,12 @@ class TaskAttachmentStorageService {
 
       // Get download URL
       final downloadUrl = await snapshot.ref.getDownloadURL();
-      
+
       return Right(downloadUrl);
     } on FirebaseException catch (e) {
-      return Left(Failure('Firebase error: ${e.message ?? e.code}'));
+      return Left(NetworkFailure('Firebase error: ${e.message ?? e.code}'));
     } catch (e) {
-      return Left(Failure('Upload failed: $e'));
+      return Left(UnknownFailure('Upload failed: $e'));
     }
   }
 
@@ -102,7 +104,7 @@ class TaskAttachmentStorageService {
       );
 
       final ref = _storage.ref().child(path);
-      
+
       final metadata = SettableMetadata(
         contentType: mimeType,
         customMetadata: {
@@ -114,11 +116,12 @@ class TaskAttachmentStorageService {
         },
       );
 
-      final uploadTask = ref.putData(bytes as Uint8List, metadata);
+      final uploadTask = ref.putData(Uint8List.fromList(bytes), metadata);
 
       uploadTask.snapshotEvents.listen((taskSnapshot) {
         if (onProgress != null && taskSnapshot.totalBytes > 0) {
-          final progress = taskSnapshot.bytesTransferred / taskSnapshot.totalBytes;
+          final progress =
+              taskSnapshot.bytesTransferred / taskSnapshot.totalBytes;
           onProgress(progress);
         }
       });
@@ -129,12 +132,12 @@ class TaskAttachmentStorageService {
       );
 
       final downloadUrl = await snapshot.ref.getDownloadURL();
-      
+
       return Right(downloadUrl);
     } on FirebaseException catch (e) {
-      return Left(Failure('Firebase error: ${e.message ?? e.code}'));
+      return Left(NetworkFailure('Firebase error: ${e.message ?? e.code}'));
     } catch (e) {
-      return Left(Failure('Upload failed: $e'));
+      return Left(UnknownFailure('Upload failed: $e'));
     }
   }
 
@@ -149,9 +152,9 @@ class TaskAttachmentStorageService {
         // Already deleted, not an error
         return const Right(null);
       }
-      return Left(Failure('Delete failed: ${e.message ?? e.code}'));
+      return Left(NetworkFailure('Delete failed: ${e.message ?? e.code}'));
     } catch (e) {
-      return Left(Failure('Delete failed: $e'));
+      return Left(UnknownFailure('Delete failed: $e'));
     }
   }
 
@@ -163,7 +166,7 @@ class TaskAttachmentStorageService {
     try {
       final path = 'attachments/$userId/$taskId/';
       final ref = _storage.ref().child(path);
-      
+
       final listResult = await ref.listAll();
       int deletedCount = 0;
 
@@ -179,9 +182,11 @@ class TaskAttachmentStorageService {
 
       return Right(deletedCount);
     } on FirebaseException catch (e) {
-      return Left(Failure('Batch delete failed: ${e.message ?? e.code}'));
+      return Left(
+        NetworkFailure('Batch delete failed: ${e.message ?? e.code}'),
+      );
     } catch (e) {
-      return Left(Failure('Batch delete failed: $e'));
+      return Left(UnknownFailure('Batch delete failed: $e'));
     }
   }
 
@@ -192,7 +197,7 @@ class TaskAttachmentStorageService {
     try {
       final ref = _storage.refFromURL(downloadUrl);
       final metadata = await ref.getMetadata();
-      
+
       return Right({
         'size': metadata.size,
         'contentType': metadata.contentType,
@@ -201,9 +206,11 @@ class TaskAttachmentStorageService {
         'customMetadata': metadata.customMetadata,
       });
     } on FirebaseException catch (e) {
-      return Left(Failure('Get metadata failed: ${e.message ?? e.code}'));
+      return Left(
+        NetworkFailure('Get metadata failed: ${e.message ?? e.code}'),
+      );
     } catch (e) {
-      return Left(Failure('Get metadata failed: $e'));
+      return Left(UnknownFailure('Get metadata failed: $e'));
     }
   }
 }

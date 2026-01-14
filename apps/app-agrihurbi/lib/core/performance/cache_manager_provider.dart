@@ -67,8 +67,10 @@ class CacheEntry<T> {
 
   double get score {
     final frequency = accessCount.toDouble();
-    final recency =
-        DateTime.now().difference(lastAccessed).inMinutes.toDouble();
+    final recency = DateTime.now()
+        .difference(lastAccessed)
+        .inMinutes
+        .toDouble();
     return frequency / (recency + 1);
   }
 }
@@ -200,8 +202,9 @@ class CacheLayer<T> {
       'evictions': _evictions,
       'hit_rate': _hits / (_hits + _misses + 1),
       'total_size_kb': _getTotalSizeKB(),
-      'avg_entry_size_bytes':
-          _data.isEmpty ? 0 : _getTotalSizeKB() * 1024 / _data.length,
+      'avg_entry_size_bytes': _data.isEmpty
+          ? 0
+          : _getTotalSizeKB() * 1024 / _data.length,
     };
   }
 }
@@ -242,7 +245,7 @@ class CacheManagerState {
 /// - TTL (Time To Live)
 /// - Size-based eviction
 /// - Memory pressure aware
-@Riverpod(keepAlive: true)
+@riverpod
 class CacheManager extends _$CacheManager {
   @override
   CacheManagerState build() {
@@ -318,7 +321,7 @@ class CacheManager extends _$CacheManager {
 
   /// Limpa todo o cache
   void clearAll() {
-    for (final layer in state.cacheLayers.values) {
+    for (final CacheLayer<dynamic> layer in state.cacheLayers.values) {
       layer.clear();
     }
     state = const CacheManagerState();
@@ -326,7 +329,7 @@ class CacheManager extends _$CacheManager {
 
   /// Força limpeza de entradas expiradas em todas as camadas
   void cleanupExpired() {
-    for (final layer in state.cacheLayers.values) {
+    for (final CacheLayer<dynamic> layer in state.cacheLayers.values) {
       layer._removeExpiredEntries();
     }
     state = state.copyWith(cacheLayers: state.cacheLayers);
@@ -334,8 +337,9 @@ class CacheManager extends _$CacheManager {
 
   /// Obtém estatísticas gerais
   Map<String, dynamic> getGlobalStats() {
-    final layerStats =
-        state.cacheLayers.values.map((layer) => layer.getStats()).toList();
+    final layerStats = state.cacheLayers.values
+        .map((CacheLayer<dynamic> layer) => layer.getStats())
+        .toList();
     final totalSize = layerStats.fold<int>(
       0,
       (int sum, Map<String, dynamic> stats) => sum + (stats['size'] as int),
@@ -361,7 +365,7 @@ class CacheManager extends _$CacheManager {
 
   /// Otimiza automaticamente todas as camadas
   void optimize() {
-    for (final layer in state.cacheLayers.values) {
+    for (final CacheLayer<dynamic> layer in state.cacheLayers.values) {
       layer._evictIfNecessary();
     }
 
@@ -371,9 +375,7 @@ class CacheManager extends _$CacheManager {
 
   /// Remove uma camada completamente
   void removeLayer(String layerName) {
-    final newLayers = Map<String, CacheLayer<dynamic>>.from(
-      state.cacheLayers,
-    );
+    final newLayers = Map<String, CacheLayer<dynamic>>.from(state.cacheLayers);
     newLayers.remove(layerName);
     state = state.copyWith(cacheLayers: newLayers);
   }

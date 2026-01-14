@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -81,6 +82,7 @@ class _MortarCalculatorPageState extends ConsumerState<MortarCalculatorPage> {
                           label: 'Área',
                           controller: _areaController,
                           suffix: 'm²',
+                          hintText: 'Ex: 50.0',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -103,6 +105,7 @@ class _MortarCalculatorPageState extends ConsumerState<MortarCalculatorPage> {
                           label: 'Espessura',
                           controller: _thicknessController,
                           suffix: 'cm',
+                          hintText: 'Ex: 2.5',
                           keyboardType: const TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: [
                             FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -205,7 +208,7 @@ class _MortarCalculatorPageState extends ConsumerState<MortarCalculatorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );
@@ -228,6 +231,7 @@ class _AdaptiveInputField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final String? suffix;
+  final String? hintText;
   final TextInputType? keyboardType;
   final List<TextInputFormatter>? inputFormatters;
   final String? Function(String?)? validator;
@@ -236,6 +240,7 @@ class _AdaptiveInputField extends StatelessWidget {
     required this.label,
     required this.controller,
     this.suffix,
+    this.hintText,
     this.keyboardType,
     this.inputFormatters,
     this.validator,
@@ -252,7 +257,7 @@ class _AdaptiveInputField extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -269,13 +274,17 @@ class _AdaptiveInputField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: TextStyle(
+              color: colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             suffixText: suffix,
             suffixStyle: TextStyle(
-              color: colorScheme.onSurface.withOpacity(0.5),
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 16,
             ),
             filled: true,
-            fillColor: colorScheme.surfaceContainerHighest.withOpacity(0.3),
+            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide.none,
@@ -283,7 +292,7 @@ class _AdaptiveInputField extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: BorderSide(
-                color: colorScheme.outline.withOpacity(0.3),
+                color: colorScheme.outline.withValues(alpha: 0.3),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -328,7 +337,7 @@ class _SelectionChip extends StatelessWidget {
     return Material(
       color: isSelected
           ? colorScheme.primaryContainer
-          : colorScheme.surfaceContainerHighest.withOpacity(0.3),
+          : colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onSelected,
@@ -339,7 +348,7 @@ class _SelectionChip extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? colorScheme.primary
-                  : colorScheme.outline.withOpacity(0.3),
+                  : colorScheme.outline.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -351,7 +360,7 @@ class _SelectionChip extends StatelessWidget {
               fontSize: 14,
               color: isSelected
                   ? colorScheme.onPrimaryContainer
-                  : colorScheme.onSurface.withOpacity(0.8),
+                  : colorScheme.onSurface.withValues(alpha: 0.8),
             ),
           ),
         ),

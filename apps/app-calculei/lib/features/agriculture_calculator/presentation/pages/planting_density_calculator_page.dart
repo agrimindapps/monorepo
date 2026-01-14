@@ -19,10 +19,10 @@ class PlantingDensityCalculatorPage extends StatefulWidget {
 class _PlantingDensityCalculatorPageState
     extends State<PlantingDensityCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _rowSpacingController = TextEditingController(text: '0.9');
-  final _plantSpacingController = TextEditingController(text: '0.2');
-  final _areaController = TextEditingController(text: '10');
-  final _costPerPlantController = TextEditingController(text: '0');
+  final _rowSpacingController = TextEditingController();
+  final _plantSpacingController = TextEditingController();
+  final _areaController = TextEditingController();
+  final _costPerPlantController = TextEditingController();
 
   PlantingDensityResult? _result;
 
@@ -71,6 +71,7 @@ class _PlantingDensityCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Espaçamento entre linhas',
                       controller: _rowSpacingController,
+                      hintText: 'Ex: 0.9',
                       suffix: 'm',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -87,6 +88,7 @@ class _PlantingDensityCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Espaçamento entre plantas',
                       controller: _plantSpacingController,
+                      hintText: 'Ex: 0.2',
                       suffix: 'm',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -113,6 +115,7 @@ class _PlantingDensityCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Área total',
                       controller: _areaController,
+                      hintText: 'Ex: 10',
                       suffix: 'ha',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -129,6 +132,7 @@ class _PlantingDensityCalculatorPageState
                     child: AdaptiveInputField(
                       label: 'Custo por muda (opcional)',
                       controller: _costPerPlantController,
+                      hintText: 'Ex: 0.50',
                       suffix: 'R\$',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -177,10 +181,10 @@ class _PlantingDensityCalculatorPageState
   }
 
   void _clear() {
-    _rowSpacingController.text = '0.9';
-    _plantSpacingController.text = '0.2';
-    _areaController.text = '10';
-    _costPerPlantController.text = '0';
+    _rowSpacingController.clear();
+    _plantSpacingController.clear();
+    _areaController.clear();
+    _costPerPlantController.clear();
     setState(() {
       _result = null;
     });

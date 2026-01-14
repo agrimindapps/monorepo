@@ -50,7 +50,14 @@ class AdminLayout extends StatelessWidget {
                   child: Column(
                     children: [
                       _buildDesktopHeader(context, isDark),
-                      Expanded(child: child),
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1120),
+                            child: child,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 // Package imports:
 // Project imports:
 import '../../../../core/widgets/accent_input_fields.dart';
-import '../../../../core/utils/brazilian_currency_formatter.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/responsive_input_row.dart';
 import '../../domain/usecases/calculate_emergency_reserve_usecase.dart';
@@ -28,9 +27,9 @@ class EmergencyReserveInputForm extends StatefulWidget {
 class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
   // Controllers
   final _monthlyExpensesController = TextEditingController();
-  final _extraExpensesController = TextEditingController(text: '0');
-  final _desiredMonthsController = TextEditingController(text: '6');
-  final _monthlySavingsController = TextEditingController(text: '0');
+  final _extraExpensesController = TextEditingController();
+  final _desiredMonthsController = TextEditingController();
+  final _monthlySavingsController = TextEditingController();
 
   // Formatters
 
@@ -48,6 +47,14 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
     _submitForm();
   }
 
+  /// Public method to clear all input fields
+  void clear() {
+    _monthlyExpensesController.clear();
+    _extraExpensesController.clear();
+    _desiredMonthsController.clear();
+    _monthlySavingsController.clear();
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.financial;
@@ -62,6 +69,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _monthlyExpensesController,
               label: 'Despesas Mensais',
               helperText: 'Total de gastos fixos e variáveis',
+              hintText: 'Ex: 2.000,00',
               accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe as despesas mensais';
@@ -77,6 +85,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _extraExpensesController,
               label: 'Despesas Extras (opcional)',
               helperText: 'Custos eventuais ou sazonais',
+              hintText: 'Ex: 500,00',
               accentColor: accentColor,              validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final numericValue = _parseNumericValue(value);
@@ -95,6 +104,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _desiredMonthsController,
               label: 'Meses de Cobertura',
               helperText: 'Recomendado: 6 a 12 meses',
+              hintText: 'Ex: 6',
               accentColor: accentColor,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -114,6 +124,7 @@ class EmergencyReserveInputFormState extends State<EmergencyReserveInputForm> {
               controller: _monthlySavingsController,
               label: 'Poupança Mensal (opcional)',
               helperText: 'Quanto pode poupar por mês',
+              hintText: 'Ex: 300,00',
               accentColor: accentColor,              validator: (value) {
                 if (value != null && value.isNotEmpty) {
                   final numericValue = _parseNumericValue(value);

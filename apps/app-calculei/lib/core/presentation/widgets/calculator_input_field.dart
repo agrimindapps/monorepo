@@ -14,7 +14,7 @@ final _currencyFormatter = MaskTextInputFormatter(
 /// Provides consistent styling and formatting for monetary values
 class CurrencyInputField extends StatelessWidget {
   final String label;
-  final String? hint;
+  final String? hintText;
   final String? helperText;
   final TextEditingController controller;
   final String? Function(String?)? validator;
@@ -25,7 +25,7 @@ class CurrencyInputField extends StatelessWidget {
     super.key,
     required this.label,
     required this.controller,
-    this.hint,
+    this.hintText,
     this.helperText,
     this.validator,
     this.enabled = true,
@@ -60,7 +60,7 @@ class CurrencyInputField extends StatelessWidget {
           inputFormatters: [_currencyFormatter],
           decoration: InputDecoration(
             prefixText: 'R\$ ',
-            hintText: hint ?? '0,00',
+            hintText: hintText ?? '0,00',
             helperText: helperText,
             filled: true,
             fillColor: isDark ? Colors.grey[850] : const Color(0xFFF5F5F5),
@@ -268,7 +268,7 @@ class _CounterButton extends StatelessWidget {
 /// Standard text input field
 class StandardInputField extends StatelessWidget {
   final String label;
-  final String? hint;
+  final String? hintText;
   final String? helperText;
   final String? suffix;
   final TextEditingController controller;
@@ -283,7 +283,7 @@ class StandardInputField extends StatelessWidget {
     super.key,
     required this.label,
     required this.controller,
-    this.hint,
+    this.hintText,
     this.helperText,
     this.suffix,
     this.keyboardType,
@@ -322,7 +322,7 @@ class StandardInputField extends StatelessWidget {
           inputFormatters: inputFormatters,
           maxLines: maxLines,
           decoration: InputDecoration(
-            hintText: hint,
+            hintText: hintText,
             helperText: helperText,
             suffixText: suffix,
             filled: true,

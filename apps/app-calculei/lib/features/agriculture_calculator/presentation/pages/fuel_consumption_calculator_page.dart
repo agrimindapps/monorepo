@@ -20,10 +20,10 @@ class FuelConsumptionCalculatorPage extends StatefulWidget {
 class _FuelConsumptionCalculatorPageState
     extends State<FuelConsumptionCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _powerController = TextEditingController(text: '100');
-  final _hoursController = TextEditingController(text: '8');
+  final _powerController = TextEditingController();
+  final _hoursController = TextEditingController();
   final _areaController = TextEditingController();
-  final _fuelPriceController = TextEditingController(text: '5.50');
+  final _fuelPriceController = TextEditingController();
 
   LoadFactor _loadFactor = LoadFactor.medium;
   OperationType _operationType = OperationType.soilPreparation;
@@ -75,10 +75,10 @@ class _FuelConsumptionCalculatorPageState
 
   void _reset() {
     setState(() {
-      _powerController.text = '100';
-      _hoursController.text = '8';
+      _powerController.clear();
+      _hoursController.clear();
       _areaController.clear();
-      _fuelPriceController.text = '5.50';
+      _fuelPriceController.clear();
       _loadFactor = LoadFactor.medium;
       _operationType = OperationType.soilPreparation;
       _result = null;
@@ -119,7 +119,7 @@ class _FuelConsumptionCalculatorPageState
                 label: 'Potência do Trator',
                 controller: _powerController,
                 suffix: 'HP',
-                hint: 'Ex: 100',
+                hintText: 'Ex: 100',
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -191,7 +191,7 @@ class _FuelConsumptionCalculatorPageState
                       label: 'Horas Trabalhadas',
                       controller: _hoursController,
                       suffix: 'h',
-                      hint: 'Ex: 8',
+                      hintText: 'Ex: 8',
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
@@ -216,7 +216,7 @@ class _FuelConsumptionCalculatorPageState
                       label: 'Área Trabalhada (opcional)',
                       controller: _areaController,
                       suffix: 'ha',
-                      hint: 'Ex: 50',
+                      hintText: 'Ex: 50',
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       inputFormatters: [
@@ -246,7 +246,7 @@ class _FuelConsumptionCalculatorPageState
                   label: 'Preço do Diesel (opcional)',
                   controller: _fuelPriceController,
                   suffix: 'R\$/L',
-                  hint: 'Ex: 5.50',
+                  hintText: 'Ex: 5.50',
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
                   inputFormatters: [

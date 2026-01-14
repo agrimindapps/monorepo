@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -86,6 +87,7 @@ class _RoofCalculatorPageState extends ConsumerState<RoofCalculatorPage> {
                               label: 'Comprimento',
                               controller: _lengthController,
                               suffix: 'm',
+                              hintText: 'Ex: 8.0',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -108,6 +110,7 @@ class _RoofCalculatorPageState extends ConsumerState<RoofCalculatorPage> {
                               label: 'Largura',
                               controller: _widthController,
                               suffix: 'm',
+                              hintText: 'Ex: 6.0',
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
                               inputFormatters: [
                                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
@@ -302,7 +305,7 @@ class _RoofCalculatorPageState extends ConsumerState<RoofCalculatorPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.toString()),
+            content: Text(e is Failure ? e.message : e.toString()),
             backgroundColor: Colors.red,
           ),
         );

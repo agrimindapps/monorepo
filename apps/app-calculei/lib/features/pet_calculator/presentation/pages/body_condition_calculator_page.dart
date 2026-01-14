@@ -369,7 +369,7 @@ ${result.description}
 _________________
 Calculado por Calculei
 by Agrimind
-https://calculei.com.br''',
+https://calculei.agrimind.com.br''',
               ),
             ],
           ),

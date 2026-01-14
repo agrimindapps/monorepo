@@ -6,7 +6,8 @@ import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/pregnancy_calculator.dart';
-export '../../../../core/widgets/calculator_page_layout.dart' show CalculatorAccentColors;
+export '../../../../core/widgets/calculator_page_layout.dart'
+    show CalculatorAccentColors;
 
 /// Página da calculadora de Gestação de Pets
 class PregnancyCalculatorPage extends StatefulWidget {
@@ -29,7 +30,7 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
     return Builder(
       builder: (context) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        
+
         return CalculatorPageLayout(
           title: 'Gestação Pet',
           subtitle: 'Acompanhamento de Gestação',
@@ -52,7 +53,9 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
                       gestationDays: _result!.gestationDays,
                       dueDate: dateFormat.format(_result!.estimatedDueDate),
                       daysRemaining: _result!.daysRemaining,
-                      stage: PregnancyCalculator.getStageText(_result!.currentStage),
+                      stage: PregnancyCalculator.getStageText(
+                        _result!.currentStage,
+                      ),
                     ),
                   );
                 },
@@ -92,15 +95,18 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
                 // Mating date
                 Builder(
                   builder: (context) {
-                    final isDark = Theme.of(context).brightness == Brightness.dark;
-                    
+                    final isDark =
+                        Theme.of(context).brightness == Brightness.dark;
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           'Data do acasalamento',
                           style: TextStyle(
-                            color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                            color: isDark
+                                ? Colors.white.withValues(alpha: 0.7)
+                                : Colors.black.withValues(alpha: 0.7),
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -112,9 +118,13 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.08)
+                                  : Colors.black.withValues(alpha: 0.08),
                               border: Border.all(
-                                color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+                                color: isDark
+                                    ? Colors.white.withValues(alpha: 0.1)
+                                    : Colors.black.withValues(alpha: 0.1),
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -145,7 +155,7 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
                         ),
                       ],
                     );
-                  }
+                  },
                 ),
 
                 const SizedBox(height: 32),
@@ -170,7 +180,7 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
             ),
           ),
         );
-      }
+      },
     );
   }
 
@@ -227,7 +237,9 @@ class _SpeciesButton extends StatelessWidget {
     return Material(
       color: isSelected
           ? accentColor.withValues(alpha: 0.15)
-          : isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+          : isDark
+          ? Colors.white.withValues(alpha: 0.05)
+          : Colors.black.withValues(alpha: 0.05),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -238,7 +250,9 @@ class _SpeciesButton extends StatelessWidget {
             border: Border.all(
               color: isSelected
                   ? accentColor
-                  : isDark ? Colors.white.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.2),
+                  : isDark
+                  ? Colors.white.withValues(alpha: 0.2)
+                  : Colors.black.withValues(alpha: 0.2),
               width: isSelected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -253,7 +267,9 @@ class _SpeciesButton extends StatelessWidget {
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   color: isSelected
                       ? accentColor
-                      : isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                      : isDark
+                      ? Colors.white.withValues(alpha: 0.7)
+                      : Colors.black.withValues(alpha: 0.7),
                 ),
               ),
             ],
@@ -274,8 +290,6 @@ class _PregnancyResultCard extends StatelessWidget {
     required this.isDog,
     required this.matingDate,
   });
-
-  final _dateFormat = DateFormat('dd/MM/yyyy');
 
   Color _getStageColor(PregnancyStage stage) {
     return switch (stage) {
@@ -298,10 +312,14 @@ class _PregnancyResultCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -316,7 +334,9 @@ class _PregnancyResultCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.9),
                 ),
               ),
             ],
@@ -348,10 +368,7 @@ class _PregnancyResultCard extends StatelessWidget {
                         color: stageColor,
                       ),
                     ),
-                    Text(
-                      'dias',
-                      style: TextStyle(color: stageColor),
-                    ),
+                    Text('dias', style: TextStyle(color: stageColor)),
                   ],
                 ),
               ],
@@ -401,7 +418,9 @@ class _PregnancyResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -412,14 +431,24 @@ class _PregnancyResultCard extends StatelessWidget {
                   value: dateFormat.format(result.estimatedDueDate),
                   color: Colors.green,
                 ),
-                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
+                Divider(
+                  height: 16,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.black.withValues(alpha: 0.1),
+                ),
                 _DetailRow(
                   icon: Icons.timer,
                   label: 'Dias restantes',
                   value: '${result.daysRemaining} dias',
                   color: Colors.blue,
                 ),
-                Divider(height: 16, color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1)),
+                Divider(
+                  height: 16,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.1)
+                      : Colors.black.withValues(alpha: 0.1),
+                ),
                 _DetailRow(
                   icon: Icons.date_range,
                   label: 'Janela de parto',
@@ -467,15 +496,15 @@ class _PregnancyResultCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.9)
+                    : Colors.black.withValues(alpha: 0.9),
               ),
             ),
             const SizedBox(height: 8),
             ...result.upcomingMilestones.map(
-              (milestone) => _MilestoneItem(
-                milestone: milestone,
-                matingDate: matingDate,
-              ),
+              (milestone) =>
+                  _MilestoneItem(milestone: milestone, matingDate: matingDate),
             ),
           ],
 
@@ -516,7 +545,7 @@ class _DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -527,7 +556,9 @@ class _DetailRow extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 14,
-              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
             ),
           ),
           const Spacer(),
@@ -552,10 +583,7 @@ class _MilestoneItem extends StatelessWidget {
   final PregnancyMilestone milestone;
   final DateTime matingDate;
 
-  const _MilestoneItem({
-    required this.milestone,
-    required this.matingDate,
-  });
+  const _MilestoneItem({required this.milestone, required this.matingDate});
 
   @override
   Widget build(BuildContext context) {
@@ -569,12 +597,16 @@ class _MilestoneItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: milestone.isImportant
             ? Colors.amber.withValues(alpha: 0.15)
-            : isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+            : isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: milestone.isImportant
               ? Colors.amber.withValues(alpha: 0.5)
-              : isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+              : isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Row(
@@ -603,14 +635,18 @@ class _MilestoneItem extends StatelessWidget {
                   milestone.title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.9)
+                        : Colors.black.withValues(alpha: 0.9),
                   ),
                 ),
                 Text(
                   milestone.description,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.7)
+                        : Colors.black.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -620,7 +656,9 @@ class _MilestoneItem extends StatelessWidget {
             dateFormat.format(milestoneDate),
             style: TextStyle(
               fontWeight: FontWeight.w500,
-              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.9)
+                  : Colors.black.withValues(alpha: 0.9),
             ),
           ),
         ],
@@ -650,13 +688,17 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.black.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -671,7 +713,9 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
                   Icon(
                     widget.icon,
                     size: 20,
-                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.7)
+                        : Colors.black.withValues(alpha: 0.7),
                   ),
                   const SizedBox(width: 8),
                   Text(
@@ -679,13 +723,17 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.9)
+                          : Colors.black.withValues(alpha: 0.9),
                     ),
                   ),
                   const Spacer(),
                   Icon(
                     _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.7)
+                        : Colors.black.withValues(alpha: 0.7),
                   ),
                 ],
               ),
@@ -714,7 +762,9 @@ class _ExpandableSectionState extends State<_ExpandableSection> {
                                 item,
                                 style: TextStyle(
                                   fontSize: 13,
-                                  color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                                  color: isDark
+                                      ? Colors.white.withValues(alpha: 0.8)
+                                      : Colors.black.withValues(alpha: 0.8),
                                 ),
                               ),
                             ),

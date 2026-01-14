@@ -212,6 +212,31 @@ class AppRouter {
   }
 }
 
+class _CulturaDetailsPlaceholder extends StatelessWidget {
+  final String? id;
+
+  const _CulturaDetailsPlaceholder({this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Detalhes da Cultura ${id ?? ''}')),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.grass, size: 64, color: Colors.lightGreen),
+            SizedBox(height: 16),
+            Text('Detalhes da Cultura', style: TextStyle(fontSize: 24)),
+            SizedBox(height: 8),
+            Text('Em desenvolvimento...'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // Placeholder widgets (to be implemented)
 class _AdminPlaceholder extends StatelessWidget {
   const _AdminPlaceholder();
@@ -250,179 +275,6 @@ class _UsersPlaceholder extends StatelessWidget {
             Icon(Icons.people, size: 64),
             SizedBox(height: 16),
             Text('Gerenciar Usuários', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EditPlaceholder extends StatelessWidget {
-  const _EditPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Editor')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.edit, size: 64),
-            SizedBox(height: 16),
-            Text('Modo Edição', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ========== CULTURAS PLACEHOLDERS ==========
-
-class _CulturaDetailsPlaceholder extends StatelessWidget {
-  final String? id;
-
-  const _CulturaDetailsPlaceholder({this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Detalhes da Cultura ${id ?? ''}')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.grass, size: 64, color: Colors.lightGreen),
-            SizedBox(height: 16),
-            Text('Detalhes da Cultura', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CreateCulturaPlaceholder extends StatelessWidget {
-  const _CreateCulturaPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Nova Cultura')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_circle_outline, size: 64, color: Colors.lightGreen),
-            SizedBox(height: 16),
-            Text('Criar Nova Cultura', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EditCulturaPlaceholder extends StatelessWidget {
-  final String? id;
-
-  const _EditCulturaPlaceholder({this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Editar Cultura ${id ?? ''}')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.edit_note, size: 64, color: Colors.lightGreen),
-            SizedBox(height: 16),
-            Text('Editar Cultura', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ========== PRAGAS PLACEHOLDERS ==========
-
-class _PragaDetailsPlaceholder extends StatelessWidget {
-  final String? id;
-
-  const _PragaDetailsPlaceholder({this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Detalhes da Praga ${id ?? ''}')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.bug_report, size: 64, color: Colors.orange),
-            SizedBox(height: 16),
-            Text('Detalhes da Praga', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CreatePragaPlaceholder extends StatelessWidget {
-  const _CreatePragaPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Nova Praga')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.add_circle_outline, size: 64, color: Colors.orange),
-            SizedBox(height: 16),
-            Text('Criar Nova Praga', style: TextStyle(fontSize: 24)),
-            SizedBox(height: 8),
-            Text('Em desenvolvimento...'),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _EditPragaPlaceholder extends StatelessWidget {
-  final String? id;
-
-  const _EditPragaPlaceholder({this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Editar Praga ${id ?? ''}')),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.edit_note, size: 64, color: Colors.orange),
-            SizedBox(height: 16),
-            Text('Editar Praga', style: TextStyle(fontSize: 24)),
             SizedBox(height: 8),
             Text('Em desenvolvimento...'),
           ],

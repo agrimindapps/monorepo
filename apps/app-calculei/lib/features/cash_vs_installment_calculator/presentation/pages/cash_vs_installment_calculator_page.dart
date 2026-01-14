@@ -114,6 +114,7 @@ class _CashVsInstallmentCalculatorPageState
 
   void _handleClear() {
     _formKey.currentState?.reset();
+    _inputFormKey.currentState?.clear();
     ref.read(cashVsInstallmentCalculatorProvider.notifier).clearCalculation();
   }
 

@@ -19,12 +19,12 @@ class SeedRateCalculatorPage extends StatefulWidget {
 class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _populationController = TextEditingController();
-  final _germinationController = TextEditingController(text: '85');
-  final _purityController = TextEditingController(text: '98');
-  final _lossesController = TextEditingController(text: '8');
+  final _germinationController = TextEditingController();
+  final _purityController = TextEditingController();
+  final _lossesController = TextEditingController();
   final _seedWeightController = TextEditingController();
-  final _areaController = TextEditingController(text: '10');
-  final _marginController = TextEditingController(text: '5');
+  final _areaController = TextEditingController();
+  final _marginController = TextEditingController();
 
   SeedCropType _crop = SeedCropType.corn;
   SeedRateResult? _result;
@@ -33,13 +33,18 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
   void initState() {
     super.initState();
     _updateDefaults();
+    _germinationController.text = '90';
+    _purityController.text = '98';
+    _lossesController.text = '5';
+    _areaController.text = '1';
+    _marginController.text = '5';
   }
 
   void _updateDefaults() {
     _populationController.text =
-        SeedRateCalculator.getRecommendedPopulation(_crop).toString();
+        SeedRateCalculator.recommendedPopulation[_crop]?.toString() ?? '';
     _seedWeightController.text =
-        SeedRateCalculator.getDefaultSeedWeight(_crop).toString();
+        SeedRateCalculator.defaultThousandSeedWeight[_crop]?.toString() ?? '';
   }
 
   @override
@@ -83,11 +88,14 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
               // Crop selection
               Builder(
                 builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return Text(
                     'Cultura',
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -125,11 +133,10 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'População desejada',
                       controller: _populationController,
+                      hintText: 'Ex: 60000',
                       suffix: 'pl/ha',
                       keyboardType: TextInputType.number,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       validator: (v) =>
                           v?.isEmpty ?? true ? 'Obrigatório' : null,
                     ),
@@ -139,6 +146,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Área',
                       controller: _areaController,
+                      hintText: 'Ex: 10',
                       suffix: 'ha',
                       keyboardType: TextInputType.number,
                       validator: (v) =>
@@ -153,11 +161,14 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
               // Seed quality
               Builder(
                 builder: (context) {
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  final isDark =
+                      Theme.of(context).brightness == Brightness.dark;
                   return Text(
                     'Qualidade das sementes',
                     style: TextStyle(
-                      color: isDark ? Colors.white.withValues(alpha: 0.8) : Colors.black.withValues(alpha: 0.8),
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.8)
+                          : Colors.black.withValues(alpha: 0.8),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -174,6 +185,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Germinação',
                       controller: _germinationController,
+                      hintText: 'Ex: 85',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                     ),
@@ -183,6 +195,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Pureza',
                       controller: _purityController,
+                      hintText: 'Ex: 98',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                     ),
@@ -192,6 +205,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Perdas campo',
                       controller: _lossesController,
+                      hintText: 'Ex: 8',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                     ),
@@ -211,6 +225,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Peso 1000 sementes',
                       controller: _seedWeightController,
+                      hintText: 'Ex: 300',
                       suffix: 'g',
                       keyboardType: TextInputType.number,
                     ),
@@ -220,6 +235,7 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Margem segurança',
                       controller: _marginController,
+                      hintText: 'Ex: 5',
                       suffix: '%',
                       keyboardType: TextInputType.number,
                     ),
@@ -266,12 +282,13 @@ class _SeedRateCalculatorPageState extends State<SeedRateCalculatorPage> {
 
   void _clear() {
     _crop = SeedCropType.corn;
-    _updateDefaults();
-    _germinationController.text = '85';
-    _purityController.text = '98';
-    _lossesController.text = '8';
-    _areaController.text = '10';
-    _marginController.text = '5';
+    _populationController.clear();
+    _germinationController.clear();
+    _purityController.clear();
+    _lossesController.clear();
+    _seedWeightController.clear();
+    _areaController.clear();
+    _marginController.clear();
     setState(() {
       _result = null;
     });
@@ -301,10 +318,14 @@ class _SeedRateResultCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.1),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.1),
         ),
       ),
       child: Column(
@@ -312,12 +333,17 @@ class _SeedRateResultCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.assessment, color: CalculatorAccentColors.agriculture),
+              const Icon(
+                Icons.assessment,
+                color: CalculatorAccentColors.agriculture,
+              ),
               const SizedBox(width: 8),
               Text(
                 'Resultado',
                 style: TextStyle(
-                  color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.9),
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
@@ -385,7 +411,9 @@ class _SeedRateResultCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.black.withValues(alpha: 0.08),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -396,7 +424,9 @@ class _SeedRateResultCard extends StatelessWidget {
                     Text(
                       'Eficiência de estabelecimento:',
                       style: TextStyle(
-                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : Colors.black.withValues(alpha: 0.7),
                       ),
                     ),
                     Text(
@@ -415,7 +445,9 @@ class _SeedRateResultCard extends StatelessWidget {
                     Text(
                       'Qualidade das sementes:',
                       style: TextStyle(
-                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : Colors.black.withValues(alpha: 0.7),
                       ),
                     ),
                     Container(
@@ -451,7 +483,9 @@ class _SeedRateResultCard extends StatelessWidget {
           Text(
             'Recomendações',
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.9)
+                  : Colors.black.withValues(alpha: 0.9),
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -464,9 +498,7 @@ class _SeedRateResultCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    rec.startsWith('⚠️')
-                        ? Icons.warning
-                        : Icons.check_circle,
+                    rec.startsWith('⚠️') ? Icons.warning : Icons.check_circle,
                     size: 18,
                     color: rec.startsWith('⚠️') ? Colors.orange : Colors.green,
                   ),
@@ -475,7 +507,9 @@ class _SeedRateResultCard extends StatelessWidget {
                     child: Text(
                       rec.replaceAll('⚠️ ', ''),
                       style: TextStyle(
-                        color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : Colors.black.withValues(alpha: 0.7),
                         fontSize: 14,
                       ),
                     ),
@@ -526,7 +560,9 @@ class _ResultBox extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.7)
+                  : Colors.black.withValues(alpha: 0.7),
               fontSize: 12,
             ),
           ),
@@ -544,5 +580,3 @@ class _ResultBox extends StatelessWidget {
     );
   }
 }
-
-

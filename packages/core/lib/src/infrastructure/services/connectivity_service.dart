@@ -9,7 +9,8 @@ import '../../domain/repositories/i_sync_repository.dart';
 import '../../shared/utils/failure.dart';
 
 /// Serviço de conectividade usando connectivity_plus
-class ConnectivityService implements IConnectivityRepository, IDisposableService {
+class ConnectivityService
+    implements IConnectivityRepository, IDisposableService {
   static ConnectivityService? _instance;
   static ConnectivityService get instance =>
       _instance ??= ConnectivityService._();
@@ -24,6 +25,9 @@ class ConnectivityService implements IConnectivityRepository, IDisposableService
   bool _isInitialized = false;
   bool _isDisposed = false;
   bool _isOnline = false;
+
+  /// Retorna o status de conectividade atual (síncrono)
+  bool get isOnlineSync => _isOnline;
 
   @override
   Future<Either<Failure, void>> initialize() async {

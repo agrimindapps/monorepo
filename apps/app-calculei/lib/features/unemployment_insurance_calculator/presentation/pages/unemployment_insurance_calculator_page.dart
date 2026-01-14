@@ -30,7 +30,7 @@ class _UnemploymentInsuranceCalculatorPageState
       title: 'Calculadora de Seguro Desemprego',
       subtitle: 'Benefício Assistencial',
       icon: Icons.health_and_safety_outlined,
-      accentColor: CalculatorAccentColors.labor,
+      accentColor: CalculatorAccentColors.financial,
       currentCategory: 'financeiro',
       maxContentWidth: 700,
       child: Padding(
@@ -51,7 +51,7 @@ class _UnemploymentInsuranceCalculatorPageState
             CalculatorActionButtons(
               onCalculate: _handleSubmit,
               onClear: _handleClear,
-              accentColor: CalculatorAccentColors.labor,
+              accentColor: CalculatorAccentColors.financial,
               isLoading: state.isLoading,
             ),
 
@@ -107,6 +107,7 @@ class _UnemploymentInsuranceCalculatorPageState
 
   void _handleClear() {
     _formKey.currentState?.reset();
+    _inputFormKey.currentState?.clear();
     ref
         .read(unemploymentInsuranceCalculatorProvider.notifier)
         .clearCalculation();

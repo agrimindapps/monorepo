@@ -1,3 +1,4 @@
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -22,19 +23,13 @@ class _HarvesterSetupCalculatorPageState
     extends ConsumerState<HarvesterSetupCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
   final _productivityController = TextEditingController();
-  final _moistureController = TextEditingController(text: '13.0');
-  final _speedController = TextEditingController(text: '5.0');
-  final _platformWidthController = TextEditingController(text: '6.0');
+  final _moistureController = TextEditingController();
+  final _speedController = TextEditingController();
+  final _platformWidthController = TextEditingController();
 
   String _cropType = 'Soja';
 
-  final _cropTypes = [
-    'Soja',
-    'Milho',
-    'Trigo',
-    'Arroz',
-    'Feijão',
-  ];
+  final _cropTypes = ['Soja', 'Milho', 'Trigo', 'Arroz', 'Feijão'];
 
   // Typical productivity ranges (sc/ha)
   final Map<String, Map<String, double>> _productivityRanges = {
@@ -57,12 +52,6 @@ class _HarvesterSetupCalculatorPageState
   @override
   void initState() {
     super.initState();
-    _setDefaultProductivity();
-  }
-
-  void _setDefaultProductivity() {
-    final typical = _productivityRanges[_cropType]!['typical']!;
-    _productivityController.text = typical.toStringAsFixed(0);
   }
 
   @override
@@ -99,16 +88,19 @@ class _HarvesterSetupCalculatorPageState
                   // Crop type selection
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Text(
                         'Cultura',
                         style: TextStyle(
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : Colors.black.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       );
-                    }
+                    },
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -121,14 +113,6 @@ class _HarvesterSetupCalculatorPageState
                         onSelected: () {
                           setState(() {
                             _cropType = crop;
-                            _setDefaultProductivity();
-                            // Update moisture default
-                            final moistureRange = _moistureRanges[_cropType]!;
-                            final avgMoisture =
-                                (moistureRange['min']! + moistureRange['max']!) /
-                                    2;
-                            _moistureController.text =
-                                avgMoisture.toStringAsFixed(1);
                           });
                         },
                         accentColor: const Color(0xFF4CAF50),
@@ -152,16 +136,19 @@ class _HarvesterSetupCalculatorPageState
                   // Input fields - Crop parameters
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Text(
                         'Parâmetros da Cultura',
                         style: TextStyle(
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : Colors.black.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       );
-                    }
+                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -174,6 +161,7 @@ class _HarvesterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Produtividade',
                           controller: _productivityController,
+                          hintText: 'Ex: 60',
                           suffix: 'sc/ha',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -205,6 +193,7 @@ class _HarvesterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Umidade',
                           controller: _moistureController,
+                          hintText: 'Ex: 13.0',
                           suffix: '%',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -237,16 +226,19 @@ class _HarvesterSetupCalculatorPageState
                   // Input fields - Harvester parameters
                   Builder(
                     builder: (context) {
-                      final isDark = Theme.of(context).brightness == Brightness.dark;
+                      final isDark =
+                          Theme.of(context).brightness == Brightness.dark;
                       return Text(
                         'Parâmetros da Colhedora',
                         style: TextStyle(
-                          color: isDark ? Colors.white.withValues(alpha: 0.9) : Colors.black.withValues(alpha: 0.9),
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.9)
+                              : Colors.black.withValues(alpha: 0.9),
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       );
-                    }
+                    },
                   ),
                   const SizedBox(height: 16),
 
@@ -259,6 +251,7 @@ class _HarvesterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Velocidade',
                           controller: _speedController,
+                          hintText: 'Ex: 5.0',
                           suffix: 'km/h',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -288,6 +281,7 @@ class _HarvesterSetupCalculatorPageState
                         child: AdaptiveInputField(
                           label: 'Largura Plataforma',
                           controller: _platformWidthController,
+                          hintText: 'Ex: 6.0',
                           suffix: 'm',
                           keyboardType: const TextInputType.numberWithOptions(
                             decimal: true,
@@ -367,7 +361,9 @@ class _HarvesterSetupCalculatorPageState
                   'Produtividade $_cropType: '
                   '${min.toStringAsFixed(0)}-${max.toStringAsFixed(0)} sc/ha',
                   style: TextStyle(
-                    color: isDark ? Colors.white.withValues(alpha: 0.85) : Colors.black.withValues(alpha: 0.85),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.85)
+                        : Colors.black.withValues(alpha: 0.85),
                     fontSize: 13,
                   ),
                 ),
@@ -375,7 +371,7 @@ class _HarvesterSetupCalculatorPageState
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -409,7 +405,9 @@ class _HarvesterSetupCalculatorPageState
                   'Umidade ideal: '
                   '${min.toStringAsFixed(1)}-${max.toStringAsFixed(1)}%',
                   style: TextStyle(
-                    color: isDark ? Colors.white.withValues(alpha: 0.85) : Colors.black.withValues(alpha: 0.85),
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.85)
+                        : Colors.black.withValues(alpha: 0.85),
                     fontSize: 13,
                   ),
                 ),
@@ -417,7 +415,7 @@ class _HarvesterSetupCalculatorPageState
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -429,7 +427,9 @@ class _HarvesterSetupCalculatorPageState
       final platformWidth = double.parse(_platformWidthController.text);
 
       try {
-        ref.read(harvesterSetupCalculatorProvider.notifier).calculate(
+        ref
+            .read(harvesterSetupCalculatorProvider.notifier)
+            .calculate(
               cropType: _cropType,
               productivity: productivity,
               moisture: moisture,
@@ -438,10 +438,7 @@ class _HarvesterSetupCalculatorPageState
             );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(e is Failure ? e.message : e.toString()), backgroundColor: Colors.red),
         );
       }
     }
@@ -449,15 +446,17 @@ class _HarvesterSetupCalculatorPageState
 
   void _clear() {
     _formKey.currentState?.reset();
+    _productivityController.clear();
+    _moistureController.clear();
+    _speedController.clear();
+    _platformWidthController.clear();
     setState(() {
       _cropType = 'Soja';
-      _moistureController.text = '13.0';
-      _speedController.text = '5.0';
-      _platformWidthController.text = '6.0';
-      _setDefaultProductivity();
+      // _moistureController.text = '13.0';
+      // _speedController.text = '5.0';
+      // _platformWidthController.text = '6.0';
+      // _setDefaultProductivity();
     });
     ref.read(harvesterSetupCalculatorProvider.notifier).reset();
   }
 }
-
-

@@ -17,9 +17,9 @@ class FeedCalculatorPage extends StatefulWidget {
 
 class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _weightController = TextEditingController(text: '450');
-  final _numAnimalsController = TextEditingController(text: '10');
-  final _daysController = TextEditingController(text: '90');
+  final _weightController = TextEditingController();
+  final _numAnimalsController = TextEditingController();
+  final _daysController = TextEditingController();
 
   AnimalType _animalType = AnimalType.cattle;
   FeedCalculatorResult? _result;
@@ -99,6 +99,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Peso médio',
                       controller: _weightController,
+                      hintText: 'Ex: 450',
                       suffix: 'kg',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -115,6 +116,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Nº de animais',
                       controller: _numAnimalsController,
+                      hintText: 'Ex: 10',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
@@ -128,6 +130,7 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
                     child: AdaptiveInputField(
                       label: 'Período',
                       controller: _daysController,
+                      hintText: 'Ex: 90',
                       suffix: 'dias',
                       keyboardType: TextInputType.number,
                       inputFormatters: [
@@ -176,9 +179,9 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
   }
 
   void _clear() {
-    _weightController.text = '450';
-    _numAnimalsController.text = '10';
-    _daysController.text = '90';
+    _weightController.clear();
+    _numAnimalsController.clear();
+    _daysController.clear();
     setState(() {
       _animalType = AnimalType.cattle;
       _result = null;
@@ -263,33 +266,6 @@ class _FeedResultCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Custo estimado:',
-                  style: TextStyle(
-                    color: isDark ? Colors.white.withValues(alpha: 0.7) : Colors.black.withValues(alpha: 0.7),
-                  ),
-                ),
-                Text(
-                  'R\$ ${result.estimatedCost.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
           ExpansionTile(
             title: Text(
               'Dicas de manejo',
@@ -334,8 +310,6 @@ class _FeedResultCard extends StatelessWidget {
 • Total necessário: ${result.totalFeedTons.toStringAsFixed(2)} toneladas
 • Consumo diário/animal: ${result.dailyFeedPerAnimal.toStringAsFixed(2)} kg
 • Sacas (60kg): ${result.bagsNeeded}
-
-💰 Custo estimado: R\$ ${result.estimatedCost.toStringAsFixed(2)}
 
 _________________
 Calculado por Calculei

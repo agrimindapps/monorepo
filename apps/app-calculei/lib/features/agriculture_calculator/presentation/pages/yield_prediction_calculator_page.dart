@@ -20,9 +20,9 @@ class YieldPredictionCalculatorPage extends StatefulWidget {
 class _YieldPredictionCalculatorPageState
     extends State<YieldPredictionCalculatorPage> {
   final _formKey = GlobalKey<FormState>();
-  final _areaController = TextEditingController(text: '10');
-  final _yieldController = TextEditingController(text: '5000');
-  final _lossController = TextEditingController(text: '5');
+  final _areaController = TextEditingController();
+  final _yieldController = TextEditingController();
+  final _lossController = TextEditingController();
 
   CropType _cropType = CropType.corn;
   YieldPredictionResult? _result;
@@ -184,9 +184,9 @@ class _YieldPredictionCalculatorPageState
   }
 
   void _clear() {
-    _areaController.text = '10';
-    _yieldController.text = '5000';
-    _lossController.text = '5';
+    _areaController.clear();
+    _yieldController.clear();
+    _lossController.clear();
     setState(() {
       _cropType = CropType.corn;
       _result = null;

@@ -71,6 +71,25 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
     _submitForm();
   }
 
+  /// Public method to clear all input fields
+  void clear() {
+    _salaryController.clear();
+    _absencesController.text = '0';
+    _dependentsController.text = '0';
+    
+    // Reset to default dates
+    setState(() {
+      _calculationDate = DateTime.now();
+      _calculationDateController.text = _formatDate(_calculationDate!);
+      
+      _admissionDate = DateTime(_calculationDate!.year, 1, 1);
+      _admissionDateController.text = _formatDate(_admissionDate!);
+      
+      _isAdvancePayment = false;
+      _updateMonthsWorked();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     const accentColor = CalculatorAccentColors.labor;
@@ -85,6 +104,7 @@ class ThirteenthSalaryInputFormState extends State<ThirteenthSalaryInputForm> {
               controller: _salaryController,
               label: 'Salário Bruto Mensal',
               helperText: 'Ex: 3.000,00',
+              hintText: 'Ex: 3.000,00',
               accentColor: accentColor,              validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Informe o salário';

@@ -25,6 +25,20 @@ abstract class AuthRepository {
     String? phone,
   });
 
+  /// Cria sessão anônima (guest user)
+  ///
+  /// Permite uso do app sem registro, com possibilidade de vincular conta depois
+  Future<Either<Failure, local_user.UserEntity>> signInAnonymously();
+
+  /// Vincula conta anônima com email/senha
+  ///
+  /// Converte usuário anônimo em usuário registrado permanente
+  Future<Either<Failure, local_user.UserEntity>> linkAnonymousWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  });
+
   /// Encerra sessão do usuário atual
   ///
   /// Limpa dados locais e invalida tokens

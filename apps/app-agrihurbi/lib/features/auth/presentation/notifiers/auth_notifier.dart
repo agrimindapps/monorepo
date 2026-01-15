@@ -1,4 +1,4 @@
-import 'package:core/core.dart' show EnhancedAccountDeletionService;
+import 'package:core/core.dart' show AuthProvider, EnhancedAccountDeletionService;
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -6,10 +6,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/link_anonymous_with_email_usecase.dart';
 import '../../domain/usecases/login_usecase.dart' as local_login;
 import '../../domain/usecases/logout_usecase.dart' as local_logout;
 import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../../domain/usecases/sign_in_anonymously_usecase.dart';
 import '../providers/auth_di_providers.dart';
 import 'auth_state.dart';
 
@@ -26,6 +28,8 @@ class AuthNotifier extends _$AuthNotifier {
   late final local_logout.LogoutUseCase _logoutUseCase;
   late final GetCurrentUserUseCase _getCurrentUserUseCase;
   late final RefreshUserUseCase _refreshUserUseCase;
+  late final SignInAnonymouslyUseCase _signInAnonymouslyUseCase;
+  late final LinkAnonymousWithEmailUseCase _linkAnonymousWithEmailUseCase;
   late final EnhancedAccountDeletionService? _enhancedDeletionService;
 
   @override
@@ -36,6 +40,9 @@ class AuthNotifier extends _$AuthNotifier {
     _logoutUseCase = ref.watch(logoutUseCaseProvider);
     _getCurrentUserUseCase = ref.watch(getCurrentUserUseCaseProvider);
     _refreshUserUseCase = ref.watch(refreshUserUseCaseProvider);
+    _signInAnonymouslyUseCase = ref.watch(signInAnonymouslyUseCaseProvider);
+    _linkAnonymousWithEmailUseCase =
+        ref.watch(linkAnonymousWithEmailUseCaseProvider);
 
     // Try to get optional service
     try {
@@ -450,5 +457,164 @@ class AuthNotifier extends _$AuthNotifier {
   /// Forces authentication status check
   Future<void> checkAuthenticationStatus() async {
     await _initializeAuthState();
+  }
+
+  /// Sends password reset email
+  Future<Either<Failure, void>> sendPasswordReset(String email) async {
+    try {
+      debugPrint('AuthNotifier: Enviando email de recuperação para $email');
+
+      state = state.copyWith(
+        isLoading: true,
+        errorMessage: null,
+      );
+
+      final repository = ref.read(authRepositoryProvider);
+      final result = await repository.forgotPassword(email: email);
+
+      return result.fold(
+        (Failure failure) {
+          debugPrint(
+            'AuthNotifier: Falha no envio de recuperação - ${failure.message}',
+          );
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return Left<Failure, void>(failure);
+        },
+        (_) {
+          debugPrint('AuthNotifier: Email de recuperação enviado com sucesso');
+          state = state.copyWith(
+            isLoading: false,
+            errorMessage: null,
+          );
+          return const Right<Failure, void>(null);
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('AuthNotifier: Erro inesperado na recuperação - $e');
+      debugPrint('StackTrace: $stackTrace');
+      final error = 'Erro ao enviar email de recuperação: ${e.toString()}';
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: error,
+      );
+      return Left(UnknownFailure(message: error));
+    }
+  }
+
+  /// Signs in anonymously (guest mode)
+  Future<Either<Failure, UserEntity>> loginAnonymously() async {
+    try {
+      debugPrint('AuthNotifier: Iniciando login anônimo');
+
+      state = state.copyWith(
+        isLoggingIn: true,
+        isLoading: true,
+        errorMessage: null,
+      );
+
+      final result = await _signInAnonymouslyUseCase.call(const NoParams());
+
+      return result.fold(
+        (Failure failure) {
+          debugPrint('AuthNotifier: Falha no login anônimo - ${failure.message}');
+          state = state.copyWith(
+            isLoggingIn: false,
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return Left<Failure, UserEntity>(failure);
+        },
+        (UserEntity user) {
+          debugPrint('AuthNotifier: Login anônimo bem-sucedido - ${user.id}');
+          state = state.copyWith(
+            currentUser: user,
+            isLoggedIn: true,
+            isAnonymous: user.provider == AuthProvider.anonymous,
+            isLoggingIn: false,
+            isLoading: false,
+            errorMessage: null,
+          );
+          return Right<Failure, UserEntity>(user);
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('AuthNotifier: Erro inesperado no login anônimo - $e');
+      debugPrint('StackTrace: $stackTrace');
+      final error = 'Erro inesperado no login anônimo: ${e.toString()}';
+      state = state.copyWith(
+        isLoggingIn: false,
+        isLoading: false,
+        errorMessage: error,
+      );
+      return Left(UnknownFailure(message: error));
+    }
+  }
+
+  /// Links anonymous account with email/password
+  Future<Either<Failure, UserEntity>> linkAnonymousWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      debugPrint('AuthNotifier: Vinculando conta anônima com $email');
+
+      if (!state.isAnonymous) {
+        const error = 'Apenas contas anônimas podem ser vinculadas';
+        state = state.copyWith(errorMessage: error);
+        return const Left(ValidationFailure(message: error));
+      }
+
+      state = state.copyWith(
+        isLinkingAccount: true,
+        isLoading: true,
+        errorMessage: null,
+      );
+
+      final result = await _linkAnonymousWithEmailUseCase.call(
+        LinkAnonymousParams(
+          name: name,
+          email: email,
+          password: password,
+        ),
+      );
+
+      return result.fold(
+        (Failure failure) {
+          debugPrint('AuthNotifier: Falha na vinculação - ${failure.message}');
+          state = state.copyWith(
+            isLinkingAccount: false,
+            isLoading: false,
+            errorMessage: failure.message,
+          );
+          return Left<Failure, UserEntity>(failure);
+        },
+        (UserEntity user) {
+          debugPrint('AuthNotifier: Conta vinculada com sucesso - ${user.id}');
+          state = state.copyWith(
+            currentUser: user,
+            isLoggedIn: true,
+            isAnonymous: false, // Não é mais anônimo
+            isLinkingAccount: false,
+            isLoading: false,
+            errorMessage: null,
+          );
+          return Right<Failure, UserEntity>(user);
+        },
+      );
+    } catch (e, stackTrace) {
+      debugPrint('AuthNotifier: Erro inesperado na vinculação - $e');
+      debugPrint('StackTrace: $stackTrace');
+      final error = 'Erro ao vincular conta: ${e.toString()}';
+      state = state.copyWith(
+        isLinkingAccount: false,
+        isLoading: false,
+        errorMessage: error,
+      );
+      return Left(UnknownFailure(message: error));
+    }
   }
 }

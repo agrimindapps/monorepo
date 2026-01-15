@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/calorias_exercicio_calculator.dart';
 
 /// Página da calculadora de calorias por exercício
@@ -37,6 +39,21 @@ class _CaloriasExercicioCalculatorPageState
       accentColor: CalculatorAccentColors.health,
       currentCategory: 'saude',
       maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () => Share.share(
+              ShareFormatter.formatCaloriasExercicioCalculation(
+                exercise: _result!.exerciseTypeName,
+                duration: int.parse(_durationController.text),
+                caloriesBurned: _result!.calories,
+                metValue: _result!.metValue,
+              ),
+            ),
+            tooltip: 'Compartilhar',
+          ),
+      ],
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Form(

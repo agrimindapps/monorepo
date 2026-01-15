@@ -564,6 +564,9 @@ $_footer''';
 
   /// Format BMI calculation for sharing
   static String formatBmiCalculation({
+    required double weight,
+    required double height,
+    required String gender,
     required double bmi,
     required String classification,
     required double minIdealWeight,
@@ -571,6 +574,10 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de IMC - Calculei App
+
+👤 Gênero: $gender
+⚖️ Peso: ${weight.toStringAsFixed(1)} kg
+📏 Altura: ${height.toStringAsFixed(0)} cm
 
 📊 Seu IMC: ${bmi.toStringAsFixed(1)}
 🏷️ Classificação: $classification
@@ -585,6 +592,10 @@ $_footer''';
 
   /// Format BMR calculation for sharing
   static String formatBmrCalculation({
+    required double weight,
+    required double height,
+    required int age,
+    required String gender,
     required double bmr,
     required double tdee,
     required String activityLevel,
@@ -594,9 +605,14 @@ $_footer''';
     return '''
 📋 Cálculo de TMB - Calculei App
 
+👤 Gênero: $gender
+⚖️ Peso: ${weight.toStringAsFixed(1)} kg
+📏 Altura: ${height.toStringAsFixed(0)} cm
+🎂 Idade: $age anos
+🏃 Nível de atividade: $activityLevel
+
 🔥 Taxa Metabólica Basal: ${bmr.toStringAsFixed(0)} kcal/dia
 ⚡ Gasto Energético Total: ${tdee.toStringAsFixed(0)} kcal/dia
-🏃 Nível de atividade: $activityLevel
 
 🎯 Metas Calóricas:
 • Para emagrecer: ${caloriesForWeightLoss.toStringAsFixed(0)} kcal/dia
@@ -609,6 +625,9 @@ $_footer''';
 
   /// Format water intake calculation for sharing
   static String formatWaterIntakeCalculation({
+    required double weight,
+    required String activityLevel,
+    required String climate,
     required double baseLiters,
     required double adjustedLiters,
     required int glasses,
@@ -616,6 +635,10 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de Hidratação - Calculei App
+
+⚖️ Peso: ${weight.toStringAsFixed(1)} kg
+🏃 Nível de atividade: $activityLevel
+🌡️ Clima: $climate
 
 💧 Consumo Recomendado: ${adjustedLiters.toStringAsFixed(1)} litros/dia
 
@@ -660,13 +683,26 @@ $_footer''';
 
   /// Format body fat calculation for sharing
   static String formatBodyFatCalculation({
+    required String gender,
+    required double weight,
+    required double height,
+    required double waist,
+    required double neck,
+    double? hip,
     required double bodyFatPercentage,
     required String category,
     required double fatMassKg,
     required double leanMassKg,
   }) {
+    final hipText = hip != null ? '\n📏 Quadril: ${hip.toStringAsFixed(1)} cm' : '';
     return '''
 📋 Cálculo de Gordura Corporal - Calculei App
+
+👤 Gênero: $gender
+⚖️ Peso: ${weight.toStringAsFixed(1)} kg
+📏 Altura: ${height.toStringAsFixed(0)} cm
+📏 Cintura: ${waist.toStringAsFixed(1)} cm
+📏 Pescoço: ${neck.toStringAsFixed(1)} cm$hipText
 
 📊 Percentual de Gordura: ${bodyFatPercentage.toStringAsFixed(1)}%
 🏷️ Classificação: $category

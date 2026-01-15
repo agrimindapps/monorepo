@@ -17,6 +17,11 @@ abstract class AuthState with _$AuthState {
     @Default(false) bool isRegistering,
     @Default(false) bool isLoggingOut,
     @Default(false) bool isRefreshing,
+    @Default(false) bool isAnonymous,
+    @Default(false) bool isLinkingAccount,
     @Default(null) String? errorMessage,
   }) = _AuthState;
+
+  /// Verifica se o usuário pode vincular conta (é anônimo e está logado)
+  bool get canLinkAccount => isAnonymous && isLoggedIn && currentUser != null;
 }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/bmi_calculator.dart';
 
 /// Página da calculadora de IMC (Índice de Massa Corporal)
@@ -41,9 +43,17 @@ class _BmiCalculatorPageState extends State<BmiCalculatorPage> {
         if (_result != null)
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {
-              // Share result
-            },
+            onPressed: () => Share.share(
+              ShareFormatter.formatBmiCalculation(
+                weight: double.parse(_weightController.text),
+                height: double.parse(_heightController.text),
+                gender: _gender == Gender.male ? 'Masculino' : 'Feminino',
+                bmi: _result!.bmi,
+                classification: _result!.classificationText,
+                minIdealWeight: _result!.minIdealWeight.toDouble(),
+                maxIdealWeight: _result!.maxIdealWeight.toDouble(),
+              ),
+            ),
             tooltip: 'Compartilhar',
           ),
       ],

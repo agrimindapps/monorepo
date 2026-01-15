@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/water_intake_calculator.dart';
 
 /// Página da calculadora de Necessidade Hídrica
@@ -44,9 +46,17 @@ class _WaterIntakeCalculatorPageState extends State<WaterIntakeCalculatorPage> {
               Icons.share_outlined,
               color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7),
             ),
-            onPressed: () {
-              // Share result
-            },
+            onPressed: () => Share.share(
+              ShareFormatter.formatWaterIntakeCalculation(
+                weight: double.parse(_weightController.text),
+                activityLevel: WaterIntakeCalculator.getActivityDescription(_activityLevel),
+                climate: WaterIntakeCalculator.getClimateDescription(_climate),
+                baseLiters: _result!.baseLiters,
+                adjustedLiters: _result!.adjustedLiters,
+                glasses: _result!.glassesOf250ml,
+                bottles: _result!.bottlesOf500ml,
+              ),
+            ),
             tooltip: 'Compartilhar',
           ),
       ],

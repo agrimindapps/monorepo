@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/macronutrients_calculator.dart';
 
 /// Página da calculadora de Macronutrientes
@@ -41,9 +43,18 @@ class _MacronutrientsCalculatorPageState
         if (_result != null)
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {
-              // TODO: Implement share
-            },
+            onPressed: () => Share.share(
+              ShareFormatter.formatMacronutrientsCalculation(
+                totalCalories: double.parse(_caloriesController.text),
+                carbsGrams: _result!.carbsGrams,
+                carbsPercent: _result!.carbsPercent,
+                proteinGrams: _result!.proteinGrams,
+                proteinPercent: _result!.proteinPercent,
+                fatGrams: _result!.fatGrams,
+                fatPercent: _result!.fatPercent,
+                goal: MacronutrientsCalculator.getGoalDescription(_selectedGoal),
+              ),
+            ),
             tooltip: 'Compartilhar',
           ),
       ],

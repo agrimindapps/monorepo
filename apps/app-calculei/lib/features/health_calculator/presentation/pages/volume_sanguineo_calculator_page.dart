@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
 import '../../../../shared/widgets/adaptive_input_field.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/bmi_calculator.dart';
 import '../../domain/calculators/volume_sanguineo_calculator.dart';
 
@@ -42,6 +44,22 @@ class _VolumeSanguineoCalculatorPageState
       accentColor: CalculatorAccentColors.health,
       currentCategory: 'saude',
       maxContentWidth: 600,
+      actions: [
+        if (_result != null)
+          IconButton(
+            icon: const Icon(Icons.share_outlined, color: Colors.white70),
+            onPressed: () => Share.share(
+              ShareFormatter.formatVolumeSanguineoCalculation(
+                weight: double.parse(_weightController.text),
+                height: double.parse(_heightController.text),
+                gender: _gender == Gender.male ? 'Masculino' : 'Feminino',
+                volumeLiters: _result!.volumeLiters,
+                volumeMl: _result!.volumeMl,
+              ),
+            ),
+            tooltip: 'Compartilhar',
+          ),
+      ],
       child: Builder(
         builder: (context) {
           final isDark = Theme.of(context).brightness == Brightness.dark;

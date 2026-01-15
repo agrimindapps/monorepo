@@ -1,4 +1,5 @@
 import 'package:app_agrihurbi/core/error/exceptions.dart';
+import 'package:core/core.dart' show AuthProvider;
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -18,6 +19,17 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
     String? phone,
+  });
+
+  /// Cria sessão anônima (guest user)
+  Future<UserModel> signInAnonymously();
+
+  /// Vincula conta anônima com email/senha
+  Future<UserModel> linkAnonymousWithEmail({
+    required String anonymousUserId,
+    required String name,
+    required String email,
+    required String password,
   });
 
   /// Encerra sessão no servidor
@@ -349,6 +361,93 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
     } catch (e) {
       debugPrint('AuthRemoteDataSourceImpl: Erro na verificação - $e');
+      throw _mapExceptionToFailure(e);
+    }
+  }
+
+  @override
+  Future<UserModel> signInAnonymously() async {
+    try {
+      debugPrint('AuthRemoteDataSourceImpl: Criando sessão anônima');
+
+      // Tenta criar guest no servidor se endpoint existir
+      try {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          '/auth/guest',
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final userData = response.data!['user'] ?? response.data;
+          debugPrint('AuthRemoteDataSourceImpl: Guest criado no servidor');
+          return UserModel.fromJson(userData as Map<String, dynamic>);
+        }
+      } catch (_) {
+        // Endpoint não existe, criar guest local
+        debugPrint('AuthRemoteDataSourceImpl: Endpoint guest não disponível, criando local');
+      }
+
+      // Cria usuário anônimo local (UUID v4 pattern)
+      final anonymousId = 'guest_${DateTime.now().millisecondsSinceEpoch}';
+      final anonymousUser = UserModel(
+        userModelId: anonymousId,
+        userModelEmail: '',
+        userModelDisplayName: 'Visitante',
+        userModelProvider: AuthProvider.anonymous,
+        userModelIsEmailVerified: false,
+        userModelCreatedAt: DateTime.now(),
+      );
+
+      debugPrint('AuthRemoteDataSourceImpl: Usuário anônimo criado localmente - $anonymousId');
+      return anonymousUser;
+    } catch (e) {
+      debugPrint('AuthRemoteDataSourceImpl: Erro ao criar sessão anônima - $e');
+      throw _mapExceptionToFailure(e);
+    }
+  }
+
+  @override
+  Future<UserModel> linkAnonymousWithEmail({
+    required String anonymousUserId,
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      debugPrint('AuthRemoteDataSourceImpl: Vinculando conta anônima $anonymousUserId com $email');
+
+      // Tenta vincular no servidor se endpoint existir
+      try {
+        final response = await _dioClient.post<Map<String, dynamic>>(
+          '/auth/link-account',
+          data: {
+            'anonymous_user_id': anonymousUserId,
+            'name': name,
+            'email': email,
+            'password': password,
+          },
+        );
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          final userData = response.data!['user'] ?? response.data;
+          debugPrint('AuthRemoteDataSourceImpl: Conta vinculada no servidor');
+          return UserModel.fromJson(userData as Map<String, dynamic>);
+        }
+      } catch (_) {
+        // Endpoint não existe, registrar como novo usuário
+        debugPrint('AuthRemoteDataSourceImpl: Endpoint link não disponível, registrando como novo');
+      }
+
+      // Fallback: registra como novo usuário
+      final registeredUser = await register(
+        name: name,
+        email: email,
+        password: password,
+      );
+
+      debugPrint('AuthRemoteDataSourceImpl: Conta vinculada via registro - ${registeredUser.id}');
+      return registeredUser;
+    } catch (e) {
+      debugPrint('AuthRemoteDataSourceImpl: Erro ao vincular conta - $e');
       throw _mapExceptionToFailure(e);
     }
   }

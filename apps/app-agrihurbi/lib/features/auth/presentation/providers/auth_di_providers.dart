@@ -6,11 +6,15 @@ import '../../data/datasources/auth_local_datasource.dart';
 import '../../data/datasources/auth_remote_datasource.dart';
 import '../../data/repositories/auth_repository_impl.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../domain/services/auth_rate_limiter.dart';
+import '../../domain/usecases/forgot_password_usecase.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
+import '../../domain/usecases/link_anonymous_with_email_usecase.dart';
 import '../../domain/usecases/login_usecase.dart' as local_login;
 import '../../domain/usecases/logout_usecase.dart' as local_logout;
 import '../../domain/usecases/refresh_user_usecase.dart';
 import '../../domain/usecases/register_usecase.dart';
+import '../../domain/usecases/sign_in_anonymously_usecase.dart';
 
 // Core Services
 final sharedPreferencesProvider =
@@ -113,4 +117,30 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
 final refreshUserUseCaseProvider = Provider<RefreshUserUseCase>((ref) {
   final repository = ref.watch(authRepositoryProvider);
   return RefreshUserUseCase(repository);
+});
+
+// Rate Limiter
+final authRateLimiterProvider = Provider<AuthRateLimiter>((ref) {
+  final secureStorage = ref.watch(secureStorageProvider);
+  return AuthRateLimiter(secureStorage);
+});
+
+// Forgot Password UseCase
+final forgotPasswordUseCaseProvider = Provider<ForgotPasswordUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return ForgotPasswordUseCase(repository);
+});
+
+// Sign In Anonymously UseCase
+final signInAnonymouslyUseCaseProvider =
+    Provider<SignInAnonymouslyUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return SignInAnonymouslyUseCase(repository);
+});
+
+// Link Anonymous With Email UseCase
+final linkAnonymousWithEmailUseCaseProvider =
+    Provider<LinkAnonymousWithEmailUseCase>((ref) {
+  final repository = ref.watch(authRepositoryProvider);
+  return LinkAnonymousWithEmailUseCase(repository);
 });

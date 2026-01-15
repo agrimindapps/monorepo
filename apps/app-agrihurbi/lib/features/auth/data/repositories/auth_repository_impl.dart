@@ -1,6 +1,7 @@
-import 'package:core/core.dart' hide UserEntity;
+import 'package:core/core.dart' hide UserEntity, Failure, NetworkFailure, ValidationFailure, UnknownFailure, CacheFailure, ServerFailure;
 import 'package:flutter/foundation.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/failures/auth_failures.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -49,13 +50,13 @@ class AuthRepositoryImpl implements AuthRepository {
       } else {
         debugPrint('AuthRepositoryImpl: Sem conectividade - login offline não disponível');
         return const Left(NetworkFailure(
-          'Sem conexão com a internet. Verifique sua conexão e tente novamente.',
+          message: 'Sem conexão com a internet. Verifique sua conexão e tente novamente.',
         ));
       }
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro inesperado no login - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro inesperado no login: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro inesperado no login: ${e.toString()}'));
     }
   }
 
@@ -72,7 +73,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (!hasConnection) {
         return const Left(NetworkFailure(
-          'Conexão com a internet necessária para criar nova conta.',
+          message: 'Conexão com a internet necessária para criar nova conta.',
         ));
       }
       final remoteResult = await _registerRemote(name, email, password, phone);
@@ -91,7 +92,62 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro inesperado no registro - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro inesperado no registro: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro inesperado no registro: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInAnonymously() async {
+    try {
+      debugPrint('AuthRepositoryImpl: Iniciando login anônimo');
+      
+      final userModel = await _remoteDataSource.signInAnonymously();
+      await _cacheUserLocally(userModel);
+      
+      debugPrint('AuthRepositoryImpl: Login anônimo bem-sucedido - ${userModel.id}');
+      return Right(userModel.toEntity());
+    } catch (e, stackTrace) {
+      debugPrint('AuthRepositoryImpl: Erro no login anônimo - $e');
+      debugPrint('StackTrace: $stackTrace');
+      return Left(UnknownFailure(message: 'Erro no login anônimo: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> linkAnonymousWithEmail({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    try {
+      debugPrint('AuthRepositoryImpl: Vinculando conta anônima com email $email');
+      
+      // Obtém usuário anônimo atual
+      final cachedUser = await _localDataSource.getLastUser();
+      if (cachedUser == null) {
+        return const Left(ValidationFailure(message: 'Nenhum usuário anônimo encontrado'));
+      }
+      
+      final hasConnection = await _hasNetworkConnection();
+      if (!hasConnection) {
+        return const Left(NetworkFailure(message: 'Conexão necessária para vincular conta.'));
+      }
+      
+      final userModel = await _remoteDataSource.linkAnonymousWithEmail(
+        anonymousUserId: cachedUser.id,
+        name: name,
+        email: email,
+        password: password,
+      );
+      
+      await _cacheUserLocally(userModel);
+      
+      debugPrint('AuthRepositoryImpl: Conta vinculada com sucesso - ${userModel.id}');
+      return Right(userModel.toEntity());
+    } catch (e, stackTrace) {
+      debugPrint('AuthRepositoryImpl: Erro ao vincular conta - $e');
+      debugPrint('StackTrace: $stackTrace');
+      return Left(UnknownFailure(message: 'Erro ao vincular conta: ${e.toString()}'));
     }
   }
 
@@ -116,7 +172,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro no logout - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro no logout: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro no logout: ${e.toString()}'));
     }
   }
 
@@ -136,7 +192,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro ao obter usuário atual - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(CacheFailure('Falha ao obter usuário do cache: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Falha ao obter usuário do cache: ${e.toString()}'));
     }
   }
 
@@ -149,11 +205,11 @@ class AuthRepositoryImpl implements AuthRepository {
       final cachedUser = await _localDataSource.getLastUser();
       
       if (cachedUser == null) {
-        return const Left(ValidationFailure('Nenhum usuário logado para atualizar'));
+        return const Left(ValidationFailure(message: 'Nenhum usuário logado para atualizar'));
       }
       
       if (cachedUser.id != userId) {
-        return const Left(ValidationFailure('ID do usuário não corresponde ao logado'));
+        return const Left(ValidationFailure(message: 'ID do usuário não corresponde ao logado'));
       }
       final hasConnection = await _hasNetworkConnection();
       
@@ -175,7 +231,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na atualização - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na atualização: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na atualização: ${e.toString()}'));
     }
   }
 
@@ -203,7 +259,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final cachedUser = await _localDataSource.getLastUser();
       
       if (cachedUser == null || cachedUser.id != userId) {
-        return const Left(ValidationFailure('Usuário não encontrado'));
+        return const Left(ValidationFailure(message: 'Usuário não encontrado'));
       }
       final updatedUser = cachedUser.copyWith(
         displayName: name ?? cachedUser.displayName,
@@ -236,7 +292,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na atualização do perfil - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na atualização do perfil: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na atualização do perfil: ${e.toString()}'));
     }
   }
 
@@ -251,7 +307,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (!hasConnection) {
         return const Left(NetworkFailure(
-          'Conexão com a internet necessária para alterar senha.',
+          message: 'Conexão com a internet necessária para alterar senha.',
         ));
       }
       
@@ -265,7 +321,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na alteração de senha - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na alteração de senha: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na alteração de senha: ${e.toString()}'));
     }
   }
 
@@ -279,7 +335,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (!hasConnection) {
         return const Left(NetworkFailure(
-          'Conexão com a internet necessária para recuperação de senha.',
+          message: 'Conexão com a internet necessária para recuperação de senha.',
         ));
       }
       
@@ -290,7 +346,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na recuperação de senha - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na recuperação de senha: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na recuperação de senha: ${e.toString()}'));
     }
   }
 
@@ -305,7 +361,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (!hasConnection) {
         return const Left(NetworkFailure(
-          'Conexão com a internet necessária para redefinir senha.',
+          message: 'Conexão com a internet necessária para redefinir senha.',
         ));
       }
       
@@ -319,7 +375,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na redefinição de senha - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na redefinição de senha: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na redefinição de senha: ${e.toString()}'));
     }
   }
 
@@ -334,7 +390,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (!hasConnection) {
         return const Left(NetworkFailure(
-          'Conexão com a internet necessária para verificação de email.',
+          message: 'Conexão com a internet necessária para verificação de email.',
         ));
       }
       
@@ -345,7 +401,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na verificação de email - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na verificação de email: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na verificação de email: ${e.toString()}'));
     }
   }
 
@@ -357,7 +413,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro ao obter token - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(CacheFailure('Erro ao obter token: ${e.toString()}'));
+      return Left(CacheFailure(message: 'Erro ao obter token: ${e.toString()}'));
     }
   }
 
@@ -370,7 +426,7 @@ class AuthRepositoryImpl implements AuthRepository {
       
       if (!hasConnection) {
         return const Left(NetworkFailure(
-          'Conexão com a internet necessária para renovar token.',
+          message: 'Conexão com a internet necessária para renovar token.',
         ));
       }
       
@@ -382,7 +438,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } catch (e, stackTrace) {
       debugPrint('AuthRepositoryImpl: Erro na renovação de token - $e');
       debugPrint('StackTrace: $stackTrace');
-      return Left(UnknownFailure('Erro na renovação de token: ${e.toString()}'));
+      return Left(UnknownFailure(message: 'Erro na renovação de token: ${e.toString()}'));
     }
   }
 
@@ -470,7 +526,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } else if (exception.toString().toLowerCase().contains('weak password')) {
       return const WeakPasswordFailure();
     } else {
-      return UnknownFailure('Erro inesperado: ${exception.toString()}');
+      return UnknownFailure(message: 'Erro inesperado: ${exception.toString()}');
     }
   }
 }

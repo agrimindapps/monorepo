@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/widgets/calculator_action_buttons.dart';
 import '../../../../core/widgets/calculator_page_layout.dart';
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/calculators/bmi_calculator.dart';
 import '../../domain/calculators/cintura_quadril_calculator.dart';
 
@@ -44,9 +46,15 @@ class _CinturaQuadrilCalculatorPageState
         if (_result != null)
           IconButton(
             icon: const Icon(Icons.share_outlined, color: Colors.white70),
-            onPressed: () {
-              // Share result
-            },
+            onPressed: () => Share.share(
+              ShareFormatter.formatCinturaQuadrilCalculation(
+                waist: double.parse(_waistController.text),
+                hip: double.parse(_hipController.text),
+                ratio: _result!.whr,
+                classification: _result!.classificationText,
+                gender: _gender == Gender.male ? 'Masculino' : 'Feminino',
+              ),
+            ),
             tooltip: 'Compartilhar',
           ),
       ],

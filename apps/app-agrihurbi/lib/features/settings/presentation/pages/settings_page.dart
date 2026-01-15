@@ -1,7 +1,10 @@
+import 'package:app_agrihurbi/core/providers/app_providers.dart';
 import 'package:app_agrihurbi/features/settings/domain/entities/settings_entity.dart';
+import 'package:app_agrihurbi/features/settings/presentation/dialogs/feedback_dialog.dart';
 import 'package:app_agrihurbi/features/settings/presentation/providers/settings_provider.dart';
 import 'package:app_agrihurbi/features/settings/presentation/widgets/settings_section.dart';
 import 'package:app_agrihurbi/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:app_agrihurbi/features/settings/presentation/widgets/support_section.dart';
 import 'package:core/core.dart' show ConsumerStatefulWidget, ConsumerState;
 import 'package:flutter/material.dart';
 
@@ -118,6 +121,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         const SizedBox(height: 24),
 
         _buildBackupSection(provider),
+        const SizedBox(height: 24),
+
+        _buildSupportSection(),
         const SizedBox(height: 24),
 
         _buildAboutSection(),
@@ -628,6 +634,65 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     );
   }
 
+  Widget _buildSupportSection() {
+    return SupportSection(
+      onFeedbackTap: _showFeedbackDialog,
+      onRateTap: _showRateAppDialog,
+      onContactTap: () => _launchContactSupport(),
+    );
+  }
+
+  void _showFeedbackDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (context) => const FeedbackDialog(),
+    );
+  }
+
+  Future<void> _showRateAppDialog() async {
+    try {
+      final appRatingService = ref.read(appRatingRepositoryProvider);
+      final canShow = await appRatingService.canShowRatingDialog();
+
+      if (canShow) {
+        if (!mounted) return;
+        final success = await appRatingService.showRatingDialog(
+          context: context,
+        );
+
+        if (mounted && !success) {
+          // Se não mostrou o diálogo, abrir a loja diretamente
+          final storeOpened = await appRatingService.openAppStore();
+          if (!storeOpened && mounted) {
+            _showSnackBar('Não foi possível abrir a loja de aplicativos');
+          }
+        }
+      } else {
+        // Já avaliou ou não atingiu os critérios, abrir loja diretamente
+        final storeOpened = await appRatingService.openAppStore();
+        if (!storeOpened && mounted) {
+          _showSnackBar('Não foi possível abrir a loja de aplicativos');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar('Erro ao abrir avaliação do app');
+      }
+    }
+  }
+
+  void _launchContactSupport() {
+    // Implementar abertura de email ou link de suporte
+    _showSnackBar('Funcionalidade de contato será implementada em breve');
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   Widget _buildAboutSection() {
     return SettingsSection(
       title: 'Sobre',
@@ -705,7 +770,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _exportSettings(SettingsNotifier provider) async {
     final data = await provider.exportSettings();
     if (data != null) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Configurações exportadas com sucesso')),
       );

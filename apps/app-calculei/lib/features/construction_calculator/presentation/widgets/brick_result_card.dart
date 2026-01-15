@@ -40,6 +40,9 @@ class BrickResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatBrickCalculation(
+                    wallLength: calculation.wallLength,
+                    wallHeight: calculation.wallHeight,
+                    openingsArea: calculation.openingsArea,
                     bricksWithWaste: calculation.bricksWithWaste,
                     bricksNeeded: calculation.bricksNeeded,
                     netArea: calculation.netArea,

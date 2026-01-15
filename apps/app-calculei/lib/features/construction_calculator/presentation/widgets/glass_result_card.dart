@@ -69,6 +69,8 @@ class GlassResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatGlassCalculation(
+                    width: calculation.width,
+                    height: calculation.height,
                     totalArea: calculation.totalArea,
                     estimatedWeight: calculation.estimatedWeight,
                     glassType: calculation.glassType,

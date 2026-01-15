@@ -67,6 +67,8 @@ class PaintResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatPaintCalculation(
+                    wallArea: calculation.wallArea,
+                    openingsArea: calculation.openingsArea,
                     paintLiters: calculation.paintLiters,
                     netArea: calculation.netArea,
                     paintType: calculation.paintType,

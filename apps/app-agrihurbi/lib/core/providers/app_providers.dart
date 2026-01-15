@@ -20,6 +20,18 @@ final analyticsRepositoryProvider = Provider<IAnalyticsRepository>((ref) {
   return FirebaseAnalyticsService();
 });
 
+final appRatingRepositoryProvider = Provider<IAppRatingRepository>((ref) {
+  return AppRatingService(
+    // TODO: Preencher com IDs reais da loja quando publicado
+    appStoreId: 'com.agrimind.agrihurbi', // iOS App Store ID
+    googlePlayId: 'com.agrimind.agrihurbi', // Google Play ID
+    minDays: 7,
+    minLaunches: 10,
+    remindDays: 7,
+    remindLaunches: 10,
+  );
+});
+
 final crashlyticsRepositoryProvider = Provider<ICrashlyticsRepository>((ref) {
   return FirebaseCrashlyticsService();
 });

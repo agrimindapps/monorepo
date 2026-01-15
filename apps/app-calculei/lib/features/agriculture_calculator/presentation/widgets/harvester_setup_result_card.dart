@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/harvester_setup_calculation.dart';
 
 /// Result card displaying harvester setup calculation results
@@ -68,6 +69,21 @@ class HarvesterSetupResultCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              ShareButton(
+                text: ShareFormatter.formatHarvesterSetupCalculation(
+                  cropType: calculation.cropType,
+                  productivity: calculation.productivity,
+                  moisture: calculation.moisture,
+                  harvestSpeed: calculation.harvestSpeed,
+                  platformWidth: calculation.platformWidth,
+                  cylinderSpeed: calculation.cylinderSpeed,
+                  concaveOpening: calculation.concaveOpening,
+                  fanSpeed: calculation.fanSpeed,
+                  sieveOpening: calculation.sieveOpening,
+                  estimatedLoss: calculation.estimatedLoss,
+                  harvestCapacity: calculation.harvestCapacity,
                 ),
               ),
               _buildQualityBadge(calculation.qualityStatus),

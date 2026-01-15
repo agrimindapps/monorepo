@@ -367,10 +367,18 @@ class _YieldResultCard extends StatelessWidget {
 
   String _formatShareText() {
     final cropName = YieldPredictionCalculator.getCropName(cropType);
+    final area = double.tryParse(_areaController.text) ?? 0;
+    final expectedYield = double.tryParse(_yieldController.text) ?? 0;
+    final lossPercent = double.tryParse(_lossController.text) ?? 0;
     return '''
 📋 Previsão de Produtividade - Calculei App
 
 🌾 Cultura: $cropName
+
+📥 Dados informados:
+• Área: ${area.toStringAsFixed(1)} ha
+• Produtividade esperada: ${expectedYield.toStringAsFixed(1)} sc/ha
+• Perdas estimadas: ${lossPercent.toStringAsFixed(1)}%
 
 📊 Resultado:
 • Produção líquida: ${result.netYieldTon.toStringAsFixed(2)} toneladas

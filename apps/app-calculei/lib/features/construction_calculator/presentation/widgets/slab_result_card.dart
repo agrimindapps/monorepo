@@ -69,6 +69,9 @@ class SlabResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatSlabCalculation(
+                    length: calculation.length,
+                    width: calculation.width,
+                    thickness: calculation.thickness,
                     slabType: calculation.slabType,
                     concreteVolume: calculation.concreteVolume,
                     cementBags: calculation.cementBags,

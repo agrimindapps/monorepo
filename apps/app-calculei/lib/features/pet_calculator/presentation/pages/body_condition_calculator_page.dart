@@ -361,6 +361,12 @@ class _BodyConditionResultCard extends StatelessWidget {
 📋 Escore de Condição Corporal - Calculei App
 
 🐾 Espécie: ${species == PetSpecies.dog ? 'Cachorro' : 'Gato'}
+
+📥 Avaliação realizada:
+• Palpação das costelas: $_ribPalpation/5
+• Visibilidade da cintura: $_waistVisibility/5
+• Perfil abdominal: $_abdominalProfile/5
+
 📊 ECC: ${result.bcs.toStringAsFixed(1)}/9
 🏷️ Classificação: ${result.classificationText}
 

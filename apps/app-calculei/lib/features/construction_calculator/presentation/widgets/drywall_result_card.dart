@@ -66,6 +66,8 @@ class DrywallResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatDrywallCalculation(
+                    length: calculation.length,
+                    height: calculation.height,
                     wallArea: calculation.wallArea,
                     numberOfPanels: calculation.numberOfPanels,
                     profilesMeters: calculation.profilesMeters,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../shared/widgets/share_button.dart';
 import '../../domain/entities/nozzle_flow_calculation.dart';
 
 /// Card de resultado do cálculo de vazão de bicos
@@ -47,6 +48,20 @@ class NozzleFlowResultCard extends StatelessWidget {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
+                  ),
+                ),
+                ShareButton(
+                  text: ShareFormatter.formatNozzleFlowCalculation(
+                    applicationRate: calculation.applicationRate,
+                    workingSpeed: calculation.workingSpeed,
+                    nozzleSpacing: calculation.nozzleSpacing,
+                    pressure: calculation.pressure,
+                    nozzleType: calculation.nozzleType.name,
+                    numberOfNozzles: calculation.numberOfNozzles,
+                    requiredFlow: calculation.requiredFlow,
+                    totalFlow: calculation.totalFlow,
+                    workingWidth: calculation.workingWidth,
+                    recommendedNozzle: calculation.recommendedNozzle?.colorName,
                   ),
                 ),
               ],

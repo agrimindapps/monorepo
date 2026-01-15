@@ -303,10 +303,16 @@ class _FertilizerDosingResultCard extends StatelessWidget {
   String _formatShareText() {
     final fertilizerName =
         FertilizerDosingCalculator.getFertilizerName(fertilizerType);
+    final area = double.tryParse(_areaController.text) ?? 0;
+    final desiredRate = double.tryParse(_desiredRateController.text) ?? 0;
     return '''
 📋 Dosagem de Fertilizante - Calculei App
 
 🧪 Fertilizante: $fertilizerName
+
+📥 Dados informados:
+• Área: ${area.toStringAsFixed(1)} ha
+• Dose desejada: ${desiredRate.toStringAsFixed(1)} kg/ha
 
 📊 Resultado:
 • Produto necessário: ${result.productKg.toStringAsFixed(1)} kg

@@ -66,6 +66,9 @@ class ConcreteResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatConcreteCalculation(
+                    length: calculation.length,
+                    width: calculation.width,
+                    height: calculation.height,
                     volume: calculation.volume,
                     cementBags: calculation.cementBags,
                     sandCubicMeters: calculation.sandCubicMeters,

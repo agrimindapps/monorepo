@@ -243,6 +243,9 @@ $_footer''';
 
   /// Format concrete calculation for sharing
   static String formatConcreteCalculation({
+    required double length,
+    required double width,
+    required double height,
     required double volume,
     required int cementBags,
     required double sandCubicMeters,
@@ -253,6 +256,11 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de Concreto - Calculei App
+
+📥 Dimensões informadas:
+• Comprimento: ${length.toStringAsFixed(2)} m
+• Largura: ${width.toStringAsFixed(2)} m
+• Altura: ${height.toStringAsFixed(2)} m
 
 📏 Volume Total: ${volume.toStringAsFixed(2)} m³
 🏗️ Tipo: $concreteType - $concreteStrength
@@ -306,6 +314,8 @@ $_footer''';
 
   /// Format roof calculation for sharing
   static String formatRoofCalculation({
+    required double length,
+    required double width,
     required double roofArea,
     required int numberOfTiles,
     required int ridgeTilesCount,
@@ -316,9 +326,13 @@ $_footer''';
     return '''
 📋 Cálculo de Telhado - Calculei App
 
+📥 Dimensões informadas:
+• Comprimento: ${length.toStringAsFixed(2)} m
+• Largura: ${width.toStringAsFixed(2)} m
+• Inclinação: ${roofSlope.toStringAsFixed(0)}%
+
 📏 Área do Telhado: ${roofArea.toStringAsFixed(2)} m²
 🏠 Tipo de Telha: $roofType
-📐 Inclinação: ${roofSlope.toStringAsFixed(0)}%
 
 📦 Materiais Necessários:
 • Telhas: $numberOfTiles unidades
@@ -329,6 +343,8 @@ $_footer''';
 
   /// Format drywall calculation for sharing
   static String formatDrywallCalculation({
+    required double length,
+    required double height,
     required double wallArea,
     required int numberOfPanels,
     required double profilesMeters,
@@ -339,6 +355,10 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de Drywall - Calculei App
+
+📥 Dimensões informadas:
+• Comprimento: ${length.toStringAsFixed(2)} m
+• Altura: ${height.toStringAsFixed(2)} m
 
 📏 Área da Parede: ${wallArea.toStringAsFixed(2)} m²
 🏗️ Tipo: Parede $wallType
@@ -385,6 +405,9 @@ $_footer''';
 
   /// Format slab calculation for sharing
   static String formatSlabCalculation({
+    required double length,
+    required double width,
+    required double thickness,
     required String slabType,
     required double concreteVolume,
     required int cementBags,
@@ -401,6 +424,11 @@ $_footer''';
     return '''
 📋 Cálculo de Laje - Calculei App
 
+📥 Dimensões informadas:
+• Comprimento: ${length.toStringAsFixed(2)} m
+• Largura: ${width.toStringAsFixed(2)} m
+• Espessura: ${thickness.toStringAsFixed(2)} cm
+
 🏗️ Tipo: Laje $slabType
 📏 Volume de Concreto: ${concreteVolume.toStringAsFixed(2)} m³
 
@@ -415,6 +443,8 @@ $_footer''';
 
   /// Format glass calculation for sharing
   static String formatGlassCalculation({
+    required double width,
+    required double height,
     required double totalArea,
     required double estimatedWeight,
     required String glassType,
@@ -423,6 +453,11 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de Vidros - Calculei App
+
+📥 Dimensões informadas:
+• Largura: ${width.toStringAsFixed(2)} m
+• Altura: ${height.toStringAsFixed(2)} m
+• Quantidade: $numberOfPanels painel(éis)
 
 📏 Área Total: ${totalArea.toStringAsFixed(2)} m²
 🪟 Painéis: $numberOfPanels unidades
@@ -463,6 +498,8 @@ $_footer''';
 
   /// Format paint calculation for sharing
   static String formatPaintCalculation({
+    required double wallArea,
+    required double openingsArea,
     required double paintLiters,
     required double netArea,
     required String paintType,
@@ -472,10 +509,14 @@ $_footer''';
     return '''
 📋 Cálculo de Tinta - Calculei App
 
+📥 Dimensões informadas:
+• Área das paredes: ${wallArea.toStringAsFixed(1)} m²
+• Área de aberturas: ${openingsArea.toStringAsFixed(1)} m²
+• Demãos: $coats
+
 🎨 Tinta Necessária: ${paintLiters.toStringAsFixed(1)} litros
 📏 Área Líquida: ${netArea.toStringAsFixed(1)} m²
 🖌️ Tipo: $paintType
-🔄 Demãos: $coats
 
 💡 Recomendação: $recommendedOption
 $_footer''';
@@ -483,6 +524,10 @@ $_footer''';
 
   /// Format flooring calculation for sharing
   static String formatFlooringCalculation({
+    required double roomLength,
+    required double roomWidth,
+    required double tileLength,
+    required double tileWidth,
     required int boxesNeeded,
     required int tilesWithWaste,
     required int tilesNeeded,
@@ -494,6 +539,10 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de Piso - Calculei App
+
+📥 Dimensões informadas:
+• Ambiente: ${roomLength.toStringAsFixed(2)} x ${roomWidth.toStringAsFixed(2)} m
+• Peça: ${(tileLength * 100).toStringAsFixed(0)} x ${(tileWidth * 100).toStringAsFixed(0)} cm
 
 📦 Caixas Necessárias: $boxesNeeded
 🔲 Peças: $tilesWithWaste (com $wastePercentage% de perda)
@@ -510,6 +559,9 @@ $_footer''';
 
   /// Format brick calculation for sharing
   static String formatBrickCalculation({
+    required double wallLength,
+    required double wallHeight,
+    required double openingsArea,
     required int bricksWithWaste,
     required int bricksNeeded,
     required double netArea,
@@ -521,6 +573,11 @@ $_footer''';
   }) {
     return '''
 📋 Cálculo de Tijolos - Calculei App
+
+📥 Dimensões informadas:
+• Comprimento: ${wallLength.toStringAsFixed(2)} m
+• Altura: ${wallHeight.toStringAsFixed(2)} m
+• Área de aberturas: ${openingsArea.toStringAsFixed(2)} m²
 
 🧱 Total de $brickTypeName: $bricksWithWaste unidades
    (com $wastePercentage% de perda)
@@ -903,6 +960,7 @@ $_footer''';
   /// Format pregnancy calculation for sharing
   static String formatPregnancyCalculation({
     required String species,
+    required String matingDate,
     required int gestationDays,
     required String dueDate,
     required int daysRemaining,
@@ -912,9 +970,10 @@ $_footer''';
 📋 Acompanhamento de Gestação - Calculei App
 
 🐾 Espécie: $species
-📅 Dias de gestação: $gestationDays dias
+📅 Data do acasalamento: $matingDate
+📆 Dias de gestação: $gestationDays dias
 🏷️ Estágio atual: $stage
-📆 Data prevista do parto: $dueDate
+🎯 Data prevista do parto: $dueDate
 ⏳ Dias restantes: $daysRemaining
 
 💡 Mantenha acompanhamento veterinário regular durante a gestação.
@@ -1325,6 +1384,245 @@ $_footer''';
 • Material: $tankType
 
 💡 Considere margem de segurança de 20% para variações.
+$_footer''';
+  }
+
+  // ========== AGRICULTURE CALCULATORS - MACHINERY ==========
+
+  /// Format field capacity calculation for sharing
+  static String formatFieldCapacityCalculation({
+    required double workingWidth,
+    required double workingSpeed,
+    required double fieldEfficiency,
+    required String operationType,
+    required double theoreticalCapacity,
+    required double effectiveCapacity,
+    required double hoursPerHectare,
+    required double hectaresPerDay8h,
+  }) {
+    return '''
+📋 Capacidade de Campo - Calculei App
+
+🚜 Operação: $operationType
+📏 Largura de Trabalho: ${workingWidth.toStringAsFixed(2)} m
+⚡ Velocidade: ${workingSpeed.toStringAsFixed(1)} km/h
+📊 Eficiência: ${fieldEfficiency.toStringAsFixed(0)}%
+
+📊 Resultado:
+• Capacidade Teórica: ${theoreticalCapacity.toStringAsFixed(2)} ha/h
+• Capacidade Efetiva: ${effectiveCapacity.toStringAsFixed(2)} ha/h
+• Tempo por Hectare: ${hoursPerHectare.toStringAsFixed(2)} h/ha
+• Rendimento (8h): ${hectaresPerDay8h.toStringAsFixed(1)} ha/dia
+
+💡 Ajuste a velocidade conforme condições do terreno.
+$_footer''';
+  }
+
+  /// Format harvester setup calculation for sharing
+  static String formatHarvesterSetupCalculation({
+    required String cropType,
+    required double productivity,
+    required double moisture,
+    required double harvestSpeed,
+    required double platformWidth,
+    required double cylinderSpeed,
+    required double concaveOpening,
+    required double fanSpeed,
+    required double sieveOpening,
+    required double estimatedLoss,
+    required double harvestCapacity,
+  }) {
+    return '''
+📋 Regulagem de Colhedora - Calculei App
+
+🌾 Cultura: $cropType
+📊 Produtividade: ${productivity.toStringAsFixed(0)} sc/ha
+💧 Umidade: ${moisture.toStringAsFixed(1)}%
+⚡ Velocidade: ${harvestSpeed.toStringAsFixed(1)} km/h
+📏 Plataforma: ${platformWidth.toStringAsFixed(1)} m
+
+⚙️ Regulagens Recomendadas:
+• Cilindro: ${cylinderSpeed.toStringAsFixed(0)} RPM
+• Côncavo: ${concaveOpening.toStringAsFixed(1)} mm
+• Ventilador: ${fanSpeed.toStringAsFixed(0)} RPM
+• Peneiras: ${sieveOpening.toStringAsFixed(1)} mm
+
+📊 Resultado:
+• Capacidade: ${harvestCapacity.toStringAsFixed(2)} ha/h
+• Perda Estimada: ${estimatedLoss.toStringAsFixed(2)} kg/ha
+
+💡 Monitore as perdas e ajuste conforme necessário.
+$_footer''';
+  }
+
+  /// Format nozzle flow calculation for sharing
+  static String formatNozzleFlowCalculation({
+    required double applicationRate,
+    required double workingSpeed,
+    required double nozzleSpacing,
+    required double pressure,
+    required String nozzleType,
+    required int numberOfNozzles,
+    required double requiredFlow,
+    required double totalFlow,
+    required double workingWidth,
+    String? recommendedNozzle,
+  }) {
+    final nozzleText = recommendedNozzle != null 
+        ? '\n• Bico Recomendado: $recommendedNozzle' 
+        : '';
+    return '''
+📋 Vazão de Bicos - Calculei App
+
+🎯 Taxa de Aplicação: ${applicationRate.toStringAsFixed(0)} L/ha
+⚡ Velocidade: ${workingSpeed.toStringAsFixed(1)} km/h
+📏 Espaçamento: ${nozzleSpacing.toStringAsFixed(0)} cm
+💨 Pressão: ${pressure.toStringAsFixed(1)} bar
+🔧 Tipo de Bico: $nozzleType
+🔢 Quantidade: $numberOfNozzles bicos
+
+📊 Resultado:
+• Vazão por Bico: ${requiredFlow.toStringAsFixed(3)} L/min
+• Vazão Total: ${totalFlow.toStringAsFixed(2)} L/min
+• Largura de Trabalho: ${workingWidth.toStringAsFixed(2)} m$nozzleText
+
+💡 Verifique a vazão real antes da aplicação.
+$_footer''';
+  }
+
+  /// Format operational cost calculation for sharing
+  static String formatOperationalCostCalculation({
+    required String operationType,
+    required double fuelConsumption,
+    required double fuelPrice,
+    required double laborHours,
+    required double laborCost,
+    required double areaWorked,
+    required double fuelCostPerHa,
+    required double laborCostPerHa,
+    required double machineryCostPerHa,
+    required double totalCostPerHa,
+    required double totalCost,
+  }) {
+    return '''
+📋 Custo Operacional - Calculei App
+
+🚜 Operação: $operationType
+📏 Área: ${areaWorked.toStringAsFixed(1)} ha
+⛽ Consumo: ${fuelConsumption.toStringAsFixed(1)} L/ha
+💰 Preço Combustível: R\$ ${fuelPrice.toStringAsFixed(2)}/L
+👷 Mão de Obra: ${laborHours.toStringAsFixed(1)} h/ha × R\$ ${laborCost.toStringAsFixed(2)}/h
+
+📊 Custos por Hectare:
+• Combustível: R\$ ${fuelCostPerHa.toStringAsFixed(2)}/ha
+• Mão de Obra: R\$ ${laborCostPerHa.toStringAsFixed(2)}/ha
+• Maquinário: R\$ ${machineryCostPerHa.toStringAsFixed(2)}/ha
+• TOTAL: R\$ ${totalCostPerHa.toStringAsFixed(2)}/ha
+
+💰 Custo Total: R\$ ${totalCost.toStringAsFixed(2)}
+
+💡 Considere custos fixos e variações sazonais.
+$_footer''';
+  }
+
+  /// Format planter setup calculation for sharing
+  static String formatPlanterSetupCalculation({
+    required String cropType,
+    required double targetPopulation,
+    required double rowSpacing,
+    required double germination,
+    required int discHoles,
+    required double seedsPerMeter,
+    required double seedsPerHectare,
+    required double wheelTurns,
+    required double seedWeight,
+  }) {
+    return '''
+📋 Regulagem de Plantadeira - Calculei App
+
+🌱 Cultura: $cropType
+🎯 População Alvo: ${targetPopulation.toStringAsFixed(0)} plantas/ha
+📏 Espaçamento: ${rowSpacing.toStringAsFixed(0)} cm
+🌡️ Germinação: ${germination.toStringAsFixed(0)}%
+⚙️ Disco: $discHoles furos
+
+📊 Regulagem:
+• Sementes/metro: ${seedsPerMeter.toStringAsFixed(2)}
+• Sementes/hectare: ${seedsPerHectare.toStringAsFixed(0)}
+• Voltas da Roda: ${wheelTurns.toStringAsFixed(1)}
+• Peso Sementes: ${seedWeight.toStringAsFixed(1)} kg/ha
+
+💡 Faça teste de estande após plantio.
+$_footer''';
+  }
+
+  /// Format tire pressure calculation for sharing
+  static String formatTirePressureCalculation({
+    required String tireType,
+    required String operationType,
+    required double axleLoad,
+    required String tireSize,
+    required double recommendedPressurePsi,
+    required double recommendedPressureBar,
+    required double minPressurePsi,
+    required double maxPressurePsi,
+    required double footprintLength,
+  }) {
+    return '''
+📋 Pressão de Pneus - Calculei App
+
+🛞 Tipo: $tireType
+📏 Tamanho: $tireSize
+🚜 Operação: $operationType
+⚖️ Carga no Eixo: ${axleLoad.toStringAsFixed(0)} kg
+
+📊 Pressão Recomendada:
+• PSI: ${recommendedPressurePsi.toStringAsFixed(1)}
+• Bar: ${recommendedPressureBar.toStringAsFixed(2)}
+
+📏 Faixa Aceitável:
+• Mínima: ${minPressurePsi.toStringAsFixed(1)} PSI
+• Máxima: ${maxPressurePsi.toStringAsFixed(1)} PSI
+
+🦶 Pegada Esperada: ${footprintLength.toStringAsFixed(0)} cm
+
+💡 Verifique com pneu frio. Ajuste para estrada/campo.
+$_footer''';
+  }
+
+  /// Format tractor ballast calculation for sharing
+  static String formatTractorBallastCalculation({
+    required String tractorType,
+    required String operationType,
+    required double tractorWeight,
+    required double implementWeight,
+    required double frontBallastNeeded,
+    required double rearBallastNeeded,
+    required double frontWeightPercent,
+    required double rearWeightPercent,
+    required int numberOfFrontWeights,
+    required int numberOfRearWeights,
+    required double totalWeight,
+  }) {
+    return '''
+📋 Lastro do Trator - Calculei App
+
+🚜 Tipo: $tractorType
+⚙️ Operação: $operationType
+⚖️ Peso Trator: ${tractorWeight.toStringAsFixed(0)} kg
+🔧 Peso Implemento: ${implementWeight.toStringAsFixed(0)} kg
+
+📊 Distribuição de Peso:
+• Frente: ${frontWeightPercent.toStringAsFixed(0)}%
+• Traseira: ${rearWeightPercent.toStringAsFixed(0)}%
+
+🏋️ Lastro Necessário:
+• Frente: ${frontBallastNeeded.toStringAsFixed(0)} kg ($numberOfFrontWeights pesos de 40kg)
+• Traseira: ${rearBallastNeeded.toStringAsFixed(0)} kg ($numberOfRearWeights pesos de 40kg)
+
+⚖️ Peso Total: ${totalWeight.toStringAsFixed(0)} kg
+
+💡 Distribua o lastro uniformemente em cada lado.
 $_footer''';
   }
 }

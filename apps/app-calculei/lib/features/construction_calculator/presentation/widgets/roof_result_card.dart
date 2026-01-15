@@ -67,6 +67,8 @@ class RoofResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatRoofCalculation(
+                    length: calculation.length,
+                    width: calculation.width,
                     roofArea: calculation.roofArea,
                     numberOfTiles: calculation.numberOfTiles,
                     ridgeTilesCount: calculation.ridgeTilesCount,

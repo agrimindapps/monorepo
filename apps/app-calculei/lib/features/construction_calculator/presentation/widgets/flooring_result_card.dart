@@ -40,6 +40,10 @@ class FlooringResultCard extends StatelessWidget {
                 ),
                 ShareButton(
                   text: ShareFormatter.formatFlooringCalculation(
+                    roomLength: calculation.roomLength,
+                    roomWidth: calculation.roomWidth,
+                    tileLength: calculation.tileLength,
+                    tileWidth: calculation.tileWidth,
                     boxesNeeded: calculation.boxesNeeded,
                     tilesWithWaste: calculation.tilesWithWaste,
                     tilesNeeded: calculation.tilesNeeded,

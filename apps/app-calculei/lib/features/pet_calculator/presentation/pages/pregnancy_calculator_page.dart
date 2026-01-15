@@ -50,6 +50,7 @@ class _PregnancyCalculatorPageState extends State<PregnancyCalculatorPage> {
                   Share.share(
                     ShareFormatter.formatPregnancyCalculation(
                       species: _isDog ? 'Cadela' : 'Gata',
+                      matingDate: dateFormat.format(_matingDate),
                       gestationDays: _result!.gestationDays,
                       dueDate: dateFormat.format(_result!.estimatedDueDate),
                       daysRemaining: _result!.daysRemaining,

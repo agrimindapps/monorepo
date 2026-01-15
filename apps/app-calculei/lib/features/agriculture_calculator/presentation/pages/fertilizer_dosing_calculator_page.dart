@@ -143,6 +143,8 @@ class _FertilizerDosingCalculatorPageState
                 _FertilizerDosingResultCard(
                   result: _result!,
                   fertilizerType: _fertilizerType,
+                  area: double.tryParse(_areaController.text) ?? 0,
+                  desiredRate: double.tryParse(_desiredRateController.text) ?? 0,
                 ),
             ],
           ),
@@ -178,10 +180,14 @@ class _FertilizerDosingCalculatorPageState
 class _FertilizerDosingResultCard extends StatelessWidget {
   final FertilizerDosingResult result;
   final FertilizerType fertilizerType;
+  final double area;
+  final double desiredRate;
 
   const _FertilizerDosingResultCard({
     required this.result,
     required this.fertilizerType,
+    required this.area,
+    required this.desiredRate,
   });
 
   @override
@@ -303,8 +309,6 @@ class _FertilizerDosingResultCard extends StatelessWidget {
   String _formatShareText() {
     final fertilizerName =
         FertilizerDosingCalculator.getFertilizerName(fertilizerType);
-    final area = double.tryParse(_areaController.text) ?? 0;
-    final desiredRate = double.tryParse(_desiredRateController.text) ?? 0;
     return '''
 📋 Dosagem de Fertilizante - Calculei App
 

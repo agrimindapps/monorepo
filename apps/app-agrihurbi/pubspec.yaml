@@ -21,19 +21,6 @@ dependencies:
   # Specific dependencies not in core
   xml: any
 
-  drift: any
-  riverpod_annotation: any
-  flutter_riverpod: any
-  dio: any
-  connectivity_plus: any
-  dartz: any
-  go_router: any
-  flutter_secure_storage: any
-  freezed_annotation: any
-  intl: any
-  path_provider: any
-  json_annotation: ^4.9.0
-  fl_chart: ^1.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -43,7 +30,7 @@ dev_dependencies:
   json_serializable: ^6.8.0
   riverpod_generator: ^3.0.3
   freezed: ^3.0.0
-  drift_dev: any
+  drift_dev: ^2.28.0
 
 flutter:
   uses-material-design: true

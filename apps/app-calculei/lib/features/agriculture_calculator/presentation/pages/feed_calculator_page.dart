@@ -155,7 +155,13 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
               const SizedBox(height: 24),
 
               if (_result != null)
-                _FeedResultCard(result: _result!, animalType: _animalType),
+                _FeedResultCard(
+                  result: _result!,
+                  animalType: _animalType,
+                  numAnimals: int.tryParse(_numAnimalsController.text) ?? 0,
+                  weight: double.tryParse(_weightController.text) ?? 0,
+                  days: int.tryParse(_daysController.text) ?? 0,
+                ),
             ],
           ),
         ),
@@ -192,8 +198,17 @@ class _FeedCalculatorPageState extends State<FeedCalculatorPage> {
 class _FeedResultCard extends StatelessWidget {
   final FeedCalculatorResult result;
   final AnimalType animalType;
+  final int numAnimals;
+  final double weight;
+  final int days;
 
-  const _FeedResultCard({required this.result, required this.animalType});
+  const _FeedResultCard({
+    required this.result,
+    required this.animalType,
+    required this.numAnimals,
+    required this.weight,
+    required this.days,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -301,9 +316,6 @@ class _FeedResultCard extends StatelessWidget {
 
   String _formatShareText() {
     final animalName = FeedCalculator.getAnimalName(animalType);
-    final numAnimals = int.tryParse(_numAnimalsController.text) ?? 0;
-    final weight = double.tryParse(_weightController.text) ?? 0;
-    final days = int.tryParse(_daysController.text) ?? 0;
     return '''
 📋 Cálculo de Ração - Calculei App
 

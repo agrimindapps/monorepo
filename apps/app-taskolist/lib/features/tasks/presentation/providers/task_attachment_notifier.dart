@@ -47,15 +47,15 @@ TaskAttachmentLocalDataSource taskAttachmentLocalDataSource(Ref ref) {
 
 /// Notifier for managing task attachments
 @riverpod
-class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
+class TaskAttachment extends _$TaskAttachment {
   @override
   Future<List<TaskAttachmentEntity>> build(String taskId) async {
     final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
     final result = await datasource.getAttachmentsByTaskId(taskId);
 
     return result.fold(
-      (failure) => throw Exception(failure.message),
-      (attachments) => attachments,
+      (Failure failure) => throw Exception(failure.message),
+      (List<TaskAttachmentEntity> attachments) => attachments,
     );
   }
 
@@ -70,21 +70,22 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
         userId: userId,
       );
 
-      return result.fold((failure) => throw Exception(failure.message), (
-        attachment,
-      ) async {
-        final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-        await datasource.saveAttachment(attachment);
-        await _uploadOrQueue(attachment, userId);
+      return result.fold(
+        (Failure failure) => throw Exception(failure.message),
+        (TaskAttachmentEntity attachment) async {
+          final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
+          await datasource.saveAttachment(attachment);
+          await _uploadOrQueue(attachment, userId);
 
-        final attachmentsResult = await datasource.getAttachmentsByTaskId(
-          taskId,
-        );
-        return attachmentsResult.fold(
-          (failure) => throw Exception(failure.message),
-          (attachments) => attachments,
-        );
-      });
+          final attachmentsResult = await datasource.getAttachmentsByTaskId(
+            taskId,
+          );
+          return attachmentsResult.fold(
+            (Failure failure) => throw Exception(failure.message),
+            (List<TaskAttachmentEntity> attachments) => attachments,
+          );
+        },
+      );
     });
   }
 
@@ -99,21 +100,22 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
         userId: userId,
       );
 
-      return result.fold((failure) => throw Exception(failure.message), (
-        attachment,
-      ) async {
-        final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-        await datasource.saveAttachment(attachment);
-        await _uploadOrQueue(attachment, userId);
+      return result.fold(
+        (Failure failure) => throw Exception(failure.message),
+        (TaskAttachmentEntity attachment) async {
+          final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
+          await datasource.saveAttachment(attachment);
+          await _uploadOrQueue(attachment, userId);
 
-        final attachmentsResult = await datasource.getAttachmentsByTaskId(
-          taskId,
-        );
-        return attachmentsResult.fold(
-          (failure) => throw Exception(failure.message),
-          (attachments) => attachments,
-        );
-      });
+          final attachmentsResult = await datasource.getAttachmentsByTaskId(
+            taskId,
+          );
+          return attachmentsResult.fold(
+            (Failure failure) => throw Exception(failure.message),
+            (List<TaskAttachmentEntity> attachments) => attachments,
+          );
+        },
+      );
     });
   }
 
@@ -129,23 +131,24 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
         allowMultiple: allowMultiple,
       );
 
-      return result.fold((failure) => throw Exception(failure.message), (
-        attachments,
-      ) async {
-        final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
-        for (final attachment in attachments) {
-          await datasource.saveAttachment(attachment);
-          await _uploadOrQueue(attachment, userId);
-        }
+      return result.fold(
+        (Failure failure) => throw Exception(failure.message),
+        (List<TaskAttachmentEntity> attachments) async {
+          final datasource = ref.read(taskAttachmentLocalDataSourceProvider);
+          for (final attachment in attachments) {
+            await datasource.saveAttachment(attachment);
+            await _uploadOrQueue(attachment, userId);
+          }
 
-        final attachmentsResult = await datasource.getAttachmentsByTaskId(
-          taskId,
-        );
-        return attachmentsResult.fold(
-          (failure) => throw Exception(failure.message),
-          (attachments) => attachments,
-        );
-      });
+          final attachmentsResult = await datasource.getAttachmentsByTaskId(
+            taskId,
+          );
+          return attachmentsResult.fold(
+            (Failure failure) => throw Exception(failure.message),
+            (List<TaskAttachmentEntity> attachments) => attachments,
+          );
+        },
+      );
     });
   }
 
@@ -172,8 +175,8 @@ class TaskAttachmentNotifier extends _$TaskAttachmentNotifier {
 
       final attachmentsResult = await datasource.getAttachmentsByTaskId(taskId);
       return attachmentsResult.fold(
-        (failure) => throw Exception(failure.message),
-        (attachments) => attachments,
+        (Failure failure) => throw Exception(failure.message),
+        (List<TaskAttachmentEntity> attachments) => attachments,
       );
     });
   }

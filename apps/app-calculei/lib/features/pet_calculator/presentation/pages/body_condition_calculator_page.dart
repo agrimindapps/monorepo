@@ -135,6 +135,9 @@ class _BodyConditionCalculatorPageState
                 _BodyConditionResultCard(
                   result: _result!,
                   species: _species,
+                  ribPalpation: _ribPalpation,
+                  waistVisibility: _waistVisibility,
+                  abdominalProfile: _abdominalProfile,
                 ),
               ],
             ],
@@ -310,10 +313,16 @@ class _SpeciesButton extends StatelessWidget {
 class _BodyConditionResultCard extends StatelessWidget {
   final BodyConditionResult result;
   final PetSpecies species;
+  final int ribPalpation;
+  final int waistVisibility;
+  final int abdominalProfile;
 
   const _BodyConditionResultCard({
     required this.result,
     required this.species,
+    required this.ribPalpation,
+    required this.waistVisibility,
+    required this.abdominalProfile,
   });
 
   Color _getClassificationColor(BcsClassification classification) {
@@ -363,9 +372,9 @@ class _BodyConditionResultCard extends StatelessWidget {
 🐾 Espécie: ${species == PetSpecies.dog ? 'Cachorro' : 'Gato'}
 
 📥 Avaliação realizada:
-• Palpação das costelas: $_ribPalpation/5
-• Visibilidade da cintura: $_waistVisibility/5
-• Perfil abdominal: $_abdominalProfile/5
+• Palpação das costelas: $ribPalpation/5
+• Visibilidade da cintura: $waistVisibility/5
+• Perfil abdominal: $abdominalProfile/5
 
 📊 ECC: ${result.bcs.toStringAsFixed(1)}/9
 🏷️ Classificação: ${result.classificationText}

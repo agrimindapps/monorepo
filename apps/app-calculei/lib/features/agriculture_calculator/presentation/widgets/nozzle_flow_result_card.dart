@@ -61,7 +61,7 @@ class NozzleFlowResultCard extends StatelessWidget {
                     requiredFlow: calculation.requiredFlow,
                     totalFlow: calculation.totalFlow,
                     workingWidth: calculation.workingWidth,
-                    recommendedNozzle: calculation.recommendedNozzle?.colorName,
+                    recommendedNozzle: calculation.recommendedNozzle?.displayName,
                   ),
                 ),
               ],

@@ -14,29 +14,15 @@ dependencies:
   core:
     path: ../../packages/core
   
-  drift: any
-  cloud_firestore: any
-  riverpod_annotation: any
-  dartz: any
-  shared_preferences: any
-  equatable: any
-  uuid: any
-  flutter_riverpod: any
-  intl: any
-  json_annotation: any
-  purchases_flutter: any
-  path_provider: any
   audioplayers: ^6.5.1
   file_picker: ^8.1.6
-  image_picker: ^1.1.2
-  mime: ^2.0.0
   open_filex: ^4.5.0
   emoji_picker_flutter: ^3.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner: ^2.4.13
-  drift_dev: any
+  drift_dev: ^2.28.0
   riverpod_generator: ^3.0.3
   json_serializable: ^6.8.0
   

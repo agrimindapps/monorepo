@@ -5,8 +5,11 @@
 ![Flutter](https://img.shields.io/badge/Flutter-3.24+-02569B?style=for-the-badge&logo=flutter)
 ![Dart](https://img.shields.io/badge/Dart-3.5.0+-0175C2?style=for-the-badge&logo=dart)
 ![Riverpod](https://img.shields.io/badge/State-Riverpod-blueviolet?style=for-the-badge)
+![PWA](https://img.shields.io/badge/PWA-Ready-success?style=for-the-badge&logo=pwa)
 
 **Aplicativo completo com 13 mini-jogos clássicos educativos e de entretenimento**
+
+> 📦 **Parte do Monorepo Agrimind**: Este app compartilha dependências e serviços centralizados via package `core` para garantir consistência e facilitar manutenção.
 
 [Jogos](#-jogos-disponíveis) •
 [Características](#-características) •
@@ -217,31 +220,35 @@ lib/
 
 ```yaml
 # State Management
-flutter_riverpod: ^2.6.1      # Migração de Provider → Riverpod
-riverpod_annotation: ^2.6.1   # Code generation
+flutter_riverpod: ^3.0.3      # Via core package
+riverpod_annotation: ^3.0.3   # Via core package
 
-# Dependency Injection
-get_it: ^8.0.2                # Service locator
-injectable: ^2.5.1            # DI code generation
+# Navegação  
+go_router: ^16.1.0            # Via core package
 
-# Storage
-hive: any                     # Local storage
-shared_preferences: any       # Settings
+# Firebase Stack (via core)
+firebase_core: ^4.0.0
+firebase_auth: ^6.0.1
+cloud_firestore: ^6.0.0
+firebase_analytics: ^12.0.0
 
-# Firebase
-firebase_core: any            # Core Firebase
-cloud_firestore: any          # Leaderboards & sync
-firebase_auth: any            # Autenticação
-firebase_analytics: any       # Analytics
+# Storage (via core)
+shared_preferences: ^2.4.0
+drift: ^2.28.2
 
-# Navigation
-go_router: ^16.2.4            # Roteamento declarativo
+# Utilities (via core)
+dartz: ^0.10.1
+equatable: ^2.0.7
+intl: ^0.19.0
 
 # Audio
 audioplayers: any             # SFX e música
 
 # Utilities
 logger: ^2.4.0                # Logging
+
+# Nota: A maioria das dependências são importadas via 
+# package 'core' do monorepo para garantir consistência
 ```
 
 ---
@@ -353,6 +360,52 @@ flutter test integration_test/
 - ✅ **iOS** (iOS 12+)
 - ✅ **Web** (Chrome, Safari, Firefox)
 - ✅ **Desktop** (Windows, macOS, Linux)
+
+---
+
+## 🌐 PWA (Progressive Web App)
+
+O app está totalmente configurado como PWA, permitindo instalação no navegador e funcionamento offline!
+
+### ✨ Funcionalidades PWA
+
+- ✅ **Instalável**: Adicione à tela inicial do dispositivo
+- ✅ **Offline-First**: Funciona sem conexão com internet
+- ✅ **Service Worker**: Cache inteligente de recursos
+- ✅ **Ícones Adaptativos**: Maskable icons para Android
+- ✅ **Splash Screen**: Carregamento visual com ícone do app
+- ✅ **Tema Personalizado**: Theme color #9C27B0 (Purple)
+
+### 📱 Como Instalar (PWA)
+
+**Chrome/Edge (Desktop e Mobile):**
+1. Acesse o app no navegador
+2. Clique no ícone de instalação na barra de endereços
+3. Confirme "Instalar"
+
+**Safari (iOS):**
+1. Abra o app no Safari
+2. Toque em "Compartilhar" → "Adicionar à Tela Inicial"
+
+### 🎨 Loading Screen
+
+Tela de carregamento moderna com:
+- Ícone real do app (animação pulse)
+- Barra de progresso com gradiente animado (shimmer)
+- Detecção automática de tema claro/escuro
+- Animações GPU-accelerated
+
+### 🔧 Build Web
+
+```bash
+# Build otimizado para produção
+flutter build web --release
+
+# Build com source maps (desenvolvimento)
+flutter build web --profile
+```
+
+O build gera uma versão otimizada em `build/web/` pronta para deploy.
 
 ---
 

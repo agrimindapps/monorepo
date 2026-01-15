@@ -140,11 +140,7 @@
     <div class="loading-content">
       <!-- Animated Logo Icon -->
       <div class="loading-icon">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor" opacity="0.3"/>
-          <path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <circle cx="12" cy="12" r="3" fill="currentColor"/>
-        </svg>
+        <img src="icons/Icon-192.png" alt="Plantis Icon" class="app-icon">
       </div>
       
       <!-- App Name -->
@@ -255,16 +251,23 @@
     }
 
     .loading-icon {
-      width: 80px; height: 80px;
+      width: auto;
+      height: auto;
       border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 24px;
-      animation: pulse 2s ease-in-out infinite;
+      background: transparent;
     }
 
-    .loading-icon svg { width: 48px; height: 48px; }
+    .app-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      animation: iconPulse 2s ease-in-out infinite;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
 
     .loading-title {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -282,16 +285,23 @@
     }
 
     .loading-bar {
-      width: 40%; height: 100%;
-      background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, 
+        var(--primary-color), 
+        var(--primary-light),
+        var(--primary-color));
+      background-size: 200% 100%;
       border-radius: 2px;
-      animation: loading 1.5s ease-in-out infinite;
+      animation: shimmer 1.5s ease-in-out infinite;
     }
 
     .loading-text {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       font-size: 14px;
       font-weight: 500;
+      letter-spacing: 0.5px;
+      animation: textPulse 1.5s ease-in-out infinite;
     }
 
     @keyframes float {
@@ -299,15 +309,29 @@
       50% { transform: translate(30px, -30px) scale(1.1); }
     }
 
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.05); opacity: 0.9; }
+    @keyframes iconPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+      }
     }
 
-    @keyframes loading {
-      0% { transform: translateX(-100%); }
-      50% { transform: translateX(150%); }
-      100% { transform: translateX(400%); }
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
+
+    @keyframes textPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
     }
 
     #loading.fade-out { opacity: 0; pointer-events: none; }
@@ -321,6 +345,15 @@
         setTimeout(() => { loading.style.display = 'none'; }, 300);
       }
     });
+  </script>
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('flutter-first-frame', function () {
+        navigator.serviceWorker.register('flutter_service_worker.js?v=' + Date.now());
+      });
+    }
   </script>
 
   <script src="flutter_bootstrap.js" async></script>

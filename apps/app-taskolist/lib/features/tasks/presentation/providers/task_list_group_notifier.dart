@@ -53,7 +53,7 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final current = state.value ?? [];
+      final List<TaskListGroupEntity> current = state.value ?? [];
       final updated = [...current, group];
 
       final prefs = await ref.read(sharedPreferencesProvider.future);
@@ -68,8 +68,10 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final current = state.value ?? [];
-      final updated = current.map((g) => g.id == group.id ? group : g).toList();
+      final List<TaskListGroupEntity> current = state.value ?? [];
+      final updated = current
+          .map((TaskListGroupEntity g) => g.id == group.id ? group : g)
+          .toList();
 
       final prefs = await ref.read(sharedPreferencesProvider.future);
       await _saveGroups(updated, prefs, group.userId);
@@ -83,8 +85,9 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final current = state.value ?? [];
-      final updated = current.where((g) => g.id != groupId).toList();
+      final List<TaskListGroupEntity> current = state.value ?? [];
+      final updated =
+          current.where((TaskListGroupEntity g) => g.id != groupId).toList();
 
       final userId = current.firstOrNull?.userId ?? '';
       final prefs = await ref.read(sharedPreferencesProvider.future);
@@ -99,8 +102,8 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final current = state.value ?? [];
-      final updated = current.map((g) {
+      final List<TaskListGroupEntity> current = state.value ?? [];
+      final updated = current.map((TaskListGroupEntity g) {
         if (g.id == groupId) {
           return g.copyWith(isCollapsed: !g.isCollapsed);
         }
@@ -120,11 +123,11 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
-      final current = state.value ?? [];
+      final List<TaskListGroupEntity> current = state.value ?? [];
       final updated = <TaskListGroupEntity>[];
 
       for (int i = 0; i < groupIds.length; i++) {
-        final group = current.firstWhere((g) => g.id == groupIds[i]);
+        final group = current.firstWhere((TaskListGroupEntity g) => g.id == groupIds[i]);
         updated.add(group.copyWith(position: i));
       }
 

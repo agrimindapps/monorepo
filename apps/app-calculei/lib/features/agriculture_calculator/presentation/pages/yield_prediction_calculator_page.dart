@@ -160,7 +160,13 @@ class _YieldPredictionCalculatorPageState
               const SizedBox(height: 24),
 
               if (_result != null)
-                _YieldResultCard(result: _result!, cropType: _cropType),
+                _YieldResultCard(
+                  result: _result!,
+                  cropType: _cropType,
+                  area: double.tryParse(_areaController.text) ?? 0,
+                  expectedYield: double.tryParse(_yieldController.text) ?? 0,
+                  lossPercent: double.tryParse(_lossController.text) ?? 0,
+                ),
             ],
           ),
         ),
@@ -197,8 +203,17 @@ class _YieldPredictionCalculatorPageState
 class _YieldResultCard extends StatelessWidget {
   final YieldPredictionResult result;
   final CropType cropType;
+  final double area;
+  final double expectedYield;
+  final double lossPercent;
 
-  const _YieldResultCard({required this.result, required this.cropType});
+  const _YieldResultCard({
+    required this.result,
+    required this.cropType,
+    required this.area,
+    required this.expectedYield,
+    required this.lossPercent,
+  });
 
   Color _getProductivityColor(double netYieldKgHa) {
     if (netYieldKgHa >= 4500) {
@@ -367,9 +382,6 @@ class _YieldResultCard extends StatelessWidget {
 
   String _formatShareText() {
     final cropName = YieldPredictionCalculator.getCropName(cropType);
-    final area = double.tryParse(_areaController.text) ?? 0;
-    final expectedYield = double.tryParse(_yieldController.text) ?? 0;
-    final lossPercent = double.tryParse(_lossController.text) ?? 0;
     return '''
 📋 Previsão de Produtividade - Calculei App
 

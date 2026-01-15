@@ -86,8 +86,9 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
 
     state = await AsyncValue.guard(() async {
       final List<TaskListGroupEntity> current = state.value ?? [];
-      final updated =
-          current.where((TaskListGroupEntity g) => g.id != groupId).toList();
+      final updated = current
+          .where((TaskListGroupEntity g) => g.id != groupId)
+          .toList();
 
       final userId = current.firstOrNull?.userId ?? '';
       final prefs = await ref.read(sharedPreferencesProvider.future);
@@ -127,7 +128,9 @@ class TaskListGroupNotifier extends _$TaskListGroupNotifier {
       final updated = <TaskListGroupEntity>[];
 
       for (int i = 0; i < groupIds.length; i++) {
-        final group = current.firstWhere((TaskListGroupEntity g) => g.id == groupIds[i]);
+        final group = current.firstWhere(
+          (TaskListGroupEntity g) => g.id == groupIds[i],
+        );
         updated.add(group.copyWith(position: i));
       }
 

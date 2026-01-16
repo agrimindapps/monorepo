@@ -121,17 +121,17 @@ dependencies:
   uuid: ^4.5.1
 
   # Code Generation - Immutability
-  freezed_annotation: ^3.0.0
+  freezed_annotation: ^3.1.0
 
   # Logging
-  logger: ^2.6.0
+  logger: ^2.6.2
 
   # Analysis/Linting (needed for transitive analysis_options.yaml inheritance)
   flutter_lints: ^5.0.0
 
   # Drift - SQL Database (Production-ready)
-  drift: ^2.28.2
-  sqlite3_flutter_libs: ^0.5.24
+  drift: ^2.30.1
+  sqlite3_flutter_libs: ^0.5.41
   sqlite3_web: ^0.4.1  # Web support with WASM
   
   web: any

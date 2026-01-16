@@ -1,16 +1,16 @@
+import 'package:app_agrihurbi/features/admin/presentation/pages/admin_dashboard_page.dart';
+import 'package:app_agrihurbi/features/admin/presentation/pages/admin_login_page.dart';
 import 'package:app_agrihurbi/features/auth/presentation/pages/login_page.dart';
 import 'package:app_agrihurbi/features/auth/presentation/pages/register_page.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/pages/calculator_detail_page.dart';
 import 'package:app_agrihurbi/features/calculators/presentation/pages/calculators_list_page.dart';
 import 'package:app_agrihurbi/features/home/presentation/pages/home_page.dart';
-import 'package:app_agrihurbi/features/livestock/presentation/pages/admin_livestock_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_detail_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovine_form_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/bovines_list_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_detail_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equine_form_page.dart';
 import 'package:app_agrihurbi/features/livestock/presentation/pages/equines_list_page.dart';
-import 'package:app_agrihurbi/features/livestock/presentation/pages/livestock_search_page.dart';
 import 'package:app_agrihurbi/features/markets/presentation/pages/market_detail_page.dart';
 import 'package:app_agrihurbi/features/markets/presentation/pages/markets_list_page.dart';
 import 'package:app_agrihurbi/features/news/presentation/pages/news_list_page.dart';
@@ -43,14 +43,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             state.matchedLocation.startsWith('/register');
         final isOnPromo = state.matchedLocation == '/promo';
 
-        // Admin route guard
+        // Admin route guard - Requires authentication
         final isOnAdminPage = state.matchedLocation.startsWith('/admin');
-        if (isOnAdminPage) {
+        if (isOnAdminPage && state.matchedLocation != '/admin') {
+          // Admin sub-pages require authentication
+          // Role validation happens in Firestore rules (double security)
           if (!isAuthenticated) {
-            return '/login';
+            return '/admin'; // Redirect to admin login
           }
-          // Check admin role (async, so we handle it in the route builder)
-          // If not admin, will be redirected in the route's redirect callback
         }
 
         if (!isAuthenticated && !isOnAuthPage && !isOnPromo) {
@@ -77,6 +77,78 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const LoginPage(),
       ),
 
+      // ========== ADMIN ROUTES ==========
+      GoRoute(
+        path: '/admin',
+        name: 'admin-login',
+        builder: (context, state) => const AdminLoginPage(),
+      ),
+      GoRoute(
+        path: '/admin/dashboard',
+        name: 'admin-dashboard',
+        builder: (context, state) => const AdminDashboardPage(),
+      ),
+      
+      // Admin - Bovinos Management
+      GoRoute(
+        path: '/admin/bovines',
+        name: 'admin-bovines',
+        builder: (context, state) => const BovinesListPage(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: 'admin-bovines-add',
+            builder: (context, state) => const BovineFormPage(),
+          ),
+          GoRoute(
+            path: 'edit/:id',
+            name: 'admin-bovines-edit',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return BovineFormPage(bovineId: id);
+            },
+          ),
+          GoRoute(
+            path: 'detail/:id',
+            name: 'admin-bovines-detail',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return BovineDetailPage(bovineId: id);
+            },
+          ),
+        ],
+      ),
+      
+      // Admin - Equinos Management
+      GoRoute(
+        path: '/admin/equines',
+        name: 'admin-equines',
+        builder: (context, state) => const EquinesListPage(),
+        routes: [
+          GoRoute(
+            path: 'add',
+            name: 'admin-equines-add',
+            builder: (context, state) => const EquineFormPage(),
+          ),
+          GoRoute(
+            path: 'edit/:id',
+            name: 'admin-equines-edit',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return EquineFormPage(equineId: id);
+            },
+          ),
+          GoRoute(
+            path: 'detail/:id',
+            name: 'admin-equines-detail',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return EquineDetailPage(equineId: id);
+            },
+          ),
+        ],
+      ),
+
       GoRoute(
         path: '/register',
         name: 'register',
@@ -87,95 +159,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         name: 'home',
         builder: (context, state) => const HomePage(),
         routes: [
-          GoRoute(
-            path: 'livestock',
-            name: 'livestock',
-            builder: (context, state) => const BovinesListPage(),
-            routes: [
-              GoRoute(
-                path: 'bovines',
-                name: 'bovines-list',
-                builder: (context, state) => const BovinesListPage(),
-                routes: [
-                  GoRoute(
-                    path: 'add',
-                    name: 'bovines-add',
-                    builder: (context, state) => const BovineFormPage(),
-                  ),
-                  GoRoute(
-                    path: 'edit/:id',
-                    name: 'bovines-edit',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return BovineFormPage(bovineId: id);
-                    },
-                  ),
-                  GoRoute(
-                    path: 'detail/:id',
-                    name: 'bovines-detail',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return BovineDetailPage(bovineId: id);
-                    },
-                  ),
-                ],
-              ),
-              GoRoute(
-                path: 'equines',
-                name: 'equines-list',
-                builder: (context, state) => const EquinesListPage(),
-                routes: [
-                  GoRoute(
-                    path: 'add',
-                    name: 'equines-add',
-                    builder: (context, state) => const EquineFormPage(),
-                  ),
-                  GoRoute(
-                    path: 'edit/:id',
-                    name: 'equines-edit',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return EquineFormPage(equineId: id);
-                    },
-                  ),
-                  GoRoute(
-                    path: 'detail/:id',
-                    name: 'equines-detail',
-                    builder: (context, state) {
-                      final id = state.pathParameters['id']!;
-                      return EquineDetailPage(equineId: id);
-                    },
-                  ),
-                ],
-              ),
-              GoRoute(
-                path: 'search',
-                name: 'livestock-search',
-                builder: (context, state) => const LivestockSearchPage(),
-              ),
-              GoRoute(
-                path: 'add',
-                name: 'add-livestock',
-                builder: (context, state) => const BovineFormPage(),
-              ),
-              GoRoute(
-                path: 'edit/:id',
-                name: 'edit-livestock',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return BovineFormPage(bovineId: id);
-                },
-              ),
-              GoRoute(
-                path: 'detail/:id',
-                name: 'livestock-detail',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return BovineDetailPage(bovineId: id);
-                },
-              ),
-            ],
-          ),
           GoRoute(
             path: 'calculators',
             name: 'calculators',
@@ -491,31 +474,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // Admin routes (outside /home, requires admin role)
-      GoRoute(
-        path: '/admin',
-        name: 'admin',
-        redirect: (context, state) async {
-          try {
-            final container = ProviderScope.containerOf(context);
-            final isAdminAsync = container.read(isAdminUserProvider);
-            final isAdmin = await isAdminAsync.value;
-            if (isAdmin != true) {
-              return '/home';
-            }
-            return null;
-          } catch (e) {
-            return '/home';
-          }
-        },
-        routes: [
-          GoRoute(
-            path: 'livestock',
-            name: 'admin-livestock',
-            builder: (context, state) => const AdminLivestockPage(),
-          ),
-        ],
-      ),
     ],
   );
 });
@@ -533,21 +491,41 @@ class AppNavigation {
   /// Navigate to register page
   static void toRegister(BuildContext context) => context.push('/register');
 
-  /// Navigate to livestock list
-  static void toLivestock(BuildContext context) =>
-      context.push('/home/livestock');
-
-  /// Navigate to livestock detail
-  static void toLivestockDetail(BuildContext context, String id) =>
-      context.push('/home/livestock/detail/$id');
-
-  /// Navigate to add livestock
-  static void toAddLivestock(BuildContext context) =>
-      context.push('/home/livestock/add');
-
-  /// Navigate to edit livestock
-  static void toEditLivestock(BuildContext context, String id) =>
-      context.push('/home/livestock/edit/$id');
+  // ========== ADMIN NAVIGATION ==========
+  
+  /// Navigate to admin login
+  static void toAdminLogin(BuildContext context) => context.go('/admin');
+  
+  /// Navigate to admin dashboard
+  static void toAdminDashboard(BuildContext context) => context.go('/admin/dashboard');
+  
+  /// Navigate to admin bovines list
+  static void toAdminBovines(BuildContext context) => context.go('/admin/bovines');
+  
+  /// Navigate to admin add bovine
+  static void toAdminAddBovine(BuildContext context) => context.push('/admin/bovines/add');
+  
+  /// Navigate to admin edit bovine
+  static void toAdminEditBovine(BuildContext context, String id) =>
+      context.push('/admin/bovines/edit/$id');
+  
+  /// Navigate to admin bovine detail
+  static void toAdminBovineDetail(BuildContext context, String id) =>
+      context.push('/admin/bovines/detail/$id');
+  
+  /// Navigate to admin equines list
+  static void toAdminEquines(BuildContext context) => context.go('/admin/equines');
+  
+  /// Navigate to admin add equine
+  static void toAdminAddEquine(BuildContext context) => context.push('/admin/equines/add');
+  
+  /// Navigate to admin edit equine
+  static void toAdminEditEquine(BuildContext context, String id) =>
+      context.push('/admin/equines/edit/$id');
+  
+  /// Navigate to admin equine detail
+  static void toAdminEquineDetail(BuildContext context, String id) =>
+      context.push('/admin/equines/detail/$id');
 
   /// Navigate to calculators
   static void toCalculators(BuildContext context) =>

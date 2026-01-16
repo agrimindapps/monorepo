@@ -1,0 +1,97 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =====================================================
+    // Helper Functions
+    // =====================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Checks if the user has admin role
+    // Option 1: Check against a hardcoded list of admin emails (simpler)
+    // Option 2: Check user document with role field (more scalable)
+    function isAdmin() {
+      return (isAuthenticated() && 
+              exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+              get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+              (isAuthenticated() && request.auth.token.email in [
+                'agrimindsolucoes@gmail.com',
+                'agrimind.br@gmail.com'
+              ]);
+    }
+
+    // =====================================================
+    // Collection Rules
+    // =====================================================
+
+    // Users collection
+    // Stores user profile information and roles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update, delete: if isOwner(userId) || isAdmin();
+    }
+
+    // Bovinos collection (Public data managed by admins)
+    match /bovinos/{bovineId} {
+      // Anyone can read public bovine data
+      allow read: if true;
+      
+      // Only admins can create, update, or delete
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Equinos collection (Public data managed by admins)
+    match /equinos/{equineId} {
+      // Anyone can read public equine data
+      allow read: if true;
+      
+      // Only admins can create, update, or delete
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Implementos collection (Public data managed by admins)
+    match /implementos/{implementId} {
+      // Anyone can read public implement data
+      allow read: if true;
+      
+      // Only admins can create, update, or delete
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Error Logs collection
+    // Used for app error tracking and monitoring
+    match /error_logs/{logId} {
+      // Allow creation of error logs by anyone
+      allow create: if true;
+      
+      // Only admins can read/manage error logs
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Analytics collection
+    match /analytics/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // User Subscriptions (if using RevenueCat or similar)
+    match /subscriptions/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Settings collection (app-wide settings)
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+  }
+}

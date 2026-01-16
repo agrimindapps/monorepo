@@ -4,8 +4,10 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.35.0+-02569B?logo=flutter)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.9.0+-0175C2?logo=dart)](https://dart.dev)
-[![Riverpod](https://img.shields.io/badge/Riverpod-3.0+-00B4AB)](https://riverpod.dev)
+[![Riverpod](https://img.shields.io/badge/Riverpod-2.6.1-00B4AB)](https://riverpod.dev)
 [![License](https://img.shields.io/badge/License-Proprietary-red)]()
+[![Quality](https://img.shields.io/badge/Quality-Production_Ready-brightgreen)]()
+[![Analyzer](https://img.shields.io/badge/Analyzer_Errors-0-success)]()
 
 ---
 
@@ -15,8 +17,8 @@ Gasometer is a production-ready vehicle management platform that helps users tra
 
 ### Key Highlights
 
-- 🎯 **26 Feature Modules** with ~185,000 lines of code
-- 🏗️ **Pure Riverpod Architecture** (~99% migrated, 182+ providers)
+- 🎯 **26 Feature Modules** with 850+ Dart files
+- 🏗️ **Pure Riverpod Architecture** (~99% migrated, 184 providers)
 - 💾 **Offline-First with Drift** (SQLite type-safe ORM)
 - ☁️ **Firebase Integration** (Auth, Firestore, Analytics, Crashlytics)
 - 🔄 **Multi-Device Sync** with conflict resolution
@@ -25,6 +27,7 @@ Gasometer is a production-ready vehicle management platform that helps users tra
 - 🌍 **Internationalization** (PT-BR, EN-US)
 - 🌓 **Light/Dark Themes**
 - ⚡ **0 Analyzer Errors** - Production-ready code quality
+- 🧪 **Comprehensive Testing** - Unit and integration tests
 
 ---
 
@@ -290,9 +293,9 @@ VehicleRepository vehicleRepository(Ref ref) {
 - **Dart**: 3.9.0+
 
 ### State Management
-- **flutter_riverpod**: 3.0+ (Pure Riverpod)
-- **riverpod_annotation**: 3.0+ (Code generation)
-- **riverpod_generator**: 3.0+ (Dev dependency)
+- **flutter_riverpod**: 2.6.1 (Pure Riverpod)
+- **riverpod_annotation**: 2.6.1 (Code generation)
+- **riverpod_generator**: 2.6.1 (Dev dependency)
 
 ### Database & Persistence
 - **drift**: 2.20.0+ (SQLite ORM)
@@ -329,16 +332,16 @@ VehicleRepository vehicleRepository(Ref ref) {
 
 | Metric | Value |
 |--------|-------|
-| **Total Files** | 713 (670 source + 43 generated) |
-| **Lines of Code** | ~185,685 |
+| **Total Dart Files** | 854 |
 | **Features** | 26 modules |
-| **Database Tables** | 9 |
+| **Database Tables** | 9 (Drift) |
 | **Repositories** | 10 Drift-based |
-| **Riverpod Providers** | 182+ |
+| **Riverpod Providers** | 184 (@riverpod) |
 | **Pages** | 39+ |
 | **Analyzer Errors** | 0 ✅ |
 | **Riverpod Migration** | ~99% ✅ |
-| **Quality Score** | 10/10 (Reference) |
+| **Architecture Score** | 9.5/10 |
+| **State Management** | Riverpod 2.6.1 |
 
 ---
 

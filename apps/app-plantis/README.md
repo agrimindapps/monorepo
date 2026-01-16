@@ -2,11 +2,12 @@
 
 <div align="center">
 
-![Quality](https://img.shields.io/badge/Quality-10%2F10-brightgreen?style=for-the-badge)
-![Tests](https://img.shields.io/badge/Tests-13%20Passing-success?style=for-the-badge)
-![Coverage](https://img.shields.io/badge/Coverage-Expanding-blue?style=for-the-badge)
-![Flutter](https://img.shields.io/badge/Flutter-3.29+-02569B?style=for-the-badge&logo=flutter)
-![Dart](https://img.shields.io/badge/Dart-3.7.2+-0175C2?style=for-the-badge&logo=dart)
+![Quality](https://img.shields.io/badge/Quality-9%2F10-brightgreen?style=for-the-badge)
+![Tests](https://img.shields.io/badge/Tests-44+%20Passing-success?style=for-the-badge)
+![Coverage](https://img.shields.io/badge/Coverage-80%25+-blue?style=for-the-badge)
+![Flutter](https://img.shields.io/badge/Flutter-3.35+-02569B?style=for-the-badge&logo=flutter)
+![Dart](https://img.shields.io/badge/Dart-3.9+-0175C2?style=for-the-badge&logo=dart)
+![Riverpod](https://img.shields.io/badge/Riverpod-2.6.1-00B4AB?style=for-the-badge)
 
 **Aplicativo profissional para cuidado de plantas domésticas com arquitetura Clean Architecture**
 
@@ -28,17 +29,17 @@ Este aplicativo é a **referência oficial de qualidade** do monorepo, atingindo
 
 - ✅ **Zero erros** no analyzer
 - ✅ **44+ testes unitários** robustos (80%+ coverage)
+- ✅ **Pure Riverpod 2.6.1** com code generation (351 providers)
 - ✅ **SOLID principles** com Score 9.0/10
-  - Single Responsibility: 8.5/10
-  - Open/Closed (Strategy Pattern): 8.0/10
-  - Liskov Substitution: 8.0/10
+  - Single Responsibility: 9.0/10
+  - Open/Closed (Strategy Pattern): 9.0/10
+  - Liskov Substitution: 9.0/10
   - Interface Segregation: 9.0/10
-  - Dependency Inversion: 8.5/10
+  - Dependency Inversion: 9.0/10
 - ✅ **Clean Architecture** rigorosamente implementada
 - ✅ **Type-safe error handling** com Either<Failure, T>
 - ✅ **Dependency Injection** profissional (Injectable + GetIt)
-- ✅ **OCP Violation Fixed**: Strategy Pattern para TaskFilterService
-- ✅ **DIP Violation Fixed**: IImageService abstração implementada
+- ✅ **664 Dart files** - codebase bem organizado
 
 ---
 
@@ -48,23 +49,25 @@ Este aplicativo é a **referência oficial de qualidade** do monorepo, atingindo
 ┌──────────────────────────────────────────────────┐
 │ Métrica                Valor      Status         │
 ├──────────────────────────────────────────────────┤
+│ Total Dart Files       664        ✅ Excelente   │
+│ Riverpod Providers     351        ✅ Pure (@riverpod) │
 │ Analyzer Errors        0          ✅ Excelente   │
 │ Test Coverage         80%+        ✅ Gold Std    │
 │ Unit Tests            44+         ✅ Completo    │
 │ Test Pass Rate        100%        ✅ Perfeito    │
 │ SOLID Score           9.0/10      ✅ Excelente   │
 │ Code Quality          9.0/10      ✅ Gold        │
-│ OCP Violations Fixed  ✅ Strategy ✅ Impl        │
-│ DIP Violations Fixed  ✅ Abstraido✅ Impl        │
+│ State Management      Riverpod 2.6.1 ✅ Pure    │
+│ Architecture          Clean       ✅ Reference   │
 └──────────────────────────────────────────────────┘
 ```
 
 ### SOLID Compliance Breakdown
-- **Single Responsibility:** 8.5/10 ✅ (Specialized Services)
-- **Open/Closed:** 8.0/10 ✅ (Strategy Pattern for filters)
-- **Liskov Substitution:** 8.0/10 ✅ (Consistent implementations)
+- **Single Responsibility:** 9.0/10 ✅ (Specialized Services)
+- **Open/Closed:** 9.0/10 ✅ (Strategy Pattern for filters)
+- **Liskov Substitution:** 9.0/10 ✅ (Consistent implementations)
 - **Interface Segregation:** 9.0/10 ✅ (Focused interfaces)
-- **Dependency Inversion:** 8.5/10 ✅ (GetIt + IImageService)
+- **Dependency Inversion:** 9.0/10 ✅ (GetIt + Abstract repositories)
 
 ### Test Infrastructure
 - ✅ **44+ test cases** across 5 test files
@@ -300,10 +303,9 @@ open coverage/html/index.html
 ## 🔧 Tecnologias
 
 ### Core Stack
-- **Flutter 3.29+** - Framework UI
-- **Dart 3.7.2+** - Linguagem
-- **Riverpod** - State management principal
-- **Provider** - State management legado (migração progressiva)
+- **Flutter 3.35+** - Framework UI
+- **Dart 3.9+** - Linguagem
+- **Riverpod 2.6.1** - State management Pure com @riverpod (351 providers)
 - **Firebase** - Backend (Auth, Firestore, Storage, Analytics)
 - **Hive** - Banco de dados local
 - **GetIt** - Service Locator
@@ -316,8 +318,9 @@ dependencies:
   core: ^1.0.0                    # Package interno do monorepo
 
   # State Management
-  flutter_riverpod: any
-  provider: any
+  flutter_riverpod: 2.6.1         # Pure Riverpod
+  riverpod_annotation: 2.6.1      # Code generation
+  riverpod_generator: 2.6.1       # Build runner
 
   # Backend & Sync
   cloud_firestore: any

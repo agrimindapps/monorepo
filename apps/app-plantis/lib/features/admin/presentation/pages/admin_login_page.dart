@@ -1,4 +1,4 @@
-import 'package:core/core.dart';
+import 'package:core/core.dart' hide FormState;
 import 'package:flutter/material.dart';
 
 /// Página de login administrativo do CantinhoVerde

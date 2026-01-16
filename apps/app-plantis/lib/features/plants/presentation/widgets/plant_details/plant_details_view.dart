@@ -130,10 +130,10 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       try {
         final errorService = ref.read(errorCaptureServiceProvider);
         final plantState = ref.read(plantDetailsNotifierProvider);
-        if (plantState.selectedPlant != null) {
+        if (plantState.plant != null) {
           errorService.setCurrentPlant(
-            id: plantState.selectedPlant!.id,
-            name: plantState.selectedPlant!.name,
+            id: plantState.plant!.id,
+            name: plantState.plant!.name,
           );
         }
       } catch (_) {

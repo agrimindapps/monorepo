@@ -1,4 +1,5 @@
 import 'package:core/core.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../services/error_capture_service.dart';
@@ -7,7 +8,7 @@ part 'error_capture_provider.g.dart';
 
 /// Provider for ErrorCaptureService
 @riverpod
-ErrorCaptureService errorCaptureService(ErrorCaptureServiceRef ref) {
+ErrorCaptureService errorCaptureService(Ref ref) {
   final errorLogService = ref.watch(errorLogServiceProvider);
   final service = ErrorCaptureService(errorLogService: errorLogService);
 

@@ -165,13 +165,13 @@ class ErrorCaptureService {
       message: error.toString(),
       stackTrace: stackTrace?.toString(),
       severity: severity,
-      status: ErrorLogStatus.newError,
+      status: ErrorStatus.newError,
       context: errorContext,
       errorHash: errorHash,
       occurrences: 1,
       platform: _getPlatform(),
       createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+      // updatedAt not present in entity
     );
 
     // Log to Firestore

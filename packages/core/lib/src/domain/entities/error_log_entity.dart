@@ -144,6 +144,7 @@ class ErrorLogEntity extends Equatable {
     this.lastOccurrence,
     this.errorHash,
     this.sessionId,
+    this.context,
   });
 
   /// ID único do erro (gerado pelo Firestore)
@@ -209,6 +210,9 @@ class ErrorLogEntity extends Equatable {
   /// ID da sessão do usuário (anônimo)
   final String? sessionId;
 
+  /// Contexto adicional do erro (route, plantId, etc)
+  final Map<String, dynamic>? context;
+
   /// Cria uma instância vazia
   factory ErrorLogEntity.empty() {
     return ErrorLogEntity(
@@ -261,6 +265,7 @@ class ErrorLogEntity extends Equatable {
           : null,
       errorHash: map['errorHash'] as String?,
       sessionId: map['sessionId'] as String?,
+      context: map['context'] as Map<String, dynamic>?,
     );
   }
 
@@ -287,6 +292,7 @@ class ErrorLogEntity extends Equatable {
       'lastOccurrence': lastOccurrence,
       'errorHash': errorHash,
       'sessionId': sessionId,
+      'context': context,
     };
   }
 
@@ -312,6 +318,7 @@ class ErrorLogEntity extends Equatable {
     DateTime? lastOccurrence,
     String? errorHash,
     String? sessionId,
+    Map<String, dynamic>? context,
   }) {
     return ErrorLogEntity(
       id: id ?? this.id,
@@ -335,6 +342,7 @@ class ErrorLogEntity extends Equatable {
       lastOccurrence: lastOccurrence ?? this.lastOccurrence,
       errorHash: errorHash ?? this.errorHash,
       sessionId: sessionId ?? this.sessionId,
+      context: context ?? this.context,
     );
   }
 
@@ -361,5 +369,6 @@ class ErrorLogEntity extends Equatable {
     lastOccurrence,
     errorHash,
     sessionId,
+    context,
   ];
 }

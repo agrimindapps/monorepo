@@ -719,7 +719,7 @@ class _AdminErrorsPageState extends ConsumerState<AdminErrorsPage> {
           ElevatedButton(
             onPressed: () async {
               final service = ref.read(errorLogServiceProvider);
-              await service.deleteOldErrors(30);
+              await service.cleanupOldErrors(30);
               if (context.mounted) {
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(

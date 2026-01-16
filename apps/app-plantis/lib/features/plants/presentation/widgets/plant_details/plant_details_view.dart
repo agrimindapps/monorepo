@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../../core/constants/app_spacing.dart';
 import '../../../../../core/localization/app_strings.dart';
+import '../../../../../core/providers/error_capture_provider.dart';
 import '../../../../../core/theme/plantis_colors.dart';
 import '../../../../../shared/widgets/base_page_scaffold.dart';
 import '../../../../../shared/widgets/responsive_layout.dart';
@@ -124,6 +125,20 @@ class _PlantDetailsViewState extends ConsumerState<PlantDetailsView>
       }
 
       _controller!.loadPlant(widget.plantId);
+
+      // 🐛 Update error context with plant info
+      try {
+        final errorService = ref.read(errorCaptureServiceProvider);
+        final plantState = ref.read(plantDetailsNotifierProvider);
+        if (plantState.selectedPlant != null) {
+          errorService.setCurrentPlant(
+            id: plantState.selectedPlant!.id,
+            name: plantState.selectedPlant!.name,
+          );
+        }
+      } catch (_) {
+        // Error service might not be initialized
+      }
 
       if (kDebugMode) {
         debugPrint(

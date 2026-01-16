@@ -63,6 +63,36 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // ===== FUNÇÕES AUXILIARES =====
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email in [
+        'agrimindsolucoes@gmail.com',
+        'agrimind.br@gmail.com'
+      ];
+    }
+
+    // ===== FEEDBACK (Admin-only) =====
+    match /feedback/{feedbackId} {
+      // Qualquer usuário autenticado pode criar feedback
+      allow create: if isAuthenticated();
+      
+      // Apenas admins podem ler, atualizar ou deletar
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ===== ERROR LOGS (Admin-only) =====
+    match /error_logs/{errorId} {
+      // Público pode criar (logging automático de erros)
+      allow create: if true;
+      
+      // Apenas admins podem ler e deletar
+      allow read, delete: if isAdmin();
+    }
+
     // ===== BLOQUEAR TODO O RESTO =====
     match /{document=**} {
       allow read, write: if false;

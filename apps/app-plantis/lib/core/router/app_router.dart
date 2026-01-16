@@ -24,6 +24,11 @@ import '../../features/tasks/presentation/pages/tasks_list_page.dart';
 import '../../shared/widgets/desktop_keyboard_shortcuts.dart';
 import '../../shared/widgets/web_optimized_navigation.dart';
 import '../providers/auth_providers.dart';
+import '../providers/error_capture_provider.dart';
+import '../observers/error_tracking_observer.dart';
+import '../../features/admin/presentation/pages/admin_login_page.dart';
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
+import '../../features/admin/presentation/pages/admin_errors_page.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -48,6 +53,9 @@ class AppRouter {
   static const String deviceManagement = '/device-management';
   static const String licenseStatus = '/license-status';
   static const String dataExport = '/data-export';
+  static const String admin = '/admin';
+  static const String adminDashboard = '/admin/dashboard';
+  static const String adminErrors = '/admin/errors';
 
   /// Helper method to navigate to plant details
   static String plantDetailsPath(String plantId) => '/plants/$plantId';
@@ -61,10 +69,13 @@ class AppRouter {
       analyticsRouteObserverFamilyProvider('plantis_'),
     );
 
+    // 🐛 Error Tracking Observer for error context
+    final errorTrackingObserver = ErrorTrackingNavigatorObserver(ref);
+
     return GoRouter(
       navigatorKey: NavigationService.navigatorKey,
       initialLocation: initialLocation,
-      observers: [analyticsObserver],
+      observers: [analyticsObserver, errorTrackingObserver],
       redirect: (context, state) {
         final authStateValue = authState.value;
         final isAuthenticated = authStateValue?.isAuthenticated ?? false;
@@ -176,6 +187,22 @@ class AppRouter {
             }
             return const AuthPage(initialTab: 1); // Register tab
           },
+        ),
+        // Admin routes (sem ShellRoute para não mostrar bottom navigation)
+        GoRoute(
+          path: admin,
+          name: 'admin',
+          builder: (context, state) => const AdminLoginPage(),
+        ),
+        GoRoute(
+          path: adminDashboard,
+          name: 'admin-dashboard',
+          builder: (context, state) => const AdminDashboardPage(),
+        ),
+        GoRoute(
+          path: adminErrors,
+          name: 'admin-errors',
+          builder: (context, state) => const AdminErrorsPage(),
         ),
         ShellRoute(
           builder: (context, state, child) =>

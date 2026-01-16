@@ -1,12 +1,14 @@
 import 'package:core/core.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
-import '../../../../core/providers/core_di_providers.dart';
 import '../../../../core/theme/plantis_colors.dart';
 
-/// Dialog para envio de feedback do usuário para Firebase Analytics
+/// Dialog para envio de feedback do usuário para Firestore
 ///
-/// Portado do app-receituagro e adaptado para Plantis
+/// Feedbacks são salvos no Firestore e podem ser visualizados
+/// pelo admin em /admin/dashboard
 class FeedbackDialog extends ConsumerStatefulWidget {
   const FeedbackDialog({super.key});
 
@@ -264,6 +266,42 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
     }
   }
 
+  /// Mapeia tipo local para FeedbackType do core
+  FeedbackType _mapToFeedbackType(String type) {
+    switch (type) {
+      case 'bug':
+        return FeedbackType.bug;
+      case 'suggestion':
+        return FeedbackType.suggestion;
+      case 'praise':
+      case 'complaint':
+        return FeedbackType.comment;
+      default:
+        return FeedbackType.other;
+    }
+  }
+
+  /// Obter informações do app para contexto
+  Future<Map<String, String>> _getAppInfo() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      return {
+        'version': packageInfo.version,
+        'buildNumber': packageInfo.buildNumber,
+      };
+    } catch (e) {
+      return {'version': 'unknown', 'buildNumber': 'unknown'};
+    }
+  }
+
+  /// Obter plataforma atual
+  String _getPlatform() {
+    if (kIsWeb) return 'web';
+    if (defaultTargetPlatform == TargetPlatform.android) return 'android';
+    if (defaultTargetPlatform == TargetPlatform.iOS) return 'ios';
+    return 'unknown';
+  }
+
   Future<void> _submitFeedback(BuildContext context) async {
     final content = _contentController.text.trim();
 
@@ -275,22 +313,36 @@ class _FeedbackDialogState extends ConsumerState<FeedbackDialog> {
     setState(() => _isLoading = true);
 
     try {
-      // Obter analytics repository do core
-      final analyticsRepository = ref.read(analyticsRepositoryProvider);
+      // Obter informações adicionais
+      final appInfo = await _getAppInfo();
+      final platform = _getPlatform();
+      final user = FirebaseAuth.instance.currentUser;
 
-      // Enviar feedback para Firebase Analytics
-      final result = await analyticsRepository.logFeedback(
-        type: _selectedType,
-        content: content,
+      // Obter feedback service do core
+      final feedbackService = ref.read(feedbackServiceProvider);
+
+      // Criar feedback entity
+      final feedback = FeedbackEntity(
+        id: '', // Firestore vai gerar
+        type: _mapToFeedbackType(_selectedType),
+        message: content,
         rating: _rating > 0 ? _rating : null,
+        userEmail: user?.email,
+        appVersion: appInfo['version'],
+        platform: platform,
+        createdAt: DateTime.now(),
+        status: FeedbackStatus.pending,
       );
+
+      // Salvar no Firestore (admin pode visualizar)
+      final result = await feedbackService.submitFeedback(feedback);
 
       result.fold(
         (Failure failure) {
           setState(() => _isLoading = false);
           _showError('Erro ao enviar feedback: ${failure.message}');
         },
-        (_) {
+        (String? feedbackId) {
           setState(() => _isLoading = false);
           _showSuccess(context);
         },

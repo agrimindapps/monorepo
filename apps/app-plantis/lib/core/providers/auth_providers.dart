@@ -11,6 +11,7 @@ import '../../features/device_management/presentation/providers/device_managemen
     as device_management_providers;
 import '../auth/auth_state_notifier.dart';
 import '../services/data_sanitization_service.dart';
+import 'error_capture_provider.dart';
 import 'repository_providers.dart';
 
 export 'auth_state_provider.dart';
@@ -196,6 +197,21 @@ class AuthNotifier extends _$AuthNotifier {
     try {
       final currentState = state.value ?? const AuthState();
       _authStateNotifier.updateUser(user);
+
+      // 🐛 Update error context with user info
+      try {
+        final errorService = ref.read(errorCaptureServiceProvider);
+        if (user != null) {
+          errorService.setUserContext(
+            userId: user.id,
+            email: user.email,
+          );
+        } else {
+          errorService.setUserContext(userId: null, email: null);
+        }
+      } catch (_) {
+        // Error service might not be initialized
+      }
 
       bool isPremium = false;
       if (user != null && !isAnonymous && _subscriptionRepository != null) {

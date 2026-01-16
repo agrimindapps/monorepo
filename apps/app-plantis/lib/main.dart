@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
-
+import 'core/providers/error_capture_provider.dart';
 import 'core/plantis_sync_config.dart';
 import 'core/services/plantis_notification_service.dart';
 import 'firebase_options.dart';
@@ -102,13 +102,27 @@ void main() async {
   // Use the SharedPreferences instance
   final prefs = await SharedPreferences.getInstance();
 
+  // Create ProviderContainer for accessing providers before runApp
+  final container = ProviderContainer(
+    overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+  );
+
+  // Initialize error capture service
+  if (firebaseInitialized) {
+    final errorCaptureService = container.read(errorCaptureServiceProvider);
+    await errorCaptureService.initialize();
+    if (kDebugMode) {
+      debugPrint('✅ ErrorCaptureService initialized');
+    }
+  }
+
   if (EnvironmentConfig.enableAnalytics) {
     await runZonedGuarded<Future<void>>(
       () async {
         // await _performanceRepository.markFirstFrame();
         runApp(
-          ProviderScope(
-            overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+          UncontrolledProviderScope(
+            container: container,
             child: const PlantisApp(),
           ),
         );
@@ -126,8 +140,8 @@ void main() async {
   } else {
     // await _performanceRepository.markFirstFrame();
     runApp(
-      ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      UncontrolledProviderScope(
+        container: container,
         child: const PlantisApp(),
       ),
     );
